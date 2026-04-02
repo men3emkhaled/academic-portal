@@ -12,18 +12,23 @@ const roadmapRoutes = require('./routes/roadmapRoutes');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// ✅ إعدادات CORS المتوافقة مع Netlify (وأي عنوان آخر في التطوير)
+// ✅ إعدادات CORS المتوافقة مع Netlify
 const allowedOrigins = [
-  'http://localhost:5173',           // التطوير المحلي
-  'https://cs-academic-portal.netlify.app/',   // 👈 استبدل برابط Netlify الفعلي
-  /\.netlify\.app$/                  // أي رابط netlify.app (regex)
+  'http://localhost:5173',
+  'https://cs-academic-portal.netlify.app', // 💡 ملاحظة: يفضل حذف "/" في نهاية الرابط
+  /\.netlify\.app$/
 ];
 
 app.use(cors({
   origin: function (origin, callback) {
-    // السماح بطلبات بدون origin (مثل Postman أو curl)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.some(o => o === origin || (o instanceof RegExp && o.test(origin)))) {
+    // التحقق من الأصل (Origin)
+    const isAllowed = allowedOrigins.some(o => {
+      if (o instanceof RegExp) return o.test(origin);
+      return o === origin;
+    });
+
+    if (isAllowed) {
       callback(null, true);
     } else {
       console.warn(`❌ CORS blocked: ${origin}`);
@@ -35,13 +40,13 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// دعم preflight requests (OPTIONS)
-app.options('*', cors());
+// ✅ الحل: تغيير '*' إلى '(.*)' لتوافق الإصدارات الجديدة
+app.options('(.*)', cors()); 
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// إنشاء مجلد uploads إذا لم يكن موجوداً
+// إنشاء مجلد uploads
 const fs = require('fs');
 if (!fs.existsSync('uploads')) {
   fs.mkdirSync('uploads');
@@ -54,12 +59,12 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/resources', resourceRoutes);
 app.use('/api/roadmap', roadmapRoutes);
 
-// مسار تجريبي للصحة
+// مسار تجريبي
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// معالجة الأخطاء العامة
+// معالجة الأخطاء
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ message: err.message });
@@ -67,5 +72,5 @@ app.use((err, req, res, next) => {
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`✅ CORS enabled for origins: ${allowedOrigins.join(', ')}`);
+  console.log(`✅ CORS configuration updated`);
 });
