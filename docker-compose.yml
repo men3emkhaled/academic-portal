@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: academic_portal_db
+    environment:
+      POSTGRES_DB: academic_portal
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: your_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/database.sql:/docker-entrypoint-initdb.d/database.sql
+    networks:
+      - academic_network
+
+  backend:
+    build: ./backend
+    container_name: academic_portal_backend
+    ports:
+      - "5000:5000"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: academic_portal
+      DB_USER: postgres
+      DB_PASSWORD: men3em-khaled
+      JWT_SECRET: your_jwt_secret_key_here
+    depends_on:
+      - postgres
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    networks:
+      - academic_network
+
+  frontend:
+    build: ./frontend
+    container_name: academic_portal_frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - academic_network
+
+networks:
+  academic_network:
+    driver: bridge
+
+volumes:
+  postgres_data:

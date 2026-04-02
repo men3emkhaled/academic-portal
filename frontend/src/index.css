@@ -1,0 +1,40 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-dark text-white font-sans antialiased;
+    background-image: radial-gradient(circle at 10% 20%, rgba(57,255,20,0.03) 0%, transparent 50%);
+  }
+}
+
+@layer components {
+  .neon-text {
+    @apply text-neon;
+    text-shadow: 0 0 5px rgba(57,255,20,0.5);
+  }
+  
+  .neon-button {
+    @apply bg-neon text-dark font-semibold py-2.5 px-6 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-[0_0_15px_rgba(57,255,20,0.5)] active:scale-95;
+  }
+  
+  .glass-card {
+    @apply bg-dark-glass backdrop-blur-md border border-white/10 rounded-2xl shadow-xl;
+  }
+  
+  .neon-border {
+    @apply border border-neon/50 shadow-[0_0_10px_rgba(57,255,20,0.2)];
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-out forwards;
+}
