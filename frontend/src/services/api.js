@@ -1,13 +1,15 @@
 import axios from 'axios';
 
+// نقوم بإنشاء instance من axios مع تحديد رابط السيرفر على Railway
 const api = axios.create({
-  baseURL: '/api',
+  // الرابط الكامل للسيرفر الخاص بك مع إضافة /api في النهاية
+  baseURL: 'https://academic-portal-production.up.railway.app/api',
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Add token to requests if it exists
+// إضافة الـ Token للطلبات إذا كان المستخدم مسجلاً للدخول (Admin)
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('adminToken');
