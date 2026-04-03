@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 const fs = require('fs');
+const path = require('path'); // إضافة مكتبة path للتعامل مع المسارات
 
 // استيراد المسارات (Routes)
 const courseRoutes = require('./routes/courseRoutes');
@@ -14,38 +15,27 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // ------------------------------
-// 1. إعدادات CORS المتقدمة (آمنة)
+// 1. إعدادات CORS
 // ------------------------------
 const allowedOrigins = [
   'http://localhost:5173',
   'https://cs-academic-portal.netlify.app',
   /\.netlify\.app$/,
-  // يمكنك إضافة روابط أخرى هنا
 ];
 
-// دالة مساعدة للتحقق من الأصل المسموح به
-const isOriginAllowed = (origin) => {
-  if (!origin) return true; // السماح للأدوات مثل Postman
-  return allowedOrigins.some(allowed => {
-    if (allowed instanceof RegExp) return allowed.test(origin);
-    return allowed === origin;
-  });
-};
-
-// تكوين CORS
 const corsOptions = {
   origin: (origin, callback) => {
-    if (isOriginAllowed(origin)) {
+    if (!origin || allowedOrigins.some(allowed => 
+      allowed instanceof RegExp ? allowed.test(origin) : allowed === origin
+    )) {
       callback(null, true);
     } else {
-      console.warn(`❌ CORS blocked: ${origin}`);
       callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  optionsSuccessStatus: 200, // بعض المتصفحات القديمة تحتاج هذا
 };
 
 app.use(cors(corsOptions));
@@ -56,6 +46,10 @@ app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// --- هام جداً: تعريف مجلد ملفات الـ React الثابتة ---
+// تأكد أن المجلد اسمه 'dist' (إذا كنت تستخدم Vite) أو 'build'
+app.use(express.static(path.join(__dirname, 'dist')));
+
 // ------------------------------
 // 3. إنشاء مجلد الرفع (uploads)
 // ------------------------------
@@ -64,7 +58,7 @@ if (!fs.existsSync('uploads')) {
 }
 
 // ------------------------------
-// 4. تسجيل المسارات (Routes)
+// 4. تسجيل مسارات الـ API
 // ------------------------------
 app.use('/api/courses', courseRoutes);
 app.use('/api/grades', gradeRoutes);
@@ -72,9 +66,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/resources', resourceRoutes);
 app.use('/api/roadmap', roadmapRoutes);
 
-// ------------------------------
-// 5. نقطة نهاية للصحة (Health Check)
-// ------------------------------
+// نقطة نهاية للصحة (Health Check)
 app.get('/api/health', (req, res) => {
   res.status(200).json({
     status: 'ok',
@@ -84,14 +76,22 @@ app.get('/api/health', (req, res) => {
 });
 
 // ------------------------------
-// 6. التعامل مع المسارات غير الموجودة (404)
+// 5. تشغيل الـ Frontend (React Catch-all)
 // ------------------------------
-app.use((req, res) => {
-  res.status(404).json({ message: `Route ${req.originalUrl} not found` });
+// هذا الجزء يحل مشكلة PathError في Express 5 ويقوم بتشغيل واجهة الموقع
+app.get('/{*path}', (req, res) => {
+  const indexPath = path.resolve(__dirname, 'dist', 'index.html');
+  
+  if (fs.existsSync(indexPath)) {
+    res.sendFile(indexPath);
+  } else {
+    // إذا لم يجد السيرفر ملفات الـ React (تأكد من عمل Build)
+    res.status(404).send('Frontend build not found. Please run "npm run build" in your frontend folder.');
+  }
 });
 
 // ------------------------------
-// 7. معالجة الأخطاء العامة (Error Handler)
+// 6. معالجة الأخطاء العامة (Error Handler)
 // ------------------------------
 app.use((err, req, res, next) => {
   console.error('❌ Error:', err.stack);
@@ -103,10 +103,9 @@ app.use((err, req, res, next) => {
 });
 
 // ------------------------------
-// 8. تشغيل الخادم
+// 7. تشغيل الخادم
 // ------------------------------
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`✅ CORS enabled for Netlify & localhost`);
-  console.log(`📦 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`✅ Production-ready with React support`);
 });
