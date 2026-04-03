@@ -10,6 +10,7 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('courses');
   const [courses, setCourses] = useState([]);
   const [gradesFile, setGradesFile] = useState(null);
+  const [studentsFile, setStudentsFile] = useState(null);
   const [selectedCourseId, setSelectedCourseId] = useState('');
   const [loading, setLoading] = useState(false);
   const [loginCredentials, setLoginCredentials] = useState({ username: '', password: '' });
@@ -79,6 +80,27 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleUploadStudents = async (e) => {
+    e.preventDefault();
+    if (!studentsFile) {
+      toast.error('Please select a file');
+      return;
+    }
+    const formData = new FormData();
+    formData.append('file', studentsFile);
+    setLoading(true);
+    try {
+      const response = await api.post('/admin/upload-students', formData);
+      toast.success(`Uploaded ${response.data.count} students successfully`);
+      setStudentsFile(null);
+      document.getElementById('studentsFileInput').value = '';
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Error uploading students');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleDeleteCourse = async (id) => {
     if (!window.confirm('Delete this course?')) return;
     try {
@@ -133,7 +155,7 @@ const AdminDashboard = () => {
                   type="text"
                   value={loginCredentials.username}
                   onChange={(e) => setLoginCredentials({ ...loginCredentials, username: e.target.value })}
-                  className="w-full bg-dark border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-neon transition-colors"
+                  className="w-full bg-dark border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-neon"
                   required
                 />
               </div>
@@ -143,7 +165,7 @@ const AdminDashboard = () => {
                   type="password"
                   value={loginCredentials.password}
                   onChange={(e) => setLoginCredentials({ ...loginCredentials, password: e.target.value })}
-                  className="w-full bg-dark border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-neon transition-colors"
+                  className="w-full bg-dark border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-neon"
                   required
                 />
               </div>
@@ -161,9 +183,9 @@ const AdminDashboard = () => {
     <div className="animate-fadeIn">
       <h1 className="text-4xl md:text-5xl font-bold neon-text mb-8 tracking-tight">Admin Dashboard</h1>
 
-      {/* Responsive Tabs */}
+      {/* Tabs */}
       <div className="flex flex-wrap gap-2 mb-10 border-b border-white/10 pb-2">
-        {['courses', 'grades', 'resources', 'roadmap'].map(tab => (
+        {['courses', 'grades', 'resources', 'roadmap', 'students'].map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -177,28 +199,27 @@ const AdminDashboard = () => {
             {tab === 'grades' && 'Upload Grades'}
             {tab === 'resources' && 'Manage Resources'}
             {tab === 'roadmap' && 'Manage Roadmap'}
+            {tab === 'students' && 'Upload Students'}
           </button>
         ))}
       </div>
 
       {/* Tab Content */}
       <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 md:p-8">
+        {/* Courses Tab */}
         {activeTab === 'courses' && (
           <div className="space-y-8">
-            {/* Add Course Form */}
             <div>
-              <h2 className="text-xl font-semibold text-neon mb-4 flex items-center gap-2">
-                <span className="w-2 h-2 bg-neon rounded-full"></span> Add New Course
-              </h2>
+              <h2 className="text-xl font-semibold text-neon mb-4">Add New Course</h2>
               <form
                 onSubmit={async (e) => {
                   e.preventDefault();
-                  const formData = new FormData(e.target);
+                  const fd = new FormData(e.target);
                   const data = {
-                    name: formData.get('name'),
-                    semester: parseInt(formData.get('semester')),
-                    description: formData.get('description'),
-                    max_score: parseInt(formData.get('max_score')) || 15,
+                    name: fd.get('name'),
+                    semester: parseInt(fd.get('semester')),
+                    description: fd.get('description'),
+                    max_score: parseInt(fd.get('max_score')) || 15,
                   };
                   try {
                     await api.post('/courses', data);
@@ -211,64 +232,39 @@ const AdminDashboard = () => {
                 }}
                 className="grid grid-cols-1 md:grid-cols-2 gap-4"
               >
-                <input
-                  name="name"
-                  placeholder="Course Name"
-                  className="bg-dark border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-neon"
-                  required
-                />
-                <select
-                  name="semester"
-                  className="bg-dark border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-neon"
-                  required
-                >
+                <input name="name" placeholder="Course Name" className="bg-dark border border-white/20 rounded-xl px-4 py-2 text-white" required />
+                <select name="semester" className="bg-dark border border-white/20 rounded-xl px-4 py-2 text-white" required>
                   <option value={1}>Semester 1</option>
                   <option value={2}>Semester 2</option>
                 </select>
-                <input
-                  name="max_score"
-                  type="number"
-                  placeholder="Max Score (e.g., 15)"
-                  className="bg-dark border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-neon"
-                  required
-                />
-                <textarea
-                  name="description"
-                  placeholder="Description"
-                  className="md:col-span-2 bg-dark border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-neon"
-                  rows="3"
-                  required
-                />
+                <input name="max_score" type="number" placeholder="Max Score" className="bg-dark border border-white/20 rounded-xl px-4 py-2 text-white" required />
+                <textarea name="description" placeholder="Description" className="md:col-span-2 bg-dark border border-white/20 rounded-xl px-4 py-2 text-white" rows="3" required />
                 <div className="md:col-span-2">
                   <button type="submit" className="neon-button w-full md:w-auto">Add Course</button>
                 </div>
               </form>
             </div>
-
-            {/* Courses List */}
             <div>
-              <h2 className="text-xl font-semibold text-neon mb-4 flex items-center gap-2">
-                <span className="w-2 h-2 bg-neon rounded-full"></span> Existing Courses
-              </h2>
+              <h2 className="text-xl font-semibold text-neon mb-4">Existing Courses</h2>
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[500px]">
                   <thead>
                     <tr className="border-b border-white/10">
-                      <th className="text-left py-3 px-4 text-gray-300 font-medium">Name</th>
-                      <th className="text-left py-3 px-4 text-gray-300 font-medium">Semester</th>
-                      <th className="text-left py-3 px-4 text-gray-300 font-medium">Max Score</th>
-                      <th className="text-left py-3 px-4 text-gray-300 font-medium">Actions</th>
+                      <th className="text-left py-3 px-4">Name</th>
+                      <th className="text-left py-3 px-4">Semester</th>
+                      <th className="text-left py-3 px-4">Max Score</th>
+                      <th className="text-left py-3 px-4">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {courses.map(course => (
-                      <tr key={course.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                      <tr key={course.id} className="border-b border-white/5 hover:bg-white/5">
                         <td className="py-3 px-4">{course.name}</td>
                         <td className="py-3 px-4">{course.semester}</td>
                         <td className="py-3 px-4">{course.max_score || 15}</td>
                         <td className="py-3 px-4 space-x-3">
-                          <button onClick={() => handleEditClick(course)} className="text-yellow-400 hover:text-yellow-300 text-sm">Edit</button>
-                          <button onClick={() => handleDeleteCourse(course.id)} className="text-red-400 hover:text-red-300 text-sm">Delete</button>
+                          <button onClick={() => handleEditClick(course)} className="text-yellow-400">Edit</button>
+                          <button onClick={() => handleDeleteCourse(course.id)} className="text-red-400">Delete</button>
                         </td>
                       </tr>
                     ))}
@@ -279,11 +275,10 @@ const AdminDashboard = () => {
           </div>
         )}
 
+        {/* Grades Tab */}
         {activeTab === 'grades' && (
           <div>
-            <h2 className="text-xl font-semibold text-neon mb-4 flex items-center gap-2">
-              <span className="w-2 h-2 bg-neon rounded-full"></span> Upload Grades (Excel)
-            </h2>
+            <h2 className="text-xl font-semibold text-neon mb-4">Upload Grades (Excel)</h2>
             <p className="text-gray-400 text-sm mb-4">
               Excel file columns: <span className="text-neon">Student ID, Student Name, Midterm Score</span><br />
               Use <span className="text-neon">-</span> for missing grades.
@@ -293,7 +288,7 @@ const AdminDashboard = () => {
               <select
                 value={selectedCourseId}
                 onChange={(e) => setSelectedCourseId(e.target.value)}
-                className="w-full bg-dark border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-neon"
+                className="w-full bg-dark border border-white/20 rounded-xl px-4 py-2 text-white"
                 required
               >
                 <option value="">-- Choose a course --</option>
@@ -303,98 +298,77 @@ const AdminDashboard = () => {
               </select>
             </div>
             <form onSubmit={handleUploadGrades} className="space-y-5">
-              <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-                <label className="relative cursor-pointer bg-dark border border-white/20 rounded-xl px-5 py-2 text-white hover:border-neon transition-colors">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <label className="relative cursor-pointer bg-dark border border-white/20 rounded-xl px-5 py-2 text-white hover:border-neon">
                   Choose File
-                  <input
-                    id="gradesFileInput"
-                    type="file"
-                    accept=".xlsx,.xls,.csv"
-                    onChange={(e) => setGradesFile(e.target.files[0])}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                  />
+                  <input id="gradesFileInput" type="file" accept=".xlsx,.xls,.csv" onChange={(e) => setGradesFile(e.target.files[0])} className="absolute inset-0 opacity-0" />
                 </label>
                 {gradesFile && <span className="text-sm text-gray-300">{gradesFile.name}</span>}
               </div>
-              <button type="submit" disabled={loading} className="neon-button w-full sm:w-auto disabled:opacity-50">
+              <button type="submit" disabled={loading} className="neon-button w-full sm:w-auto">
                 {loading ? 'Uploading...' : 'Upload Grades'}
               </button>
             </form>
           </div>
         )}
 
+        {/* Resources Tab */}
         {activeTab === 'resources' && <ResourceManager />}
+        
+        {/* Roadmap Tab */}
         {activeTab === 'roadmap' && <RoadmapManager />}
+        
+        {/* Students Upload Tab */}
+        {activeTab === 'students' && (
+          <div>
+            <h2 className="text-xl font-semibold text-neon mb-4">Upload Students (Excel)</h2>
+            <p className="text-gray-400 text-sm mb-4">
+              Excel file should have columns: <span className="text-neon">Student ID, Student Name</span>
+            </p>
+            <form onSubmit={handleUploadStudents} className="space-y-5">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <label className="relative cursor-pointer bg-dark border border-white/20 rounded-xl px-5 py-2 text-white hover:border-neon">
+                  Choose File
+                  <input id="studentsFileInput" type="file" accept=".xlsx,.xls,.csv" onChange={(e) => setStudentsFile(e.target.files[0])} className="absolute inset-0 opacity-0" />
+                </label>
+                {studentsFile && <span className="text-sm text-gray-300">{studentsFile.name}</span>}
+              </div>
+              <button type="submit" disabled={loading} className="neon-button w-full sm:w-auto">
+                {loading ? 'Uploading...' : 'Upload Students'}
+              </button>
+            </form>
+          </div>
+        )}
       </div>
 
       {/* Edit Course Modal */}
       {editingCourse && (
-        <div
-          className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 backdrop-blur-sm"
-          onClick={() => setEditingCourse(null)}
-        >
-          <div
-            className="bg-charcoal border border-neon rounded-2xl p-6 w-full max-w-md shadow-2xl"
-            onClick={e => e.stopPropagation()}
-          >
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4" onClick={() => setEditingCourse(null)}>
+          <div className="bg-charcoal border border-neon rounded-2xl p-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
             <h2 className="text-2xl font-bold neon-text mb-5">Edit Course</h2>
             <form onSubmit={handleUpdateCourse} className="space-y-4">
               <div>
-                <label className="block text-gray-300 mb-1 text-sm">Course Name</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={editFormData.name}
-                  onChange={handleEditFormChange}
-                  className="w-full bg-dark border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-neon"
-                  required
-                />
+                <label className="block text-gray-300 mb-1">Course Name</label>
+                <input type="text" name="name" value={editFormData.name} onChange={handleEditFormChange} className="w-full bg-dark border border-white/20 rounded-xl px-4 py-2 text-white" required />
               </div>
               <div>
-                <label className="block text-gray-300 mb-1 text-sm">Semester</label>
-                <select
-                  name="semester"
-                  value={editFormData.semester}
-                  onChange={handleEditFormChange}
-                  className="w-full bg-dark border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-neon"
-                >
+                <label className="block text-gray-300 mb-1">Semester</label>
+                <select name="semester" value={editFormData.semester} onChange={handleEditFormChange} className="w-full bg-dark border border-white/20 rounded-xl px-4 py-2 text-white">
                   <option value={1}>Semester 1</option>
                   <option value={2}>Semester 2</option>
                 </select>
               </div>
               <div>
-                <label className="block text-gray-300 mb-1 text-sm">Max Score</label>
-                <input
-                  type="number"
-                  name="max_score"
-                  value={editFormData.max_score}
-                  onChange={handleEditFormChange}
-                  className="w-full bg-dark border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-neon"
-                  required
-                />
+                <label className="block text-gray-300 mb-1">Max Score</label>
+                <input type="number" name="max_score" value={editFormData.max_score} onChange={handleEditFormChange} className="w-full bg-dark border border-white/20 rounded-xl px-4 py-2 text-white" required />
               </div>
               <div>
-                <label className="block text-gray-300 mb-1 text-sm">Description</label>
-                <textarea
-                  name="description"
-                  value={editFormData.description}
-                  onChange={handleEditFormChange}
-                  className="w-full bg-dark border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-neon"
-                  rows="3"
-                  required
-                />
+                <label className="block text-gray-300 mb-1">Description</label>
+                <textarea name="description" value={editFormData.description} onChange={handleEditFormChange} className="w-full bg-dark border border-white/20 rounded-xl px-4 py-2 text-white" rows="3" required />
               </div>
               <div className="flex gap-3 pt-2">
-                <button type="submit" disabled={loading} className="neon-button flex-1">
-                  {loading ? 'Saving...' : 'Save Changes'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setEditingCourse(null)}
-                  className="px-4 py-2 border border-white/20 rounded-xl hover:bg-white/10 transition-colors"
-                >
-                  Cancel
-                </button>
+                <button type="submit" disabled={loading} className="neon-button flex-1">{loading ? 'Saving...' : 'Save Changes'}</button>
+                <button type="button" onClick={() => setEditingCourse(null)} className="px-4 py-2 border border-white/20 rounded-xl hover:bg-white/10">Cancel</button>
               </div>
             </form>
           </div>
