@@ -2,9 +2,7 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 const fs = require('fs');
-const path = require('path');
 
-// استيراد المسارات (Routes)
 const courseRoutes = require('./routes/courseRoutes');
 const gradeRoutes = require('./routes/gradeRoutes');
 const adminRoutes = require('./routes/adminRoutes');
@@ -14,44 +12,43 @@ const roadmapRoutes = require('./routes/roadmapRoutes');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// 1. إعدادات CORS
 const allowedOrigins = [
   'http://localhost:5173',
   'https://cs-academic-portal.netlify.app',
   /\.netlify\.app$/,
 ];
 
+const isOriginAllowed = (origin) => {
+  if (!origin) return true;
+  return allowedOrigins.some(allowed => {
+    if (allowed instanceof RegExp) return allowed.test(origin);
+    return allowed === origin;
+  });
+};
+
 const corsOptions = {
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.some(allowed => 
-      allowed instanceof RegExp ? allowed.test(origin) : allowed === origin
-    )) {
+    if (isOriginAllowed(origin)) {
       callback(null, true);
     } else {
+      console.warn(`CORS blocked: ${origin}`);
       callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
+  optionsSuccessStatus: 200,
 };
 
 app.use(cors(corsOptions));
-
-// 2. Middleware الأساسية
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// --- هام: تعريف مجلد ملفات الـ React الثابتة ---
-// السيرفر سيبحث عن ملفات الـ CSS والـ JS داخل فولدر dist
-app.use(express.static(path.join(__dirname, 'dist')));
-
-// 3. إنشاء مجلد الرفع
 if (!fs.existsSync('uploads')) {
   fs.mkdirSync('uploads');
 }
 
-// 4. تسجيل مسارات الـ API (يجب أن تكون قبل مسار الـ React)
 app.use('/api/courses', courseRoutes);
 app.use('/api/grades', gradeRoutes);
 app.use('/api/admin', adminRoutes);
@@ -59,29 +56,37 @@ app.use('/api/resources', resourceRoutes);
 app.use('/api/roadmap', roadmapRoutes);
 
 app.get('/api/health', (req, res) => {
-  res.status(200).json({ status: 'ok', uptime: process.uptime() });
+  res.status(200).json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+  });
 });
 
-// 5. حل مشكلة الـ 404 والـ PathError (تشغيل الـ Frontend)
-// أي مسار لا يبدأ بـ /api سيقوم السيرفر بإرسال ملف الـ index.html
-app.get('/{*path}', (req, res) => {
-  const indexPath = path.resolve(__dirname, 'dist', 'index.html');
-  if (fs.existsSync(indexPath)) {
-    res.sendFile(indexPath);
-  } else {
-    // هذه الرسالة تظهر فقط إذا لم تقم بعمل Build للـ Frontend
-    res.status(404).send('Frontend build not found. Make sure "dist" folder exists.');
+app.get('/api/db-test', async (req, res) => {
+  const { Pool } = require('pg');
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+  try {
+    const result = await pool.query('SELECT NOW()');
+    res.json({ success: true, time: result.rows[0] });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 
-// 6. معالجة الأخطاء العامة
+app.use((req, res) => {
+  res.status(404).json({ message: `Route ${req.originalUrl} not found` });
+});
+
 app.use((err, req, res, next) => {
-  console.error('❌ Error:', err.stack);
-  res.status(err.status || 500).json({
-    message: err.message || 'Internal Server Error'
+  console.error('Error:', err.stack);
+  const status = err.status || 500;
+  res.status(status).json({
+    message: err.message || 'Internal Server Error',
+    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
   });
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
