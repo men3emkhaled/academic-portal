@@ -1,40 +1,47 @@
-// frontend/src/components/Navbar.jsx
-import React from 'react';
-import { useStudentAuth } from '../context/StudentAuthContext';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-const Navbar = ({ onMenuClick, isMobile }) => {
-  const { student } = useStudentAuth();
-  const { token: adminToken } = useAuth();
-  const user = student || (adminToken ? { name: 'Admin', role: 'admin' } : null);
+const Navbar = () => {
+  const { token, logout } = useAuth();
+  const navigate = useNavigate();
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+    setIsOpen(false);
+  };
+
+  const links = [
+    { name: 'Home', path: '/' },
+    { name: 'Roadmap', path: '/roadmap' },
+    { name: 'Grades', path: '/grades' },
+    { name: 'Contact', path: '/contact' },
+  ];
 
   return (
-    <nav className="bg-charcoal/80 backdrop-blur-md border-b border-neon/30 px-4 py-3 flex justify-between items-center sticky top-0 z-30">
-      {/* زر القائمة (يظهر فقط في الموبايل) */}
-      {isMobile && (
-        <button
-          onClick={onMenuClick}
-          className="p-2 rounded-lg hover:bg-white/10 transition-colors"
-        >
-          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </button>
-      )}
+    <nav className="bg-dark-card border-b border-primary/20 sticky top-0 z-50">
+      <div className="container mx-auto px-4 py-3 flex justify-between items-center">
+        <Link to="/" className="text-2xl font-bold text-primary">
+          Academic Portal
+        </Link>
 
-      {/* العنوان في المنتصف أو اليمين */}
-      <div className={`flex items-center gap-2 ${isMobile ? 'mx-auto' : 'ml-auto'}`}>
-        {user && (
-          <>
-            <div className="text-right">
-              <p className="text-sm text-gray-300">{user.role === 'admin' ? 'Admin' : 'Student'}</p>
-              <p className="text-md font-semibold text-neon">{user.name}</p>
-            </div>
-            <div className="w-10 h-10 rounded-full bg-neon/20 border border-neon/50 flex items-center justify-center text-neon font-bold">
-              {user.name?.charAt(0).toUpperCase() || 'U'}
-            </div>
-          </>
-        )}
+        <div className="hidden md:flex items-center gap-6">
+          {links.map((link) => (
+            <Link key={link.path} to={link.path} className="text-gray-300 hover:text-primary transition-colors">
+              {link.name}
+            </Link>
+          ))}
+          {token ? (
+            <>
+              <Link to="/admin" className="text-gray-300 hover:text-primary">Admin</Link>
+              <button onClick={handleLogout} className="text-red-400 hover:text-red-300">Logout</button>
+            </>
+          ) : (
+            <Link to="/admin" className="text-gray-300 hover:text-primary">Admin Login</Link>
+          )}
+        </div>
       </div>
     </nav>
   );

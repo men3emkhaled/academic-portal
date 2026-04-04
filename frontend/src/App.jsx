@@ -20,12 +20,9 @@ import StudentMaterials from './pages/StudentMaterials';
 import StudentNotifications from './pages/StudentNotifications';
 import StudentSettings from './pages/StudentSettings';
 
-// Protected Route wrapper for student pages
 const ProtectedStudentRoute = ({ children }) => {
   const token = localStorage.getItem('studentToken');
-  if (!token) {
-    return <Navigate to="/student/login" replace />;
-  }
+  if (!token) return <Navigate to="/student/login" replace />;
   return children;
 };
 
@@ -34,9 +31,8 @@ function App() {
     <AuthProvider>
       <StudentAuthProvider>
         <Router>
-          {/* الـ Navbar يظهر بس للصفحات العامة والأدمن */}
           <Routes>
-            {/* Public Routes with Navbar */}
+            {/* ===== Public Routes with Navbar ===== */}
             <Route path="/" element={<><Navbar /><Home /></>} />
             <Route path="/course/:id" element={<><Navbar /><CourseDetails /></>} />
             <Route path="/grades" element={<><Navbar /><Grades /></>} />
@@ -44,10 +40,10 @@ function App() {
             <Route path="/roadmap" element={<><Navbar /><RoadmapList /></>} />
             <Route path="/roadmap/:id" element={<><Navbar /><RoadmapDetail /></>} />
             
-            {/* Admin Route - no Navbar, has its own header */}
+            {/* ===== Admin Route (no Navbar - has its own header) ===== */}
             <Route path="/admin" element={<AdminDashboard />} />
             
-            {/* Student Routes - no Navbar, use Sidebar inside each page */}
+            {/* ===== Student Routes (no Navbar - use Sidebar inside) ===== */}
             <Route path="/student/login" element={<StudentLogin />} />
             <Route path="/student/dashboard" element={<ProtectedStudentRoute><StudentDashboard /></ProtectedStudentRoute>} />
             <Route path="/student/grades" element={<ProtectedStudentRoute><StudentGrades /></ProtectedStudentRoute>} />
