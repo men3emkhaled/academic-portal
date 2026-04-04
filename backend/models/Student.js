@@ -59,6 +59,12 @@ class Student {
     );
     return result.rows[0];
   }
+
+  // ✅ دالة حذف الطالب (تستخدم في adminRoutes)
+  static async delete(id) {
+    await db.query('DELETE FROM students WHERE id = $1', [id]);
+    return true;
+  }
 }
 
 module.exports = Student;
