@@ -13,13 +13,13 @@ const StudentTimetable = () => {
   const [selectedDay, setSelectedDay] = useState('Monday');
 
   const days = [
-    { id: 'Monday', name: 'الإثنين', short: 'Mon' },
-    { id: 'Tuesday', name: 'الثلاثاء', short: 'Tue' },
-    { id: 'Wednesday', name: 'الأربعاء', short: 'Wed' },
-    { id: 'Thursday', name: 'الخميس', short: 'Thu' },
-    { id: 'Friday', name: 'الجمعة', short: 'Fri' },
-    { id: 'Saturday', name: 'السبت', short: 'Sat' },
-    { id: 'Sunday', name: 'الأحد', short: 'Sun' },
+    { id: 'Monday', name: 'Monday', short: 'Mon' },
+    { id: 'Tuesday', name: 'Tuesday', short: 'Tue' },
+    { id: 'Wednesday', name: 'Wednesday', short: 'Wed' },
+    { id: 'Thursday', name: 'Thursday', short: 'Thu' },
+    { id: 'Friday', name: 'Friday', short: 'Fri' },
+    { id: 'Saturday', name: 'Saturday', short: 'Sat' },
+    { id: 'Sunday', name: 'Sunday', short: 'Sun' },
   ];
 
   useEffect(() => {
