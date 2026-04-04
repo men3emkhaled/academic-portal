@@ -15,13 +15,13 @@ const StudentTimetable = () => {
 
   // ✅ ترتيب الأيام (الأسبوع يبدأ من الأحد)
   const days = [
-    { id: 'Sunday', name: 'Sunday', short: 'Sun', arabic: 'الأحد' },
-    { id: 'Monday', name: 'Monday', short: 'Mon', arabic: 'الإثنين' },
-    { id: 'Tuesday', name: 'Tuesday', short: 'Tue', arabic: 'الثلاثاء' },
-    { id: 'Wednesday', name: 'Wednesday', short: 'Wed', arabic: 'الأربعاء' },
-    { id: 'Thursday', name: 'Thursday', short: 'Thu', arabic: 'الخميس' },
-    { id: 'Friday', name: 'Friday', short: 'Fri', arabic: 'الجمعة' },
-    { id: 'Saturday', name: 'Saturday', short: 'Sat', arabic: 'السبت' },
+    { id: 'Sunday', name: 'Sunday', short: 'Sun'},
+    { id: 'Monday', name: 'Monday', short: 'Mon'},
+    { id: 'Tuesday', name: 'Tuesday', short: 'Tue'},
+    { id: 'Wednesday', name: 'Wednesday', short: 'Wed'},
+    { id: 'Thursday', name: 'Thursday', short: 'Thu'},
+    { id: 'Friday', name: 'Friday', short: 'Fri'},
+    { id: 'Saturday', name: 'Saturday', short: 'Sat'},
   ];
 
   // ✅ دالة لجلب تاريخ بداية الأسبوع (الأحد)
