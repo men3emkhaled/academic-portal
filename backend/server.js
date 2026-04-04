@@ -56,7 +56,7 @@ if (!fs.existsSync('uploads')) {
   fs.mkdirSync('uploads');
 }
 
-// Routes
+// ============= Routes =============
 app.use('/api/courses', courseRoutes);
 app.use('/api/grades', gradeRoutes);
 app.use('/api/admin', adminRoutes);
@@ -66,7 +66,7 @@ app.use('/api/student', studentRoutes);
 app.use('/api/timetable', timetableRoutes);
 app.use('/api/notifications', notificationRoutes);
 
-// Health check
+// ============= Health Check =============
 app.get('/api/health', (req, res) => {
   res.status(200).json({
     status: 'ok',
@@ -76,28 +76,40 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Database test
+// ============= Database Test =============
 app.get('/api/db-test', async (req, res) => {
   const { Pool } = require('pg');
-  const pool = new Pool({ 
-    connectionString: process.env.DATABASE_URL || `postgresql://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`
-  });
+  let pool;
   try {
+    if (process.env.DATABASE_URL) {
+      pool = new Pool({ 
+        connectionString: process.env.DATABASE_URL,
+        ssl: { rejectUnauthorized: false }
+      });
+    } else {
+      pool = new Pool({ 
+        host: process.env.DB_HOST,
+        port: process.env.DB_PORT,
+        database: process.env.DB_NAME,
+        user: process.env.DB_USER,
+        password: process.env.DB_PASSWORD,
+      });
+    }
     const result = await pool.query('SELECT NOW()');
+    await pool.end();
     res.json({ success: true, time: result.rows[0] });
   } catch (error) {
+    if (pool) await pool.end();
     res.status(500).json({ success: false, error: error.message });
-  } finally {
-    await pool.end();
   }
 });
 
-// 404 handler
+// ============= 404 Handler =============
 app.use((req, res) => {
   res.status(404).json({ message: `Route ${req.originalUrl} not found` });
 });
 
-// Error handler
+// ============= Error Handler =============
 app.use((err, req, res, next) => {
   console.error('Error:', err.stack);
   const status = err.status || 500;
@@ -107,8 +119,11 @@ app.use((err, req, res, next) => {
   });
 });
 
+// ============= Start Server =============
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📡 API available at http://localhost:${PORT}/api`);
   console.log(`✅ Health check: http://localhost:${PORT}/api/health`);
+  console.log(`🔐 Student login: http://localhost:${PORT}/api/student/login`);
+  console.log(`👑 Admin login: http://localhost:${PORT}/api/admin/login`);
 });
