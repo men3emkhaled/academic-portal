@@ -56,13 +56,13 @@ if (!fs.existsSync('uploads')) {
   fs.mkdirSync('uploads');
 }
 
-// ============= Routes =============
+// ============= Routes (القديم والجديد مع بعض) =============
 app.use('/api/courses', courseRoutes);
 app.use('/api/grades', gradeRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/resources', resourceRoutes);
 app.use('/api/roadmap', roadmapRoutes);
-app.use('/api/student', studentRoutes);
+app.use('/api/student', studentRoutes);      // الجديد
 app.use('/api/timetable', timetableRoutes);
 app.use('/api/notifications', notificationRoutes);
 

@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const studentApi = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'https://academic-portal-production.up.railway.app/api/student',
+  baseURL: 'https://academic-portal-production.up.railway.app/api/student',
   headers: {
     'Content-Type': 'application/json',
   },
