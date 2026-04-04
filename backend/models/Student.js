@@ -18,16 +18,28 @@ class Student {
   }
 
   static async create(id, name, password, level = 1, section = null) {
+    // ✅ لو الطالب موجود، متغيرش الباسورد والسكشن إلا لو جايين جدد
+    const existing = await this.findById(id);
+    
+    let finalPassword = password;
+    let finalSection = section;
+    
+    if (existing) {
+      // لو الطالب موجود، خلي الباسورد القديم لو مجاش جديد
+      finalPassword = password === 'default123' ? existing.password_hash : password;
+      finalSection = section !== null && section !== undefined ? section : existing.section;
+    }
+    
     const result = await db.query(
       `INSERT INTO students (id, name, password_hash, level, section) 
        VALUES ($1, $2, $3, $4, $5) 
        ON CONFLICT (id) DO UPDATE SET 
          name = EXCLUDED.name,
-         password_hash = EXCLUDED.password_hash,
+         password_hash = COALESCE(EXCLUDED.password_hash, students.password_hash),
          level = EXCLUDED.level,
-         section = EXCLUDED.section
+         section = COALESCE(EXCLUDED.section, students.section)
        RETURNING id, name, level, section`,
-      [id, name, password, level, section]
+      [id, name, finalPassword, level, finalSection]
     );
     return result.rows[0];
   }

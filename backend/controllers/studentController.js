@@ -16,26 +16,32 @@ const uploadStudentsExcel = async (req, res) => {
     const data = XLSX.utils.sheet_to_json(worksheet);
     
     const students = [];
+    const updatedStudents = [];
     
     for (const row of data) {
       const studentId = row['Student ID'] || row['student_id'] || row['ID'];
       const studentName = row['Student Name'] || row['student_name'] || row['Name'];
-      let password = row['Password'] || row['password'] || '123456';
+      let password = row['Password'] || row['password'] || 'default123';
       const level = row['Level'] || row['level'] || 1;
       let section = row['Section'] || row['section'] || null;
       
       if (!studentId || !studentName) continue;
       
-      // ✅ التعامل مع الـ section كـ string (حرف)
+      // ✅ تحويل السكشن من حرف لرقم
       if (section) {
-        section = String(section).toUpperCase().trim();
-        // لو الرقم كان رقم زي 1، حوله لـ A
-        if (section === '1') section = 'A';
-        else if (section === '2') section = 'B';
-        else if (section === '3') section = 'C';
-        else if (section === '4') section = 'D';
-        else if (section === '5') section = 'E';
-        else if (section === '6') section = 'F';
+        const sectionMap = { 'A': '1', 'B': '2', 'C': '3', 'D': '4', 'E': '5', 'F': '6' };
+        section = sectionMap[section.toUpperCase()] || section;
+      }
+      
+      // ✅ لو الباسورد default123، معناه إننا مش عاوزين نغير الباسورد الحالي
+      const existingStudent = await Student.findById(studentId);
+      if (existingStudent && password === 'default123') {
+        password = existingStudent.password_hash;
+      }
+      
+      // ✅ لو السكشن مش موجود في الـ Excel، خلي السكشن القديم
+      if (existingStudent && (!section || section === '')) {
+        section = existingStudent.section;
       }
       
       students.push({
@@ -52,14 +58,15 @@ const uploadStudentsExcel = async (req, res) => {
     }
     
     for (const student of students) {
-      await Student.create(student.id, student.name, student.password, student.level, student.section);
+      const result = await Student.create(student.id, student.name, student.password, student.level, student.section);
+      updatedStudents.push(result);
     }
     
     fs.unlinkSync(filePath);
     res.json({ 
       message: 'Students uploaded successfully', 
       count: students.length,
-      students: students.map(s => ({ id: s.id, name: s.name, level: s.level, section: s.section }))
+      students: updatedStudents
     });
   } catch (error) {
     if (filePath && fs.existsSync(filePath)) fs.unlinkSync(filePath);
@@ -85,11 +92,10 @@ const updateStudentSection = async (req, res) => {
       return res.status(400).json({ message: 'Section is required' });
     }
     
-    // ✅ التعامل مع الـ section كـ string
-    section = String(section).toUpperCase().trim();
-    const validSections = ['A', 'B', 'C', 'D', 'E', 'F'];
+    section = String(section);
+    const validSections = ['1', '2', '3', '4', '5', '6'];
     if (!validSections.includes(section)) {
-      return res.status(400).json({ message: 'Section must be A, B, C, D, E, or F' });
+      return res.status(400).json({ message: 'Section must be 1, 2, 3, 4, 5, or 6' });
     }
     
     const student = await Student.updateSection(id, section);
@@ -113,8 +119,9 @@ const resetStudentPassword = async (req, res) => {
       return res.status(404).json({ message: 'Student not found' });
     }
     
-    await Student.updatePassword(id, newPassword || '123456');
-    res.json({ message: 'Password reset successfully' });
+    const finalPassword = newPassword || '123456';
+    await Student.updatePassword(id, finalPassword);
+    res.json({ message: 'Password reset successfully', newPassword: finalPassword });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
