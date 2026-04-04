@@ -25,7 +25,8 @@ const StudentDashboard = () => {
 
   const fetchGrades = async () => {
     try {
-      const response = await studentApi.get('/my-grades');
+      // ✅ المسار الصحيح: /grades/my-grades
+      const response = await studentApi.get('/grades/my-grades');
       setGrades(response.data.grades || []);
       setSummary(response.data.summary || null);
     } catch (error) {
@@ -89,7 +90,6 @@ const StudentDashboard = () => {
     <div className="flex min-h-screen bg-dark">
       <Sidebar activePage="dashboard" onLogout={handleLogout} />
       
-      {/* ✅ إضافة pb-20 للموبايل عشان المحتوى مايختفيش تحت الـ Bottom Bar */}
       <div className="flex-1 ml-0 md:ml-64 pb-20 md:pb-8 p-4 md:p-8">
         <div className="max-w-6xl mx-auto">
           <div className="mb-8">
@@ -154,7 +154,7 @@ const StudentDashboard = () => {
                     <tr>
                       <td colSpan="6" className="text-center py-8 md:py-12 text-gray-400">
                         No grades available yet.
-                       </td>
+                      </td>
                     </tr>
                   ) : (
                     grades.map((grade, idx) => {
@@ -166,17 +166,20 @@ const StudentDashboard = () => {
                             <span className={getGradeColor(grade.midterm_score, grade.max_score)}>
                               {grade.midterm_score || '-'}
                             </span>
-                           </td>
+                            {grade.midterm_status === 'pending' && <span className="text-xs text-yellow-500 block">pending</span>}
+                          </td>
                           <td className="text-center py-2 px-3 md:py-3 md:px-6">
                             <span className={getGradeColor(grade.practical_score, grade.max_score)}>
                               {grade.practical_score || '-'}
                             </span>
-                           </td>
+                            {grade.practical_status === 'pending' && <span className="text-xs text-yellow-500 block">pending</span>}
+                          </td>
                           <td className="text-center py-2 px-3 md:py-3 md:px-6">
                             <span className={getGradeColor(grade.oral_score, grade.max_score)}>
                               {grade.oral_score || '-'}
                             </span>
-                           </td>
+                            {grade.oral_status === 'pending' && <span className="text-xs text-yellow-500 block">pending</span>}
+                          </td>
                           <td className="text-center py-2 px-3 md:py-3 md:px-6 font-semibold text-primary">{total}</td>
                           <td className="text-center py-2 px-3 md:py-3 md:px-6 text-gray-400">{grade.max_score}</td>
                         </tr>
