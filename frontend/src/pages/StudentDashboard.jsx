@@ -70,11 +70,19 @@ const StudentDashboard = () => {
     }
   };
 
+  // ✅ دالة تحديد لون الدرجة (ناجح/راسب)
   const getGradeColor = (score, maxScore) => {
     if (score === null || score === undefined) return 'text-gray-500';
-    const percentage = (score / maxScore) * 100;
+    const roundedScore = Math.round(score);
+    const percentage = (roundedScore / maxScore) * 100;
     if (percentage >= 50) return 'text-green-400';
     return 'text-red-400';
+  };
+
+  // ✅ دالة تقريب الدرجة
+  const formatScore = (score) => {
+    if (score === null || score === undefined) return '-';
+    return Math.round(score);
   };
 
   if (loading) {
@@ -89,7 +97,7 @@ const StudentDashboard = () => {
     <div className="min-h-screen bg-dark">
       <Sidebar onLogout={handleLogout} />
       
-      {/* المحتوى الرئيسي - مع padding مناسب للموبايل والـ desktop */}
+      {/* المحتوى الرئيسي */}
       <div className="md:ml-64 pb-24 md:pb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
           {/* Header */}
@@ -108,16 +116,16 @@ const StudentDashboard = () => {
             </button>
           </div>
 
-          {/* Stats Cards - شبكة responsive */}
+          {/* Stats Cards - المجموع من 240 */}
           {summary && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
               <div className="bg-white/5 rounded-xl p-4 sm:p-6 border border-white/10 hover:border-primary/30 transition-all">
                 <div className="flex items-center justify-between">
                   <h3 className="text-gray-400 text-sm sm:text-base">Total Score</h3>
                   <span className="text-2xl">📊</span>
                 </div>
                 <p className="text-2xl sm:text-3xl font-bold text-primary mt-2">{summary.totalEarned || 0}</p>
-                <p className="text-xs text-gray-500 mt-1">out of {summary.totalPossible || 0}</p>
+                <p className="text-xs text-gray-500 mt-1">out of {summary.totalPossible || 240}</p>
               </div>
               
               <div className="bg-white/5 rounded-xl p-4 sm:p-6 border border-white/10 hover:border-primary/30 transition-all">
@@ -127,82 +135,131 @@ const StudentDashboard = () => {
                 </div>
                 <p className="text-2xl sm:text-3xl font-bold text-primary mt-2">{summary.overallPercentage || 0}%</p>
                 <div className="mt-2 h-2 bg-white/10 rounded-full overflow-hidden">
-                  <div className="h-full bg-primary rounded-full transition-all duration-500" style={{ width: `${summary.overallPercentage || 0}%` }} />
+                  <div 
+                    className="h-full bg-primary rounded-full transition-all duration-500" 
+                    style={{ width: `${summary.overallPercentage || 0}%` }} 
+                  />
                 </div>
               </div>
               
-              <div className="bg-white/5 rounded-xl p-4 sm:p-6 border border-white/10 hover:border-primary/30 transition-all sm:col-span-2 lg:col-span-1">
+              <div className="bg-white/5 rounded-xl p-4 sm:p-6 border border-white/10 hover:border-primary/30 transition-all">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-gray-400 text-sm sm:text-base">Courses with Grades</h3>
-                  <span className="text-2xl">📚</span>
+                  <h3 className="text-gray-400 text-sm sm:text-base">Courses Passed</h3>
+                  <span className="text-2xl">✅</span>
                 </div>
                 <p className="text-2xl sm:text-3xl font-bold text-primary mt-2">{summary.coursesWithGrades || 0}</p>
-                <p className="text-xs text-gray-500 mt-1">out of {grades.length} courses</p>
+                <p className="text-xs text-gray-500 mt-1">out of {summary.totalCourses || grades.length} courses</p>
+              </div>
+
+              <div className="bg-white/5 rounded-xl p-4 sm:p-6 border border-white/10 hover:border-primary/30 transition-all">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-gray-400 text-sm sm:text-base">Total Courses</h3>
+                  <span className="text-2xl">📚</span>
+                </div>
+                <p className="text-2xl sm:text-3xl font-bold text-primary mt-2">{summary.totalCourses || grades.length}</p>
+                <p className="text-xs text-gray-500 mt-1">Semester 2</p>
               </div>
             </div>
           )}
 
-          {/* Grades Table - responsive overflow */}
+          {/* Grades Table */}
           <div className="bg-white/5 rounded-xl border border-white/10 overflow-hidden">
             <div className="p-4 sm:p-6 border-b border-white/10">
               <h2 className="text-lg sm:text-xl font-semibold text-primary">Your Grades</h2>
-              <p className="text-gray-400 text-xs sm:text-sm mt-1">Midterm • Practical • Oral scores</p>
+              <p className="text-gray-400 text-xs sm:text-sm mt-1">
+                Midterm (max {grades[0]?.midterm_max || 15}) • Practical (max {grades[0]?.practical_max || 15}) • Oral (max {grades[0]?.oral_max || 10})
+              </p>
             </div>
             
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[500px] text-sm sm:text-base">
+              <table className="w-full min-w-[600px] text-sm sm:text-base">
                 <thead>
                   <tr className="border-b border-white/10 bg-white/5">
                     <th className="text-left py-3 px-3 sm:py-4 sm:px-6 text-primary text-xs sm:text-sm">Course</th>
-                    <th className="text-center py-3 px-3 sm:py-4 sm:px-6 text-primary text-xs sm:text-sm">Mid</th>
-                    <th className="text-center py-3 px-3 sm:py-4 sm:px-6 text-primary text-xs sm:text-sm">Prac</th>
+                    <th className="text-center py-3 px-3 sm:py-4 sm:px-6 text-primary text-xs sm:text-sm">Midterm</th>
+                    <th className="text-center py-3 px-3 sm:py-4 sm:px-6 text-primary text-xs sm:text-sm">Practical</th>
                     <th className="text-center py-3 px-3 sm:py-4 sm:px-6 text-primary text-xs sm:text-sm">Oral</th>
                     <th className="text-center py-3 px-3 sm:py-4 sm:px-6 text-primary text-xs sm:text-sm">Total</th>
                     <th className="text-center py-3 px-3 sm:py-4 sm:px-6 text-primary text-xs sm:text-sm">Max</th>
+                    <th className="text-center py-3 px-3 sm:py-4 sm:px-6 text-primary text-xs sm:text-sm">Status</th>
                   </tr>
                 </thead>
                 <tbody>
                   {grades.length === 0 ? (
                     <tr>
-                      <td colSpan="6" className="text-center py-8 sm:py-12 text-gray-400">
+                      <td colSpan="7" className="text-center py-8 sm:py-12 text-gray-400">
                         📭 No grades available yet.
                       </td>
                     </tr>
                   ) : (
                     grades.map((grade, idx) => {
                       const total = (grade.midterm_score || 0) + (grade.practical_score || 0) + (grade.oral_score || 0);
+                      const percentage = grade.max_score > 0 ? (total / grade.max_score) * 100 : 0;
+                      const isPassing = percentage >= 50;
+                      
                       return (
                         <tr key={idx} className="border-b border-white/5 hover:bg-white/5 transition">
                           <td className="py-2 px-3 sm:py-3 sm:px-6 font-medium text-white text-xs sm:text-sm break-words max-w-[150px] sm:max-w-none">
                             {grade.course_name}
                           </td>
                           <td className="text-center py-2 px-3 sm:py-3 sm:px-6">
-                            <span className={getGradeColor(grade.midterm_score, grade.max_score)}>
-                              {grade.midterm_score || '-'}
+                            <span className={getGradeColor(grade.midterm_score, grade.midterm_max)}>
+                              {formatScore(grade.midterm_score)}
                             </span>
-                            {grade.midterm_status === 'pending' && <span className="text-[10px] text-yellow-500 block">pending</span>}
+                            {grade.midterm_status === 'pending' && (
+                              <span className="text-[10px] text-yellow-500 block">pending</span>
+                            )}
                           </td>
                           <td className="text-center py-2 px-3 sm:py-3 sm:px-6">
-                            <span className={getGradeColor(grade.practical_score, grade.max_score)}>
-                              {grade.practical_score || '-'}
+                            <span className={getGradeColor(grade.practical_score, grade.practical_max)}>
+                              {formatScore(grade.practical_score)}
                             </span>
-                            {grade.practical_status === 'pending' && <span className="text-[10px] text-yellow-500 block">pending</span>}
+                            {grade.practical_status === 'pending' && (
+                              <span className="text-[10px] text-yellow-500 block">pending</span>
+                            )}
                           </td>
                           <td className="text-center py-2 px-3 sm:py-3 sm:px-6">
-                            <span className={getGradeColor(grade.oral_score, grade.max_score)}>
-                              {grade.oral_score || '-'}
+                            <span className={getGradeColor(grade.oral_score, grade.oral_max)}>
+                              {formatScore(grade.oral_score)}
                             </span>
-                            {grade.oral_status === 'pending' && <span className="text-[10px] text-yellow-500 block">pending</span>}
+                            {grade.oral_status === 'pending' && (
+                              <span className="text-[10px] text-yellow-500 block">pending</span>
+                            )}
                           </td>
-                          <td className="text-center py-2 px-3 sm:py-3 sm:px-6 font-semibold text-primary">{total}</td>
-                          <td className="text-center py-2 px-3 sm:py-3 sm:px-6 text-gray-400">{grade.max_score}</td>
-                        </tr>
+                          <td className="text-center py-2 px-3 sm:py-3 sm:px-6 font-semibold text-primary">
+                            {Math.round(total)}
+                          </td>
+                          <td className="text-center py-2 px-3 sm:py-3 sm:px-6 text-gray-400">
+                            {grade.max_score}
+                          </td>
+                          <td className="text-center py-2 px-3 sm:py-3 sm:px-6">
+                            {total > 0 && (
+                              <span className={`text-xs px-2 py-1 rounded-full ${
+                                isPassing 
+                                  ? 'bg-green-400/20 text-green-400' 
+                                  : 'bg-red-400/20 text-red-400'
+                              }`}>
+                                {isPassing ? 'Passing' : 'Failing'}
+                              </span>
+                            )}
+                            {total === 0 && (
+                              <span className="text-xs text-gray-500">Not graded</span>
+                            )}
+                           </td>
+                         </tr>
                       );
                     })
                   )}
                 </tbody>
               </table>
             </div>
+          </div>
+
+          {/* Note */}
+          <div className="mt-4 p-3 bg-white/5 rounded-lg border border-white/10 text-center">
+            <p className="text-xs text-gray-400">
+              📝 Each course total = Midterm + Practical + Oral • Total possible = 240 (6 courses × 40)
+            </p>
           </div>
         </div>
       </div>
@@ -245,10 +302,18 @@ const StudentDashboard = () => {
                 />
               </div>
               <div className="flex gap-3 pt-2">
-                <button type="submit" disabled={changingPassword} className="flex-1 bg-primary text-dark font-semibold py-2.5 rounded-xl hover:bg-primaryDark transition-all disabled:opacity-50">
+                <button 
+                  type="submit" 
+                  disabled={changingPassword} 
+                  className="flex-1 bg-primary text-dark font-semibold py-2.5 rounded-xl hover:bg-primaryDark transition-all disabled:opacity-50"
+                >
                   {changingPassword ? 'Saving...' : 'Save Changes'}
                 </button>
-                <button type="button" onClick={() => setShowChangePassword(false)} className="px-4 py-2.5 border border-white/20 rounded-xl hover:bg-white/10 transition-all">
+                <button 
+                  type="button" 
+                  onClick={() => setShowChangePassword(false)} 
+                  className="px-4 py-2.5 border border-white/20 rounded-xl hover:bg-white/10 transition-all"
+                >
                   Cancel
                 </button>
               </div>

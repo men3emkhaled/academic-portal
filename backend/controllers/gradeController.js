@@ -4,7 +4,7 @@ const Course = require('../models/Course');
 const XLSX = require('xlsx');
 const fs = require('fs');
 
-// جلب درجات طالب معين (بالـ ID)
+// جلب درجات طالب معين
 const getGradesByStudentId = async (req, res) => {
   try {
     const { studentId } = req.params;
@@ -21,7 +21,7 @@ const getGradesByStudentId = async (req, res) => {
   }
 };
 
-// رفع الدرجات (متقدم - يدعم 3 أنواع)
+// رفع الدرجات
 const uploadAdvancedGrades = async (req, res) => {
   let filePath = null;
   try {
@@ -64,7 +64,7 @@ const uploadAdvancedGrades = async (req, res) => {
       if (score !== undefined && score !== null && score !== '-') {
         const parsed = parseFloat(score);
         if (!isNaN(parsed)) {
-          scoreValue = parsed;
+          scoreValue = Math.round(parsed); // ✅ تقريب لأقرب عدد صحيح
           status = 'completed';
         }
       }
@@ -114,8 +114,14 @@ const updateSingleGrade = async (req, res) => {
       return res.status(404).json({ message: 'Course not found' });
     }
     
-    if (score !== null && score !== undefined && score > course.max_score) {
-      return res.status(400).json({ message: `Score cannot exceed ${course.max_score}` });
+    // التحقق من الحد الأقصى حسب نوع الامتحان
+    let maxAllowed = 0;
+    if (examType === 'midterm') maxAllowed = course.midterm_max || 15;
+    else if (examType === 'practical') maxAllowed = course.practical_max || 15;
+    else if (examType === 'oral') maxAllowed = course.oral_max || 10;
+    
+    if (score !== null && score !== undefined && score > maxAllowed) {
+      return res.status(400).json({ message: `${examType} score cannot exceed ${maxAllowed}` });
     }
     
     const updatedGrade = await Grade.updateSingleGrade(studentId, courseName, examType, score, status);
@@ -129,7 +135,7 @@ const updateSingleGrade = async (req, res) => {
   }
 };
 
-// جلب كل الدرجات (للـ Admin)
+// جلب كل الدرجات
 const getAllGrades = async (req, res) => {
   try {
     const grades = await Grade.getAllGrades();
@@ -139,20 +145,16 @@ const getAllGrades = async (req, res) => {
   }
 };
 
-// جلب درجات الطالب المسجل (للوحة تحكم الطالب) - المعدلة عشان تظهر كل المواد
+// جلب درجات الطالب المسجل
 const getMyGrades = async (req, res) => {
   try {
     const studentId = req.user.id;
     const student = await Student.findById(studentId);
     
-    // جلب كل المواد (حتى اللي مفيش درجات)
     const allCourses = await Course.findAll();
     const semester2Courses = allCourses.filter(c => c.semester === 2);
-    
-    // جلب الدرجات الموجودة
     const existingGrades = await Grade.getStudentGrades(studentId);
     
-    // دمج المواد مع الدرجات
     const gradesMap = new Map();
     existingGrades.forEach(grade => {
       gradesMap.set(grade.course_name, grade);
@@ -164,16 +166,19 @@ const getMyGrades = async (req, res) => {
         course_id: course.id,
         course_name: course.name,
         max_score: course.max_score,
-        midterm_score: existing?.midterm_score !== undefined && existing?.midterm_score !== null ? existing.midterm_score : null,
+        midterm_max: course.midterm_max || 15,
+        practical_max: course.practical_max || 15,
+        oral_max: course.oral_max || 10,
+        midterm_score: existing?.midterm_score !== undefined && existing?.midterm_score !== null ? Math.round(existing.midterm_score) : null,
         midterm_status: existing?.midterm_status || 'pending',
-        practical_score: existing?.practical_score !== undefined && existing?.practical_score !== null ? existing.practical_score : null,
+        practical_score: existing?.practical_score !== undefined && existing?.practical_score !== null ? Math.round(existing.practical_score) : null,
         practical_status: existing?.practical_status || 'pending',
-        oral_score: existing?.oral_score !== undefined && existing?.oral_score !== null ? existing.oral_score : null,
+        oral_score: existing?.oral_score !== undefined && existing?.oral_score !== null ? Math.round(existing.oral_score) : null,
         oral_status: existing?.oral_status || 'pending'
       };
     });
     
-    // حساب الإحصائيات
+    // ✅ حساب المجاميع من 240
     let totalEarned = 0;
     let totalPossible = 0;
     let coursesWithGrades = 0;
@@ -181,13 +186,11 @@ const getMyGrades = async (req, res) => {
     for (const grade of grades) {
       const earned = (grade.midterm_score || 0) + (grade.practical_score || 0) + (grade.oral_score || 0);
       totalPossible += grade.max_score;
-      if (earned > 0) {
-        totalEarned += earned;
-        coursesWithGrades++;
-      }
+      totalEarned += earned;
+      if (earned > 0) coursesWithGrades++;
     }
     
-    const overallPercentage = totalPossible > 0 ? (totalEarned / totalPossible) * 100 : 0;
+    const overallPercentage = totalPossible > 0 ? Math.round((totalEarned / totalPossible) * 100) : 0;
     
     res.json({
       student: {
@@ -200,8 +203,9 @@ const getMyGrades = async (req, res) => {
       summary: {
         totalEarned,
         totalPossible,
-        overallPercentage: Math.round(overallPercentage),
-        coursesWithGrades
+        overallPercentage,
+        coursesWithGrades,
+        totalCourses: grades.length
       }
     });
   } catch (error) {
