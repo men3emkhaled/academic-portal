@@ -3,14 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'r
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
 import { StudentAuthProvider } from './context/StudentAuthContext';
-import Navbar from './components/Navbar';
-import Home from './pages/Home';
-import CourseDetails from './pages/CourseDetails';
-import Grades from './pages/Grades';
 import AdminDashboard from './pages/AdminDashboard';
-import Contact from './pages/Contact';
-import RoadmapList from './pages/RoadmapList';
-import RoadmapDetail from './pages/RoadmapDetail';
 import StudentLogin from './pages/StudentLogin';
 import StudentDashboard from './pages/StudentDashboard';
 import StudentTimetable from './pages/StudentTimetable';
@@ -30,14 +23,10 @@ const ProtectedStudentRoute = ({ children }) => {
     }
   }, [token, navigate]);
 
-  if (!token) {
-    return null;
-  }
-
+  if (!token) return null;
   return children;
 };
 
-// ✅ لو فيه توكن وما حاولش يدخل على login، حوله للـ dashboard
 const StudentLoginRedirect = () => {
   const token = localStorage.getItem('studentToken');
   const navigate = useNavigate();
@@ -57,13 +46,8 @@ function App() {
       <StudentAuthProvider>
         <Router>
           <Routes>
-            {/* Public Routes with Navbar */}
-            <Route path="/" element={<><Navbar /><Home /></>} />
-            <Route path="/course/:id" element={<><Navbar /><CourseDetails /></>} />
-            <Route path="/grades" element={<><Navbar /><Grades /></>} />
-            <Route path="/contact" element={<><Navbar /><Contact /></>} />
-            <Route path="/roadmap" element={<><Navbar /><RoadmapList /></>} />
-            <Route path="/roadmap/:id" element={<><Navbar /><RoadmapDetail /></>} />
+            {/* الصفحة الرئيسية تحول لتسجيل دخول الطالب */}
+            <Route path="/" element={<Navigate to="/student/login" replace />} />
             
             {/* Admin Route */}
             <Route path="/admin" element={<AdminDashboard />} />

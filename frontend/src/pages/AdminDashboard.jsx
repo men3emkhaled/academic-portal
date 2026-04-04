@@ -9,9 +9,7 @@ const AdminDashboard = () => {
   const { token, login } = useAuth();
   const [activeTab, setActiveTab] = useState('courses');
   const [courses, setCourses] = useState([]);
-  const [gradesFile, setGradesFile] = useState(null);
-  const [selectedCourseId, setSelectedCourseId] = useState('');
-  const [selectedExamType, setSelectedExamType] = useState('midterm');
+  const [students, setStudents] = useState([]);        // ✅ تخزين الطلاب
   const [loading, setLoading] = useState(false);
   const [uploadingGrades, setUploadingGrades] = useState(false);
   const [uploadingStudents, setUploadingStudents] = useState(false);
@@ -24,53 +22,66 @@ const AdminDashboard = () => {
     description: '',
     max_score: 15,
   });
+
+  // States for grades upload
+  const [gradesFile, setGradesFile] = useState(null);
+  const [selectedCourseId, setSelectedCourseId] = useState('');
+  const [selectedExamType, setSelectedExamType] = useState('midterm');
+
+  // States for timetable upload
   const [timetableFile, setTimetableFile] = useState(null);
   const [selectedSection, setSelectedSection] = useState('');
   const [uploadingTimetable, setUploadingTimetable] = useState(false);
-  
-  // Notifications State
+
+  // Notifications state
   const [notifications, setNotifications] = useState([]);
   const [sending, setSending] = useState(false);
-  const [notificationForm, setNotificationForm] = useState({
-    studentId: '',
-    title: '',
-    content: ''
-  });
+  const [notificationForm, setNotificationForm] = useState({ studentId: '', title: '', content: '' });
 
+  // ------------------- Fetch Data -------------------
   useEffect(() => {
     if (!token) return;
     fetchCourses();
-    if (activeTab === 'notifications') {
-      fetchNotifications();
-    }
+    fetchStudents();        // جلب الطلاب عند تحميل الصفحة
+    if (activeTab === 'notifications') fetchNotifications();
   }, [token, activeTab]);
 
   const fetchCourses = async () => {
     try {
-      const response = await api.get('/courses');
-      setCourses(response.data);
+      const res = await api.get('/courses');
+      setCourses(res.data);
     } catch (error) {
       toast.error('Error loading courses');
     }
   };
 
+  const fetchStudents = async () => {
+    try {
+      const res = await api.get('/admin/students-with-passwords');
+      setStudents(res.data);
+    } catch (error) {
+      console.error('Error fetching students:', error);
+      toast.error('Failed to load students');
+    }
+  };
+
   const fetchNotifications = async () => {
     try {
-      const response = await api.get('/notifications/admin/all');
-      setNotifications(response.data);
+      const res = await api.get('/notifications/admin/all');
+      setNotifications(res.data);
     } catch (error) {
       console.error('Error fetching notifications:', error);
     }
   };
 
+  // ------------------- Admin Login -------------------
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await api.post('/admin/login', loginCredentials);
-      login(response.data.token);
+      const res = await api.post('/admin/login', loginCredentials);
+      login(res.data.token);
       toast.success('Login successful');
-      fetchCourses();
     } catch (error) {
       toast.error('Invalid credentials');
     } finally {
@@ -78,25 +89,24 @@ const AdminDashboard = () => {
     }
   };
 
-  // Grades Upload
+  // ------------------- Grades Upload -------------------
   const handleUploadGrades = async (e) => {
     e.preventDefault();
     if (!gradesFile || !selectedCourseId) {
       toast.error('Please select a file and a course');
       return;
     }
-    
     const formData = new FormData();
     formData.append('file', gradesFile);
     formData.append('courseId', selectedCourseId);
     formData.append('examType', selectedExamType);
-    
+
     setUploadingGrades(true);
     try {
-      const response = await api.post('/grades/admin/upload-advanced', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+      const res = await api.post('/grades/admin/upload-advanced', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
-      toast.success(`✅ Uploaded ${response.data.count} grades`);
+      toast.success(`✅ Uploaded ${res.data.count} grades`);
       setGradesFile(null);
       setSelectedCourseId('');
       document.getElementById('gradesFileInput').value = '';
@@ -107,25 +117,24 @@ const AdminDashboard = () => {
     }
   };
 
-  // Students Upload
+  // ------------------- Students Upload (Excel) -------------------
   const handleUploadStudents = async (e) => {
     e.preventDefault();
     if (!studentsFile) {
       toast.error('Please select a file');
       return;
     }
-    
     const formData = new FormData();
     formData.append('file', studentsFile);
-    
     setUploadingStudents(true);
     try {
-      const response = await api.post('/admin/upload-students', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+      const res = await api.post('/admin/upload-students', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
-      toast.success(`✅ Uploaded ${response.data.count} students`);
+      toast.success(`✅ Uploaded ${res.data.count} students`);
       setStudentsFile(null);
       document.getElementById('studentsFileInput').value = '';
+      fetchStudents(); // تحديث القائمة
     } catch (error) {
       toast.error(error.response?.data?.message || 'Error uploading students');
     } finally {
@@ -133,22 +142,48 @@ const AdminDashboard = () => {
     }
   };
 
-  // Timetable Upload
+  // ------------------- Student: Reset Password -------------------
+  const handleResetPassword = async (studentId) => {
+    const newPassword = prompt('Enter new password for student (min 4 characters):');
+    if (!newPassword || newPassword.length < 4) {
+      toast.error('Password must be at least 4 characters');
+      return;
+    }
+    try {
+      await api.put(`/admin/students/${studentId}/reset-password`, { newPassword });
+      toast.success(`Password for ${studentId} reset successfully`);
+      fetchStudents(); // تحديث القائمة (الباسورد بيتغير في قاعدة البيانات)
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to reset password');
+    }
+  };
+
+  // ------------------- Student: Delete -------------------
+  const handleDeleteStudent = async (studentId, studentName) => {
+    if (!window.confirm(`Are you sure you want to delete student "${studentName}" (${studentId})? This action cannot be undone.`)) return;
+    try {
+      await api.delete(`/admin/students/${studentId}`);
+      toast.success(`Student ${studentId} deleted`);
+      fetchStudents();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to delete student');
+    }
+  };
+
+  // ------------------- Timetable Upload -------------------
   const handleUploadTimetable = async (e) => {
     e.preventDefault();
     if (!timetableFile || !selectedSection) {
       toast.error('Please select a file and a section');
       return;
     }
-    
     const formData = new FormData();
     formData.append('file', timetableFile);
     formData.append('section', selectedSection);
-    
     setUploadingTimetable(true);
     try {
-      const response = await api.post('/timetable/admin/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+      const res = await api.post('/timetable/admin/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
       toast.success(`✅ Uploaded timetable for Section ${selectedSection}`);
       setTimetableFile(null);
@@ -161,19 +196,18 @@ const AdminDashboard = () => {
     }
   };
 
-  // Notifications Send
+  // ------------------- Notifications -------------------
   const handleSendToAll = async (e) => {
     e.preventDefault();
     if (!notificationForm.title || !notificationForm.content) {
       toast.error('Title and content are required');
       return;
     }
-    
     setSending(true);
     try {
       await api.post('/notifications/admin/send-to-all', {
         title: notificationForm.title,
-        content: notificationForm.content
+        content: notificationForm.content,
       });
       toast.success('Notification sent to all students!');
       setNotificationForm({ studentId: '', title: '', content: '' });
@@ -191,13 +225,12 @@ const AdminDashboard = () => {
       toast.error('Student ID, title, and content are required');
       return;
     }
-    
     setSending(true);
     try {
       await api.post('/notifications/admin/send-to-student', {
         studentId: notificationForm.studentId,
         title: notificationForm.title,
-        content: notificationForm.content
+        content: notificationForm.content,
       });
       toast.success(`Notification sent to student ${notificationForm.studentId}`);
       setNotificationForm({ studentId: '', title: '', content: '' });
@@ -209,7 +242,7 @@ const AdminDashboard = () => {
     }
   };
 
-  // Course Management
+  // ------------------- Course Management -------------------
   const handleDeleteCourse = async (id) => {
     if (!window.confirm('Delete this course?')) return;
     try {
@@ -265,357 +298,324 @@ const AdminDashboard = () => {
     }
   };
 
-  // Login Screen
+  // ------------------- Login Screen -------------------
   if (!token) {
     return (
-      <div className="min-h-[80vh] flex items-center justify-center">
-        <div className="w-full max-w-md">
-          <div className="bg-white/5 backdrop-blur-sm border border-primary/30 rounded-2xl p-8 shadow-2xl">
-            <h2 className="text-3xl font-bold text-primary text-center mb-6">Admin Login</h2>
-            <form onSubmit={handleLogin} className="space-y-5">
-              <div>
-                <label className="block text-gray-300 mb-2 text-sm">Username</label>
-                <input
-                  type="text"
-                  value={loginCredentials.username}
-                  onChange={(e) => setLoginCredentials({ ...loginCredentials, username: e.target.value })}
-                  className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-gray-300 mb-2 text-sm">Password</label>
-                <input
-                  type="password"
-                  value={loginCredentials.password}
-                  onChange={(e) => setLoginCredentials({ ...loginCredentials, password: e.target.value })}
-                  className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary"
-                  required
-                />
-              </div>
-              <button type="submit" disabled={loading} className="w-full bg-primary text-dark font-semibold py-3 rounded-xl transition-all duration-300 hover:scale-[1.02] disabled:opacity-50">
-                {loading ? 'Logging in...' : 'Login →'}
-              </button>
-            </form>
-          </div>
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="w-full max-w-md bg-white/5 backdrop-blur-sm border border-primary/30 rounded-2xl p-8 shadow-2xl">
+          <h2 className="text-3xl font-bold text-primary text-center mb-6">Admin Login</h2>
+          <form onSubmit={handleLogin} className="space-y-5">
+            <div>
+              <label className="block text-gray-300 mb-2 text-sm">Username</label>
+              <input
+                type="text"
+                value={loginCredentials.username}
+                onChange={(e) => setLoginCredentials({ ...loginCredentials, username: e.target.value })}
+                className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-gray-300 mb-2 text-sm">Password</label>
+              <input
+                type="password"
+                value={loginCredentials.password}
+                onChange={(e) => setLoginCredentials({ ...loginCredentials, password: e.target.value })}
+                className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary"
+                required
+              />
+            </div>
+            <button type="submit" disabled={loading} className="w-full bg-primary text-dark font-semibold py-3 rounded-xl transition-all hover:scale-[1.02] disabled:opacity-50">
+              {loading ? 'Logging in...' : 'Login →'}
+            </button>
+          </form>
         </div>
       </div>
     );
   }
 
-  // Main Dashboard
+  // ------------------- Main Dashboard (مرن وغير لاصق) -------------------
   return (
-    <div className="animate-fadeIn">
-      <h1 className="text-4xl md:text-5xl font-bold text-primary mb-8 tracking-tight">Admin Dashboard</h1>
+    <div className="min-h-screen bg-dark p-4 md:p-8">
+      <div className="max-w-[1400px] mx-auto">
+        <h1 className="text-3xl md:text-5xl font-bold text-primary mb-6 tracking-tight">Admin Dashboard</h1>
 
-      {/* Tabs */}
-      <div className="flex flex-wrap gap-2 mb-10 border-b border-white/10 pb-2">
-        {['courses', 'grades', 'resources', 'roadmap', 'students', 'timetable', 'notifications'].map(tab => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 md:px-6 md:py-2.5 font-medium rounded-t-xl transition-all duration-200 text-sm md:text-base ${
-              activeTab === tab
-                ? 'text-primary border-b-2 border-primary bg-white/5'
-                : 'text-gray-400 hover:text-gray-200 hover:bg-white/5'
-            }`}
-          >
-            {tab === 'courses' && '📚 Courses'}
-            {tab === 'grades' && '📊 Upload Grades'}
-            {tab === 'resources' && '📎 Resources'}
-            {tab === 'roadmap' && '🗺️ Roadmap'}
-            {tab === 'students' && '👥 Students'}
-            {tab === 'timetable' && '📅 Timetable'}
-            {tab === 'notifications' && '🔔 Notifications'}
-          </button>
-        ))}
-      </div>
+        {/* Tabs */}
+        <div className="flex flex-wrap gap-2 mb-6 border-b border-white/10 pb-2 overflow-x-auto">
+          {['courses', 'grades', 'resources', 'roadmap', 'students', 'timetable', 'notifications'].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-4 py-2 md:px-6 md:py-2.5 font-medium rounded-t-xl transition-all text-sm md:text-base whitespace-nowrap ${
+                activeTab === tab
+                  ? 'text-primary border-b-2 border-primary bg-white/5'
+                  : 'text-gray-400 hover:text-gray-200 hover:bg-white/5'
+              }`}
+            >
+              {tab === 'courses' && '📚 Courses'}
+              {tab === 'grades' && '📊 Upload Grades'}
+              {tab === 'resources' && '📎 Resources'}
+              {tab === 'roadmap' && '🗺️ Roadmap'}
+              {tab === 'students' && '👥 Students'}
+              {tab === 'timetable' && '📅 Timetable'}
+              {tab === 'notifications' && '🔔 Notifications'}
+            </button>
+          ))}
+        </div>
 
-      {/* Tab Content */}
-      <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 md:p-8">
-        
-        {/* Courses Tab */}
-        {activeTab === 'courses' && (
-          <div className="space-y-8">
-            <div>
-              <h2 className="text-xl font-semibold text-primary mb-4">➕ Add New Course</h2>
-              <form onSubmit={handleAddCourse} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input name="name" placeholder="Course Name" className="bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white" required />
-                <select name="semester" className="bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white" required>
-                  <option value={1}>Semester 1</option>
-                  <option value={2}>Semester 2</option>
-                </select>
-                <input name="max_score" type="number" placeholder="Max Score (default: 40)" className="bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white" />
-                <textarea name="description" placeholder="Description" className="md:col-span-2 bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white" rows="3" required />
-                <div className="md:col-span-2">
-                  <button type="submit" className="bg-primary text-dark font-semibold py-2.5 px-6 rounded-xl transition-all hover:scale-105">Add Course</button>
+        {/* Tab Content */}
+        <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 md:p-6 overflow-x-auto">
+          {/* ---------- Courses ---------- */}
+          {activeTab === 'courses' && (
+            <div className="space-y-8">
+              <div>
+                <h2 className="text-xl font-semibold text-primary mb-4">➕ Add New Course</h2>
+                <form onSubmit={handleAddCourse} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <input name="name" placeholder="Course Name" className="bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white" required />
+                  <select name="semester" className="bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white" required>
+                    <option value={1}>Semester 1</option>
+                    <option value={2}>Semester 2</option>
+                  </select>
+                  <input name="max_score" type="number" placeholder="Max Score (default: 40)" className="bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white" />
+                  <textarea name="description" placeholder="Description" className="md:col-span-2 bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white" rows="3" required />
+                  <div className="md:col-span-2">
+                    <button type="submit" className="bg-primary text-dark font-semibold py-2 px-6 rounded-xl transition hover:scale-105">Add Course</button>
+                  </div>
+                </form>
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold text-primary mb-4">📋 Existing Courses</h2>
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[500px]">
+                    <thead>
+                      <tr className="border-b border-white/10">
+                        <th className="text-left py-3 px-4 text-primary">Name</th>
+                        <th className="text-left py-3 px-4 text-primary">Semester</th>
+                        <th className="text-left py-3 px-4 text-primary">Max Score</th>
+                        <th className="text-left py-3 px-4 text-primary">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {courses.map((course) => (
+                        <tr key={course.id} className="border-b border-white/5 hover:bg-white/5">
+                          <td className="py-3 px-4 text-white">{course.name}</td>
+                          <td className="py-3 px-4 text-gray-300">{course.semester}</td>
+                          <td className="py-3 px-4 text-gray-300">{course.max_score || 40}</td>
+                          <td className="py-3 px-4 space-x-3">
+                            <button onClick={() => handleEditClick(course)} className="text-yellow-400">Edit</button>
+                            <button onClick={() => handleDeleteCourse(course.id)} className="text-red-400">Delete</button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* ---------- Upload Grades ---------- */}
+          {activeTab === 'grades' && (
+            <div>
+              <h2 className="text-xl font-semibold text-primary mb-4">📊 Upload Grades</h2>
+              <p className="text-gray-400 text-sm mb-4">Excel file columns: <span className="text-primary">Student ID, Student Name, Score</span></p>
+              <div className="mb-4">
+                <label className="block text-gray-300 mb-2">Select Course</label>
+                <select
+                  value={selectedCourseId}
+                  onChange={(e) => setSelectedCourseId(e.target.value)}
+                  className="w-full md:w-80 bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white"
+                >
+                  <option value="">-- Choose a course --</option>
+                  {courses.map((c) => (
+                    <option key={c.id} value={c.id}>{c.name} (Max: {c.max_score || 40})</option>
+                  ))}
+                </select>
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-300 mb-2">Exam Type</label>
+                <select
+                  value={selectedExamType}
+                  onChange={(e) => setSelectedExamType(e.target.value)}
+                  className="w-full md:w-80 bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white"
+                >
+                  <option value="midterm">📝 Midterm Exam</option>
+                  <option value="practical">🔧 Practical Exam</option>
+                  <option value="oral">🎤 Oral Exam</option>
+                </select>
+              </div>
+              <form onSubmit={handleUploadGrades} className="space-y-5">
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <label className="relative cursor-pointer bg-dark/50 border border-white/20 rounded-xl px-5 py-2 text-white hover:border-primary transition">
+                    📁 Choose File
+                    <input id="gradesFileInput" type="file" accept=".xlsx,.xls,.csv" onChange={(e) => setGradesFile(e.target.files[0])} className="absolute inset-0 opacity-0 cursor-pointer" />
+                  </label>
+                  {gradesFile && <span className="text-sm text-gray-300">📄 {gradesFile.name}</span>}
+                </div>
+                <button type="submit" disabled={uploadingGrades || !selectedCourseId || !gradesFile} className="bg-primary text-dark font-semibold py-2 px-6 rounded-xl transition hover:scale-105 disabled:opacity-50">
+                  {uploadingGrades ? '⏳ Uploading...' : '⬆️ Upload Grades'}
+                </button>
               </form>
             </div>
-            
+          )}
+
+          {/* ---------- Resources ---------- */}
+          {activeTab === 'resources' && <ResourceManager />}
+
+          {/* ---------- Roadmap ---------- */}
+          {activeTab === 'roadmap' && <RoadmapManager />}
+
+          {/* ---------- Students (مع إضافة تعديل باسورد وحذف) ---------- */}
+          {activeTab === 'students' && (
             <div>
-              <h2 className="text-xl font-semibold text-primary mb-4">📋 Existing Courses</h2>
+              <h2 className="text-xl font-semibold text-primary mb-4">👥 Manage Students</h2>
+              {/* Upload Excel */}
+              <div className="mb-8 p-4 bg-white/5 rounded-xl border border-white/10">
+                <h3 className="text-lg font-semibold text-white mb-2">Upload Students (Excel)</h3>
+                <p className="text-gray-400 text-sm mb-4">Columns: Student ID, Student Name, Password (optional), Level (optional), Section (1-6)</p>
+                <form onSubmit={handleUploadStudents} className="space-y-4">
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <label className="relative cursor-pointer bg-dark/50 border border-white/20 rounded-xl px-5 py-2 text-white hover:border-primary transition">
+                      📁 Choose File
+                      <input id="studentsFileInput" type="file" accept=".xlsx,.xls,.csv" onChange={(e) => setStudentsFile(e.target.files[0])} className="absolute inset-0 opacity-0 cursor-pointer" />
+                    </label>
+                    {studentsFile && <span className="text-sm text-gray-300">📄 {studentsFile.name}</span>}
+                  </div>
+                  <button type="submit" disabled={uploadingStudents || !studentsFile} className="bg-primary text-dark font-semibold py-2 px-6 rounded-xl transition hover:scale-105 disabled:opacity-50">
+                    {uploadingStudents ? '⏳ Uploading...' : '⬆️ Upload Students'}
+                  </button>
+                </form>
+              </div>
+
+              {/* Students Table with Actions */}
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[500px]">
+                <table className="w-full min-w-[700px]">
                   <thead>
-                    <tr className="border-b border-white/10">
+                    <tr className="border-b border-white/10 bg-white/5">
+                      <th className="text-left py-3 px-4 text-primary">ID</th>
                       <th className="text-left py-3 px-4 text-primary">Name</th>
-                      <th className="text-left py-3 px-4 text-primary">Semester</th>
-                      <th className="text-left py-3 px-4 text-primary">Max Score</th>
+                      <th className="text-left py-3 px-4 text-primary">Level</th>
+                      <th className="text-left py-3 px-4 text-primary">Section</th>
+                      <th className="text-left py-3 px-4 text-primary">Password</th>
                       <th className="text-left py-3 px-4 text-primary">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {courses.map(course => (
-                      <tr key={course.id} className="border-b border-white/5 hover:bg-white/5">
-                        <td className="py-3 px-4 text-white">{course.name}</td>
-                        <td className="py-3 px-4 text-gray-300">{course.semester}</td>
-                        <td className="py-3 px-4 text-gray-300">{course.max_score || 40}</td>
-                        <td className="py-3 px-4 space-x-3">
-                          <button onClick={() => handleEditClick(course)} className="text-yellow-400 hover:text-yellow-300">Edit</button>
-                          <button onClick={() => handleDeleteCourse(course.id)} className="text-red-400 hover:text-red-300">Delete</button>
-                        </td>
-                      </tr>
-                    ))}
+                    {students.length === 0 ? (
+                      <tr><td colSpan="6" className="text-center py-8 text-gray-400">No students found.</td></tr>
+                    ) : (
+                      students.map((s) => (
+                        <tr key={s.id} className="border-b border-white/5 hover:bg-white/5">
+                          <td className="py-2 px-4 text-white">{s.id}</td>
+                          <td className="py-2 px-4 text-white">{s.name}</td>
+                          <td className="py-2 px-4 text-gray-300">{s.level}</td>
+                          <td className="py-2 px-4 text-gray-300">{s.section || '—'}</td>
+                          <td className="py-2 px-4 font-mono text-sm text-yellow-300">{s.password}</td>
+                          <td className="py-2 px-4 space-x-3">
+                            <button onClick={() => handleResetPassword(s.id)} className="text-blue-400 hover:text-blue-300 text-sm">🔑 Reset Pwd</button>
+                            <button onClick={() => handleDeleteStudent(s.id, s.name)} className="text-red-400 hover:text-red-300 text-sm">🗑️ Delete</button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Grades Upload Tab */}
-        {activeTab === 'grades' && (
-          <div>
-            <h2 className="text-xl font-semibold text-primary mb-4">📊 Upload Grades</h2>
-            <p className="text-gray-400 text-sm mb-4">
-              Excel file columns: <span className="text-primary">Student ID, Student Name, Score</span>
-            </p>
-            
-            <div className="mb-4">
-              <label className="block text-gray-300 mb-2">Select Course</label>
-              <select
-                value={selectedCourseId}
-                onChange={(e) => setSelectedCourseId(e.target.value)}
-                className="w-full md:w-80 bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white"
-              >
-                <option value="">-- Choose a course --</option>
-                {courses.map(course => (
-                  <option key={course.id} value={course.id}>{course.name} (Max: {course.max_score || 40})</option>
-                ))}
-              </select>
-            </div>
-            
-            <div className="mb-4">
-              <label className="block text-gray-300 mb-2">Exam Type</label>
-              <select
-                value={selectedExamType}
-                onChange={(e) => setSelectedExamType(e.target.value)}
-                className="w-full md:w-80 bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white"
-              >
-                <option value="midterm">📝 Midterm Exam</option>
-                <option value="practical">🔧 Practical Exam</option>
-                <option value="oral">🎤 Oral Exam</option>
-              </select>
-            </div>
-            
-            <form onSubmit={handleUploadGrades} className="space-y-5">
-              <div className="flex flex-col sm:flex-row gap-4">
-                <label className="relative cursor-pointer bg-dark/50 border border-white/20 rounded-xl px-5 py-2 text-white hover:border-primary transition-all">
-                  📁 Choose File
-                  <input id="gradesFileInput" type="file" accept=".xlsx,.xls,.csv" onChange={(e) => setGradesFile(e.target.files[0])} className="absolute inset-0 opacity-0 cursor-pointer" />
-                </label>
-                {gradesFile && <span className="text-sm text-gray-300">📄 {gradesFile.name}</span>}
-              </div>
-              <button type="submit" disabled={uploadingGrades || !selectedCourseId || !gradesFile} className="bg-primary text-dark font-semibold py-2.5 px-6 rounded-xl transition-all hover:scale-105 disabled:opacity-50">
-                {uploadingGrades ? '⏳ Uploading...' : '⬆️ Upload Grades'}
-              </button>
-            </form>
-          </div>
-        )}
-
-        {/* Resources Tab */}
-        {activeTab === 'resources' && <ResourceManager />}
-        
-        {/* Roadmap Tab */}
-        {activeTab === 'roadmap' && <RoadmapManager />}
-        
-        {/* Students Upload Tab */}
-        {activeTab === 'students' && (
-          <div>
-            <h2 className="text-xl font-semibold text-primary mb-4">👥 Upload Students (Excel)</h2>
-            <p className="text-gray-400 text-sm mb-4">
-              Excel file columns: <span className="text-primary">Student ID, Student Name, Password (optional), Level (optional), Section (optional - use numbers 1-6)</span>
-            </p>
-            <form onSubmit={handleUploadStudents} className="space-y-5">
-              <div className="flex flex-col sm:flex-row gap-4">
-                <label className="relative cursor-pointer bg-dark/50 border border-white/20 rounded-xl px-5 py-2 text-white hover:border-primary transition-all">
-                  📁 Choose File
-                  <input id="studentsFileInput" type="file" accept=".xlsx,.xls,.csv" onChange={(e) => setStudentsFile(e.target.files[0])} className="absolute inset-0 opacity-0 cursor-pointer" />
-                </label>
-                {studentsFile && <span className="text-sm text-gray-300">📄 {studentsFile.name}</span>}
-              </div>
-              <button type="submit" disabled={uploadingStudents || !studentsFile} className="bg-primary text-dark font-semibold py-2.5 px-6 rounded-xl transition-all hover:scale-105 disabled:opacity-50">
-                {uploadingStudents ? '⏳ Uploading...' : '⬆️ Upload Students'}
-              </button>
-            </form>
-          </div>
-        )}
-
-        {/* Timetable Upload Tab */}
-        {activeTab === 'timetable' && (
-          <div>
-            <h2 className="text-xl font-semibold text-primary mb-4">📅 Upload Timetable</h2>
-            <p className="text-gray-400 text-sm mb-4">
-              Excel file columns: <span className="text-primary">Day, Start Time, End Time, Course Name, Location, Instructor, Type</span>
-            </p>
-            
-            <div className="mb-4">
-              <label className="block text-gray-300 mb-2">Select Section (Number 1-6)</label>
-              <select
-                value={selectedSection}
-                onChange={(e) => setSelectedSection(e.target.value)}
-                className="w-full md:w-64 bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white"
-              >
-                <option value="">-- Choose section --</option>
-                <option value="1">Section 1</option>
-                <option value="2">Section 2</option>
-                <option value="3">Section 3</option>
-                <option value="4">Section 4</option>
-                <option value="5">Section 5</option>
-                <option value="6">Section 6</option>
-              </select>
-            </div>
-            
-            <form onSubmit={handleUploadTimetable} className="space-y-5">
-              <div className="flex flex-col sm:flex-row gap-4">
-                <label className="relative cursor-pointer bg-dark/50 border border-white/20 rounded-xl px-5 py-2 text-white hover:border-primary transition-all">
-                  📁 Choose Excel File
-                  <input id="timetableFileInput" type="file" accept=".xlsx,.xls,.csv" onChange={(e) => setTimetableFile(e.target.files[0])} className="absolute inset-0 opacity-0 cursor-pointer" />
-                </label>
-                {timetableFile && <span className="text-sm text-gray-300">📄 {timetableFile.name}</span>}
-              </div>
-              <button type="submit" disabled={uploadingTimetable || !selectedSection || !timetableFile} className="bg-primary text-dark font-semibold py-2.5 px-6 rounded-xl transition-all hover:scale-105 disabled:opacity-50">
-                {uploadingTimetable ? '⏳ Uploading...' : '⬆️ Upload Timetable'}
-              </button>
-            </form>
-          </div>
-        )}
-
-        {/* Notifications Tab */}
-        {activeTab === 'notifications' && (
-          <div>
-            <h2 className="text-xl font-semibold text-primary mb-4">🔔 Send Notifications</h2>
-            
-            <div className="mb-8 p-5 bg-white/5 rounded-xl border border-white/10">
-              <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">📢 Send to All Students</h3>
-              <form onSubmit={handleSendToAll} className="space-y-4">
-                <input
-                  type="text"
-                  placeholder="Notification Title"
-                  value={notificationForm.title}
-                  onChange={(e) => setNotificationForm({ ...notificationForm, title: e.target.value })}
-                  className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white"
-                  required
-                />
-                <textarea
-                  placeholder="Notification Message"
-                  rows="3"
-                  value={notificationForm.content}
-                  onChange={(e) => setNotificationForm({ ...notificationForm, content: e.target.value })}
-                  className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white"
-                  required
-                />
-                <button type="submit" disabled={sending} className="bg-primary text-dark font-semibold py-2 px-6 rounded-xl hover:scale-105 transition disabled:opacity-50">
-                  {sending ? 'Sending...' : 'Send to All →'}
-                </button>
-              </form>
-            </div>
-
-            <div className="mb-8 p-5 bg-white/5 rounded-xl border border-white/10">
-              <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">👤 Send to Specific Student</h3>
-              <form onSubmit={handleSendToStudent} className="space-y-4">
-                <input
-                  type="text"
-                  placeholder="Student ID (e.g., 2021001)"
-                  value={notificationForm.studentId}
-                  onChange={(e) => setNotificationForm({ ...notificationForm, studentId: e.target.value })}
-                  className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white"
-                  required
-                />
-                <input
-                  type="text"
-                  placeholder="Notification Title"
-                  value={notificationForm.title}
-                  onChange={(e) => setNotificationForm({ ...notificationForm, title: e.target.value })}
-                  className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white"
-                  required
-                />
-                <textarea
-                  placeholder="Notification Message"
-                  rows="3"
-                  value={notificationForm.content}
-                  onChange={(e) => setNotificationForm({ ...notificationForm, content: e.target.value })}
-                  className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white"
-                  required
-                />
-                <button type="submit" disabled={sending} className="bg-primary text-dark font-semibold py-2 px-6 rounded-xl hover:scale-105 transition disabled:opacity-50">
-                  {sending ? 'Sending...' : 'Send to Student →'}
-                </button>
-              </form>
-            </div>
-
+          {/* ---------- Timetable ---------- */}
+          {activeTab === 'timetable' && (
             <div>
-              <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">📜 Sent Notifications</h3>
-              <div className="space-y-2 max-h-96 overflow-y-auto">
-                {notifications.length === 0 ? (
-                  <p className="text-gray-400 text-center py-8">No notifications sent yet.</p>
-                ) : (
-                  notifications.map((notif) => (
-                    <div key={notif.id} className="bg-white/5 rounded-xl p-4 border border-white/10">
-                      <h4 className="font-semibold text-primary">{notif.title}</h4>
-                      <p className="text-gray-300 text-sm mt-1">{notif.content}</p>
-                      <div className="flex gap-3 mt-2 text-xs text-gray-500">
-                        <span>To: {notif.student_name || 'All Students'}</span>
-                        <span>{new Date(notif.created_at).toLocaleString()}</span>
+              <h2 className="text-xl font-semibold text-primary mb-4">📅 Upload Timetable</h2>
+              <p className="text-gray-400 text-sm mb-4">Excel columns: Day, Start Time, End Time, Course Name, Location, Instructor, Type</p>
+              <div className="mb-4">
+                <label className="block text-gray-300 mb-2">Select Section (1-6)</label>
+                <select
+                  value={selectedSection}
+                  onChange={(e) => setSelectedSection(e.target.value)}
+                  className="w-full md:w-64 bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white"
+                >
+                  <option value="">-- Choose section --</option>
+                  {[1,2,3,4,5,6].map(sec => <option key={sec} value={sec}>Section {sec}</option>)}
+                </select>
+              </div>
+              <form onSubmit={handleUploadTimetable} className="space-y-5">
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <label className="relative cursor-pointer bg-dark/50 border border-white/20 rounded-xl px-5 py-2 text-white hover:border-primary transition">
+                    📁 Choose Excel File
+                    <input id="timetableFileInput" type="file" accept=".xlsx,.xls,.csv" onChange={(e) => setTimetableFile(e.target.files[0])} className="absolute inset-0 opacity-0 cursor-pointer" />
+                  </label>
+                  {timetableFile && <span className="text-sm text-gray-300">📄 {timetableFile.name}</span>}
+                </div>
+                <button type="submit" disabled={uploadingTimetable || !selectedSection || !timetableFile} className="bg-primary text-dark font-semibold py-2 px-6 rounded-xl transition hover:scale-105 disabled:opacity-50">
+                  {uploadingTimetable ? '⏳ Uploading...' : '⬆️ Upload Timetable'}
+                </button>
+              </form>
+            </div>
+          )}
+
+          {/* ---------- Notifications ---------- */}
+          {activeTab === 'notifications' && (
+            <div>
+              <h2 className="text-xl font-semibold text-primary mb-4">🔔 Send Notifications</h2>
+              <div className="mb-8 p-5 bg-white/5 rounded-xl border border-white/10">
+                <h3 className="text-lg font-semibold text-white mb-4">📢 Send to All Students</h3>
+                <form onSubmit={handleSendToAll} className="space-y-4">
+                  <input type="text" placeholder="Title" value={notificationForm.title} onChange={(e) => setNotificationForm({ ...notificationForm, title: e.target.value })} className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white" required />
+                  <textarea placeholder="Message" rows="3" value={notificationForm.content} onChange={(e) => setNotificationForm({ ...notificationForm, content: e.target.value })} className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white" required />
+                  <button type="submit" disabled={sending} className="bg-primary text-dark font-semibold py-2 px-6 rounded-xl transition hover:scale-105">{sending ? 'Sending...' : 'Send to All →'}</button>
+                </form>
+              </div>
+              <div className="mb-8 p-5 bg-white/5 rounded-xl border border-white/10">
+                <h3 className="text-lg font-semibold text-white mb-4">👤 Send to Specific Student</h3>
+                <form onSubmit={handleSendToStudent} className="space-y-4">
+                  <input type="text" placeholder="Student ID" value={notificationForm.studentId} onChange={(e) => setNotificationForm({ ...notificationForm, studentId: e.target.value })} className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white" required />
+                  <input type="text" placeholder="Title" value={notificationForm.title} onChange={(e) => setNotificationForm({ ...notificationForm, title: e.target.value })} className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white" required />
+                  <textarea placeholder="Message" rows="3" value={notificationForm.content} onChange={(e) => setNotificationForm({ ...notificationForm, content: e.target.value })} className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white" required />
+                  <button type="submit" disabled={sending} className="bg-primary text-dark font-semibold py-2 px-6 rounded-xl transition hover:scale-105">{sending ? 'Sending...' : 'Send to Student →'}</button>
+                </form>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-white mb-4">📜 Sent Notifications</h3>
+                <div className="space-y-2 max-h-96 overflow-y-auto">
+                  {notifications.length === 0 ? (
+                    <p className="text-gray-400 text-center py-8">No notifications sent yet.</p>
+                  ) : (
+                    notifications.map((n) => (
+                      <div key={n.id} className="bg-white/5 rounded-xl p-4 border border-white/10">
+                        <h4 className="font-semibold text-primary">{n.title}</h4>
+                        <p className="text-gray-300 text-sm mt-1">{n.content}</p>
+                        <div className="flex gap-3 mt-2 text-xs text-gray-500">
+                          <span>To: {n.student_name || 'All Students'}</span>
+                          <span>{new Date(n.created_at).toLocaleString()}</span>
+                        </div>
                       </div>
-                    </div>
-                  ))
-                )}
+                    ))
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Edit Course Modal */}
       {editingCourse && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4" onClick={() => setEditingCourse(null)}>
-          <div className="bg-charcoal border border-primary/30 rounded-2xl p-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
+          <div className="bg-charcoal border border-primary/30 rounded-2xl p-6 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
             <h2 className="text-2xl font-bold text-primary mb-5">Edit Course</h2>
             <form onSubmit={handleUpdateCourse} className="space-y-4">
-              <div>
-                <label className="block text-gray-300 mb-1">Course Name</label>
-                <input type="text" name="name" value={editFormData.name} onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })} className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white" required />
-              </div>
-              <div>
-                <label className="block text-gray-300 mb-1">Semester</label>
-                <select name="semester" value={editFormData.semester} onChange={(e) => setEditFormData({ ...editFormData, semester: parseInt(e.target.value) })} className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white">
-                  <option value={1}>Semester 1</option>
-                  <option value={2}>Semester 2</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-gray-300 mb-1">Max Score</label>
-                <input type="number" name="max_score" value={editFormData.max_score} onChange={(e) => setEditFormData({ ...editFormData, max_score: parseInt(e.target.value) })} className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white" required />
-              </div>
-              <div>
-                <label className="block text-gray-300 mb-1">Description</label>
-                <textarea name="description" value={editFormData.description} onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })} className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white" rows="3" required />
-              </div>
-              <div className="flex gap-3 pt-2">
-                <button type="submit" disabled={loading} className="flex-1 bg-primary text-dark font-semibold py-2 rounded-xl hover:bg-primaryDark transition-all">{loading ? 'Saving...' : 'Save Changes'}</button>
-                <button type="button" onClick={() => setEditingCourse(null)} className="px-4 py-2 border border-white/20 rounded-xl hover:bg-white/10">Cancel</button>
+              <input type="text" placeholder="Course Name" value={editFormData.name} onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })} className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white" required />
+              <select value={editFormData.semester} onChange={(e) => setEditFormData({ ...editFormData, semester: parseInt(e.target.value) })} className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white">
+                <option value={1}>Semester 1</option>
+                <option value={2}>Semester 2</option>
+              </select>
+              <input type="number" placeholder="Max Score" value={editFormData.max_score} onChange={(e) => setEditFormData({ ...editFormData, max_score: parseInt(e.target.value) })} className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white" required />
+              <textarea placeholder="Description" value={editFormData.description} onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })} className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white" rows="3" required />
+              <div className="flex gap-3">
+                <button type="submit" disabled={loading} className="flex-1 bg-primary text-dark font-semibold py-2 rounded-xl">{loading ? 'Saving...' : 'Save Changes'}</button>
+                <button type="button" onClick={() => setEditingCourse(null)} className="px-4 py-2 border border-white/20 rounded-xl">Cancel</button>
               </div>
             </form>
           </div>

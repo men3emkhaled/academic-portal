@@ -33,3 +33,6 @@ logs/
 # Database
 *.sqlite
 *.sqlite3
+
+
+academic_portal_dump.sql
