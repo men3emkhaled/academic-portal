@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStudentAuth } from '../context/StudentAuthContext';
 import toast from 'react-hot-toast';
@@ -10,16 +10,19 @@ const StudentLogin = () => {
   const { login } = useStudentAuth();
   const navigate = useNavigate();
 
-  // ✅ لو فيه توكن مخزن بالفعل، حوله على الـ dashboard
-  React.useEffect(() => {
+  // ✅ لو فيه توكن مخزن، حوله على الـ dashboard فوراً
+  useEffect(() => {
     const token = localStorage.getItem('studentToken');
     if (token) {
-      navigate('/student/dashboard');
+      navigate('/student/dashboard', { replace: true });
     }
   }, [navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // ✅ منع الإرسال المتكرر
+    if (loading) return;
     
     if (!username.trim() || !password.trim()) {
       toast.error('Please enter both student ID and password');
@@ -58,6 +61,7 @@ const StudentLogin = () => {
                 className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
                 placeholder="Enter your student ID"
                 autoComplete="username"
+                disabled={loading}
               />
             </div>
             
@@ -70,6 +74,7 @@ const StudentLogin = () => {
                 className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
                 placeholder="Enter your password"
                 autoComplete="current-password"
+                disabled={loading}
               />
             </div>
             
@@ -78,7 +83,17 @@ const StudentLogin = () => {
               disabled={loading}
               className="w-full bg-primary hover:bg-primaryDark text-dark font-bold py-3 rounded-xl transition-all duration-300 hover:scale-[1.02] disabled:opacity-50 disabled:scale-100"
             >
-              {loading ? 'Logging in...' : 'Login →'}
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="animate-spin h-5 w-5 text-dark" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Logging in...
+                </span>
+              ) : (
+                'Login →'
+              )}
             </button>
           </form>
         </div>

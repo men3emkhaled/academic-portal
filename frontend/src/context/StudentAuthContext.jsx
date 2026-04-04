@@ -6,7 +6,6 @@ const StudentAuthContext = createContext();
 export const useStudentAuth = () => useContext(StudentAuthContext);
 
 export const StudentAuthProvider = ({ children }) => {
-  // ✅ جلب التوكن من localStorage عند تحميل الصفحة
   const [token, setToken] = useState(() => {
     const savedToken = localStorage.getItem('studentToken');
     return savedToken || null;
@@ -15,11 +14,9 @@ export const StudentAuthProvider = ({ children }) => {
   const [student, setStudent] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // ✅ كل ما يتغير التوكن، احفظه في localStorage
   useEffect(() => {
     if (token) {
       localStorage.setItem('studentToken', token);
-      // ✅ ضبط التوكن في axios headers
       studentApi.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     } else {
       localStorage.removeItem('studentToken');
@@ -27,7 +24,6 @@ export const StudentAuthProvider = ({ children }) => {
     }
   }, [token]);
 
-  // ✅ جلب بيانات الطالب لو فيه توكن مخزن
   useEffect(() => {
     const initAuth = async () => {
       const savedToken = localStorage.getItem('studentToken');
@@ -39,7 +35,6 @@ export const StudentAuthProvider = ({ children }) => {
           setStudent(response.data);
         } catch (error) {
           console.error('Session expired or invalid token:', error);
-          // لو التوكن مش صالح، نسجله خروج
           localStorage.removeItem('studentToken');
           setToken(null);
           setStudent(null);
@@ -53,6 +48,7 @@ export const StudentAuthProvider = ({ children }) => {
 
   const login = async (username, password) => {
     try {
+      // ✅ منع الطلبات المتكررة (لو فيه طلب قيد التنفيذ)
       const response = await studentApi.post('/student/login', { username, password });
       const { token: newToken, student: studentData } = response.data;
       
@@ -62,9 +58,15 @@ export const StudentAuthProvider = ({ children }) => {
       return { success: true };
     } catch (error) {
       console.error('Login error:', error);
+      let errorMessage = 'Login failed';
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.request) {
+        errorMessage = 'No response from server. Please check your connection.';
+      }
       return { 
         success: false, 
-        message: error.response?.data?.message || 'Login failed'
+        message: errorMessage
       };
     }
   };
