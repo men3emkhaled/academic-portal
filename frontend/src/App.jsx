@@ -4,7 +4,6 @@ import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
 import { StudentAuthProvider } from './context/StudentAuthContext';
 import Navbar from './components/Navbar';
-import Home from './pages/Home';
 import CourseDetails from './pages/CourseDetails';
 import Grades from './pages/Grades';
 import AdminDashboard from './pages/AdminDashboard';
@@ -44,12 +43,14 @@ function App() {
         <Router>
           <Routes>
             {/* ===== Public Routes with Navbar ===== */}
-            <Route path="/" element={<><Navbar /><Home /></>} />
             <Route path="/course/:id" element={<><Navbar /><CourseDetails /></>} />
             <Route path="/grades" element={<><Navbar /><Grades /></>} />
             <Route path="/contact" element={<><Navbar /><Contact /></>} />
             <Route path="/roadmap" element={<><Navbar /><RoadmapList /></>} />
             <Route path="/roadmap/:id" element={<><Navbar /><RoadmapDetail /></>} />
+            
+            {/* ===== Redirect root to student dashboard ===== */}
+            <Route path="/" element={<Navigate to="/student/dashboard" replace />} />
             
             {/* ===== Admin Route (no Navbar) ===== */}
             <Route path="/admin" element={<AdminDashboard />} />
