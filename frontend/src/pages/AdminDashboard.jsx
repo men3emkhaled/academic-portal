@@ -28,10 +28,22 @@ const AdminDashboard = () => {
   const [selectedCourseId, setSelectedCourseId] = useState('');
   const [selectedExamType, setSelectedExamType] = useState('midterm');
 
-  // Timetable upload states
+  // Timetable states (FULL CONTROL)
   const [timetableFile, setTimetableFile] = useState(null);
-  const [selectedSection, setSelectedSection] = useState('');
   const [uploadingTimetable, setUploadingTimetable] = useState(false);
+  const [allTimetables, setAllTimetables] = useState([]);
+  const [editingEntry, setEditingEntry] = useState(null);
+  const [editEntryForm, setEditEntryForm] = useState({
+    section: '',
+    day_of_week: '',
+    start_time: '',
+    end_time: '',
+    course_name: '',
+    location: '',
+    instructor: '',
+    type: ''
+  });
+  const [showEditEntryModal, setShowEditEntryModal] = useState(false);
 
   // Notifications states
   const [notifications, setNotifications] = useState([]);
@@ -46,6 +58,7 @@ const AdminDashboard = () => {
     if (!token) return;
     fetchCourses();
     fetchStudents();
+    fetchAllTimetables();
     if (activeTab === 'notifications') fetchNotifications();
   }, [token, activeTab]);
 
@@ -64,6 +77,15 @@ const AdminDashboard = () => {
       setStudents(res.data);
     } catch (error) {
       console.error('Error fetching students:', error);
+    }
+  };
+
+  const fetchAllTimetables = async () => {
+    try {
+      const res = await api.get('/timetable/admin/all');
+      setAllTimetables(res.data);
+    } catch (error) {
+      console.error('Error fetching timetables:', error);
     }
   };
 
@@ -171,29 +193,80 @@ const AdminDashboard = () => {
     }
   };
 
-  // ------------------- Timetable Upload -------------------
+  // ------------------- Timetable: Upload Excel (with Section column) -------------------
   const handleUploadTimetable = async (e) => {
     e.preventDefault();
-    if (!timetableFile || !selectedSection) {
-      toast.error('Please select a file and a section');
+    if (!timetableFile) {
+      toast.error('Please select a file');
       return;
     }
     const formData = new FormData();
     formData.append('file', timetableFile);
-    formData.append('section', selectedSection);
     setUploadingTimetable(true);
     try {
-      const res = await api.post('/timetable/admin/upload', formData, {
+      const res = await api.post('/timetable/admin/upload-all', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-      toast.success(`✅ Uploaded timetable for Section ${selectedSection}`);
+      toast.success(`✅ Uploaded ${res.data.count} entries for sections: ${res.data.sections.join(', ')}`);
       setTimetableFile(null);
-      setSelectedSection('');
       document.getElementById('timetableFileInput').value = '';
+      fetchAllTimetables();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Error uploading timetable');
     } finally {
       setUploadingTimetable(false);
+    }
+  };
+
+  // ------------------- Timetable: Edit Entry -------------------
+  const handleEditEntry = (entry) => {
+    setEditingEntry(entry);
+    setEditEntryForm({
+      section: entry.section,
+      day_of_week: entry.day_of_week,
+      start_time: entry.start_time?.substring(0, 5) || '',
+      end_time: entry.end_time?.substring(0, 5) || '',
+      course_name: entry.course_name,
+      location: entry.location || '',
+      instructor: entry.instructor || '',
+      type: entry.type || 'Lecture'
+    });
+    setShowEditEntryModal(true);
+  };
+
+  const handleUpdateEntry = async (e) => {
+    e.preventDefault();
+    try {
+      await api.put(`/timetable/admin/${editingEntry.id}`, editEntryForm);
+      toast.success('Entry updated');
+      setShowEditEntryModal(false);
+      fetchAllTimetables();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Update failed');
+    }
+  };
+
+  // ------------------- Timetable: Delete Entry -------------------
+  const handleDeleteEntry = async (id) => {
+    if (!window.confirm('Delete this timetable entry?')) return;
+    try {
+      await api.delete(`/timetable/admin/${id}`);
+      toast.success('Entry deleted');
+      fetchAllTimetables();
+    } catch (error) {
+      toast.error('Delete failed');
+    }
+  };
+
+  // ------------------- Timetable: Delete Entire Section -------------------
+  const handleDeleteSection = async (section) => {
+    if (!window.confirm(`Delete entire timetable for Section ${section}?`)) return;
+    try {
+      await api.delete(`/timetable/admin/section/${section}`);
+      toast.success(`Section ${section} timetable deleted`);
+      fetchAllTimetables();
+    } catch (error) {
+      toast.error('Delete failed');
     }
   };
 
@@ -493,7 +566,6 @@ const AdminDashboard = () => {
           {activeTab === 'students' && (
             <div>
               <h2 className="text-xl font-semibold text-primary mb-4">👥 Manage Students</h2>
-              {/* Upload Excel */}
               <div className="mb-8 p-4 bg-white/5 rounded-xl border border-white/10">
                 <h3 className="text-lg font-semibold text-white mb-2">Upload Students (Excel)</h3>
                 <p className="text-gray-400 text-sm mb-4">Columns: Student ID, Student Name, Password (optional), Level (optional), Section (1-6)</p>
@@ -511,7 +583,6 @@ const AdminDashboard = () => {
                 </form>
               </div>
 
-              {/* Students Table with Actions */}
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[700px]">
                   <thead>
@@ -548,44 +619,96 @@ const AdminDashboard = () => {
             </div>
           )}
 
-          {/* ---------- Timetable Tab ---------- */}
+          {/* ---------- Timetable Tab (FULL CONTROL) ---------- */}
           {activeTab === 'timetable' && (
             <div>
-              <h2 className="text-xl font-semibold text-primary mb-4">📅 Upload Timetable</h2>
-              <p className="text-gray-400 text-sm mb-4">Excel columns: Day, Start Time, End Time, Course Name, Location, Instructor, Type</p>
-              <div className="mb-4">
-                <label className="block text-gray-300 mb-2">Select Section (1-6)</label>
-                <select
-                  value={selectedSection}
-                  onChange={(e) => setSelectedSection(e.target.value)}
-                  className="w-full md:w-64 bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white"
-                >
-                  <option value="">-- Choose section --</option>
-                  {[1,2,3,4,5,6].map(sec => <option key={sec} value={sec}>Section {sec}</option>)}
-                </select>
+              <h2 className="text-xl font-semibold text-primary mb-4">📅 Full Timetable Control</h2>
+              
+              {/* Upload Section */}
+              <div className="mb-8 p-5 bg-white/5 rounded-xl border border-white/10">
+                <h3 className="text-lg font-semibold text-white mb-2">Upload Timetable (Excel)</h3>
+                <p className="text-gray-400 text-sm mb-4">
+                  Excel columns: <span className="text-primary">Section, Day, Start Time, End Time, Course Name, Location, Instructor, Type</span>
+                </p>
+                <form onSubmit={handleUploadTimetable} className="space-y-4">
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <label className="relative cursor-pointer bg-dark/50 border border-white/20 rounded-xl px-5 py-2 text-white hover:border-primary transition">
+                      📁 Choose Excel File
+                      <input id="timetableFileInput" type="file" accept=".xlsx,.xls,.csv" onChange={(e) => setTimetableFile(e.target.files[0])} className="absolute inset-0 opacity-0 cursor-pointer" />
+                    </label>
+                    {timetableFile && <span className="text-sm text-gray-300">📄 {timetableFile.name}</span>}
+                  </div>
+                  <button type="submit" disabled={uploadingTimetable || !timetableFile} className="bg-primary text-dark font-semibold py-2 px-6 rounded-xl transition hover:scale-105 disabled:opacity-50">
+                    {uploadingTimetable ? '⏳ Uploading...' : '⬆️ Upload Timetable (All Sections)'}
+                  </button>
+                </form>
               </div>
-              <form onSubmit={handleUploadTimetable} className="space-y-5">
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <label className="relative cursor-pointer bg-dark/50 border border-white/20 rounded-xl px-5 py-2 text-white hover:border-primary transition">
-                    📁 Choose Excel File
-                    <input id="timetableFileInput" type="file" accept=".xlsx,.xls,.csv" onChange={(e) => setTimetableFile(e.target.files[0])} className="absolute inset-0 opacity-0 cursor-pointer" />
-                  </label>
-                  {timetableFile && <span className="text-sm text-gray-300">📄 {timetableFile.name}</span>}
+
+              {/* Display and Edit/Delete Section */}
+              <div>
+                <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
+                  <h3 className="text-lg font-semibold text-white">📋 All Timetable Entries</h3>
+                  <div className="flex gap-2 flex-wrap">
+                    {[1,2,3,4,5,6].map(sec => (
+                      <button
+                        key={sec}
+                        onClick={() => handleDeleteSection(sec)}
+                        className="text-red-400 text-xs border border-red-400/30 px-2 py-1 rounded-lg hover:bg-red-500/10 transition"
+                      >
+                        Del Sec {sec}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                <button type="submit" disabled={uploadingTimetable || !selectedSection || !timetableFile} className="bg-primary text-dark font-semibold py-2 px-6 rounded-xl transition hover:scale-105 disabled:opacity-50">
-                  {uploadingTimetable ? '⏳ Uploading...' : '⬆️ Upload Timetable'}
-                </button>
-              </form>
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[800px]">
+                    <thead>
+                      <tr className="border-b border-white/10 bg-white/5">
+                        <th className="text-left py-3 px-3 text-primary">Sec</th>
+                        <th className="text-left py-3 px-3 text-primary">Day</th>
+                        <th className="text-left py-3 px-3 text-primary">Start</th>
+                        <th className="text-left py-3 px-3 text-primary">End</th>
+                        <th className="text-left py-3 px-3 text-primary">Course</th>
+                        <th className="text-left py-3 px-3 text-primary">Location</th>
+                        <th className="text-left py-3 px-3 text-primary">Instructor</th>
+                        <th className="text-left py-3 px-3 text-primary">Type</th>
+                        <th className="text-left py-3 px-3 text-primary">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {allTimetables.length === 0 ? (
+                        <tr><td colSpan="9" className="text-center py-8 text-gray-400">No timetable entries yet. Upload Excel file.</td></tr>
+                      ) : (
+                        allTimetables.map((entry) => (
+                          <tr key={entry.id} className="border-b border-white/5 hover:bg-white/5">
+                            <td className="py-2 px-3 text-white">{entry.section}</td>
+                            <td className="py-2 px-3 text-gray-300">{entry.day_of_week}</td>
+                            <td className="py-2 px-3 text-gray-300">{entry.start_time?.substring(0,5) || '-'}</td>
+                            <td className="py-2 px-3 text-gray-300">{entry.end_time?.substring(0,5) || '-'}</td>
+                            <td className="py-2 px-3 text-white">{entry.course_name}</td>
+                            <td className="py-2 px-3 text-gray-300">{entry.location || '-'}</td>
+                            <td className="py-2 px-3 text-gray-300">{entry.instructor || '-'}</td>
+                            <td className="py-2 px-3 text-gray-300">{entry.type || 'Lecture'}</td>
+                            <td className="py-2 px-3 space-x-2">
+                              <button onClick={() => handleEditEntry(entry)} className="text-yellow-400 text-sm">✏️ Edit</button>
+                              <button onClick={() => handleDeleteEntry(entry.id)} className="text-red-400 text-sm">🗑️ Del</button>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
           )}
 
-          {/* ---------- Notifications Tab (Full Control) ---------- */}
+          {/* ---------- Notifications Tab ---------- */}
           {activeTab === 'notifications' && (
             <div>
               <h2 className="text-xl font-semibold text-primary mb-4">🔔 Full Notification Control</h2>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* LEFT: Send Forms */}
                 <div className="space-y-6">
                   <div className="p-5 bg-white/5 rounded-xl border border-white/10">
                     <h3 className="text-lg font-semibold text-white mb-4">📢 Send to All Students</h3>
@@ -607,7 +730,6 @@ const AdminDashboard = () => {
                   </div>
                 </div>
 
-                {/* RIGHT: Notifications List with Edit/Delete */}
                 <div>
                   <h3 className="text-lg font-semibold text-white mb-4">📜 All Notifications</h3>
                   <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
