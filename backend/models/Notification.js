@@ -13,7 +13,18 @@ class Notification {
     return result.rows;
   }
 
-  // جلب الإشعارات غير المقروءة لطالب
+  // جلب كل الإشعارات (للـ Admin)
+  static async getAll() {
+    const result = await db.query(
+      `SELECT n.*, s.name as student_name 
+       FROM notifications n
+       LEFT JOIN students s ON n.student_id = s.id
+       ORDER BY n.created_at DESC`
+    );
+    return result.rows;
+  }
+
+  // جلب عدد الإشعارات غير المقروءة لطالب
   static async getUnreadCount(studentId) {
     const result = await db.query(
       `SELECT COUNT(*) FROM notifications 
@@ -45,6 +56,12 @@ class Notification {
     return result.rows[0];
   }
 
+  // حذف إشعار
+  static async delete(id) {
+    await db.query('DELETE FROM notifications WHERE id = $1', [id]);
+    return true;
+  }
+
   // تحديث حالة الإشعار إلى مقروء
   static async markAsRead(notificationId, studentId) {
     const result = await db.query(
@@ -65,23 +82,6 @@ class Notification {
        WHERE (student_id = $1 OR student_id IS NULL) AND is_read = false
        RETURNING *`,
       [studentId]
-    );
-    return result.rows;
-  }
-
-  // حذف إشعار
-  static async delete(id) {
-    await db.query('DELETE FROM notifications WHERE id = $1', [id]);
-    return true;
-  }
-
-  // جلب كل الإشعارات (للـ Admin)
-  static async getAll() {
-    const result = await db.query(
-      `SELECT n.*, s.name as student_name 
-       FROM notifications n
-       LEFT JOIN students s ON n.student_id = s.id
-       ORDER BY n.created_at DESC`
     );
     return result.rows;
   }

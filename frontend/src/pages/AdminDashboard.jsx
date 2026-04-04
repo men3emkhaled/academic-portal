@@ -9,7 +9,6 @@ const AdminDashboard = () => {
   const { token, login } = useAuth();
   const [activeTab, setActiveTab] = useState('courses');
   const [courses, setCourses] = useState([]);
-  const [students, setStudents] = useState([]);
   const [gradesFile, setGradesFile] = useState(null);
   const [selectedCourseId, setSelectedCourseId] = useState('');
   const [selectedExamType, setSelectedExamType] = useState('midterm');
@@ -23,25 +22,97 @@ const AdminDashboard = () => {
     name: '',
     semester: 1,
     description: '',
-    max_score: 15,
+    max_score: 40,
   });
   const [timetableFile, setTimetableFile] = useState(null);
   const [selectedSection, setSelectedSection] = useState('');
   const [uploadingTimetable, setUploadingTimetable] = useState(false);
-  const [editingGrade, setEditingGrade] = useState(null);
-  const [gradeFormData, setGradeFormData] = useState({
-    studentId: '',
-    courseName: '',
-    examType: 'midterm',
-    score: '',
-    status: 'completed'
-  });
+  
+  // Notifications state
+  const [notifications, setNotifications] = useState([]);
+  const [sending, setSending] = useState(false);
 
   useEffect(() => {
     if (!token) return;
     fetchCourses();
-    fetchStudents();
   }, [token]);
+
+  useEffect(() => {
+    if (token && activeTab === 'notifications') {
+      fetchNotifications();
+    }
+  }, [token, activeTab]);
+
+  const fetchNotifications = async () => {
+    try {
+      const response = await api.get('/notifications/admin/all');
+      setNotifications(response.data);
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+    }
+  };
+
+  const deleteNotification = async (id) => {
+    if (!window.confirm('Delete this notification?')) return;
+    try {
+      await api.delete(`/notifications/admin/${id}`);
+      toast.success('Deleted');
+      fetchNotifications();
+    } catch (error) {
+      toast.error('Delete failed');
+    }
+  };
+
+  const sendToAll = async (e) => {
+    e.preventDefault();
+    const title = document.getElementById('allTitle')?.value;
+    const content = document.getElementById('allContent')?.value;
+    
+    if (!title || !content) {
+      toast.error('Title and content are required');
+      return;
+    }
+    
+    setSending(true);
+    try {
+      await api.post('/notifications/admin/send-to-all', { title, content });
+      toast.success('Notification sent to all students!');
+      if (document.getElementById('sendToAllForm')) {
+        document.getElementById('sendToAllForm').reset();
+      }
+      fetchNotifications();
+    } catch (error) {
+      toast.error('Failed to send');
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const sendToStudent = async (e) => {
+    e.preventDefault();
+    const studentId = document.getElementById('studentId')?.value;
+    const title = document.getElementById('studentTitle')?.value;
+    const content = document.getElementById('studentContent')?.value;
+    
+    if (!studentId || !title || !content) {
+      toast.error('Student ID, title, and content are required');
+      return;
+    }
+    
+    setSending(true);
+    try {
+      await api.post('/notifications/admin/send-to-student', { studentId, title, content });
+      toast.success(`Notification sent to student ${studentId}`);
+      if (document.getElementById('sendToStudentForm')) {
+        document.getElementById('sendToStudentForm').reset();
+      }
+      fetchNotifications();
+    } catch (error) {
+      toast.error('Failed to send');
+    } finally {
+      setSending(false);
+    }
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -51,7 +122,6 @@ const AdminDashboard = () => {
       login(response.data.token);
       toast.success('Login successful');
       fetchCourses();
-      fetchStudents();
     } catch (error) {
       toast.error('Invalid credentials');
     } finally {
@@ -68,16 +138,7 @@ const AdminDashboard = () => {
     }
   };
 
-  const fetchStudents = async () => {
-    try {
-      const response = await api.get('/admin/students-with-passwords');
-      setStudents(response.data);
-    } catch (error) {
-      console.error('Error fetching students:', error);
-    }
-  };
-
-  // ============= Grades Upload =============
+  // Grades Upload
   const handleUploadGrades = async (e) => {
     e.preventDefault();
     
@@ -88,6 +149,13 @@ const AdminDashboard = () => {
     
     if (!selectedCourseId) {
       toast.error('Please select a course');
+      return;
+    }
+    
+    const fileName = gradesFile.name;
+    const fileExt = fileName.split('.').pop().toLowerCase();
+    if (!['xlsx', 'xls', 'csv'].includes(fileExt)) {
+      toast.error('Please upload an Excel file (.xlsx, .xls, or .csv)');
       return;
     }
     
@@ -103,21 +171,30 @@ const AdminDashboard = () => {
       });
       toast.success(`✅ Uploaded ${response.data.count} grades for ${response.data.examType}`);
       setGradesFile(null);
+      setSelectedCourseId('');
       document.getElementById('gradesFileInput').value = '';
     } catch (error) {
       console.error('Upload error:', error);
-      toast.error(error.response?.data?.message || 'Error uploading grades');
+      const errorMsg = error.response?.data?.message || error.response?.data?.details || 'Error uploading grades';
+      toast.error(errorMsg);
     } finally {
       setUploadingGrades(false);
     }
   };
 
-  // ============= Students Upload =============
+  // Students Upload
   const handleUploadStudents = async (e) => {
     e.preventDefault();
     
     if (!studentsFile) {
       toast.error('Please select a file');
+      return;
+    }
+    
+    const fileName = studentsFile.name;
+    const fileExt = fileName.split('.').pop().toLowerCase();
+    if (!['xlsx', 'xls', 'csv'].includes(fileExt)) {
+      toast.error('Please upload an Excel file (.xlsx, .xls, or .csv)');
       return;
     }
     
@@ -131,17 +208,17 @@ const AdminDashboard = () => {
       });
       toast.success(`✅ Uploaded ${response.data.count} students successfully`);
       setStudentsFile(null);
-      fetchStudents();
       document.getElementById('studentsFileInput').value = '';
     } catch (error) {
       console.error('Upload error:', error);
-      toast.error(error.response?.data?.message || 'Error uploading students');
+      const errorMsg = error.response?.data?.message || error.response?.data?.details || 'Error uploading students';
+      toast.error(errorMsg);
     } finally {
       setUploadingStudents(false);
     }
   };
 
-  // ============= Timetable Upload =============
+  // Timetable Upload
   const handleUploadTimetable = async (e) => {
     e.preventDefault();
     
@@ -176,67 +253,7 @@ const AdminDashboard = () => {
     }
   };
 
-  // ============= Single Grade Update =============
-  const handleUpdateSingleGrade = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      await api.put('/grades/admin/update-single', {
-        studentId: gradeFormData.studentId,
-        courseName: gradeFormData.courseName,
-        examType: gradeFormData.examType,
-        score: gradeFormData.score ? parseFloat(gradeFormData.score) : null,
-        status: gradeFormData.status
-      });
-      toast.success('Grade updated successfully');
-      setEditingGrade(null);
-      setGradeFormData({
-        studentId: '',
-        courseName: '',
-        examType: 'midterm',
-        score: '',
-        status: 'completed'
-      });
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Error updating grade');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // ============= Reset Student Password =============
-  const handleResetPassword = async (studentId) => {
-    if (!window.confirm(`Reset password for student ${studentId} to 123456?`)) return;
-    try {
-      await api.put(`/admin/students/${studentId}/reset-password`, { newPassword: '123456' });
-      toast.success(`Password reset for ${studentId}`);
-      fetchStudents();
-    } catch (error) {
-      toast.error('Error resetting password');
-    }
-  };
-
-  // ============= Update Student Section =============
-  const handleUpdateSection = async (studentId, currentSection) => {
-    const newSection = prompt(`Enter new section for student ${studentId} (1-6):`, currentSection || '1');
-    if (!newSection) return;
-    
-    const sectionNum = parseInt(newSection);
-    if (isNaN(sectionNum) || sectionNum < 1 || sectionNum > 6) {
-      toast.error('Section must be a number between 1 and 6');
-      return;
-    }
-    
-    try {
-      await api.put(`/admin/students/${studentId}/section`, { section: sectionNum });
-      toast.success(`Section updated to ${sectionNum}`);
-      fetchStudents();
-    } catch (error) {
-      toast.error('Error updating section');
-    }
-  };
-
-  // ============= Course Management =============
+  // Course Management
   const handleDeleteCourse = async (id) => {
     if (!window.confirm('Delete this course?')) return;
     try {
@@ -254,7 +271,7 @@ const AdminDashboard = () => {
       name: course.name,
       semester: course.semester,
       description: course.description || '',
-      max_score: course.max_score || 15,
+      max_score: course.max_score || 40,
     });
   };
 
@@ -280,7 +297,7 @@ const AdminDashboard = () => {
       name: formData.get('name'),
       semester: parseInt(formData.get('semester')),
       description: formData.get('description'),
-      max_score: parseInt(formData.get('max_score')) || 15,
+      max_score: parseInt(formData.get('max_score')) || 40,
     };
     try {
       await api.post('/courses', data);
@@ -292,7 +309,7 @@ const AdminDashboard = () => {
     }
   };
 
-  // ============= Login Screen =============
+  // Login Screen
   if (!token) {
     return (
       <div className="min-h-[80vh] flex items-center justify-center">
@@ -330,14 +347,14 @@ const AdminDashboard = () => {
     );
   }
 
-  // ============= Main Dashboard =============
+  // Main Dashboard
   return (
     <div className="animate-fadeIn">
       <h1 className="text-4xl md:text-5xl font-bold text-primary mb-8 tracking-tight">Admin Dashboard</h1>
 
       {/* Tabs */}
       <div className="flex flex-wrap gap-2 mb-10 border-b border-white/10 pb-2">
-        {['courses', 'grades', 'resources', 'roadmap', 'students', 'timetable', 'manage-grades'].map(tab => (
+        {['courses', 'grades', 'resources', 'roadmap', 'students', 'timetable', 'notifications'].map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -353,7 +370,7 @@ const AdminDashboard = () => {
             {tab === 'roadmap' && '🗺️ Roadmap'}
             {tab === 'students' && '👥 Students'}
             {tab === 'timetable' && '📅 Timetable'}
-            {tab === 'manage-grades' && '✏️ Manage Grades'}
+            {tab === 'notifications' && '🔔 Notifications'}
           </button>
         ))}
       </div>
@@ -372,7 +389,7 @@ const AdminDashboard = () => {
                   <option value={1}>Semester 1</option>
                   <option value={2}>Semester 2</option>
                 </select>
-                <input name="max_score" type="number" placeholder="Max Score (default: 15)" className="bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white" />
+                <input name="max_score" type="number" placeholder="Max Score (default: 40)" className="bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white" />
                 <textarea name="description" placeholder="Description" className="md:col-span-2 bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white" rows="3" required />
                 <div className="md:col-span-2">
                   <button type="submit" className="bg-primary text-dark font-semibold py-2.5 px-6 rounded-xl transition-all hover:scale-105">Add Course</button>
@@ -397,7 +414,7 @@ const AdminDashboard = () => {
                       <tr key={course.id} className="border-b border-white/5 hover:bg-white/5">
                         <td className="py-3 px-4 text-white">{course.name}</td>
                         <td className="py-3 px-4 text-gray-300">{course.semester}</td>
-                        <td className="py-3 px-4 text-gray-300">{course.max_score || 15}</td>
+                        <td className="py-3 px-4 text-gray-300">{course.max_score || 40}</td>
                         <td className="py-3 px-4 space-x-3">
                           <button onClick={() => handleEditClick(course)} className="text-yellow-400 hover:text-yellow-300">Edit</button>
                           <button onClick={() => handleDeleteCourse(course.id)} className="text-red-400 hover:text-red-300">Delete</button>
@@ -430,7 +447,7 @@ const AdminDashboard = () => {
               >
                 <option value="">-- Choose a course --</option>
                 {courses.map(course => (
-                  <option key={course.id} value={course.id}>{course.name} (Max: {course.max_score || 15})</option>
+                  <option key={course.id} value={course.id}>{course.name} (Max: {course.max_score || 40})</option>
                 ))}
               </select>
             </div>
@@ -469,81 +486,35 @@ const AdminDashboard = () => {
         {/* ============= Roadmap Tab ============= */}
         {activeTab === 'roadmap' && <RoadmapManager />}
         
-        {/* ============= Students Tab ============= */}
+        {/* ============= Students Upload Tab ============= */}
         {activeTab === 'students' && (
           <div>
-            <h2 className="text-xl font-semibold text-primary mb-4">👥 Manage Students</h2>
-            
-            {/* Upload Section */}
-            <div className="mb-8 p-4 bg-white/5 rounded-xl">
-              <h3 className="text-lg font-semibold text-white mb-3">Upload Students (Excel)</h3>
-              <p className="text-gray-400 text-sm mb-4">
-                Excel file columns: <span className="text-primary">Student ID, Student Name, Password (optional), Level (optional), Section (1-6)</span>
-              </p>
-              <form onSubmit={handleUploadStudents} className="space-y-5">
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <label className="relative cursor-pointer bg-dark/50 border border-white/20 rounded-xl px-5 py-2 text-white hover:border-primary transition-all">
-                    📁 Choose File
-                    <input id="studentsFileInput" type="file" accept=".xlsx,.xls,.csv" onChange={(e) => setStudentsFile(e.target.files[0])} className="absolute inset-0 opacity-0 cursor-pointer" />
-                  </label>
-                  {studentsFile && <span className="text-sm text-gray-300">📄 {studentsFile.name}</span>}
-                </div>
-                <button type="submit" disabled={uploadingStudents || !studentsFile} className="bg-primary text-dark font-semibold py-2.5 px-6 rounded-xl transition-all hover:scale-105 disabled:opacity-50">
-                  {uploadingStudents ? '⏳ Uploading...' : '⬆️ Upload Students'}
-                </button>
-              </form>
-            </div>
-
-            {/* Students List */}
-            <div>
-              <h3 className="text-lg font-semibold text-white mb-3">📋 All Students</h3>
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[700px]">
-                  <thead>
-                    <tr className="border-b border-white/10">
-                      <th className="text-left py-3 px-4 text-primary">ID</th>
-                      <th className="text-left py-3 px-4 text-primary">Name</th>
-                      <th className="text-left py-3 px-4 text-primary">Level</th>
-                      <th className="text-left py-3 px-4 text-primary">Section</th>
-                      <th className="text-left py-3 px-4 text-primary">Password</th>
-                      <th className="text-left py-3 px-4 text-primary">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {students.map(student => (
-                      <tr key={student.id} className="border-b border-white/5 hover:bg-white/5">
-                        <td className="py-3 px-4 text-white">{student.id}</td>
-                        <td className="py-3 px-4 text-white">{student.name}</td>
-                        <td className="py-3 px-4 text-gray-300">{student.level}</td>
-                        <td className="py-3 px-4">
-                          <button 
-                            onClick={() => handleUpdateSection(student.id, student.section)}
-                            className="text-primary hover:underline font-mono"
-                          >
-                            {student.section || '—'}
-                          </button>
-                         </td>
-                        <td className="py-3 px-4 font-mono text-sm text-yellow-400">{student.password}</td>
-                        <td className="py-3 px-4 space-x-2">
-                          <button onClick={() => handleResetPassword(student.id)} className="text-blue-400 hover:text-blue-300 text-sm">
-                            Reset PW
-                          </button>
-                         </td>
-                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+            <h2 className="text-xl font-semibold text-primary mb-4">👥 Upload Students (Excel)</h2>
+            <p className="text-gray-400 text-sm mb-4">
+              Excel file columns: <span className="text-primary">Student ID, Student Name, Password (optional), Level (optional), Section (optional)</span>
+            </p>
+            <form onSubmit={handleUploadStudents} className="space-y-5">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <label className="relative cursor-pointer bg-dark/50 border border-white/20 rounded-xl px-5 py-2 text-white hover:border-primary transition-all">
+                  📁 Choose File
+                  <input id="studentsFileInput" type="file" accept=".xlsx,.xls,.csv" onChange={(e) => setStudentsFile(e.target.files[0])} className="absolute inset-0 opacity-0 cursor-pointer" />
+                </label>
+                {studentsFile && <span className="text-sm text-gray-300">📄 {studentsFile.name}</span>}
               </div>
-            </div>
+              <button type="submit" disabled={uploadingStudents || !studentsFile} className="bg-primary text-dark font-semibold py-2.5 px-6 rounded-xl transition-all hover:scale-105 disabled:opacity-50">
+                {uploadingStudents ? '⏳ Uploading...' : '⬆️ Upload Students'}
+              </button>
+            </form>
           </div>
         )}
 
-        {/* ============= Timetable Tab ============= */}
+        {/* ============= Timetable Upload Tab ============= */}
         {activeTab === 'timetable' && (
           <div>
             <h2 className="text-xl font-semibold text-primary mb-4">📅 Upload Timetable</h2>
             <p className="text-gray-400 text-sm mb-4">
-              Excel file columns: <span className="text-primary">Day, Start Time, End Time, Course Name, Location, Instructor, Type</span>
+              Excel file columns: <span className="text-primary">Day, Start Time, End Time, Course Name, Location, Instructor, Type</span><br />
+              Days: Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday
             </p>
             
             <div className="mb-4">
@@ -578,84 +549,98 @@ const AdminDashboard = () => {
           </div>
         )}
 
-        {/* ============= Manage Grades (Single Student) Tab ============= */}
-        {activeTab === 'manage-grades' && (
+        {/* ============= Notifications Tab ============= */}
+        {activeTab === 'notifications' && (
           <div>
-            <h2 className="text-xl font-semibold text-primary mb-4">✏️ Update Single Grade</h2>
-            <p className="text-gray-400 text-sm mb-4">
-              Update a student's grade for a specific course and exam type without uploading an Excel file.
-            </p>
+            <h2 className="text-xl font-semibold text-primary mb-4">🔔 Send Notification</h2>
             
-            <form onSubmit={handleUpdateSingleGrade} className="space-y-4 max-w-lg">
-              <div>
-                <label className="block text-gray-300 mb-2">Student ID</label>
-                <input
-                  type="text"
-                  value={gradeFormData.studentId}
-                  onChange={(e) => setGradeFormData({ ...gradeFormData, studentId: e.target.value })}
-                  className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-primary"
-                  placeholder="e.g., 2021001"
-                  required
+            {/* Send to All */}
+            <div className="mb-8 p-4 bg-white/5 rounded-xl border border-white/10">
+              <h3 className="text-lg font-semibold text-white mb-4">📢 Send to All Students</h3>
+              <form id="sendToAllForm" className="space-y-4" onSubmit={sendToAll}>
+                <input 
+                  type="text" 
+                  id="allTitle" 
+                  placeholder="Title" 
+                  className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-primary" 
+                  required 
                 />
-              </div>
-              
-              <div>
-                <label className="block text-gray-300 mb-2">Course Name</label>
-                <select
-                  value={gradeFormData.courseName}
-                  onChange={(e) => setGradeFormData({ ...gradeFormData, courseName: e.target.value })}
-                  className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-primary"
-                  required
-                >
-                  <option value="">-- Select course --</option>
-                  {courses.map(course => (
-                    <option key={course.id} value={course.name}>{course.name}</option>
-                  ))}
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-gray-300 mb-2">Exam Type</label>
-                <select
-                  value={gradeFormData.examType}
-                  onChange={(e) => setGradeFormData({ ...gradeFormData, examType: e.target.value })}
-                  className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-primary"
-                >
-                  <option value="midterm">📝 Midterm Exam</option>
-                  <option value="practical">🔧 Practical Exam</option>
-                  <option value="oral">🎤 Oral Exam</option>
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-gray-300 mb-2">Score</label>
-                <input
-                  type="number"
-                  step="0.5"
-                  value={gradeFormData.score}
-                  onChange={(e) => setGradeFormData({ ...gradeFormData, score: e.target.value })}
-                  className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-primary"
-                  placeholder="Enter score (leave empty for pending)"
+                <textarea 
+                  id="allContent" 
+                  placeholder="Message" 
+                  rows="3" 
+                  className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-primary" 
+                  required 
                 />
+                <button type="submit" disabled={sending} className="bg-primary text-dark font-semibold py-2 px-6 rounded-xl hover:scale-105 transition disabled:opacity-50">
+                  {sending ? 'Sending...' : 'Send to All'}
+                </button>
+              </form>
+            </div>
+            
+            {/* Send to Specific Student */}
+            <div className="mb-8 p-4 bg-white/5 rounded-xl border border-white/10">
+              <h3 className="text-lg font-semibold text-white mb-4">👤 Send to Specific Student</h3>
+              <form id="sendToStudentForm" className="space-y-4" onSubmit={sendToStudent}>
+                <input 
+                  type="text" 
+                  id="studentId" 
+                  placeholder="Student ID" 
+                  className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-primary" 
+                  required 
+                />
+                <input 
+                  type="text" 
+                  id="studentTitle" 
+                  placeholder="Title" 
+                  className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-primary" 
+                  required 
+                />
+                <textarea 
+                  id="studentContent" 
+                  placeholder="Message" 
+                  rows="3" 
+                  className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-primary" 
+                  required 
+                />
+                <button type="submit" disabled={sending} className="bg-primary text-dark font-semibold py-2 px-6 rounded-xl hover:scale-105 transition disabled:opacity-50">
+                  {sending ? 'Sending...' : 'Send to Student'}
+                </button>
+              </form>
+            </div>
+            
+            {/* Notifications List */}
+            <div>
+              <h3 className="text-lg font-semibold text-white mb-4">📜 Sent Notifications</h3>
+              <div className="space-y-2 max-h-96 overflow-y-auto">
+                {notifications.length === 0 ? (
+                  <p className="text-gray-400 text-center py-8">No notifications sent yet.</p>
+                ) : (
+                  notifications.map((notif) => (
+                    <div key={notif.id} className="bg-white/5 rounded-xl p-4 border border-white/10">
+                      <div className="flex justify-between items-start flex-wrap gap-2">
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-primary">{notif.title}</h4>
+                          <p className="text-gray-300 text-sm mt-1">{notif.content}</p>
+                          <p className="text-xs text-gray-500 mt-2">
+                            {notif.student_id ? `To: ${notif.student_name || notif.student_id}` : 'To: All Students'}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs text-gray-500">{new Date(notif.created_at).toLocaleString()}</p>
+                          <button 
+                            onClick={() => deleteNotification(notif.id)} 
+                            className="text-red-400 text-xs hover:text-red-300 mt-2"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
-              
-              <div>
-                <label className="block text-gray-300 mb-2">Status</label>
-                <select
-                  value={gradeFormData.status}
-                  onChange={(e) => setGradeFormData({ ...gradeFormData, status: e.target.value })}
-                  className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-primary"
-                >
-                  <option value="completed">✅ Completed</option>
-                  <option value="pending">⏳ Pending</option>
-                  <option value="not_held">❌ Not Held</option>
-                </select>
-              </div>
-              
-              <button type="submit" disabled={loading} className="bg-primary text-dark font-semibold py-2.5 px-6 rounded-xl transition-all hover:scale-105 disabled:opacity-50">
-                {loading ? 'Updating...' : '✏️ Update Grade'}
-              </button>
-            </form>
+            </div>
           </div>
         )}
       </div>
@@ -686,7 +671,7 @@ const AdminDashboard = () => {
                 <textarea name="description" value={editFormData.description} onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })} className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white" rows="3" required />
               </div>
               <div className="flex gap-3 pt-2">
-                <button type="submit" disabled={loading} className="flex-1 bg-primary text-dark font-semibold py-2 rounded-xl hover:bg-primaryDark transition-all">{loading ? 'Saving...' : 'Save Changes'}</button>
+                <button type="submit" disabled={loading} className="flex-1 bg-primary text-dark font-semibold py-2 rounded-xl hover:bg-primaryDark transition-all disabled:opacity-50">{loading ? 'Saving...' : 'Save Changes'}</button>
                 <button type="button" onClick={() => setEditingCourse(null)} className="px-4 py-2 border border-white/20 rounded-xl hover:bg-white/10">Cancel</button>
               </div>
             </form>

@@ -1,67 +1,18 @@
 const Notification = require('../models/Notification');
 const Student = require('../models/Student');
 
-// Get notifications for logged-in student
-const getMyNotifications = async (req, res) => {
-  try {
-    const studentId = req.user.id;
-    const notifications = await Notification.getByStudentId(studentId);
-    res.json(notifications);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// Get unread count for student
-const getUnreadCount = async (req, res) => {
-  try {
-    const studentId = req.user.id;
-    const count = await Notification.getUnreadCount(studentId);
-    res.json({ count });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// Mark single notification as read
-const markAsRead = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const studentId = req.user.id;
-    const notification = await Notification.markAsRead(id, studentId);
-    if (!notification) {
-      return res.status(404).json({ message: 'Notification not found' });
-    }
-    res.json(notification);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// Mark all notifications as read for student
-const markAllAsRead = async (req, res) => {
-  try {
-    const studentId = req.user.id;
-    const notifications = await Notification.markAllAsRead(studentId);
-    res.json({ count: notifications.length });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// ============= Admin Functions =============
-
-// Get all notifications
+// جلب كل الإشعارات (للـ Admin)
 const getAllNotifications = async (req, res) => {
   try {
     const notifications = await Notification.getAll();
     res.json(notifications);
   } catch (error) {
+    console.error('Error fetching notifications:', error);
     res.status(500).json({ message: error.message });
   }
 };
 
-// Send notification to specific student
+// إرسال إشعار لطالب معين
 const sendToStudent = async (req, res) => {
   try {
     const { studentId, title, content } = req.body;
@@ -76,13 +27,15 @@ const sendToStudent = async (req, res) => {
     }
     
     const notification = await Notification.sendToStudent(studentId, title, content);
+    console.log(`📨 Notification sent to student ${studentId}: ${title}`);
     res.status(201).json(notification);
   } catch (error) {
+    console.error('Error sending to student:', error);
     res.status(500).json({ message: error.message });
   }
 };
 
-// Send notification to all students
+// إرسال إشعار لكل الطلاب
 const sendToAll = async (req, res) => {
   try {
     const { title, content } = req.body;
@@ -92,30 +45,85 @@ const sendToAll = async (req, res) => {
     }
     
     const notification = await Notification.sendToAll(title, content);
+    console.log(`📢 Notification sent to all students: ${title}`);
     res.status(201).json(notification);
   } catch (error) {
+    console.error('Error sending to all:', error);
     res.status(500).json({ message: error.message });
   }
 };
 
-// Delete notification
+// حذف إشعار
 const deleteNotification = async (req, res) => {
   try {
     const { id } = req.params;
     await Notification.delete(id);
     res.json({ message: 'Notification deleted successfully' });
   } catch (error) {
+    console.error('Error deleting notification:', error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// جلب إشعارات الطالب الحالي (للوحة الطالب)
+const getMyNotifications = async (req, res) => {
+  try {
+    const studentId = req.user.id;
+    const notifications = await Notification.getByStudentId(studentId);
+    res.json(notifications);
+  } catch (error) {
+    console.error('Error fetching my notifications:', error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// جلب عدد الإشعارات غير المقروءة
+const getUnreadCount = async (req, res) => {
+  try {
+    const studentId = req.user.id;
+    const count = await Notification.getUnreadCount(studentId);
+    res.json({ count });
+  } catch (error) {
+    console.error('Error fetching unread count:', error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// تحديث إشعار إلى مقروء
+const markAsRead = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const studentId = req.user.id;
+    const notification = await Notification.markAsRead(id, studentId);
+    if (!notification) {
+      return res.status(404).json({ message: 'Notification not found' });
+    }
+    res.json(notification);
+  } catch (error) {
+    console.error('Error marking as read:', error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// تحديث كل الإشعارات إلى مقروءة
+const markAllAsRead = async (req, res) => {
+  try {
+    const studentId = req.user.id;
+    const notifications = await Notification.markAllAsRead(studentId);
+    res.json({ count: notifications.length });
+  } catch (error) {
+    console.error('Error marking all as read:', error);
     res.status(500).json({ message: error.message });
   }
 };
 
 module.exports = {
-  getMyNotifications,
-  getUnreadCount,
-  markAsRead,
-  markAllAsRead,
   getAllNotifications,
   sendToStudent,
   sendToAll,
-  deleteNotification
+  deleteNotification,
+  getMyNotifications,
+  getUnreadCount,
+  markAsRead,
+  markAllAsRead
 };
