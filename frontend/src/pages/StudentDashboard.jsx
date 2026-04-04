@@ -70,7 +70,7 @@ const StudentDashboard = () => {
     }
   };
 
-  // ✅ دالة تحديد لون الدرجة (ناجح/راسب)
+  // دالة تحديد لون الدرجة (ناجح/راسب حسب النسبة من الـ max بتاعها)
   const getGradeColor = (score, maxScore) => {
     if (score === null || score === undefined) return 'text-gray-500';
     const roundedScore = Math.round(score);
@@ -79,10 +79,35 @@ const StudentDashboard = () => {
     return 'text-red-400';
   };
 
-  // ✅ دالة تقريب الدرجة
+  // دالة تقريب الدرجة
   const formatScore = (score) => {
     if (score === null || score === undefined) return '-';
     return Math.round(score);
+  };
+
+  // ✅ دالة تحديد حالة المادة (ناجح/راسب/قيد الانتظار) - بعد اكتمال الدرجات فقط
+  const getCourseStatus = (grade) => {
+    const midtermExists = grade.midterm_score !== null && grade.midterm_score !== undefined;
+    const practicalExists = grade.practical_score !== null && grade.practical_score !== undefined;
+    const oralExists = grade.oral_score !== null && grade.oral_score !== undefined;
+    
+    const total = (grade.midterm_score || 0) + (grade.practical_score || 0) + (grade.oral_score || 0);
+    
+    // لو كل الدرجات نزلت
+    if (midtermExists && practicalExists && oralExists) {
+      const percentage = (total / grade.max_score) * 100;
+      return percentage >= 50 ? 'Passing' : 'Failing';
+    }
+    
+    // لو لسا في درجات ناقصة
+    return 'Pending';
+  };
+
+  // ✅ دالة لون الحالة
+  const getStatusColor = (status) => {
+    if (status === 'Passing') return 'bg-green-400/20 text-green-400';
+    if (status === 'Failing') return 'bg-red-400/20 text-red-400';
+    return 'bg-yellow-500/20 text-yellow-400';
   };
 
   if (loading) {
@@ -194,8 +219,25 @@ const StudentDashboard = () => {
                   ) : (
                     grades.map((grade, idx) => {
                       const total = (grade.midterm_score || 0) + (grade.practical_score || 0) + (grade.oral_score || 0);
-                      const percentage = grade.max_score > 0 ? (total / grade.max_score) * 100 : 0;
-                      const isPassing = percentage >= 50;
+                      const midtermExists = grade.midterm_score !== null && grade.midterm_score !== undefined;
+                      const practicalExists = grade.practical_score !== null && grade.practical_score !== undefined;
+                      const oralExists = grade.oral_score !== null && grade.oral_score !== undefined;
+                      const allGradesExist = midtermExists && practicalExists && oralExists;
+                      
+                      // ✅ تحديد الحالة بناءً على اكتمال الدرجات
+                      let status = 'Pending';
+                      let statusColor = 'bg-yellow-500/20 text-yellow-400';
+                      
+                      if (allGradesExist) {
+                        const percentage = (total / grade.max_score) * 100;
+                        if (percentage >= 50) {
+                          status = 'Passing';
+                          statusColor = 'bg-green-400/20 text-green-400';
+                        } else {
+                          status = 'Failing';
+                          statusColor = 'bg-red-400/20 text-red-400';
+                        }
+                      }
                       
                       return (
                         <tr key={idx} className="border-b border-white/5 hover:bg-white/5 transition">
@@ -206,7 +248,7 @@ const StudentDashboard = () => {
                             <span className={getGradeColor(grade.midterm_score, grade.midterm_max)}>
                               {formatScore(grade.midterm_score)}
                             </span>
-                            {grade.midterm_status === 'pending' && (
+                            {!midtermExists && (
                               <span className="text-[10px] text-yellow-500 block">pending</span>
                             )}
                           </td>
@@ -214,7 +256,7 @@ const StudentDashboard = () => {
                             <span className={getGradeColor(grade.practical_score, grade.practical_max)}>
                               {formatScore(grade.practical_score)}
                             </span>
-                            {grade.practical_status === 'pending' && (
+                            {!practicalExists && (
                               <span className="text-[10px] text-yellow-500 block">pending</span>
                             )}
                           </td>
@@ -222,7 +264,7 @@ const StudentDashboard = () => {
                             <span className={getGradeColor(grade.oral_score, grade.oral_max)}>
                               {formatScore(grade.oral_score)}
                             </span>
-                            {grade.oral_status === 'pending' && (
+                            {!oralExists && (
                               <span className="text-[10px] text-yellow-500 block">pending</span>
                             )}
                           </td>
@@ -233,20 +275,11 @@ const StudentDashboard = () => {
                             {grade.max_score}
                           </td>
                           <td className="text-center py-2 px-3 sm:py-3 sm:px-6">
-                            {total > 0 && (
-                              <span className={`text-xs px-2 py-1 rounded-full ${
-                                isPassing 
-                                  ? 'bg-green-400/20 text-green-400' 
-                                  : 'bg-red-400/20 text-red-400'
-                              }`}>
-                                {isPassing ? 'Passing' : 'Failing'}
-                              </span>
-                            )}
-                            {total === 0 && (
-                              <span className="text-xs text-gray-500">Not graded</span>
-                            )}
-                           </td>
-                         </tr>
+                            <span className={`text-xs px-2 py-1 rounded-full ${statusColor}`}>
+                              {status}
+                            </span>
+                          </td>
+                        </tr>
                       );
                     })
                   )}
