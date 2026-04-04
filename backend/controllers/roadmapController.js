@@ -59,8 +59,10 @@ const deleteRoadmapItem = async (req, res) => {
 const getAllTracks = async (req, res) => {
   try {
     const tracks = await CareerTrack.getAll();
+    console.log('✅ Tracks fetched:', tracks.length);
     res.json(tracks);
   } catch (error) {
+    console.error('❌ Error fetching tracks:', error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -162,6 +164,7 @@ const getStudentProgress = async (req, res) => {
     const tasks = await StudentProgress.getStudentTrackProgress(studentId, trackId);
     res.json({ ...progress, tasks });
   } catch (error) {
+    console.error('Error getting student progress:', error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -173,6 +176,7 @@ const toggleTask = async (req, res) => {
     const result = await StudentProgress.toggleTask(studentId, taskId, isCompleted);
     res.json({ success: true, progress: result });
   } catch (error) {
+    console.error('Error toggling task:', error);
     res.status(500).json({ message: error.message });
   }
 };

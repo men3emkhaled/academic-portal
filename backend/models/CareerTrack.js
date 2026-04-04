@@ -1,7 +1,6 @@
 const db = require('../config/database');
 
 class CareerTrack {
-  // جلب كل المسارات
   static async getAll() {
     const result = await db.query(`
       SELECT * FROM career_tracks ORDER BY is_primary DESC, name
@@ -9,7 +8,6 @@ class CareerTrack {
     return result.rows;
   }
 
-  // جلب مسار معين مع مهامه
   static async getById(id) {
     const trackResult = await db.query(
       'SELECT * FROM career_tracks WHERE id = $1',
@@ -28,7 +26,6 @@ class CareerTrack {
     return track;
   }
 
-  // إضافة مسار جديد
   static async create(name, description, is_primary = false) {
     const result = await db.query(
       `INSERT INTO career_tracks (name, description, is_primary) 
@@ -38,7 +35,6 @@ class CareerTrack {
     return result.rows[0];
   }
 
-  // تحديث مسار
   static async update(id, name, description, is_primary) {
     const result = await db.query(
       `UPDATE career_tracks 
@@ -49,13 +45,11 @@ class CareerTrack {
     return result.rows[0];
   }
 
-  // حذف مسار
   static async delete(id) {
     await db.query('DELETE FROM career_tracks WHERE id = $1', [id]);
     return true;
   }
 
-  // إضافة مهمة لمسار
   static async addTask(track_id, title, description, order_index) {
     const result = await db.query(
       `INSERT INTO roadmap_tasks (track_id, title, description, order_index) 
@@ -65,7 +59,6 @@ class CareerTrack {
     return result.rows[0];
   }
 
-  // تحديث مهمة
   static async updateTask(task_id, title, description, order_index) {
     const result = await db.query(
       `UPDATE roadmap_tasks 
@@ -76,7 +69,6 @@ class CareerTrack {
     return result.rows[0];
   }
 
-  // حذف مهمة
   static async deleteTask(task_id) {
     await db.query('DELETE FROM roadmap_tasks WHERE id = $1', [task_id]);
     return true;
