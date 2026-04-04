@@ -3,7 +3,7 @@ const db = require('../config/database');
 class Student {
   static async findById(id) {
     const result = await db.query(
-      'SELECT id, name, level, section, created_at FROM students WHERE id = $1',
+      'SELECT id, name, level, section, password_hash FROM students WHERE id = $1',
       [id]
     );
     return result.rows[0];
@@ -44,7 +44,6 @@ class Student {
     return student.password_hash === plainPassword;
   }
 
-  // ✅ جلب كل الطلاب مع الباسوردات
   static async getAll() {
     const result = await db.query('SELECT id, name, level, section, password_hash FROM students ORDER BY id');
     return result.rows;
@@ -56,30 +55,6 @@ class Student {
       [section, id]
     );
     return result.rows[0];
-  }
-
-  static async getTotalScore(studentId) {
-    const result = await db.query(
-      `SELECT 
-        COALESCE(SUM(
-          CASE 
-            WHEN midterm_score IS NOT NULL THEN midterm_score 
-            ELSE 0 
-          END +
-          CASE 
-            WHEN practical_score IS NOT NULL THEN practical_score 
-            ELSE 0 
-          END +
-          CASE 
-            WHEN oral_score IS NOT NULL THEN oral_score 
-            ELSE 0 
-          END
-        ), 0) as total_score
-       FROM grades 
-       WHERE student_id = $1`,
-      [studentId]
-    );
-    return result.rows[0].total_score;
   }
 }
 

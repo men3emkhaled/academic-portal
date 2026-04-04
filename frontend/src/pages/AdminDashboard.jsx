@@ -216,6 +216,26 @@ const AdminDashboard = () => {
     }
   };
 
+  // ============= Update Student Section =============
+  const handleUpdateSection = async (studentId, currentSection) => {
+    const newSection = prompt(`Enter new section for student ${studentId} (1-6):`, currentSection || '1');
+    if (!newSection) return;
+    
+    const sectionNum = parseInt(newSection);
+    if (isNaN(sectionNum) || sectionNum < 1 || sectionNum > 6) {
+      toast.error('Section must be a number between 1 and 6');
+      return;
+    }
+    
+    try {
+      await api.put(`/admin/students/${studentId}/section`, { section: sectionNum });
+      toast.success(`Section updated to ${sectionNum}`);
+      fetchStudents();
+    } catch (error) {
+      toast.error('Error updating section');
+    }
+  };
+
   // ============= Course Management =============
   const handleDeleteCourse = async (id) => {
     if (!window.confirm('Delete this course?')) return;
@@ -458,7 +478,7 @@ const AdminDashboard = () => {
             <div className="mb-8 p-4 bg-white/5 rounded-xl">
               <h3 className="text-lg font-semibold text-white mb-3">Upload Students (Excel)</h3>
               <p className="text-gray-400 text-sm mb-4">
-                Excel file columns: <span className="text-primary">Student ID, Student Name, Password (optional), Level (optional), Section (optional)</span>
+                Excel file columns: <span className="text-primary">Student ID, Student Name, Password (optional), Level (optional), Section (1-6)</span>
               </p>
               <form onSubmit={handleUploadStudents} className="space-y-5">
                 <div className="flex flex-col sm:flex-row gap-4">
@@ -478,7 +498,7 @@ const AdminDashboard = () => {
             <div>
               <h3 className="text-lg font-semibold text-white mb-3">📋 All Students</h3>
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[600px]">
+                <table className="w-full min-w-[700px]">
                   <thead>
                     <tr className="border-b border-white/10">
                       <th className="text-left py-3 px-4 text-primary">ID</th>
@@ -495,13 +515,20 @@ const AdminDashboard = () => {
                         <td className="py-3 px-4 text-white">{student.id}</td>
                         <td className="py-3 px-4 text-white">{student.name}</td>
                         <td className="py-3 px-4 text-gray-300">{student.level}</td>
-                        <td className="py-3 px-4 text-gray-300">{student.section || '—'}</td>
-                        <td className="py-3 px-4 font-mono text-sm text-yellow-400">{student.password}</td>
                         <td className="py-3 px-4">
-                          <button onClick={() => handleResetPassword(student.id)} className="text-blue-400 hover:text-blue-300 text-sm">
-                            Reset Password
+                          <button 
+                            onClick={() => handleUpdateSection(student.id, student.section)}
+                            className="text-primary hover:underline font-mono"
+                          >
+                            {student.section || '—'}
                           </button>
-                        </td>
+                         </td>
+                        <td className="py-3 px-4 font-mono text-sm text-yellow-400">{student.password}</td>
+                        <td className="py-3 px-4 space-x-2">
+                          <button onClick={() => handleResetPassword(student.id)} className="text-blue-400 hover:text-blue-300 text-sm">
+                            Reset PW
+                          </button>
+                         </td>
                        </tr>
                     ))}
                   </tbody>
@@ -527,10 +554,12 @@ const AdminDashboard = () => {
                 className="w-full md:w-64 bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-primary"
               >
                 <option value="">-- Choose section --</option>
-                <option value="A">Section A</option>
-                <option value="B">Section B</option>
-                <option value="C">Section C</option>
-                <option value="D">Section D</option>
+                <option value="1">Section 1</option>
+                <option value="2">Section 2</option>
+                <option value="3">Section 3</option>
+                <option value="4">Section 4</option>
+                <option value="5">Section 5</option>
+                <option value="6">Section 6</option>
               </select>
             </div>
             
