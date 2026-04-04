@@ -2,19 +2,31 @@ const Student = require('../models/Student');
 const XLSX = require('xlsx');
 const fs = require('fs');
 
-// رفع الطلاب من Excel (مع Password و Section)
+// رفع الطلاب من Excel
 const uploadStudentsExcel = async (req, res) => {
   let filePath = null;
   try {
+    console.log('📥 Request received at /upload-students');
+    console.log('📋 Request body:', req.body);
+    console.log('📎 Request file:', req.file);
+    
     if (!req.file) {
-      return res.status(400).json({ message: 'No file uploaded' });
+      console.log('❌ No file in request');
+      return res.status(400).json({ 
+        message: 'No file uploaded',
+        details: 'Please select an Excel file to upload'
+      });
     }
     
     filePath = req.file.path;
+    console.log('📁 File saved at:', filePath);
+    
     const workbook = XLSX.readFile(filePath);
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
     const data = XLSX.utils.sheet_to_json(worksheet);
+    
+    console.log('📊 Excel data rows:', data.length);
     
     const students = [];
     
@@ -26,6 +38,7 @@ const uploadStudentsExcel = async (req, res) => {
       const section = row['Section'] || row['section'] || null;
       
       if (!studentId || !studentName) {
+        console.log('⚠️ Skipping row missing ID or Name:', row);
         continue;
       }
       
@@ -39,22 +52,34 @@ const uploadStudentsExcel = async (req, res) => {
     }
     
     if (students.length === 0) {
-      return res.status(400).json({ message: 'No valid student data found' });
+      console.log('❌ No valid student data found');
+      return res.status(400).json({ 
+        message: 'No valid student data found',
+        details: 'Excel file must contain columns: Student ID, Student Name'
+      });
     }
+    
+    console.log(`✅ Found ${students.length} students to upload`);
     
     for (const student of students) {
       await Student.create(student.id, student.name, student.password, student.level, student.section);
     }
     
     fs.unlinkSync(filePath);
+    console.log('✅ Upload successful');
+    
     res.json({ 
       message: 'Students uploaded successfully', 
       count: students.length,
       students: students.map(s => ({ id: s.id, name: s.name, level: s.level, section: s.section }))
     });
   } catch (error) {
+    console.error('❌ Error in uploadStudentsExcel:', error);
     if (filePath && fs.existsSync(filePath)) fs.unlinkSync(filePath);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ 
+      message: error.message,
+      details: error.stack
+    });
   }
 };
 

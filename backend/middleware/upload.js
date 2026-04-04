@@ -1,28 +1,60 @@
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
+
+// تأكد من وجود مجلد uploads
+const uploadDir = 'uploads';
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'uploads/');
+        cb(null, uploadDir);
     },
     filename: (req, file, cb) => {
-        cb(null, `${Date.now()}-${file.originalname}`);
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const ext = path.extname(file.originalname);
+        cb(null, uniqueSuffix + ext);
     }
 });
 
 const fileFilter = (req, file, cb) => {
-    const allowedTypes = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel', 'text/csv'];
-    if (allowedTypes.includes(file.mimetype)) {
+    const allowedTypes = [
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'application/vnd.ms-excel',
+        'text/csv',
+        'application/octet-stream'
+    ];
+    
+    const ext = path.extname(file.originalname).toLowerCase();
+    const allowedExt = ['.xlsx', '.xls', '.csv'];
+    
+    if (allowedTypes.includes(file.mimetype) || allowedExt.includes(ext)) {
         cb(null, true);
     } else {
-        cb(new Error('Only Excel files are allowed'), false);
+        cb(new Error(`Only Excel files are allowed. Received: ${file.mimetype}`), false);
     }
 };
 
 const upload = multer({
     storage: storage,
     fileFilter: fileFilter,
-    limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+    limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
 });
 
-module.exports = upload;
+// Error handler for multer
+const handleMulterError = (err, req, res, next) => {
+    if (err instanceof multer.MulterError) {
+        if (err.code === 'LIMIT_FILE_SIZE') {
+            return res.status(400).json({ message: 'File too large. Max size is 10MB' });
+        }
+        return res.status(400).json({ message: err.message });
+    }
+    if (err) {
+        return res.status(400).json({ message: err.message });
+    }
+    next();
+};
+
+module.exports = { upload, handleMulterError };
