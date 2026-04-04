@@ -34,48 +34,30 @@ function App() {
     <AuthProvider>
       <StudentAuthProvider>
         <Router>
-          <div className="min-h-screen bg-dark">
-            <Navbar />
-            <main className="container mx-auto px-4 py-8">
-              <Routes>
-                {/* Public Routes */}
-                <Route path="/" element={<Home />} />
-                <Route path="/course/:id" element={<CourseDetails />} />
-                <Route path="/grades" element={<Grades />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/roadmap" element={<RoadmapList />} />
-                <Route path="/roadmap/:id" element={<RoadmapDetail />} />
-                
-                {/* Admin Route */}
-                <Route path="/admin" element={<AdminDashboard />} />
-                
-                {/* Student Routes */}
-                <Route path="/student/login" element={<StudentLogin />} />
-                <Route path="/student/dashboard" element={
-                  <ProtectedStudentRoute><StudentDashboard /></ProtectedStudentRoute>
-                } />
-                <Route path="/student/grades" element={
-                  <ProtectedStudentRoute><StudentGrades /></ProtectedStudentRoute>
-                } />
-                <Route path="/student/timetable" element={
-                  <ProtectedStudentRoute><StudentTimetable /></ProtectedStudentRoute>
-                } />
-                <Route path="/student/roadmap" element={
-                  <ProtectedStudentRoute><StudentRoadmap /></ProtectedStudentRoute>
-                } />
-                <Route path="/student/materials" element={
-                  <ProtectedStudentRoute><StudentMaterials /></ProtectedStudentRoute>
-                } />
-                <Route path="/student/notifications" element={
-                  <ProtectedStudentRoute><StudentNotifications /></ProtectedStudentRoute>
-                } />
-                <Route path="/student/settings" element={
-                  <ProtectedStudentRoute><StudentSettings /></ProtectedStudentRoute>
-                } />
-              </Routes>
-            </main>
-            <Toaster position="bottom-right" />
-          </div>
+          {/* الـ Navbar يظهر بس للصفحات العامة والأدمن */}
+          <Routes>
+            {/* Public Routes with Navbar */}
+            <Route path="/" element={<><Navbar /><Home /></>} />
+            <Route path="/course/:id" element={<><Navbar /><CourseDetails /></>} />
+            <Route path="/grades" element={<><Navbar /><Grades /></>} />
+            <Route path="/contact" element={<><Navbar /><Contact /></>} />
+            <Route path="/roadmap" element={<><Navbar /><RoadmapList /></>} />
+            <Route path="/roadmap/:id" element={<><Navbar /><RoadmapDetail /></>} />
+            
+            {/* Admin Route - no Navbar, has its own header */}
+            <Route path="/admin" element={<AdminDashboard />} />
+            
+            {/* Student Routes - no Navbar, use Sidebar inside each page */}
+            <Route path="/student/login" element={<StudentLogin />} />
+            <Route path="/student/dashboard" element={<ProtectedStudentRoute><StudentDashboard /></ProtectedStudentRoute>} />
+            <Route path="/student/grades" element={<ProtectedStudentRoute><StudentGrades /></ProtectedStudentRoute>} />
+            <Route path="/student/timetable" element={<ProtectedStudentRoute><StudentTimetable /></ProtectedStudentRoute>} />
+            <Route path="/student/roadmap" element={<ProtectedStudentRoute><StudentRoadmap /></ProtectedStudentRoute>} />
+            <Route path="/student/materials" element={<ProtectedStudentRoute><StudentMaterials /></ProtectedStudentRoute>} />
+            <Route path="/student/notifications" element={<ProtectedStudentRoute><StudentNotifications /></ProtectedStudentRoute>} />
+            <Route path="/student/settings" element={<ProtectedStudentRoute><StudentSettings /></ProtectedStudentRoute>} />
+          </Routes>
+          <Toaster position="bottom-right" />
         </Router>
       </StudentAuthProvider>
     </AuthProvider>
