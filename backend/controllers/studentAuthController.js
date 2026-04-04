@@ -6,7 +6,7 @@ const studentLogin = async (req, res) => {
     const { username, password } = req.body;
     
     console.log('📥 POST /api/student/login - Request received');
-    console.log('📥 Body:', { username, password });
+    console.log('📥 Body:', { username, password: '***' });
     
     if (!username || !password) {
       return res.status(400).json({ message: 'Username and password are required' });
@@ -51,10 +51,15 @@ const studentLogin = async (req, res) => {
 
 const getCurrentStudent = async (req, res) => {
   try {
+    console.log('📥 GET /api/student/me - User ID:', req.user?.id);
+    
     const student = await Student.findById(req.user.id);
     if (!student) {
+      console.log('❌ Student not found:', req.user.id);
       return res.status(404).json({ message: 'Student not found' });
     }
+    
+    console.log('✅ Student found:', student.id, student.name);
     
     res.json({
       id: student.id,
@@ -63,6 +68,7 @@ const getCurrentStudent = async (req, res) => {
       section: student.section
     });
   } catch (error) {
+    console.error('❌ Error in getCurrentStudent:', error);
     res.status(500).json({ message: error.message });
   }
 };

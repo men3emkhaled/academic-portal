@@ -1,6 +1,5 @@
 import axios from 'axios';
 
-// ✅ تأكد إن الرابط بالضبط كده
 const API_BASE_URL = 'https://academic-portal-production.up.railway.app/api';
 
 const studentApi = axios.create({
@@ -10,23 +9,42 @@ const studentApi = axios.create({
   },
 });
 
+// ✅ Interceptor للتأكد من إضافة التوكن لكل request
 studentApi.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('studentToken');
+    
+    console.log(`📤 ${config.method.toUpperCase()} ${config.baseURL + config.url}`);
+    
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+      console.log('✅ Token added to headers');
+    } else {
+      console.log('⚠️ No token found in localStorage');
     }
-    
-    console.log('📤 Axios Request:', {
-      method: config.method,
-      baseURL: config.baseURL,
-      url: config.url,
-      fullPath: config.baseURL + config.url
-    });
     
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => {
+    console.error('❌ Request interceptor error:', error);
+    return Promise.reject(error);
+  }
+);
+
+// ✅ Interceptor للردود - لو 401 نخلي المستخدم يسجل خروج
+studentApi.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    if (error.response?.status === 401) {
+      console.log('⚠️ 401 Unauthorized - Clearing token');
+      localStorage.removeItem('studentToken');
+      delete studentApi.defaults.headers.common['Authorization'];
+      window.location.href = '/student/login';
+    }
+    return Promise.reject(error);
+  }
 );
 
 export default studentApi;
