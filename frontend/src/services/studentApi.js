@@ -1,7 +1,14 @@
 import axios from 'axios';
 
-// ✅ الرابط كامل مع https://
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://academic-portal-production.up.railway.app/api';
+// ✅ تأكد إن الرابط يبدأ بـ https://
+// ❌ ممنوع تكتب: 'academic-portal-production.up.railway.app/api'
+// ❌ ممنوع تكتب: '/api'
+// ✅ صح: 'https://academic-portal-production.up.railway.app/api'
+
+const API_BASE_URL = 'https://academic-portal-production.up.railway.app/api';
+
+// لو عايز تستخدم environment variable
+// const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://academic-portal-production.up.railway.app/api';
 
 const studentApi = axios.create({
   baseURL: API_BASE_URL,
@@ -18,18 +25,8 @@ studentApi.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
     
-    // تحويل المسارات
-    if (config.url === '/my-grades') {
-      config.url = '/grades/my-grades';
-    }
-    
-    if (config.url === '/me') {
-      config.url = '/student/me';
-    }
-    
-    if (config.url === '/change-password') {
-      config.url = '/student/change-password';
-    }
+    // تأكد من المسارات
+    console.log('📤 Request URL:', config.baseURL + config.url);
     
     return config;
   },
