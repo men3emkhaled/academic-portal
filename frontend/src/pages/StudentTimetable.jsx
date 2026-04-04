@@ -32,7 +32,7 @@ const StudentTimetable = () => {
 
   const fetchTimetable = async () => {
     try {
-      const response = await studentApi.get('/my-timetable');
+      const response = await studentApi.get('timetable/my-timetable');
       setTimetable(response.data);
     } catch (error) {
       console.error('Error fetching timetable:', error);
