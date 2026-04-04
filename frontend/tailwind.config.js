@@ -7,10 +7,10 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: '#2ecc71',      // أخضر هادي أساسي
-        primaryLight: '#58d68d',  // أخضر فاتح
-        primaryDark: '#27ae60',   // أخضر غامق
-        secondary: '#1abc9c',     // أخضر مائي للتباين
+        primary: '#2ecc71',
+        primaryLight: '#58d68d',
+        primaryDark: '#27ae60',
+        secondary: '#1abc9c',
         success: '#2ecc71',
         danger: '#e74c3c',
         warning: '#f39c12',
@@ -20,9 +20,6 @@ module.exports = {
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
-      },
-      backdropBlur: {
-        xs: '2px',
       },
       animation: {
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
