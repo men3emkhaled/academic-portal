@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStudentAuth } from '../context/StudentAuthContext';
 import toast from 'react-hot-toast';
@@ -9,8 +9,8 @@ const StudentLogin = () => {
   const [loading, setLoading] = useState(false);
   const { login } = useStudentAuth();
   const navigate = useNavigate();
+  const abortControllerRef = useRef(null);
 
-  // ✅ لو فيه توكن مخزن، حوله على الـ dashboard فوراً
   useEffect(() => {
     const token = localStorage.getItem('studentToken');
     if (token) {
@@ -20,19 +20,30 @@ const StudentLogin = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // ✅ منع الإرسال المتكرر
-    if (loading) return;
-    
+
+    // منع التكرار
+    if (loading) {
+      console.log('⏳ Login already in progress, ignoring...');
+      return;
+    }
+
     if (!username.trim() || !password.trim()) {
       toast.error('Please enter both student ID and password');
       return;
     }
-    
+
+    // إلغاء أي طلب سابق
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+
     setLoading(true);
-    const result = await login(username, password);
+    const result = await login(username, password, abortController.signal);
     setLoading(false);
-    
+    abortControllerRef.current = null;
+
     if (result.success) {
       toast.success('Login successful!');
       navigate('/student/dashboard');
@@ -50,7 +61,7 @@ const StudentLogin = () => {
             <h1 className="text-3xl font-bold text-primary mb-2">Student Login</h1>
             <p className="text-gray-400 text-sm">Enter your student ID and password</p>
           </div>
-          
+
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className="block text-gray-300 mb-2 text-sm font-medium">Student ID</label>
@@ -64,7 +75,7 @@ const StudentLogin = () => {
                 disabled={loading}
               />
             </div>
-            
+
             <div>
               <label className="block text-gray-300 mb-2 text-sm font-medium">Password</label>
               <input
@@ -77,7 +88,7 @@ const StudentLogin = () => {
                 disabled={loading}
               />
             </div>
-            
+
             <button
               type="submit"
               disabled={loading}

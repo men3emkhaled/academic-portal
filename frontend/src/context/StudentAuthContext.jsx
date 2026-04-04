@@ -14,6 +14,7 @@ export const StudentAuthProvider = ({ children }) => {
   const [student, setStudent] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // تحديث التوكن في localStorage و axios headers
   useEffect(() => {
     if (token) {
       localStorage.setItem('studentToken', token);
@@ -24,6 +25,7 @@ export const StudentAuthProvider = ({ children }) => {
     }
   }, [token]);
 
+  // استعادة الجلسة عند تحميل الصفحة
   useEffect(() => {
     const initAuth = async () => {
       const savedToken = localStorage.getItem('studentToken');
@@ -46,10 +48,10 @@ export const StudentAuthProvider = ({ children }) => {
     initAuth();
   }, []);
 
-  const login = async (username, password) => {
+  // ✅ دالة تسجيل الدخول مع دعم AbortController
+  const login = async (username, password, signal) => {
     try {
-      // ✅ منع الطلبات المتكررة (لو فيه طلب قيد التنفيذ)
-      const response = await studentApi.post('/student/login', { username, password });
+      const response = await studentApi.post('/student/login', { username, password }, { signal });
       const { token: newToken, student: studentData } = response.data;
       
       setToken(newToken);
@@ -57,6 +59,10 @@ export const StudentAuthProvider = ({ children }) => {
       
       return { success: true };
     } catch (error) {
+      if (error.name === 'AbortError') {
+        console.log('Login request was cancelled');
+        return { success: false, message: 'Request cancelled' };
+      }
       console.error('Login error:', error);
       let errorMessage = 'Login failed';
       if (error.response?.data?.message) {
