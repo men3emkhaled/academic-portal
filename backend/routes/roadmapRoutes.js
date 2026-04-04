@@ -4,20 +4,20 @@ const roadmapController = require('../controllers/roadmapController');
 const { adminAuth } = require('../middleware/auth');
 const { studentAuth } = require('../middleware/studentAuth');
 
-// ============= Public Routes =============
+// Public routes
 router.get('/', roadmapController.getAllRoadmapItems);
 router.get('/:id', roadmapController.getRoadmapItemById);
 
-// ============= Career Tracks Routes =============
+// Career Tracks routes (لازم تكون موجودة)
 router.get('/tracks', roadmapController.getAllTracks);
 router.get('/tracks/:id', roadmapController.getTrackById);
 router.get('/tracks/:id/tasks', roadmapController.getTrackTasks);
 
-// ============= Student Progress Routes =============
+// Student progress routes
 router.get('/progress/:trackId', studentAuth, roadmapController.getStudentProgress);
 router.post('/toggle-task', studentAuth, roadmapController.toggleTask);
 
-// ============= Admin Routes =============
+// Admin routes
 router.post('/', adminAuth, roadmapController.createRoadmapItem);
 router.put('/:id', adminAuth, roadmapController.updateRoadmapItem);
 router.delete('/:id', adminAuth, roadmapController.deleteRoadmapItem);
