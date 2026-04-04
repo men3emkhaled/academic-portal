@@ -21,7 +21,6 @@ const StudentNotifications = () => {
 
   const fetchNotifications = async () => {
     try {
-      // ✅ المسار الصحيح
       const response = await studentApi.get('/notifications/my-notifications');
       setNotifications(response.data);
     } catch (error) {
