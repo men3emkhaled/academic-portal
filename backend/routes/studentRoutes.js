@@ -4,11 +4,15 @@ const { studentLogin, getCurrentStudent, changePassword } = require('../controll
 const { getMyGrades } = require('../controllers/gradeController');
 const { studentAuth } = require('../middleware/studentAuth');
 
+// مسارات عامة (بدون Auth)
 router.post('/login', studentLogin);
+
+// المسارات المحمية (بتطلب توكن)
 router.get('/me', studentAuth, getCurrentStudent);
 router.post('/change-password', studentAuth, changePassword);
 router.get('/my-grades', studentAuth, getMyGrades);
 
+// ✅ أضف الـ route دي (جدول الطالب)
 router.get('/my-timetable', studentAuth, async (req, res) => {
   try {
     const Student = require('../models/Student');
