@@ -12,18 +12,28 @@ router.get('/me', studentAuth, getCurrentStudent);
 router.post('/change-password', studentAuth, changePassword);
 router.get('/my-grades', studentAuth, getMyGrades);
 
-// ✅ أضف الـ route دي (جدول الطالب)
+// ✅ إضافة route الجدول - تجيب الجدول على حسب section الطالب
 router.get('/my-timetable', studentAuth, async (req, res) => {
   try {
     const Student = require('../models/Student');
     const Timetable = require('../models/Timetable');
     
+    // جيب بيانات الطالب المسجل
     const student = await Student.findById(req.user.id);
-    if (!student || !student.section) {
+    
+    if (!student) {
+      return res.status(404).json({ message: 'Student not found' });
+    }
+    
+    if (!student.section) {
       return res.json([]);
     }
     
+    // جيب الجدول بتاع section بتاعه
     const timetable = await Timetable.getBySection(student.section);
+    
+    console.log(`📅 Timetable fetched for section ${student.section}: ${timetable.length} entries`);
+    
     res.json(timetable);
   } catch (error) {
     console.error('Error fetching my-timetable:', error);
