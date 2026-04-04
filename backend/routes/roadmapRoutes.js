@@ -2,11 +2,35 @@ const express = require('express');
 const router = express.Router();
 const roadmapController = require('../controllers/roadmapController');
 const { adminAuth } = require('../middleware/auth');
+const { studentAuth } = require('../middleware/studentAuth');
 
+// ============= Public Routes =============
 router.get('/', roadmapController.getAllRoadmapItems);
 router.get('/:id', roadmapController.getRoadmapItemById);
+
+// ============= Career Tracks Routes (Public) =============
+router.get('/tracks', roadmapController.getAllTracks);
+router.get('/tracks/:id', roadmapController.getTrackById);
+router.get('/tracks/:id/tasks', roadmapController.getTrackTasks);
+
+// ============= Student Progress Routes (Protected) =============
+router.get('/progress/:trackId', studentAuth, roadmapController.getStudentProgress);
+router.post('/toggle-task', studentAuth, roadmapController.toggleTask);
+
+// ============= Admin Routes =============
+// Roadmap Items
 router.post('/', adminAuth, roadmapController.createRoadmapItem);
 router.put('/:id', adminAuth, roadmapController.updateRoadmapItem);
 router.delete('/:id', adminAuth, roadmapController.deleteRoadmapItem);
+
+// Career Tracks
+router.post('/tracks', adminAuth, roadmapController.createTrack);
+router.put('/tracks/:id', adminAuth, roadmapController.updateTrack);
+router.delete('/tracks/:id', adminAuth, roadmapController.deleteTrack);
+
+// Tasks
+router.post('/tracks/:trackId/tasks', adminAuth, roadmapController.addTask);
+router.put('/tasks/:id', adminAuth, roadmapController.updateTask);
+router.delete('/tasks/:id', adminAuth, roadmapController.deleteTask);
 
 module.exports = router;

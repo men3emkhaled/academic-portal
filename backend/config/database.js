@@ -7,10 +7,10 @@ if (process.env.DATABASE_URL) {
   // بيئة الإنتاج (Railway / Neon)
   poolConfig = {
     connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false }, // مطلوب لـ Neon
+    ssl: { rejectUnauthorized: false },
   };
 } else {
-  // بيئة التطوير المحلي (استخدام متغيرات منفردة)
+  // بيئة التطوير المحلي
   poolConfig = {
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,
@@ -21,6 +21,16 @@ if (process.env.DATABASE_URL) {
 }
 
 const pool = new Pool(poolConfig);
+
+// اختبار الاتصال
+pool.connect((err, client, release) => {
+  if (err) {
+    console.error('❌ Database connection error:', err.message);
+  } else {
+    console.log('✅ Connected to PostgreSQL database');
+    release();
+  }
+});
 
 module.exports = {
   query: (text, params) => pool.query(text, params),
