@@ -7,24 +7,17 @@ import RoadmapManager from '../components/RoadmapManager';
 
 const AdminDashboard = () => {
   const { token, login } = useAuth();
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState('courses');
   const [courses, setCourses] = useState([]);
   const [students, setStudents] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [loginCredentials, setLoginCredentials] = useState({ username: '', password: '' });
-  
-  // Upload states
   const [gradesFile, setGradesFile] = useState(null);
   const [selectedCourseId, setSelectedCourseId] = useState('');
   const [selectedExamType, setSelectedExamType] = useState('midterm');
+  const [loading, setLoading] = useState(false);
   const [uploadingGrades, setUploadingGrades] = useState(false);
-  const [studentsFile, setStudentsFile] = useState(null);
   const [uploadingStudents, setUploadingStudents] = useState(false);
-  const [timetableFile, setTimetableFile] = useState(null);
-  const [selectedSection, setSelectedSection] = useState('');
-  const [uploadingTimetable, setUploadingTimetable] = useState(false);
-  
-  // Edit states
+  const [studentsFile, setStudentsFile] = useState(null);
+  const [loginCredentials, setLoginCredentials] = useState({ username: '', password: '' });
   const [editingCourse, setEditingCourse] = useState(null);
   const [editFormData, setEditFormData] = useState({
     name: '',
@@ -32,6 +25,9 @@ const AdminDashboard = () => {
     description: '',
     max_score: 15,
   });
+  const [timetableFile, setTimetableFile] = useState(null);
+  const [selectedSection, setSelectedSection] = useState('');
+  const [uploadingTimetable, setUploadingTimetable] = useState(false);
   const [editingGrade, setEditingGrade] = useState(null);
   const [gradeFormData, setGradeFormData] = useState({
     studentId: '',
@@ -41,18 +37,10 @@ const AdminDashboard = () => {
     status: 'completed'
   });
 
-  // Stats
-  const [stats, setStats] = useState({
-    totalStudents: 0,
-    totalCourses: 0,
-    totalResources: 0
-  });
-
   useEffect(() => {
     if (!token) return;
     fetchCourses();
     fetchStudents();
-    fetchStats();
   }, [token]);
 
   const handleLogin = async (e) => {
@@ -62,6 +50,8 @@ const AdminDashboard = () => {
       const response = await api.post('/admin/login', loginCredentials);
       login(response.data.token);
       toast.success('Login successful');
+      fetchCourses();
+      fetchStudents();
     } catch (error) {
       toast.error('Invalid credentials');
     } finally {
@@ -82,26 +72,22 @@ const AdminDashboard = () => {
     try {
       const response = await api.get('/admin/students-with-passwords');
       setStudents(response.data);
-      setStats(prev => ({ ...prev, totalStudents: response.data.length }));
     } catch (error) {
       console.error('Error fetching students:', error);
-    }
-  };
-
-  const fetchStats = async () => {
-    try {
-      const coursesRes = await api.get('/courses');
-      setStats(prev => ({ ...prev, totalCourses: coursesRes.data.length }));
-    } catch (error) {
-      console.error('Error fetching stats:', error);
     }
   };
 
   // ============= Grades Upload =============
   const handleUploadGrades = async (e) => {
     e.preventDefault();
-    if (!gradesFile || !selectedCourseId) {
-      toast.error('Please select a file and a course');
+    
+    if (!gradesFile) {
+      toast.error('Please select a file');
+      return;
+    }
+    
+    if (!selectedCourseId) {
+      toast.error('Please select a course');
       return;
     }
     
@@ -115,10 +101,11 @@ const AdminDashboard = () => {
       const response = await api.post('/grades/admin/upload-advanced', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      toast.success(`✅ Uploaded ${response.data.count} grades`);
+      toast.success(`✅ Uploaded ${response.data.count} grades for ${response.data.examType}`);
       setGradesFile(null);
       document.getElementById('gradesFileInput').value = '';
     } catch (error) {
+      console.error('Upload error:', error);
       toast.error(error.response?.data?.message || 'Error uploading grades');
     } finally {
       setUploadingGrades(false);
@@ -128,6 +115,7 @@ const AdminDashboard = () => {
   // ============= Students Upload =============
   const handleUploadStudents = async (e) => {
     e.preventDefault();
+    
     if (!studentsFile) {
       toast.error('Please select a file');
       return;
@@ -141,11 +129,12 @@ const AdminDashboard = () => {
       const response = await api.post('/admin/upload-students', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      toast.success(`✅ Uploaded ${response.data.count} students`);
+      toast.success(`✅ Uploaded ${response.data.count} students successfully`);
       setStudentsFile(null);
-      document.getElementById('studentsFileInput').value = '';
       fetchStudents();
+      document.getElementById('studentsFileInput').value = '';
     } catch (error) {
+      console.error('Upload error:', error);
       toast.error(error.response?.data?.message || 'Error uploading students');
     } finally {
       setUploadingStudents(false);
@@ -155,8 +144,14 @@ const AdminDashboard = () => {
   // ============= Timetable Upload =============
   const handleUploadTimetable = async (e) => {
     e.preventDefault();
-    if (!timetableFile || !selectedSection) {
-      toast.error('Please select a file and a section');
+    
+    if (!timetableFile) {
+      toast.error('Please select a file');
+      return;
+    }
+    
+    if (!selectedSection) {
+      toast.error('Please select a section');
       return;
     }
     
@@ -174,9 +169,50 @@ const AdminDashboard = () => {
       setSelectedSection('');
       document.getElementById('timetableFileInput').value = '';
     } catch (error) {
+      console.error('Upload error:', error);
       toast.error(error.response?.data?.message || 'Error uploading timetable');
     } finally {
       setUploadingTimetable(false);
+    }
+  };
+
+  // ============= Single Grade Update =============
+  const handleUpdateSingleGrade = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      await api.put('/grades/admin/update-single', {
+        studentId: gradeFormData.studentId,
+        courseName: gradeFormData.courseName,
+        examType: gradeFormData.examType,
+        score: gradeFormData.score ? parseFloat(gradeFormData.score) : null,
+        status: gradeFormData.status
+      });
+      toast.success('Grade updated successfully');
+      setEditingGrade(null);
+      setGradeFormData({
+        studentId: '',
+        courseName: '',
+        examType: 'midterm',
+        score: '',
+        status: 'completed'
+      });
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Error updating grade');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ============= Reset Student Password =============
+  const handleResetPassword = async (studentId) => {
+    if (!window.confirm(`Reset password for student ${studentId} to 123456?`)) return;
+    try {
+      await api.put(`/admin/students/${studentId}/reset-password`, { newPassword: '123456' });
+      toast.success(`Password reset for ${studentId}`);
+      fetchStudents();
+    } catch (error) {
+      toast.error('Error resetting password');
     }
   };
 
@@ -236,51 +272,6 @@ const AdminDashboard = () => {
     }
   };
 
-  // ============= Single Grade Update =============
-  const handleUpdateSingleGrade = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      await api.put('/admin/students/update-grade', gradeFormData);
-      toast.success('Grade updated successfully');
-      setEditingGrade(null);
-      setGradeFormData({
-        studentId: '',
-        courseName: '',
-        examType: 'midterm',
-        score: '',
-        status: 'completed'
-      });
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Error updating grade');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // ============= Reset Student Password =============
-  const handleResetPassword = async (studentId) => {
-    if (!window.confirm(`Reset password for student ${studentId} to "123456"?`)) return;
-    try {
-      await api.put(`/admin/students/${studentId}/reset-password`, { newPassword: '123456' });
-      toast.success(`Password reset for ${studentId}`);
-      fetchStudents();
-    } catch (error) {
-      toast.error('Failed to reset password');
-    }
-  };
-
-  // ============= Update Student Section =============
-  const handleUpdateSection = async (studentId, section) => {
-    try {
-      await api.put(`/admin/students/${studentId}/section`, { section });
-      toast.success(`Section updated for ${studentId}`);
-      fetchStudents();
-    } catch (error) {
-      toast.error('Failed to update section');
-    }
-  };
-
   // ============= Login Screen =============
   if (!token) {
     return (
@@ -324,25 +315,9 @@ const AdminDashboard = () => {
     <div className="animate-fadeIn">
       <h1 className="text-4xl md:text-5xl font-bold text-primary mb-8 tracking-tight">Admin Dashboard</h1>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-        <div className="bg-white/5 rounded-xl p-6 border border-white/10">
-          <h3 className="text-gray-400 text-sm mb-2">Total Students</h3>
-          <p className="text-3xl font-bold text-primary">{stats.totalStudents}</p>
-        </div>
-        <div className="bg-white/5 rounded-xl p-6 border border-white/10">
-          <h3 className="text-gray-400 text-sm mb-2">Total Courses</h3>
-          <p className="text-3xl font-bold text-primary">{stats.totalCourses}</p>
-        </div>
-        <div className="bg-white/5 rounded-xl p-6 border border-white/10">
-          <h3 className="text-gray-400 text-sm mb-2">Resources</h3>
-          <p className="text-3xl font-bold text-primary">{stats.totalResources}</p>
-        </div>
-      </div>
-
       {/* Tabs */}
       <div className="flex flex-wrap gap-2 mb-10 border-b border-white/10 pb-2">
-        {['dashboard', 'courses', 'grades', 'students', 'timetable', 'resources', 'roadmap'].map(tab => (
+        {['courses', 'grades', 'resources', 'roadmap', 'students', 'timetable', 'manage-grades'].map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -352,13 +327,13 @@ const AdminDashboard = () => {
                 : 'text-gray-400 hover:text-gray-200 hover:bg-white/5'
             }`}
           >
-            {tab === 'dashboard' && '📊 Dashboard'}
             {tab === 'courses' && '📚 Courses'}
             {tab === 'grades' && '📊 Upload Grades'}
-            {tab === 'students' && '👥 Students'}
-            {tab === 'timetable' && '📅 Timetable'}
             {tab === 'resources' && '📎 Resources'}
             {tab === 'roadmap' && '🗺️ Roadmap'}
+            {tab === 'students' && '👥 Students'}
+            {tab === 'timetable' && '📅 Timetable'}
+            {tab === 'manage-grades' && '✏️ Manage Grades'}
           </button>
         ))}
       </div>
@@ -366,46 +341,21 @@ const AdminDashboard = () => {
       {/* Tab Content */}
       <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 md:p-8">
         
-        {/* ============= Dashboard Tab ============= */}
-        {activeTab === 'dashboard' && (
-          <div>
-            <h2 className="text-xl font-semibold text-primary mb-4">Quick Actions</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <button onClick={() => setActiveTab('students')} className="p-4 bg-primary/10 rounded-xl border border-primary/30 hover:bg-primary/20 transition-all">
-                <span className="text-2xl block mb-2">👥</span>
-                <span className="text-white">Manage Students</span>
-              </button>
-              <button onClick={() => setActiveTab('courses')} className="p-4 bg-primary/10 rounded-xl border border-primary/30 hover:bg-primary/20 transition-all">
-                <span className="text-2xl block mb-2">📚</span>
-                <span className="text-white">Manage Courses</span>
-              </button>
-              <button onClick={() => setActiveTab('grades')} className="p-4 bg-primary/10 rounded-xl border border-primary/30 hover:bg-primary/20 transition-all">
-                <span className="text-2xl block mb-2">📊</span>
-                <span className="text-white">Upload Grades</span>
-              </button>
-              <button onClick={() => setActiveTab('timetable')} className="p-4 bg-primary/10 rounded-xl border border-primary/30 hover:bg-primary/20 transition-all">
-                <span className="text-2xl block mb-2">📅</span>
-                <span className="text-white">Upload Timetable</span>
-              </button>
-            </div>
-          </div>
-        )}
-
         {/* ============= Courses Tab ============= */}
         {activeTab === 'courses' && (
           <div className="space-y-8">
             <div>
               <h2 className="text-xl font-semibold text-primary mb-4">➕ Add New Course</h2>
               <form onSubmit={handleAddCourse} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input name="name" placeholder="Course Name" className="bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white" required />
-                <select name="semester" className="bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white" required>
+                <input name="name" placeholder="Course Name" className="bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-primary" required />
+                <select name="semester" className="bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-primary" required>
                   <option value={1}>Semester 1</option>
                   <option value={2}>Semester 2</option>
                 </select>
-                <input name="max_score" type="number" placeholder="Max Score" className="bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white" />
+                <input name="max_score" type="number" placeholder="Max Score (default: 15)" className="bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white" />
                 <textarea name="description" placeholder="Description" className="md:col-span-2 bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white" rows="3" required />
                 <div className="md:col-span-2">
-                  <button type="submit" className="bg-primary text-dark font-semibold py-2.5 px-6 rounded-xl">Add Course</button>
+                  <button type="submit" className="bg-primary text-dark font-semibold py-2.5 px-6 rounded-xl transition-all hover:scale-105">Add Course</button>
                 </div>
               </form>
             </div>
@@ -429,8 +379,8 @@ const AdminDashboard = () => {
                         <td className="py-3 px-4 text-gray-300">{course.semester}</td>
                         <td className="py-3 px-4 text-gray-300">{course.max_score || 15}</td>
                         <td className="py-3 px-4 space-x-3">
-                          <button onClick={() => handleEditClick(course)} className="text-yellow-400">Edit</button>
-                          <button onClick={() => handleDeleteCourse(course.id)} className="text-red-400">Delete</button>
+                          <button onClick={() => handleEditClick(course)} className="text-yellow-400 hover:text-yellow-300">Edit</button>
+                          <button onClick={() => handleDeleteCourse(course.id)} className="text-red-400 hover:text-red-300">Delete</button>
                         </td>
                       </tr>
                     ))}
@@ -444,19 +394,23 @@ const AdminDashboard = () => {
         {/* ============= Grades Upload Tab ============= */}
         {activeTab === 'grades' && (
           <div>
-            <h2 className="text-xl font-semibold text-primary mb-4">📊 Upload Grades (Excel)</h2>
-            <p className="text-gray-400 text-sm mb-4">Columns: Student ID, Student Name, Score</p>
+            <h2 className="text-xl font-semibold text-primary mb-4">📊 Upload Grades</h2>
+            <p className="text-gray-400 text-sm mb-4">
+              Excel file columns: <span className="text-primary">Student ID, Student Name, Score</span><br />
+              For status, add a <span className="text-primary">Status</span> column (completed/pending)
+            </p>
             
             <div className="mb-4">
               <label className="block text-gray-300 mb-2">Select Course</label>
               <select
                 value={selectedCourseId}
                 onChange={(e) => setSelectedCourseId(e.target.value)}
-                className="w-full md:w-80 bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white"
+                className="w-full md:w-80 bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-primary"
+                required
               >
                 <option value="">-- Choose a course --</option>
                 {courses.map(course => (
-                  <option key={course.id} value={course.id}>{course.name}</option>
+                  <option key={course.id} value={course.id}>{course.name} (Max: {course.max_score || 15})</option>
                 ))}
               </select>
             </div>
@@ -466,135 +420,111 @@ const AdminDashboard = () => {
               <select
                 value={selectedExamType}
                 onChange={(e) => setSelectedExamType(e.target.value)}
-                className="w-full md:w-80 bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white"
+                className="w-full md:w-80 bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-primary"
               >
-                <option value="midterm">Midterm Exam</option>
-                <option value="practical">Practical Exam</option>
-                <option value="oral">Oral Exam</option>
+                <option value="midterm">📝 Midterm Exam</option>
+                <option value="practical">🔧 Practical Exam</option>
+                <option value="oral">🎤 Oral Exam</option>
               </select>
             </div>
             
             <form onSubmit={handleUploadGrades} className="space-y-5">
               <div className="flex flex-col sm:flex-row gap-4">
-                <label className="relative cursor-pointer bg-dark/50 border border-white/20 rounded-xl px-5 py-2 text-white hover:border-primary">
+                <label className="relative cursor-pointer bg-dark/50 border border-white/20 rounded-xl px-5 py-2 text-white hover:border-primary transition-all">
                   📁 Choose File
-                  <input id="gradesFileInput" type="file" accept=".xlsx,.xls,.csv" onChange={(e) => setGradesFile(e.target.files[0])} className="absolute inset-0 opacity-0" />
+                  <input id="gradesFileInput" type="file" accept=".xlsx,.xls,.csv" onChange={(e) => setGradesFile(e.target.files[0])} className="absolute inset-0 opacity-0 cursor-pointer" />
                 </label>
-                {gradesFile && <span className="text-sm text-gray-300">{gradesFile.name}</span>}
+                {gradesFile && <span className="text-sm text-gray-300">📄 {gradesFile.name}</span>}
               </div>
-              <button type="submit" disabled={uploadingGrades} className="bg-primary text-dark font-semibold py-2.5 px-6 rounded-xl disabled:opacity-50">
-                {uploadingGrades ? 'Uploading...' : 'Upload Grades'}
+              <button type="submit" disabled={uploadingGrades || !selectedCourseId || !gradesFile} className="bg-primary text-dark font-semibold py-2.5 px-6 rounded-xl transition-all hover:scale-105 disabled:opacity-50">
+                {uploadingGrades ? '⏳ Uploading...' : '⬆️ Upload Grades'}
               </button>
             </form>
           </div>
         )}
 
-        {/* ============= Students Management Tab ============= */}
+        {/* ============= Resources Tab ============= */}
+        {activeTab === 'resources' && <ResourceManager />}
+        
+        {/* ============= Roadmap Tab ============= */}
+        {activeTab === 'roadmap' && <RoadmapManager />}
+        
+        {/* ============= Students Tab ============= */}
         {activeTab === 'students' && (
           <div>
-            <h2 className="text-xl font-semibold text-primary mb-4">👥 Students Management</h2>
+            <h2 className="text-xl font-semibold text-primary mb-4">👥 Manage Students</h2>
             
             {/* Upload Section */}
             <div className="mb-8 p-4 bg-white/5 rounded-xl">
               <h3 className="text-lg font-semibold text-white mb-3">Upload Students (Excel)</h3>
-              <p className="text-gray-400 text-sm mb-3">Columns: Student ID, Student Name, Password (optional), Level (optional), Section (optional)</p>
-              <form onSubmit={handleUploadStudents} className="flex flex-col sm:flex-row gap-4 items-start">
-                <label className="relative cursor-pointer bg-dark/50 border border-white/20 rounded-xl px-5 py-2 text-white hover:border-primary">
-                  📁 Choose File
-                  <input id="studentsFileInput" type="file" accept=".xlsx,.xls,.csv" onChange={(e) => setStudentsFile(e.target.files[0])} className="absolute inset-0 opacity-0" />
-                </label>
-                {studentsFile && <span className="text-sm text-gray-300">{studentsFile.name}</span>}
-                <button type="submit" disabled={uploadingStudents} className="bg-primary text-dark font-semibold py-2 px-6 rounded-xl disabled:opacity-50">
-                  {uploadingStudents ? 'Uploading...' : 'Upload'}
+              <p className="text-gray-400 text-sm mb-4">
+                Excel file columns: <span className="text-primary">Student ID, Student Name, Password (optional), Level (optional), Section (optional)</span>
+              </p>
+              <form onSubmit={handleUploadStudents} className="space-y-5">
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <label className="relative cursor-pointer bg-dark/50 border border-white/20 rounded-xl px-5 py-2 text-white hover:border-primary transition-all">
+                    📁 Choose File
+                    <input id="studentsFileInput" type="file" accept=".xlsx,.xls,.csv" onChange={(e) => setStudentsFile(e.target.files[0])} className="absolute inset-0 opacity-0 cursor-pointer" />
+                  </label>
+                  {studentsFile && <span className="text-sm text-gray-300">📄 {studentsFile.name}</span>}
+                </div>
+                <button type="submit" disabled={uploadingStudents || !studentsFile} className="bg-primary text-dark font-semibold py-2.5 px-6 rounded-xl transition-all hover:scale-105 disabled:opacity-50">
+                  {uploadingStudents ? '⏳ Uploading...' : '⬆️ Upload Students'}
                 </button>
               </form>
             </div>
 
-            {/* Students Table */}
-            <div className="overflow-x-auto">
-              <h3 className="text-lg font-semibold text-white mb-3">All Students</h3>
-              <table className="w-full min-w-[800px]">
-                <thead>
-                  <tr className="border-b border-white/10">
-                    <th className="text-left py-3 px-4 text-primary">ID</th>
-                    <th className="text-left py-3 px-4 text-primary">Name</th>
-                    <th className="text-left py-3 px-4 text-primary">Level</th>
-                    <th className="text-left py-3 px-4 text-primary">Section</th>
-                    <th className="text-left py-3 px-4 text-primary">Password</th>
-                    <th className="text-left py-3 px-4 text-primary">Changed</th>
-                    <th className="text-left py-3 px-4 text-primary">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {students.map(student => (
-                    <tr key={student.id} className="border-b border-white/5 hover:bg-white/5">
-                      <td className="py-3 px-4 text-white">{student.id}</td>
-                      <td className="py-3 px-4 text-white">{student.name}</td>
-                      <td className="py-3 px-4 text-gray-300">{student.level}</td>
-                      <td className="py-3 px-4">
-                        <select
-                          value={student.section || ''}
-                          onChange={(e) => handleUpdateSection(student.id, e.target.value)}
-                          className="bg-dark/50 border border-white/20 rounded-lg px-2 py-1 text-white text-sm"
-                        >
-                          <option value="">None</option>
-                          <option value="A">A</option>
-                          <option value="B">B</option>
-                          <option value="C">C</option>
-                          <option value="D">D</option>
-                        </select>
-                       </td>
-                      <td className="py-3 px-4 text-gray-300">{student.password_display || '123456'}</td>
-                      <td className="py-3 px-4">
-                        {student.password_changed ? (
-                          <span className="text-yellow-400 text-sm">✓ Changed</span>
-                        ) : (
-                          <span className="text-gray-500 text-sm">Default</span>
-                        )}
-                       </td>
-                      <td className="py-3 px-4 space-x-2">
-                        <button
-                          onClick={() => handleResetPassword(student.id)}
-                          className="text-blue-400 text-sm hover:text-blue-300"
-                        >
-                          Reset PW
-                        </button>
-                        <button
-                          onClick={() => {
-                            setEditingGrade(student);
-                            setGradeFormData({
-                              studentId: student.id,
-                              courseName: courses[0]?.name || '',
-                              examType: 'midterm',
-                              score: '',
-                              status: 'completed'
-                            });
-                          }}
-                          className="text-green-400 text-sm hover:text-green-300"
-                        >
-                          Edit Grade
-                        </button>
-                       </td>
-                     </tr>
-                  ))}
-                </tbody>
-               </table>
+            {/* Students List */}
+            <div>
+              <h3 className="text-lg font-semibold text-white mb-3">📋 All Students</h3>
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[600px]">
+                  <thead>
+                    <tr className="border-b border-white/10">
+                      <th className="text-left py-3 px-4 text-primary">ID</th>
+                      <th className="text-left py-3 px-4 text-primary">Name</th>
+                      <th className="text-left py-3 px-4 text-primary">Level</th>
+                      <th className="text-left py-3 px-4 text-primary">Section</th>
+                      <th className="text-left py-3 px-4 text-primary">Password</th>
+                      <th className="text-left py-3 px-4 text-primary">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {students.map(student => (
+                      <tr key={student.id} className="border-b border-white/5 hover:bg-white/5">
+                        <td className="py-3 px-4 text-white">{student.id}</td>
+                        <td className="py-3 px-4 text-white">{student.name}</td>
+                        <td className="py-3 px-4 text-gray-300">{student.level}</td>
+                        <td className="py-3 px-4 text-gray-300">{student.section || '—'}</td>
+                        <td className="py-3 px-4 font-mono text-sm text-yellow-400">{student.password}</td>
+                        <td className="py-3 px-4">
+                          <button onClick={() => handleResetPassword(student.id)} className="text-blue-400 hover:text-blue-300 text-sm">
+                            Reset Password
+                          </button>
+                        </td>
+                       </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}
 
-        {/* ============= Timetable Upload Tab ============= */}
+        {/* ============= Timetable Tab ============= */}
         {activeTab === 'timetable' && (
           <div>
             <h2 className="text-xl font-semibold text-primary mb-4">📅 Upload Timetable</h2>
-            <p className="text-gray-400 text-sm mb-4">Columns: Day, Start Time, End Time, Course Name, Location, Instructor, Type</p>
+            <p className="text-gray-400 text-sm mb-4">
+              Excel file columns: <span className="text-primary">Day, Start Time, End Time, Course Name, Location, Instructor, Type</span>
+            </p>
             
             <div className="mb-4">
               <label className="block text-gray-300 mb-2">Select Section</label>
               <select
                 value={selectedSection}
                 onChange={(e) => setSelectedSection(e.target.value)}
-                className="w-full md:w-64 bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white"
+                className="w-full md:w-64 bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-primary"
               >
                 <option value="">-- Choose section --</option>
                 <option value="A">Section A</option>
@@ -606,24 +536,99 @@ const AdminDashboard = () => {
             
             <form onSubmit={handleUploadTimetable} className="space-y-5">
               <div className="flex flex-col sm:flex-row gap-4">
-                <label className="relative cursor-pointer bg-dark/50 border border-white/20 rounded-xl px-5 py-2 text-white hover:border-primary">
+                <label className="relative cursor-pointer bg-dark/50 border border-white/20 rounded-xl px-5 py-2 text-white hover:border-primary transition-all">
                   📁 Choose Excel File
-                  <input id="timetableFileInput" type="file" accept=".xlsx,.xls,.csv" onChange={(e) => setTimetableFile(e.target.files[0])} className="absolute inset-0 opacity-0" />
+                  <input id="timetableFileInput" type="file" accept=".xlsx,.xls,.csv" onChange={(e) => setTimetableFile(e.target.files[0])} className="absolute inset-0 opacity-0 cursor-pointer" />
                 </label>
-                {timetableFile && <span className="text-sm text-gray-300">{timetableFile.name}</span>}
+                {timetableFile && <span className="text-sm text-gray-300">📄 {timetableFile.name}</span>}
               </div>
-              <button type="submit" disabled={uploadingTimetable} className="bg-primary text-dark font-semibold py-2.5 px-6 rounded-xl disabled:opacity-50">
-                {uploadingTimetable ? 'Uploading...' : 'Upload Timetable'}
+              <button type="submit" disabled={uploadingTimetable || !selectedSection || !timetableFile} className="bg-primary text-dark font-semibold py-2.5 px-6 rounded-xl transition-all hover:scale-105 disabled:opacity-50">
+                {uploadingTimetable ? '⏳ Uploading...' : '⬆️ Upload Timetable'}
               </button>
             </form>
           </div>
         )}
 
-        {/* ============= Resources Tab ============= */}
-        {activeTab === 'resources' && <ResourceManager />}
-        
-        {/* ============= Roadmap Tab ============= */}
-        {activeTab === 'roadmap' && <RoadmapManager />}
+        {/* ============= Manage Grades (Single Student) Tab ============= */}
+        {activeTab === 'manage-grades' && (
+          <div>
+            <h2 className="text-xl font-semibold text-primary mb-4">✏️ Update Single Grade</h2>
+            <p className="text-gray-400 text-sm mb-4">
+              Update a student's grade for a specific course and exam type without uploading an Excel file.
+            </p>
+            
+            <form onSubmit={handleUpdateSingleGrade} className="space-y-4 max-w-lg">
+              <div>
+                <label className="block text-gray-300 mb-2">Student ID</label>
+                <input
+                  type="text"
+                  value={gradeFormData.studentId}
+                  onChange={(e) => setGradeFormData({ ...gradeFormData, studentId: e.target.value })}
+                  className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-primary"
+                  placeholder="e.g., 2021001"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-gray-300 mb-2">Course Name</label>
+                <select
+                  value={gradeFormData.courseName}
+                  onChange={(e) => setGradeFormData({ ...gradeFormData, courseName: e.target.value })}
+                  className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-primary"
+                  required
+                >
+                  <option value="">-- Select course --</option>
+                  {courses.map(course => (
+                    <option key={course.id} value={course.name}>{course.name}</option>
+                  ))}
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-gray-300 mb-2">Exam Type</label>
+                <select
+                  value={gradeFormData.examType}
+                  onChange={(e) => setGradeFormData({ ...gradeFormData, examType: e.target.value })}
+                  className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-primary"
+                >
+                  <option value="midterm">📝 Midterm Exam</option>
+                  <option value="practical">🔧 Practical Exam</option>
+                  <option value="oral">🎤 Oral Exam</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-gray-300 mb-2">Score</label>
+                <input
+                  type="number"
+                  step="0.5"
+                  value={gradeFormData.score}
+                  onChange={(e) => setGradeFormData({ ...gradeFormData, score: e.target.value })}
+                  className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-primary"
+                  placeholder="Enter score (leave empty for pending)"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-gray-300 mb-2">Status</label>
+                <select
+                  value={gradeFormData.status}
+                  onChange={(e) => setGradeFormData({ ...gradeFormData, status: e.target.value })}
+                  className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-primary"
+                >
+                  <option value="completed">✅ Completed</option>
+                  <option value="pending">⏳ Pending</option>
+                  <option value="not_held">❌ Not Held</option>
+                </select>
+              </div>
+              
+              <button type="submit" disabled={loading} className="bg-primary text-dark font-semibold py-2.5 px-6 rounded-xl transition-all hover:scale-105 disabled:opacity-50">
+                {loading ? 'Updating...' : '✏️ Update Grade'}
+              </button>
+            </form>
+          </div>
+        )}
       </div>
 
       {/* Edit Course Modal */}
@@ -632,72 +637,28 @@ const AdminDashboard = () => {
           <div className="bg-charcoal border border-primary/30 rounded-2xl p-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
             <h2 className="text-2xl font-bold text-primary mb-5">Edit Course</h2>
             <form onSubmit={handleUpdateCourse} className="space-y-4">
-              <input type="text" value={editFormData.name} onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })} className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white" required />
-              <select value={editFormData.semester} onChange={(e) => setEditFormData({ ...editFormData, semester: parseInt(e.target.value) })} className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white">
-                <option value={1}>Semester 1</option>
-                <option value={2}>Semester 2</option>
-              </select>
-              <input type="number" value={editFormData.max_score} onChange={(e) => setEditFormData({ ...editFormData, max_score: parseInt(e.target.value) })} className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white" required />
-              <textarea value={editFormData.description} onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })} className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white" rows="3" required />
-              <div className="flex gap-3">
-                <button type="submit" className="flex-1 bg-primary text-dark font-semibold py-2 rounded-xl">Save</button>
-                <button type="button" onClick={() => setEditingCourse(null)} className="px-4 py-2 border border-white/20 rounded-xl">Cancel</button>
+              <div>
+                <label className="block text-gray-300 mb-1">Course Name</label>
+                <input type="text" name="name" value={editFormData.name} onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })} className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-primary" required />
               </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Edit Grade Modal */}
-      {editingGrade && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4" onClick={() => setEditingGrade(null)}>
-          <div className="bg-charcoal border border-primary/30 rounded-2xl p-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
-            <h2 className="text-2xl font-bold text-primary mb-5">Edit Grade</h2>
-            <p className="text-gray-400 mb-4">Student: {editingGrade.id} - {editingGrade.name}</p>
-            <form onSubmit={handleUpdateSingleGrade} className="space-y-4">
-              <select
-                value={gradeFormData.courseName}
-                onChange={(e) => setGradeFormData({ ...gradeFormData, courseName: e.target.value })}
-                className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white"
-                required
-              >
-                <option value="">Select Course</option>
-                {courses.map(course => (
-                  <option key={course.id} value={course.name}>{course.name}</option>
-                ))}
-              </select>
-              
-              <select
-                value={gradeFormData.examType}
-                onChange={(e) => setGradeFormData({ ...gradeFormData, examType: e.target.value })}
-                className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white"
-                required
-              >
-                <option value="midterm">Midterm Exam</option>
-                <option value="practical">Practical Exam</option>
-                <option value="oral">Oral Exam</option>
-              </select>
-              
-              <input
-                type="number"
-                placeholder="Score"
-                value={gradeFormData.score}
-                onChange={(e) => setGradeFormData({ ...gradeFormData, score: e.target.value })}
-                className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white"
-              />
-              
-              <select
-                value={gradeFormData.status}
-                onChange={(e) => setGradeFormData({ ...gradeFormData, status: e.target.value })}
-                className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white"
-              >
-                <option value="completed">Completed</option>
-                <option value="pending">Pending</option>
-              </select>
-              
-              <div className="flex gap-3">
-                <button type="submit" disabled={loading} className="flex-1 bg-primary text-dark font-semibold py-2 rounded-xl">Save Grade</button>
-                <button type="button" onClick={() => setEditingGrade(null)} className="px-4 py-2 border border-white/20 rounded-xl">Cancel</button>
+              <div>
+                <label className="block text-gray-300 mb-1">Semester</label>
+                <select name="semester" value={editFormData.semester} onChange={(e) => setEditFormData({ ...editFormData, semester: parseInt(e.target.value) })} className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white">
+                  <option value={1}>Semester 1</option>
+                  <option value={2}>Semester 2</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-gray-300 mb-1">Max Score</label>
+                <input type="number" name="max_score" value={editFormData.max_score} onChange={(e) => setEditFormData({ ...editFormData, max_score: parseInt(e.target.value) })} className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white" required />
+              </div>
+              <div>
+                <label className="block text-gray-300 mb-1">Description</label>
+                <textarea name="description" value={editFormData.description} onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })} className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white" rows="3" required />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button type="submit" disabled={loading} className="flex-1 bg-primary text-dark font-semibold py-2 rounded-xl hover:bg-primaryDark transition-all">{loading ? 'Saving...' : 'Save Changes'}</button>
+                <button type="button" onClick={() => setEditingCourse(null)} className="px-4 py-2 border border-white/20 rounded-xl hover:bg-white/10">Cancel</button>
               </div>
             </form>
           </div>
