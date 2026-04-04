@@ -22,7 +22,6 @@ const StudentGrades = () => {
 
   const fetchGrades = async () => {
     try {
-      // ✅ المسار الصحيح: /grades/my-grades
       const response = await studentApi.get('/grades/my-grades');
       setGrades(response.data.grades || []);
       setSummary(response.data.summary || null);
@@ -40,26 +39,59 @@ const StudentGrades = () => {
     toast.success('Logged out successfully');
   };
 
+  // دالة تحديد لون الدرجة
   const getGradeColor = (score, maxScore) => {
     if (score === null || score === undefined) return 'text-gray-500';
-    const percentage = (score / maxScore) * 100;
+    const roundedScore = Math.round(score);
+    const percentage = (roundedScore / maxScore) * 100;
     if (percentage >= 50) return 'text-green-400';
     return 'text-red-400';
   };
 
+  // دالة تقريب الدرجة
+  const formatScore = (score) => {
+    if (score === null || score === undefined) return '-';
+    return Math.round(score);
+  };
+
+  // ✅ دالة تحديد حالة المادة (ناجح/راسب/قيد الانتظار) - بعد اكتمال الدرجات فقط
+  const getCourseStatus = (grade) => {
+    const midtermExists = grade.midterm_score !== null && grade.midterm_score !== undefined;
+    const practicalExists = grade.practical_score !== null && grade.practical_score !== undefined;
+    const oralExists = grade.oral_score !== null && grade.oral_score !== undefined;
+    
+    const total = (grade.midterm_score || 0) + (grade.practical_score || 0) + (grade.oral_score || 0);
+    
+    // لو كل الدرجات نزلت
+    if (midtermExists && practicalExists && oralExists) {
+      const percentage = (total / grade.max_score) * 100;
+      return percentage >= 50 ? 'Passing' : 'Failing';
+    }
+    
+    // لو لسا في درجات ناقصة
+    return 'Pending';
+  };
+
+  // ✅ دالة لون الحالة
+  const getStatusColor = (status) => {
+    if (status === 'Passing') return 'bg-green-400/20 text-green-400';
+    if (status === 'Failing') return 'bg-red-400/20 text-red-400';
+    return 'bg-yellow-500/20 text-yellow-400';
+  };
+
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
+      <div className="flex justify-center items-center min-h-screen bg-dark">
         <div className="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-dark">
+    <div className="min-h-screen bg-dark">
       <Sidebar activePage="grades" onLogout={handleLogout} />
       
-      <div className="flex-1 ml-0 md:ml-64 pb-20 md:pb-8 p-4 md:p-8">
+      <div className="md:ml-64 pb-24 md:pb-8 p-4 md:p-8">
         <div className="max-w-6xl mx-auto">
           <div className="mb-8">
             <h1 className="text-2xl md:text-4xl font-bold text-primary mb-2">📊 My Grades</h1>
@@ -71,7 +103,7 @@ const StudentGrades = () => {
               <div className="bg-white/5 rounded-xl p-4 md:p-6 border border-white/10">
                 <h3 className="text-gray-400 text-xs md:text-sm mb-2">Total Score</h3>
                 <p className="text-2xl md:text-3xl font-bold text-primary">{summary.totalEarned || 0}</p>
-                <p className="text-xs text-gray-500">out of {summary.totalPossible || 0}</p>
+                <p className="text-xs text-gray-500">out of {summary.totalPossible || 240}</p>
               </div>
               <div className="bg-white/5 rounded-xl p-4 md:p-6 border border-white/10">
                 <h3 className="text-gray-400 text-xs md:text-sm mb-2">Overall Percentage</h3>
@@ -115,38 +147,65 @@ const StudentGrades = () => {
                   ) : (
                     grades.map((grade, idx) => {
                       const total = (grade.midterm_score || 0) + (grade.practical_score || 0) + (grade.oral_score || 0);
-                      const percentage = grade.max_score > 0 ? (total / grade.max_score) * 100 : 0;
-                      const isPassing = percentage >= 50;
+                      const midtermExists = grade.midterm_score !== null && grade.midterm_score !== undefined;
+                      const practicalExists = grade.practical_score !== null && grade.practical_score !== undefined;
+                      const oralExists = grade.oral_score !== null && grade.oral_score !== undefined;
+                      const allGradesExist = midtermExists && practicalExists && oralExists;
+                      
+                      // ✅ تحديد الحالة بناءً على اكتمال الدرجات
+                      let status = 'Pending';
+                      let statusColor = 'bg-yellow-500/20 text-yellow-400';
+                      
+                      if (allGradesExist) {
+                        const percentage = (total / grade.max_score) * 100;
+                        if (percentage >= 50) {
+                          status = 'Passing';
+                          statusColor = 'bg-green-400/20 text-green-400';
+                        } else {
+                          status = 'Failing';
+                          statusColor = 'bg-red-400/20 text-red-400';
+                        }
+                      }
+                      
                       return (
                         <tr key={idx} className="border-b border-white/5 hover:bg-white/5 transition">
-                          <td className="py-2 px-3 md:py-3 md:px-6 font-medium text-white text-xs md:text-base">{grade.course_name}</td>
-                          <td className="text-center py-2 px-3 md:py-3 md:px-6">
-                            <span className={getGradeColor(grade.midterm_score, grade.max_score)}>
-                              {grade.midterm_score || '-'}
-                            </span>
-                            {grade.midterm_status === 'pending' && <span className="text-xs text-yellow-500 block">pending</span>}
+                          <td className="py-2 px-3 md:py-3 md:px-6 font-medium text-white text-xs md:text-base">
+                            {grade.course_name}
                           </td>
                           <td className="text-center py-2 px-3 md:py-3 md:px-6">
-                            <span className={getGradeColor(grade.practical_score, grade.max_score)}>
-                              {grade.practical_score || '-'}
+                            <span className={getGradeColor(grade.midterm_score, grade.midterm_max)}>
+                              {formatScore(grade.midterm_score)}
                             </span>
-                            {grade.practical_status === 'pending' && <span className="text-xs text-yellow-500 block">pending</span>}
-                          </td>
-                          <td className="text-center py-2 px-3 md:py-3 md:px-6">
-                            <span className={getGradeColor(grade.oral_score, grade.max_score)}>
-                              {grade.oral_score || '-'}
-                            </span>
-                            {grade.oral_status === 'pending' && <span className="text-xs text-yellow-500 block">pending</span>}
-                          </td>
-                          <td className="text-center py-2 px-3 md:py-3 md:px-6 font-semibold text-primary">{total}</td>
-                          <td className="text-center py-2 px-3 md:py-3 md:px-6 text-gray-400">{grade.max_score}</td>
-                          <td className="text-center py-2 px-3 md:py-3 md:px-6">
-                            {total > 0 && (
-                              <span className={`text-xs px-2 py-1 rounded-full ${isPassing ? 'bg-green-400/20 text-green-400' : 'bg-red-400/20 text-red-400'}`}>
-                                {isPassing ? 'Passing' : 'Failing'}
-                              </span>
+                            {!midtermExists && (
+                              <span className="text-[10px] text-yellow-500 block">pending</span>
                             )}
-                            {total === 0 && <span className="text-xs text-gray-500">Not graded</span>}
+                          </td>
+                          <td className="text-center py-2 px-3 md:py-3 md:px-6">
+                            <span className={getGradeColor(grade.practical_score, grade.practical_max)}>
+                              {formatScore(grade.practical_score)}
+                            </span>
+                            {!practicalExists && (
+                              <span className="text-[10px] text-yellow-500 block">pending</span>
+                            )}
+                          </td>
+                          <td className="text-center py-2 px-3 md:py-3 md:px-6">
+                            <span className={getGradeColor(grade.oral_score, grade.oral_max)}>
+                              {formatScore(grade.oral_score)}
+                            </span>
+                            {!oralExists && (
+                              <span className="text-[10px] text-yellow-500 block">pending</span>
+                            )}
+                          </td>
+                          <td className="text-center py-2 px-3 md:py-3 md:px-6 font-semibold text-primary">
+                            {Math.round(total)}
+                          </td>
+                          <td className="text-center py-2 px-3 md:py-3 md:px-6 text-gray-400">
+                            {grade.max_score}
+                          </td>
+                          <td className="text-center py-2 px-3 md:py-3 md:px-6">
+                            <span className={`text-xs px-2 py-1 rounded-full ${statusColor}`}>
+                              {status}
+                            </span>
                           </td>
                         </tr>
                       );
@@ -155,6 +214,13 @@ const StudentGrades = () => {
                 </tbody>
               </table>
             </div>
+          </div>
+
+          {/* Note */}
+          <div className="mt-6 p-3 bg-white/5 rounded-lg border border-white/10 text-center">
+            <p className="text-xs text-gray-400">
+              📝 Each course total = Midterm + Practical + Oral • Status only appears when all three grades are available
+            </p>
           </div>
         </div>
       </div>
