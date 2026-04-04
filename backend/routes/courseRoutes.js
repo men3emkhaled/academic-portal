@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const courseController = require('../controllers/courseController');
-const { adminAuth } = require('../middleware/auth');
+const { adminAuth } = require(`${__dirname}/../middleware/auth`);
 
 router.get('/', courseController.getAllCourses);
 router.get('/semester/:semester', courseController.getCoursesBySemester);
