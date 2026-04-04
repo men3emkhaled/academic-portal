@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useStudentAuth } from '../context/StudentAuthContext';
 import { useNavigate } from 'react-router-dom';
 import studentApi from '../services/studentApi';
-import api from '../services/api';
 import toast from 'react-hot-toast';
 import Sidebar from '../components/Sidebar';
 
@@ -22,6 +21,7 @@ const StudentNotifications = () => {
 
   const fetchNotifications = async () => {
     try {
+      // ✅ المسار الصحيح
       const response = await studentApi.get('/notifications/my-notifications');
       setNotifications(response.data);
     } catch (error) {
