@@ -3,7 +3,7 @@ const db = require('../config/database');
 class Student {
   static async findById(id) {
     const result = await db.query(
-      'SELECT id, name, level, section, password_hash, created_at FROM students WHERE id = $1',
+      'SELECT id, name, level, section, created_at FROM students WHERE id = $1',
       [id]
     );
     return result.rows[0];
@@ -18,7 +18,6 @@ class Student {
   }
 
   static async create(id, name, password, level = 1, section = null) {
-    // تخزين الباسورد كما هو (مؤقتاً من غير hashing)
     const result = await db.query(
       `INSERT INTO students (id, name, password_hash, level, section) 
        VALUES ($1, $2, $3, $4, $5) 
@@ -42,10 +41,10 @@ class Student {
   }
 
   static async verifyPassword(student, plainPassword) {
-    // مقارنة مباشرة (مؤقتاً من غير hashing)
     return student.password_hash === plainPassword;
   }
 
+  // ✅ جلب كل الطلاب مع الباسوردات
   static async getAll() {
     const result = await db.query('SELECT id, name, level, section, password_hash FROM students ORDER BY id');
     return result.rows;
