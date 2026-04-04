@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 class Student {
   static async findById(id) {
     const result = await db.query(
-      'SELECT id, name, level, section, created_at FROM students WHERE id = $1',
+      'SELECT id, name, level, section, created_at, updated_at FROM students WHERE id = $1',
       [id]
     );
     return result.rows[0];
@@ -18,6 +18,37 @@ class Student {
     return result.rows[0];
   }
 
+  static async getAllWithPasswords() {
+    // جلب الطلاب مع إظهار الباسورد الأصلي وحالة التغيير
+    const result = await db.query(`
+      SELECT 
+        s.id, 
+        s.name, 
+        s.level, 
+        s.section,
+        CASE 
+          WHEN s.password_hash = '$2a$10$N9qo8uLOickgx2ZMRZoMy.Mr/.cZxqVvLQVQg6V7XKjKXw5Yx5KqG' 
+          THEN '123456' 
+          ELSE '••••••' 
+        END as password_display,
+        CASE 
+          WHEN s.password_hash != '$2a$10$N9qo8uLOickgx2ZMRZoMy.Mr/.cZxqVvLQVQg6V7XKjKXw5Yx5KqG' 
+          THEN true 
+          ELSE false 
+        END as password_changed,
+        s.created_at,
+        s.updated_at
+      FROM students s
+      ORDER BY s.id
+    `);
+    return result.rows;
+  }
+
+  static async getAll() {
+    const result = await db.query('SELECT id, name, level, section FROM students ORDER BY id');
+    return result.rows;
+  }
+
   static async create(id, name, password, level = 1, section = null) {
     const hashedPassword = await bcrypt.hash(password, 10);
     const result = await db.query(
@@ -25,9 +56,9 @@ class Student {
        VALUES ($1, $2, $3, $4, $5) 
        ON CONFLICT (id) DO UPDATE SET 
          name = EXCLUDED.name,
-         password_hash = EXCLUDED.password_hash,
          level = EXCLUDED.level,
-         section = EXCLUDED.section
+         section = EXCLUDED.section,
+         updated_at = CURRENT_TIMESTAMP
        RETURNING id, name, level, section`,
       [id, name, hashedPassword, level, section]
     );
@@ -45,11 +76,6 @@ class Student {
 
   static async verifyPassword(student, plainPassword) {
     return await bcrypt.compare(plainPassword, student.password_hash);
-  }
-
-  static async getAll() {
-    const result = await db.query('SELECT id, name, level, section FROM students ORDER BY id');
-    return result.rows;
   }
 
   static async updateSection(id, section) {

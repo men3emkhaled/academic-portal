@@ -1,6 +1,7 @@
 const Student = require('../models/Student');
 const XLSX = require('xlsx');
 const fs = require('fs');
+const bcrypt = require('bcryptjs');
 
 // رفع الطلاب من Excel
 const uploadStudentsExcel = async (req, res) => {
@@ -83,7 +84,18 @@ const uploadStudentsExcel = async (req, res) => {
   }
 };
 
-// جلب كل الطلاب
+// جلب كل الطلاب مع الباسوردات وحالة التغيير
+const getAllStudentsWithPasswords = async (req, res) => {
+  try {
+    const result = await Student.getAllWithPasswords();
+    res.json(result);
+  } catch (error) {
+    console.error('Error fetching students:', error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// جلب كل الطلاب (بدون باسوردات - للاستخدام العادي)
 const getAllStudents = async (req, res) => {
   try {
     const students = await Student.getAll();
@@ -126,8 +138,30 @@ const resetStudentPassword = async (req, res) => {
     }
     
     await Student.updatePassword(id, newPassword || '123456');
-    res.json({ message: 'Password reset successfully' });
+    res.json({ message: 'Password reset successfully', newPassword: newPassword || '123456' });
   } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// تعديل درجة طالب واحد في مادة معينة
+const updateSingleStudentGrade = async (req, res) => {
+  try {
+    const { studentId, courseName, examType, score, status } = req.body;
+    
+    if (!studentId || !courseName || !examType) {
+      return res.status(400).json({ message: 'Student ID, course name, and exam type are required' });
+    }
+    
+    const Grade = require('../models/Grade');
+    const updatedGrade = await Grade.updateSingleGrade(studentId, courseName, examType, score, status);
+    
+    res.json({ 
+      message: 'Grade updated successfully',
+      grade: updatedGrade
+    });
+  } catch (error) {
+    console.error('Error updating grade:', error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -135,6 +169,8 @@ const resetStudentPassword = async (req, res) => {
 module.exports = {
   uploadStudentsExcel,
   getAllStudents,
+  getAllStudentsWithPasswords,
   updateStudentSection,
-  resetStudentPassword
+  resetStudentPassword,
+  updateSingleStudentGrade
 };
