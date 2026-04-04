@@ -4,6 +4,7 @@ import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
 import { StudentAuthProvider } from './context/StudentAuthContext';
 import Navbar from './components/Navbar';
+import Home from './pages/Home';
 import CourseDetails from './pages/CourseDetails';
 import Grades from './pages/Grades';
 import AdminDashboard from './pages/AdminDashboard';
@@ -36,27 +37,39 @@ const ProtectedStudentRoute = ({ children }) => {
   return children;
 };
 
+// ✅ لو فيه توكن وما حاولش يدخل على login، حوله للـ dashboard
+const StudentLoginRedirect = () => {
+  const token = localStorage.getItem('studentToken');
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (token) {
+      navigate('/student/dashboard', { replace: true });
+    }
+  }, [token, navigate]);
+
+  return <StudentLogin />;
+};
+
 function App() {
   return (
     <AuthProvider>
       <StudentAuthProvider>
         <Router>
           <Routes>
-            {/* ===== Public Routes with Navbar ===== */}
+            {/* Public Routes with Navbar */}
+            <Route path="/" element={<><Navbar /><Home /></>} />
             <Route path="/course/:id" element={<><Navbar /><CourseDetails /></>} />
             <Route path="/grades" element={<><Navbar /><Grades /></>} />
             <Route path="/contact" element={<><Navbar /><Contact /></>} />
             <Route path="/roadmap" element={<><Navbar /><RoadmapList /></>} />
             <Route path="/roadmap/:id" element={<><Navbar /><RoadmapDetail /></>} />
             
-            {/* ===== Redirect root to student dashboard ===== */}
-            <Route path="/" element={<Navigate to="/student/dashboard" replace />} />
-            
-            {/* ===== Admin Route (no Navbar) ===== */}
+            {/* Admin Route */}
             <Route path="/admin" element={<AdminDashboard />} />
             
-            {/* ===== Student Routes (no Navbar - Sidebar inside) ===== */}
-            <Route path="/student/login" element={<StudentLogin />} />
+            {/* Student Routes */}
+            <Route path="/student/login" element={<StudentLoginRedirect />} />
             <Route path="/student/dashboard" element={<ProtectedStudentRoute><StudentDashboard /></ProtectedStudentRoute>} />
             <Route path="/student/grades" element={<ProtectedStudentRoute><StudentGrades /></ProtectedStudentRoute>} />
             <Route path="/student/timetable" element={<ProtectedStudentRoute><StudentTimetable /></ProtectedStudentRoute>} />

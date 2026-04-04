@@ -10,6 +10,14 @@ const StudentLogin = () => {
   const { login } = useStudentAuth();
   const navigate = useNavigate();
 
+  // ✅ لو فيه توكن مخزن بالفعل، حوله على الـ dashboard
+  React.useEffect(() => {
+    const token = localStorage.getItem('studentToken');
+    if (token) {
+      navigate('/student/dashboard');
+    }
+  }, [navigate]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     

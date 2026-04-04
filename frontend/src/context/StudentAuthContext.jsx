@@ -6,55 +6,62 @@ const StudentAuthContext = createContext();
 export const useStudentAuth = () => useContext(StudentAuthContext);
 
 export const StudentAuthProvider = ({ children }) => {
-  const [token, setToken] = useState(localStorage.getItem('studentToken'));
+  // ✅ جلب التوكن من localStorage عند تحميل الصفحة
+  const [token, setToken] = useState(() => {
+    const savedToken = localStorage.getItem('studentToken');
+    return savedToken || null;
+  });
+  
   const [student, setStudent] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // تحديث التوكن في localStorage و axios headers
+  // ✅ كل ما يتغير التوكن، احفظه في localStorage
   useEffect(() => {
     if (token) {
       localStorage.setItem('studentToken', token);
-      // ✅ مهم: تحديث الـ default header في axios
+      // ✅ ضبط التوكن في axios headers
       studentApi.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      fetchCurrentStudent();
     } else {
       localStorage.removeItem('studentToken');
       delete studentApi.defaults.headers.common['Authorization'];
-      setStudent(null);
-      setLoading(false);
     }
   }, [token]);
 
-  const fetchCurrentStudent = async () => {
-    try {
-      console.log('🔍 Fetching current student with token:', localStorage.getItem('studentToken'));
-      const response = await studentApi.get('/student/me');
-      console.log('✅ Student data:', response.data);
-      setStudent(response.data);
-    } catch (error) {
-      console.error('❌ Error fetching student:', error.response?.status, error.response?.data);
-      // لو التوكن مش صالح، نسجله خروج
-      if (error.response?.status === 401) {
-        setToken(null);
+  // ✅ جلب بيانات الطالب لو فيه توكن مخزن
+  useEffect(() => {
+    const initAuth = async () => {
+      const savedToken = localStorage.getItem('studentToken');
+      
+      if (savedToken) {
+        setToken(savedToken);
+        try {
+          const response = await studentApi.get('/student/me');
+          setStudent(response.data);
+        } catch (error) {
+          console.error('Session expired or invalid token:', error);
+          // لو التوكن مش صالح، نسجله خروج
+          localStorage.removeItem('studentToken');
+          setToken(null);
+          setStudent(null);
+        }
       }
-    } finally {
       setLoading(false);
-    }
-  };
+    };
+    
+    initAuth();
+  }, []);
 
   const login = async (username, password) => {
     try {
-      console.log('📤 Login attempt:', username);
       const response = await studentApi.post('/student/login', { username, password });
       const { token: newToken, student: studentData } = response.data;
       
-      console.log('✅ Login success, token received:', newToken ? 'Yes' : 'No');
-      
       setToken(newToken);
       setStudent(studentData);
+      
       return { success: true };
     } catch (error) {
-      console.error('❌ Login error:', error.response?.status, error.response?.data);
+      console.error('Login error:', error);
       return { 
         success: false, 
         message: error.response?.data?.message || 'Login failed'
@@ -63,9 +70,9 @@ export const StudentAuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    console.log('🚪 Logging out');
     setToken(null);
     setStudent(null);
+    localStorage.removeItem('studentToken');
   };
 
   const changePassword = async (currentPassword, newPassword) => {
