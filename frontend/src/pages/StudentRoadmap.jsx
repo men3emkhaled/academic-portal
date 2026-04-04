@@ -26,6 +26,7 @@ const StudentRoadmap = () => {
 
   const fetchTracks = async () => {
     try {
+      // ✅ المسار الصحيح لـ tracks
       const response = await api.get('/roadmap/tracks');
       setTracks(response.data);
       if (response.data.length > 0) {
@@ -43,9 +44,11 @@ const StudentRoadmap = () => {
   const fetchTrackDetails = async (trackId) => {
     setLoading(true);
     try {
+      // ✅ المسار الصحيح لـ tasks
       const tasksResponse = await api.get(`/roadmap/tracks/${trackId}/tasks`);
       setTasks(tasksResponse.data);
       
+      // ✅ المسار الصحيح لـ progress
       const progressResponse = await studentApi.get(`/roadmap/progress/${trackId}`);
       setProgress(progressResponse.data);
     } catch (error) {
@@ -58,19 +61,18 @@ const StudentRoadmap = () => {
   const toggleTask = async (taskId, currentStatus) => {
     setUpdating(true);
     try {
+      // ✅ المسار الصحيح لتحديث المهمة
       await studentApi.post('/roadmap/toggle-task', {
         taskId,
         isCompleted: !currentStatus
       });
       
-      // Update local state
       setTasks(tasks.map(task => 
         task.id === taskId 
           ? { ...task, is_completed: !currentStatus }
           : task
       ));
       
-      // Update progress
       const newProgress = { ...progress };
       if (!currentStatus) {
         newProgress.completed_tasks += 1;
@@ -82,6 +84,7 @@ const StudentRoadmap = () => {
       
       toast.success(currentStatus ? 'Task marked as incomplete' : 'Task completed! 🎉');
     } catch (error) {
+      console.error('Error toggling task:', error);
       toast.error('Failed to update task');
     } finally {
       setUpdating(false);
@@ -102,7 +105,7 @@ const StudentRoadmap = () => {
 
   if (loading && tracks.length === 0) {
     return (
-      <div className="flex justify-center items-center h-64">
+      <div className="flex justify-center items-center h-screen">
         <div className="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
       </div>
     );
@@ -112,41 +115,36 @@ const StudentRoadmap = () => {
     <div className="flex min-h-screen bg-dark">
       <Sidebar activePage="roadmap" onLogout={handleLogout} />
       
-      <div className="flex-1 ml-0 md:ml-64 p-6 md:p-8">
+      <div className="flex-1 ml-0 md:ml-64 pb-20 md:pb-8 p-4 md:p-8">
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold text-primary mb-2">
-              🗺️ Career Roadmap
-            </h1>
-            <p className="text-gray-400">
-              Track your progress and mark completed milestones
-            </p>
+            <h1 className="text-2xl md:text-4xl font-bold text-primary mb-2">🗺️ Career Roadmap</h1>
+            <p className="text-gray-400 text-sm md:text-base">Track your progress and mark completed milestones</p>
           </div>
 
-          {/* Track Selector */}
-          <div className="mb-6">
-            <label className="block text-gray-300 mb-2">Select Career Track</label>
-            <select
-              value={selectedTrack?.id || ''}
-              onChange={(e) => handleTrackChange(e.target.value)}
-              className="w-full md:w-64 bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-primary"
-            >
-              {tracks.map(track => (
-                <option key={track.id} value={track.id}>
-                  {track.name} {track.is_primary ? '⭐' : ''}
-                </option>
-              ))}
-            </select>
-          </div>
+          {tracks.length > 0 && (
+            <div className="mb-6">
+              <label className="block text-gray-300 mb-2 text-sm">Select Career Track</label>
+              <select
+                value={selectedTrack?.id || ''}
+                onChange={(e) => handleTrackChange(e.target.value)}
+                className="w-full md:w-64 bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-primary"
+              >
+                {tracks.map(track => (
+                  <option key={track.id} value={track.id}>
+                    {track.name} {track.is_primary ? '⭐' : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           {selectedTrack && (
             <>
-              {/* Track Header */}
               <div className="bg-gradient-to-r from-primary/20 to-transparent rounded-2xl p-6 mb-6 border border-primary/30">
-                <h2 className="text-2xl font-bold text-white mb-2">{selectedTrack.name}</h2>
-                <p className="text-gray-300">{selectedTrack.description}</p>
+                <h2 className="text-xl md:text-2xl font-bold text-white mb-2">{selectedTrack.name}</h2>
+                <p className="text-gray-300 text-sm md:text-base">{selectedTrack.description}</p>
                 
-                {/* Progress Bar */}
                 {progress && (
                   <div className="mt-4">
                     <div className="flex justify-between text-sm mb-1">
@@ -166,7 +164,6 @@ const StudentRoadmap = () => {
                 )}
               </div>
 
-              {/* Tasks List */}
               <div className="space-y-3">
                 <h3 className="text-lg font-semibold text-white mb-4">Milestones & Tasks</h3>
                 {tasks.length === 0 ? (
