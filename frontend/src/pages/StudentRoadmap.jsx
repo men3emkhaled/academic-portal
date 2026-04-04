@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useStudentAuth } from '../context/StudentAuthContext';
 import { useNavigate } from 'react-router-dom';
-import api from '../services/api';
 import studentApi from '../services/studentApi';
 import toast from 'react-hot-toast';
 import Sidebar from '../components/Sidebar';
@@ -27,7 +26,7 @@ const StudentRoadmap = () => {
   const fetchTracks = async () => {
     try {
       console.log('📤 Fetching tracks from: /roadmap/tracks');
-      const response = await api.get('/roadmap/tracks');
+      const response = await studentApi.get('/roadmap/tracks');
       console.log('✅ Tracks response:', response.data);
       setTracks(response.data);
       if (response.data.length > 0) {
@@ -46,7 +45,7 @@ const StudentRoadmap = () => {
     setLoading(true);
     try {
       console.log(`📤 Fetching tasks for track ${trackId}`);
-      const tasksResponse = await api.get(`/roadmap/tracks/${trackId}/tasks`);
+      const tasksResponse = await studentApi.get(`/roadmap/tracks/${trackId}/tasks`);
       console.log('✅ Tasks response:', tasksResponse.data);
       setTasks(tasksResponse.data);
       
