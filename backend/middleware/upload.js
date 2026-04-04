@@ -5,22 +5,19 @@ const fs = require('fs');
 // تأكد من وجود مجلد uploads
 const uploadDir = 'uploads';
 if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
+    fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-// إعداد التخزين
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, uploadDir);
     },
     filename: (req, file, cb) => {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        const ext = path.extname(file.originalname);
-        cb(null, uniqueSuffix + ext);
+        cb(null, uniqueSuffix + path.extname(file.originalname));
     }
 });
 
-// فلترة الملفات
 const fileFilter = (req, file, cb) => {
     const allowedTypes = [
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -39,14 +36,14 @@ const fileFilter = (req, file, cb) => {
     }
 };
 
-// إنشاء instance من multer
+// ✅ إنشاء upload object بشكل صحيح
 const upload = multer({
     storage: storage,
     fileFilter: fileFilter,
-    limits: { fileSize: 10 * 1024 * 1024 } // 10MB
+    limits: { fileSize: 10 * 1024 * 1024 }
 });
 
-// معالج الأخطاء
+// ✅ معالج الأخطاء
 const handleMulterError = (err, req, res, next) => {
     if (err instanceof multer.MulterError) {
         if (err.code === 'LIMIT_FILE_SIZE') {
@@ -61,7 +58,4 @@ const handleMulterError = (err, req, res, next) => {
 };
 
 // ✅ التصدير الصحيح
-module.exports = { 
-    upload,           // هذا هو object multer
-    handleMulterError 
-};
+module.exports = { upload, handleMulterError };
