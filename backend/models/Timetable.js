@@ -1,7 +1,7 @@
 const db = require('../config/database');
 
 class Timetable {
-  // ✅ دالة جلب الجدول حسب section
+  // جلب جدول سيكشن معين (section رقم)
   static async getBySection(section) {
     const result = await db.query(
       `SELECT * FROM timetable 
@@ -86,7 +86,7 @@ class Timetable {
     return true;
   }
 
-  // جلب كل الجداول
+  // جلب كل الجداول (للـ Admin)
   static async getAll() {
     const result = await db.query('SELECT * FROM timetable ORDER BY section');
     return result.rows;

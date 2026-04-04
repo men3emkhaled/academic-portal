@@ -16,7 +16,6 @@ const uploadStudentsExcel = async (req, res) => {
     const data = XLSX.utils.sheet_to_json(worksheet);
     
     const students = [];
-    const updatedStudents = [];
     
     for (const row of data) {
       const studentId = row['Student ID'] || row['student_id'] || row['ID'];
@@ -27,28 +26,28 @@ const uploadStudentsExcel = async (req, res) => {
       
       if (!studentId || !studentName) continue;
       
-      // ✅ تحويل السكشن من حرف لرقم
+      // ✅ تحويل section إلى رقم (1-6)
       if (section) {
-        const sectionMap = { 'A': '1', 'B': '2', 'C': '3', 'D': '4', 'E': '5', 'F': '6' };
-        section = sectionMap[section.toUpperCase()] || section;
+        const sectionMap = { 'A': 1, 'B': 2, 'C': 3, 'D': 4, 'E': 5, 'F': 6 };
+        if (typeof section === 'string' && sectionMap[section.toUpperCase()]) {
+          section = sectionMap[section.toUpperCase()];
+        } else {
+          section = parseInt(section, 10);
+        }
+        if (isNaN(section) || section < 1 || section > 6) section = null;
       }
       
-      // ✅ لو الباسورد default123، معناه إننا مش عاوزين نغير الباسورد الحالي
+      // الحفاظ على الباسورد القديم
       const existingStudent = await Student.findById(studentId);
       if (existingStudent && password === 'default123') {
         password = existingStudent.password_hash;
-      }
-      
-      // ✅ لو السكشن مش موجود في الـ Excel، خلي السكشن القديم
-      if (existingStudent && (!section || section === '')) {
-        section = existingStudent.section;
       }
       
       students.push({
         id: String(studentId),
         name: String(studentName),
         password: String(password),
-        level: parseInt(level),
+        level: parseInt(level, 10),
         section: section
       });
     }
@@ -57,6 +56,7 @@ const uploadStudentsExcel = async (req, res) => {
       return res.status(400).json({ message: 'No valid student data found' });
     }
     
+    const updatedStudents = [];
     for (const student of students) {
       const result = await Student.create(student.id, student.name, student.password, student.level, student.section);
       updatedStudents.push(result);
@@ -92,10 +92,9 @@ const updateStudentSection = async (req, res) => {
       return res.status(400).json({ message: 'Section is required' });
     }
     
-    section = String(section);
-    const validSections = ['1', '2', '3', '4', '5', '6'];
-    if (!validSections.includes(section)) {
-      return res.status(400).json({ message: 'Section must be 1, 2, 3, 4, 5, or 6' });
+    section = parseInt(section, 10);
+    if (isNaN(section) || section < 1 || section > 6) {
+      return res.status(400).json({ message: 'Section must be a number between 1 and 6' });
     }
     
     const student = await Student.updateSection(id, section);

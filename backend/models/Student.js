@@ -18,17 +18,7 @@ class Student {
   }
 
   static async create(id, name, password, level = 1, section = null) {
-    // ✅ لو الطالب موجود، متغيرش الباسورد والسكشن إلا لو جايين جدد
-    const existing = await this.findById(id);
-    
-    let finalPassword = password;
-    let finalSection = section;
-    
-    if (existing) {
-      // لو الطالب موجود، خلي الباسورد القديم لو مجاش جديد
-      finalPassword = password === 'default123' ? existing.password_hash : password;
-      finalSection = section !== null && section !== undefined ? section : existing.section;
-    }
+    const sectionInt = section ? parseInt(section, 10) : null;
     
     const result = await db.query(
       `INSERT INTO students (id, name, password_hash, level, section) 
@@ -39,7 +29,7 @@ class Student {
          level = EXCLUDED.level,
          section = COALESCE(EXCLUDED.section, students.section)
        RETURNING id, name, level, section`,
-      [id, name, finalPassword, level, finalSection]
+      [id, name, password, level, sectionInt]
     );
     return result.rows[0];
   }
@@ -62,9 +52,10 @@ class Student {
   }
 
   static async updateSection(id, section) {
+    const sectionInt = parseInt(section, 10);
     const result = await db.query(
       'UPDATE students SET section = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 RETURNING *',
-      [section, id]
+      [sectionInt, id]
     );
     return result.rows[0];
   }
