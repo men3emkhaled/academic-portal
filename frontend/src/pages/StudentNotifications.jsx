@@ -22,7 +22,7 @@ const StudentNotifications = () => {
 
   const fetchNotifications = async () => {
     try {
-      const response = await studentApi.get('/notifications');
+      const response = await studentApi.get('/notifications/my-notifications');
       setNotifications(response.data);
     } catch (error) {
       console.error('Error fetching notifications:', error);
