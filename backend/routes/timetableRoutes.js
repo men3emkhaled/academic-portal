@@ -8,21 +8,16 @@ const { upload, handleMulterError } = require('../middleware/upload');
 // ============= Public Routes =============
 router.get('/section/:section', timetableController.getTimetableBySection);
 
-// ✅ إضافة route للطالب (my-timetable)
+// ============= Student Routes =============
 router.get('/my-timetable', studentAuth, async (req, res) => {
   try {
     const Student = require('../models/Student');
     const Timetable = require('../models/Timetable');
-    
     const student = await Student.findById(req.user.id);
-    if (!student || !student.section) {
-      return res.json([]);
-    }
-    
+    if (!student || !student.section) return res.json([]);
     const timetable = await Timetable.getBySection(student.section);
     res.json(timetable);
   } catch (error) {
-    console.error('Error fetching my-timetable:', error);
     res.status(500).json({ message: error.message });
   }
 });
@@ -30,6 +25,7 @@ router.get('/my-timetable', studentAuth, async (req, res) => {
 // ============= Admin Routes =============
 router.get('/admin/all', adminAuth, timetableController.getAllTimetables);
 router.post('/admin/upload', adminAuth, upload.single('file'), handleMulterError, timetableController.uploadTimetableExcel);
+router.post('/admin/upload-all', adminAuth, upload.single('file'), handleMulterError, timetableController.uploadTimetableAllSections); // ✅ إضافة هذه
 router.post('/admin/add', adminAuth, timetableController.addTimetableEntry);
 router.put('/admin/:id', adminAuth, timetableController.updateTimetableEntry);
 router.delete('/admin/:id', adminAuth, timetableController.deleteTimetableEntry);
