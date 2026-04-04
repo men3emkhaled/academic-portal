@@ -37,7 +37,7 @@ const StudentLogin = () => {
           <div className="text-center mb-8">
             <div className="text-5xl mb-3">🎓</div>
             <h1 className="text-3xl font-bold text-primary mb-2">Student Login</h1>
-            <p className="text-gray-400 text-sm">Enter your student ID and password to access your portal</p>
+            <p className="text-gray-400 text-sm">Enter your student ID and password</p>
           </div>
           
           <form onSubmit={handleSubmit} className="space-y-6">

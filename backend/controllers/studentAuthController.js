@@ -6,7 +6,7 @@ const studentLogin = async (req, res) => {
   try {
     const { username, password } = req.body;
     
-    console.log('Login attempt:', username);
+    console.log('📥 Login attempt:', { username, password });
     
     if (!username || !password) {
       return res.status(400).json({ message: 'Username and password are required' });
@@ -14,15 +14,17 @@ const studentLogin = async (req, res) => {
     
     const student = await Student.findByUsername(username);
     
+    console.log('📊 Student found:', student ? { id: student.id, name: student.name, storedPassword: student.password_hash } : 'NOT FOUND');
+    
     if (!student) {
-      console.log('Student not found:', username);
       return res.status(401).json({ message: 'Invalid credentials' });
     }
     
     const isValid = await Student.verifyPassword(student, password);
     
+    console.log('🔐 Password valid:', isValid, 'Stored:', student.password_hash, 'Provided:', password);
+    
     if (!isValid) {
-      console.log('Invalid password for:', username);
       return res.status(401).json({ message: 'Invalid credentials' });
     }
     
@@ -32,7 +34,7 @@ const studentLogin = async (req, res) => {
       { expiresIn: '7d' }
     );
     
-    console.log('Login successful:', username);
+    console.log('✅ Login successful:', username);
     
     res.json({
       token,
