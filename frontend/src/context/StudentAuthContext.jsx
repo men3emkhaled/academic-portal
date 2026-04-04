@@ -28,6 +28,7 @@ export const StudentAuthProvider = ({ children }) => {
     } catch (error) {
       console.error('Error fetching student:', error);
       setToken(null);
+      setStudent(null);
     } finally {
       setLoading(false);
     }
@@ -41,9 +42,10 @@ export const StudentAuthProvider = ({ children }) => {
       setStudent(studentData);
       return { success: true };
     } catch (error) {
+      console.error('Login error:', error);
       return { 
         success: false, 
-        message: error.response?.data?.message || 'Login failed' 
+        message: error.response?.data?.message || 'Login failed. Please check your credentials.'
       };
     }
   };
@@ -51,6 +53,7 @@ export const StudentAuthProvider = ({ children }) => {
   const logout = () => {
     setToken(null);
     setStudent(null);
+    localStorage.removeItem('studentToken');
   };
 
   const changePassword = async (currentPassword, newPassword) => {
@@ -60,7 +63,7 @@ export const StudentAuthProvider = ({ children }) => {
     } catch (error) {
       return { 
         success: false, 
-        message: error.response?.data?.message || 'Password change failed' 
+        message: error.response?.data?.message || 'Password change failed'
       };
     }
   };

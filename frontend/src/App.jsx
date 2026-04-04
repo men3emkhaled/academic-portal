@@ -1,5 +1,5 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
 import { StudentAuthProvider } from './context/StudentAuthContext';
@@ -22,7 +22,18 @@ import StudentSettings from './pages/StudentSettings';
 
 const ProtectedStudentRoute = ({ children }) => {
   const token = localStorage.getItem('studentToken');
-  if (!token) return <Navigate to="/student/login" replace />;
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!token) {
+      navigate('/student/login', { replace: true });
+    }
+  }, [token, navigate]);
+
+  if (!token) {
+    return null;
+  }
+
   return children;
 };
 
@@ -40,10 +51,10 @@ function App() {
             <Route path="/roadmap" element={<><Navbar /><RoadmapList /></>} />
             <Route path="/roadmap/:id" element={<><Navbar /><RoadmapDetail /></>} />
             
-            {/* ===== Admin Route (no Navbar - has its own header) ===== */}
+            {/* ===== Admin Route (no Navbar) ===== */}
             <Route path="/admin" element={<AdminDashboard />} />
             
-            {/* ===== Student Routes (no Navbar - use Sidebar inside) ===== */}
+            {/* ===== Student Routes (no Navbar - Sidebar inside) ===== */}
             <Route path="/student/login" element={<StudentLogin />} />
             <Route path="/student/dashboard" element={<ProtectedStudentRoute><StudentDashboard /></ProtectedStudentRoute>} />
             <Route path="/student/grades" element={<ProtectedStudentRoute><StudentGrades /></ProtectedStudentRoute>} />
