@@ -22,26 +22,37 @@ const AdminDashboard = () => {
     name: '',
     semester: 1,
     description: '',
-    max_score: 40,
+    max_score: 15,
   });
   const [timetableFile, setTimetableFile] = useState(null);
   const [selectedSection, setSelectedSection] = useState('');
   const [uploadingTimetable, setUploadingTimetable] = useState(false);
   
-  // Notifications state
+  // ============= Notifications State =============
   const [notifications, setNotifications] = useState([]);
   const [sending, setSending] = useState(false);
+  const [notificationForm, setNotificationForm] = useState({
+    studentId: '',
+    title: '',
+    content: ''
+  });
 
   useEffect(() => {
     if (!token) return;
     fetchCourses();
-  }, [token]);
-
-  useEffect(() => {
-    if (token && activeTab === 'notifications') {
+    if (activeTab === 'notifications') {
       fetchNotifications();
     }
   }, [token, activeTab]);
+
+  const fetchCourses = async () => {
+    try {
+      const response = await api.get('/courses');
+      setCourses(response.data);
+    } catch (error) {
+      toast.error('Error loading courses');
+    }
+  };
 
   const fetchNotifications = async () => {
     try {
@@ -49,68 +60,6 @@ const AdminDashboard = () => {
       setNotifications(response.data);
     } catch (error) {
       console.error('Error fetching notifications:', error);
-    }
-  };
-
-  const deleteNotification = async (id) => {
-    if (!window.confirm('Delete this notification?')) return;
-    try {
-      await api.delete(`/notifications/admin/${id}`);
-      toast.success('Deleted');
-      fetchNotifications();
-    } catch (error) {
-      toast.error('Delete failed');
-    }
-  };
-
-  const sendToAll = async (e) => {
-    e.preventDefault();
-    const title = document.getElementById('allTitle')?.value;
-    const content = document.getElementById('allContent')?.value;
-    
-    if (!title || !content) {
-      toast.error('Title and content are required');
-      return;
-    }
-    
-    setSending(true);
-    try {
-      await api.post('/notifications/admin/send-to-all', { title, content });
-      toast.success('Notification sent to all students!');
-      if (document.getElementById('sendToAllForm')) {
-        document.getElementById('sendToAllForm').reset();
-      }
-      fetchNotifications();
-    } catch (error) {
-      toast.error('Failed to send');
-    } finally {
-      setSending(false);
-    }
-  };
-
-  const sendToStudent = async (e) => {
-    e.preventDefault();
-    const studentId = document.getElementById('studentId')?.value;
-    const title = document.getElementById('studentTitle')?.value;
-    const content = document.getElementById('studentContent')?.value;
-    
-    if (!studentId || !title || !content) {
-      toast.error('Student ID, title, and content are required');
-      return;
-    }
-    
-    setSending(true);
-    try {
-      await api.post('/notifications/admin/send-to-student', { studentId, title, content });
-      toast.success(`Notification sent to student ${studentId}`);
-      if (document.getElementById('sendToStudentForm')) {
-        document.getElementById('sendToStudentForm').reset();
-      }
-      fetchNotifications();
-    } catch (error) {
-      toast.error('Failed to send');
-    } finally {
-      setSending(false);
     }
   };
 
@@ -129,33 +78,15 @@ const AdminDashboard = () => {
     }
   };
 
-  const fetchCourses = async () => {
-    try {
-      const response = await api.get('/courses');
-      setCourses(response.data);
-    } catch (error) {
-      toast.error('Error loading courses');
-    }
-  };
-
-  // Grades Upload
+  // ============= Grades Upload =============
   const handleUploadGrades = async (e) => {
     e.preventDefault();
-    
     if (!gradesFile) {
       toast.error('Please select a file');
       return;
     }
-    
     if (!selectedCourseId) {
       toast.error('Please select a course');
-      return;
-    }
-    
-    const fileName = gradesFile.name;
-    const fileExt = fileName.split('.').pop().toLowerCase();
-    if (!['xlsx', 'xls', 'csv'].includes(fileExt)) {
-      toast.error('Please upload an Excel file (.xlsx, .xls, or .csv)');
       return;
     }
     
@@ -169,32 +100,22 @@ const AdminDashboard = () => {
       const response = await api.post('/grades/admin/upload-advanced', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      toast.success(`✅ Uploaded ${response.data.count} grades for ${response.data.examType}`);
+      toast.success(`✅ Uploaded ${response.data.count} grades`);
       setGradesFile(null);
       setSelectedCourseId('');
       document.getElementById('gradesFileInput').value = '';
     } catch (error) {
-      console.error('Upload error:', error);
-      const errorMsg = error.response?.data?.message || error.response?.data?.details || 'Error uploading grades';
-      toast.error(errorMsg);
+      toast.error(error.response?.data?.message || 'Error uploading grades');
     } finally {
       setUploadingGrades(false);
     }
   };
 
-  // Students Upload
+  // ============= Students Upload =============
   const handleUploadStudents = async (e) => {
     e.preventDefault();
-    
     if (!studentsFile) {
       toast.error('Please select a file');
-      return;
-    }
-    
-    const fileName = studentsFile.name;
-    const fileExt = fileName.split('.').pop().toLowerCase();
-    if (!['xlsx', 'xls', 'csv'].includes(fileExt)) {
-      toast.error('Please upload an Excel file (.xlsx, .xls, or .csv)');
       return;
     }
     
@@ -206,27 +127,23 @@ const AdminDashboard = () => {
       const response = await api.post('/admin/upload-students', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      toast.success(`✅ Uploaded ${response.data.count} students successfully`);
+      toast.success(`✅ Uploaded ${response.data.count} students`);
       setStudentsFile(null);
       document.getElementById('studentsFileInput').value = '';
     } catch (error) {
-      console.error('Upload error:', error);
-      const errorMsg = error.response?.data?.message || error.response?.data?.details || 'Error uploading students';
-      toast.error(errorMsg);
+      toast.error(error.response?.data?.message || 'Error uploading students');
     } finally {
       setUploadingStudents(false);
     }
   };
 
-  // Timetable Upload
+  // ============= Timetable Upload =============
   const handleUploadTimetable = async (e) => {
     e.preventDefault();
-    
     if (!timetableFile) {
       toast.error('Please select a file');
       return;
     }
-    
     if (!selectedSection) {
       toast.error('Please select a section');
       return;
@@ -246,14 +163,61 @@ const AdminDashboard = () => {
       setSelectedSection('');
       document.getElementById('timetableFileInput').value = '';
     } catch (error) {
-      console.error('Upload error:', error);
       toast.error(error.response?.data?.message || 'Error uploading timetable');
     } finally {
       setUploadingTimetable(false);
     }
   };
 
-  // Course Management
+  // ============= Notifications Send =============
+  const handleSendToAll = async (e) => {
+    e.preventDefault();
+    if (!notificationForm.title || !notificationForm.content) {
+      toast.error('Title and content are required');
+      return;
+    }
+    
+    setSending(true);
+    try {
+      await api.post('/notifications/admin/send-to-all', {
+        title: notificationForm.title,
+        content: notificationForm.content
+      });
+      toast.success('Notification sent to all students!');
+      setNotificationForm({ studentId: '', title: '', content: '' });
+      fetchNotifications();
+    } catch (error) {
+      toast.error('Failed to send');
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const handleSendToStudent = async (e) => {
+    e.preventDefault();
+    if (!notificationForm.studentId || !notificationForm.title || !notificationForm.content) {
+      toast.error('Student ID, title, and content are required');
+      return;
+    }
+    
+    setSending(true);
+    try {
+      await api.post('/notifications/admin/send-to-student', {
+        studentId: notificationForm.studentId,
+        title: notificationForm.title,
+        content: notificationForm.content
+      });
+      toast.success(`Notification sent to student ${notificationForm.studentId}`);
+      setNotificationForm({ studentId: '', title: '', content: '' });
+      fetchNotifications();
+    } catch (error) {
+      toast.error('Failed to send');
+    } finally {
+      setSending(false);
+    }
+  };
+
+  // ============= Course Management =============
   const handleDeleteCourse = async (id) => {
     if (!window.confirm('Delete this course?')) return;
     try {
@@ -271,7 +235,7 @@ const AdminDashboard = () => {
       name: course.name,
       semester: course.semester,
       description: course.description || '',
-      max_score: course.max_score || 40,
+      max_score: course.max_score || 15,
     });
   };
 
@@ -297,7 +261,7 @@ const AdminDashboard = () => {
       name: formData.get('name'),
       semester: parseInt(formData.get('semester')),
       description: formData.get('description'),
-      max_score: parseInt(formData.get('max_score')) || 40,
+      max_score: parseInt(formData.get('max_score')) || 15,
     };
     try {
       await api.post('/courses', data);
@@ -309,7 +273,7 @@ const AdminDashboard = () => {
     }
   };
 
-  // Login Screen
+  // ============= Login Screen =============
   if (!token) {
     return (
       <div className="min-h-[80vh] flex items-center justify-center">
@@ -347,7 +311,7 @@ const AdminDashboard = () => {
     );
   }
 
-  // Main Dashboard
+  // ============= Main Dashboard =============
   return (
     <div className="animate-fadeIn">
       <h1 className="text-4xl md:text-5xl font-bold text-primary mb-8 tracking-tight">Admin Dashboard</h1>
@@ -433,8 +397,7 @@ const AdminDashboard = () => {
           <div>
             <h2 className="text-xl font-semibold text-primary mb-4">📊 Upload Grades</h2>
             <p className="text-gray-400 text-sm mb-4">
-              Excel file columns: <span className="text-primary">Student ID, Student Name, Score</span><br />
-              For status, add a <span className="text-primary">Status</span> column (completed/pending)
+              Excel file columns: <span className="text-primary">Student ID, Student Name, Score</span>
             </p>
             
             <div className="mb-4">
@@ -513,8 +476,7 @@ const AdminDashboard = () => {
           <div>
             <h2 className="text-xl font-semibold text-primary mb-4">📅 Upload Timetable</h2>
             <p className="text-gray-400 text-sm mb-4">
-              Excel file columns: <span className="text-primary">Day, Start Time, End Time, Course Name, Location, Instructor, Type</span><br />
-              Days: Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday
+              Excel file columns: <span className="text-primary">Day, Start Time, End Time, Course Name, Location, Instructor, Type</span>
             </p>
             
             <div className="mb-4">
@@ -549,91 +511,95 @@ const AdminDashboard = () => {
           </div>
         )}
 
-        {/* ============= Notifications Tab ============= */}
+        {/* ============= NOTIFICATIONS TAB ============= */}
         {activeTab === 'notifications' && (
           <div>
-            <h2 className="text-xl font-semibold text-primary mb-4">🔔 Send Notification</h2>
+            <h2 className="text-xl font-semibold text-primary mb-4">🔔 Send Notifications</h2>
             
-            {/* Send to All */}
-            <div className="mb-8 p-4 bg-white/5 rounded-xl border border-white/10">
-              <h3 className="text-lg font-semibold text-white mb-4">📢 Send to All Students</h3>
-              <form id="sendToAllForm" className="space-y-4" onSubmit={sendToAll}>
-                <input 
-                  type="text" 
-                  id="allTitle" 
-                  placeholder="Title" 
-                  className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-primary" 
-                  required 
+            {/* Send to All Students */}
+            <div className="mb-8 p-5 bg-white/5 rounded-xl border border-white/10">
+              <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                <span>📢</span> Send to All Students
+              </h3>
+              <form onSubmit={handleSendToAll} className="space-y-4">
+                <input
+                  type="text"
+                  placeholder="Notification Title"
+                  value={notificationForm.title}
+                  onChange={(e) => setNotificationForm({ ...notificationForm, title: e.target.value })}
+                  className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-primary"
+                  required
                 />
-                <textarea 
-                  id="allContent" 
-                  placeholder="Message" 
-                  rows="3" 
-                  className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-primary" 
-                  required 
+                <textarea
+                  placeholder="Notification Message"
+                  rows="3"
+                  value={notificationForm.content}
+                  onChange={(e) => setNotificationForm({ ...notificationForm, content: e.target.value })}
+                  className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-primary"
+                  required
                 />
                 <button type="submit" disabled={sending} className="bg-primary text-dark font-semibold py-2 px-6 rounded-xl hover:scale-105 transition disabled:opacity-50">
-                  {sending ? 'Sending...' : 'Send to All'}
+                  {sending ? 'Sending...' : 'Send to All →'}
                 </button>
               </form>
             </div>
-            
+
             {/* Send to Specific Student */}
-            <div className="mb-8 p-4 bg-white/5 rounded-xl border border-white/10">
-              <h3 className="text-lg font-semibold text-white mb-4">👤 Send to Specific Student</h3>
-              <form id="sendToStudentForm" className="space-y-4" onSubmit={sendToStudent}>
-                <input 
-                  type="text" 
-                  id="studentId" 
-                  placeholder="Student ID" 
-                  className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-primary" 
-                  required 
+            <div className="mb-8 p-5 bg-white/5 rounded-xl border border-white/10">
+              <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                <span>👤</span> Send to Specific Student
+              </h3>
+              <form onSubmit={handleSendToStudent} className="space-y-4">
+                <input
+                  type="text"
+                  placeholder="Student ID (e.g., 2021001)"
+                  value={notificationForm.studentId}
+                  onChange={(e) => setNotificationForm({ ...notificationForm, studentId: e.target.value })}
+                  className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-primary"
+                  required
                 />
-                <input 
-                  type="text" 
-                  id="studentTitle" 
-                  placeholder="Title" 
-                  className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-primary" 
-                  required 
+                <input
+                  type="text"
+                  placeholder="Notification Title"
+                  value={notificationForm.title}
+                  onChange={(e) => setNotificationForm({ ...notificationForm, title: e.target.value })}
+                  className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-primary"
+                  required
                 />
-                <textarea 
-                  id="studentContent" 
-                  placeholder="Message" 
-                  rows="3" 
-                  className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-primary" 
-                  required 
+                <textarea
+                  placeholder="Notification Message"
+                  rows="3"
+                  value={notificationForm.content}
+                  onChange={(e) => setNotificationForm({ ...notificationForm, content: e.target.value })}
+                  className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-primary"
+                  required
                 />
                 <button type="submit" disabled={sending} className="bg-primary text-dark font-semibold py-2 px-6 rounded-xl hover:scale-105 transition disabled:opacity-50">
-                  {sending ? 'Sending...' : 'Send to Student'}
+                  {sending ? 'Sending...' : 'Send to Student →'}
                 </button>
               </form>
             </div>
-            
-            {/* Notifications List */}
+
+            {/* Notifications History */}
             <div>
-              <h3 className="text-lg font-semibold text-white mb-4">📜 Sent Notifications</h3>
+              <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                <span>📜</span> Sent Notifications
+              </h3>
               <div className="space-y-2 max-h-96 overflow-y-auto">
                 {notifications.length === 0 ? (
                   <p className="text-gray-400 text-center py-8">No notifications sent yet.</p>
                 ) : (
                   notifications.map((notif) => (
                     <div key={notif.id} className="bg-white/5 rounded-xl p-4 border border-white/10">
-                      <div className="flex justify-between items-start flex-wrap gap-2">
-                        <div className="flex-1">
+                      <div className="flex justify-between items-start">
+                        <div>
                           <h4 className="font-semibold text-primary">{notif.title}</h4>
                           <p className="text-gray-300 text-sm mt-1">{notif.content}</p>
-                          <p className="text-xs text-gray-500 mt-2">
-                            {notif.student_id ? `To: ${notif.student_name || notif.student_id}` : 'To: All Students'}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-xs text-gray-500">{new Date(notif.created_at).toLocaleString()}</p>
-                          <button 
-                            onClick={() => deleteNotification(notif.id)} 
-                            className="text-red-400 text-xs hover:text-red-300 mt-2"
-                          >
-                            Delete
-                          </button>
+                          <div className="flex gap-3 mt-2 text-xs text-gray-500">
+                            <span>To: {notif.student_name || 'All Students'}</span>
+                            <span>{new Date(notif.created_at).toLocaleString()}</span>
+                            {notif.is_read && <span className="text-green-400">✓ Read</span>}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -671,7 +637,7 @@ const AdminDashboard = () => {
                 <textarea name="description" value={editFormData.description} onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })} className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white" rows="3" required />
               </div>
               <div className="flex gap-3 pt-2">
-                <button type="submit" disabled={loading} className="flex-1 bg-primary text-dark font-semibold py-2 rounded-xl hover:bg-primaryDark transition-all disabled:opacity-50">{loading ? 'Saving...' : 'Save Changes'}</button>
+                <button type="submit" disabled={loading} className="flex-1 bg-primary text-dark font-semibold py-2 rounded-xl hover:bg-primaryDark transition-all">{loading ? 'Saving...' : 'Save Changes'}</button>
                 <button type="button" onClick={() => setEditingCourse(null)} className="px-4 py-2 border border-white/20 rounded-xl hover:bg-white/10">Cancel</button>
               </div>
             </form>
