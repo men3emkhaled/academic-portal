@@ -4,7 +4,7 @@ const Course = require('../models/Course');
 const XLSX = require('xlsx');
 const fs = require('fs');
 
-// جلب درجات طالب معين
+// جلب درجات طالب معين (بالـ ID)
 const getGradesByStudentId = async (req, res) => {
   try {
     const { studentId } = req.params;
@@ -60,7 +60,6 @@ const uploadAdvancedGrades = async (req, res) => {
       
       if (!studentId) continue;
       
-      // معالجة الدرجة
       let scoreValue = null;
       if (score !== undefined && score !== null && score !== '-') {
         const parsed = parseFloat(score);
@@ -76,14 +75,12 @@ const uploadAdvancedGrades = async (req, res) => {
         status: status
       });
       
-      // جلب اسم الطالب إذا موجود في نفس الصف
       const studentName = row['Student Name'] || row['student_name'];
       if (studentName) {
         studentsToUpdate.push({ id: String(studentId), name: String(studentName) });
       }
     }
     
-    // تحديث بيانات الطلاب
     for (const student of studentsToUpdate) {
       await Student.create(student.id, student.name, 'default123', 1, null);
     }
@@ -117,7 +114,6 @@ const updateSingleGrade = async (req, res) => {
       return res.status(404).json({ message: 'Course not found' });
     }
     
-    // التحقق من أن الدرجة لا تتجاوز الـ max_score
     if (score !== null && score !== undefined && score > course.max_score) {
       return res.status(400).json({ message: `Score cannot exceed ${course.max_score}` });
     }
@@ -143,12 +139,39 @@ const getAllGrades = async (req, res) => {
   }
 };
 
-// جلب درجات طالب للكورسات بتاعته (للوحة تحكم الطالب)
+// جلب درجات الطالب المسجل (للوحة تحكم الطالب) - المعدلة عشان تظهر كل المواد
 const getMyGrades = async (req, res) => {
   try {
     const studentId = req.user.id;
-    const grades = await Grade.getStudentGrades(studentId);
     const student = await Student.findById(studentId);
+    
+    // جلب كل المواد (حتى اللي مفيش درجات)
+    const allCourses = await Course.findAll();
+    const semester2Courses = allCourses.filter(c => c.semester === 2);
+    
+    // جلب الدرجات الموجودة
+    const existingGrades = await Grade.getStudentGrades(studentId);
+    
+    // دمج المواد مع الدرجات
+    const gradesMap = new Map();
+    existingGrades.forEach(grade => {
+      gradesMap.set(grade.course_name, grade);
+    });
+    
+    const grades = semester2Courses.map(course => {
+      const existing = gradesMap.get(course.name);
+      return {
+        course_id: course.id,
+        course_name: course.name,
+        max_score: course.max_score,
+        midterm_score: existing?.midterm_score !== undefined && existing?.midterm_score !== null ? existing.midterm_score : null,
+        midterm_status: existing?.midterm_status || 'pending',
+        practical_score: existing?.practical_score !== undefined && existing?.practical_score !== null ? existing.practical_score : null,
+        practical_status: existing?.practical_status || 'pending',
+        oral_score: existing?.oral_score !== undefined && existing?.oral_score !== null ? existing.oral_score : null,
+        oral_status: existing?.oral_status || 'pending'
+      };
+    });
     
     // حساب الإحصائيات
     let totalEarned = 0;
@@ -156,10 +179,10 @@ const getMyGrades = async (req, res) => {
     let coursesWithGrades = 0;
     
     for (const grade of grades) {
-      if (grade.midterm_score || grade.practical_score || grade.oral_score) {
-        const earned = (grade.midterm_score || 0) + (grade.practical_score || 0) + (grade.oral_score || 0);
+      const earned = (grade.midterm_score || 0) + (grade.practical_score || 0) + (grade.oral_score || 0);
+      totalPossible += grade.max_score;
+      if (earned > 0) {
         totalEarned += earned;
-        totalPossible += grade.max_score;
         coursesWithGrades++;
       }
     }
@@ -182,6 +205,7 @@ const getMyGrades = async (req, res) => {
       }
     });
   } catch (error) {
+    console.error('Error in getMyGrades:', error);
     res.status(500).json({ message: error.message });
   }
 };
