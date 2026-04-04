@@ -6,6 +6,8 @@ const studentLogin = async (req, res) => {
   try {
     const { username, password } = req.body;
     
+    console.log('Login attempt:', username);
+    
     if (!username || !password) {
       return res.status(400).json({ message: 'Username and password are required' });
     }
@@ -13,12 +15,14 @@ const studentLogin = async (req, res) => {
     const student = await Student.findByUsername(username);
     
     if (!student) {
+      console.log('Student not found:', username);
       return res.status(401).json({ message: 'Invalid credentials' });
     }
     
     const isValid = await Student.verifyPassword(student, password);
     
     if (!isValid) {
+      console.log('Invalid password for:', username);
       return res.status(401).json({ message: 'Invalid credentials' });
     }
     
@@ -27,6 +31,8 @@ const studentLogin = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
+    
+    console.log('Login successful:', username);
     
     res.json({
       token,
@@ -51,11 +57,11 @@ const getCurrentStudent = async (req, res) => {
       return res.status(404).json({ message: 'Student not found' });
     }
     
-    const totalScore = await Student.getTotalScore(req.user.id);
-    
     res.json({
-      ...student,
-      total_score: totalScore
+      id: student.id,
+      name: student.name,
+      level: student.level,
+      section: student.section
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

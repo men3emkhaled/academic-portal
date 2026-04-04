@@ -37,8 +37,7 @@ const StudentLogin = () => {
           <div className="text-center mb-8">
             <div className="text-5xl mb-3">🎓</div>
             <h1 className="text-3xl font-bold text-primary mb-2">Student Login</h1>
-            <p className="text-gray-400 text-sm">Enter your student ID and password</p>
-            <p className="text-yellow-500 text-xs mt-2">⚠️ Test credentials: any ID + password: 123456</p>
+            <p className="text-gray-400 text-sm">Enter your student ID and password to access your portal</p>
           </div>
           
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -49,7 +48,7 @@ const StudentLogin = () => {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
-                placeholder="e.g., 2021001"
+                placeholder="Enter your student ID"
                 autoComplete="username"
               />
             </div>
@@ -74,10 +73,6 @@ const StudentLogin = () => {
               {loading ? 'Logging in...' : 'Login →'}
             </button>
           </form>
-          
-          <div className="mt-6 text-center text-xs text-gray-500">
-            <p>Default password: <span className="text-primary">123456</span></p>
-          </div>
         </div>
       </div>
     </div>
