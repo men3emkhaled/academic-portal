@@ -1,12 +1,12 @@
 const jwt = require('jsonwebtoken');
 const Student = require('../models/Student');
 
-// تسجيل دخول الطالب
 const studentLogin = async (req, res) => {
   try {
     const { username, password } = req.body;
     
-    console.log('📥 Login attempt:', { username, password });
+    console.log('📥 POST /api/student/login - Request received');
+    console.log('📥 Body:', { username, password });
     
     if (!username || !password) {
       return res.status(400).json({ message: 'Username and password are required' });
@@ -14,17 +14,15 @@ const studentLogin = async (req, res) => {
     
     const student = await Student.findByUsername(username);
     
-    console.log('📊 Student found:', student ? { id: student.id, name: student.name, storedPassword: student.password_hash } : 'NOT FOUND');
-    
     if (!student) {
+      console.log('❌ Student not found:', username);
       return res.status(401).json({ message: 'Invalid credentials' });
     }
     
     const isValid = await Student.verifyPassword(student, password);
     
-    console.log('🔐 Password valid:', isValid, 'Stored:', student.password_hash, 'Provided:', password);
-    
     if (!isValid) {
+      console.log('❌ Invalid password for:', username);
       return res.status(401).json({ message: 'Invalid credentials' });
     }
     
@@ -46,12 +44,11 @@ const studentLogin = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Login error:', error);
+    console.error('❌ Login error:', error);
     res.status(500).json({ message: error.message });
   }
 };
 
-// جلب بيانات الطالب الحالي
 const getCurrentStudent = async (req, res) => {
   try {
     const student = await Student.findById(req.user.id);
@@ -70,7 +67,6 @@ const getCurrentStudent = async (req, res) => {
   }
 };
 
-// تعديل كلمة المرور
 const changePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;

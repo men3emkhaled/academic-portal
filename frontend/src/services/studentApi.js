@@ -1,14 +1,7 @@
 import axios from 'axios';
 
-// ✅ تأكد إن الرابط يبدأ بـ https://
-// ❌ ممنوع تكتب: 'academic-portal-production.up.railway.app/api'
-// ❌ ممنوع تكتب: '/api'
-// ✅ صح: 'https://academic-portal-production.up.railway.app/api'
-
+// ✅ تأكد إن الرابط بالضبط كده
 const API_BASE_URL = 'https://academic-portal-production.up.railway.app/api';
-
-// لو عايز تستخدم environment variable
-// const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://academic-portal-production.up.railway.app/api';
 
 const studentApi = axios.create({
   baseURL: API_BASE_URL,
@@ -17,7 +10,6 @@ const studentApi = axios.create({
   },
 });
 
-// Interceptor لإضافة التوكن
 studentApi.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('studentToken');
@@ -25,14 +17,16 @@ studentApi.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
     
-    // تأكد من المسارات
-    console.log('📤 Request URL:', config.baseURL + config.url);
+    console.log('📤 Axios Request:', {
+      method: config.method,
+      baseURL: config.baseURL,
+      url: config.url,
+      fullPath: config.baseURL + config.url
+    });
     
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 export default studentApi;
