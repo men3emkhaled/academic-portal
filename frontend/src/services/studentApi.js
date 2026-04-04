@@ -1,5 +1,6 @@
 import axios from 'axios';
 
+// ✅ الرابط كامل مع https://
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://academic-portal-production.up.railway.app/api';
 
 const studentApi = axios.create({
@@ -9,6 +10,7 @@ const studentApi = axios.create({
   },
 });
 
+// Interceptor لإضافة التوكن
 studentApi.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('studentToken');
@@ -16,6 +18,7 @@ studentApi.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
     
+    // تحويل المسارات
     if (config.url === '/my-grades') {
       config.url = '/grades/my-grades';
     }
