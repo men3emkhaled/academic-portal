@@ -1,26 +1,26 @@
 import axios from 'axios';
 
-// نقوم بإنشاء instance من axios مع تحديد رابط السيرفر على Railway
+// ✅ نفس الرابط
+const API_BASE_URL = 'https://academic-portal-production.up.railway.app/api';
+
 const api = axios.create({
-  // الرابط الكامل للسيرفر الخاص بك مع إضافة /api في النهاية
-  baseURL: 'https://academic-portal-production.up.railway.app/api',
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 30000,
 });
 
-// إضافة الـ Token للطلبات إذا كان المستخدم مسجلاً للدخول (Admin)
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('adminToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    console.log('📤 [Admin Request]', config.method.toUpperCase(), config.baseURL + config.url);
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 export default api;
