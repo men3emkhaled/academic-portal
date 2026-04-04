@@ -9,7 +9,7 @@ const AdminDashboard = () => {
   const { token, login } = useAuth();
   const [activeTab, setActiveTab] = useState('courses');
   const [courses, setCourses] = useState([]);
-  const [students, setStudents] = useState([]);        // ✅ تخزين الطلاب
+  const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(false);
   const [uploadingGrades, setUploadingGrades] = useState(false);
   const [uploadingStudents, setUploadingStudents] = useState(false);
@@ -23,26 +23,29 @@ const AdminDashboard = () => {
     max_score: 15,
   });
 
-  // States for grades upload
+  // Grades upload states
   const [gradesFile, setGradesFile] = useState(null);
   const [selectedCourseId, setSelectedCourseId] = useState('');
   const [selectedExamType, setSelectedExamType] = useState('midterm');
 
-  // States for timetable upload
+  // Timetable upload states
   const [timetableFile, setTimetableFile] = useState(null);
   const [selectedSection, setSelectedSection] = useState('');
   const [uploadingTimetable, setUploadingTimetable] = useState(false);
 
-  // Notifications state
+  // Notifications states
   const [notifications, setNotifications] = useState([]);
   const [sending, setSending] = useState(false);
   const [notificationForm, setNotificationForm] = useState({ studentId: '', title: '', content: '' });
+  const [editingNotification, setEditingNotification] = useState(null);
+  const [editNotifForm, setEditNotifForm] = useState({ title: '', content: '', is_read: false });
+  const [showEditModal, setShowEditModal] = useState(false);
 
   // ------------------- Fetch Data -------------------
   useEffect(() => {
     if (!token) return;
     fetchCourses();
-    fetchStudents();        // جلب الطلاب عند تحميل الصفحة
+    fetchStudents();
     if (activeTab === 'notifications') fetchNotifications();
   }, [token, activeTab]);
 
@@ -61,7 +64,6 @@ const AdminDashboard = () => {
       setStudents(res.data);
     } catch (error) {
       console.error('Error fetching students:', error);
-      toast.error('Failed to load students');
     }
   };
 
@@ -100,7 +102,6 @@ const AdminDashboard = () => {
     formData.append('file', gradesFile);
     formData.append('courseId', selectedCourseId);
     formData.append('examType', selectedExamType);
-
     setUploadingGrades(true);
     try {
       const res = await api.post('/grades/admin/upload-advanced', formData, {
@@ -134,7 +135,7 @@ const AdminDashboard = () => {
       toast.success(`✅ Uploaded ${res.data.count} students`);
       setStudentsFile(null);
       document.getElementById('studentsFileInput').value = '';
-      fetchStudents(); // تحديث القائمة
+      fetchStudents();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Error uploading students');
     } finally {
@@ -152,7 +153,7 @@ const AdminDashboard = () => {
     try {
       await api.put(`/admin/students/${studentId}/reset-password`, { newPassword });
       toast.success(`Password for ${studentId} reset successfully`);
-      fetchStudents(); // تحديث القائمة (الباسورد بيتغير في قاعدة البيانات)
+      fetchStudents();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to reset password');
     }
@@ -239,6 +240,29 @@ const AdminDashboard = () => {
       toast.error('Failed to send');
     } finally {
       setSending(false);
+    }
+  };
+
+  const handleUpdateNotification = async (e) => {
+    e.preventDefault();
+    try {
+      await api.put(`/notifications/admin/${editingNotification.id}`, editNotifForm);
+      toast.success('Notification updated');
+      setShowEditModal(false);
+      fetchNotifications();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Update failed');
+    }
+  };
+
+  const handleDeleteNotification = async (id) => {
+    if (!window.confirm('Delete this notification?')) return;
+    try {
+      await api.delete(`/notifications/admin/${id}`);
+      toast.success('Notification deleted');
+      fetchNotifications();
+    } catch (error) {
+      toast.error('Delete failed');
     }
   };
 
@@ -334,7 +358,7 @@ const AdminDashboard = () => {
     );
   }
 
-  // ------------------- Main Dashboard (مرن وغير لاصق) -------------------
+  // ------------------- Main Dashboard -------------------
   return (
     <div className="min-h-screen bg-dark p-4 md:p-8">
       <div className="max-w-[1400px] mx-auto">
@@ -365,7 +389,7 @@ const AdminDashboard = () => {
 
         {/* Tab Content */}
         <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 md:p-6 overflow-x-auto">
-          {/* ---------- Courses ---------- */}
+          {/* ---------- Courses Tab ---------- */}
           {activeTab === 'courses' && (
             <div className="space-y-8">
               <div>
@@ -393,7 +417,7 @@ const AdminDashboard = () => {
                         <th className="text-left py-3 px-4 text-primary">Semester</th>
                         <th className="text-left py-3 px-4 text-primary">Max Score</th>
                         <th className="text-left py-3 px-4 text-primary">Actions</th>
-                      </tr>
+                       </tr>
                     </thead>
                     <tbody>
                       {courses.map((course) => (
@@ -414,7 +438,7 @@ const AdminDashboard = () => {
             </div>
           )}
 
-          {/* ---------- Upload Grades ---------- */}
+          {/* ---------- Upload Grades Tab ---------- */}
           {activeTab === 'grades' && (
             <div>
               <h2 className="text-xl font-semibold text-primary mb-4">📊 Upload Grades</h2>
@@ -459,13 +483,13 @@ const AdminDashboard = () => {
             </div>
           )}
 
-          {/* ---------- Resources ---------- */}
+          {/* ---------- Resources Tab ---------- */}
           {activeTab === 'resources' && <ResourceManager />}
 
-          {/* ---------- Roadmap ---------- */}
+          {/* ---------- Roadmap Tab ---------- */}
           {activeTab === 'roadmap' && <RoadmapManager />}
 
-          {/* ---------- Students (مع إضافة تعديل باسورد وحذف) ---------- */}
+          {/* ---------- Students Tab ---------- */}
           {activeTab === 'students' && (
             <div>
               <h2 className="text-xl font-semibold text-primary mb-4">👥 Manage Students</h2>
@@ -524,7 +548,7 @@ const AdminDashboard = () => {
             </div>
           )}
 
-          {/* ---------- Timetable ---------- */}
+          {/* ---------- Timetable Tab ---------- */}
           {activeTab === 'timetable' && (
             <div>
               <h2 className="text-xl font-semibold text-primary mb-4">📅 Upload Timetable</h2>
@@ -555,46 +579,93 @@ const AdminDashboard = () => {
             </div>
           )}
 
-          {/* ---------- Notifications ---------- */}
+          {/* ---------- Notifications Tab (Full Control) ---------- */}
           {activeTab === 'notifications' && (
             <div>
-              <h2 className="text-xl font-semibold text-primary mb-4">🔔 Send Notifications</h2>
-              <div className="mb-8 p-5 bg-white/5 rounded-xl border border-white/10">
-                <h3 className="text-lg font-semibold text-white mb-4">📢 Send to All Students</h3>
-                <form onSubmit={handleSendToAll} className="space-y-4">
-                  <input type="text" placeholder="Title" value={notificationForm.title} onChange={(e) => setNotificationForm({ ...notificationForm, title: e.target.value })} className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white" required />
-                  <textarea placeholder="Message" rows="3" value={notificationForm.content} onChange={(e) => setNotificationForm({ ...notificationForm, content: e.target.value })} className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white" required />
-                  <button type="submit" disabled={sending} className="bg-primary text-dark font-semibold py-2 px-6 rounded-xl transition hover:scale-105">{sending ? 'Sending...' : 'Send to All →'}</button>
-                </form>
-              </div>
-              <div className="mb-8 p-5 bg-white/5 rounded-xl border border-white/10">
-                <h3 className="text-lg font-semibold text-white mb-4">👤 Send to Specific Student</h3>
-                <form onSubmit={handleSendToStudent} className="space-y-4">
-                  <input type="text" placeholder="Student ID" value={notificationForm.studentId} onChange={(e) => setNotificationForm({ ...notificationForm, studentId: e.target.value })} className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white" required />
-                  <input type="text" placeholder="Title" value={notificationForm.title} onChange={(e) => setNotificationForm({ ...notificationForm, title: e.target.value })} className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white" required />
-                  <textarea placeholder="Message" rows="3" value={notificationForm.content} onChange={(e) => setNotificationForm({ ...notificationForm, content: e.target.value })} className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white" required />
-                  <button type="submit" disabled={sending} className="bg-primary text-dark font-semibold py-2 px-6 rounded-xl transition hover:scale-105">{sending ? 'Sending...' : 'Send to Student →'}</button>
-                </form>
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-white mb-4">📜 Sent Notifications</h3>
-                <div className="space-y-2 max-h-96 overflow-y-auto">
-                  {notifications.length === 0 ? (
-                    <p className="text-gray-400 text-center py-8">No notifications sent yet.</p>
-                  ) : (
-                    notifications.map((n) => (
-                      <div key={n.id} className="bg-white/5 rounded-xl p-4 border border-white/10">
-                        <h4 className="font-semibold text-primary">{n.title}</h4>
-                        <p className="text-gray-300 text-sm mt-1">{n.content}</p>
-                        <div className="flex gap-3 mt-2 text-xs text-gray-500">
-                          <span>To: {n.student_name || 'All Students'}</span>
-                          <span>{new Date(n.created_at).toLocaleString()}</span>
+              <h2 className="text-xl font-semibold text-primary mb-4">🔔 Full Notification Control</h2>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* LEFT: Send Forms */}
+                <div className="space-y-6">
+                  <div className="p-5 bg-white/5 rounded-xl border border-white/10">
+                    <h3 className="text-lg font-semibold text-white mb-4">📢 Send to All Students</h3>
+                    <form onSubmit={handleSendToAll} className="space-y-4">
+                      <input type="text" placeholder="Title" value={notificationForm.title} onChange={(e) => setNotificationForm({ ...notificationForm, title: e.target.value })} className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white" required />
+                      <textarea placeholder="Message" rows="3" value={notificationForm.content} onChange={(e) => setNotificationForm({ ...notificationForm, content: e.target.value })} className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white" required />
+                      <button type="submit" disabled={sending} className="bg-primary text-dark font-semibold py-2 px-6 rounded-xl transition hover:scale-105 disabled:opacity-50">{sending ? 'Sending...' : 'Send to All →'}</button>
+                    </form>
+                  </div>
+
+                  <div className="p-5 bg-white/5 rounded-xl border border-white/10">
+                    <h3 className="text-lg font-semibold text-white mb-4">👤 Send to Specific Student</h3>
+                    <form onSubmit={handleSendToStudent} className="space-y-4">
+                      <input type="text" placeholder="Student ID" value={notificationForm.studentId} onChange={(e) => setNotificationForm({ ...notificationForm, studentId: e.target.value })} className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white" required />
+                      <input type="text" placeholder="Title" value={notificationForm.title} onChange={(e) => setNotificationForm({ ...notificationForm, title: e.target.value })} className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white" required />
+                      <textarea placeholder="Message" rows="3" value={notificationForm.content} onChange={(e) => setNotificationForm({ ...notificationForm, content: e.target.value })} className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white" required />
+                      <button type="submit" disabled={sending} className="bg-primary text-dark font-semibold py-2 px-6 rounded-xl transition hover:scale-105 disabled:opacity-50">{sending ? 'Sending...' : 'Send to Student →'}</button>
+                    </form>
+                  </div>
+                </div>
+
+                {/* RIGHT: Notifications List with Edit/Delete */}
+                <div>
+                  <h3 className="text-lg font-semibold text-white mb-4">📜 All Notifications</h3>
+                  <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
+                    {notifications.length === 0 ? (
+                      <p className="text-gray-400 text-center py-8">No notifications sent yet.</p>
+                    ) : (
+                      notifications.map((notif) => (
+                        <div key={notif.id} className="bg-white/5 rounded-xl p-4 border border-white/10 hover:border-primary/30 transition-all">
+                          <div className="flex justify-between items-start gap-3">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <h4 className="font-semibold text-primary">{notif.title}</h4>
+                                {notif.student_name ? (
+                                  <span className="text-xs bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-full">To: {notif.student_name}</span>
+                                ) : (
+                                  <span className="text-xs bg-green-500/20 text-green-300 px-2 py-0.5 rounded-full">To: All Students</span>
+                                )}
+                                {notif.is_read ? (
+                                  <span className="text-xs bg-gray-500/20 text-gray-300 px-2 py-0.5 rounded-full">Read</span>
+                                ) : (
+                                  <span className="text-xs bg-yellow-500/20 text-yellow-300 px-2 py-0.5 rounded-full">Unread</span>
+                                )}
+                              </div>
+                              <p className="text-gray-300 text-sm mt-2">{notif.content}</p>
+                              <p className="text-xs text-gray-500 mt-2">{new Date(notif.created_at).toLocaleString()}</p>
+                            </div>
+                            <div className="flex gap-2">
+                              <button onClick={() => { setEditingNotification(notif); setEditNotifForm({ title: notif.title, content: notif.content, is_read: notif.is_read }); setShowEditModal(true); }} className="text-yellow-400 hover:text-yellow-300 transition" title="Edit">✏️</button>
+                              <button onClick={() => handleDeleteNotification(notif.id)} className="text-red-400 hover:text-red-300 transition" title="Delete">🗑️</button>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    ))
-                  )}
+                      ))
+                    )}
+                  </div>
                 </div>
               </div>
+
+              {/* Edit Notification Modal */}
+              {showEditModal && editingNotification && (
+                <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+                  <div className="bg-dark-card border border-primary/30 rounded-2xl p-6 w-full max-w-md">
+                    <h3 className="text-xl font-bold text-primary mb-4">Edit Notification</h3>
+                    <form onSubmit={handleUpdateNotification} className="space-y-4">
+                      <input type="text" placeholder="Title" value={editNotifForm.title} onChange={(e) => setEditNotifForm({ ...editNotifForm, title: e.target.value })} className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white" required />
+                      <textarea placeholder="Content" rows="4" value={editNotifForm.content} onChange={(e) => setEditNotifForm({ ...editNotifForm, content: e.target.value })} className="w-full bg-dark/50 border border-white/20 rounded-xl px-4 py-2 text-white" required />
+                      <label className="flex items-center gap-2 text-white">
+                        <input type="checkbox" checked={editNotifForm.is_read} onChange={(e) => setEditNotifForm({ ...editNotifForm, is_read: e.target.checked })} />
+                        Mark as read
+                      </label>
+                      <div className="flex gap-3 pt-2">
+                        <button type="submit" className="flex-1 bg-primary text-dark font-semibold py-2 rounded-xl">Save Changes</button>
+                        <button type="button" onClick={() => setShowEditModal(false)} className="px-4 py-2 border border-white/20 rounded-xl">Cancel</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
