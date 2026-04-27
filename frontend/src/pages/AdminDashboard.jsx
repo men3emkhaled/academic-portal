@@ -806,7 +806,7 @@ const AdminDashboard = () => {
           {activeTab === 'reviews' && <PendingReviews />}
           {activeTab === 'events' && <EventsManager />}
           {activeTab === 'progress' && <ProgressManager courses={courses} />}
-          {activeTab === 'tasks' && <OfficialTaskManager courses={courses} />}
+          {activeTab === 'tasks' && <OfficialTaskManager courses={courses} departments={departments} />}
           {activeTab === 'emails' && <LinkedEmailsManager />}
           {activeTab === 'logs' && <LogsDashboard />}
         </div>

@@ -7,6 +7,7 @@ class OfficialTask {
         CREATE TABLE IF NOT EXISTS official_tasks (
           id SERIAL PRIMARY KEY,
           course_id INT REFERENCES courses(id) ON DELETE CASCADE,
+          department_id INT REFERENCES departments(id) ON DELETE SET NULL,
           title VARCHAR(255) NOT NULL,
           description TEXT,
           drive_link TEXT NOT NULL,
@@ -32,15 +33,20 @@ class OfficialTask {
 
   static async getAll() {
     const result = await db.query(`
-      SELECT ot.*, c.name as course_name 
+      SELECT ot.*, c.name as course_name, d.name as department_name
       FROM official_tasks ot
       JOIN courses c ON ot.course_id = c.id
+      LEFT JOIN departments d ON ot.department_id = d.id
       ORDER BY ot.created_at DESC
     `);
     return result.rows;
   }
 
   static async getForStudent(studentId) {
+    // Get student's department_id first
+    const studentRes = await db.query('SELECT department_id FROM students WHERE id = $1', [studentId]);
+    const deptId = studentRes.rows[0]?.department_id;
+
     const result = await db.query(`
       SELECT 
         ot.*, 
@@ -50,26 +56,27 @@ class OfficialTask {
       FROM official_tasks ot
       JOIN courses c ON ot.course_id = c.id
       LEFT JOIN student_official_tasks sot ON ot.id = sot.task_id AND sot.student_id = $1
+      WHERE ot.department_id IS NULL OR ot.department_id = $2
       ORDER BY ot.deadline ASC NULLS LAST, ot.created_at DESC
-    `, [studentId]);
+    `, [studentId, deptId]);
     return result.rows;
   }
 
-  static async create(course_id, title, description, drive_link, deadline) {
+  static async create(course_id, title, description, drive_link, deadline, department_id = null) {
     const result = await db.query(
-      `INSERT INTO official_tasks (course_id, title, description, drive_link, deadline)
-       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-      [course_id, title, description, drive_link, deadline]
+      `INSERT INTO official_tasks (course_id, title, description, drive_link, deadline, department_id)
+       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+      [course_id, title, description, drive_link, deadline, department_id]
     );
     return result.rows[0];
   }
 
-  static async update(id, course_id, title, description, drive_link, deadline) {
+  static async update(id, course_id, title, description, drive_link, deadline, department_id = null) {
     const result = await db.query(
       `UPDATE official_tasks 
-       SET course_id = $1, title = $2, description = $3, drive_link = $4, deadline = $5
-       WHERE id = $6 RETURNING *`,
-      [course_id, title, description, drive_link, deadline, id]
+       SET course_id = $1, title = $2, description = $3, drive_link = $4, deadline = $5, department_id = $6
+       WHERE id = $7 RETURNING *`,
+      [course_id, title, description, drive_link, deadline, department_id, id]
     );
     return result.rows[0];
   }

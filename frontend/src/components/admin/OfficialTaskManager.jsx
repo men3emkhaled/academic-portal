@@ -3,10 +3,10 @@ import api from '../../services/api';
 import toast from 'react-hot-toast';
 import { 
   CheckSquare, Plus, Trash2, Edit, ExternalLink, 
-  BookOpen, Calendar, Link as LinkIcon, Search, Filter 
+  BookOpen, Calendar, Link as LinkIcon, Search, Filter, Layers 
 } from 'lucide-react';
 
-const OfficialTaskManager = ({ courses = [] }) => {
+const OfficialTaskManager = ({ courses = [], departments = [] }) => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -16,6 +16,7 @@ const OfficialTaskManager = ({ courses = [] }) => {
 
   const [formData, setFormData] = useState({
     course_id: '',
+    department_id: '',
     title: '',
     description: '',
     drive_link: '',
@@ -46,16 +47,21 @@ const OfficialTaskManager = ({ courses = [] }) => {
     }
 
     try {
+      const dataToSend = {
+        ...formData,
+        department_id: formData.department_id || null
+      };
+
       if (editingTask) {
-        await api.put(`/official-tasks/admin/${editingTask.id}`, formData);
+        await api.put(`/official-tasks/admin/${editingTask.id}`, dataToSend);
         toast.success('Task updated');
       } else {
-        await api.post('/official-tasks/admin', formData);
+        await api.post('/official-tasks/admin', dataToSend);
         toast.success('Task created');
       }
       setShowForm(false);
       setEditingTask(null);
-      setFormData({ course_id: '', title: '', description: '', drive_link: '', deadline: '' });
+      setFormData({ course_id: '', department_id: '', title: '', description: '', drive_link: '', deadline: '' });
       fetchTasks();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Operation failed');
@@ -66,6 +72,7 @@ const OfficialTaskManager = ({ courses = [] }) => {
     setEditingTask(task);
     setFormData({
       course_id: task.course_id,
+      department_id: task.department_id || '',
       title: task.title,
       description: task.description || '',
       drive_link: task.drive_link,
@@ -106,10 +113,10 @@ const OfficialTaskManager = ({ courses = [] }) => {
         </div>
 
         <button
-          onClick={() => { setShowForm(true); setEditingTask(null); setFormData({ course_id: '', title: '', description: '', drive_link: '', deadline: '' }); }}
+          onClick={() => { setShowForm(true); setEditingTask(null); setFormData({ course_id: '', department_id: '', title: '', description: '', drive_link: '', deadline: '' }); }}
           className="admin-btn-primary h-[50px] px-6"
         >
-          <Plus className="w-5 h-5" /> CREATE TASK NODE
+          <Plus className="w-5 h-5" /> CREATE TASK
         </button>
       </div>
 
@@ -157,9 +164,16 @@ const OfficialTaskManager = ({ courses = [] }) => {
           {filteredTasks.map(task => (
             <div key={task.id} className="admin-card group hover:border-emerald-500/30 transition-all duration-300">
               <div className="flex justify-between items-start mb-4">
-                <span className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-widest border border-emerald-500/20">
-                  {task.course_name}
-                </span>
+                <div className="flex flex-wrap gap-2">
+                  <span className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-widest border border-emerald-500/20">
+                    {task.course_name}
+                  </span>
+                  {task.department_name && (
+                    <span className="bg-blue-500/10 text-blue-600 dark:text-blue-400 text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-widest border border-blue-500/20">
+                      {task.department_name}
+                    </span>
+                  )}
+                </div>
                 <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button onClick={() => handleEdit(task)} className="p-2 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-500 hover:text-white transition-all">
                     <Edit className="w-4 h-4" />
@@ -203,7 +217,7 @@ const OfficialTaskManager = ({ courses = [] }) => {
             <div className="p-8 border-b border-gray-100 dark:border-white/5 flex items-center justify-between bg-gray-50/50 dark:bg-white/[0.02]">
               <div>
                 <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
-                  {editingTask ? 'Edit Task Node' : 'Initialize Task'}
+                  {editingTask ? 'Edit Task' : 'Create Task'}
                 </h3>
                 <p className="text-gray-500 dark:text-slate-500 text-[10px] font-black uppercase tracking-widest mt-1">Official Curriculum Sync</p>
               </div>
@@ -213,19 +227,41 @@ const OfficialTaskManager = ({ courses = [] }) => {
             </div>
 
             <form onSubmit={handleSubmit} className="p-8 space-y-6">
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-emerald-500 uppercase tracking-widest ml-4">Target Course</label>
-                <select
-                  value={formData.course_id}
-                  onChange={(e) => setFormData({ ...formData, course_id: e.target.value })}
-                  className="admin-input h-[55px] appearance-none"
-                  required
-                >
-                  <option value="">Select course</option>
-                  {courses.map(course => (
-                    <option key={course.id} value={course.id}>{course.name}</option>
-                  ))}
-                </select>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-emerald-500 uppercase tracking-widest ml-4">Target Course</label>
+                  <div className="relative">
+                    <BookOpen className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <select
+                      value={formData.course_id}
+                      onChange={(e) => setFormData({ ...formData, course_id: e.target.value })}
+                      className="admin-input pl-12 h-[55px] appearance-none"
+                      required
+                    >
+                      <option value="">Select course</option>
+                      {courses.map(course => (
+                        <option key={course.id} value={course.id}>{course.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-blue-500 uppercase tracking-widest ml-4">Target Department</label>
+                  <div className="relative">
+                    <Layers className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <select
+                      value={formData.department_id}
+                      onChange={(e) => setFormData({ ...formData, department_id: e.target.value })}
+                      className="admin-input pl-12 h-[55px] appearance-none"
+                    >
+                      <option value="">All Departments</option>
+                      {departments.map(dept => (
+                        <option key={dept.id} value={dept.id}>{dept.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
               </div>
 
               <div className="space-y-2">
@@ -255,22 +291,14 @@ const OfficialTaskManager = ({ courses = [] }) => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-emerald-500 uppercase tracking-widest ml-4">Deadline</label>
-                  <input
-                    type="date"
-                    value={formData.deadline}
-                    onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
-                    className="admin-input h-[55px]"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-emerald-500 uppercase tracking-widest ml-4">Sync Mode</label>
-                  <div className="admin-input h-[55px] flex items-center text-gray-400 text-xs font-bold">
-                    Automatic Distribution
-                  </div>
-                </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-emerald-500 uppercase tracking-widest ml-4">Deadline</label>
+                <input
+                  type="date"
+                  value={formData.deadline}
+                  onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
+                  className="admin-input h-[55px]"
+                />
               </div>
 
               <div className="space-y-2">
@@ -285,7 +313,7 @@ const OfficialTaskManager = ({ courses = [] }) => {
               </div>
 
               <button type="submit" className="w-full admin-btn-primary h-[60px] text-lg mt-4 shadow-[0_10px_30px_rgba(16,185,129,0.3)]">
-                {editingTask ? 'UPDATE TASK NODE' : 'DEPLOY TASK'}
+                {editingTask ? 'UPDATE TASK' : 'CREATE TASK'}
               </button>
             </form>
           </div>

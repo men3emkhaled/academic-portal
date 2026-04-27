@@ -11,11 +11,11 @@ const getAdminTasks = async (req, res) => {
 
 const createOfficialTask = async (req, res) => {
   try {
-    const { course_id, title, description, drive_link, deadline } = req.body;
+    const { course_id, title, description, drive_link, deadline, department_id } = req.body;
     if (!course_id || !title || !drive_link) {
       return res.status(400).json({ message: 'Course, Title and Drive Link are required' });
     }
-    const task = await OfficialTask.create(course_id, title, description, drive_link, deadline);
+    const task = await OfficialTask.create(course_id, title, description, drive_link, deadline, department_id);
     res.status(201).json(task);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -25,8 +25,8 @@ const createOfficialTask = async (req, res) => {
 const updateOfficialTask = async (req, res) => {
   try {
     const { id } = req.params;
-    const { course_id, title, description, drive_link, deadline } = req.body;
-    const task = await OfficialTask.update(id, course_id, title, description, drive_link, deadline);
+    const { course_id, title, description, drive_link, deadline, department_id } = req.body;
+    const task = await OfficialTask.update(id, course_id, title, description, drive_link, deadline, department_id);
     if (!task) return res.status(404).json({ message: 'Task not found' });
     res.json(task);
   } catch (error) {
