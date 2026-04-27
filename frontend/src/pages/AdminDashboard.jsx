@@ -26,7 +26,7 @@ import {
   Calendar, Bell, LayoutDashboard, Settings,
   CheckCircle, Database, LogOut, Lock, UserCheck,
   TrendingUp, Award, Activity, ShieldCheck, ChevronRight,
-  Smartphone, Heart, ScrollText, Mail, ClipboardList, Sun, Moon
+  Smartphone, Heart, ScrollText, Mail, ClipboardList, Sun, Moon, CheckSquare
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
