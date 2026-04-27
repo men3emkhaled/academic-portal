@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const officialTaskController = require('../controllers/officialTaskController');
-const { adminAuth } = require('../middleware/adminAuth');
+const { adminAuth } = require('../middleware/auth');
 const { studentAuth } = require('../middleware/studentAuth');
 
 // Student routes
