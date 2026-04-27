@@ -1,0 +1,230 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-slate-950 text-slate-100 font-sans antialiased;
+    background-image: radial-gradient(circle at 10% 20%, rgba(52, 211, 153, 0.08) 0%, transparent 25%), radial-gradient(circle at 85% 15%, rgba(56, 189, 133, 0.1) 0%, transparent 18%);
+    background-color: #0f172a;
+  }
+}
+
+@layer components {
+  .neon-text {
+    @apply text-primary;
+    text-shadow: 0 0 5px rgba(46,204,113,0.5);
+  }
+  
+  .neon-button {
+    @apply bg-primary text-dark font-semibold py-2.5 px-6 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-[0_0_15px_rgba(46,204,113,0.5)] active:scale-95;
+  }
+  
+  .glass-card {
+    @apply bg-black/60 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)];
+  }
+  
+  .admin-card {
+    @apply bg-white/[0.03] backdrop-blur-3xl border border-white/5 rounded-[2rem] p-8 transition-all duration-300 hover:border-white/10;
+  }
+
+  .admin-panel {
+    @apply bg-black/80 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] shadow-2xl;
+  }
+
+  .admin-input {
+    @apply w-full bg-slate-900/50 border border-white/5 rounded-2xl px-6 py-3.5 text-white placeholder-slate-600 focus:border-emerald-500/50 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 transition-all font-medium;
+  }
+
+  .admin-input-sm {
+    @apply bg-slate-900/50 border border-white/5 rounded-xl px-4 py-2 text-white text-sm placeholder-slate-600 focus:border-emerald-500/50 focus:outline-none transition-all;
+  }
+
+  .admin-btn-primary {
+    @apply bg-emerald-500 text-black font-black py-3 px-8 rounded-2xl shadow-lg shadow-emerald-500/20 transition-all hover:scale-[1.03] hover:bg-emerald-400 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+
+  .admin-btn-secondary {
+    @apply bg-white/5 text-slate-300 border border-white/10 py-3 px-8 rounded-2xl font-bold transition-all hover:bg-white/10 hover:text-white active:scale-95;
+  }
+
+  .admin-btn-ghost {
+    @apply text-slate-400 bg-transparent border border-white/5 py-2.5 px-5 rounded-xl font-bold transition-all hover:bg-white/5 hover:text-white;
+  }
+
+  .admin-modal-backdrop {
+    @apply fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4;
+  }
+
+  .admin-modal-panel {
+    @apply bg-[#111111] border border-white/10 rounded-[2.5rem] p-10 w-full max-w-3xl shadow-2xl relative overflow-hidden animate-fadeInUp;
+  }
+
+  .admin-table {
+    @apply w-full min-w-full text-sm border-separate border-spacing-0;
+  }
+
+  .admin-table-head th {
+    @apply text-left py-3 px-4 text-primary;
+  }
+
+  .admin-table-row {
+    @apply border-b border-white/5 hover:bg-white/5;
+  }
+
+  .admin-tag {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold;
+  }
+
+  .neon-border {
+    @apply border border-primary/50 shadow-[0_0_10px_rgba(46,204,113,0.2)];
+  }
+}
+
+@layer utilities {
+  .animate-fadeIn {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+  
+  .animate-fadeInUp {
+    animation: fadeInUp 0.6s ease-out forwards;
+  }
+  
+  .animate-slideUp {
+    animation: slideUp 0.2s ease-out;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============= Custom Scrollbar ============= */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a1a1a;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2ecc71;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #27ae60;
+}
+
+/* ============= Mobile Bottom Bar Fix ============= */
+@media (max-width: 768px) {
+  /* إضافة مسافة أسفل الصفحات عشان المحتوى مايختفيش تحت الـ Bottom Bar */
+  .pb-safe {
+    padding-bottom: 70px;
+  }
+  
+  /* تحسين حجم الخط في الموبايل */
+  html {
+    font-size: 14px;
+  }
+  
+  /* منع التمرير الأفقي */
+  body {
+    overflow-x: hidden;
+  }
+  
+  /* تحسين الـ cards في الموبايل */
+  .glass-card {
+    backdrop-filter: blur(4px);
+  }
+}
+
+/* ============= Table Responsive Fix ============= */
+@media (max-width: 640px) {
+  table {
+    font-size: 12px;
+  }
+  
+  th, td {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+}
+
+/* ============= Loading Animation ============= */
+@keyframes pulse-slow {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* ============= Glow Animation ============= */
+@keyframes glow {
+  0% {
+    box-shadow: 0 0 5px rgba(46, 204, 113, 0.3);
+  }
+  100% {
+    box-shadow: 0 0 20px rgba(46, 204, 113, 0.6);
+  }
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite alternate;
+}
+
+/* ============= Selection Color ============= */
+::selection {
+  background-color: #2ecc71;
+  color: #0a0a0a;
+}
+
+::-moz-selection {
+  background-color: #2ecc71;
+  color: #0a0a0a;
+}
+
+/* ============= Focus Styles ============= */
+*:focus-visible {
+  outline: 2px solid #2ecc71;
+  outline-offset: 2px;
+}
+
+/* ============= Disable Number Input Spinners ============= */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+}
