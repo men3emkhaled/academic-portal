@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { ThemeProvider } from './context/ThemeContext';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
 import { StudentAuthProvider, useStudentAuth } from './context/StudentAuthContext';
@@ -100,16 +101,18 @@ function AppContent() {
 
 function App() {
   return (
-    <AuthProvider>
-      <StudentAuthProvider>
-        <StudentDataContextProvider>
-          <Router>
-            <AppContent />
-            <Toaster position="bottom-right" />
-          </Router>
-        </StudentDataContextProvider>
-      </StudentAuthProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <StudentAuthProvider>
+          <StudentDataContextProvider>
+            <Router>
+              <AppContent />
+              <Toaster position="bottom-right" />
+            </Router>
+          </StudentDataContextProvider>
+        </StudentAuthProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

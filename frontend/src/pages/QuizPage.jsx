@@ -184,7 +184,7 @@ const QuizPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-dark flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-dark flex items-center justify-center transition-colors duration-300">
         <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -192,11 +192,11 @@ const QuizPage = () => {
 
   if (!quizData || !quizData.questions || quizData.questions.length === 0) {
     return (
-      <div className="min-h-screen bg-dark text-white flex flex-col items-center justify-center p-6">
+      <div className="min-h-screen bg-gray-50 dark:bg-dark text-gray-900 dark:text-white flex flex-col items-center justify-center p-6 transition-colors duration-300">
         <p className="text-xl mb-4"><AlertCircle className="w-8 h-8 text-primary mx-auto mb-4" /> No questions available</p>
         <button
           onClick={() => navigate('/student/quizzes')}
-          className="px-6 py-3 bg-primary text-dark rounded-xl font-bold"
+          className="px-6 py-3 bg-primary text-white dark:text-dark rounded-xl font-bold"
         >
           Back to Quizzes
         </button>
@@ -209,13 +209,13 @@ const QuizPage = () => {
   const progress = (answeredCount / quizData.questions.length) * 100;
 
   return (
-    <div className="min-h-screen bg-dark text-white font-body">
+    <div className="min-h-screen bg-gray-50 dark:bg-dark text-gray-900 dark:text-white font-body transition-colors duration-300">
       <main className="pt-8 px-6 max-w-2xl mx-auto pb-8">
         <div className="flex justify-between items-center mb-8">
           <h1 className="font-headline font-extrabold text-2xl text-primary">
             {quizData.quiz_title}
           </h1>
-          <div className="flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full border border-primary/10">
+          <div className="flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full border border-primary/20 dark:border-primary/10">
             <span className="text-xl"><Clock className="w-5 h-5 text-primary" /></span>
             <span className="font-mono text-primary font-bold text-lg tracking-widest">
               {formatTime(timeLeft)}
@@ -226,24 +226,24 @@ const QuizPage = () => {
         <div className="mb-8">
           <div className="flex justify-between items-end mb-2">
             <span className="text-3xl font-headline font-black text-primary italic">
-              {currentIndex + 1}<span className="text-primary/20 font-normal not-italic mx-1">/</span>{quizData.questions.length}
+              {currentIndex + 1}<span className="text-primary/40 dark:text-primary/20 font-normal not-italic mx-1">/</span>{quizData.questions.length}
             </span>
-            <span className="text-xs font-label font-medium text-primary/40 tracking-wider">
+            <span className="text-xs font-label font-medium text-primary/60 dark:text-primary/40 tracking-wider">
               PROGRESS
             </span>
           </div>
-          <div className="h-1.5 w-full bg-primary/10 rounded-full overflow-hidden">
+          <div className="h-1.5 w-full bg-primary/20 dark:bg-primary/10 rounded-full overflow-hidden">
             <div
-              className="h-full bg-primary shadow-[0_0_15px_rgba(var(--primary),0.6)]"
+              className="h-full bg-primary shadow-[0_0_15px_rgba(46,204,113,0.6)] dark:shadow-[0_0_15px_rgba(var(--primary),0.6)]"
               style={{ width: `${progress}%` }}
             />
           </div>
         </div>
 
         <div className="relative mb-10">
-          <div className="absolute -top-6 -left-6 w-32 h-32 bg-primary/5 blur-3xl rounded-full"></div>
-          <div className="relative p-8 bg-dark-card rounded-2xl border-l-4 border-primary">
-            <h2 className="text-2xl md:text-3xl font-headline font-bold leading-tight text-white">
+          <div className="absolute -top-6 -left-6 w-32 h-32 bg-primary/10 dark:bg-primary/5 blur-3xl rounded-full"></div>
+          <div className="relative p-8 bg-white dark:bg-dark-card rounded-2xl border-l-4 border-primary shadow-sm dark:shadow-none">
+            <h2 className="text-2xl md:text-3xl font-headline font-bold leading-tight text-gray-900 dark:text-white">
               {currentQuestion.question_text}
             </h2>
             {currentQuestion.image_url && (
@@ -251,7 +251,7 @@ const QuizPage = () => {
                 <img
                   src={getDirectImageUrl(currentQuestion.image_url)}
                   alt="Question illustration"
-                  className="max-h-64 rounded-lg border border-white/10/30"
+                  className="max-h-64 rounded-lg border border-gray-200 dark:border-white/10/30"
                   onError={(e) => {
                     e.target.onerror = null;
                     e.target.src = 'https://via.placeholder.com/400x200/1a1a1a/8eff71?text=Image+Not+Available';
@@ -272,14 +272,14 @@ const QuizPage = () => {
                   onClick={() => handleAnswerSelect(currentQuestion.id, option)}
                   className={`w-full text-left p-6 rounded-2xl border transition-all flex items-center justify-between ${
                     isSelected
-                      ? 'bg-primary/10 border-2 border-primary shadow-[0_0_30px_rgba(var(--primary),0.15)]'
-                      : 'bg-dark-glass border border-transparent hover:border-primary/20'
+                      ? 'bg-primary/10 border-2 border-primary shadow-[0_4px_15px_rgba(46,204,113,0.15)] dark:shadow-[0_0_30px_rgba(var(--primary),0.15)]'
+                      : 'bg-white dark:bg-dark-glass border-gray-200 dark:border-transparent hover:border-primary/40 dark:hover:border-primary/20 shadow-sm dark:shadow-none'
                   }`}
                 >
-                  <span className="text-lg font-medium capitalize">{option}</span>
+                  <span className="text-lg font-medium capitalize text-gray-900 dark:text-white">{option}</span>
                   {isSelected && (
                     <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
-                      <span className="text-dark text-sm font-bold"><Check className="w-4 h-4 text-dark" /></span>
+                      <span className="text-white dark:text-dark text-sm font-bold"><Check className="w-4 h-4 text-white dark:text-dark" /></span>
                     </div>
                   )}
                 </button>
@@ -295,47 +295,46 @@ const QuizPage = () => {
                   onClick={() => handleAnswerSelect(currentQuestion.id, letter)}
                   className={`w-full text-left p-6 rounded-2xl border transition-all flex items-center justify-between ${
                     isSelected
-                      ? 'bg-primary/10 border-2 border-primary shadow-[0_0_30px_rgba(var(--primary),0.15)]'
-                      : 'bg-dark-glass border border-transparent hover:border-primary/20'
+                      ? 'bg-primary/10 border-2 border-primary shadow-[0_4px_15px_rgba(46,204,113,0.15)] dark:shadow-[0_0_30px_rgba(var(--primary),0.15)]'
+                      : 'bg-white dark:bg-dark-glass border-gray-200 dark:border-transparent hover:border-primary/40 dark:hover:border-primary/20 shadow-sm dark:shadow-none'
                   }`}
                 >
                   <div className="flex items-center gap-5">
                     <span
                       className={`w-10 h-10 flex items-center justify-center rounded-xl font-black ${
                         isSelected
-                          ? 'bg-primary text-dark'
-                          : 'bg-primary/10 text-gray-400'
+                          ? 'bg-primary text-white dark:text-dark'
+                          : 'bg-primary/10 text-gray-500 dark:text-gray-400'
                       }`}
                     >
                       {letter}
                     </span>
-                    <span className={`text-lg ${isSelected ? 'font-bold text-primary' : 'font-medium'}`}>
+                    <span className={`text-lg ${isSelected ? 'font-bold text-primary' : 'font-medium text-gray-900 dark:text-white'}`}>
                       {opt}
                     </span>
                   </div>
                   {isSelected && (
                     <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
-                      <span className="text-dark text-sm font-bold"><Check className="w-4 h-4 text-dark" /></span>
+                      <span className="text-white dark:text-dark text-sm font-bold"><Check className="w-4 h-4 text-white dark:text-dark" /></span>
                     </div>
                   )}
                 </button>
               );
             })
           ) : (
-            <div className="bg-dark-glass p-6 rounded-2xl border border-primary/20">
-              <p className="text-gray-300 mb-4 text-sm">Write your answer or upload/take a photo</p>
+            <div className="bg-white dark:bg-dark-glass p-6 rounded-2xl border border-primary/20 shadow-sm dark:shadow-none">
+              <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm">Write your answer or upload/take a photo</p>
               
               <textarea
                 placeholder="Type your answer here..."
                 value={writtenText[currentQuestion.id] || ''}
                 onChange={(e) => setWrittenText(prev => ({ ...prev, [currentQuestion.id]: e.target.value }))}
-                className="w-full bg-dark-card border border-primary/30 rounded-xl p-3 text-white mb-4"
+                className="w-full bg-gray-50 dark:bg-dark-card border border-primary/30 rounded-xl p-3 text-gray-900 dark:text-white mb-4 focus:ring-2 focus:ring-primary/50 focus:outline-none"
                 rows="4"
               />
               
-              {/* ✅ زران منفصلان: رفع ملف وكاميرا */}
               <div className="flex gap-3 mb-4">
-                <label className="flex-1 cursor-pointer bg-dark-card border border-dashed border-primary/40 rounded-xl p-4 text-center hover:border-primary transition">
+                <label className="flex-1 cursor-pointer bg-gray-50 dark:bg-dark-card border border-dashed border-primary/40 rounded-xl p-4 text-center hover:border-primary transition">
                   <input
                     type="file"
                     accept="image/*"
@@ -347,11 +346,11 @@ const QuizPage = () => {
                       }
                     }}
                   />
-                  <span className="text-2xl block mb-1"><FolderUp className="w-8 h-8 text-gray-400 mx-auto mb-2" /></span>
-                  <span className="text-primary text-sm">Choose File</span>
+                  <span className="text-2xl block mb-1"><FolderUp className="w-8 h-8 text-gray-400 dark:text-gray-500 mx-auto mb-2" /></span>
+                  <span className="text-primary text-sm font-medium">Choose File</span>
                 </label>
                 
-                <label className="flex-1 cursor-pointer bg-dark-card border border-dashed border-primary/40 rounded-xl p-4 text-center hover:border-primary transition">
+                <label className="flex-1 cursor-pointer bg-gray-50 dark:bg-dark-card border border-dashed border-primary/40 rounded-xl p-4 text-center hover:border-primary transition">
                   <input
                     type="file"
                     accept="image/*"
@@ -364,8 +363,8 @@ const QuizPage = () => {
                       }
                     }}
                   />
-                  <span className="text-2xl block mb-1"><Camera className="w-8 h-8 text-gray-400 mx-auto mb-2" /></span>
-                  <span className="text-primary text-sm">Take Photo</span>
+                  <span className="text-2xl block mb-1"><Camera className="w-8 h-8 text-gray-400 dark:text-gray-500 mx-auto mb-2" /></span>
+                  <span className="text-primary text-sm font-medium">Take Photo</span>
                 </label>
               </div>
               
@@ -374,7 +373,7 @@ const QuizPage = () => {
                   <img
                     src={URL.createObjectURL(answers[currentQuestion.id])}
                     alt="Preview"
-                    className="max-h-48 rounded-lg mx-auto border border-white/10/30"
+                    className="max-h-48 rounded-lg mx-auto border border-gray-200 dark:border-white/10/30"
                   />
                 </div>
               )}
@@ -389,7 +388,7 @@ const QuizPage = () => {
                   }
                   saveWrittenAnswer(currentQuestion.id, text, file);
                 }}
-                className="mt-4 bg-primary/20 text-primary px-4 py-2 rounded-lg text-sm hover:bg-primary/30 transition"
+                className="mt-4 bg-primary/10 dark:bg-primary/20 text-primary font-bold px-4 py-2 rounded-lg text-sm hover:bg-primary/20 dark:hover:bg-primary/30 transition"
               >
                 Save Answer
               </button>
@@ -402,7 +401,7 @@ const QuizPage = () => {
             <button
               onClick={handlePrevious}
               disabled={currentIndex === 0}
-              className="flex-1 py-4 bg-dark-glass text-gray-400 font-headline font-bold text-lg rounded-xl border border-white/10/30 hover:bg-primary/10 transition disabled:opacity-30 disabled:cursor-not-allowed"
+              className="flex-1 py-4 bg-white dark:bg-dark-glass text-gray-600 dark:text-gray-400 font-headline font-bold text-lg rounded-xl border border-gray-200 dark:border-white/10/30 hover:bg-gray-50 dark:hover:bg-primary/10 transition disabled:opacity-50 disabled:bg-gray-100 dark:disabled:opacity-30 disabled:cursor-not-allowed shadow-sm dark:shadow-none"
             >
               ← Previous
             </button>
@@ -410,14 +409,14 @@ const QuizPage = () => {
               <button
                 onClick={handleSubmitClick}
                 disabled={submitting || hasSubmittedRef.current}
-                className="flex-1 py-4 bg-primary text-dark font-headline font-black text-lg rounded-xl shadow-[0_12px_40px_rgba(var(--primary),0.25)] hover:scale-[1.02] active:scale-95 transition-all uppercase tracking-tight"
+                className="flex-1 py-4 bg-primary text-white dark:text-dark font-headline font-black text-lg rounded-xl shadow-[0_4px_15px_rgba(46,204,113,0.3)] dark:shadow-[0_12px_40px_rgba(var(--primary),0.25)] hover:scale-[1.02] active:scale-95 transition-all uppercase tracking-tight"
               >
                 {submitting ? 'Submitting...' : 'Submit'}
               </button>
             ) : (
               <button
                 onClick={handleNext}
-                className="flex-1 py-4 bg-primary text-dark font-headline font-black text-lg rounded-xl shadow-[0_12px_40px_rgba(var(--primary),0.25)] hover:scale-[1.02] active:scale-95 transition-all uppercase tracking-tight"
+                className="flex-1 py-4 bg-primary text-white dark:text-dark font-headline font-black text-lg rounded-xl shadow-[0_4px_15px_rgba(46,204,113,0.3)] dark:shadow-[0_12px_40px_rgba(var(--primary),0.25)] hover:scale-[1.02] active:scale-95 transition-all uppercase tracking-tight"
               >
                 Next →
               </button>
@@ -426,7 +425,7 @@ const QuizPage = () => {
           {currentIndex < quizData.questions.length - 1 && (
             <button
               onClick={handleNext}
-              className="text-primary/60 font-label font-bold text-xs uppercase tracking-[0.2em] hover:text-primary transition-colors py-2"
+              className="text-primary/80 dark:text-primary/60 font-label font-bold text-xs uppercase tracking-[0.2em] hover:text-primary transition-colors py-2"
             >
               Skip for now
             </button>
@@ -443,10 +442,10 @@ const QuizPage = () => {
                 onClick={() => setCurrentIndex(idx)}
                 className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition ${
                   isCurrent
-                    ? 'bg-primary text-dark'
+                    ? 'bg-primary text-white dark:text-dark shadow-sm'
                     : isAnswered
-                    ? 'bg-primary/30 text-primary border border-primary'
-                    : 'bg-dark-glass text-gray-400 border border-white/10 hover:bg-primary/10'
+                    ? 'bg-primary/20 dark:bg-primary/30 text-primary border border-primary'
+                    : 'bg-white dark:bg-dark-glass text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-primary/10'
                 }`}
               >
                 {idx + 1}

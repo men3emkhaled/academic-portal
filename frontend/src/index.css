@@ -6,9 +6,12 @@
 
 @layer base {
   body {
-    @apply bg-slate-950 text-slate-100 font-sans antialiased;
+    @apply bg-gray-50 text-gray-900 font-sans antialiased transition-colors duration-300;
+  }
+  
+  .dark body {
+    @apply bg-dark text-slate-100;
     background-image: radial-gradient(circle at 10% 20%, rgba(52, 211, 153, 0.08) 0%, transparent 25%), radial-gradient(circle at 85% 15%, rgba(56, 189, 133, 0.1) 0%, transparent 18%);
-    background-color: #0f172a;
   }
 }
 
@@ -23,43 +26,43 @@
   }
   
   .glass-card {
-    @apply bg-black/60 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)];
+    @apply bg-white/70 dark:bg-black/60 backdrop-blur-2xl border border-gray-200 dark:border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)];
   }
   
   .admin-card {
-    @apply bg-white/[0.03] backdrop-blur-3xl border border-white/5 rounded-[2rem] p-8 transition-all duration-300 hover:border-white/10;
+    @apply bg-white dark:bg-white/[0.03] backdrop-blur-3xl border border-gray-200 dark:border-white/5 rounded-[2rem] p-8 transition-all duration-300 hover:border-gray-300 dark:hover:border-white/10 shadow-sm dark:shadow-none;
   }
 
   .admin-panel {
-    @apply bg-black/80 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] shadow-2xl;
+    @apply bg-white dark:bg-black/80 backdrop-blur-3xl border border-gray-200 dark:border-white/10 rounded-[2.5rem] shadow-xl dark:shadow-2xl;
   }
 
   .admin-input {
-    @apply w-full bg-slate-900/50 border border-white/5 rounded-2xl px-6 py-3.5 text-white placeholder-slate-600 focus:border-emerald-500/50 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 transition-all font-medium;
+    @apply w-full bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/5 rounded-2xl px-6 py-3.5 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-600 focus:border-emerald-500/50 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 transition-all font-medium;
   }
 
   .admin-input-sm {
-    @apply bg-slate-900/50 border border-white/5 rounded-xl px-4 py-2 text-white text-sm placeholder-slate-600 focus:border-emerald-500/50 focus:outline-none transition-all;
+    @apply bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/5 rounded-xl px-4 py-2 text-gray-900 dark:text-white text-sm placeholder-gray-400 dark:placeholder-slate-600 focus:border-emerald-500/50 focus:outline-none transition-all;
   }
 
   .admin-btn-primary {
-    @apply bg-emerald-500 text-black font-black py-3 px-8 rounded-2xl shadow-lg shadow-emerald-500/20 transition-all hover:scale-[1.03] hover:bg-emerald-400 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed;
+    @apply bg-emerald-500 text-white dark:text-black font-black py-3 px-8 rounded-2xl shadow-lg shadow-emerald-500/20 transition-all hover:scale-[1.03] hover:bg-emerald-600 dark:hover:bg-emerald-400 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed;
   }
 
   .admin-btn-secondary {
-    @apply bg-white/5 text-slate-300 border border-white/10 py-3 px-8 rounded-2xl font-bold transition-all hover:bg-white/10 hover:text-white active:scale-95;
+    @apply bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-slate-300 border border-gray-200 dark:border-white/10 py-3 px-8 rounded-2xl font-bold transition-all hover:bg-gray-200 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white active:scale-95;
   }
 
   .admin-btn-ghost {
-    @apply text-slate-400 bg-transparent border border-white/5 py-2.5 px-5 rounded-xl font-bold transition-all hover:bg-white/5 hover:text-white;
+    @apply text-gray-600 dark:text-slate-400 bg-transparent border border-transparent dark:border-white/5 py-2.5 px-5 rounded-xl font-bold transition-all hover:bg-gray-100 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white;
   }
 
   .admin-modal-backdrop {
-    @apply fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4;
+    @apply fixed inset-0 bg-gray-900/40 dark:bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4;
   }
 
   .admin-modal-panel {
-    @apply bg-[#111111] border border-white/10 rounded-[2.5rem] p-10 w-full max-w-3xl shadow-2xl relative overflow-hidden animate-fadeInUp;
+    @apply bg-white dark:bg-[#111111] border border-gray-200 dark:border-white/10 rounded-[2.5rem] p-10 w-full max-w-3xl shadow-2xl relative overflow-hidden animate-fadeInUp;
   }
 
   .admin-table {
@@ -71,7 +74,7 @@
   }
 
   .admin-table-row {
-    @apply border-b border-white/5 hover:bg-white/5;
+    @apply border-b border-gray-200 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-white/5;
   }
 
   .admin-tag {
@@ -125,17 +128,15 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #1a1a1a;
-  border-radius: 4px;
+  @apply bg-gray-100 dark:bg-[#1a1a1a] rounded-md;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #2ecc71;
-  border-radius: 4px;
+  @apply bg-primary rounded-md;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #27ae60;
+  @apply bg-primaryDark;
 }
 
 /* ============= Mobile Bottom Bar Fix ============= */

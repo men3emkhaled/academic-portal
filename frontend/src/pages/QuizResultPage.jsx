@@ -48,7 +48,7 @@ const QuizResultPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-dark flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-dark flex items-center justify-center transition-colors duration-300">
         <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -56,11 +56,11 @@ const QuizResultPage = () => {
 
   if (!result || !result.answers || result.answers.length === 0) {
     return (
-      <div className="min-h-screen bg-dark text-white flex flex-col items-center justify-center p-6">
+      <div className="min-h-screen bg-gray-50 dark:bg-dark text-gray-900 dark:text-white flex flex-col items-center justify-center p-6 transition-colors duration-300">
         <p className="text-xl mb-4"><AlertCircle className="w-8 h-8 text-primary mx-auto mb-4" /> No results available</p>
         <button
           onClick={() => navigate('/student/quizzes')}
-          className="px-6 py-3 bg-primary text-dark rounded-xl font-bold"
+          className="px-6 py-3 bg-primary text-white dark:text-dark rounded-xl font-bold"
         >
           Back to Quizzes
         </button>
@@ -75,40 +75,40 @@ const QuizResultPage = () => {
   const canRetry = !isPendingReview && attemptsCount < maxAttempts;
 
   return (
-    <div className="min-h-screen bg-dark text-white font-body">
+    <div className="min-h-screen bg-gray-50 dark:bg-dark text-gray-900 dark:text-white font-body transition-colors duration-300">
       <main className="pt-8 px-6 max-w-2xl mx-auto pb-8">
         {/* Hero Section */}
         <section className="text-center mb-12">
-          <h2 className="font-headline font-extrabold text-4xl mb-8 tracking-tighter text-white flex justify-center items-center gap-3">
+          <h2 className="font-headline font-extrabold text-4xl mb-8 tracking-tighter text-gray-900 dark:text-white flex justify-center items-center gap-3">
             {isPendingReview ? <><Clock className="w-8 h-8" /> Under Review</> : 'Quiz Completed!'}
           </h2>
           {isPendingReview ? (
-            <div className="bg-dark-glass rounded-2xl p-8 border border-primary/30">
+            <div className="bg-white dark:bg-dark-glass rounded-2xl p-8 border border-primary/20 dark:border-primary/30 shadow-sm dark:shadow-none">
               <span className="text-6xl mb-4 block"><AlertCircle className="w-16 h-16 text-secondary mx-auto mb-4" /></span>
-              <p className="text-lg text-gray-400">
+              <p className="text-lg text-gray-600 dark:text-gray-400">
                 Your written answers are being reviewed.
               </p>
-              <p className="text-sm text-gray-400 mt-2">
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
                 You will be notified once grading is complete.
               </p>
             </div>
           ) : (
             <>
               <div className="relative inline-flex items-center justify-center p-12 mb-6">
-                <div className="absolute inset-0 rounded-full border-4 border-[#002d0f] opacity-20"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-green-100 dark:border-[#002d0f] opacity-50 dark:opacity-20"></div>
                 <div className="absolute inset-0 rounded-full border-4 border-primary border-t-transparent animate-spin-slow opacity-40"></div>
-                <div className="glow-score w-48 h-48 rounded-full bg-dark-glass flex flex-col items-center justify-center relative z-10 border border-white/10/20">
-                  <span className="font-headline font-black text-6xl text-primary drop-shadow-[0_0_15px_rgba(142,255,113,0.4)]">
+                <div className="glow-score w-48 h-48 rounded-full bg-white dark:bg-dark-glass flex flex-col items-center justify-center relative z-10 border border-gray-200 dark:border-white/10/20 shadow-md dark:shadow-none">
+                  <span className="font-headline font-black text-6xl text-primary drop-shadow-[0_0_15px_rgba(46,204,113,0.3)] dark:drop-shadow-[0_0_15px_rgba(142,255,113,0.4)]">
                     {percentage}%
                   </span>
-                  <span className="font-label text-xs uppercase tracking-widest text-gray-400 mt-2">
+                  <span className="font-label text-xs uppercase tracking-widest text-gray-500 dark:text-gray-400 mt-2">
                     Accuracy
                   </span>
                 </div>
               </div>
-              <div className="bg-dark-card rounded-xl p-4 inline-block">
+              <div className="bg-white dark:bg-dark-card rounded-xl p-4 inline-block shadow-sm dark:shadow-none border border-gray-200 dark:border-transparent">
                 <p className="font-headline font-bold text-xl">
-                  Score: <span className="text-primary">{score}</span> / <span className="text-gray-400">{total_points}</span>
+                  Score: <span className="text-primary">{score}</span> / <span className="text-gray-500 dark:text-gray-400">{total_points}</span>
                 </p>
               </div>
             </>
@@ -117,39 +117,39 @@ const QuizResultPage = () => {
 
         {/* Stats Bento */}
         <div className="grid grid-cols-2 gap-4 mb-8">
-          <div className="bg-dark-glass p-6 rounded-xl border border-white/10/10">
-            <span className="text-2xl mb-2 block"><Clock className="w-6 h-6 text-gray-400" /></span>
-            <p className="text-gray-400 text-xs uppercase tracking-wider mb-1">Time Spent</p>
-            <p className="font-headline font-bold text-xl text-white">{time_spent || '00:00'}</p>
+          <div className="bg-white dark:bg-dark-glass p-6 rounded-xl border border-gray-200 dark:border-white/10/10 shadow-sm dark:shadow-none">
+            <span className="text-2xl mb-2 block"><Clock className="w-6 h-6 text-gray-500 dark:text-gray-400" /></span>
+            <p className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider mb-1">Time Spent</p>
+            <p className="font-headline font-bold text-xl text-gray-900 dark:text-white">{time_spent || '00:00'}</p>
           </div>
-          <div className="bg-dark-glass p-6 rounded-xl border border-white/10/10">
+          <div className="bg-white dark:bg-dark-glass p-6 rounded-xl border border-gray-200 dark:border-white/10/10 shadow-sm dark:shadow-none">
             <span className="text-2xl mb-2 block"><Target className="w-6 h-6 text-primary" /></span>
-            <p className="text-gray-400 text-xs uppercase tracking-wider mb-1">Rank</p>
-            <p className="font-headline font-bold text-xl text-white">
+            <p className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider mb-1">Rank</p>
+            <p className="font-headline font-bold text-xl text-gray-900 dark:text-white">
               {isPendingReview ? '—' : `#${rank || '-'}`}
             </p>
           </div>
         </div>
 
-        {/* Tabs (تظهر فقط إذا كانت المحاولة مكتملة) */}
+        {/* Tabs */}
         {!isPendingReview && (
-          <div className="flex gap-4 border-b border-white/10 pb-3 mb-6">
+          <div className="flex gap-4 border-b border-gray-200 dark:border-white/10 pb-3 mb-6">
             <button
               onClick={() => setActiveTab('review')}
-              className={`px-4 py-1 rounded-full text-sm font-medium transition ${
+              className={`px-4 py-1.5 rounded-full text-sm font-bold transition flex items-center gap-2 ${
                 activeTab === 'review'
-                  ? 'bg-primary text-dark'
-                  : 'text-gray-400 hover:text-white'
+                  ? 'bg-primary text-white dark:text-dark shadow-sm'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5'
               }`}
             >
               <FileQuestion className="w-4 h-4" /> Review Answers
             </button>
             <button
               onClick={() => setActiveTab('leaderboard')}
-              className={`px-4 py-1 rounded-full text-sm font-medium transition ${
+              className={`px-4 py-1.5 rounded-full text-sm font-bold transition flex items-center gap-2 ${
                 activeTab === 'leaderboard'
-                  ? 'bg-primary text-dark'
-                  : 'text-gray-400 hover:text-white'
+                  ? 'bg-primary text-white dark:text-dark shadow-sm'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5'
               }`}
             >
               <Activity className="w-4 h-4" /> Leaderboard
@@ -158,9 +158,8 @@ const QuizResultPage = () => {
         )}
 
         {isPendingReview ? (
-          /* ✅ عرض محسّن للإجابات أثناء المراجعة */
           <section className="space-y-6">
-            <h3 className="font-headline font-bold text-xl mb-4">Your Submitted Answers</h3>
+            <h3 className="font-headline font-bold text-xl mb-4 text-gray-900 dark:text-white">Your Submitted Answers</h3>
             {answers.map((ans, idx) => {
               if (!ans || !ans.question_id) return null;
               const hasText = ans.student_answer && ans.student_answer.trim() !== '';
@@ -169,32 +168,30 @@ const QuizResultPage = () => {
               return (
                 <div
                   key={ans.question_id}
-                  className="bg-dark-glass rounded-xl p-6 border-l-4 border-yellow-500/50 relative overflow-hidden"
+                  className="bg-white dark:bg-dark-glass rounded-xl p-6 border-l-4 border-yellow-400 dark:border-yellow-500/50 shadow-sm dark:shadow-none relative overflow-hidden"
                 >
                   <div className="flex items-start gap-4">
-                    <div className="w-8 h-8 rounded-lg bg-yellow-500/20 text-yellow-500 flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-lg bg-yellow-100 dark:bg-yellow-500/20 text-yellow-600 dark:text-yellow-500 flex items-center justify-center shrink-0">
                       <span className="font-headline font-black">{idx + 1}</span>
                     </div>
                     <div className="flex-1">
-                      <p className="font-headline font-bold text-lg mb-4 text-white">
+                      <p className="font-headline font-bold text-lg mb-4 text-gray-900 dark:text-white">
                         {ans.question_text}
                       </p>
                       
-                      {/* عرض النص المكتوب */}
                       {hasText && (
-                        <div className="mb-4 p-4 bg-dark-card rounded-lg border border-white/10/30">
-                          <p className="text-xs text-gray-400 mb-1">Your written answer:</p>
-                          <p className="text-white whitespace-pre-wrap">{ans.student_answer}</p>
+                        <div className="mb-4 p-4 bg-gray-50 dark:bg-dark-card rounded-lg border border-gray-200 dark:border-white/10/30">
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Your written answer:</p>
+                          <p className="text-gray-800 dark:text-white whitespace-pre-wrap">{ans.student_answer}</p>
                         </div>
                       )}
                       
-                      {/* عرض الصورة المرفوعة */}
                       {hasImage && (
                         <div className="mb-4">
                           <img
                             src={getDirectImageUrl(`${process.env.REACT_APP_API_URL || ''}${ans.written_answer_url}`)}
                             alt="Your answer"
-                            className="max-h-64 rounded-lg border border-white/10/30 cursor-pointer"
+                            className="max-h-64 rounded-lg border border-gray-200 dark:border-white/10/30 cursor-pointer shadow-sm"
                             onError={(e) => {
                               e.target.onerror = null;
                               e.target.src = 'https://via.placeholder.com/400x200/1a1a1a/8eff71?text=Image+Not+Available';
@@ -205,10 +202,10 @@ const QuizResultPage = () => {
                       )}
                       
                       {!hasText && !hasImage && (
-                        <p className="text-red-400 text-sm">No answer provided</p>
+                        <p className="text-red-500 dark:text-red-400 text-sm font-medium">No answer provided</p>
                       )}
                       
-                      <div className="mt-4 flex items-center gap-2 text-yellow-500">
+                      <div className="mt-4 flex items-center gap-2 text-yellow-600 dark:text-yellow-500 font-medium">
                         <span><Clock className="w-4 h-4" /></span>
                         <span className="text-sm">Waiting for review</span>
                       </div>
@@ -220,7 +217,6 @@ const QuizResultPage = () => {
           </section>
         ) : activeTab === 'review' ? (
           <section className="space-y-6">
-            {/* عرض الإجابات العادية (MCQ/True-False) مع دعم الصور المقالية بعد التصحيح */}
             {answers.map((ans, idx) => {
               if (!ans || !ans.question_id) return null;
               const isCorrect = ans.is_correct;
@@ -230,23 +226,23 @@ const QuizResultPage = () => {
               return (
                 <div
                   key={ans.question_id}
-                  className={`bg-dark-glass rounded-xl p-6 border-l-4 ${
-                    isCorrect ? 'border-primary/50' : 'border-secondary/50'
-                  } relative overflow-hidden group`}
+                  className={`bg-white dark:bg-dark-glass rounded-xl p-6 border-l-4 ${
+                    isCorrect ? 'border-primary/80 dark:border-primary/50' : 'border-secondary/80 dark:border-secondary/50'
+                  } shadow-sm dark:shadow-none relative overflow-hidden group`}
                 >
-                  <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                  <div className="absolute top-0 right-0 p-4 opacity-[0.03] dark:opacity-5 group-hover:opacity-10 transition-opacity">
                     <span className="text-8xl">{isCorrect ? <CheckCircle2 className="w-full h-full text-primary" /> : <AlertCircle className="w-full h-full text-secondary" />}</span>
                   </div>
                   <div className="flex items-start gap-4">
                     <div
                       className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
-                        isCorrect ? 'bg-primary/20 text-primary' : 'bg-secondary/20 text-secondary'
+                        isCorrect ? 'bg-primary/10 dark:bg-primary/20 text-primary' : 'bg-secondary/10 dark:bg-secondary/20 text-secondary'
                       }`}
                     >
                       <span className="font-headline font-black">{idx + 1}</span>
                     </div>
-                    <div className="flex-1">
-                      <p className="font-headline font-bold text-lg mb-2 text-white">
+                    <div className="flex-1 relative z-10">
+                      <p className="font-headline font-bold text-lg mb-2 text-gray-900 dark:text-white">
                         {ans.question_text || 'Question text not available'}
                       </p>
 
@@ -255,7 +251,7 @@ const QuizResultPage = () => {
                           <img
                             src={getDirectImageUrl(ans.image_url)}
                             alt="Question illustration"
-                            className="max-h-48 rounded-lg border border-white/10/30"
+                            className="max-h-48 rounded-lg border border-gray-200 dark:border-white/10/30"
                             onError={(e) => {
                               e.target.onerror = null;
                               e.target.src = 'https://via.placeholder.com/400x200/1a1a1a/8eff71?text=Image+Not+Available';
@@ -270,34 +266,34 @@ const QuizResultPage = () => {
                             <img
                               src={getDirectImageUrl(`${process.env.REACT_APP_API_URL || ''}${ans.written_answer_url}`)}
                               alt="Your written answer"
-                              className="max-h-64 rounded-lg border border-white/10/30 cursor-pointer"
+                              className="max-h-64 rounded-lg border border-gray-200 dark:border-white/10/30 cursor-pointer shadow-sm"
                               onClick={() => window.open(`${process.env.REACT_APP_API_URL || ''}${ans.written_answer_url}`, '_blank')}
                             />
                           )}
-                          <p className="text-sm text-gray-400 mt-2">
-                            Points: {ans.points_earned ?? 0} / {ans.points ?? 0}
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 font-medium">
+                            Points: <span className="font-bold text-gray-900 dark:text-white">{ans.points_earned ?? 0}</span> / {ans.points ?? 0}
                           </p>
                         </div>
                       ) : ans.question_type === 'true_false' ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                           <div
-                            className={`flex items-center gap-3 bg-primary/10 p-3 rounded-lg border ${
-                              isCorrect ? 'border-primary/20' : 'border-secondary/20'
+                            className={`flex items-center gap-3 bg-gray-50 dark:bg-primary/10 p-3 rounded-lg border ${
+                              isCorrect ? 'border-primary/30 dark:border-primary/20' : 'border-secondary/30 dark:border-secondary/20'
                             }`}
                           >
                             <span className="text-xl">{isCorrect ? <CheckCircle2 className="w-full h-full text-primary" /> : <AlertCircle className="w-full h-full text-secondary" />}</span>
                             <div>
-                              <p className="text-[10px] uppercase text-gray-400 font-bold">Your Answer</p>
+                              <p className="text-[10px] uppercase text-gray-500 dark:text-gray-400 font-bold">Your Answer</p>
                               <p className={`font-bold ${isCorrect ? 'text-primary' : 'text-secondary'}`}>
                                 {studentAnswer === 'true' ? 'True' : 'False'}
                               </p>
                             </div>
                           </div>
                           {!isCorrect && (
-                            <div className="flex items-center gap-3 bg-primary/10 p-3 rounded-lg border border-primary/20">
+                            <div className="flex items-center gap-3 bg-primary/5 dark:bg-primary/10 p-3 rounded-lg border border-primary/20">
                               <span className="text-xl">✅</span>
                               <div>
-                                <p className="text-[10px] uppercase text-gray-400 font-bold">Correct Answer</p>
+                                <p className="text-[10px] uppercase text-gray-500 dark:text-gray-400 font-bold">Correct Answer</p>
                                 <p className="font-bold text-primary">
                                   {correctAnswer === 'true' ? 'True' : 'False'}
                                 </p>
@@ -312,18 +308,18 @@ const QuizResultPage = () => {
                             const isStudentChoice = studentAnswer === letter;
                             const isCorrectChoice = correctAnswer === letter;
 
-                            let bgClass = 'bg-primary/10';
-                            let borderClass = '';
-                            let textClass = '';
+                            let bgClass = 'bg-gray-50 dark:bg-primary/10';
+                            let borderClass = 'border-gray-100 dark:border-transparent';
+                            let textClass = 'text-gray-700 dark:text-white';
 
                             if (isCorrectChoice) {
                               bgClass = 'bg-primary/10';
                               borderClass = 'border-primary/40';
-                              textClass = 'text-primary';
+                              textClass = 'text-primary font-bold';
                             } else if (isStudentChoice && !isCorrectChoice) {
                               bgClass = 'bg-secondary/10';
                               borderClass = 'border-secondary/40';
-                              textClass = 'text-secondary';
+                              textClass = 'text-secondary font-bold';
                             }
 
                             return (
@@ -331,13 +327,13 @@ const QuizResultPage = () => {
                                 key={i}
                                 className={`flex items-center gap-3 p-3 rounded-lg border ${bgClass} ${borderClass}`}
                               >
-                                <span className="font-bold mr-2">{letter}.</span>
+                                <span className="font-bold mr-2 text-gray-600 dark:text-gray-400">{letter}.</span>
                                 <span className={textClass}>{opt}</span>
                                 {isStudentChoice && (
-                                  <span className="ml-auto text-xs text-gray-400">(Your answer)</span>
+                                  <span className="ml-auto text-xs text-gray-500 dark:text-gray-400 font-medium">(Your answer)</span>
                                 )}
                                 {isCorrectChoice && (
-                                  <span className="ml-auto text-xs text-primary">✓ Correct</span>
+                                  <span className="ml-auto text-xs text-primary font-bold">✓ Correct</span>
                                 )}
                               </div>
                             );
@@ -346,14 +342,14 @@ const QuizResultPage = () => {
                       )}
 
                       {ans.explanation && (
-                        <div className="mt-4 p-4 bg-dark-card rounded-lg border border-primary/20">
-                          <p className="text-xs uppercase tracking-wider text-primary mb-1"><MonitorPlay className="w-4 h-4" /> Explanation</p>
-                          <p className="text-sm text-gray-400">{ans.explanation}</p>
+                        <div className="mt-4 p-4 bg-gray-50 dark:bg-dark-card rounded-lg border border-primary/20">
+                          <p className="text-xs uppercase tracking-wider text-primary mb-1 font-bold flex items-center gap-1"><MonitorPlay className="w-4 h-4" /> Explanation</p>
+                          <p className="text-sm text-gray-700 dark:text-gray-400">{ans.explanation}</p>
                         </div>
                       )}
 
-                      <p className="text-sm text-gray-400 mt-4">
-                        Points: {ans.points_earned ?? 0} / {ans.points ?? 0}
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-4 font-medium">
+                        Points: <span className="font-bold text-gray-900 dark:text-white">{ans.points_earned ?? 0}</span> / {ans.points ?? 0}
                       </p>
                     </div>
                   </div>
@@ -364,10 +360,10 @@ const QuizResultPage = () => {
         ) : (
           <section>
             {leaderboard.length === 0 ? (
-              <p className="text-center text-gray-400 py-8">No leaderboard data available.</p>
+              <p className="text-center text-gray-500 dark:text-gray-400 py-8 bg-white dark:bg-transparent rounded-2xl shadow-sm dark:shadow-none">No leaderboard data available.</p>
             ) : (
               <div className="space-y-2">
-                <div className="grid grid-cols-12 gap-2 text-xs uppercase tracking-wider text-gray-400 font-bold px-4 py-2">
+                <div className="grid grid-cols-12 gap-2 text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 font-bold px-4 py-2">
                   <div className="col-span-2">Rank</div>
                   <div className="col-span-5">Student</div>
                   <div className="col-span-3 text-right">Score</div>
@@ -376,20 +372,20 @@ const QuizResultPage = () => {
                 {leaderboard.map((entry) => (
                   <div
                     key={entry.student_id}
-                    className={`grid grid-cols-12 gap-2 items-center p-4 rounded-lg ${
+                    className={`grid grid-cols-12 gap-2 items-center p-4 rounded-lg shadow-sm dark:shadow-none ${
                       entry.student_id === student_id
-                        ? 'bg-primary/20 border border-primary/50'
-                        : 'bg-dark-glass'
+                        ? 'bg-primary/10 dark:bg-primary/20 border border-primary/30 dark:border-primary/50'
+                        : 'bg-white dark:bg-dark-glass border border-gray-100 dark:border-transparent'
                     }`}
                   >
                     <div className="col-span-2 font-bold">
-                      {entry.rank === 1 ? <span className="text-secondary font-black">#1</span> : entry.rank === 2 ? <span className="text-gray-400 font-black">#2</span> : entry.rank === 3 ? <span className="text-[#cd7f32] font-black">#3</span> : `#${entry.rank}`}
+                      {entry.rank === 1 ? <span className="text-secondary font-black">#1</span> : entry.rank === 2 ? <span className="text-gray-500 dark:text-gray-400 font-black">#2</span> : entry.rank === 3 ? <span className="text-[#cd7f32] font-black">#3</span> : <span className="text-gray-700 dark:text-gray-300">#{entry.rank}</span>}
                     </div>
-                    <div className="col-span-5 truncate">{entry.student_name}</div>
-                    <div className="col-span-3 text-right font-mono">
+                    <div className="col-span-5 truncate font-medium text-gray-900 dark:text-white">{entry.student_name}</div>
+                    <div className="col-span-3 text-right font-mono font-bold text-primary">
                       {entry.score} / {entry.total_points} ({entry.percentage}%)
                     </div>
-                    <div className="col-span-2 text-right text-sm text-gray-400">
+                    <div className="col-span-2 text-right text-sm text-gray-500 dark:text-gray-400">
                       {entry.time_spent || '—'}
                     </div>
                   </div>
@@ -403,7 +399,7 @@ const QuizResultPage = () => {
         <section className="mt-12 space-y-3">
           <button
             onClick={() => navigate('/student/quizzes')}
-            className="w-full py-4 bg-primary text-dark font-headline font-extrabold text-lg rounded-xl shadow-[0_12px_40px_rgba(var(--primary),0.25)] hover:scale-[1.02] active:scale-95 transition-all uppercase tracking-tight"
+            className="w-full py-4 bg-primary text-white dark:text-dark font-headline font-extrabold text-lg rounded-xl shadow-[0_4px_15px_rgba(46,204,113,0.3)] dark:shadow-[0_12px_40px_rgba(var(--primary),0.25)] hover:scale-[1.02] active:scale-95 transition-all uppercase tracking-tight"
           >
             Back to Quizzes
           </button>
@@ -417,7 +413,7 @@ const QuizResultPage = () => {
           )}
           <button
             onClick={() => toast.success('Results copied to clipboard')}
-            className="w-full text-gray-400 font-label text-sm uppercase tracking-widest hover:text-white transition-colors py-2"
+            className="w-full text-gray-500 dark:text-gray-400 font-label text-sm font-bold uppercase tracking-widest hover:text-gray-900 dark:hover:text-white transition-colors py-2"
           >
             Share Results
           </button>
@@ -433,6 +429,9 @@ const QuizResultPage = () => {
           animation: spin-slow 3s linear infinite;
         }
         .glow-score {
+          box-shadow: 0 0 40px rgba(46, 204, 113, 0.2);
+        }
+        .dark .glow-score {
           box-shadow: 0 0 60px rgba(142, 255, 113, 0.15);
         }
         .font-headline {

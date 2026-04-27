@@ -53,11 +53,9 @@ const StudentRoadmap = () => {
 
   const toggleTask = async (taskId, currentStatus) => {
     if (updating) return;
-    console.log('Toggling task:', taskId, 'Current status:', currentStatus);
     setUpdating(true);
     const newStatus = !currentStatus;
 
-    // تحديث وهمي للمهمة المحددة فقط
     setTasks(prevTasks =>
       prevTasks.map(task =>
         task.task_id === taskId ? { ...task, is_completed: newStatus } : task
@@ -74,7 +72,6 @@ const StudentRoadmap = () => {
       toast.success(newStatus ? 'Task completed! 🎉' : 'Task marked as incomplete');
     } catch (error) {
       console.error('Error toggling task:', error);
-      // إعادة تحميل الحالة الحقيقية من الخادم في حالة الخطأ
       fetchTrackProgress(selectedTrack.id);
       toast.error('Failed to update task');
     } finally {
@@ -96,7 +93,7 @@ const StudentRoadmap = () => {
 
   if ((loading || loadingRoadmap) && tracks.length === 0) {
     return (
-      <div className="min-h-screen bg-dark text-white font-body">
+      <div className="min-h-screen bg-gray-50 dark:bg-dark text-gray-900 dark:text-white font-body transition-colors duration-300">
         <Sidebar onLogout={handleLogout} />
         <div className="md:ml-64 flex justify-center items-center h-screen">
           <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
@@ -106,67 +103,73 @@ const StudentRoadmap = () => {
   }
 
   return (
-    <div className="min-h-screen bg-dark text-white font-body">
+    <div className="min-h-screen bg-gray-50 dark:bg-dark text-gray-900 dark:text-white font-body transition-colors duration-300">
       <Sidebar activePage="roadmap" onLogout={handleLogout} />
 
       <div className="md:ml-64 pb-24 md:pb-8">
         <div className="max-w-4xl mx-auto px-6 py-8">
           <div className="flex items-center justify-between mb-8">
-            <h1 className="font-headline text-4xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-white to-white/70 leading-tight pb-2 mb-2">
+            <h1 className="font-headline text-4xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-white/70 leading-tight pb-2 mb-2">
               Career Roadmap
             </h1>
           </div>
 
           {tracks.length === 0 ? (
-            <div className="text-center py-16 bg-dark-glass/50 backdrop-blur-md rounded-[2rem] border border-dashed border-white/10 shadow-inner">
-              <p className="text-gray-400">No roadmap tracks available yet.</p>
+            <div className="text-center py-16 bg-white/50 dark:bg-dark-glass/50 backdrop-blur-md rounded-[2rem] border border-dashed border-gray-300 dark:border-white/10 shadow-sm dark:shadow-inner">
+              <p className="text-gray-500 dark:text-gray-400">No roadmap tracks available yet.</p>
             </div>
           ) : (
             <>
-              <div className="bg-dark-card rounded-[2rem] border border-white/10 p-6 flex flex-col md:flex-row md:items-center justify-between gap-5 mb-10 shadow-2xl relative overflow-hidden group hover:border-white/20 transition-all duration-500"><div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent pointer-events-none"></div>
-                <div className="flex items-center gap-4">
+              <div className="bg-white dark:bg-dark-card rounded-[2rem] border border-gray-200 dark:border-white/10 p-6 flex flex-col md:flex-row md:items-center justify-between gap-5 mb-10 shadow-sm dark:shadow-2xl relative overflow-hidden group hover:border-gray-300 dark:hover:border-white/20 transition-all duration-500">
+                <div className="absolute inset-0 bg-gradient-to-br from-gray-50 dark:from-white/[0.02] to-transparent pointer-events-none"></div>
+                <div className="flex items-center gap-4 relative z-10">
                   <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
                     <Target className="w-8 h-8 text-primary" />
                   </div>
                   <div>
-                    <p className="text-primary/70 text-[10px] font-bold uppercase tracking-widest">Active Track</p>
-                    <h2 className="font-headline font-extrabold text-xl text-white">
+                    <p className="text-primary/80 dark:text-primary/70 text-[10px] font-bold uppercase tracking-widest">Active Track</p>
+                    <h2 className="font-headline font-extrabold text-xl text-gray-900 dark:text-white">
                       {selectedTrack?.name || 'Select a track'}
                     </h2>
                   </div>
                 </div>
-                <div className="relative group"><div className="absolute inset-y-0 right-3 flex items-center pointer-events-none"><span className="text-gray-400">⌵</span></div><select
-                  value={selectedTrack?.id || ''}
-                  onChange={(e) => handleTrackChange(e.target.value)}
-                  className="px-4 py-3 bg-dark-glass hover:bg-white/5 text-white text-sm font-bold rounded-xl border border-white/10 shadow-inner focus:ring-2 focus:ring-primary/40 focus:outline-none cursor-pointer transition-all duration-300 w-full md:w-auto appearance-none"
-                >
-                  {tracks.map(track => (
-                    <option key={track.id} value={track.id}>
-                      {track.name} {track.is_primary ? '⭐' : ''}
-                    </option>
-                  ))}
-                </select></div>
+                <div className="relative group z-10">
+                  <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                    <span className="text-gray-500 dark:text-gray-400">⌵</span>
+                  </div>
+                  <select
+                    value={selectedTrack?.id || ''}
+                    onChange={(e) => handleTrackChange(e.target.value)}
+                    className="px-4 py-3 bg-gray-50 dark:bg-dark-glass hover:bg-gray-100 dark:hover:bg-white/5 text-gray-900 dark:text-white text-sm font-bold rounded-xl border border-gray-200 dark:border-white/10 shadow-sm dark:shadow-inner focus:ring-2 focus:ring-primary/40 focus:outline-none cursor-pointer transition-all duration-300 w-full md:w-auto appearance-none"
+                  >
+                    {tracks.map(track => (
+                      <option key={track.id} value={track.id}>
+                        {track.name} {track.is_primary ? '⭐' : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
               {selectedTrack && (
                 <>
-                  <div className="relative overflow-hidden bg-dark-glass rounded-[2rem] p-8 mb-10 shadow-[0_12px_40px_rgba(142,255,113,0.15)] border border-primary/30 backdrop-blur-xl group hover:shadow-[0_20px_50px_rgba(142,255,113,0.2)] hover:border-primary/50 transition-all duration-500">
-                    <div className="absolute -top-12 -right-12 w-32 h-32 bg-primary/5 rounded-full blur-3xl"></div>
+                  <div className="relative overflow-hidden bg-white dark:bg-dark-glass rounded-[2rem] p-8 mb-10 shadow-[0_4px_20px_rgba(46,204,113,0.1)] dark:shadow-[0_12px_40px_rgba(142,255,113,0.15)] border border-primary/20 dark:border-primary/30 backdrop-blur-xl group hover:shadow-[0_8px_30px_rgba(46,204,113,0.15)] dark:hover:shadow-[0_20px_50px_rgba(142,255,113,0.2)] hover:border-primary/40 dark:hover:border-primary/50 transition-all duration-500">
+                    <div className="absolute -top-12 -right-12 w-32 h-32 bg-primary/10 dark:bg-primary/5 rounded-full blur-3xl"></div>
                     <div className="relative z-10 space-y-4">
                       <div className="flex justify-between items-end">
                         <div className="space-y-1">
-                          <p className="text-primary/70 text-[10px] sm:text-xs font-bold uppercase tracking-wider">Your Progress</p>
+                          <p className="text-primary/80 dark:text-primary/70 text-[10px] sm:text-xs font-bold uppercase tracking-wider">Your Progress</p>
                           <h3 className="font-headline font-black text-4xl text-primary">{progress?.percentage || 0}%</h3>
                         </div>
                         <div className="text-right">
-                          <p className="text-white text-sm font-semibold">
+                          <p className="text-gray-900 dark:text-white text-sm font-semibold">
                             {progress?.completed_tasks || 0} of {progress?.total_tasks || 0} Done
                           </p>
                         </div>
                       </div>
-                      <div className="h-3 w-full bg-dark border border-white/10 rounded-full overflow-hidden shadow-inner">
+                      <div className="h-3 w-full bg-gray-100 dark:bg-dark border border-gray-200 dark:border-white/10 rounded-full overflow-hidden shadow-inner">
                         <div 
-                          className="h-full bg-primary rounded-full shadow-[0_0_12px_rgba(142,255,113,0.5)] transition-all duration-500"
+                          className="h-full bg-primary rounded-full shadow-[0_0_12px_rgba(46,204,113,0.5)] dark:shadow-[0_0_12px_rgba(142,255,113,0.5)] transition-all duration-500"
                           style={{ width: `${progress?.percentage || 0}%` }}
                         />
                       </div>
@@ -175,47 +178,47 @@ const StudentRoadmap = () => {
 
                   <div className="space-y-4">
                     <div className="flex items-center gap-3 mb-4">
-                      <h3 className="font-headline font-black text-2xl text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400 whitespace-nowrap">Milestones & Tasks</h3>
-                      <div className="hidden sm:block h-[1px] flex-grow bg-gradient-to-r from-white/10 to-transparent"></div>
+                      <h3 className="font-headline font-black text-2xl text-transparent bg-clip-text bg-gradient-to-r from-gray-900 to-gray-500 dark:from-white dark:to-gray-400 whitespace-nowrap">Milestones & Tasks</h3>
+                      <div className="hidden sm:block h-[1px] flex-grow bg-gradient-to-r from-gray-200 dark:from-white/10 to-transparent"></div>
                     </div>
 
                     {tasks.length === 0 ? (
-                      <div className="text-center py-12 bg-dark-glass/50 backdrop-blur-md rounded-[2rem] border border-dashed border-white/10 shadow-inner">
-                        <p className="text-gray-400">No tasks defined for this track yet.</p>
+                      <div className="text-center py-12 bg-white/50 dark:bg-dark-glass/50 backdrop-blur-md rounded-[2rem] border border-dashed border-gray-300 dark:border-white/10 shadow-sm dark:shadow-inner">
+                        <p className="text-gray-500 dark:text-gray-400">No tasks defined for this track yet.</p>
                       </div>
                     ) : (
                       <div className="space-y-3">
                         {tasks.map((task, idx) => (
                           <div
                             key={task.task_id}
-                            className={`relative overflow-hidden group bg-dark-card border border-white/5 rounded-[1.5rem] p-6 flex items-start gap-5 hover:border-primary/40 hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(142,255,113,0.1)] transition-all duration-300 ${
+                            className={`relative overflow-hidden group bg-white dark:bg-dark-card border border-gray-200 dark:border-white/5 rounded-[1.5rem] p-6 flex items-start gap-5 hover:border-primary/40 dark:hover:border-primary/40 hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(46,204,113,0.1)] dark:hover:shadow-[0_10px_30px_rgba(142,255,113,0.1)] shadow-sm dark:shadow-none transition-all duration-300 ${
                               task.is_completed ? 'opacity-70' : ''
                             }`}
                           >
                             <button
                               onClick={() => toggleTask(task.task_id, task.is_completed)}
                               disabled={updating}
-                              className="flex items-center justify-center hover:scale-110 active:scale-95 hover:shadow-[0_0_15px_rgba(142,255,113,0.5)] rounded-full transition-all mt-1"
+                              className="flex items-center justify-center hover:scale-110 active:scale-95 hover:shadow-[0_0_15px_rgba(46,204,113,0.4)] dark:hover:shadow-[0_0_15px_rgba(142,255,113,0.5)] rounded-full transition-all mt-1"
                             >
                               {task.is_completed ? (
                                 <svg className="w-6 h-6 text-primary" fill="currentColor" viewBox="0 0 24 24">
                                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                                 </svg>
                               ) : (
-                                <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-6 h-6 text-gray-400 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none"/>
                                 </svg>
                               )}
                             </button>
-                            <div className="flex-1">
-                              <h4 className={`font-headline font-bold text-white ${task.is_completed ? 'line-through decoration-primary/40' : ''}`}>
+                            <div className="flex-1 relative z-10">
+                              <h4 className={`font-headline font-bold text-gray-900 dark:text-white ${task.is_completed ? 'line-through decoration-primary/40' : ''}`}>
                                 {task.title}
                               </h4>
                               {task.description && (
-                                <p className="text-sm text-gray-400 mt-0.5">{task.description}</p>
+                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{task.description}</p>
                               )}
                             </div>
-                            <span className="text-xs text-gray-400/50">#{idx + 1}</span>
+                            <span className="text-xs text-gray-400 dark:text-gray-400/50 relative z-10">#{idx + 1}</span>
                           </div>
                         ))}
                       </div>
