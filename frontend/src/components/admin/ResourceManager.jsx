@@ -161,12 +161,12 @@ const ResourceManager = () => {
 
   const getTypeIcon = (type) => {
       switch(type) {
-          case 'video': return <Video className="w-4 h-4 text-red-400" />;
-          case 'pdf': return <FileText className="w-4 h-4 text-orange-400" />;
-          case 'summary': return <Layers className="w-4 h-4 text-blue-400" />;
-          case 'playlist': return <PlayCircle className="w-4 h-4 text-purple-400" />;
-          case 'recording': return <Mic className="w-4 h-4 text-emerald-400" />;
-          default: return <LinkIcon className="w-4 h-4 text-slate-400" />;
+          case 'video': return <Video className="w-4 h-4 text-red-500 dark:text-red-400" />;
+          case 'pdf': return <FileText className="w-4 h-4 text-orange-500 dark:text-orange-400" />;
+          case 'summary': return <Layers className="w-4 h-4 text-blue-500 dark:text-blue-400" />;
+          case 'playlist': return <PlayCircle className="w-4 h-4 text-purple-500 dark:text-purple-400" />;
+          case 'recording': return <Mic className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />;
+          default: return <LinkIcon className="w-4 h-4 text-gray-500 dark:text-slate-400" />;
       }
   };
 
@@ -177,10 +177,10 @@ const ResourceManager = () => {
         <div className="flex items-center gap-4">
           <div className="w-2 h-10 bg-blue-500 rounded-full shadow-[0_0_15px_rgba(59,130,246,0.5)]"></div>
           <div>
-            <h2 className="text-2xl font-black text-white tracking-tight flex items-center gap-3">
-              <FolderOpen className="w-6 h-6 text-blue-400" /> Resource Vault
+            <h2 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight flex items-center gap-3">
+              <FolderOpen className="w-6 h-6 text-blue-500 dark:text-blue-400" /> Resource Vault
             </h2>
-            <p className="text-slate-500 text-xs font-bold uppercase tracking-[0.2em] mt-1">Course Material Management & Distribution</p>
+            <p className="text-gray-500 dark:text-slate-500 text-xs font-bold uppercase tracking-[0.2em] mt-1">Course Material Management & Distribution</p>
           </div>
         </div>
       </div>
@@ -188,22 +188,22 @@ const ResourceManager = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
         <div className="space-y-8">
             {/* Control Node: Selection */}
-            <div className="admin-card relative overflow-hidden group">
+            <div className="admin-card relative overflow-hidden group transition-colors">
                 <div className="absolute top-0 right-0 w-48 h-48 bg-blue-500/5 blur-[80px] rounded-full"></div>
                 
                 <div className="relative z-10">
                     <div className="flex items-center gap-3 mb-6">
-                        <div className="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center border border-blue-500/30">
-                            <BookOpen className="w-5 h-5 text-blue-400" />
+                        <div className="w-10 h-10 bg-blue-500/10 dark:bg-blue-500/20 rounded-xl flex items-center justify-center border border-blue-500/20 dark:border-blue-500/30">
+                            <BookOpen className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                         </div>
                         <div>
-                            <h3 className="text-lg font-black text-white tracking-tight">Active Linkage</h3>
-                            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Connect resources to course grid</p>
+                            <h3 className="text-lg font-black text-gray-900 dark:text-white tracking-tight">Active Linkage</h3>
+                            <p className="text-[10px] text-gray-500 dark:text-slate-500 font-bold uppercase tracking-widest">Connect resources to course grid</p>
                         </div>
                     </div>
 
                     <div className="space-y-4">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4">Target Course</label>
+                        <label className="text-[10px] font-black text-gray-500 dark:text-slate-500 uppercase tracking-widest ml-4">Target Course</label>
                         <select
                             value={selectedCourseName}
                             onChange={(e) => setSelectedCourseName(e.target.value)}
@@ -214,9 +214,9 @@ const ResourceManager = () => {
                                 <option key={c.name} value={c.name}>{c.name}</option>
                             ))}
                         </select>
-                        <div className="flex items-start gap-2 bg-white/[0.02] p-4 rounded-2xl border border-white/5">
+                        <div className="flex items-start gap-2 bg-gray-50 dark:bg-white/[0.02] p-4 rounded-2xl border border-gray-100 dark:border-white/5">
                             <Activity className="w-4 h-4 text-blue-500/50 flex-shrink-0 mt-0.5" />
-                            <p className="text-[10px] text-slate-500 font-bold uppercase leading-relaxed tracking-wider">
+                            <p className="text-[10px] text-gray-500 dark:text-slate-500 font-bold uppercase leading-relaxed tracking-wider">
                                 Resources are synchronized across all department sectors for identical course hashes.
                             </p>
                         </div>
@@ -226,26 +226,26 @@ const ResourceManager = () => {
 
             {/* Form Node: Add/Edit */}
             {selectedCourseName && (
-                <div className="admin-card relative overflow-hidden animate-fadeInUp">
+                <div className="admin-card relative overflow-hidden animate-fadeInUp transition-colors">
                     <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/5 blur-[80px] rounded-full"></div>
                     
                     <div className="relative z-10">
                         <div className="flex items-center gap-3 mb-8">
-                            <div className="w-10 h-10 bg-emerald-500/20 rounded-xl flex items-center justify-center border border-emerald-500/30">
-                                {editingResource ? <Edit3 className="w-5 h-5 text-emerald-400" /> : <Plus className="w-5 h-5 text-emerald-400" />}
+                            <div className="w-10 h-10 bg-emerald-500/10 dark:bg-emerald-500/20 rounded-xl flex items-center justify-center border border-emerald-500/20 dark:border-emerald-500/30">
+                                {editingResource ? <Edit3 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" /> : <Plus className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />}
                             </div>
                             <div>
-                                <h3 className="text-lg font-black text-white tracking-tight">
+                                <h3 className="text-lg font-black text-gray-900 dark:text-white tracking-tight">
                                     {editingResource ? 'Recalibrate Meta' : 'Inject New Data'}
                                 </h3>
-                                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Resource Definition Protocol</p>
+                                <p className="text-[10px] text-gray-500 dark:text-slate-500 font-bold uppercase tracking-widest">Resource Definition Protocol</p>
                             </div>
                         </div>
 
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4">Vector Type</label>
+                                    <label className="text-[10px] font-black text-gray-500 dark:text-slate-500 uppercase tracking-widest ml-4">Vector Type</label>
                                     <select
                                         value={formData.type}
                                         onChange={(e) => {
@@ -262,7 +262,7 @@ const ResourceManager = () => {
                                     </select>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4">Descriptive Title</label>
+                                    <label className="text-[10px] font-black text-gray-500 dark:text-slate-500 uppercase tracking-widest ml-4">Descriptive Title</label>
                                     <input
                                         type="text"
                                         placeholder="Identification tag..."
@@ -276,10 +276,10 @@ const ResourceManager = () => {
 
                             {formData.type === 'recording' ? (
                                 <div className="space-y-4">
-                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4">Source Transmission File</label>
-                                    <label className={`relative flex flex-col items-center justify-center gap-3 cursor-pointer bg-slate-900 border border-white/5 border-dashed rounded-3xl p-8 hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-all group ${loading ? 'opacity-50 pointer-events-none' : ''}`}>
-                                        <Mic className="w-10 h-10 text-slate-700 group-hover:text-emerald-400 transition-colors" />
-                                        <span className="text-slate-400 font-black uppercase text-xs tracking-widest text-center">
+                                    <label className="text-[10px] font-black text-gray-500 dark:text-slate-500 uppercase tracking-widest ml-4">Source Transmission File</label>
+                                    <label className={`relative flex flex-col items-center justify-center gap-3 cursor-pointer bg-gray-100 dark:bg-slate-900 border border-gray-200 dark:border-white/5 border-dashed rounded-3xl p-8 hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-all group ${loading ? 'opacity-50 pointer-events-none' : ''}`}>
+                                        <Mic className="w-10 h-10 text-gray-400 dark:text-slate-700 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors" />
+                                        <span className="text-gray-500 dark:text-slate-400 font-black uppercase text-xs tracking-widest text-center">
                                             {recordingFile ? recordingFile.name : (editingResource ? 'CURRENT_FILE_ACTIVE' : 'CHOOSE_AUDIO_VECTOR')}
                                         </span>
                                         <input type="file" accept="audio/*,video/*" onChange={(e) => setRecordingFile(e.target.files[0])} className="absolute inset-0 opacity-0 cursor-pointer" required={!editingResource} />
@@ -287,7 +287,7 @@ const ResourceManager = () => {
                                 </div>
                             ) : (
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4">Source URL / Pointer</label>
+                                    <label className="text-[10px] font-black text-gray-500 dark:text-slate-500 uppercase tracking-widest ml-4">Source URL / Pointer</label>
                                     <div className="relative">
                                         <input
                                             type="url"
@@ -297,7 +297,7 @@ const ResourceManager = () => {
                                             className="admin-input pl-12"
                                             required
                                         />
-                                        <LinkIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-700" />
+                                        <LinkIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-slate-700" />
                                     </div>
                                 </div>
                             )}
@@ -317,18 +317,18 @@ const ResourceManager = () => {
         </div>
 
         {/* Existing Vault Registry */}
-        <div className="bg-[#111111]/40 border border-white/5 rounded-[2.5rem] flex flex-col min-h-[600px] h-fit">
-            <div className="p-8 border-b border-white/5 bg-white/[0.02] flex justify-between items-center">
+        <div className="bg-white dark:bg-[#111111]/40 border border-gray-200 dark:border-white/5 rounded-[2.5rem] flex flex-col min-h-[600px] h-fit transition-colors shadow-sm dark:shadow-2xl">
+            <div className="p-8 border-b border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-white/[0.02] flex justify-between items-center">
                 <div className="flex items-center gap-3">
                     <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
-                    <h3 className="text-sm font-black text-white uppercase tracking-[0.1em]">Vault Registry</h3>
+                    <h3 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-[0.1em]">Vault Registry</h3>
                 </div>
-                <span className="px-3 py-1 rounded-lg bg-white/5 text-[10px] font-black text-slate-500 uppercase tracking-widest">{resources.length} units</span>
+                <span className="px-3 py-1 rounded-lg bg-gray-100 dark:bg-white/5 text-[10px] font-black text-gray-500 dark:text-slate-500 uppercase tracking-widest">{resources.length} units</span>
             </div>
 
             <div className="p-8 space-y-4 overflow-y-auto max-h-[800px] custom-scrollbar">
                 {!selectedCourseName ? (
-                    <div className="flex flex-col items-center justify-center py-40 grayscale opacity-20 border border-white/5 border-dashed rounded-[2rem]">
+                    <div className="flex flex-col items-center justify-center py-40 grayscale opacity-20 border border-gray-200 dark:border-white/5 border-dashed rounded-[2rem]">
                         <FileType className="w-20 h-20 mb-6" />
                         <p className="text-[10px] font-black uppercase tracking-[0.4em]">Node selection required</p>
                     </div>
@@ -339,22 +339,22 @@ const ResourceManager = () => {
                     </div>
                 ) : (
                     resources.map(r => (
-                        <div key={r.id} className="group relative bg-[#151515]/50 border border-white/5 rounded-3xl p-6 hover:bg-white/[0.02] hover:border-blue-500/20 transition-all duration-300">
+                        <div key={r.id} className="group relative bg-gray-50/50 dark:bg-[#151515]/50 border border-gray-200 dark:border-white/5 rounded-3xl p-6 hover:bg-white dark:hover:bg-white/[0.02] hover:border-blue-500/20 transition-all duration-300 transition-colors">
                              <div className="flex justify-between items-center gap-4">
                                 <div className="flex items-center gap-5 min-w-0">
-                                    <div className="w-12 h-12 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center justify-center transition-all group-hover:scale-110 group-hover:bg-blue-500/10 group-hover:border-blue-500/30">
+                                    <div className="w-12 h-12 rounded-2xl bg-white dark:bg-white/[0.03] border border-gray-200 dark:border-white/5 flex items-center justify-center transition-all group-hover:scale-110 group-hover:bg-blue-500/10 group-hover:border-blue-500/30">
                                         {getTypeIcon(r.type)}
                                     </div>
                                     <div className="min-w-0">
-                                        <h4 className="text-white font-black tracking-tight truncate group-hover:text-blue-400 transition-colors uppercase text-sm mb-1">{r.title}</h4>
-                                        <div className="flex items-center gap-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                                        <h4 className="text-gray-900 dark:text-white font-black tracking-tight truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors uppercase text-sm mb-1">{r.title}</h4>
+                                        <div className="flex items-center gap-3 text-[10px] font-bold text-gray-500 dark:text-slate-500 uppercase tracking-wider">
                                             <span className="flex items-center gap-1.5"><FileType className="w-3 h-3" /> {r.type}</span>
                                             {r.type !== 'recording' ? (
-                                                <a href={r.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-blue-500/70 hover:text-blue-400 transition-colors">
+                                                <a href={r.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-blue-600 dark:text-blue-500/70 hover:text-blue-500 dark:hover:text-blue-400 transition-colors">
                                                     <ExternalLink className="w-3 h-3" /> LINK_SOURCE
                                                 </a>
                                             ) : (
-                                                <span className="flex items-center gap-1.5 text-emerald-500/70 tracking-tighter">
+                                                <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-500/70 tracking-tighter">
                                                     <Download className="w-3 h-3" /> AUDIO_STREAM_ACTIVE
                                                 </span>
                                             )}
@@ -363,10 +363,10 @@ const ResourceManager = () => {
                                 </div>
 
                                 <div className="flex gap-2">
-                                    <button onClick={() => startEdit(r)} className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 text-yellow-500 hover:bg-yellow-500 hover:text-black transition-all transform hover:scale-105">
+                                    <button onClick={() => startEdit(r)} className="w-10 h-10 flex items-center justify-center rounded-xl bg-gray-100 dark:bg-white/5 text-yellow-600 dark:text-yellow-500 hover:bg-yellow-600 dark:hover:bg-yellow-500 hover:text-white dark:hover:text-black transition-all transform hover:scale-105">
                                         <Edit3 className="w-4 h-4" />
                                     </button>
-                                    <button onClick={() => handleDelete(r.id)} className="w-10 h-10 flex items-center justify-center rounded-xl bg-red-400/10 text-red-500 hover:bg-red-500 hover:text-white transition-all transform hover:scale-105">
+                                    <button onClick={() => handleDelete(r.id)} className="w-10 h-10 flex items-center justify-center rounded-xl bg-red-500/10 dark:bg-red-400/10 text-red-600 dark:text-red-500 hover:bg-red-600 dark:hover:bg-red-500 hover:text-white transition-all transform hover:scale-105">
                                         <Trash2 className="w-4 h-4" />
                                     </button>
                                 </div>

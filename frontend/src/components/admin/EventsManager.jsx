@@ -4,7 +4,8 @@ import toast from 'react-hot-toast';
 import { 
   Calendar, MapPin, Tag, Plus, Trash2, Edit3, 
   Search, Clock, LayoutGrid, List as ListIcon, 
-  ChevronRight, X, AlertCircle, Save, Info
+  ChevronRight, X, AlertCircle, Save, Info,
+  CheckCircle2
 } from 'lucide-react';
 
 const EventsManager = () => {
@@ -113,28 +114,28 @@ const EventsManager = () => {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fadeIn pb-10">
       {/* Header & Actions */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h2 className="text-2xl font-black text-white flex items-center gap-3">
-            <Calendar className="w-8 h-8 text-blue-500" />
+          <h2 className="text-2xl font-black text-gray-900 dark:text-white flex items-center gap-3 transition-colors">
+            <Calendar className="w-8 h-8 text-blue-600 dark:text-blue-500" />
             University Life Events
           </h2>
-          <p className="text-slate-400 text-sm mt-1">Manage organizational activities and campus events</p>
+          <p className="text-gray-500 dark:text-slate-400 text-sm font-medium mt-1 transition-colors">Manage organizational activities and campus events</p>
         </div>
         
         <div className="flex items-center gap-3">
-          <div className="flex bg-slate-800/50 p-1 rounded-xl border border-slate-700/50">
+          <div className="flex bg-gray-100 dark:bg-slate-800/50 p-1 rounded-xl border border-gray-200 dark:border-slate-700/50 transition-colors shadow-sm">
             <button 
               onClick={() => setViewMode('grid')}
-              className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-blue-500 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}
+              className={`p-2.5 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-blue-500 text-white shadow-lg' : 'text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white'}`}
             >
               <LayoutGrid className="w-4 h-4" />
             </button>
             <button 
               onClick={() => setViewMode('list')}
-              className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-blue-500 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}
+              className={`p-2.5 rounded-lg transition-all ${viewMode === 'list' ? 'bg-blue-500 text-white shadow-lg' : 'text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white'}`}
             >
               <ListIcon className="w-4 h-4" />
             </button>
@@ -142,7 +143,7 @@ const EventsManager = () => {
           
           <button 
             onClick={() => openModal()}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-lg active:scale-95"
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl font-black transition-all shadow-lg active:scale-95"
           >
             <Plus className="w-5 h-5" />
             New Event
@@ -151,68 +152,70 @@ const EventsManager = () => {
       </div>
 
       {/* Search Bar */}
-      <div className="relative group">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-blue-500 transition-colors" />
+      <div className="relative group shadow-sm rounded-2xl overflow-hidden transition-all">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-slate-500 group-focus-within:text-blue-500 transition-colors" />
         <input 
           type="text"
           placeholder="Search events by title or category..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full bg-slate-900 icon-search border border-slate-700/50 rounded-2xl py-3.5 pl-12 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+          className="w-full bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700/50 rounded-2xl py-4 pl-12 pr-4 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium transition-colors"
         />
       </div>
 
       {/* Events View */}
       {loading ? (
-        <div className="flex flex-col items-center justify-center py-20 bg-slate-900/50 rounded-3xl border border-dashed border-slate-800">
-           <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500 mb-4"></div>
-           <p className="text-slate-500 font-medium">Loading university events...</p>
+        <div className="flex flex-col items-center justify-center py-24 bg-white dark:bg-slate-900/50 rounded-[2.5rem] border border-dashed border-gray-200 dark:border-slate-800 transition-colors">
+           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-6"></div>
+           <p className="text-gray-500 dark:text-slate-500 font-black uppercase tracking-widest text-[10px]">Synchronizing University Data...</p>
         </div>
       ) : filteredEvents.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 bg-slate-900/50 rounded-3xl border border-dashed border-slate-800">
-           <Calendar className="w-16 h-16 text-slate-700 mb-4" />
-           <h3 className="text-lg font-bold text-slate-400">No events found</h3>
-           <p className="text-slate-500 text-sm mt-1">Try searching for something else or create a new event.</p>
+        <div className="flex flex-col items-center justify-center py-24 bg-white dark:bg-slate-900/50 rounded-[2.5rem] border border-dashed border-gray-200 dark:border-slate-800 grayscale opacity-20 transition-colors">
+           <Calendar className="w-16 h-16 text-gray-400 dark:text-slate-700 mb-4" />
+           <h3 className="text-sm font-black uppercase tracking-widest text-gray-900 dark:text-slate-400">No events found</h3>
+           <p className="text-xs font-medium text-gray-500 dark:text-slate-500 mt-2">The registry is currently empty.</p>
         </div>
       ) : viewMode === 'grid' ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredEvents.map(event => (
-            <div key={event.id} className="bg-slate-900/80 border border-slate-700/50 rounded-3xl p-6 transition-all hover:border-blue-500/50 hover:translate-y-[-4px] group shadow-xl">
-               <div className="flex justify-between items-start mb-4">
-                  <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
-                    event.is_published ? 'bg-green-500/10 text-green-500' : 'bg-slate-700 text-slate-400'
+            <div key={event.id} className="bg-white dark:bg-slate-900/80 border border-gray-100 dark:border-slate-700/50 rounded-[2rem] p-8 transition-all hover:border-blue-500/50 hover:translate-y-[-6px] group shadow-sm dark:shadow-2xl transition-colors relative overflow-hidden">
+               <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 blur-[40px] rounded-full pointer-events-none"></div>
+               
+               <div className="flex justify-between items-start mb-6 relative z-10">
+                  <span className={`px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-colors ${
+                    event.is_published ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-500' : 'bg-gray-100 dark:bg-slate-700 border-gray-200 dark:border-slate-600 text-gray-400 dark:text-slate-400'
                   }`}>
                     {event.is_published ? 'Published' : 'Draft'}
                   </span>
-                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                     <button onClick={() => openModal(event)} className="p-2 bg-slate-800 hover:bg-slate-700 text-blue-400 rounded-lg transition-colors">
+                  <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                     <button onClick={() => openModal(event)} className="w-9 h-9 flex items-center justify-center bg-gray-100 dark:bg-slate-800 hover:bg-blue-500 hover:text-white dark:hover:bg-blue-500 text-blue-600 dark:text-blue-400 rounded-xl transition-all shadow-sm">
                         <Edit3 className="w-4 h-4" />
                      </button>
-                     <button onClick={() => handleDelete(event.id)} className="p-2 bg-slate-800 hover:bg-red-500/20 text-red-400 rounded-lg transition-colors">
+                     <button onClick={() => handleDelete(event.id)} className="w-9 h-9 flex items-center justify-center bg-red-500/10 hover:bg-red-500 hover:text-white text-red-600 dark:text-red-400 rounded-xl transition-all shadow-sm">
                         <Trash2 className="w-4 h-4" />
                      </button>
                   </div>
                </div>
                
-               <h3 className="text-xl font-black text-white line-clamp-2 min-h-[3.5rem]">{event.title}</h3>
+               <h3 className="text-xl font-black text-gray-900 dark:text-white line-clamp-2 min-h-[3.5rem] transition-colors leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400">{event.title}</h3>
                
-               <div className="space-y-2 mt-4">
-                  <div className="flex items-center gap-2 text-slate-400 text-xs">
+               <div className="space-y-3 mt-6 pt-6 border-t border-gray-50 dark:border-white/5 transition-colors">
+                  <div className="flex items-center gap-3 text-gray-500 dark:text-slate-400 text-xs font-bold transition-colors">
                      <Clock className="w-4 h-4 text-blue-500" />
                      {new Date(event.event_date).toLocaleString()}
                   </div>
-                  <div className="flex items-center gap-2 text-slate-400 text-xs">
+                  <div className="flex items-center gap-3 text-gray-500 dark:text-slate-400 text-xs font-bold transition-colors">
                      <MapPin className="w-4 h-4 text-purple-500" />
                      {event.location || 'Online / TBA'}
                   </div>
-                  <div className="flex items-center gap-2 text-slate-400 text-xs text-blue-500 font-bold">
+                  <div className="flex items-center gap-3 text-blue-600 dark:text-blue-400 text-xs font-black uppercase tracking-widest transition-colors">
                      <Tag className="w-4 h-4" />
                      {event.category}
                   </div>
                </div>
                
                {event.description && (
-                 <p className="text-slate-500 text-sm mt-4 line-clamp-3 leading-relaxed">
+                 <p className="text-gray-500 dark:text-slate-500 text-sm mt-6 line-clamp-3 leading-relaxed transition-colors font-medium italic">
                    {event.description}
                  </p>
                )}
@@ -220,36 +223,38 @@ const EventsManager = () => {
           ))}
         </div>
       ) : (
-        <div className="bg-slate-900/50 rounded-3xl border border-slate-800 overflow-hidden shadow-xl">
+        <div className="bg-white dark:bg-slate-900/50 rounded-[2rem] border border-gray-200 dark:border-slate-800 overflow-hidden shadow-sm dark:shadow-xl transition-colors">
           <table className="w-full text-left">
             <thead>
-              <tr className="border-b border-slate-800 bg-slate-800/30">
-                <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">Title</th>
-                <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">Date & Time</th>
-                <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">Category</th>
-                <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">Status</th>
-                <th className="px-6 py-4 text-right">Actions</th>
+              <tr className="border-b border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-800/30 transition-colors">
+                <th className="px-8 py-5 text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-[0.2em] transition-colors">Title</th>
+                <th className="px-8 py-5 text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-[0.2em] transition-colors">Date & Time</th>
+                <th className="px-8 py-5 text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-[0.2em] transition-colors">Category</th>
+                <th className="px-8 py-5 text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-[0.2em] transition-colors text-center">Status</th>
+                <th className="px-8 py-5 text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-[0.2em] text-right transition-colors">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800">
+            <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
               {filteredEvents.map(event => (
-                <tr key={event.id} className="hover:bg-slate-800/20 transition-colors">
-                  <td className="px-6 py-4 font-bold text-white max-w-xs truncate">{event.title}</td>
-                  <td className="px-6 py-4 text-slate-400 text-sm">{new Date(event.event_date).toLocaleDateString()}</td>
-                  <td className="px-6 py-4">
-                    <span className="bg-blue-500/10 text-blue-500 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">
+                <tr key={event.id} className="hover:bg-gray-50 dark:hover:bg-slate-800/20 transition-colors group">
+                  <td className="px-8 py-5 font-black text-gray-900 dark:text-white max-w-xs truncate transition-colors uppercase text-sm">{event.title}</td>
+                  <td className="px-8 py-5 text-gray-500 dark:text-slate-400 text-xs font-bold transition-colors">{new Date(event.event_date).toLocaleDateString()}</td>
+                  <td className="px-8 py-5">
+                    <span className="bg-blue-500/10 text-blue-600 dark:text-blue-400 px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border border-blue-500/20 transition-colors">
                       {event.category}
                     </span>
                   </td>
-                  <td className="px-6 py-4">
-                    <div className={`w-2.5 h-2.5 rounded-full ${event.is_published ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-slate-600'}`}></div>
+                  <td className="px-8 py-5">
+                    <div className="flex justify-center">
+                        <div className={`w-3 h-3 rounded-full ${event.is_published ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]' : 'bg-gray-300 dark:bg-slate-700'}`}></div>
+                    </div>
                   </td>
-                  <td className="px-6 py-4 text-right">
+                  <td className="px-8 py-5 text-right">
                     <div className="flex justify-end gap-2">
-                      <button onClick={() => openModal(event)} className="p-2 hover:bg-blue-500/10 text-blue-400 rounded-lg transition-colors">
+                      <button onClick={() => openModal(event)} className="w-9 h-9 flex items-center justify-center bg-gray-100 dark:bg-slate-800 hover:bg-blue-500 hover:text-white text-blue-600 dark:text-blue-400 rounded-xl transition-all shadow-sm">
                         <Edit3 className="w-4 h-4" />
                       </button>
-                      <button onClick={() => handleDelete(event.id)} className="p-2 hover:bg-red-500/10 text-red-400 rounded-lg transition-colors">
+                      <button onClick={() => handleDelete(event.id)} className="w-9 h-9 flex items-center justify-center bg-red-500/10 hover:bg-red-500 hover:text-white text-red-600 dark:text-red-400 rounded-xl transition-all shadow-sm">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
@@ -263,110 +268,112 @@ const EventsManager = () => {
 
       {/* Create/Edit Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-md">
-           <div className="bg-slate-900 border border-slate-700 shadow-2xl rounded-[2.5rem] w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col scale-in">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/60 dark:bg-black/80 backdrop-blur-md animate-fadeIn">
+           <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 shadow-2xl rounded-[2.5rem] w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col transition-colors relative">
+              <div className="absolute -top-32 -right-32 w-80 h-80 bg-blue-500/5 dark:bg-blue-500/10 blur-[100px] rounded-full transition-colors"></div>
+              
               {/* Modal Header */}
-              <div className="p-8 border-b border-slate-800 flex justify-between items-center bg-slate-900">
+              <div className="p-10 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center bg-gray-50 dark:bg-slate-900/50 transition-colors relative z-10">
                  <div>
-                    <h2 className="text-2xl font-black text-white">{editingEvent ? 'Edit Event' : 'Create New Event'}</h2>
-                    <p className="text-slate-400 text-sm">Fill in the details for the university event</p>
+                    <h2 className="text-2xl font-black text-gray-900 dark:text-white transition-colors">{editingEvent ? 'Recalibrate Event' : 'Initialize New Event'}</h2>
+                    <p className="text-gray-500 dark:text-slate-400 text-xs font-bold uppercase tracking-widest mt-1 transition-colors">University Organizational Logic</p>
                  </div>
-                 <button onClick={closeModal} className="p-2 hover:bg-slate-800 text-slate-400 hover:text-white rounded-xl transition-all">
+                 <button onClick={closeModal} className="w-12 h-12 flex items-center justify-center bg-gray-200 dark:bg-slate-800 hover:bg-gray-300 dark:hover:bg-slate-700 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white rounded-2xl transition-all">
                     <X className="w-6 h-6" />
                  </button>
               </div>
 
               {/* Modal Body */}
-              <div className="p-8 overflow-y-auto custom-scrollbar">
-                 <form id="event-form" onSubmit={handleSubmit} className="space-y-6">
-                    <div>
-                       <label className="block text-[10px] font-black text-blue-500 uppercase tracking-widest mb-2">Event Title</label>
+              <div className="p-10 overflow-y-auto custom-scrollbar relative z-10">
+                 <form id="event-form" onSubmit={handleSubmit} className="space-y-8">
+                    <div className="space-y-2">
+                       <label className="block text-[10px] font-black text-blue-600 dark:text-blue-500 uppercase tracking-widest ml-4 transition-colors">Event Title *</label>
                        <input 
                          type="text"
                          required
                          value={formData.title}
                          onChange={(e) => setFormData({...formData, title: e.target.value})}
-                         className="w-full bg-slate-800/50 border border-slate-700/50 rounded-2xl p-4 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-bold placeholder:text-slate-600"
+                         className="admin-input"
                          placeholder="e.g. Annual Student Organization Fair"
                        />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                       <div>
-                          <label className="block text-[10px] font-black text-blue-500 uppercase tracking-widest mb-2">Event Date & Time</label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                       <div className="space-y-2">
+                          <label className="block text-[10px] font-black text-blue-600 dark:text-blue-500 uppercase tracking-widest ml-4 transition-colors">Event Date & Time *</label>
                           <input 
                             type="datetime-local"
                             required
                             value={formData.event_date}
                             onChange={(e) => setFormData({...formData, event_date: e.target.value})}
-                            className="w-full bg-slate-800/50 border border-slate-700/50 rounded-2xl p-4 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-bold"
+                            className="admin-input"
                           />
                        </div>
-                       <div>
-                          <label className="block text-[10px] font-black text-blue-500 uppercase tracking-widest mb-2">Location</label>
+                       <div className="space-y-2">
+                          <label className="block text-[10px] font-black text-blue-600 dark:text-blue-500 uppercase tracking-widest ml-4 transition-colors">Location Node</label>
                           <input 
                             type="text"
                             value={formData.location}
                             onChange={(e) => setFormData({...formData, location: e.target.value})}
-                            className="w-full bg-slate-800/50 border border-slate-700/50 rounded-2xl p-4 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-bold placeholder:text-slate-600"
+                            className="admin-input"
                             placeholder="e.g. Main Auditorium / Zoom"
                           />
                        </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                       <div>
-                          <label className="block text-[10px] font-black text-blue-500 uppercase tracking-widest mb-2">Category</label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                       <div className="space-y-2">
+                          <label className="block text-[10px] font-black text-blue-600 dark:text-blue-500 uppercase tracking-widest ml-4 transition-colors">Classification</label>
                           <select 
                             value={formData.category}
                             onChange={(e) => setFormData({...formData, category: e.target.value})}
-                            className="w-full bg-slate-800/50 border border-slate-700/50 rounded-2xl p-4 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-bold"
+                            className="admin-input appearance-none"
                           >
                             {categories.map(cat => (
-                              <option key={cat} value={cat}>{cat}</option>
+                              <option key={cat} value={cat} className="bg-white dark:bg-slate-900">{cat}</option>
                             ))}
                           </select>
                        </div>
-                       <div className="flex items-end pb-2">
-                          <label className="flex items-center gap-3 cursor-pointer group">
-                             <div className="relative">
+                       <div className="flex items-center gap-4 bg-gray-50 dark:bg-white/[0.02] p-6 rounded-[1.5rem] border border-gray-100 dark:border-white/5 transition-colors">
+                          <div className="relative flex items-center">
                                 <input 
                                   type="checkbox"
                                   className="sr-only"
+                                  id="publish-switch"
                                   checked={formData.is_published}
                                   onChange={(e) => setFormData({...formData, is_published: e.target.checked})}
                                 />
-                                <div className={`w-12 h-6 rounded-full transition-colors ${formData.is_published ? 'bg-blue-600' : 'bg-slate-700'}`}></div>
-                                <div className={`absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform ${formData.is_published ? 'translate-x-6' : 'translate-x-0'}`}></div>
-                             </div>
-                             <span className="text-slate-300 font-bold text-sm">Publish Immediately</span>
-                          </label>
+                                <label htmlFor="publish-switch" className={`w-14 h-7 rounded-full transition-colors cursor-pointer flex items-center px-1 ${formData.is_published ? 'bg-blue-500' : 'bg-gray-300 dark:bg-slate-700'}`}>
+                                    <div className={`w-5 h-5 bg-white rounded-full shadow-md transition-transform ${formData.is_published ? 'translate-x-7' : 'translate-x-0'}`}></div>
+                                </label>
+                          </div>
+                          <span className="text-gray-900 dark:text-slate-300 font-black text-xs uppercase tracking-widest transition-colors">PROD_SYNC ACTIVE</span>
                        </div>
                     </div>
 
-                    <div>
-                       <label className="block text-[10px] font-black text-blue-500 uppercase tracking-widest mb-2">Description</label>
+                    <div className="space-y-2">
+                       <label className="block text-[10px] font-black text-blue-600 dark:text-blue-500 uppercase tracking-widest ml-4 transition-colors">Event Rationale</label>
                        <textarea 
                          rows="4"
                          value={formData.description}
                          onChange={(e) => setFormData({...formData, description: e.target.value})}
-                         className="w-full bg-slate-800/50 border border-slate-700/50 rounded-2xl p-4 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-bold placeholder:text-slate-600 resize-none"
-                         placeholder="Details about the event, organizers, etc."
+                         className="admin-input scrollbar-hide resize-none"
+                         placeholder="Detailed description of event objectives and participants..."
                        ></textarea>
                     </div>
                  </form>
               </div>
 
               {/* Modal Footer */}
-              <div className="p-8 border-t border-slate-800 flex justify-end gap-4 bg-slate-900">
-                 <button onClick={closeModal} className="px-6 py-3 rounded-2xl font-bold text-slate-400 hover:text-white transition-all">Cancel</button>
+              <div className="p-10 border-t border-gray-100 dark:border-slate-800 flex justify-end gap-4 bg-gray-50 dark:bg-slate-900/50 transition-colors relative z-10">
+                 <button onClick={closeModal} className="px-8 py-3 rounded-2xl font-black text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white transition-all uppercase text-xs tracking-widest">Abort</button>
                  <button 
                    type="submit" 
                    form="event-form"
-                   className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-2xl font-black transition-all shadow-lg shadow-blue-600/20 active:scale-95"
+                   className="flex items-center gap-3 bg-blue-600 hover:bg-blue-500 text-white px-10 py-4 rounded-2xl font-black transition-all shadow-lg shadow-blue-500/20 active:scale-95 uppercase text-xs tracking-[0.2em]"
                  >
                    <Save className="w-5 h-5" />
-                   {editingEvent ? 'Update Event' : 'Create Event'}
+                   {editingEvent ? 'Deploy Updates' : 'Inject Event'}
                  </button>
               </div>
            </div>

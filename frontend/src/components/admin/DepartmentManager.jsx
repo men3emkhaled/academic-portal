@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import { 
   LayoutDashboard, Building2, Tag, FileText, 
   Plus, Edit3, Trash2, Activity, ChevronRight,
-  Shield, Map
+  Shield, Map, X
 } from 'lucide-react';
 
 const DepartmentManager = () => {
@@ -74,16 +74,16 @@ const DepartmentManager = () => {
   };
 
   return (
-    <div className="animate-fadeIn">
+    <div className="animate-fadeIn pb-10">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
         <div className="flex items-center gap-4">
           <div className="w-2 h-10 bg-purple-500 rounded-full shadow-[0_0_15px_rgba(168,85,247,0.5)]"></div>
           <div>
-            <h2 className="text-2xl font-black text-white tracking-tight flex items-center gap-3">
-              <Building2 className="w-6 h-6 text-purple-400" /> Department Units
+            <h2 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight flex items-center gap-3 transition-colors">
+              <Building2 className="w-6 h-6 text-purple-600 dark:text-purple-400" /> Department Units
             </h2>
-            <p className="text-slate-500 text-xs font-bold uppercase tracking-[0.2em] mt-1">Institutional Structure Mapping</p>
+            <p className="text-gray-500 dark:text-slate-500 text-xs font-bold uppercase tracking-[0.2em] mt-1 transition-colors">Institutional Structure Mapping</p>
           </div>
         </div>
         <button 
@@ -95,48 +95,48 @@ const DepartmentManager = () => {
       </div>
 
       {/* Main Grid: Data Table */}
-      <div className="bg-[#111111]/40 border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl backdrop-blur-sm relative">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/5 blur-[80px] rounded-full pointer-events-none"></div>
+      <div className="bg-white dark:bg-[#111111]/40 border border-gray-200 dark:border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl backdrop-blur-sm relative transition-colors">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/5 blur-[80px] rounded-full pointer-events-none transition-colors"></div>
         
-        <div className="p-8 border-b border-white/5 bg-white/[0.02] flex justify-between items-center relative z-10">
+        <div className="p-8 border-b border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-white/[0.02] flex justify-between items-center relative z-10 transition-colors">
             <div className="flex items-center gap-3">
                 <div className="w-3 h-3 bg-purple-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(168,85,247,0.5)]"></div>
-                <span className="text-sm font-black text-white uppercase tracking-[0.1em]">Unit Directory</span>
+                <span className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-[0.1em] transition-colors">Unit Directory</span>
             </div>
-            <span className="text-xs font-bold text-slate-500 bg-white/5 px-3 py-1 rounded-lg border border-white/5">{departments.length} Units Active</span>
+            <span className="text-xs font-bold text-gray-500 dark:text-slate-500 bg-gray-100 dark:bg-white/5 px-3 py-1 rounded-lg border border-gray-200 dark:border-white/5 transition-colors">{departments.length} Units Active</span>
         </div>
 
         <div className="overflow-x-auto relative z-10">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-white/[0.01]">
-                <th className="py-5 px-8 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] w-32">Identifier</th>
-                <th className="py-5 px-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Unit Name</th>
-                <th className="py-5 px-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Purpose & Info</th>
-                <th className="py-5 px-8 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] text-right">Settings</th>
+              <tr className="bg-gray-50 dark:bg-white/[0.01] transition-colors">
+                <th className="py-5 px-8 text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-[0.2em] w-32 transition-colors">Identifier</th>
+                <th className="py-5 px-6 text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-[0.2em] transition-colors">Unit Name</th>
+                <th className="py-5 px-6 text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-[0.2em] transition-colors">Purpose & Info</th>
+                <th className="py-5 px-8 text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-[0.2em] text-right transition-colors">Settings</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/[0.03]">
+            <tbody className="divide-y divide-gray-100 dark:divide-white/[0.03]">
               {departments.length === 0 ? (
                 <tr>
-                    <td colSpan="4" className="text-center py-24">
-                        <Map className="w-16 h-16 text-slate-800 mx-auto mb-4" />
-                        <p className="text-slate-600 font-bold uppercase tracking-widest">No structural units mapped yet.</p>
+                    <td colSpan="4" className="text-center py-24 grayscale opacity-10">
+                        <Map className="w-16 h-16 text-gray-400 dark:text-white mx-auto mb-4" />
+                        <p className="text-sm font-black uppercase tracking-widest text-gray-500 dark:text-white">No structural units mapped yet.</p>
                     </td>
                 </tr>
               ) : (
                 departments.map(dept => (
-                  <tr key={dept.id} className="group hover:bg-white/[0.02] transition-colors">
+                  <tr key={dept.id} className="group hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors">
                     <td className="py-6 px-8">
-                      <span className="inline-flex items-center px-3 py-1.5 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-black uppercase tracking-widest">
+                      <span className="inline-flex items-center px-3 py-1.5 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-600 dark:text-purple-400 text-xs font-black uppercase tracking-widest transition-colors">
                         {dept.code}
                       </span>
                     </td>
                     <td className="py-6 px-6">
-                      <p className="text-white font-black tracking-tight leading-tight">{dept.name}</p>
+                      <p className="text-gray-900 dark:text-white font-black tracking-tight leading-tight transition-colors">{dept.name}</p>
                     </td>
                     <td className="py-6 px-6">
-                      <p className="text-slate-500 text-sm italic font-medium max-w-sm truncate">
+                      <p className="text-gray-500 dark:text-slate-500 text-sm italic font-medium max-w-sm truncate transition-colors">
                         {dept.description || 'No system description provided.'}
                       </p>
                     </td>
@@ -144,13 +144,13 @@ const DepartmentManager = () => {
                       <div className="flex items-center justify-end gap-3">
                         <button 
                           onClick={() => editDepartment(dept)} 
-                          className="w-11 h-11 flex items-center justify-center rounded-2xl bg-purple-500/10 text-purple-400 hover:bg-purple-500 hover:text-white transition-all shadow-lg shadow-purple-500/0 hover:shadow-purple-500/20"
+                          className="w-11 h-11 flex items-center justify-center rounded-2xl bg-purple-500/10 text-purple-600 dark:text-purple-400 hover:bg-purple-600 dark:hover:bg-purple-500 hover:text-white transition-all shadow-lg shadow-purple-500/0 hover:shadow-purple-500/20"
                         >
                           <Edit3 className="w-4 h-4" />
                         </button>
                         <button 
                           onClick={() => handleDelete(dept.id, dept.name)} 
-                          className="w-11 h-11 flex items-center justify-center rounded-2xl bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-lg shadow-red-500/0 hover:shadow-red-500/20"
+                          className="w-11 h-11 flex items-center justify-center rounded-2xl bg-red-500/10 text-red-600 dark:text-red-500 hover:bg-red-600 dark:hover:bg-red-500 hover:text-white transition-all shadow-lg shadow-red-500/0 hover:shadow-red-500/20"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -167,26 +167,31 @@ const DepartmentManager = () => {
       {/* Form Modal */}
       {showForm && (
         <div className="admin-modal-backdrop" onClick={resetForm}>
-          <div className="admin-modal-panel max-w-2xl" onClick={e => e.stopPropagation()}>
-            <div className="absolute -top-24 -right-24 w-64 h-64 bg-purple-500/10 blur-[100px] rounded-full"></div>
+          <div className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-white/10 rounded-[2.5rem] p-10 w-full max-w-2xl shadow-2xl relative overflow-hidden animate-fadeInUp transition-colors" onClick={e => e.stopPropagation()}>
+            <div className="absolute -top-24 -right-24 w-64 h-64 bg-purple-500/10 blur-[100px] rounded-full transition-colors"></div>
             
             <div className="relative z-10">
-              <div className="flex items-center gap-4 mb-10">
-                <div className="w-14 h-14 bg-purple-500/20 rounded-2xl flex items-center justify-center border border-purple-500/30">
-                  <Activity className="w-6 h-6 text-purple-400" />
+              <div className="flex items-center justify-between mb-10">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 bg-purple-500/10 dark:bg-purple-500/20 rounded-2xl flex items-center justify-center border border-purple-500/20 dark:border-purple-500/30 transition-colors">
+                    <Activity className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight transition-colors">
+                      {editingDept ? 'Update Unit Node' : 'Initialize New Unit'}
+                    </h3>
+                    <p className="text-gray-500 dark:text-slate-400 text-xs font-bold uppercase tracking-widest transition-colors">Metadata Registry Interface</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-2xl font-black text-white tracking-tight">
-                    {editingDept ? 'Update Unit Node' : 'Initialize New Unit'}
-                  </h3>
-                  <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Metadata Registry Interface</p>
-                </div>
+                <button onClick={resetForm} className="w-12 h-12 flex items-center justify-center rounded-2xl bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+                    <X className="w-6 h-6" />
+                </button>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="space-y-2">
-                    <label className="block text-slate-300 ml-4 text-[10px] font-bold uppercase tracking-widest">Short Code</label>
+                    <label className="block text-gray-500 dark:text-slate-300 ml-4 text-[10px] font-bold uppercase tracking-widest transition-colors">Short Code</label>
                     <input
                       type="text"
                       placeholder="e.g. AI"
@@ -197,7 +202,7 @@ const DepartmentManager = () => {
                     />
                   </div>
                   <div className="md:col-span-2 space-y-2">
-                    <label className="block text-slate-300 ml-4 text-[10px] font-bold uppercase tracking-widest">Unit Full Title</label>
+                    <label className="block text-gray-500 dark:text-slate-300 ml-4 text-[10px] font-bold uppercase tracking-widest transition-colors">Unit Full Title</label>
                     <input
                       type="text"
                       placeholder="Full Designation"
@@ -210,7 +215,7 @@ const DepartmentManager = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="block text-slate-300 ml-4 text-[10px] font-bold uppercase tracking-widest">Purpose Description</label>
+                  <label className="block text-gray-500 dark:text-slate-300 ml-4 text-[10px] font-bold uppercase tracking-widest transition-colors">Purpose Description</label>
                   <textarea
                     placeholder="Describe unit jurisdiction..."
                     rows="4"
@@ -221,10 +226,10 @@ const DepartmentManager = () => {
                 </div>
 
                 <div className="flex gap-4 pt-6">
-                  <button type="submit" disabled={loading} className="flex-1 admin-btn-primary h-[65px] font-black uppercase tracking-widest">
-                    {loading ? 'PROCESSING...' : (editingDept ? 'PULL UPDATES' : 'COMMIT DEPLOYMENT')}
+                  <button type="submit" disabled={loading} className="flex-1 admin-btn-primary h-[65px] font-black uppercase tracking-widest shadow-lg shadow-purple-500/20">
+                    {loading ? <Activity className="w-6 h-6 animate-spin mx-auto" /> : (editingDept ? 'PULL UPDATES' : 'COMMIT DEPLOYMENT')}
                   </button>
-                  <button type="button" onClick={resetForm} className="px-10 py-5 admin-btn-secondary h-[65px] font-bold uppercase">
+                  <button type="button" onClick={resetForm} className="px-10 py-5 admin-btn-secondary h-[65px] font-bold uppercase transition-colors">
                     ABORT
                   </button>
                 </div>

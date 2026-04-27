@@ -25,11 +25,13 @@ import {
   Calendar, Bell, LayoutDashboard, Settings,
   CheckCircle, Database, LogOut, Lock, UserCheck,
   TrendingUp, Award, Activity, ShieldCheck, ChevronRight,
-  Smartphone, Heart, ScrollText, Mail, ClipboardList
+  Smartphone, Heart, ScrollText, Mail, ClipboardList, Sun, Moon
 } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 const AdminDashboard = () => {
   const { token, login, logout } = useAuth();
+  const { isDarkMode, toggleTheme } = useTheme();
 
   const parseJwt = (t) => {
     try {
@@ -74,6 +76,7 @@ const AdminDashboard = () => {
   const [students, setStudents] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [initialDataLoading, setInitialDataLoading] = useState(false);
   const [studentsFile, setStudentsFile] = useState(null);
   const [uploadingStudents, setUploadingStudents] = useState(false);
   const [loginCredentials, setLoginCredentials] = useState({ username: '', password: '' });
@@ -128,11 +131,23 @@ const AdminDashboard = () => {
   // ------------------- Fetch Data -------------------
   useEffect(() => {
     if (!token) return;
-    fetchCourses();
-    fetchStudents();
-    fetchDepartments();
-    fetchAllTimetables();
-    fetchNotifications();
+    const loadAllData = async () => {
+      setInitialDataLoading(true);
+      try {
+        await Promise.all([
+          fetchCourses(),
+          fetchStudents(),
+          fetchDepartments(),
+          fetchAllTimetables(),
+          fetchNotifications()
+        ]);
+      } catch (err) {
+        console.error("Initialization error", err);
+      } finally {
+        setInitialDataLoading(false);
+      }
+    };
+    loadAllData();
   }, [token]);
 
   useEffect(() => {
@@ -470,44 +485,44 @@ const AdminDashboard = () => {
 
   if (!token) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-[#050505] relative overflow-hidden">
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50 dark:bg-[#050505] relative overflow-hidden transition-colors duration-300">
         {/* Background Decorative Elements */}
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-emerald-500/10 blur-[120px] rounded-full"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/10 blur-[120px] rounded-full"></div>
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-emerald-500/5 dark:bg-emerald-500/10 blur-[120px] rounded-full"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/5 dark:bg-blue-500/10 blur-[120px] rounded-full"></div>
 
-        <div className="w-full max-w-md bg-[#111111]/80 border border-white/10 rounded-[2.5rem] p-10 shadow-2xl backdrop-blur-2xl animate-fadeInUp relative z-10">
+        <div className="w-full max-w-md bg-white/80 dark:bg-[#111111]/80 border border-gray-200 dark:border-white/10 rounded-[2.5rem] p-10 shadow-xl dark:shadow-2xl backdrop-blur-2xl animate-fadeInUp relative z-10">
           <div className="flex justify-center mb-6">
-            <div className="w-16 h-16 bg-emerald-500/20 rounded-2xl flex items-center justify-center border border-emerald-500/30">
-              <ShieldCheck className="w-10 h-10 text-emerald-400" />
+            <div className="w-16 h-16 bg-emerald-500/10 dark:bg-emerald-500/20 rounded-2xl flex items-center justify-center border border-emerald-500/20 dark:border-emerald-500/30">
+              <ShieldCheck className="w-10 h-10 text-emerald-500 dark:text-emerald-400" />
             </div>
           </div>
-          <h2 className="text-3xl font-extrabold text-white text-center mb-2 tracking-tight">Admin Portal</h2>
-          <p className="text-slate-400 text-center mb-8 text-sm uppercase tracking-widest font-medium">Secure Access Node</p>
+          <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white text-center mb-2 tracking-tight">Admin Portal</h2>
+          <p className="text-gray-500 dark:text-slate-400 text-center mb-8 text-sm uppercase tracking-widest font-medium">Secure Access Node</p>
 
           <form onSubmit={handleLogin} className="space-y-6">
             <div className="space-y-2">
-              <label className="block text-slate-300 ml-4 text-xs font-bold uppercase tracking-widest">Username</label>
+              <label className="block text-gray-700 dark:text-slate-300 ml-4 text-xs font-bold uppercase tracking-widest">Username</label>
               <div className="relative">
-                <LayoutDashboard className="absolute left-4 top-3.5 w-5 h-5 text-slate-500" />
+                <LayoutDashboard className="absolute left-4 top-3.5 w-5 h-5 text-gray-400 dark:text-slate-500" />
                 <input
                   type="text"
                   value={loginCredentials.username}
                   onChange={(e) => setLoginCredentials({ ...loginCredentials, username: e.target.value })}
-                  className="w-full bg-slate-900/50 border border-white/5 rounded-2xl pl-12 pr-4 py-3.5 text-slate-100 placeholder:text-slate-600 focus:border-emerald-500/50 focus:outline-none transition-all"
+                  className="w-full bg-gray-100 dark:bg-slate-900/50 border border-gray-200 dark:border-white/5 rounded-2xl pl-12 pr-4 py-3.5 text-gray-900 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-600 focus:border-emerald-500/50 focus:outline-none transition-all"
                   placeholder="Admin identifier"
                   required
                 />
               </div>
             </div>
             <div className="space-y-2">
-              <label className="block text-slate-300 ml-4 text-xs font-bold uppercase tracking-widest">Password</label>
+              <label className="block text-gray-700 dark:text-slate-300 ml-4 text-xs font-bold uppercase tracking-widest">Password</label>
               <div className="relative">
-                <Lock className="absolute left-4 top-3.5 w-5 h-5 text-slate-500" />
+                <Lock className="absolute left-4 top-3.5 w-5 h-5 text-gray-400 dark:text-slate-500" />
                 <input
                   type="password"
                   value={loginCredentials.password}
                   onChange={(e) => setLoginCredentials({ ...loginCredentials, password: e.target.value })}
-                  className="w-full bg-slate-900/50 border border-white/5 rounded-2xl pl-12 pr-4 py-3.5 text-slate-100 placeholder:text-slate-600 focus:border-emerald-500/50 focus:outline-none transition-all"
+                  className="w-full bg-gray-100 dark:bg-slate-900/50 border border-gray-200 dark:border-white/5 rounded-2xl pl-12 pr-4 py-3.5 text-gray-900 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-600 focus:border-emerald-500/50 focus:outline-none transition-all"
                   placeholder="••••••••"
                   required
                 />
@@ -516,48 +531,77 @@ const AdminDashboard = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-emerald-500 text-black font-bold py-4 rounded-2xl transition-all hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(16,185,129,0.3)] active:scale-[0.98] disabled:opacity-60 disabled:hover:scale-100 mt-4 flex items-center justify-center gap-2"
+              className="w-full bg-emerald-500 text-white dark:text-black font-bold py-4 rounded-2xl transition-all hover:scale-[1.02] hover:shadow-[0_10px_20px_rgba(16,185,129,0.2)] dark:hover:shadow-[0_0_20px_rgba(16,185,129,0.3)] active:scale-[0.98] disabled:opacity-60 disabled:hover:scale-100 mt-4 flex items-center justify-center gap-2"
             >
               {loading ? (
-                <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                <div className="w-5 h-5 border-2 border-white dark:border-black/20 border-t-transparent dark:border-t-black rounded-full animate-spin" />
               ) : (
                 <>Sign In <ChevronRight className="w-5 h-5" /></>
               )}
             </button>
           </form>
+          <div className="mt-6 flex justify-center">
+            <button onClick={toggleTheme} className="p-3 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-400 hover:text-emerald-500 transition-all">
+              {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (initialDataLoading) {
+    return (
+      <div className="flex flex-col justify-center items-center h-screen bg-gray-50 dark:bg-[#050505] transition-colors duration-500 overflow-hidden relative">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-emerald-500/5 dark:bg-emerald-500/10 blur-[120px] rounded-full animate-pulse-slow"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/5 dark:bg-blue-500/10 blur-[120px] rounded-full animate-pulse-slow"></div>
+
+        <div className="relative z-10 flex flex-col items-center">
+          <div className="relative flex items-center justify-center w-24 h-24 mb-8">
+            <div className="absolute inset-0 border-4 border-emerald-500/20 dark:border-emerald-500/10 rounded-full"></div>
+            <div className="absolute inset-0 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+            <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center animate-pulse">
+                <span className="text-2xl font-black text-emerald-500">Z</span>
+            </div>
+          </div>
+          <p className="text-gray-900 dark:text-white font-black text-xs uppercase tracking-[0.4em] mb-2 animate-pulse">ZNU PORTAL</p>
+          <p className="text-gray-500 dark:text-gray-400 font-bold text-sm tracking-wide">جاري تحميل الجلسة...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#050505] p-4 md:p-10 text-slate-100 relative overflow-hidden">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#050505] p-4 md:p-10 text-gray-900 dark:text-slate-100 relative overflow-hidden transition-colors duration-300">
       {/* Background Decor */}
-      <div className="absolute top-[-20%] right-[-10%] w-[60%] h-[60%] bg-emerald-500/[0.03] blur-[150px] rounded-full"></div>
-      <div className="absolute bottom-[-20%] left-[-10%] w-[60%] h-[60%] bg-blue-500/[0.03] blur-[150px] rounded-full"></div>
+      <div className="absolute top-[-20%] right-[-10%] w-[60%] h-[60%] bg-emerald-500/[0.02] dark:bg-emerald-500/[0.03] blur-[150px] rounded-full"></div>
+      <div className="absolute bottom-[-20%] left-[-10%] w-[60%] h-[60%] bg-blue-500/[0.02] dark:bg-blue-500/[0.03] blur-[150px] rounded-full"></div>
 
       <div className="max-w-[1600px] mx-auto relative z-10">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
           <div>
             <div className="flex items-center gap-3 mb-2">
               <div className="w-2 h-8 bg-emerald-500 rounded-full shadow-[0_0_15px_rgba(16,185,129,0.5)]"></div>
-              <h1 className="text-3xl md:text-5xl font-black text-white tracking-tight">Admin Dashboard</h1>
+              <h1 className="text-3xl md:text-5xl font-black text-gray-900 dark:text-white tracking-tight">Admin Dashboard</h1>
             </div>
-            <p className="text-slate-400 font-medium ml-5 text-sm uppercase tracking-[0.3em]">Institutional Management Node</p>
+            <p className="text-gray-500 dark:text-slate-400 font-medium ml-5 text-sm uppercase tracking-[0.3em]">Institutional Management Node</p>
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-3 bg-white/5 border border-white/10 px-4 py-2 rounded-2xl backdrop-blur-xl">
-              <div className="w-8 h-8 bg-emerald-500/20 rounded-full flex items-center justify-center">
-                <UserCheck className="w-4 h-4 text-emerald-400" />
+            <button onClick={toggleTheme} className="p-3 rounded-2xl bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-400 hover:text-emerald-500 transition-all shadow-sm">
+              {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
+            <div className="flex items-center gap-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 px-4 py-2 rounded-2xl backdrop-blur-xl shadow-sm">
+              <div className="w-8 h-8 bg-emerald-500/10 rounded-full flex items-center justify-center">
+                <UserCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
               </div>
-              <span className="text-xs font-bold text-slate-300 uppercase tracking-widest">
+              <span className="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-widest">
                 {isSuperAdmin ? 'Root Admin' : 'Assistant'}
               </span>
             </div>
             <button
               onClick={logout}
-              className="flex items-center gap-2 bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 px-5 py-3 rounded-2xl text-sm font-black transition-all shadow-lg hover:scale-105 active:scale-95"
+              className="flex items-center gap-2 bg-red-500/10 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500/20 hover:bg-red-500/20 px-5 py-3 rounded-2xl text-sm font-black transition-all shadow-sm hover:scale-105 active:scale-95"
             >
               Logout <LogOut className="w-4 h-4" />
             </button>
@@ -565,63 +609,63 @@ const AdminDashboard = () => {
         </div>
 
         <div className="grid gap-6 mb-12 md:grid-cols-4 animate-fadeIn">
-          <div className="bg-[#111111]/80 backdrop-blur-xl border border-white/5 p-6 rounded-[2rem] hover:border-emerald-500/30 transition-all duration-500 group shadow-2xl">
+          <div className="bg-white dark:bg-[#111111]/80 backdrop-blur-xl border border-gray-200 dark:border-white/5 p-6 rounded-[2rem] hover:border-emerald-500/30 transition-all duration-500 group shadow-sm dark:shadow-2xl">
             <div className="flex items-center gap-4 mb-4">
               <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center group-hover:bg-emerald-500/20 transition-all">
-                <BookOpen className="w-6 h-6 text-emerald-400" />
+                <BookOpen className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
               </div>
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500 group-hover:text-emerald-300/70 transition-all">Courses</p>
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-slate-500 group-hover:text-emerald-600 dark:group-hover:text-emerald-300/70 transition-all">Courses</p>
             </div>
             <div className="flex items-end justify-between">
-              <p className="text-4xl font-black text-white">{courses.length}</p>
-              <div className="flex items-center gap-1 text-emerald-400 text-xs font-bold bg-emerald-400/10 px-2 py-1 rounded-lg">
+              <p className="text-4xl font-black text-gray-900 dark:text-white">{courses.length}</p>
+              <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 text-xs font-bold bg-emerald-500/10 px-2 py-1 rounded-lg">
                 <Activity className="w-3 h-3" /> LIVE
               </div>
             </div>
           </div>
 
-          <div className="bg-[#111111]/80 backdrop-blur-xl border border-white/5 p-6 rounded-[2rem] hover:border-blue-500/30 transition-all duration-500 group shadow-2xl">
+          <div className="bg-white dark:bg-[#111111]/80 backdrop-blur-xl border border-gray-200 dark:border-white/5 p-6 rounded-[2rem] hover:border-blue-500/30 transition-all duration-500 group shadow-sm dark:shadow-2xl">
             <div className="flex items-center gap-4 mb-4">
               <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center group-hover:bg-blue-500/20 transition-all">
-                <Users className="w-6 h-6 text-blue-400" />
+                <Users className="w-6 h-6 text-blue-600 dark:text-blue-400" />
               </div>
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500 group-hover:text-blue-300/70 transition-all">Students</p>
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-slate-500 group-hover:text-blue-600 dark:group-hover:text-blue-300/70 transition-all">Students</p>
             </div>
             <div className="flex items-end justify-between">
-              <p className="text-4xl font-black text-white">{students.length}</p>
-              <div className="flex items-center gap-1 text-blue-400 text-xs font-bold bg-blue-400/10 px-2 py-1 rounded-lg">
+              <p className="text-4xl font-black text-gray-900 dark:text-white">{students.length}</p>
+              <div className="flex items-center gap-1 text-blue-600 dark:text-blue-400 text-xs font-bold bg-blue-500/10 px-2 py-1 rounded-lg">
                 <CheckCircle className="w-3 h-3" /> SECURE
               </div>
             </div>
           </div>
 
-          <div className="bg-[#111111]/80 backdrop-blur-xl border border-white/5 p-6 rounded-[2rem] hover:border-purple-500/30 transition-all duration-500 group shadow-2xl">
+          <div className="bg-white dark:bg-[#111111]/80 backdrop-blur-xl border border-gray-200 dark:border-white/5 p-6 rounded-[2rem] hover:border-purple-500/30 transition-all duration-500 group shadow-sm dark:shadow-2xl">
             <div className="flex items-center gap-4 mb-4">
               <div className="w-12 h-12 bg-purple-500/10 rounded-2xl flex items-center justify-center group-hover:bg-purple-500/20 transition-all">
-                <LayoutDashboard className="w-6 h-6 text-purple-400" />
+                <LayoutDashboard className="w-6 h-6 text-purple-600 dark:text-purple-400" />
               </div>
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500 group-hover:text-purple-300/70 transition-all">Departments</p>
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-slate-500 group-hover:text-purple-600 dark:group-hover:text-purple-300/70 transition-all">Departments</p>
             </div>
             <div className="flex items-end justify-between">
-              <p className="text-4xl font-black text-white">{departments.length}</p>
-              <div className="flex items-center gap-1 text-purple-400 text-xs font-bold bg-purple-400/10 px-2 py-1 rounded-lg">
+              <p className="text-4xl font-black text-gray-900 dark:text-white">{departments.length}</p>
+              <div className="flex items-center gap-1 text-purple-600 dark:text-purple-400 text-xs font-bold bg-purple-500/10 px-2 py-1 rounded-lg">
                 <Award className="w-3 h-3" /> STABLE
               </div>
             </div>
           </div>
 
-          <div className="bg-[#111111]/80 backdrop-blur-xl border border-white/5 p-6 rounded-[2rem] hover:border-red-500/30 transition-all duration-500 group shadow-2xl relative overflow-hidden">
+          <div className="bg-white dark:bg-[#111111]/80 backdrop-blur-xl border border-gray-200 dark:border-white/5 p-6 rounded-[2rem] hover:border-red-500/30 transition-all duration-500 group shadow-sm dark:shadow-2xl relative overflow-hidden">
             {notifications.filter(n => !n.is_read).length > 0 && (
               <div className="absolute top-4 right-4 w-2 h-2 bg-red-500 rounded-full animate-ping"></div>
             )}
             <div className="flex items-center gap-4 mb-4">
               <div className="w-12 h-12 bg-red-500/10 rounded-2xl flex items-center justify-center group-hover:bg-red-500/20 transition-all">
-                <Bell className="w-6 h-6 text-red-400" />
+                <Bell className="w-6 h-6 text-red-600 dark:text-red-400" />
               </div>
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500 group-hover:text-red-300/70 transition-all">Alerts</p>
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-slate-500 group-hover:text-red-600 dark:group-hover:text-red-300/70 transition-all">Alerts</p>
             </div>
             <div className="flex items-end justify-between">
-              <p className="text-4xl font-black text-white">{notifications.filter(n => !n.is_read).length}</p>
+              <p className="text-4xl font-black text-gray-900 dark:text-white">{notifications.filter(n => !n.is_read).length}</p>
               <button
                 onClick={() => {
                   const hasAccess = isSuperAdmin || userPermissions.includes('manage_materials');
@@ -631,7 +675,7 @@ const AdminDashboard = () => {
                     toast.error('You do not have permission to access this module');
                   }
                 }}
-                className="text-xs font-black text-black bg-red-400 hover:bg-red-300 px-3 py-1.5 rounded-xl transition-all active:scale-95 shadow-[0_0_15px_rgba(248,113,113,0.3)]"
+                className="text-xs font-black text-white dark:text-black bg-red-500 dark:bg-red-400 hover:bg-red-600 dark:hover:bg-red-300 px-3 py-1.5 rounded-xl transition-all active:scale-95 shadow-sm dark:shadow-[0_0_15px_rgba(248,113,113,0.3)]"
               >
                 VIEW ALL
               </button>
@@ -639,7 +683,7 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-3 mb-10 bg-white/[0.02] border border-white/5 rounded-[2.5rem] p-3 backdrop-blur-3xl overflow-x-auto no-scrollbar shadow-inner">
+        <div className="flex flex-wrap gap-3 mb-10 bg-white/50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/5 rounded-[2.5rem] p-3 backdrop-blur-3xl overflow-x-auto no-scrollbar shadow-sm dark:shadow-inner">
           {ALL_TABS.map((tab) => {
             const hasAccess = isSuperAdmin || (tab.reqPerm !== 'admin' && userPermissions.includes(tab.reqPerm));
             return (
@@ -649,9 +693,9 @@ const AdminDashboard = () => {
                 className={`flex items-center gap-3 px-6 py-3.5 font-bold rounded-2xl transition-all text-sm whitespace-nowrap shadow-sm
                   ${hasAccess
                     ? (activeTab === tab.id
-                      ? 'text-black bg-emerald-400 shadow-[0_8px_20px_rgba(16,185,129,0.3)] scale-105'
-                      : 'text-slate-500 hover:text-white hover:bg-white/5 active:scale-95')
-                    : 'text-slate-700 bg-black/20 cursor-not-allowed opacity-50 border border-white/5'}`}
+                      ? 'text-white dark:text-black bg-emerald-500 dark:bg-emerald-400 shadow-[0_8px_20px_rgba(16,185,129,0.3)] scale-105'
+                      : 'text-gray-500 dark:text-slate-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 active:scale-95')
+                    : 'text-gray-400 dark:text-slate-700 bg-gray-200 dark:bg-black/20 cursor-not-allowed opacity-50 border border-gray-200 dark:border-white/5'}`}
               >
                 {tab.icon}
                 {tab.label}
@@ -662,7 +706,7 @@ const AdminDashboard = () => {
         </div>
 
 
-        <div className="bg-[#111111]/80 backdrop-blur-2xl border border-white/5 shadow-2xl rounded-[2.5rem] p-6 md:p-10 animate-fadeIn overflow-hidden min-h-[600px] relative">
+        <div className="bg-white dark:bg-[#111111]/80 backdrop-blur-2xl border border-gray-200 dark:border-white/5 shadow-xl dark:shadow-2xl rounded-[2.5rem] p-6 md:p-10 animate-fadeIn overflow-hidden min-h-[600px] relative">
           <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 blur-[80px] rounded-full pointer-events-none"></div>
           {activeTab === 'courses' && <CoursesManager departments={departments} />}
           {activeTab === 'grades' && <GradesUploader courses={courses} departments={departments} />}
@@ -767,42 +811,42 @@ const AdminDashboard = () => {
 
       {/* Edit Student Modal */}
       {showEditStudentModal && selectedStudent && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
-          <div className="bg-[#111111] border border-white/10 rounded-[2.5rem] p-10 w-full max-w-lg shadow-2xl relative overflow-hidden animate-fadeInUp">
-            <div className="absolute -top-24 -right-24 w-64 h-64 bg-emerald-500/10 blur-[100px] rounded-full"></div>
+        <div className="fixed inset-0 bg-gray-900/40 dark:bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-white/10 rounded-[2.5rem] p-10 w-full max-w-lg shadow-2xl relative overflow-hidden animate-fadeInUp transition-colors duration-300">
+            <div className="absolute -top-24 -right-24 w-64 h-64 bg-emerald-500/5 dark:bg-emerald-500/10 blur-[100px] rounded-full"></div>
 
             <div className="relative z-10">
               <div className="flex items-center gap-4 mb-8">
-                <div className="w-12 h-12 bg-emerald-500/20 rounded-2xl flex items-center justify-center border border-emerald-500/30">
-                  <UserCheck className="w-6 h-6 text-emerald-400" />
+                <div className="w-12 h-12 bg-emerald-500/10 dark:bg-emerald-500/20 rounded-2xl flex items-center justify-center border border-emerald-500/20 dark:border-emerald-500/30">
+                  <UserCheck className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-black text-white tracking-tight">Edit Student</h3>
-                  <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">{selectedStudent.id}</p>
+                  <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">Edit Student</h3>
+                  <p className="text-gray-500 dark:text-slate-400 text-xs font-bold uppercase tracking-widest">{selectedStudent.id}</p>
                 </div>
               </div>
 
               <form onSubmit={handleUpdateStudentInfo} className="space-y-6">
                 <div className="space-y-2">
-                  <label className="block text-slate-300 ml-4 text-[10px] font-bold uppercase tracking-widest">Full Name</label>
-                  <input type="text" value={editStudentForm.name} onChange={(e) => setEditStudentForm({ ...editStudentForm, name: e.target.value })} className="w-full bg-slate-900/50 border border-white/5 rounded-2xl px-6 py-3.5 text-white focus:outline-none focus:border-emerald-500/50 transition-all font-medium" required />
+                  <label className="block text-gray-600 dark:text-slate-300 ml-4 text-[10px] font-bold uppercase tracking-widest">Full Name</label>
+                  <input type="text" value={editStudentForm.name} onChange={(e) => setEditStudentForm({ ...editStudentForm, name: e.target.value })} className="w-full bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/5 rounded-2xl px-6 py-3.5 text-gray-900 dark:text-white focus:outline-none focus:border-emerald-500/50 transition-all font-medium" required />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="block text-slate-300 ml-4 text-[10px] font-bold uppercase tracking-widest">Level</label>
-                    <input type="number" value={editStudentForm.level} onChange={(e) => setEditStudentForm({ ...editStudentForm, level: e.target.value })} className="w-full bg-slate-900/50 border border-white/5 rounded-2xl px-6 py-3.5 text-white focus:outline-none focus:border-emerald-500/50 transition-all font-medium" required />
+                    <label className="block text-gray-600 dark:text-slate-300 ml-4 text-[10px] font-bold uppercase tracking-widest">Level</label>
+                    <input type="number" value={editStudentForm.level} onChange={(e) => setEditStudentForm({ ...editStudentForm, level: e.target.value })} className="w-full bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/5 rounded-2xl px-6 py-3.5 text-gray-900 dark:text-white focus:outline-none focus:border-emerald-500/50 transition-all font-medium" required />
                   </div>
                   <div className="space-y-2">
-                    <label className="block text-slate-300 ml-4 text-[10px] font-bold uppercase tracking-widest">Section</label>
-                    <input type="text" value={editStudentForm.section} onChange={(e) => setEditStudentForm({ ...editStudentForm, section: e.target.value })} className="w-full bg-slate-900/50 border border-white/5 rounded-2xl px-6 py-3.5 text-white focus:outline-none focus:border-emerald-500/50 transition-all font-medium" />
+                    <label className="block text-gray-600 dark:text-slate-300 ml-4 text-[10px] font-bold uppercase tracking-widest">Section</label>
+                    <input type="text" value={editStudentForm.section} onChange={(e) => setEditStudentForm({ ...editStudentForm, section: e.target.value })} className="w-full bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/5 rounded-2xl px-6 py-3.5 text-gray-900 dark:text-white focus:outline-none focus:border-emerald-500/50 transition-all font-medium" />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="block text-slate-300 ml-4 text-[10px] font-bold uppercase tracking-widest">Department</label>
+                  <label className="block text-gray-600 dark:text-slate-300 ml-4 text-[10px] font-bold uppercase tracking-widest">Department</label>
                   <select
                     value={editStudentForm.department_id || ''}
                     onChange={(e) => setEditStudentForm({ ...editStudentForm, department_id: e.target.value })}
-                    className="w-full bg-slate-900/50 border border-white/5 rounded-2xl px-6 py-3.5 text-white focus:outline-none focus:border-emerald-500/50 transition-all font-medium appearance-none"
+                    className="w-full bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/5 rounded-2xl px-6 py-3.5 text-gray-900 dark:text-white focus:outline-none focus:border-emerald-500/50 transition-all font-medium appearance-none"
                   >
                     <option value="">-- Select Department --</option>
                     {departments.map(d => (
@@ -811,8 +855,8 @@ const AdminDashboard = () => {
                   </select>
                 </div>
                 <div className="flex gap-4 pt-4">
-                  <button type="submit" className="flex-1 bg-emerald-500 text-black font-black py-4 rounded-2xl hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-emerald-500/20">SAVE CHANGES</button>
-                  <button type="button" onClick={() => setShowEditStudentModal(false)} className="px-8 py-4 bg-white/5 border border-white/10 rounded-2xl text-slate-300 font-bold hover:bg-white/10 transition-all">CANCEL</button>
+                  <button type="submit" className="flex-1 bg-emerald-500 text-white dark:text-black font-black py-4 rounded-2xl hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-emerald-500/20">SAVE CHANGES</button>
+                  <button type="button" onClick={() => setShowEditStudentModal(false)} className="px-8 py-4 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl text-gray-600 dark:text-slate-300 font-bold hover:bg-gray-200 dark:hover:bg-white/10 transition-all">CANCEL</button>
                 </div>
               </form>
             </div>
@@ -822,28 +866,28 @@ const AdminDashboard = () => {
 
       {/* Manage Role & Permissions Modal */}
       {showRoleModal && selectedStudentForRole && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
-          <div className="bg-[#111111] border border-white/10 rounded-[2.5rem] p-10 w-full max-w-lg shadow-2xl relative overflow-hidden animate-fadeInUp">
-            <div className="absolute -top-24 -right-24 w-64 h-64 bg-yellow-500/10 blur-[100px] rounded-full"></div>
+        <div className="fixed inset-0 bg-gray-900/40 dark:bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-white/10 rounded-[2.5rem] p-10 w-full max-w-lg shadow-2xl relative overflow-hidden animate-fadeInUp transition-colors duration-300">
+            <div className="absolute -top-24 -right-24 w-64 h-64 bg-yellow-500/5 dark:bg-yellow-500/10 blur-[100px] rounded-full"></div>
 
             <div className="relative z-10">
               <div className="flex items-center gap-4 mb-8">
-                <div className="w-12 h-12 bg-yellow-500/20 rounded-2xl flex items-center justify-center border border-yellow-500/30">
-                  <ShieldCheck className="w-6 h-6 text-yellow-400" />
+                <div className="w-12 h-12 bg-yellow-500/10 dark:bg-yellow-500/20 rounded-2xl flex items-center justify-center border border-yellow-500/20 dark:border-yellow-500/30">
+                  <ShieldCheck className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-black text-white tracking-tight">Manage Roles</h3>
-                  <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">{selectedStudentForRole.name}</p>
+                  <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">Manage Roles</h3>
+                  <p className="text-gray-500 dark:text-slate-400 text-xs font-bold uppercase tracking-widest">{selectedStudentForRole.name}</p>
                 </div>
               </div>
 
               <form onSubmit={handleUpdateRole} className="space-y-6">
                 <div className="space-y-2">
-                  <label className="block text-slate-300 ml-4 text-[10px] font-bold uppercase tracking-widest">User Role</label>
+                  <label className="block text-gray-600 dark:text-slate-300 ml-4 text-[10px] font-bold uppercase tracking-widest">User Role</label>
                   <select
                     value={roleForm.role}
                     onChange={(e) => setRoleForm({ ...roleForm, role: e.target.value })}
-                    className="w-full bg-slate-900/50 border border-white/5 rounded-2xl px-6 py-3.5 text-white focus:outline-none focus:border-yellow-500/50 transition-all font-medium appearance-none"
+                    className="w-full bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/5 rounded-2xl px-6 py-3.5 text-gray-900 dark:text-white focus:outline-none focus:border-yellow-500/50 transition-all font-medium appearance-none"
                   >
                     <option value="student">Student (Standard)</option>
                     <option value="assistant">Assistant (Limited Admin)</option>
@@ -852,15 +896,15 @@ const AdminDashboard = () => {
                 </div>
 
                 {roleForm.role === 'assistant' && (
-                  <div className="space-y-4 bg-white/[0.02] p-5 rounded-2xl border border-white/5">
-                    <label className="block text-slate-300 text-[10px] font-bold uppercase tracking-widest mb-2">Module Permissions</label>
+                  <div className="space-y-4 bg-gray-50 dark:bg-white/[0.02] p-5 rounded-2xl border border-gray-200 dark:border-white/5">
+                    <label className="block text-gray-600 dark:text-slate-300 text-[10px] font-bold uppercase tracking-widest mb-2">Module Permissions</label>
 
                     {/* Select All / Deselect All */}
                     <div className="flex gap-2 mb-3">
                       <button type="button" onClick={() => setRoleForm({ ...roleForm, permissions: ['manage_courses', 'manage_grades', 'manage_resources', 'manage_roadmap', 'manage_timetable', 'manage_notifications', 'manage_quizzes', 'manage_events', 'manage_progress'] })}
-                        className="text-[10px] font-bold px-3 py-1.5 bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 rounded-lg hover:bg-yellow-500/20 transition-all">Select All</button>
+                        className="text-[10px] font-bold px-3 py-1.5 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border border-yellow-200 dark:border-yellow-500/20 rounded-lg hover:bg-yellow-500/20 transition-all">Select All</button>
                       <button type="button" onClick={() => setRoleForm({ ...roleForm, permissions: [] })}
-                        className="text-[10px] font-bold px-3 py-1.5 bg-white/5 text-slate-400 border border-white/10 rounded-lg hover:bg-white/10 transition-all">Deselect All</button>
+                        className="text-[10px] font-bold px-3 py-1.5 bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-slate-400 border border-gray-200 dark:border-white/10 rounded-lg hover:bg-gray-200 dark:hover:bg-white/10 transition-all">Deselect All</button>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -877,8 +921,8 @@ const AdminDashboard = () => {
                       ].map(perm => (
                         <label key={perm.id} htmlFor={perm.id}
                           className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${roleForm.permissions.includes(perm.id)
-                              ? 'bg-yellow-500/10 border-yellow-500/30'
-                              : 'bg-white/[0.02] border-white/5 hover:border-white/15'
+                              ? 'bg-yellow-500/10 border-yellow-500/30 shadow-sm'
+                              : 'bg-white dark:bg-white/[0.02] border-gray-100 dark:border-white/5 hover:border-gray-200 dark:hover:border-white/15'
                             }`}>
                           <input type="checkbox" id={perm.id}
                             checked={roleForm.permissions.includes(perm.id)}
@@ -888,10 +932,10 @@ const AdminDashboard = () => {
                                 : roleForm.permissions.filter(p => p !== perm.id);
                               setRoleForm({ ...roleForm, permissions: newPerms });
                             }}
-                            className="w-4 h-4 rounded border-white/10 bg-slate-900 text-yellow-500 focus:ring-yellow-500/20 cursor-pointer flex-shrink-0" />
+                            className="w-4 h-4 rounded border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-slate-900 text-yellow-500 focus:ring-yellow-500/20 cursor-pointer flex-shrink-0" />
                           <div>
-                            <p className="text-white text-sm font-bold">{perm.label}</p>
-                            <p className="text-slate-500 text-[10px] font-medium">{perm.desc}</p>
+                            <p className="text-gray-900 dark:text-white text-sm font-bold">{perm.label}</p>
+                            <p className="text-gray-500 dark:text-slate-500 text-[10px] font-medium">{perm.desc}</p>
                           </div>
                         </label>
                       ))}
@@ -900,8 +944,8 @@ const AdminDashboard = () => {
                 )}
 
                 <div className="flex gap-4 pt-4">
-                  <button type="submit" className="flex-1 bg-yellow-500 text-black font-black py-4 rounded-2xl hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-yellow-500/20 uppercase">Save Permissions</button>
-                  <button type="button" onClick={() => setShowRoleModal(false)} className="px-8 py-4 bg-white/5 border border-white/10 rounded-2xl text-slate-300 font-bold hover:bg-white/10 transition-all uppercase">Cancel</button>
+                  <button type="submit" className="flex-1 bg-yellow-500 text-white dark:text-black font-black py-4 rounded-2xl hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-yellow-500/20 uppercase">Save Permissions</button>
+                  <button type="button" onClick={() => setShowRoleModal(false)} className="px-8 py-4 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl text-gray-600 dark:text-slate-300 font-bold hover:bg-gray-200 dark:hover:bg-white/10 transition-all uppercase">Cancel</button>
                 </div>
               </form>
             </div>
@@ -911,78 +955,78 @@ const AdminDashboard = () => {
 
       {/* Edit Timetable Entry Modal */}
       {showEditEntryModal && editingEntry && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
-          <div className="bg-[#111111] border border-white/10 rounded-[2.5rem] p-10 w-full max-w-xl shadow-2xl relative overflow-hidden animate-fadeInUp">
-            <div className="absolute -top-24 -right-24 w-64 h-64 bg-emerald-500/10 blur-[100px] rounded-full"></div>
+        <div className="fixed inset-0 bg-gray-900/40 dark:bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-white/10 rounded-[2.5rem] p-10 w-full max-w-xl shadow-2xl relative overflow-hidden animate-fadeInUp transition-colors duration-300">
+            <div className="absolute -top-24 -right-24 w-64 h-64 bg-emerald-500/5 dark:bg-emerald-500/10 blur-[100px] rounded-full"></div>
 
             <div className="relative z-10">
               <div className="flex items-center gap-4 mb-8">
-                <div className="w-12 h-12 bg-emerald-500/20 rounded-2xl flex items-center justify-center border border-emerald-500/30">
-                  <Calendar className="w-6 h-6 text-emerald-400" />
+                <div className="w-12 h-12 bg-emerald-500/10 dark:bg-emerald-500/20 rounded-2xl flex items-center justify-center border border-emerald-500/20 dark:border-emerald-500/30">
+                  <Calendar className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-black text-white tracking-tight">Edit Timetable Entry</h3>
-                  <p className="text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em]">{editingEntry.course_name}</p>
+                  <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">Edit Timetable Entry</h3>
+                  <p className="text-gray-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em]">{editingEntry.course_name}</p>
                 </div>
               </div>
 
               <form onSubmit={handleUpdateEntry} className="space-y-6">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="block text-slate-300 ml-4 text-[10px] font-bold uppercase tracking-widest">Section</label>
-                    <input type="text" placeholder="Section" value={editEntryForm.section} onChange={(e) => setEditEntryForm({ ...editEntryForm, section: e.target.value })} className="w-full bg-slate-900/50 border border-white/5 rounded-2xl px-6 py-3.5 text-white focus:outline-none focus:border-emerald-500/50 transition-all font-medium" required />
+                    <label className="block text-gray-600 dark:text-slate-300 ml-4 text-[10px] font-bold uppercase tracking-widest">Section</label>
+                    <input type="text" placeholder="Section" value={editEntryForm.section} onChange={(e) => setEditEntryForm({ ...editEntryForm, section: e.target.value })} className="w-full bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/5 rounded-2xl px-6 py-3.5 text-gray-900 dark:text-white focus:outline-none focus:border-emerald-500/50 transition-all font-medium" required />
                   </div>
                   <div className="space-y-2">
-                    <label className="block text-slate-300 ml-4 text-[10px] font-bold uppercase tracking-widest">Day</label>
-                    <input type="text" placeholder="Day (e.g., Monday)" value={editEntryForm.day_of_week} onChange={(e) => setEditEntryForm({ ...editEntryForm, day_of_week: e.target.value })} className="w-full bg-slate-900/50 border border-white/5 rounded-2xl px-6 py-3.5 text-white focus:outline-none focus:border-emerald-500/50 transition-all font-medium" required />
+                    <label className="block text-gray-600 dark:text-slate-300 ml-4 text-[10px] font-bold uppercase tracking-widest">Day</label>
+                    <input type="text" placeholder="Day (e.g., Monday)" value={editEntryForm.day_of_week} onChange={(e) => setEditEntryForm({ ...editEntryForm, day_of_week: e.target.value })} className="w-full bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/5 rounded-2xl px-6 py-3.5 text-gray-900 dark:text-white focus:outline-none focus:border-emerald-500/50 transition-all font-medium" required />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="block text-slate-300 ml-4 text-[10px] font-bold uppercase tracking-widest">Start Time</label>
-                    <input type="time" placeholder="Start Time" value={editEntryForm.start_time} onChange={(e) => setEditEntryForm({ ...editEntryForm, start_time: e.target.value })} className="w-full bg-slate-900/50 border border-white/5 rounded-2xl px-6 py-3.5 text-white focus:outline-none focus:border-emerald-500/50 transition-all font-medium" required />
+                    <label className="block text-gray-600 dark:text-slate-300 ml-4 text-[10px] font-bold uppercase tracking-widest">Start Time</label>
+                    <input type="time" placeholder="Start Time" value={editEntryForm.start_time} onChange={(e) => setEditEntryForm({ ...editEntryForm, start_time: e.target.value })} className="w-full bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/5 rounded-2xl px-6 py-3.5 text-gray-900 dark:text-white focus:outline-none focus:border-emerald-500/50 transition-all font-medium" required />
                   </div>
                   <div className="space-y-2">
-                    <label className="block text-slate-300 ml-4 text-[10px] font-bold uppercase tracking-widest">End Time</label>
-                    <input type="time" placeholder="End Time" value={editEntryForm.end_time} onChange={(e) => setEditEntryForm({ ...editEntryForm, end_time: e.target.value })} className="w-full bg-slate-900/50 border border-white/5 rounded-2xl px-6 py-3.5 text-white focus:outline-none focus:border-emerald-500/50 transition-all font-medium" required />
+                    <label className="block text-gray-600 dark:text-slate-300 ml-4 text-[10px] font-bold uppercase tracking-widest">End Time</label>
+                    <input type="time" placeholder="End Time" value={editEntryForm.end_time} onChange={(e) => setEditEntryForm({ ...editEntryForm, end_time: e.target.value })} className="w-full bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/5 rounded-2xl px-6 py-3.5 text-gray-900 dark:text-white focus:outline-none focus:border-emerald-500/50 transition-all font-medium" required />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="block text-slate-300 ml-4 text-[10px] font-bold uppercase tracking-widest">Course Name</label>
-                  <input type="text" placeholder="Course Name" value={editEntryForm.course_name} onChange={(e) => setEditEntryForm({ ...editEntryForm, course_name: e.target.value })} className="w-full bg-slate-900/50 border border-white/5 rounded-2xl px-6 py-3.5 text-white focus:outline-none focus:border-emerald-500/50 transition-all font-medium" required />
+                  <label className="block text-gray-600 dark:text-slate-300 ml-4 text-[10px] font-bold uppercase tracking-widest">Course Name</label>
+                  <input type="text" placeholder="Course Name" value={editEntryForm.course_name} onChange={(e) => setEditEntryForm({ ...editEntryForm, course_name: e.target.value })} className="w-full bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/5 rounded-2xl px-6 py-3.5 text-gray-900 dark:text-white focus:outline-none focus:border-emerald-500/50 transition-all font-medium" required />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="block text-slate-300 ml-4 text-[10px] font-bold uppercase tracking-widest">Location</label>
-                    <input type="text" placeholder="Location" value={editEntryForm.location} onChange={(e) => setEditEntryForm({ ...editEntryForm, location: e.target.value })} className="w-full bg-slate-900/50 border border-white/5 rounded-2xl px-6 py-3.5 text-white focus:outline-none focus:border-emerald-500/50 transition-all font-medium" />
+                    <label className="block text-gray-600 dark:text-slate-300 ml-4 text-[10px] font-bold uppercase tracking-widest">Location</label>
+                    <input type="text" placeholder="Location" value={editEntryForm.location} onChange={(e) => setEditEntryForm({ ...editEntryForm, location: e.target.value })} className="w-full bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/5 rounded-2xl px-6 py-3.5 text-gray-900 dark:text-white focus:outline-none focus:border-emerald-500/50 transition-all font-medium" />
                   </div>
                   <div className="space-y-2">
-                    <label className="block text-slate-300 ml-4 text-[10px] font-bold uppercase tracking-widest">Instructor</label>
-                    <input type="text" placeholder="Instructor" value={editEntryForm.instructor} onChange={(e) => setEditEntryForm({ ...editEntryForm, instructor: e.target.value })} className="w-full bg-slate-900/50 border border-white/5 rounded-2xl px-6 py-3.5 text-white focus:outline-none focus:border-emerald-500/50 transition-all font-medium" />
+                    <label className="block text-gray-600 dark:text-slate-300 ml-4 text-[10px] font-bold uppercase tracking-widest">Instructor</label>
+                    <input type="text" placeholder="Instructor" value={editEntryForm.instructor} onChange={(e) => setEditEntryForm({ ...editEntryForm, instructor: e.target.value })} className="w-full bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/5 rounded-2xl px-6 py-3.5 text-gray-900 dark:text-white focus:outline-none focus:border-emerald-500/50 transition-all font-medium" />
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between gap-6">
                   <div className="space-y-2 flex-1">
-                    <label className="block text-slate-300 ml-4 text-[10px] font-bold uppercase tracking-widest">Session Type</label>
-                    <select value={editEntryForm.type} onChange={(e) => setEditEntryForm({ ...editEntryForm, type: e.target.value })} className="w-full bg-slate-900/50 border border-white/5 rounded-2xl px-6 py-3.5 text-white focus:outline-none focus:border-emerald-500/50 transition-all font-medium appearance-none">
+                    <label className="block text-gray-600 dark:text-slate-300 ml-4 text-[10px] font-bold uppercase tracking-widest">Session Type</label>
+                    <select value={editEntryForm.type} onChange={(e) => setEditEntryForm({ ...editEntryForm, type: e.target.value })} className="w-full bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/5 rounded-2xl px-6 py-3.5 text-gray-900 dark:text-white focus:outline-none focus:border-emerald-500/50 transition-all font-medium appearance-none">
                       <option value="Lecture">Lecture</option>
                       <option value="Lab">Lab</option>
                       <option value="Tutorial">Tutorial</option>
                     </select>
                   </div>
                   <div className="flex items-center space-x-3 pt-6">
-                    <input type="checkbox" id="isQuiz" checked={editEntryForm.is_quiz} onChange={(e) => setEditEntryForm({ ...editEntryForm, is_quiz: e.target.checked })} className="w-6 h-6 rounded-lg border-white/10 bg-slate-900 text-emerald-500 focus:ring-emerald-500/20 cursor-pointer" />
-                    <label htmlFor="isQuiz" className="text-slate-300 font-bold text-sm cursor-pointer whitespace-nowrap">📝 Quiz Event?</label>
+                    <input type="checkbox" id="isQuiz" checked={editEntryForm.is_quiz} onChange={(e) => setEditEntryForm({ ...editEntryForm, is_quiz: e.target.checked })} className="w-6 h-6 rounded-lg border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-slate-900 text-emerald-500 focus:ring-emerald-500/20 cursor-pointer" />
+                    <label htmlFor="isQuiz" className="text-gray-700 dark:text-slate-300 font-bold text-sm cursor-pointer whitespace-nowrap">📝 Quiz Event?</label>
                   </div>
                 </div>
 
                 <div className="flex gap-4 pt-4">
-                  <button type="submit" className="flex-1 bg-emerald-500 text-black font-black py-4 rounded-2xl hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-emerald-500/20 uppercase">Update Entry</button>
-                  <button type="button" onClick={() => setShowEditEntryModal(false)} className="px-8 py-4 bg-white/5 border border-white/10 rounded-2xl text-slate-300 font-bold hover:bg-white/10 transition-all uppercase">Cancel</button>
+                  <button type="submit" className="flex-1 bg-emerald-500 text-white dark:text-black font-black py-4 rounded-2xl hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-emerald-500/20 uppercase">Update Entry</button>
+                  <button type="button" onClick={() => setShowEditEntryModal(false)} className="px-8 py-4 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl text-gray-600 dark:text-slate-300 font-bold hover:bg-gray-200 dark:hover:bg-white/10 transition-all uppercase">Cancel</button>
                 </div>
               </form>
             </div>

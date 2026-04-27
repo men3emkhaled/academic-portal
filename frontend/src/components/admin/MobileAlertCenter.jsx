@@ -74,30 +74,30 @@ const MobileAlertCenter = ({
         <div className="flex items-center gap-4">
           <div className="w-2 h-10 bg-emerald-500 rounded-full shadow-[0_0_15px_rgba(16,185,129,0.5)]"></div>
           <div>
-            <h2 className="text-2xl font-black text-white tracking-tight flex items-center gap-3">
-              <Smartphone className="w-6 h-6 text-emerald-400" /> Mobile Alert Center
+            <h2 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight flex items-center gap-3">
+              <Smartphone className="w-6 h-6 text-emerald-600 dark:text-emerald-400" /> Mobile Alert Center
             </h2>
-            <p className="text-slate-500 text-xs font-bold uppercase tracking-[0.2em] mt-1">External Signal Management (Android Only)</p>
+            <p className="text-gray-500 dark:text-slate-500 text-xs font-bold uppercase tracking-[0.2em] mt-1">External Signal Management (Android Only)</p>
           </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
         <div className="space-y-6">
-          <div className="admin-card border-emerald-500/10 relative overflow-hidden">
+          <div className="admin-card border-emerald-500/10 relative overflow-hidden transition-colors">
             <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 blur-[50px] rounded-full"></div>
             
             <div className="relative z-10 space-y-6">
                 <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 bg-emerald-500/20 rounded-xl flex items-center justify-center border border-emerald-500/30">
-                        <Send className="w-5 h-5 text-emerald-400" />
+                    <div className="w-10 h-10 bg-emerald-500/10 dark:bg-emerald-500/20 rounded-xl flex items-center justify-center border border-emerald-500/20 dark:border-emerald-500/30">
+                        <Send className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                     </div>
-                    <h3 className="text-lg font-black text-white tracking-tight">Dispatch Module</h3>
+                    <h3 className="text-lg font-black text-gray-900 dark:text-white tracking-tight">Dispatch Module</h3>
                 </div>
 
                 <div className="space-y-4">
                     <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4">Alert Header</label>
+                        <label className="text-[10px] font-black text-gray-500 dark:text-slate-500 uppercase tracking-widest ml-4">Alert Header</label>
                         <input 
                             type="text" 
                             placeholder="Push title (lock screen)..." 
@@ -107,7 +107,7 @@ const MobileAlertCenter = ({
                         />
                     </div>
                     <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4">Body Content</label>
+                        <label className="text-[10px] font-black text-gray-500 dark:text-slate-500 uppercase tracking-widest ml-4">Body Content</label>
                         <textarea 
                             placeholder="Internal signal message..." 
                             rows="3" 
@@ -118,29 +118,29 @@ const MobileAlertCenter = ({
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-white/5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-100 dark:border-white/5 transition-colors">
                     <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4">Target Unit</label>
+                        <label className="text-[10px] font-black text-gray-500 dark:text-slate-500 uppercase tracking-widest ml-4">Target Unit</label>
                         <select 
                             value={alertForm.department_id || ''} 
                             onChange={(e) => setAlertForm({ ...alertForm, department_id: e.target.value })} 
                             className="admin-input appearance-none"
                         >
-                            <option value="">Select Dept</option>
+                            <option value="" className="bg-white dark:bg-slate-900">Select Dept</option>
                             {departments.map((dept) => (
-                                <option key={dept.id} value={dept.id}>{dept.code}</option>
+                                <option key={dept.id} value={dept.id} className="bg-white dark:bg-slate-900">{dept.code}</option>
                             ))}
                         </select>
                         <button 
                             onClick={() => handleSendPush('dept')} 
                             disabled={sending}
-                            className="w-full mt-2 py-3 bg-indigo-600/20 text-indigo-400 border border-indigo-500/20 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all flex items-center justify-center gap-2"
+                            className="w-full mt-2 py-3 bg-indigo-600/10 dark:bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all flex items-center justify-center gap-2"
                         >
                             <Building2 className="w-3.5 h-3.5" /> Dept Dispatch
                         </button>
                     </div>
                     <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4">Target Student</label>
+                        <label className="text-[10px] font-black text-gray-500 dark:text-slate-500 uppercase tracking-widest ml-4">Target Student</label>
                         <input 
                             type="text" 
                             placeholder="ID####" 
@@ -151,7 +151,7 @@ const MobileAlertCenter = ({
                         <button 
                             onClick={() => handleSendPush('student')} 
                             disabled={sending}
-                            className="w-full mt-2 py-3 bg-cyan-600/20 text-cyan-400 border border-cyan-500/20 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-cyan-600 hover:text-white transition-all flex items-center justify-center gap-2"
+                            className="w-full mt-2 py-3 bg-cyan-600/10 dark:bg-cyan-600/20 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-cyan-600 hover:text-white transition-all flex items-center justify-center gap-2"
                         >
                             <User className="w-3.5 h-3.5" /> Solo Dispatch
                         </button>
@@ -168,50 +168,50 @@ const MobileAlertCenter = ({
             </div>
           </div>
 
-          <div className="p-6 bg-blue-500/5 border border-blue-500/10 rounded-3xl flex items-start gap-4">
-              <div className="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <AlertCircle className="w-5 h-5 text-blue-400" />
+          <div className="p-6 bg-blue-500/5 dark:bg-blue-500/5 border border-blue-500/10 rounded-3xl flex items-start gap-4 transition-colors">
+              <div className="w-10 h-10 bg-blue-500/10 dark:bg-blue-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                  <h4 className="text-white font-bold text-sm mb-1">Signal Isolation Info</h4>
-                  <p className="text-slate-500 text-xs leading-relaxed">Alerts sent from this module will **only** appear on the lock-screen of Android devices. They will not be visible in the student's in-app notification center.</p>
+                  <h4 className="text-gray-900 dark:text-white font-bold text-sm mb-1">Signal Isolation Info</h4>
+                  <p className="text-gray-500 dark:text-slate-500 text-xs leading-relaxed">Alerts sent from this module will **only** appear on the lock-screen of Android devices. They will not be visible in the student's in-app notification center.</p>
               </div>
           </div>
         </div>
 
         {/* History Log */}
-        <div className="bg-[#111111]/40 border border-white/5 rounded-[2.5rem] flex flex-col h-[700px]">
-          <div className="p-8 border-b border-white/5 bg-white/[0.02] flex justify-between items-center">
-            <h3 className="text-sm font-black text-white uppercase tracking-[0.1em] flex items-center gap-2">
-                <History className="w-4 h-4 text-slate-500" /> Dispatch Registry
+        <div className="bg-white dark:bg-[#111111]/40 border border-gray-200 dark:border-white/5 rounded-[2.5rem] flex flex-col h-[700px] shadow-sm dark:shadow-2xl transition-colors">
+          <div className="p-8 border-b border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-white/[0.02] flex justify-between items-center transition-colors">
+            <h3 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-[0.1em] flex items-center gap-2">
+                <History className="w-4 h-4 text-gray-400 dark:text-slate-500" /> Dispatch Registry
             </h3>
-            <span className="text-[10px] font-black text-slate-500 bg-white/5 px-3 py-1 rounded-xl border border-white/5 uppercase tracking-widest">{mobileHistory.length} Alerts</span>
+            <span className="text-[10px] font-black text-gray-500 dark:text-slate-500 bg-gray-100 dark:bg-white/5 px-3 py-1 rounded-xl border border-gray-200 dark:border-white/5 uppercase tracking-widest transition-colors">{mobileHistory.length} Alerts</span>
           </div>
 
           <div className="flex-1 overflow-y-auto p-8 space-y-4 custom-scrollbar">
             {mobileHistory.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-20 grayscale opacity-20">
-                    <Smartphone className="w-16 h-16 mb-4" />
-                    <p className="text-sm font-black uppercase tracking-[0.2em]">No signals recorded</p>
+                <div className="flex flex-col items-center justify-center py-20 grayscale opacity-20 transition-all">
+                    <Smartphone className="w-16 h-16 mb-4 text-gray-400 dark:text-white" />
+                    <p className="text-sm font-black uppercase tracking-[0.2em] text-gray-500 dark:text-white">No signals recorded</p>
                 </div>
             ) : (
               mobileHistory.map((notif) => (
-                <div key={notif.id} className="group bg-[#151515]/50 border border-white/5 rounded-2xl p-5 hover:border-emerald-500/20 transition-all">
+                <div key={notif.id} className="group bg-gray-50/50 dark:bg-[#151515]/50 border border-gray-100 dark:border-white/5 rounded-2xl p-5 hover:border-emerald-500/20 transition-all transition-colors">
                   <div className="flex justify-between items-start gap-4">
                     <div className="min-w-0">
                       <div className="flex items-center gap-3 mb-2">
                         <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
-                        <h4 className="font-bold text-white text-sm truncate">{notif.title}</h4>
+                        <h4 className="font-bold text-gray-900 dark:text-white text-sm truncate">{notif.title}</h4>
                       </div>
-                      <p className="text-slate-400 text-xs line-clamp-2 mb-3 px-4 border-l border-white/5">{notif.content}</p>
-                      <div className="flex items-center gap-4 text-[9px] font-black text-slate-600 uppercase tracking-widest">
+                      <p className="text-gray-500 dark:text-slate-400 text-xs line-clamp-2 mb-3 px-4 border-l border-gray-200 dark:border-white/5 transition-colors">{notif.content}</p>
+                      <div className="flex items-center gap-4 text-[9px] font-black text-gray-400 dark:text-slate-600 uppercase tracking-widest transition-colors">
                          <span className="flex items-center gap-1.5"><Clock className="w-3 h-3" /> {new Date(notif.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                          <span className="flex items-center gap-1.5"><Calendar className="w-3 h-3" /> {new Date(notif.created_at).toLocaleDateString()}</span>
                       </div>
                     </div>
                     <button 
                         onClick={() => handleDelete(notif.id)}
-                        className="opacity-0 group-hover:opacity-100 p-2 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all"
+                        className="opacity-0 group-hover:opacity-100 p-2 rounded-lg bg-red-500/10 text-red-600 dark:text-red-500 hover:bg-red-600 dark:hover:bg-red-500 hover:text-white transition-all"
                     >
                         <Trash2 className="w-3.5 h-3.5" />
                     </button>

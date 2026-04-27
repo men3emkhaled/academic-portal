@@ -7,14 +7,14 @@ const LogsDashboard = () => {
   const [activeTab, setActiveTab] = useState('admin');
 
   return (
-    <div className="space-y-6">
-      <div className="flex gap-4 border-b border-white/10 pb-4">
+    <div className="space-y-6 animate-fadeIn">
+      <div className="flex gap-4 border-b border-gray-200 dark:border-white/10 pb-4 transition-colors">
         <button
           onClick={() => setActiveTab('admin')}
           className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all ${
             activeTab === 'admin'
-              ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-              : 'bg-white/[0.02] text-slate-400 hover:text-white border border-white/5 hover:bg-white/[0.05]'
+              ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30'
+              : 'bg-gray-100 dark:bg-white/[0.02] text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-white/5 hover:bg-gray-200 dark:hover:bg-white/[0.05]'
           }`}
         >
           <ShieldAlert className="w-5 h-5" />
@@ -24,8 +24,8 @@ const LogsDashboard = () => {
           onClick={() => setActiveTab('student')}
           className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all ${
             activeTab === 'student'
-              ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-              : 'bg-white/[0.02] text-slate-400 hover:text-white border border-white/5 hover:bg-white/[0.05]'
+              ? 'bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/30'
+              : 'bg-gray-100 dark:bg-white/[0.02] text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-white/5 hover:bg-gray-200 dark:hover:bg-white/[0.05]'
           }`}
         >
           <Users className="w-5 h-5" />
