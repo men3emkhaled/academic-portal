@@ -17,6 +17,7 @@ const departmentRoutes = require('./routes/departmentRoutes');
 const personalTaskRoutes = require('./routes/personalTaskRoutes');
 const eventRoutes = require('./routes/eventRoutes');
 const examScheduleRoutes = require('./routes/examScheduleRoutes');
+const officialTaskRoutes = require('./routes/officialTaskRoutes');
 
 // ✅ استيراد مسارات الاختبارات
 const quizRoutes = require('./routes/quizRoutes');
@@ -30,6 +31,7 @@ const { adminActivityLogger } = require('./middleware/adminLogger');
 const AdminLog = require('./models/AdminLog');
 const StudentLog = require('./models/StudentLog');
 const studentLogRoutes = require('./routes/studentLogRoutes');
+const OfficialTask = require('./models/OfficialTask');
 
 // ✅ استيراد معدلات الحد
 const {
@@ -129,12 +131,14 @@ app.use('/api/quizzes', quizRoutes);
 
 // ✅ إضافة مسارات تقدم المواد
 app.use('/api/progress', courseProgressRoutes);
+app.use('/api/official-tasks', adminActivityLogger);
 
 // ✅ إضافة مسارات سجل أنشطة الأدمن
 app.use('/api/admin-logs', adminLogRoutes);
 app.use('/api/student-logs', studentLogRoutes);
 
 app.use('/api/exams', examScheduleRoutes); // ✅ جديد
+app.use('/api/official-tasks', officialTaskRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -211,6 +215,7 @@ app.listen(PORT, async () => {
   // ✅ إنشاء جدول الـ logs تلقائياً
   await AdminLog.ensureTable();
   await StudentLog.initializeTable();
+  await OfficialTask.initializeTable();
 
   console.log(`📡 API available at http://localhost:${PORT}/api`);
   console.log(`✅ Health check: http://localhost:${PORT}/api/health`);

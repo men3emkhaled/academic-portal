@@ -20,6 +20,7 @@ import ProgressManager from '../components/admin/ProgressManager';
 import LogsDashboard from '../components/admin/LogsDashboard';
 import LinkedEmailsManager from '../components/admin/LinkedEmailsManager';
 import ExamScheduleManager from '../components/admin/ExamScheduleManager';
+import OfficialTaskManager from '../components/admin/OfficialTaskManager';
 import {
   Users, BookOpen, FileText, Map as RoadmapIcon,
   Calendar, Bell, LayoutDashboard, Settings,
@@ -61,6 +62,7 @@ const AdminDashboard = () => {
     { id: 'reviews', label: 'Reviews', icon: <CheckCircle className="w-4 h-4" />, reqPerm: 'manage_quizzes' },
     { id: 'events', label: 'University', icon: <Heart className="w-4 h-4" />, reqPerm: 'manage_events' },
     { id: 'progress', label: 'Progress', icon: <CheckCircle className="w-4 h-4" />, reqPerm: 'manage_progress' },
+    { id: 'tasks', label: 'Tasks', icon: <CheckSquare className="w-4 h-4" />, reqPerm: 'manage_courses' },
     { id: 'emails', label: 'Emails', icon: <Mail className="w-4 h-4" />, reqPerm: 'admin' },
     { id: 'logs', label: 'Logs', icon: <ScrollText className="w-4 h-4" />, reqPerm: 'admin' },
   ];
@@ -804,6 +806,7 @@ const AdminDashboard = () => {
           {activeTab === 'reviews' && <PendingReviews />}
           {activeTab === 'events' && <EventsManager />}
           {activeTab === 'progress' && <ProgressManager courses={courses} />}
+          {activeTab === 'tasks' && <OfficialTaskManager courses={courses} />}
           {activeTab === 'emails' && <LinkedEmailsManager />}
           {activeTab === 'logs' && <LogsDashboard />}
         </div>

@@ -26,7 +26,9 @@ const StudentDashboard = () => {
   const { student, logout } = useStudentAuth();
   const { 
     gradesData, loadingGrades, 
-    notifications: allNotifications, loadingNotifications, markNotificationAsRead 
+    notifications: allNotifications, loadingNotifications, markNotificationAsRead,
+    officialTasks, loadingOfficialTasks, fetchOfficialTasks,
+    tasks: personalTasks, loadingTasks, fetchTasks
   } = useStudentData();
   const navigate = useNavigate();
 
@@ -51,6 +53,18 @@ const StudentDashboard = () => {
 
   const markAsRead = async (id) => {
     await markNotificationAsRead(id);
+  };
+
+  const handleToggleOfficial = async (taskId, currentStatus) => {
+    try {
+      await studentApi.patch(`/official-tasks/${taskId}/toggle`, {
+        is_completed: !currentStatus
+      });
+      fetchOfficialTasks();
+      toast.success(!currentStatus ? 'Task completed!' : 'Marked as incomplete');
+    } catch (error) {
+      toast.error('Failed to update task');
+    }
   };
 
   const handleLogout = () => {
@@ -260,6 +274,80 @@ const StudentDashboard = () => {
               </div>
             </div>
           )}
+
+          {/* Tasks Section (New) */}
+          <div className="mb-10 space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="font-headline font-extrabold text-2xl tracking-tight flex items-center gap-3 text-gray-900 dark:text-white">
+                <span className="w-2 h-8 bg-primary rounded-full"></span>
+                Pending Tasks
+              </h2>
+              <button 
+                onClick={() => navigate('/student/personal-tasks')}
+                className="text-xs font-bold text-gray-500 hover:text-primary transition-colors uppercase tracking-widest flex items-center gap-1 group"
+              >
+                View all <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {loadingTasks || loadingOfficialTasks ? (
+                <div className="col-span-full h-32 flex items-center justify-center bg-white dark:bg-dark-card rounded-[1.5rem] border border-gray-200 dark:border-white/5 animate-pulse">
+                  <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                </div>
+              ) : (officialTasks.filter(t => !t.is_completed).length === 0 && personalTasks.filter(t => !t.is_completed).length === 0) ? (
+                <div className="col-span-full py-10 bg-white/50 dark:bg-dark-glass/50 backdrop-blur-md rounded-[1.5rem] border border-dashed border-gray-300 dark:border-white/10 text-center">
+                  <p className="text-gray-500 dark:text-gray-400 text-sm">All caught up! No pending tasks.</p>
+                </div>
+              ) : (
+                <>
+                  {/* Show up to 4 pending tasks (2 official, 2 personal) */}
+                  {officialTasks.filter(t => !t.is_completed).slice(0, 2).map(task => (
+                    <div key={`dash-off-${task.id}`} className="bg-white dark:bg-dark-card border border-gray-200 dark:border-white/5 rounded-[1.5rem] p-5 flex items-center gap-4 hover:border-primary/30 transition-all shadow-sm">
+                      <button 
+                        onClick={() => handleToggleOfficial(task.id, false)}
+                        className="w-10 h-10 rounded-full border-2 border-gray-100 dark:border-white/5 flex items-center justify-center hover:border-primary/50 hover:bg-primary/5 transition-all group"
+                      >
+                        <div className="w-4 h-4 rounded-full border-2 border-gray-300 dark:border-white/10 group-hover:border-primary transition-colors"></div>
+                      </button>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <span className="bg-primary/10 text-primary text-[9px] font-black px-1.5 py-0.5 rounded-md uppercase tracking-wider">{task.course_name}</span>
+                          <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">Official</span>
+                        </div>
+                        <h4 className="font-bold text-gray-900 dark:text-white text-sm truncate">{task.title}</h4>
+                      </div>
+                      <a 
+                        href={task.drive_link} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="w-10 h-10 flex items-center justify-center bg-gray-50 dark:bg-white/5 text-gray-400 hover:text-primary transition-all rounded-xl"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                      </a>
+                    </div>
+                  ))}
+                  {personalTasks.filter(t => !t.is_completed).slice(0, 2).map(task => (
+                    <div key={`dash-pers-${task.id}`} className="bg-white dark:bg-dark-card border border-gray-200 dark:border-white/5 rounded-[1.5rem] p-5 flex items-center gap-4 hover:border-primary/30 transition-all shadow-sm">
+                      <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-white/5 flex items-center justify-center">
+                        <ShieldCheck className="w-5 h-5 text-gray-400" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider mb-0.5 block">Personal Task</span>
+                        <h4 className="font-bold text-gray-900 dark:text-white text-sm truncate">{task.title}</h4>
+                      </div>
+                      <button 
+                        onClick={() => navigate('/student/personal-tasks')}
+                        className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-primary transition-all"
+                      >
+                        <ChevronRight className="w-5 h-5" />
+                      </button>
+                    </div>
+                  ))}
+                </>
+              )}
+            </div>
+          </div>
 
           {/* Grades Section */}
           <div className="space-y-6">

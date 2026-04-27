@@ -21,6 +21,7 @@ export const StudentDataContextProvider = ({ children }) => {
   const [completedQuizzes, setCompletedQuizzes] = useState([]);
   const [roadmapTracks, setRoadmapTracks] = useState([]);
   const [exams, setExams] = useState([]);
+  const [officialTasks, setOfficialTasks] = useState([]);
   
   // Loading states
   const [loading, setLoading] = useState({
@@ -31,6 +32,7 @@ export const StudentDataContextProvider = ({ children }) => {
     quizzes: true,
     roadmap: true,
     exams: true,
+    officialTasks: true,
   });
 
   const updateLoading = (key, value) => {
@@ -143,6 +145,18 @@ export const StudentDataContextProvider = ({ children }) => {
       updateLoading('exams', false);
     }
   }, [student?.department_id]);
+  
+  const fetchOfficialTasks = useCallback(async () => {
+    updateLoading('officialTasks', true);
+    try {
+      const response = await studentApi.get('/official-tasks/my-tasks');
+      setOfficialTasks(response.data || []);
+    } catch (error) {
+      console.error('Error fetching official tasks:', error);
+    } finally {
+      updateLoading('officialTasks', false);
+    }
+  }, []);
 
   // Fetch all when student logs in
   useEffect(() => {
@@ -154,6 +168,7 @@ export const StudentDataContextProvider = ({ children }) => {
       fetchQuizzes();
       fetchRoadmapTracks();
       fetchExams();
+      fetchOfficialTasks();
     } else {
       // Clear data if logged out
       setGradesData({ grades: [], summary: null });
@@ -165,8 +180,9 @@ export const StudentDataContextProvider = ({ children }) => {
       setCompletedQuizzes([]);
       setRoadmapTracks([]);
       setExams([]);
+      setOfficialTasks([]);
     }
-  }, [student, token, fetchGrades, fetchNotifications, fetchTimetable, fetchTasks, fetchQuizzes, fetchRoadmapTracks, fetchExams]);
+  }, [student, token, fetchGrades, fetchNotifications, fetchTimetable, fetchTasks, fetchQuizzes, fetchRoadmapTracks, fetchExams, fetchOfficialTasks]);
 
   return (
     <StudentDataContext.Provider value={{
@@ -176,7 +192,8 @@ export const StudentDataContextProvider = ({ children }) => {
       tasks, setTasks, loadingTasks: loading.tasks, fetchTasks,
       quizzes, completedQuizzes, setQuizzes, setCompletedQuizzes, loadingQuizzes: loading.quizzes, fetchQuizzes,
       roadmapTracks, loadingRoadmap: loading.roadmap, fetchRoadmapTracks,
-      exams, setExams, loadingExams: loading.exams, fetchExams
+      exams, setExams, loadingExams: loading.exams, fetchExams,
+      officialTasks, setOfficialTasks, loadingOfficialTasks: loading.officialTasks, fetchOfficialTasks
     }}>
       {children}
     </StudentDataContext.Provider>

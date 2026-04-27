@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CheckSquare, Edit, Trash2 } from 'lucide-react';
+import { CheckSquare, Edit, Trash2, ExternalLink, Link as LinkIcon, BookOpen } from 'lucide-react';
 import { useStudentAuth } from '../context/StudentAuthContext';
 import { useStudentData } from '../context/StudentDataContext';
 import { useNavigate } from 'react-router-dom';
@@ -9,13 +9,13 @@ import Sidebar from '../components/Sidebar';
 
 const StudentPersonalTasks = () => {
   const { student, logout } = useStudentAuth();
-  const { tasks, setTasks, loadingTasks, fetchTasks } = useStudentData();
+  const { tasks, setTasks, loadingTasks, fetchTasks, officialTasks, setOfficialTasks, fetchOfficialTasks, loadingOfficialTasks } = useStudentData();
   const navigate = useNavigate();
   const [showForm, setShowForm] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [formData, setFormData] = useState({ title: '', description: '' });
 
-  const loading = loadingTasks;
+  const loading = loadingTasks || loadingOfficialTasks;
 
   const handleLogout = () => {
     logout();
@@ -65,6 +65,18 @@ const StudentPersonalTasks = () => {
       });
       setTasks(tasks.map(t => t.id === taskId ? { ...t, is_completed: !currentStatus } : t));
       toast.success(currentStatus ? 'Marked as incomplete' : 'Completed!');
+    } catch (error) {
+      toast.error('Failed to update task');
+    }
+  };
+  
+  const handleToggleOfficial = async (taskId, currentStatus) => {
+    try {
+      await studentApi.patch(`/official-tasks/${taskId}/toggle`, {
+        is_completed: !currentStatus
+      });
+      setOfficialTasks(officialTasks.map(t => t.id === taskId ? { ...t, is_completed: !currentStatus } : t));
+      toast.success(!currentStatus ? 'Completed!' : 'Marked as incomplete');
     } catch (error) {
       toast.error('Failed to update task');
     }
@@ -131,47 +143,108 @@ const StudentPersonalTasks = () => {
             </button>
           </div>
 
-          {tasks.length === 0 ? (
-            <div className="text-center py-16 bg-white/50 dark:bg-dark-glass/50 backdrop-blur-md rounded-[2rem] border border-dashed border-gray-300 dark:border-white/10 shadow-sm dark:shadow-inner">
-              <p className="text-gray-500 dark:text-gray-400">No personal tasks yet. Create your first task!</p>
+          {(tasks.length === 0 && officialTasks.length === 0) ? (
+            <div className="text-center py-16 bg-white/50 dark:bg-dark-glass/50 backdrop-blur-md rounded-[2rem] border border-dashed border-gray-200 dark:border-white/10 shadow-sm dark:shadow-inner">
+              <p className="text-gray-500 dark:text-gray-400">No tasks yet. Enjoy your free time!</p>
             </div>
           ) : (
-            <div className="space-y-3">
-              {tasks.map((task) => (
-                <div
-                  key={task.id}
-                  className={`relative overflow-hidden group bg-white dark:bg-dark-card border border-gray-200 dark:border-white/5 rounded-[1.5rem] p-5 flex items-center gap-5 hover:border-primary/40 dark:hover:border-primary/40 hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(46,204,113,0.1)] dark:hover:shadow-[0_10px_30px_rgba(142,255,113,0.1)] shadow-sm dark:shadow-none transition-all duration-300 ${
-                    task.is_completed ? 'opacity-60 grayscale-[0.5]' : ''
-                  }`}
-                >
-                  <button
-                    onClick={() => handleToggle(task.id, task.is_completed)}
-                    className="flex items-center justify-center hover:scale-110 active:scale-95 hover:shadow-[0_0_15px_rgba(46,204,113,0.5)] dark:hover:shadow-[0_0_15px_rgba(142,255,113,0.5)] rounded-full transition-all"
-                  >
-                    {task.is_completed ? (
-                      <svg className="w-6 h-6 text-primary" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                      </svg>
-                    ) : (
-                      <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none"/>
-                      </svg>
-                    )}
-                  </button>
-                  <div className="flex-1">
-                    <h4 className={`font-headline font-bold text-gray-900 dark:text-white ${task.is_completed ? 'line-through decoration-primary/40' : ''}`}>
-                      {task.title}
-                    </h4>
-                    {task.description && (
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{task.description}</p>
-                    )}
-                  </div>
-                  <div className="flex gap-2">
-                    <button onClick={() => editTask(task)} className="text-yellow-500 dark:text-yellow-400 text-lg hover:scale-110 hover:drop-shadow-[0_0_8px_rgba(234,179,8,0.5)] dark:hover:drop-shadow-[0_0_8px_rgba(250,204,21,0.5)] transition-all"><Edit className="w-4 h-4" /></button>
-                    <button onClick={() => handleDelete(task.id)} className="text-red-500 dark:text-red-400 text-lg hover:scale-110 hover:drop-shadow-[0_0_8px_rgba(239,68,68,0.5)] dark:hover:drop-shadow-[0_0_8px_rgba(248,113,113,0.5)] transition-all"><Trash2 className="w-4 h-4" /></button>
-                  </div>
+            <div className="space-y-6">
+              {officialTasks.length > 0 && (
+                <div className="space-y-3">
+                  <h3 className="text-xs font-black text-gray-400 dark:text-slate-500 uppercase tracking-[0.3em] ml-2 mb-4 flex items-center gap-2">
+                    <BookOpen className="w-3.5 h-3.5 text-primary" /> Official Course Tasks
+                  </h3>
+                  {officialTasks.map((task) => (
+                    <div
+                      key={`official-${task.id}`}
+                      className={`relative overflow-hidden group bg-white dark:bg-dark-card border-l-4 ${task.is_completed ? 'border-l-gray-300 dark:border-l-gray-700' : 'border-l-primary'} border border-gray-200 dark:border-white/5 rounded-[1.5rem] p-5 flex items-center gap-5 hover:border-primary/40 dark:hover:border-primary/40 hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(46,204,113,0.1)] dark:hover:shadow-[0_10px_30px_rgba(142,255,113,0.1)] shadow-sm dark:shadow-none transition-all duration-300 ${
+                        task.is_completed ? 'opacity-60 grayscale-[0.5]' : ''
+                      }`}
+                    >
+                      <button
+                        onClick={() => handleToggleOfficial(task.id, task.is_completed)}
+                        className="flex items-center justify-center hover:scale-110 active:scale-95 transition-all"
+                      >
+                        {task.is_completed ? (
+                          <svg className="w-6 h-6 text-primary" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                          </svg>
+                        ) : (
+                          <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none"/>
+                          </svg>
+                        )}
+                      </button>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="bg-primary/10 text-primary text-[10px] font-black px-2 py-0.5 rounded-lg uppercase tracking-widest">{task.course_name}</span>
+                          {task.deadline && (
+                            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Due: {new Date(task.deadline).toLocaleDateString()}</span>
+                          )}
+                        </div>
+                        <h4 className={`font-headline font-bold text-gray-900 dark:text-white ${task.is_completed ? 'line-through decoration-primary/40' : ''}`}>
+                          {task.title}
+                        </h4>
+                        {task.description && (
+                          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{task.description}</p>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        <a 
+                          href={task.drive_link} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="w-10 h-10 flex items-center justify-center bg-primary/10 text-primary rounded-xl hover:bg-primary hover:text-white dark:text-dark transition-all"
+                          title="Open in Drive"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                        </a>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              )}
+
+              {tasks.length > 0 && (
+                <div className="space-y-3">
+                  <h3 className="text-xs font-black text-gray-400 dark:text-slate-500 uppercase tracking-[0.3em] ml-2 mb-4">Personal Tasks</h3>
+                  {tasks.map((task) => (
+                    <div
+                      key={`personal-${task.id}`}
+                      className={`relative overflow-hidden group bg-white dark:bg-dark-card border border-gray-200 dark:border-white/5 rounded-[1.5rem] p-5 flex items-center gap-5 hover:border-primary/40 dark:hover:border-primary/40 hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(46,204,113,0.1)] dark:hover:shadow-[0_10px_30px_rgba(142,255,113,0.1)] shadow-sm dark:shadow-none transition-all duration-300 ${
+                        task.is_completed ? 'opacity-60 grayscale-[0.5]' : ''
+                      }`}
+                    >
+                      <button
+                        onClick={() => handleToggle(task.id, task.is_completed)}
+                        className="flex items-center justify-center hover:scale-110 active:scale-95 transition-all"
+                      >
+                        {task.is_completed ? (
+                          <svg className="w-6 h-6 text-primary" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                          </svg>
+                        ) : (
+                          <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none"/>
+                          </svg>
+                        )}
+                      </button>
+                      <div className="flex-1">
+                        <h4 className={`font-headline font-bold text-gray-900 dark:text-white ${task.is_completed ? 'line-through decoration-primary/40' : ''}`}>
+                          {task.title}
+                        </h4>
+                        {task.description && (
+                          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{task.description}</p>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        <button onClick={() => editTask(task)} className="w-10 h-10 flex items-center justify-center bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 rounded-xl hover:bg-yellow-500 hover:text-white transition-all"><Edit className="w-4 h-4" /></button>
+                        <button onClick={() => handleDelete(task.id)} className="w-10 h-10 flex items-center justify-center bg-red-500/10 text-red-600 dark:text-red-400 rounded-xl hover:bg-red-500 hover:text-white transition-all"><Trash2 className="w-4 h-4" /></button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
