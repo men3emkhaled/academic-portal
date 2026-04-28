@@ -3,6 +3,7 @@ const router = express.Router();
 const { 
   studentLogin, 
   googleLogin,
+  microsoftLogin,
   getCurrentStudent, 
   changePassword, 
   getPortalStats,
@@ -25,6 +26,7 @@ const db = require('../config/database');
 
 router.post('/login', studentLogin);
 router.post('/google-login', googleLogin);
+router.post('/microsoft-login', microsoftLogin);
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPassword);
 router.post('/verify-email', verifyEmail);

@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { useStudentAuth } from '../context/StudentAuthContext';
 import toast from 'react-hot-toast';
 import { GoogleLogin } from '@react-oauth/google';
+import { useMsal } from "@azure/msal-react";
+import { loginRequest } from "../config/microsoftAuthConfig";
 
 const StudentLogin = () => {
   const [username, setUsername] = useState('');
@@ -16,7 +18,8 @@ const StudentLogin = () => {
   const [resetStudentId, setResetStudentId] = useState('');
   const [resetLoading, setResetLoading] = useState(false);
   
-  const { login, googleLogin, forgotPassword, token, loading: authLoading } = useStudentAuth();
+  const { login, googleLogin, microsoftLogin, forgotPassword, token, loading: authLoading } = useStudentAuth();
+  const { instance } = useMsal();
   const navigate = useNavigate();
   const abortControllerRef = useRef(null);
 
@@ -76,6 +79,28 @@ const StudentLogin = () => {
 
   const handleGoogleError = () => {
     toast.error('Google Login Failed');
+  };
+
+  const handleMicrosoftLogin = async () => {
+    try {
+      setLoading(true);
+      const loginResponse = await instance.loginPopup(loginRequest);
+      if (loginResponse && loginResponse.accessToken) {
+        const result = await microsoftLogin(loginResponse.accessToken);
+        if (result.success) {
+          toast.success('Login successful!');
+        } else {
+          toast.error(result.message || 'Microsoft Login failed');
+        }
+      }
+    } catch (error) {
+      console.error('Microsoft login error:', error);
+      if (error.name !== 'BrowserAuthError' || !error.message.includes('user_cancelled')) {
+        toast.error('Microsoft Login Failed');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleForgotPassword = async (e) => {
@@ -220,7 +245,7 @@ const StudentLogin = () => {
                 <div className="flex-1 h-px bg-gray-200 dark:bg-white/10"></div>
               </div>
 
-              <div className="w-full flex justify-center">
+              <div className="w-full flex flex-col gap-3 justify-center">
                 <GoogleLogin
                   onSuccess={handleGoogleSuccess}
                   onError={handleGoogleError}
@@ -228,7 +253,23 @@ const StudentLogin = () => {
                   shape="pill"
                   size="large"
                   text="signin_with"
+                  width="100%"
                 />
+                
+                <button
+                  type="button"
+                  onClick={handleMicrosoftLogin}
+                  disabled={loading || authLoading}
+                  className="w-full h-[40px] bg-[#2F2F2F] hover:bg-black text-white rounded-full flex items-center justify-center gap-3 transition-all text-sm font-medium border border-white/10 shadow-sm"
+                >
+                  <svg className="w-4 h-4" viewBox="0 0 23 23" xmlns="http://www.w3.org/2000/svg">
+                    <path fill="#f3f3f3" d="M0 0h11v11H0z"/>
+                    <path fill="#f3f3f3" d="M12 0h11v11H12z"/>
+                    <path fill="#f3f3f3" d="M0 12h11v11H0z"/>
+                    <path fill="#f3f3f3" d="M12 12h11v11H12z"/>
+                  </svg>
+                  Sign in with Microsoft
+                </button>
               </div>
 
             </form>

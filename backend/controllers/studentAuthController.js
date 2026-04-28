@@ -301,6 +301,62 @@ const googleLogin = async (req, res) => {
   }
 };
 
+const microsoftLogin = async (req, res) => {
+  try {
+    const { accessToken } = req.body;
+    if (!accessToken) return res.status(400).json({ message: 'Microsoft access token is required' });
+
+    // Fetch user profile from Microsoft Graph API
+    const response = await fetch('https://graph.microsoft.com/v1.0/me', {
+      headers: {
+        Authorization: `Bearer ${accessToken}`
+      }
+    });
+
+    if (!response.ok) {
+      return res.status(401).json({ message: 'Microsoft authentication failed' });
+    }
+
+    const userData = await response.json();
+    const email = userData.mail || userData.userPrincipalName;
+
+    if (!email) {
+      return res.status(400).json({ message: 'No email found in Microsoft account' });
+    }
+
+    const result = await db.query('SELECT * FROM students WHERE email = $1', [email]);
+    if (result.rows.length === 0) {
+      return res.status(401).json({ message: 'This email is not linked to any student account. Please login with your Student ID and link your email in Settings first.' });
+    }
+
+    const student = result.rows[0];
+
+    const token = jwt.sign(
+      { id: student.id, role: 'student', level: student.level, department_id: student.department_id },
+      process.env.JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+
+    StudentLog.logLogin(student.id, student.name, 'Microsoft', req.ip || req.connection?.remoteAddress);
+
+    res.json({
+      success: true,
+      token,
+      student: {
+        id: student.id,
+        name: student.name,
+        level: student.level,
+        section: student.section,
+        department_id: student.department_id,
+        email: student.email
+      }
+    });
+  } catch (error) {
+    console.error('Microsoft login error:', error);
+    res.status(500).json({ message: 'Microsoft authentication failed' });
+  }
+};
+
 module.exports = {
   studentLogin,
   googleLogin,
@@ -310,5 +366,6 @@ module.exports = {
   linkEmail,
   verifyEmail,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  microsoftLogin
 };

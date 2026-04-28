@@ -152,6 +152,28 @@ export const StudentAuthProvider = ({ children }) => {
     }
   };
 
+  const microsoftLogin = async (accessToken) => {
+    try {
+      const response = await studentApi.post('/student/microsoft-login', { accessToken });
+      const { token: newToken, student: studentData } = response.data;
+      
+      setToken(newToken);
+      setStudent(studentData);
+      
+      return { success: true };
+    } catch (error) {
+      console.error('Microsoft login error:', error);
+      let errorMessage = 'Microsoft Login failed';
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+      return { 
+        success: false, 
+        message: errorMessage
+      };
+    }
+  };
+
   return (
     <StudentAuthContext.Provider value={{
       token,
@@ -163,7 +185,8 @@ export const StudentAuthProvider = ({ children }) => {
       changePassword,
       linkEmail,
       forgotPassword,
-      resetPassword
+      resetPassword,
+      microsoftLogin
     }}>
       {children}
     </StudentAuthContext.Provider>
