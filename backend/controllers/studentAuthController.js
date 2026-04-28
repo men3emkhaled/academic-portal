@@ -341,12 +341,18 @@ const microsoftLogin = async (req, res) => {
     let student;
 
     if (email.toLowerCase().endsWith(aiDomain)) {
+      console.log('🔍 AI Domain detected:', email);
       const studentIdFromEmail = email.split('@')[0];
+      console.log('🔍 Extracted Student ID:', studentIdFromEmail);
+
       // Search by ID and ensure they are in the AI department
       const result = await db.query('SELECT * FROM students WHERE id = $1 AND department_id = $2', [studentIdFromEmail, aiDepartmentId]);
       student = result.rows[0];
       
+      console.log('🔍 Database Result:', student ? 'Student Found' : 'Student NOT Found');
+
       if (!student) {
+        console.log('❌ No AI student found with ID:', studentIdFromEmail);
         return res.status(401).json({ message: 'No AI student found with this ID. Please ensure your Student ID and Department are correct.' });
       }
     } else {
