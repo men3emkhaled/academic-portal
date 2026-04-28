@@ -210,14 +210,17 @@ const forgotPassword = async (req, res) => {
     if (!student) return res.status(404).json({ message: 'Student not found' });
     
     let targetEmail;
-    const aiDomain = '@ai.znu.edu.eg';
-    const aiDepartmentId = 5;
+    const institutionalDomains = {
+      5: '@ai.znu.edu.eg',
+      2: '@ais.znu.edu.eg'
+    };
 
     if (method === 'microsoft') {
-      if (student.department_id !== aiDepartmentId) {
-        return res.status(400).json({ message: 'Institutional email reset is only available for AI department students.' });
+      const domain = institutionalDomains[student.department_id];
+      if (!domain) {
+        return res.status(400).json({ message: 'Institutional email reset is only available for supported departments (AI, Aviation).' });
       }
-      targetEmail = `${student.id}${aiDomain}`;
+      targetEmail = `${student.id}${domain}`;
     } else {
       if (!student.email) {
         return res.status(400).json({ message: 'No personal email linked to this account. If you are an AI student, try the Institutional Email option.' });
@@ -352,25 +355,29 @@ const microsoftLogin = async (req, res) => {
       return res.status(400).json({ message: 'No email found in Microsoft account' });
     }
 
-    const aiDomain = '@ai.znu.edu.eg';
-    const aiDepartmentId = 5;
+    const institutionalDomains = [
+      { domain: '@ai.znu.edu.eg', deptId: 5, label: 'AI' },
+      { domain: '@ais.znu.edu.eg', deptId: 2, label: 'Aviation' }
+    ];
     let student;
 
     const normalizedEmail = email.toLowerCase().trim();
+    
+    const matchedInstitution = institutionalDomains.find(d => normalizedEmail.endsWith(d.domain));
 
-    if (normalizedEmail.endsWith(aiDomain)) {
-      console.log('🔍 AI Domain detected:', normalizedEmail);
+    if (matchedInstitution) {
+      console.log(`🔍 ${matchedInstitution.label} Domain detected:`, normalizedEmail);
       const studentIdFromEmail = normalizedEmail.split('@')[0];
       console.log('🔍 Extracted Student ID:', studentIdFromEmail);
 
-      // Search by ID and ensure they are in the AI department
-      const result = await db.query('SELECT * FROM students WHERE id = $1 AND department_id = $2', [studentIdFromEmail, aiDepartmentId]);
+      // Search by ID and ensure they are in the correct department
+      const result = await db.query('SELECT * FROM students WHERE id = $1 AND department_id = $2', [studentIdFromEmail, matchedInstitution.deptId]);
       student = result.rows[0];
       
       if (!student) {
-        console.log('❌ No AI student found with ID:', studentIdFromEmail, 'in department:', aiDepartmentId);
+        console.log(`❌ No student found with ID: ${studentIdFromEmail} in department: ${matchedInstitution.deptId}`);
         return res.status(401).json({ 
-          message: `No student found with ID ${studentIdFromEmail} in the Artificial Intelligence department. Please contact your admin.` 
+          message: `No student found with ID ${studentIdFromEmail} in the ${matchedInstitution.label} department. Please contact your admin.` 
         });
       }
     } else {
