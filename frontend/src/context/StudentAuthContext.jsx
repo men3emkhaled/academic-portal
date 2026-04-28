@@ -130,9 +130,14 @@ export const StudentAuthProvider = ({ children }) => {
     }
   };
 
-  const googleLogin = async (credential) => {
+  const googleLogin = async (token) => {
     try {
-      const response = await studentApi.post('/student/google-login', { credential });
+      // Determine if it's an idToken (credential) or accessToken
+      // JWTs usually have 3 parts separated by dots
+      const isIdToken = typeof token === 'string' && token.includes('.');
+      const payload = isIdToken ? { credential: token } : { accessToken: token };
+      
+      const response = await studentApi.post('/student/google-login', payload);
       const { token: newToken, student: studentData } = response.data;
       
       setToken(newToken);

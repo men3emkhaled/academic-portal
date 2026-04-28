@@ -3,7 +3,7 @@ import { Fingerprint, Lock, Eye, EyeOff, HelpCircle, ArrowRight, Users, Building
 import { useNavigate } from 'react-router-dom';
 import { useStudentAuth } from '../context/StudentAuthContext';
 import toast from 'react-hot-toast';
-import { GoogleLogin } from '@react-oauth/google';
+import { useGoogleLogin } from '@react-oauth/google';
 import { useMsal } from "@azure/msal-react";
 import { loginRequest } from "../config/microsoftAuthConfig";
 
@@ -66,20 +66,21 @@ const StudentLogin = () => {
     }
   };
 
-  const handleGoogleSuccess = async (credentialResponse) => {
-    setLoading(true);
-    const result = await googleLogin(credentialResponse.credential);
-    setLoading(false);
-    if (result.success) {
-      toast.success('Login successful!');
-    } else {
-      toast.error(result.message || 'Google Login failed');
-    }
-  };
-
-  const handleGoogleError = () => {
-    toast.error('Google Login Failed');
-  };
+  const handleGoogleLogin = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      setLoading(true);
+      const result = await googleLogin(tokenResponse.access_token);
+      setLoading(false);
+      if (result.success) {
+        toast.success('Login successful!');
+      } else {
+        toast.error(result.message || 'Google Login failed');
+      }
+    },
+    onError: () => {
+      toast.error('Google Login Failed');
+    },
+  });
 
   const handleMicrosoftLogin = async () => {
     try {
@@ -246,21 +247,26 @@ const StudentLogin = () => {
               </div>
 
               <div className="w-full flex flex-col gap-3 justify-center">
-                <GoogleLogin
-                  onSuccess={handleGoogleSuccess}
-                  onError={handleGoogleError}
-                  theme="filled_black"
-                  shape="pill"
-                  size="large"
-                  text="signin_with"
-                  width="100%"
-                />
+                <button
+                  type="button"
+                  onClick={() => handleGoogleLogin()}
+                  disabled={loading || authLoading}
+                  className="w-full h-[40px] bg-white hover:bg-gray-100 text-gray-900 rounded-full flex items-center justify-center gap-3 transition-all text-sm font-bold border border-gray-200 shadow-sm"
+                >
+                  <svg className="w-4 h-4" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.12 7.09-17.65z"/>
+                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24s.92 7.54 2.56 10.78l7.97-6.19z"/>
+                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                  </svg>
+                  Sign in with Google
+                </button>
                 
                 <button
                   type="button"
                   onClick={handleMicrosoftLogin}
                   disabled={loading || authLoading}
-                  className="w-full h-[40px] bg-[#2F2F2F] hover:bg-black text-white rounded-full flex items-center justify-center gap-3 transition-all text-sm font-medium border border-white/10 shadow-sm"
+                  className="w-full h-[40px] bg-[#2F2F2F] hover:bg-black text-white rounded-full flex items-center justify-center gap-3 transition-all text-sm font-bold border border-white/10 shadow-sm"
                 >
                   <svg className="w-4 h-4" viewBox="0 0 23 23" xmlns="http://www.w3.org/2000/svg">
                     <path fill="#f3f3f3" d="M0 0h11v11H0z"/>

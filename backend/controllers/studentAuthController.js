@@ -253,16 +253,28 @@ const resetPassword = async (req, res) => {
 
 const googleLogin = async (req, res) => {
   try {
-    const { credential } = req.body;
-    if (!credential) return res.status(400).json({ message: 'Google credential is required' });
+    const { credential, accessToken } = req.body;
+    let email;
 
-    const ticket = await googleClient.verifyIdToken({
-      idToken: credential,
-      audience: process.env.GOOGLE_CLIENT_ID,
-    });
-    
-    const payload = ticket.getPayload();
-    const email = payload.email;
+    if (credential) {
+      // Legacy idToken verification
+      const ticket = await googleClient.verifyIdToken({
+        idToken: credential,
+        audience: process.env.GOOGLE_CLIENT_ID,
+      });
+      const payload = ticket.getPayload();
+      email = payload.email;
+    } else if (accessToken) {
+      // New access_token verification (from custom button)
+      const response = await fetch(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${accessToken}`);
+      if (!response.ok) {
+        return res.status(401).json({ message: 'Google authentication failed' });
+      }
+      const userData = await response.json();
+      email = userData.email;
+    } else {
+      return res.status(400).json({ message: 'Google credential or access token is required' });
+    }
 
     if (!email) {
       return res.status(400).json({ message: 'No email found in Google account' });
