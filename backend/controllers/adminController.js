@@ -2,6 +2,7 @@ const { generateToken } = require('../middleware/auth');
 const Student = require('../models/Student');
 const jwt = require('jsonwebtoken');
 const { logAdminLogin } = require('../middleware/adminLogger');
+const db = require('../config/database');
 
 const login = async (req, res) => {
     try {
@@ -56,4 +57,28 @@ const login = async (req, res) => {
     }
 };
 
-module.exports = { login };
+const getDashboardStats = async (req, res) => {
+    try {
+        const client = await db.pool.connect();
+        try {
+            const studentsCount = await client.query('SELECT COUNT(*) FROM students');
+            const coursesCount = await client.query('SELECT COUNT(*) FROM courses');
+            const departmentsCount = await client.query('SELECT COUNT(*) FROM departments');
+            // Assuming admin notifications are those where user_type = 'admin' or target = 'all'
+            const unreadNotificationsCount = await client.query("SELECT COUNT(*) FROM notifications WHERE is_read = false");
+            
+            res.json({
+                students: parseInt(studentsCount.rows[0].count),
+                courses: parseInt(coursesCount.rows[0].count),
+                departments: parseInt(departmentsCount.rows[0].count),
+                unread_notifications: parseInt(unreadNotificationsCount.rows[0].count)
+            });
+        } finally {
+            client.release();
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+module.exports = { login, getDashboardStats };

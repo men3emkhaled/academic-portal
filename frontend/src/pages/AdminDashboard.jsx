@@ -117,6 +117,7 @@ const AdminDashboard = () => {
   const [studentCourses, setStudentCourses] = useState([]);
   const [availableCourses, setAvailableCourses] = useState([]);
   const [studentGrades, setStudentGrades] = useState([]);
+  const [stats, setStats] = useState({ courses: 0, students: 0, departments: 0, unread_notifications: 0 });
   const [showAddCourseModal, setShowAddCourseModal] = useState(false);
   const [selectedCourseToAdd, setSelectedCourseToAdd] = useState('');
   const [editingGrade, setEditingGrade] = useState(null);
@@ -133,15 +134,14 @@ const AdminDashboard = () => {
   // ------------------- Fetch Data -------------------
   useEffect(() => {
     if (!token) return;
-    const loadAllData = async () => {
+    const loadInitialData = async () => {
       setInitialDataLoading(true);
       try {
+        const statsRes = await api.get('/admin/stats');
+        setStats(statsRes.data);
         await Promise.all([
           fetchCourses(),
-          fetchStudents(),
-          fetchDepartments(),
-          fetchAllTimetables(),
-          fetchNotifications()
+          fetchDepartments()
         ]);
       } catch (err) {
         console.error("Initialization error", err);
@@ -149,11 +149,12 @@ const AdminDashboard = () => {
         setInitialDataLoading(false);
       }
     };
-    loadAllData();
+    loadInitialData();
   }, [token]);
 
   useEffect(() => {
     if (activeTab === 'notifications') fetchNotifications();
+    if (activeTab === 'students' || activeTab === 'student-courses') fetchStudents();
   }, [activeTab]);
 
   useEffect(() => {
@@ -619,7 +620,7 @@ const AdminDashboard = () => {
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-slate-500 group-hover:text-emerald-600 dark:group-hover:text-emerald-300/70 transition-all">Courses</p>
             </div>
             <div className="flex items-end justify-between">
-              <p className="text-4xl font-black text-gray-900 dark:text-white">{courses.length}</p>
+              <p className="text-4xl font-black text-gray-900 dark:text-white">{stats.courses}</p>
               <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 text-xs font-bold bg-emerald-500/10 px-2 py-1 rounded-lg">
                 <Activity className="w-3 h-3" /> LIVE
               </div>
@@ -634,7 +635,7 @@ const AdminDashboard = () => {
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-slate-500 group-hover:text-blue-600 dark:group-hover:text-blue-300/70 transition-all">Students</p>
             </div>
             <div className="flex items-end justify-between">
-              <p className="text-4xl font-black text-gray-900 dark:text-white">{students.length}</p>
+              <p className="text-4xl font-black text-gray-900 dark:text-white">{stats.students}</p>
               <div className="flex items-center gap-1 text-blue-600 dark:text-blue-400 text-xs font-bold bg-blue-500/10 px-2 py-1 rounded-lg">
                 <CheckCircle className="w-3 h-3" /> SECURE
               </div>
@@ -649,7 +650,7 @@ const AdminDashboard = () => {
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-slate-500 group-hover:text-purple-600 dark:group-hover:text-purple-300/70 transition-all">Departments</p>
             </div>
             <div className="flex items-end justify-between">
-              <p className="text-4xl font-black text-gray-900 dark:text-white">{departments.length}</p>
+              <p className="text-4xl font-black text-gray-900 dark:text-white">{stats.departments}</p>
               <div className="flex items-center gap-1 text-purple-600 dark:text-purple-400 text-xs font-bold bg-purple-500/10 px-2 py-1 rounded-lg">
                 <Award className="w-3 h-3" /> STABLE
               </div>
@@ -657,7 +658,7 @@ const AdminDashboard = () => {
           </div>
 
           <div className="bg-white dark:bg-[#111111]/80 backdrop-blur-xl border border-gray-200 dark:border-white/5 p-6 rounded-[2rem] hover:border-red-500/30 transition-all duration-500 group shadow-sm dark:shadow-2xl relative overflow-hidden">
-            {notifications.filter(n => !n.is_read).length > 0 && (
+            {stats.unread_notifications > 0 && (
               <div className="absolute top-4 right-4 w-2 h-2 bg-red-500 rounded-full animate-ping"></div>
             )}
             <div className="flex items-center gap-4 mb-4">
@@ -667,7 +668,7 @@ const AdminDashboard = () => {
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-slate-500 group-hover:text-red-600 dark:group-hover:text-red-300/70 transition-all">Alerts</p>
             </div>
             <div className="flex items-end justify-between">
-              <p className="text-4xl font-black text-gray-900 dark:text-white">{notifications.filter(n => !n.is_read).length}</p>
+              <p className="text-4xl font-black text-gray-900 dark:text-white">{stats.unread_notifications}</p>
               <button
                 onClick={() => {
                   const hasAccess = isSuperAdmin || userPermissions.includes('manage_materials');

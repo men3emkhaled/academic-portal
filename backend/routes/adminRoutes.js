@@ -10,6 +10,7 @@ const db = require('../config/database');
 const quizController = require('../controllers/quizController');
 
 router.post('/login', adminController.login);
+router.get('/stats', adminAuth, adminController.getDashboardStats);
 
 // ------------------- Students Management -------------------
 router.get('/students-with-passwords', adminAuth, async (req, res) => {
