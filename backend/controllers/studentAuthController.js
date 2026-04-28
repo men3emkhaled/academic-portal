@@ -267,33 +267,6 @@ const resetPassword = async (req, res) => {
   }
 };
 
-const changePassword = async (req, res) => {
-  try {
-    const { oldPassword, newPassword } = req.body;
-    const studentId = req.student.id;
-
-    if (!oldPassword || !newPassword) {
-      return res.status(400).json({ message: 'Old and new passwords are required' });
-    }
-
-    const student = await Student.findById(studentId);
-    if (!student) return res.status(404).json({ message: 'Student not found' });
-
-    // Verify old password
-    const isMatch = await bcrypt.compare(oldPassword, student.password_hash);
-    if (!isMatch) {
-      return res.status(400).json({ message: 'Incorrect old password' });
-    }
-
-    // Update password
-    await Student.updatePassword(studentId, newPassword);
-
-    res.json({ success: true, message: 'Password updated successfully' });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
 const googleLogin = async (req, res) => {
   try {
     const { credential, accessToken } = req.body;
@@ -446,6 +419,5 @@ module.exports = {
   verifyEmail,
   forgotPassword,
   resetPassword,
-  microsoftLogin,
-  changePassword
+  microsoftLogin
 };
