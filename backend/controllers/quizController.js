@@ -5,6 +5,32 @@ const db = require('../config/database');
 const supabase = require('../config/supabase');
 const fs = require('fs');
 
+const _forceSubmitAttempt = async (attemptId, quizId) => {
+    try {
+        const writtenCheck = await db.query(
+            `SELECT COUNT(*) FROM student_answers sa
+             JOIN questions q ON sa.question_id = q.id
+             WHERE sa.attempt_id = $1 AND q.question_type = 'written'`,
+            [attemptId]
+        );
+        const hasWritten = parseInt(writtenCheck.rows[0].count) > 0;
+        let score = 0;
+        const totalPoints = await Quiz.getTotalPoints(quizId);
+        let finalStatus = 'completed';
+
+        if (hasWritten) {
+            finalStatus = 'pending_review';
+        } else {
+            score = await StudentAnswer.calculateScore(attemptId);
+        }
+
+        await QuizAttempt.complete(attemptId, score, totalPoints, finalStatus);
+        return finalStatus;
+    } catch (e) {
+        console.error('Force submit error:', e);
+    }
+};
+
 // ============= STUDENT FUNCTIONS =============
 
 const startQuiz = async (req, res) => {
@@ -31,8 +57,17 @@ const startQuiz = async (req, res) => {
 
         if (activeAttempt) {
             if (attempt_id && parseInt(attempt_id) === activeAttempt.id) {
-                const questions = await Quiz.getQuestions(quizId, true);
                 const remainingSeconds = await QuizAttempt.getRemainingSeconds(activeAttempt.id);
+                
+                if (remainingSeconds <= -60) {
+                    await _forceSubmitAttempt(activeAttempt.id, quizId);
+                    return res.status(403).json({
+                        message: 'Time limit exceeded. Your attempt has been automatically submitted.',
+                        reason: 'time_exceeded'
+                    });
+                }
+
+                const questions = await Quiz.getQuestions(quizId, true);
                 const sanitizedQuestions = questions.map(q => ({
                     id: q.id,
                     question_text: q.question_text,
@@ -46,6 +81,7 @@ const startQuiz = async (req, res) => {
                     attempt_id: activeAttempt.id,
                     quiz_title: quiz.title,
                     time_limit_minutes: quiz.time_limit_minutes,
+                    is_official: quiz.is_official || false,
                     remaining_seconds: remainingSeconds,
                     questions: sanitizedQuestions,
                     total_points: await Quiz.getTotalPoints(quizId),
@@ -85,6 +121,7 @@ const startQuiz = async (req, res) => {
             attempt_id: newAttempt.id,
             quiz_title: quiz.title,
             time_limit_minutes: quiz.time_limit_minutes,
+            is_official: quiz.is_official || false,
             remaining_seconds: remainingSeconds,
             questions: sanitizedQuestions,
             total_points: await Quiz.getTotalPoints(quizId),
@@ -111,6 +148,12 @@ const saveAnswer = async (req, res) => {
         }
         if (attempt.status !== 'in_progress') {
             return res.status(400).json({ message: 'Quiz already completed' });
+        }
+
+        const remainingSeconds = await QuizAttempt.getRemainingSeconds(attemptId);
+        if (remainingSeconds <= -60) {
+            await _forceSubmitAttempt(attemptId, attempt.quiz_id);
+            return res.status(403).json({ message: 'Time limit exceeded. Answers are no longer accepted and quiz has been auto-submitted.' });
         }
 
         const questionResult = await db.query(
@@ -414,7 +457,7 @@ const createQuiz = async (req, res) => {
     try {
         const { 
             course_id, title, description, time_limit_minutes, passing_score,
-            max_attempts, start_date, end_date 
+            max_attempts, start_date, end_date, is_official
         } = req.body;
         
         if (!course_id || !title || !time_limit_minutes) {
@@ -424,10 +467,10 @@ const createQuiz = async (req, res) => {
         const result = await db.query(
             `INSERT INTO quizzes 
                 (course_id, title, description, time_limit_minutes, passing_score, 
-                 max_attempts, start_date, end_date, is_published) 
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, false) RETURNING *`,
+                 max_attempts, start_date, end_date, is_published, is_official) 
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, false, $9) RETURNING *`,
             [course_id, title, description, time_limit_minutes, passing_score || 50,
-             max_attempts || 1, start_date || null, end_date || null]
+             max_attempts || 1, start_date || null, end_date || null, is_official || false]
         );
         res.status(201).json(result.rows[0]);
     } catch (error) {
@@ -441,7 +484,7 @@ const updateQuiz = async (req, res) => {
         const { id } = req.params;
         const { 
             course_id, title, description, time_limit_minutes, passing_score,
-            max_attempts, start_date, end_date 
+            max_attempts, start_date, end_date, is_official
         } = req.body;
         
         const result = await db.query(
@@ -449,10 +492,11 @@ const updateQuiz = async (req, res) => {
              SET course_id = $1, title = $2, description = $3, 
                  time_limit_minutes = $4, passing_score = $5, 
                  max_attempts = $6, start_date = $7, end_date = $8,
+                 is_official = $9,
                  updated_at = CURRENT_TIMESTAMP 
-             WHERE id = $9 RETURNING *`,
+             WHERE id = $10 RETURNING *`,
             [course_id, title, description, time_limit_minutes, passing_score,
-             max_attempts || 1, start_date || null, end_date || null, id]
+             max_attempts || 1, start_date || null, end_date || null, is_official || false, id]
         );
         if (result.rows.length === 0) {
             return res.status(404).json({ message: 'Quiz not found' });

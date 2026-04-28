@@ -9,6 +9,8 @@ import '../providers/auth_provider.dart';
 import '../theme.dart';
 import '../l10n/tr.dart';
 import '../services/fcm_service.dart';
+import 'package:aad_oauth_ce/aad_oauth.dart';
+import '../config/msal_config.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -24,6 +26,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
   bool _showPassword = false;
   bool _rememberDevice = false;
   bool _isGoogleLoading = false;
+  bool _isMicrosoftLoading = false;
   String? _errorMessage;
   String _focused = '';
 
@@ -66,6 +69,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     bool sending = false;
     bool sent = false;
     String? error;
+    String method = 'google'; // Default to personal
 
     showModalBottomSheet(
       context: context,
@@ -88,7 +92,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                 children: [
                   const Text('Forget Password', style: TextStyle(color: AppTheme.primary, fontWeight: FontWeight.w900, fontSize: 20)),
                   const SizedBox(height: 8),
-                  Text('Enter your Student ID and we will send a reset link to your linked email.', style: TextStyle(color: colors.textSecondary, fontSize: 13)),
+                  Text('Enter your Student ID and choose where to receive the reset link.', style: TextStyle(color: colors.textSecondary, fontSize: 13)),
                   const SizedBox(height: 20),
                   TextField(
                     controller: forgotCtl,
@@ -103,6 +107,48 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                       prefixIcon: Icon(LucideIcons.fingerprint, color: colors.textHint),
                     ),
                   ),
+                  const SizedBox(height: 20),
+                  const Text('Send Link To:', style: TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.2)),
+                  const SizedBox(height: 12),
+                  Row(children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => setStateModal(() => method = 'google'),
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: method == 'google' ? AppTheme.primary.withValues(alpha: 0.1) : Colors.transparent,
+                            border: Border.all(color: method == 'google' ? AppTheme.primary : colors.borderSubtle),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Column(children: [
+                            Image.network('https://www.google.com/favicon.ico', width: 24, height: 24, errorBuilder: (c,e,s) => const Icon(LucideIcons.mail, size: 24)),
+                            const SizedBox(height: 8),
+                            Text('Personal', style: TextStyle(color: method == 'google' ? AppTheme.primary : colors.textSecondary, fontWeight: FontWeight.bold, fontSize: 10)),
+                          ]),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => setStateModal(() => method = 'microsoft'),
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: method == 'microsoft' ? AppTheme.primary.withValues(alpha: 0.1) : Colors.transparent,
+                            border: Border.all(color: method == 'microsoft' ? AppTheme.primary : colors.borderSubtle),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Column(children: [
+                            _microsoftIcon(),
+                            const SizedBox(height: 8),
+                            Text('Institutional', style: TextStyle(color: method == 'microsoft' ? AppTheme.primary : colors.textSecondary, fontWeight: FontWeight.bold, fontSize: 10)),
+                          ]),
+                        ),
+                      ),
+                    ),
+                  ]),
                   if (error != null) ...[
                     const SizedBox(height: 12),
                     Text(error!, style: const TextStyle(color: Colors.redAccent, fontSize: 13)),
@@ -112,10 +158,10 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(color: Colors.greenAccent.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
-                      child: const Text('Reset link sent to your email!', style: TextStyle(color: Colors.greenAccent, fontWeight: FontWeight.bold)),
+                      child: const Text('Reset link sent successfully!', style: TextStyle(color: Colors.greenAccent, fontWeight: FontWeight.bold)),
                     ),
                   ],
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 24),
                   Row(children: [
                     Expanded(
                       child: GestureDetector(
@@ -135,7 +181,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                         onTap: () async {
                           if (forgotCtl.text.trim().isEmpty) return;
                           setStateModal(() { sending = true; error = null; });
-                          final res = await context.read<AuthProvider>().forgotPassword(forgotCtl.text.trim());
+                          final res = await context.read<AuthProvider>().forgotPassword(forgotCtl.text.trim(), method: method);
                           setStateModal(() { sending = false; });
                           if (res['success'] == true) {
                             setStateModal(() => sent = true);
@@ -198,6 +244,40 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
       }
     } catch (e) {
       if (mounted) setState(() { _isGoogleLoading = false; _errorMessage = 'Google sign-in error: $e'; });
+    }
+  }
+
+  Future<void> _handleMicrosoftLogin() async {
+    setState(() { _isMicrosoftLoading = true; _errorMessage = null; });
+    try {
+      final AadOAuth oauth = AadOAuth(MsalConfig.config);
+      await oauth.login();
+      final accessToken = await oauth.getAccessToken();
+      
+      if (accessToken == null) {
+        setState(() => _isMicrosoftLoading = false);
+        return;
+      }
+      
+      if (!mounted) return;
+      final result = await context.read<AuthProvider>().microsoftLogin(accessToken);
+      
+      if (!mounted) return;
+      setState(() => _isMicrosoftLoading = false);
+      
+      if (result['success'] == true) {
+        try {
+          final fcmToken = await FCMService.getToken();
+          if (fcmToken != null) {
+            await context.read<AuthProvider>().updateFcmToken(fcmToken);
+          }
+        } catch (_) {}
+        if (mounted) context.go('/dashboard');
+      } else {
+        setState(() => _errorMessage = result['message'] ?? 'Microsoft login failed');
+      }
+    } catch (e) {
+      if (mounted) setState(() { _isMicrosoftLoading = false; _errorMessage = 'Microsoft sign-in error: $e'; });
     }
   }
 
@@ -464,26 +544,50 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
 
                           const SizedBox(height: 16),
 
-                          // ── Google Sign-In Button ──
-                          GestureDetector(
-                            onTap: (_isLoading || _isGoogleLoading) ? null : _handleGoogleLogin,
-                            child: Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              decoration: BoxDecoration(
-                                color: colors.card,
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(color: colors.borderSubtle),
+                          // ── SOCIAL LOGIN BUTTONS ──
+                          Row(children: [
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: (_isLoading || _isGoogleLoading || _isMicrosoftLoading) ? null : _handleGoogleLogin,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(vertical: 14),
+                                  decoration: BoxDecoration(
+                                    color: colors.card,
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(color: colors.borderSubtle),
+                                  ),
+                                  child: _isGoogleLoading
+                                    ? const Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)))
+                                    : Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                                        Image.network('https://www.google.com/favicon.ico', width: 18, height: 18, errorBuilder: (c, e, s) => const Icon(LucideIcons.globe, size: 18)),
+                                        const SizedBox(width: 8),
+                                        Text('Google', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: colors.textPrimary)),
+                                      ]),
+                                ),
                               ),
-                              child: _isGoogleLoading
-                                ? const Center(child: SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5)))
-                                : Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                                    Image.network('https://www.google.com/favicon.ico', width: 20, height: 20, errorBuilder: (c, e, s) => const Icon(LucideIcons.globe, size: 20)),
-                                    const SizedBox(width: 12),
-                                    Text('Sign in with Google', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: colors.textPrimary)),
-                                  ]),
                             ),
-                          ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: (_isLoading || _isGoogleLoading || _isMicrosoftLoading) ? null : _handleMicrosoftLogin,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(vertical: 14),
+                                  decoration: BoxDecoration(
+                                    color: colors.card,
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(color: colors.borderSubtle),
+                                  ),
+                                  child: _isMicrosoftLoading
+                                    ? const Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)))
+                                    : Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                                        _microsoftIcon(),
+                                        const SizedBox(width: 8),
+                                        Text('Microsoft', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: colors.textPrimary)),
+                                      ]),
+                                ),
+                              ),
+                            ),
+                          ]),
                         ],
                       ),
                     ),
@@ -581,6 +685,25 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _microsoftIcon() {
+    return SizedBox(
+      width: 18, height: 18,
+      child: GridView.count(
+        crossAxisCount: 2,
+        padding: EdgeInsets.zero,
+        mainAxisSpacing: 1,
+        crossAxisSpacing: 1,
+        physics: const NeverScrollableScrollPhysics(),
+        children: [
+          Container(color: const Color(0xFFF25022)),
+          Container(color: const Color(0xFF7FBB00)),
+          Container(color: const Color(0xFF00A1F1)),
+          Container(color: const Color(0xFFFFB900)),
         ],
       ),
     );

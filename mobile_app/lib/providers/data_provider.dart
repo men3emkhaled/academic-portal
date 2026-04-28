@@ -7,12 +7,13 @@ import '../services/notification_service.dart';
 
 class DataProvider extends ChangeNotifier {
   final ApiService _apiService = ApiService();
-  
+
   List<dynamic> _timetable = [];
   List<dynamic> _departmentTimetable = [];
   List<dynamic> _exams = [];
   Map<String, dynamic> _gradesData = {};
   List<dynamic> _tasks = [];
+  List<dynamic> _officialTasks = [];
   List<dynamic> _quizzes = [];
   List<dynamic> _completedQuizzes = [];
   List<dynamic> _roadmapTracks = [];
@@ -33,13 +34,15 @@ class DataProvider extends ChangeNotifier {
   List<dynamic> get exams => _exams;
   Map<String, dynamic> get gradesData => _gradesData;
   List<dynamic> get tasks => _tasks;
+  List<dynamic> get officialTasks => _officialTasks;
   List<dynamic> get quizzes => _quizzes;
   List<dynamic> get completedQuizzes => _completedQuizzes;
   List<dynamic> get roadmapTracks => _roadmapTracks;
   List<dynamic> get notifications => _notifications;
 
   List<dynamic> get grades => (_gradesData['grades'] as List<dynamic>?) ?? [];
-  Map<String, dynamic> get gradesSummary => (_gradesData['summary'] as Map<String, dynamic>?) ?? {};
+  Map<String, dynamic> get gradesSummary =>
+      (_gradesData['summary'] as Map<String, dynamic>?) ?? {};
   List<dynamic> get events => _events;
 
   bool get isLoadingTimetable => _isLoadingTimetable;
@@ -52,16 +55,24 @@ class DataProvider extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
 
     if (prefs.containsKey('cache_my_timetable')) {
-       try { 
-         _timetable = jsonDecode(prefs.getString('cache_my_timetable')!); 
-         NotificationService().scheduleLectureNotifications(_timetable);
-       } catch(_) {}
+      try {
+        _timetable = jsonDecode(prefs.getString('cache_my_timetable')!);
+        NotificationService().scheduleLectureNotifications(_timetable);
+      } catch (_) {}
     }
-    if (departmentId != null && prefs.containsKey('cache_dept_timetable_$departmentId')) {
-       try { _departmentTimetable = jsonDecode(prefs.getString('cache_dept_timetable_$departmentId')!); } catch(_) {}
+    if (departmentId != null &&
+        prefs.containsKey('cache_dept_timetable_$departmentId')) {
+      try {
+        _departmentTimetable = jsonDecode(
+          prefs.getString('cache_dept_timetable_$departmentId')!,
+        );
+      } catch (_) {}
     }
-    if (departmentId != null && prefs.containsKey('cache_exams_$departmentId')) {
-       try { _exams = jsonDecode(prefs.getString('cache_exams_$departmentId')!); } catch(_) {}
+    if (departmentId != null &&
+        prefs.containsKey('cache_exams_$departmentId')) {
+      try {
+        _exams = jsonDecode(prefs.getString('cache_exams_$departmentId')!);
+      } catch (_) {}
     }
 
     try {
@@ -69,14 +80,22 @@ class DataProvider extends ChangeNotifier {
       _timetable = response1.data ?? [];
       prefs.setString('cache_my_timetable', jsonEncode(_timetable));
       NotificationService().scheduleLectureNotifications(_timetable);
-      
+
       if (departmentId != null) {
-        final response2 = await _apiService.dio.get('/timetable/department/$departmentId');
+        final response2 = await _apiService.dio.get(
+          '/timetable/department/$departmentId',
+        );
         _departmentTimetable = response2.data ?? [];
-        prefs.setString('cache_dept_timetable_$departmentId', jsonEncode(_departmentTimetable));
+        prefs.setString(
+          'cache_dept_timetable_$departmentId',
+          jsonEncode(_departmentTimetable),
+        );
 
         try {
-          final response3 = await _apiService.dio.get('/exams', queryParameters: {'department_id': departmentId});
+          final response3 = await _apiService.dio.get(
+            '/exams',
+            queryParameters: {'department_id': departmentId},
+          );
           _exams = response3.data ?? [];
           prefs.setString('cache_exams_$departmentId', jsonEncode(_exams));
         } catch (e) {
@@ -98,12 +117,12 @@ class DataProvider extends ChangeNotifier {
 
     // Load cached grades and build initial signatures
     if (prefs.containsKey('cache_grades_data')) {
-       try {
-         _gradesData = jsonDecode(prefs.getString('cache_grades_data')!);
-         if (_isFirstGradesFetch) {
-           _knownGradeSignatures = _buildGradeSignatures(_gradesData);
-         }
-       } catch(_) {}
+      try {
+        _gradesData = jsonDecode(prefs.getString('cache_grades_data')!);
+        if (_isFirstGradesFetch) {
+          _knownGradeSignatures = _buildGradeSignatures(_gradesData);
+        }
+      } catch (_) {}
     }
 
     try {
@@ -114,7 +133,7 @@ class DataProvider extends ChangeNotifier {
       if (!_isFirstGradesFetch) {
         final newSignatures = _buildGradeSignatures(newData);
         final brandNew = newSignatures.difference(_knownGradeSignatures);
-        
+
         // Extract unique course names from new grade signatures
         final Set<String> notifiedCourses = {};
         for (final sig in brandNew) {
@@ -159,23 +178,44 @@ class DataProvider extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
 
     try {
-       if (prefs.containsKey('cache_tasks')) _tasks = jsonDecode(prefs.getString('cache_tasks')!);
-       if (prefs.containsKey('cache_quizzes')) _quizzes = jsonDecode(prefs.getString('cache_quizzes')!);
-       if (prefs.containsKey('cache_completed_quizzes')) _completedQuizzes = jsonDecode(prefs.getString('cache_completed_quizzes')!);
-       if (prefs.containsKey('cache_roadmap_tracks')) _roadmapTracks = jsonDecode(prefs.getString('cache_roadmap_tracks')!);
-       if (prefs.containsKey('cache_notifications')) _notifications = jsonDecode(prefs.getString('cache_notifications')!);
-    } catch(_) {}
+      if (prefs.containsKey('cache_tasks'))
+        _tasks = jsonDecode(prefs.getString('cache_tasks')!);
+      if (prefs.containsKey('cache_official_tasks'))
+        _officialTasks = jsonDecode(prefs.getString('cache_official_tasks')!);
+      if (prefs.containsKey('cache_quizzes'))
+        _quizzes = jsonDecode(prefs.getString('cache_quizzes')!);
+      if (prefs.containsKey('cache_completed_quizzes'))
+        _completedQuizzes = jsonDecode(
+          prefs.getString('cache_completed_quizzes')!,
+        );
+      if (prefs.containsKey('cache_roadmap_tracks'))
+        _roadmapTracks = jsonDecode(prefs.getString('cache_roadmap_tracks')!);
+      if (prefs.containsKey('cache_notifications'))
+        _notifications = jsonDecode(prefs.getString('cache_notifications')!);
+    } catch (_) {}
 
     try {
       final tasksRes = await _apiService.dio.get('/student/personal-tasks');
       _tasks = tasksRes.data ?? [];
       prefs.setString('cache_tasks', jsonEncode(_tasks));
 
+      try {
+        final officialRes = await _apiService.dio.get(
+          '/official-tasks/my-tasks',
+        );
+        _officialTasks = officialRes.data ?? [];
+        prefs.setString('cache_official_tasks', jsonEncode(_officialTasks));
+      } catch (e) {
+        debugPrint('Error fetching official tasks: $e');
+      }
+
       final quizzesRes = await _apiService.dio.get('/student/my-quizzes');
       _quizzes = quizzesRes.data ?? [];
       prefs.setString('cache_quizzes', jsonEncode(_quizzes));
 
-      final compQuizzesRes = await _apiService.dio.get('/student/completed-quizzes');
+      final compQuizzesRes = await _apiService.dio.get(
+        '/student/completed-quizzes',
+      );
       _completedQuizzes = compQuizzesRes.data ?? [];
       prefs.setString('cache_completed_quizzes', jsonEncode(_completedQuizzes));
 
@@ -183,7 +223,9 @@ class DataProvider extends ChangeNotifier {
       _roadmapTracks = roadmapRes.data ?? [];
       prefs.setString('cache_roadmap_tracks', jsonEncode(_roadmapTracks));
 
-      final notifRes = await _apiService.dio.get('/notifications/my-notifications');
+      final notifRes = await _apiService.dio.get(
+        '/notifications/my-notifications',
+      );
       _notifications = notifRes.data ?? [];
       prefs.setString('cache_notifications', jsonEncode(_notifications));
 
@@ -199,7 +241,9 @@ class DataProvider extends ChangeNotifier {
   Future<void> fetchEvents() async {
     final prefs = await SharedPreferences.getInstance();
     if (prefs.containsKey('cache_events')) {
-       try { _events = jsonDecode(prefs.getString('cache_events')!); } catch(_) {}
+      try {
+        _events = jsonDecode(prefs.getString('cache_events')!);
+      } catch (_) {}
     }
 
     try {
@@ -218,7 +262,9 @@ class DataProvider extends ChangeNotifier {
       final index = _notifications.indexWhere((n) => n['id'] == id);
       if (index != -1) {
         // Create a new map for the notification to ensure provider state updates correctly
-        final newNotification = Map<String, dynamic>.from(_notifications[index]);
+        final newNotification = Map<String, dynamic>.from(
+          _notifications[index],
+        );
         newNotification['is_read'] = 1;
         _notifications[index] = newNotification;
         notifyListeners();
@@ -227,7 +273,7 @@ class DataProvider extends ChangeNotifier {
       debugPrint('Error marking notification read: $e');
     }
   }
-  
+
   /// Start background polling for new grades (every 3 minutes)
   void startGradePolling() {
     _pollingTimer?.cancel();
@@ -249,6 +295,7 @@ class DataProvider extends ChangeNotifier {
     _exams = [];
     _gradesData = {};
     _tasks = [];
+    _officialTasks = [];
     _quizzes = [];
     _completedQuizzes = [];
     _roadmapTracks = [];

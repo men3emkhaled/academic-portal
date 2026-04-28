@@ -11,6 +11,8 @@ import 'providers/theme_provider.dart';
 import 'providers/locale_provider.dart';
 import 'screens/login_screen.dart';
 import 'screens/app_layout.dart';
+import 'config/msal_config.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -43,6 +45,7 @@ class _UniversityAppState extends State<UniversityApp> {
     if (_router != null) return _router!;
 
     _router = GoRouter(
+      navigatorKey: MsalConfig.navigatorKey,
       initialLocation: '/',
       refreshListenable: auth,
       redirect: (context, state) {

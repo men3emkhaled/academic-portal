@@ -107,13 +107,39 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  /// Forgot Password - sends a reset link to the student's linked email
-  Future<Map<String, dynamic>> forgotPassword(String studentId) async {
+  /// Microsoft OAuth Login - sends the Azure access token to the backend
+  Future<Map<String, dynamic>> microsoftLogin(String accessToken) async {
     try {
-      await _apiService.dio.post('/student/forgot-password', data: {
-        'studentId': studentId,
+      final response = await _apiService.dio.post('/student/microsoft-login', data: {
+        'accessToken': accessToken,
       });
+
+      _token = response.data['token'];
+      _student = response.data['student'];
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('studentToken', _token!);
+      await prefs.setString('studentData', jsonEncode(_student));
+
+      notifyListeners();
       return {'success': true};
+    } on DioException catch (e) {
+      String errorMessage = 'Microsoft login failed';
+      if (e.response?.data != null && e.response?.data['message'] != null) {
+        errorMessage = e.response!.data['message'];
+      }
+      return {'success': false, 'message': errorMessage};
+    }
+  }
+
+  /// Forgot Password - sends a reset link to the student's linked email
+  Future<Map<String, dynamic>> forgotPassword(String studentId, {String method = 'google'}) async {
+    try {
+      final response = await _apiService.dio.post('/student/forgot-password', data: {
+        'studentId': studentId,
+        'method': method,
+      });
+      return {'success': true, 'message': response.data['message']};
     } on DioException catch (e) {
       String errorMessage = 'Failed to send reset email';
       if (e.response?.data != null && e.response?.data['message'] != null) {
@@ -123,19 +149,21 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  /// Link Email - associates a Google email with the student account
+  /// Link Email - updates the student's personal email and allows for Google SSO recovery
   Future<Map<String, dynamic>> linkEmail(String email) async {
     try {
       final response = await _apiService.dio.post('/student/link-email', data: {
         'email': email,
       });
+
       // Update local student data with the new email
       if (_student != null) {
         _student!['email'] = email;
         final prefs = await SharedPreferences.getInstance();
-        prefs.setString('studentData', jsonEncode(_student));
-        notifyListeners();
+        await prefs.setString('studentData', jsonEncode(_student));
       }
+
+      notifyListeners();
       return {'success': true, 'message': response.data['message'] ?? 'Email linked successfully'};
     } on DioException catch (e) {
       String errorMessage = 'Failed to link email';
@@ -146,11 +174,11 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  Future<Map<String, dynamic>> changePassword(String currentPassword, String newPassword) async {
+  Future<Map<String, dynamic>> changePassword(String oldPassword, String newPassword) async {
     try {
       final response = await _apiService.dio.post('/student/change-password', data: {
-        'current_password': currentPassword,
-        'new_password': newPassword,
+        'oldPassword': oldPassword,
+        'newPassword': newPassword,
       });
       return {'success': true};
     } on DioException catch (e) {

@@ -66,10 +66,7 @@ class NotificationService {
         final RegExp timeRegex = RegExp(r'(\d+):(\d+)(?::(\d+))?\s*(AM|PM)?', caseSensitive: false);
         final match = timeRegex.firstMatch(timeStr);
 
-        if (match == null) {
-          debugPrint('⚠️ NotificationService: Invalid time format: $timeStr');
-          continue;
-        }
+        if (match == null) continue;
 
         int hour = int.parse(match.group(1)!);
         int minute = int.parse(match.group(2)!);
@@ -80,23 +77,34 @@ class NotificationService {
           if (amPm.toUpperCase() == 'AM' && hour == 12) hour = 0;
         }
 
-        // Calculate the notification time (15 min before the lecture) directly,
-        // so that _nextInstanceOfDayAndTime compares the correct time against "now".
-        const int earlyMinutes = 15;
-        tz.TZDateTime scheduledDate = _nextInstanceOfDayAndTime(
-          dayIndex, hour, minute, subtractMinutes: earlyMinutes,
-        );
+        // ── USE SYSTEM CLOCK FOR CALCULATION ──
+        final now = DateTime.now();
+        // Create a DateTime object based on the DEVICE'S current clock
+        DateTime lectureDateTime = DateTime(now.year, now.month, now.day, hour, minute);
+        
+        // Find the next occurrence of this weekday
+        while (lectureDateTime.weekday != dayIndex) {
+          lectureDateTime = lectureDateTime.add(const Duration(days: 1));
+        }
 
-        // Generate friendly location/time text
+        // Notification 15 mins before
+        DateTime notifyDateTime = lectureDateTime.subtract(const Duration(minutes: 15));
+
+        // If it already passed for this week's occurrence, move to next week
+        if (notifyDateTime.isBefore(now)) {
+          notifyDateTime = notifyDateTime.add(const Duration(days: 7));
+        }
+
+        // Convert the system DateTime moment to TZDateTime for the notification plugin
+        // This preserves the exact 'moment' in time from the device's clock.
+        final tzScheduledDate = tz.TZDateTime.from(notifyDateTime, tz.local);
+
         final room = entry['location'] ?? 'Classroom';
-        final title = 'Lecture in 15 Minutes!';
-        final body = '${entry['course_name']} starts at ${entry['start_time']} in $room';
-
         await flutterLocalNotificationsPlugin.zonedSchedule(
           id: idTracker++,
-          title: title,
-          body: body,
-          scheduledDate: scheduledDate,
+          title: 'Lecture in 15 Minutes!',
+          body: '${entry['course_name']} starts at ${entry['start_time']} in $room',
+          scheduledDate: tzScheduledDate,
           notificationDetails: const NotificationDetails(
             android: AndroidNotificationDetails(
               'lecture_channel', 
@@ -164,9 +172,25 @@ class NotificationService {
       case 'thursday': return DateTime.thursday;
       case 'friday': return DateTime.friday;
       case 'saturday': return DateTime.saturday;
-      case 'sunday': return DateTime.sunday;
+      case 'sunday': return 7; // Sunday is 7 in adhan/DateTime for some systems, but let's be careful
       default: return -1;
     }
+  }
+
+  bool _isEgyptDSTPeriod(DateTime date) {
+    if (date.month < 4 || date.month > 10) return false;
+    if (date.month > 4 && date.month < 10) return true;
+    if (date.month == 4) {
+      DateTime lastDay = DateTime(date.year, 4, 30);
+      int lastFriday = 30 - (lastDay.weekday + 2) % 7;
+      return date.day >= lastFriday;
+    }
+    if (date.month == 10) {
+      DateTime lastDay = DateTime(date.year, 10, 31);
+      int lastThursday = 31 - (lastDay.weekday + 3) % 7;
+      return date.day < lastThursday;
+    }
+    return false;
   }
 
   tz.TZDateTime _nextInstanceOfDayAndTime(int weekday, int hour, int minute, {int subtractMinutes = 0}) {

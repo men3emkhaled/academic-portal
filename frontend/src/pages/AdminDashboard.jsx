@@ -13,7 +13,7 @@ import TimetableManager from '../components/admin/TimetableManager';
 import NotificationsManager from '../components/admin/NotificationsManager';
 import DepartmentManager from '../components/admin/DepartmentManager';
 import QuizManager from '../components/admin/QuizManager';
-import PendingReviews from '../components/admin/PendingReviews';
+import PendingReviews from '../components/admin/quizzes/PendingReviews';
 import MobileAlertCenter from '../components/admin/MobileAlertCenter';
 import EventsManager from '../components/admin/EventsManager';
 import ProgressManager from '../components/admin/ProgressManager';

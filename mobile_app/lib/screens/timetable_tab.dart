@@ -61,14 +61,34 @@ class _TimetableTabState extends State<TimetableTab> {
     return now.isAfter(start) && now.isBefore(end);
   }
 
+  bool _isEgyptDSTPeriod(DateTime date) {
+    if (date.month < 4 || date.month > 10) return false;
+    if (date.month > 4 && date.month < 10) return true;
+    if (date.month == 4) {
+      DateTime lastDay = DateTime(date.year, 4, 30);
+      int lastFriday = 30 - (lastDay.weekday + 2) % 7;
+      return date.day >= lastFriday;
+    }
+    if (date.month == 10) {
+      DateTime lastDay = DateTime(date.year, 10, 31);
+      int lastThursday = 31 - (lastDay.weekday + 3) % 7;
+      return date.day < lastThursday;
+    }
+    return false;
+  }
+
   String _formatTime(String? time) {
     if (time == null) return '—';
     final parts = time.split(':');
     int hour = int.parse(parts[0]);
+    int minute = int.parse(parts[1]);
+
     final ampm = hour >= 12 ? 'PM' : 'AM';
     if (hour > 12) hour -= 12;
     if (hour == 0) hour = 12;
-    return '$hour:${parts[1]} $ampm';
+    
+    final minuteStr = minute.toString().padLeft(2, '0');
+    return '$hour:$minuteStr $ampm';
   }
 
   @override
@@ -78,6 +98,10 @@ class _TimetableTabState extends State<TimetableTab> {
     final colors = Theme.of(context).extension<AppColors>()!;
     final section = auth.studentSection ?? '?';
     final deptId = auth.student?['department_id'];
+
+    // If no exams in DB, force lectures view
+    final effectiveScheduleType = dp.exams.isEmpty ? 'lectures' : _scheduleType;
+
 
     List<dynamic> activeTimetable = [];
     if (_viewMode == 'my-section') {
@@ -142,6 +166,7 @@ class _TimetableTabState extends State<TimetableTab> {
                  child: Align(alignment: Alignment.centerLeft, child: Text('WEEK $weekNumber', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 2, color: AppTheme.primaryBlue))),
               ),
               
+              if (dp.exams.isNotEmpty)
               Padding(
                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                  child: Container(
@@ -155,8 +180,9 @@ class _TimetableTabState extends State<TimetableTab> {
                     )
                  )
               ),
+
               
-              if (_scheduleType == 'lectures') ...[
+              if (effectiveScheduleType == 'lectures') ...[
               // --- HORIZONTAL DAY SELECTOR ---
              Container(
                margin: const EdgeInsets.fromLTRB(24, 24, 24, 24),

@@ -212,12 +212,19 @@ class _AppLayoutState extends State<AppLayout> with TickerProviderStateMixin {
                         const SizedBox(width: 14),
                         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                           Text(tr(context, 'znu_menu'), style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: colors.textPrimary)),
-                          if (student != null)
+                          if (student != null) ...[
                             Text(
                               student['name']?.toString().split(' ').take(2).join(' ') ?? '',
-                              style: const TextStyle(fontSize: 12, color: AppTheme.primary, fontWeight: FontWeight.bold),
+                              style: const TextStyle(fontSize: 14, color: AppTheme.primary, fontWeight: FontWeight.bold),
                               overflow: TextOverflow.ellipsis,
                             ),
+                            if (student['email'] != null && student['email'].toString().isNotEmpty)
+                              Text(
+                                student['email'].toString(),
+                                style: TextStyle(fontSize: 11, color: colors.textSecondary, fontWeight: FontWeight.w500),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                          ],
                         ])),
                         IconButton(
                           icon: Icon(LucideIcons.x, color: colors.textSecondary, size: 20),

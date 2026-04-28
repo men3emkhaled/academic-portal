@@ -81,14 +81,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
                              children: [
                                 Text(tr(context, 'student_profile'), style: const TextStyle(color: AppTheme.primaryBlue, fontWeight: FontWeight.bold, fontSize: 10, letterSpacing: 2)),
                                 const SizedBox(height: 8),
-                                GradientText(context.read<AuthProvider>().studentName ?? '', fontSize: 28),
-                                const SizedBox(height: 16),
+                                GradientText(auth.studentName ?? '', fontSize: 28),
+                                if (auth.student?['email'] != null && auth.student!['email'].toString().isNotEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 4, bottom: 8),
+                                    child: Row(
+                                      children: [
+                                        const Icon(LucideIcons.mail, size: 14, color: AppTheme.primaryBlue),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          auth.student!['email'].toString(),
+                                          style: TextStyle(fontSize: 13, color: colors.textSecondary, fontWeight: FontWeight.w500),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                const SizedBox(height: 12),
                                 Wrap(
                                   spacing: 8, runSpacing: 8,
                                   children: [
-                                    _buildPill(LucideIcons.graduationCap, '${tr(context, 'id_label')}: ${context.read<AuthProvider>().studentId ?? ''}', colors),
-                                    _buildPill(LucideIcons.layers, '${tr(context, 'level_label')}: ${context.read<AuthProvider>().studentLevel ?? ''}', colors),
-                                    _buildPill(LucideIcons.users, '${tr(context, 'section_label')}: ${context.read<AuthProvider>().studentSection ?? tr(context, 'not_assigned')}', colors, highlight: true),
+                                    _buildPill(LucideIcons.graduationCap, '${tr(context, 'id_label')}: ${auth.studentId ?? ''}', colors),
+                                    _buildPill(LucideIcons.layers, '${tr(context, 'level_label')}: ${auth.studentLevel ?? ''}', colors),
+                                    _buildPill(LucideIcons.users, '${tr(context, 'section_label')}: ${auth.studentSection ?? tr(context, 'not_assigned')}', colors, highlight: true),
                                    ],
                                 ),
                              ],

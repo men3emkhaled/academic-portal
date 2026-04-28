@@ -1,10 +1,6 @@
 # Project-level configuration.
 cmake_minimum_required(VERSION 3.13)
 
-# Force the compiler to use the system clang instead of the snap bundled one
-set(CMAKE_C_COMPILER "/usr/bin/clang")
-set(CMAKE_CXX_COMPILER "/usr/bin/clang++")
-
 project(runner LANGUAGES CXX)
 
 # The name of the executable created for the application. Change this to change
