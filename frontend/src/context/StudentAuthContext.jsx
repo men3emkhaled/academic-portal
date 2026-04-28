@@ -10,7 +10,7 @@ export const StudentAuthProvider = ({ children }) => {
     const savedToken = localStorage.getItem('studentToken');
     return savedToken || null;
   });
-  
+
   const [student, setStudent] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -27,7 +27,7 @@ export const StudentAuthProvider = ({ children }) => {
   useEffect(() => {
     const initAuth = async () => {
       const savedToken = localStorage.getItem('studentToken');
-      
+
       if (savedToken) {
         setToken(savedToken);
         try {
@@ -42,7 +42,7 @@ export const StudentAuthProvider = ({ children }) => {
       }
       setLoading(false);
     };
-    
+
     initAuth();
   }, []);
 
@@ -50,10 +50,10 @@ export const StudentAuthProvider = ({ children }) => {
     try {
       const response = await studentApi.post('/student/login', { username, password }, { signal });
       const { token: newToken, student: studentData } = response.data;
-      
+
       setToken(newToken);
       setStudent(studentData);
-      
+
       return { success: true };
     } catch (error) {
       if (error.name === 'AbortError') {
@@ -67,8 +67,8 @@ export const StudentAuthProvider = ({ children }) => {
       } else if (error.request) {
         errorMessage = 'No response from server. Please check your connection.';
       }
-      return { 
-        success: false, 
+      return {
+        success: false,
         message: errorMessage
       };
     }
@@ -85,8 +85,8 @@ export const StudentAuthProvider = ({ children }) => {
       await studentApi.post('/student/change-password', { currentPassword, newPassword });
       return { success: true };
     } catch (error) {
-      return { 
-        success: false, 
+      return {
+        success: false,
         message: error.response?.data?.message || 'Password change failed'
       };
     }
@@ -133,16 +133,16 @@ export const StudentAuthProvider = ({ children }) => {
   const googleLogin = async (token) => {
     try {
       // Determine if it's an idToken (credential) or accessToken
-      // JWTs usually have 3 parts separated by dots
+      // JWTs usually have 3 parts separated by dotss
       const isIdToken = typeof token === 'string' && token.includes('.');
       const payload = isIdToken ? { credential: token } : { accessToken: token };
-      
+
       const response = await studentApi.post('/student/google-login', payload);
       const { token: newToken, student: studentData } = response.data;
-      
+
       setToken(newToken);
       setStudent(studentData);
-      
+
       return { success: true };
     } catch (error) {
       console.error('Google login error:', error);
@@ -150,8 +150,8 @@ export const StudentAuthProvider = ({ children }) => {
       if (error.response?.data?.message) {
         errorMessage = error.response.data.message;
       }
-      return { 
-        success: false, 
+      return {
+        success: false,
         message: errorMessage
       };
     }
@@ -161,10 +161,10 @@ export const StudentAuthProvider = ({ children }) => {
     try {
       const response = await studentApi.post('/student/microsoft-login', { accessToken });
       const { token: newToken, student: studentData } = response.data;
-      
+
       setToken(newToken);
       setStudent(studentData);
-      
+
       return { success: true };
     } catch (error) {
       console.error('Microsoft login error:', error);
@@ -172,8 +172,8 @@ export const StudentAuthProvider = ({ children }) => {
       if (error.response?.data?.message) {
         errorMessage = error.response.data.message;
       }
-      return { 
-        success: false, 
+      return {
+        success: false,
         message: errorMessage
       };
     }
