@@ -336,12 +336,28 @@ const microsoftLogin = async (req, res) => {
       return res.status(400).json({ message: 'No email found in Microsoft account' });
     }
 
-    const result = await db.query('SELECT * FROM students WHERE email = $1', [email]);
-    if (result.rows.length === 0) {
-      return res.status(401).json({ message: 'This email is not linked to any student account. Please login with your Student ID and link your email in Settings first.' });
-    }
+    const aiDomain = '@ai.znu.edu.eg';
+    const aiDepartmentId = 5;
+    let student;
 
-    const student = result.rows[0];
+    if (email.toLowerCase().endsWith(aiDomain)) {
+      const studentIdFromEmail = email.split('@')[0];
+      // Search by ID and ensure they are in the AI department
+      const result = await db.query('SELECT * FROM students WHERE id = $1 AND department_id = $2', [studentIdFromEmail, aiDepartmentId]);
+      student = result.rows[0];
+      
+      if (!student) {
+        return res.status(401).json({ message: 'No AI student found with this ID. Please ensure your Student ID and Department are correct.' });
+      }
+    } else {
+      // Standard search for non-AI domains or manually linked emails
+      const result = await db.query('SELECT * FROM students WHERE email = $1', [email]);
+      student = result.rows[0];
+      
+      if (!student) {
+        return res.status(401).json({ message: 'This email is not linked to any student account. Please login with your Student ID and link your email in Settings first.' });
+      }
+    }
 
     const token = jwt.sign(
       { id: student.id, role: 'student', level: student.level, department_id: student.department_id },
