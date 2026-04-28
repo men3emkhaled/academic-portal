@@ -27,6 +27,7 @@ const db = require('../config/database');
 router.post('/login', studentLogin);
 router.post('/google-login', googleLogin);
 router.post('/microsoft-login', microsoftLogin);
+router.post('/change-password', studentAuth, changePassword);
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPassword);
 router.post('/verify-email', verifyEmail);

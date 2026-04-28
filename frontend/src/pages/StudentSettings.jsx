@@ -7,13 +7,17 @@ import Sidebar from '../components/Sidebar';
 import { useTheme } from '../context/ThemeContext';
 
 const StudentSettings = () => {
-  const { student, logout, linkEmail, forgotPassword } = useStudentAuth();
   const navigate = useNavigate();
   const { isDarkMode, toggleTheme } = useTheme();
-  
   const [emailInput, setEmailInput] = useState('');
   const [isLinking, setIsLinking] = useState(false);
-  const [isSendingReset, setIsSendingReset] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [passwordData, setPasswordData] = useState({
+    oldPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const { student, logout, linkEmail, changePassword } = useStudentAuth();
 
   const handleLogout = () => {
     logout();
@@ -40,18 +44,28 @@ const StudentSettings = () => {
     }
   };
 
-  const handleForgotPassword = async () => {
-    if (!student?.email) {
-      toast.error('You need to link an email first before resetting password.');
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    if (!passwordData.oldPassword || !passwordData.newPassword) {
+      toast.error('All fields are required');
+      return;
+    }
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast.error('New passwords do not match');
+      return;
+    }
+    if (passwordData.newPassword.length < 6) {
+      toast.error('Password must be at least 6 characters');
       return;
     }
 
-    setIsSendingReset(true);
-    const result = await forgotPassword(student.id);
-    setIsSendingReset(false);
+    setIsChangingPassword(true);
+    const result = await changePassword(passwordData.oldPassword, passwordData.newPassword);
+    setIsChangingPassword(false);
 
     if (result.success) {
-      toast.success('Password reset link sent to your email!');
+      toast.success('Password updated successfully!');
+      setPasswordData({ oldPassword: '', newPassword: '', confirmPassword: '' });
     } else {
       toast.error(result.message);
     }
@@ -146,23 +160,57 @@ const StudentSettings = () => {
             </div>
 
             <div className="bg-white dark:bg-dark-card rounded-[2rem] border border-gray-200 dark:border-white/10 p-8 shadow-sm dark:shadow-2xl relative overflow-hidden group hover:border-primary/20 dark:hover:border-white/20 transition-all duration-500">
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div>
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-1">
-                    <Lock className="w-5 h-5 text-primary" /> Password
-                  </h3>
-                  <p className="text-gray-500 dark:text-gray-400 text-sm">
-                    Instead of changing your password here, we will send a secure reset link to your linked email address.
-                  </p>
+              <div className="mb-6">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-1">
+                  <Lock className="w-5 h-5 text-primary" /> Change Password
+                </h3>
+                <p className="text-gray-500 dark:text-gray-400 text-sm">Update your account password securely.</p>
+              </div>
+
+              <form onSubmit={handleChangePassword} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="md:col-span-2">
+                    <label className="text-xs uppercase tracking-widest text-primary font-bold px-1 mb-2 block">Current Password</label>
+                    <input
+                      type="password"
+                      value={passwordData.oldPassword}
+                      onChange={(e) => setPasswordData({...passwordData, oldPassword: e.target.value})}
+                      placeholder="Enter current password"
+                      className="w-full bg-gray-50 dark:bg-dark text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 shadow-inner rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-primary/40 focus:outline-none transition-all placeholder:text-gray-400 dark:placeholder:text-gray-500/40"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs uppercase tracking-widest text-primary font-bold px-1 mb-2 block">New Password</label>
+                    <input
+                      type="password"
+                      value={passwordData.newPassword}
+                      onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
+                      placeholder="New password"
+                      className="w-full bg-gray-50 dark:bg-dark text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 shadow-inner rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-primary/40 focus:outline-none transition-all placeholder:text-gray-400 dark:placeholder:text-gray-500/40"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs uppercase tracking-widest text-primary font-bold px-1 mb-2 block">Confirm New Password</label>
+                    <input
+                      type="password"
+                      value={passwordData.confirmPassword}
+                      onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
+                      placeholder="Confirm new password"
+                      className="w-full bg-gray-50 dark:bg-dark text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 shadow-inner rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-primary/40 focus:outline-none transition-all placeholder:text-gray-400 dark:placeholder:text-gray-500/40"
+                      required
+                    />
+                  </div>
                 </div>
                 <button
-                  onClick={handleForgotPassword}
-                  disabled={isSendingReset}
-                  className="w-full sm:w-auto bg-primary text-white dark:text-[#064200] font-headline font-bold py-3.5 px-6 rounded-xl shadow-[0_4px_15px_rgba(46,204,113,0.3)] dark:shadow-[0_0_20px_rgba(142,255,113,0.3)] hover:brightness-110 active:scale-[0.98] transition-all whitespace-nowrap disabled:opacity-50 flex items-center justify-center gap-2"
+                  type="submit"
+                  disabled={isChangingPassword}
+                  className="w-full bg-primary text-white dark:text-[#064200] font-headline font-bold py-4 rounded-xl shadow-[0_4px_15px_rgba(46,204,113,0.3)] dark:shadow-[0_0_20px_rgba(142,255,113,0.3)] hover:brightness-110 active:scale-[0.98] transition-all disabled:opacity-50"
                 >
-                  Send Reset Link <Mail className="w-4 h-4 ml-1" />
+                  {isChangingPassword ? 'Updating...' : 'Update Password'}
                 </button>
-              </div>
+              </form>
             </div>
           </div>
 

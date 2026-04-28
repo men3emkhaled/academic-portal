@@ -80,18 +80,6 @@ export const StudentAuthProvider = ({ children }) => {
     localStorage.removeItem('studentToken');
   };
 
-  const changePassword = async (currentPassword, newPassword) => {
-    try {
-      await studentApi.post('/student/change-password', { currentPassword, newPassword });
-      return { success: true };
-    } catch (error) {
-      return {
-        success: false,
-        message: error.response?.data?.message || 'Password change failed'
-      };
-    }
-  };
-
   const linkEmail = async (email) => {
     try {
       await studentApi.post('/student/link-email', { email });
@@ -175,6 +163,18 @@ export const StudentAuthProvider = ({ children }) => {
       return {
         success: false,
         message: errorMessage
+      };
+    }
+  };
+
+  const changePassword = async (oldPassword, newPassword) => {
+    try {
+      const response = await studentApi.post('/student/change-password', { oldPassword, newPassword });
+      return { success: true, message: response.data.message };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to change password'
       };
     }
   };
