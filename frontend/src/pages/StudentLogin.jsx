@@ -251,7 +251,7 @@ const StudentLogin = () => {
                   type="button"
                   onClick={() => handleGoogleLogin()}
                   disabled={loading || authLoading}
-                  className="w-full h-[40px] bg-white hover:bg-gray-100 text-gray-900 rounded-full flex items-center justify-center gap-3 transition-all text-sm font-bold border border-gray-200 shadow-sm"
+                  className="w-full h-[40px] bg-white dark:bg-[#161616] hover:bg-gray-100 dark:hover:bg-[#222222] text-gray-900 dark:text-white rounded-full flex items-center justify-center gap-3 transition-all text-sm font-bold border border-gray-200 dark:border-white/10 shadow-sm"
                 >
                   <svg className="w-4 h-4" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
                     <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
@@ -266,13 +266,13 @@ const StudentLogin = () => {
                   type="button"
                   onClick={handleMicrosoftLogin}
                   disabled={loading || authLoading}
-                  className="w-full h-[40px] bg-[#2F2F2F] hover:bg-black text-white rounded-full flex items-center justify-center gap-3 transition-all text-sm font-bold border border-white/10 shadow-sm"
+                  className="w-full h-[40px] bg-white dark:bg-[#2F2F2F] hover:bg-gray-100 dark:hover:bg-black text-gray-900 dark:text-white rounded-full flex items-center justify-center gap-3 transition-all text-sm font-bold border border-gray-200 dark:border-white/10 shadow-sm"
                 >
-                  <svg className="w-4 h-4" viewBox="0 0 23 23" xmlns="http://www.w3.org/2000/svg">
-                    <path fill="#f3f3f3" d="M0 0h11v11H0z"/>
-                    <path fill="#f3f3f3" d="M12 0h11v11H12z"/>
-                    <path fill="#f3f3f3" d="M0 12h11v11H0z"/>
-                    <path fill="#f3f3f3" d="M12 12h11v11H12z"/>
+                  <svg className="w-4 h-4" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+                    <path fill="#f25022" d="M0 0h10v10H0z"/>
+                    <path fill="#7fbb00" d="M11 0h10v10H11z"/>
+                    <path fill="#00a1f1" d="M0 11h10v10H0z"/>
+                    <path fill="#ffb900" d="M11 11h10v10H11z"/>
                   </svg>
                   Sign in with Microsoft
                 </button>
