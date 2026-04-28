@@ -5,6 +5,7 @@ const getAdminTasks = async (req, res) => {
     const tasks = await OfficialTask.getAll();
     res.json(tasks);
   } catch (error) {
+    console.error('❌ Error in getAdminTasks:', error.message);
     res.status(500).json({ message: error.message });
   }
 };
@@ -18,6 +19,7 @@ const createOfficialTask = async (req, res) => {
     const task = await OfficialTask.create(course_id, title, description, drive_link, deadline, department_id);
     res.status(201).json(task);
   } catch (error) {
+    console.error('❌ Error in createOfficialTask:', error.message);
     res.status(500).json({ message: error.message });
   }
 };
@@ -30,6 +32,7 @@ const updateOfficialTask = async (req, res) => {
     if (!task) return res.status(404).json({ message: 'Task not found' });
     res.json(task);
   } catch (error) {
+    console.error('❌ Error in updateOfficialTask:', error.message);
     res.status(500).json({ message: error.message });
   }
 };
@@ -40,6 +43,7 @@ const deleteOfficialTask = async (req, res) => {
     await OfficialTask.delete(id);
     res.json({ message: 'Task deleted successfully' });
   } catch (error) {
+    console.error('❌ Error in deleteOfficialTask:', error.message);
     res.status(500).json({ message: error.message });
   }
 };
@@ -50,6 +54,7 @@ const getStudentTasks = async (req, res) => {
     const tasks = await OfficialTask.getForStudent(studentId);
     res.json(tasks);
   } catch (error) {
+    console.error('❌ Error in getStudentTasks:', error.message);
     res.status(500).json({ message: error.message });
   }
 };
@@ -62,6 +67,7 @@ const toggleTaskCompletion = async (req, res) => {
     const status = await OfficialTask.toggleComplete(id, studentId, is_completed);
     res.json(status);
   } catch (error) {
+    console.error('❌ Error in toggleTaskCompletion:', error.message);
     res.status(500).json({ message: error.message });
   }
 };

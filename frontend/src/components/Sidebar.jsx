@@ -3,12 +3,14 @@ import { Home, Calendar, Library, BarChart3, FileText, Map, Bell, CheckSquare, S
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useStudentAuth } from '../context/StudentAuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from 'react-i18next';
 
 const Sidebar = ({ onLogout }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const { student } = useStudentAuth();
   const { theme, toggleTheme } = useTheme();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -21,18 +23,18 @@ const Sidebar = ({ onLogout }) => {
   }, []);
 
   const bottomBarItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: <Home className="w-5 h-5" />, path: '/student/dashboard' },
-    { id: 'timetable', label: 'Timetable', icon: <Calendar className="w-5 h-5" />, path: '/student/timetable' },
-    { id: 'materials', label: 'Materials', icon: <Library className="w-5 h-5" />, path: '/student/materials' },
+    { id: 'dashboard', label: t('sidebar.dashboard'), icon: <Home className="w-5 h-5" />, path: '/student/dashboard' },
+    { id: 'timetable', label: t('sidebar.timetable'), icon: <Calendar className="w-5 h-5" />, path: '/student/timetable' },
+    { id: 'materials', label: t('sidebar.materials'), icon: <Library className="w-5 h-5" />, path: '/student/materials' },
   ];
 
   const menuItems = [
-    { id: 'grades', label: 'Grades', icon: <BarChart3 className="w-5 h-5" />, path: '/student/grades' },
-    { id: 'quizzes', label: 'Quizzes', icon: <FileText className="w-5 h-5" />, path: '/student/quizzes' },
-    { id: 'roadmap', label: 'Roadmap', icon: <Map className="w-5 h-5" />, path: '/student/roadmap' },
-    { id: 'notifications', label: 'Notifications', icon: <Bell className="w-5 h-5" />, path: '/student/notifications' },
-    { id: 'personal-tasks', label: 'My Tasks', icon: <CheckSquare className="w-5 h-5" />, path: '/student/personal-tasks' },
-    { id: 'settings', label: 'Settings', icon: <Settings className="w-5 h-5" />, path: '/student/settings' },
+    { id: 'grades', label: t('sidebar.courses_grades'), icon: <BarChart3 className="w-5 h-5" />, path: '/student/grades' },
+    { id: 'quizzes', label: t('sidebar.quizzes'), icon: <FileText className="w-5 h-5" />, path: '/student/quizzes' },
+    { id: 'roadmap', label: t('sidebar.roadmap'), icon: <Map className="w-5 h-5" />, path: '/student/roadmap' },
+    { id: 'notifications', label: t('sidebar.notifications'), icon: <Bell className="w-5 h-5" />, path: '/student/notifications' },
+    { id: 'personal-tasks', label: t('sidebar.personal_tasks'), icon: <CheckSquare className="w-5 h-5" />, path: '/student/personal-tasks' },
+    { id: 'settings', label: t('sidebar.settings'), icon: <Settings className="w-5 h-5" />, path: '/student/settings' },
   ];
 
   if (student && (student.role === 'assistant' || student.role === 'admin')) {
@@ -94,8 +96,8 @@ const Sidebar = ({ onLogout }) => {
               to={item.path}
               className={({ isActive }) => `
                 flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300
-                ${isActive 
-                  ? 'bg-primary/10 text-primary shadow-[inset_0_0_20px_rgba(46,204,113,0.05)] border border-primary/20 font-semibold' 
+                ${isActive
+                  ? 'bg-primary/10 text-primary shadow-[inset_0_0_20px_rgba(46,204,113,0.05)] border border-primary/20 font-semibold'
                   : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white border border-transparent font-medium'
                 }
               `}
@@ -112,14 +114,14 @@ const Sidebar = ({ onLogout }) => {
             className="flex items-center justify-center gap-3 w-full px-4 py-3 rounded-2xl text-gray-700 dark:text-gray-300 font-bold bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:bg-gray-200 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white transition-all"
           >
             {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-            <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+            <span>{theme === 'dark' ? t('sidebar.light_mode', 'Light Mode') : t('sidebar.dark_mode', 'Dark Mode')}</span>
           </button>
           <button
             onClick={handleLogout}
             className="flex items-center justify-center gap-3 w-full px-4 py-3 rounded-2xl text-red-500 dark:text-red-400 font-bold bg-red-50 dark:bg-red-400/5 border border-red-100 dark:border-red-400/10 hover:bg-red-100 dark:hover:bg-red-400/10 transition-all"
           >
             <LogOut className="w-5 h-5" />
-            <span>Logout</span>
+            <span>{t('sidebar.logout')}</span>
           </button>
         </div>
       </div>
@@ -139,8 +141,8 @@ const Sidebar = ({ onLogout }) => {
                 to={item.path}
                 className={({ isActive: navActive }) => `
                   flex flex-col items-center gap-1 px-4 py-2 rounded-2xl transition-all duration-300
-                  ${isActive || navActive 
-                    ? 'text-primary bg-primary/10 shadow-[inset_0_0_15px_rgba(46,204,113,0.1)] border border-primary/10' 
+                  ${isActive || navActive
+                    ? 'text-primary bg-primary/10 shadow-[inset_0_0_15px_rgba(46,204,113,0.1)] border border-primary/10'
                     : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-gray-300 border border-transparent'
                   }
                 `}
@@ -155,14 +157,14 @@ const Sidebar = ({ onLogout }) => {
             className="flex flex-col items-center gap-1 px-4 py-2 rounded-2xl text-gray-500 hover:bg-gray-100 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-gray-300 border border-transparent transition-all"
           >
             <Menu className="w-6 h-6" />
-            <span className="text-[11px] font-semibold">More</span>
+            <span className="text-[11px] font-semibold">{t('sidebar.more', 'More')}</span>
           </button>
         </div>
       </div>
 
       {isOpen && (
         <>
-          <div 
+          <div
             className="fixed inset-0 bg-gray-900/60 dark:bg-black/80 backdrop-blur-md z-50 transition-opacity duration-300"
             onClick={() => setIsOpen(false)}
           />
@@ -180,14 +182,14 @@ const Sidebar = ({ onLogout }) => {
                   )}
                 </div>
               </div>
-              <button 
+              <button
                 onClick={() => setIsOpen(false)}
                 className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/10 transition-all"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
-            
+
             <div className="p-3 max-h-[55vh] overflow-y-auto hidden-scrollbar">
               <div className="space-y-1">
                 {menuItems.map((item) => {
@@ -199,8 +201,8 @@ const Sidebar = ({ onLogout }) => {
                       onClick={() => setIsOpen(false)}
                       className={`
                         flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-300
-                        ${isActive 
-                          ? 'bg-primary/10 text-primary border border-primary/20 shadow-[inset_0_0_15px_rgba(46,204,113,0.05)]' 
+                        ${isActive
+                          ? 'bg-primary/10 text-primary border border-primary/20 shadow-[inset_0_0_15px_rgba(46,204,113,0.05)]'
                           : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white border border-transparent'
                         }
                       `}
@@ -216,9 +218,9 @@ const Sidebar = ({ onLogout }) => {
                   );
                 })}
               </div>
-              
+
               <div className="my-3 mx-2 h-px bg-gray-200 dark:bg-white/5" />
-              
+
               <div className="flex gap-2">
                 <button
                   onClick={toggleTheme}
@@ -227,7 +229,7 @@ const Sidebar = ({ onLogout }) => {
                   {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
                   <span className="font-bold">{theme === 'dark' ? 'Light' : 'Dark'}</span>
                 </button>
-                
+
                 <button
                   onClick={() => {
                     setIsOpen(false);
@@ -236,7 +238,7 @@ const Sidebar = ({ onLogout }) => {
                   className="flex-[2] flex items-center justify-center gap-3 px-4 py-4 rounded-2xl text-red-500 dark:text-red-400 font-bold bg-red-50 dark:bg-red-400/5 border border-red-100 dark:border-red-400/10 hover:bg-red-100 dark:hover:bg-red-400/10 transition-all"
                 >
                   <LogOut className="w-5 h-5" />
-                  <span className="font-bold">Logout</span>
+                  <span className="font-bold">{t('sidebar.logout')}</span>
                 </button>
               </div>
             </div>

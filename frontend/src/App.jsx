@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { Toaster } from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import { AuthProvider } from './context/AuthContext';
 import { StudentAuthProvider, useStudentAuth } from './context/StudentAuthContext';
 import { StudentDataContextProvider } from './context/StudentDataContext';
@@ -26,6 +27,7 @@ import QuizResultPage from './pages/QuizResultPage';
 // مكون حماية المسارات للطلاب
 const ProtectedStudentRoute = ({ children }) => {
   const { token, loading } = useStudentAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -49,7 +51,7 @@ const ProtectedStudentRoute = ({ children }) => {
             </div>
           </div>
           <p className="text-gray-900 dark:text-white font-black text-[10px] uppercase tracking-[0.4em] mb-1 animate-pulse">ZNU PORTAL</p>
-          <p className="text-gray-500 dark:text-gray-400 font-bold text-xs tracking-wide">جاري تحميل الجلسة...</p>
+          <p className="text-gray-500 dark:text-gray-400 font-bold text-xs tracking-wide">{t('dashboard.loading')}</p>
         </div>
       </div>
     );
@@ -76,6 +78,7 @@ const StudentLoginRedirect = () => {
 // المكون الرئيسي للتطبيق (بعد تحميل حالة المصادقة)
 function AppContent() {
   const { loading } = useStudentAuth();
+  const { t } = useTranslation();
 
   if (loading) {
     return (
@@ -93,7 +96,7 @@ function AppContent() {
             </div>
           </div>
           <p className="text-gray-900 dark:text-white font-black text-xs uppercase tracking-[0.4em] mb-2 animate-pulse">ZNU PORTAL</p>
-          <p className="text-gray-500 dark:text-gray-400 font-bold text-sm tracking-wide">جاري تحميل الجلسة...</p>
+          <p className="text-gray-500 dark:text-gray-400 font-bold text-sm tracking-wide">{t('dashboard.loading')}</p>
         </div>
       </div>
     );

@@ -3,11 +3,11 @@ const db = require('../config/database');
 class OfficialTask {
   static async initializeTable() {
     try {
+      // Create official_tasks table
       await db.query(`
         CREATE TABLE IF NOT EXISTS official_tasks (
           id SERIAL PRIMARY KEY,
           course_id INT REFERENCES courses(id) ON DELETE CASCADE,
-          department_id INT REFERENCES departments(id) ON DELETE SET NULL,
           title VARCHAR(255) NOT NULL,
           description TEXT,
           drive_link TEXT NOT NULL,
@@ -16,6 +16,17 @@ class OfficialTask {
         )
       `);
 
+      // ✅ Add department_id column if it doesn't exist (Migration)
+      try {
+        await db.query(`
+          ALTER TABLE official_tasks 
+          ADD COLUMN IF NOT EXISTS department_id INT REFERENCES departments(id) ON DELETE SET NULL
+        `);
+      } catch (colErr) {
+        console.log('ℹ️ department_id column might already exist or departments table missing');
+      }
+
+      // Create student_official_tasks table
       await db.query(`
         CREATE TABLE IF NOT EXISTS student_official_tasks (
           student_id VARCHAR REFERENCES students(id) ON DELETE CASCADE,
@@ -45,7 +56,7 @@ class OfficialTask {
   static async getForStudent(studentId) {
     // Get student's department_id first
     const studentRes = await db.query('SELECT department_id FROM students WHERE id = $1', [studentId]);
-    const deptId = studentRes.rows[0]?.department_id;
+    const deptId = studentRes.rows[0]?.department_id || null;
 
     const result = await db.query(`
       SELECT 

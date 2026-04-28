@@ -5,6 +5,7 @@ import { useStudentData } from '../context/StudentDataContext';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 
 // دالة تحديد النمط بناءً على محتوى الإشعار
 const getNotificationStyle = (title, content) => {
@@ -24,8 +25,9 @@ const getNotificationStyle = (title, content) => {
 
 const StudentDashboard = () => {
   const { student, logout } = useStudentAuth();
-  const { 
-    gradesData, loadingGrades, 
+  const { t } = useTranslation();
+  const {
+    gradesData, loadingGrades,
     notifications: allNotifications, loadingNotifications, markNotificationAsRead,
     officialTasks, loadingOfficialTasks, fetchOfficialTasks,
     tasks: personalTasks, loadingTasks, fetchTasks
@@ -93,14 +95,14 @@ const StudentDashboard = () => {
     const total = (grade.midterm_score || 0) + (grade.practical_score || 0) + (grade.oral_score || 0);
     if (midtermExists && practicalExists && oralExists) {
       const percentage = (total / grade.max_score) * 100;
-      return percentage >= 50 ? 'Passing' : 'Failing';
+      return percentage >= 50 ? t('dashboard.passing') : t('dashboard.failing');
     }
-    return 'Pending';
+    return t('dashboard.pending_status');
   };
 
   const getStatusColor = (status) => {
-    if (status === 'Passing') return 'bg-green-100 dark:bg-green-400/20 text-green-700 dark:text-green-400';
-    if (status === 'Failing') return 'bg-red-100 dark:bg-red-400/20 text-red-700 dark:text-red-400';
+    if (status === t('dashboard.passing')) return 'bg-green-100 dark:bg-green-400/20 text-green-700 dark:text-green-400';
+    if (status === t('dashboard.failing')) return 'bg-red-100 dark:bg-red-400/20 text-red-700 dark:text-red-400';
     return 'bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-white/10 shadow-sm dark:shadow-inner';
   };
 
@@ -172,11 +174,11 @@ const StudentDashboard = () => {
             <div className="absolute inset-0 border-4 border-emerald-500/20 dark:border-emerald-500/10 rounded-full"></div>
             <div className="absolute inset-0 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
             <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center animate-pulse">
-                <span className="text-xl font-black text-emerald-500">Z</span>
+              <span className="text-xl font-black text-emerald-500">Z</span>
             </div>
           </div>
           <p className="text-gray-900 dark:text-white font-black text-[10px] uppercase tracking-[0.4em] mb-1 animate-pulse">ZNU PORTAL</p>
-          <p className="text-gray-500 dark:text-gray-400 font-bold text-xs tracking-wide">جاري تحميل الجلسة...</p>
+          <p className="text-gray-500 dark:text-gray-400 font-bold text-xs tracking-wide">{t('dashboard.loading')}</p>
         </div>
       </div>
     );
@@ -192,7 +194,7 @@ const StudentDashboard = () => {
           <div className="relative overflow-hidden shadow-sm dark:shadow-2xl p-8 rounded-[2rem] bg-white dark:bg-dark-card border border-gray-200 dark:border-white/10 mb-10 group hover:border-gray-300 dark:hover:border-white/20 transition-all duration-500">
             <div className="absolute -top-24 -right-24 w-64 h-64 bg-primary/10 blur-[100px] rounded-full"></div>
             <div className="relative z-10">
-              <p className="font-headline font-bold text-primary text-xs uppercase tracking-[0.2em] mb-2">Student Profile</p>
+              <p className="font-headline font-bold text-primary text-xs uppercase tracking-[0.2em] mb-2">{t('dashboard.profile_label')}</p>
               <h1 className="font-headline font-extrabold text-3xl md:text-4xl text-transparent bg-clip-text bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400 tracking-tight mb-4">
                 {student?.name}
               </h1>
@@ -203,11 +205,11 @@ const StudentDashboard = () => {
                 </div>
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-100 dark:bg-dark-glass border border-gray-200 dark:border-white/5 text-gray-700 dark:text-gray-300 text-sm font-semibold">
                   <Layers className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-                  <span>Level: {student?.level}</span>
+                  <span>{t('dashboard.level')}: {student?.level}</span>
                 </div>
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 dark:bg-dark-glass border border-primary/20 dark:border-white/5 text-primary dark:text-white text-sm font-semibold">
                   <Users className="w-5 h-5 text-primary dark:text-white" />
-                  <span>Section: {student?.section || 'Not assigned'}</span>
+                  <span>{t('dashboard.section')}: {student?.section || 'Not assigned'}</span>
                 </div>
               </div>
             </div>
@@ -219,7 +221,7 @@ const StudentDashboard = () => {
               <div className="flex items-center justify-between">
                 <h2 className="font-headline font-extrabold text-2xl tracking-tight flex items-center gap-3 text-gray-900 dark:text-white">
                   <span className="w-2 h-8 bg-primary rounded-full"></span>
-                  Recent Notifications
+                  {t('sidebar.notifications')}
                 </h2>
               </div>
               <div className="space-y-4">
@@ -234,7 +236,7 @@ const StudentDashboard = () => {
                       {isUnread && (
                         <div className={`absolute top-0 left-0 w-1 h-full ${borderColor} rounded-l-xl shadow-[0_0_12px_rgba(46,204,113,0.2)] dark:shadow-[0_0_12px_rgba(142,255,113,0.3)]`} />
                       )}
-                      
+
                       <div className="flex justify-between items-start gap-3">
                         <div className="flex items-start gap-3">
                           <div className={`w-10 h-10 rounded-full ${iconBg} flex items-center justify-center`}>
@@ -253,18 +255,18 @@ const StudentDashboard = () => {
                           {formatDate(notification.created_at)}
                         </span>
                       </div>
-                      
+
                       <div className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed mt-3 whitespace-pre-wrap" dir="auto">
                         {renderContent(notification.content)}
                       </div>
-                      
+
                       {isUnread && (
                         <div className="mt-3 flex justify-end">
                           <button
                             onClick={(e) => { e.stopPropagation(); markAsRead(notification.id); }}
                             className="text-xs font-bold text-primary/80 dark:text-primary/70 hover:text-primary transition-colors uppercase tracking-wider px-3 py-1 rounded-full bg-primary/10 hover:bg-primary/20"
                           >
-                            Mark as read
+                            {t('dashboard.mark_as_read')}
                           </button>
                         </div>
                       )}
@@ -282,14 +284,14 @@ const StudentDashboard = () => {
                 <span className="w-2 h-8 bg-primary rounded-full"></span>
                 Pending Tasks
               </h2>
-              <button 
+              <button
                 onClick={() => navigate('/student/personal-tasks')}
                 className="text-xs font-bold text-gray-500 hover:text-primary transition-colors uppercase tracking-widest flex items-center gap-1 group"
               >
-                View all <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                {t('dashboard.view_all')} <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {loadingTasks || loadingOfficialTasks ? (
                 <div className="col-span-full h-32 flex items-center justify-center bg-white dark:bg-dark-card rounded-[1.5rem] border border-gray-200 dark:border-white/5 animate-pulse">
@@ -297,14 +299,14 @@ const StudentDashboard = () => {
                 </div>
               ) : (officialTasks.filter(t => !t.is_completed).length === 0 && personalTasks.filter(t => !t.is_completed).length === 0) ? (
                 <div className="col-span-full py-10 bg-white/50 dark:bg-dark-glass/50 backdrop-blur-md rounded-[1.5rem] border border-dashed border-gray-300 dark:border-white/10 text-center">
-                  <p className="text-gray-500 dark:text-gray-400 text-sm">All caught up! No pending tasks.</p>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm">{t('dashboard.no_pending_tasks')}</p>
                 </div>
               ) : (
                 <>
                   {/* Show up to 4 pending tasks (2 official, 2 personal) */}
                   {officialTasks.filter(t => !t.is_completed).slice(0, 2).map(task => (
                     <div key={`dash-off-${task.id}`} className="bg-white dark:bg-dark-card border border-gray-200 dark:border-white/5 rounded-[1.5rem] p-5 flex items-center gap-4 hover:border-primary/30 transition-all shadow-sm">
-                      <button 
+                      <button
                         onClick={() => handleToggleOfficial(task.id, false)}
                         className="w-10 h-10 rounded-full border-2 border-gray-100 dark:border-white/5 flex items-center justify-center hover:border-primary/50 hover:bg-primary/5 transition-all group"
                       >
@@ -313,13 +315,13 @@ const StudentDashboard = () => {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-0.5">
                           <span className="bg-primary/10 text-primary text-[9px] font-black px-1.5 py-0.5 rounded-md uppercase tracking-wider">{task.course_name}</span>
-                          <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">Official</span>
+                          <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">{t('dashboard.official')}</span>
                         </div>
                         <h4 className="font-bold text-gray-900 dark:text-white text-sm truncate">{task.title}</h4>
                       </div>
-                      <a 
-                        href={task.drive_link} 
-                        target="_blank" 
+                      <a
+                        href={task.drive_link}
+                        target="_blank"
                         rel="noopener noreferrer"
                         className="w-10 h-10 flex items-center justify-center bg-gray-50 dark:bg-white/5 text-gray-400 hover:text-primary transition-all rounded-xl"
                       >
@@ -333,10 +335,10 @@ const StudentDashboard = () => {
                         <ShieldCheck className="w-5 h-5 text-gray-400" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider mb-0.5 block">Personal Task</span>
+                        <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider mb-0.5 block">{t('dashboard.personal')}</span>
                         <h4 className="font-bold text-gray-900 dark:text-white text-sm truncate">{task.title}</h4>
                       </div>
-                      <button 
+                      <button
                         onClick={() => navigate('/student/personal-tasks')}
                         className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-primary transition-all"
                       >
@@ -354,7 +356,7 @@ const StudentDashboard = () => {
             <div className="flex items-center justify-between">
               <h2 className="font-headline font-extrabold text-2xl tracking-tight flex items-center gap-3 text-gray-900 dark:text-white">
                 <span className="w-2 h-8 bg-primary rounded-full"></span>
-                Your Grades
+                {t('dashboard.grades')}
               </h2>
             </div>
 
@@ -369,14 +371,14 @@ const StudentDashboard = () => {
                   const total = (grade.midterm_score || 0) + (grade.practical_score || 0) + (grade.oral_score || 0);
                   const status = getCourseStatus(grade);
                   const statusColor = getStatusColor(status);
-                  
+
                   return (
                     <div key={idx} className="relative overflow-hidden group bg-white dark:bg-dark-card border border-gray-200 dark:border-white/5 rounded-[1.5rem] p-6 hover:border-primary/40 hover:-translate-y-1.5 hover:shadow-[0_12px_40px_rgba(46,204,113,0.1)] dark:hover:shadow-[0_12px_40px_rgba(142,255,113,0.15)] transition-all duration-500 shadow-sm dark:shadow-none">
                       <div className="absolute inset-0 bg-gradient-to-br from-gray-50/50 dark:from-white/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
                       <div className="flex justify-between items-start mb-5 relative">
                         <div>
                           <h4 className="font-headline font-bold text-lg leading-tight mb-1 text-gray-900 dark:text-white">{grade.course_name}</h4>
-                          <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Course</span>
+                          <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">{t('sidebar.courses_grades').split(' ')[0]}</span>
                         </div>
                         <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter border ${statusColor} border-current/20`}>
                           {status}
@@ -403,7 +405,7 @@ const StudentDashboard = () => {
                         </div>
                       </div>
                       <div className="mt-3 pt-2 border-t border-gray-100 dark:border-white/5 flex justify-between items-center">
-                        <span className="text-xs text-gray-500 dark:text-gray-400">Total</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">{t('dashboard.total')}</span>
                         <span className="text-lg font-headline font-bold text-primary">{formatScore(total)} / {grade.max_score}</span>
                       </div>
                     </div>
