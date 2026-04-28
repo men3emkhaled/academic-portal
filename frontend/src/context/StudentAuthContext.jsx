@@ -106,10 +106,10 @@ export const StudentAuthProvider = ({ children }) => {
     }
   };
 
-  const forgotPassword = async (studentId) => {
+  const forgotPassword = async (studentId, method = 'google') => {
     try {
-      await studentApi.post('/student/forgot-password', { studentId });
-      return { success: true };
+      const response = await studentApi.post('/student/forgot-password', { studentId, method });
+      return { success: true, message: response.data.message };
     } catch (error) {
       return {
         success: false,

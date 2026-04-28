@@ -202,21 +202,36 @@ const verifyEmail = async (req, res) => {
 
 const forgotPassword = async (req, res) => {
   try {
-    const { studentId } = req.body;
+    const { studentId, method } = req.body;
     if (!studentId) return res.status(400).json({ message: 'Student ID is required' });
     
     const student = await Student.findById(studentId);
     if (!student) return res.status(404).json({ message: 'Student not found' });
-    if (!student.email) return res.status(400).json({ message: 'No email linked to this account. Contact admin.' });
+    
+    let targetEmail;
+    const aiDomain = '@ai.znu.edu.eg';
+    const aiDepartmentId = 5;
+
+    if (method === 'microsoft') {
+      if (student.department_id !== aiDepartmentId) {
+        return res.status(400).json({ message: 'Institutional email reset is only available for AI department students.' });
+      }
+      targetEmail = `${student.id}${aiDomain}`;
+    } else {
+      if (!student.email) {
+        return res.status(400).json({ message: 'No personal email linked to this account. If you are an AI student, try the Institutional Email option.' });
+      }
+      targetEmail = student.email;
+    }
     
     const secret = process.env.JWT_SECRET + student.password_hash;
     const token = jwt.sign({ id: student.id }, secret, { expiresIn: '15m' });
     
-    const sent = await sendPasswordResetEmail(student.email, `${student.id}-${token}`);
+    const sent = await sendPasswordResetEmail(targetEmail, `${student.id}-${token}`);
     if (sent) {
-      res.json({ message: 'Password reset link sent to your email' });
+      res.json({ message: `Password reset link sent to your ${method === 'microsoft' ? 'Institutional' : 'Personal'} email (${targetEmail})` });
     } else {
-      res.status(500).json({ message: 'Failed to send email' });
+      res.status(500).json({ message: 'Failed to send email. Please try again later.' });
     }
   } catch (error) {
     res.status(500).json({ message: error.message });
