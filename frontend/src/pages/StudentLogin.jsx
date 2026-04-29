@@ -5,6 +5,7 @@ import { useStudentAuth } from '../context/StudentAuthContext';
 import toast from 'react-hot-toast';
 import { useGoogleLogin } from '@react-oauth/google';
 import { useMsal } from "@azure/msal-react";
+import { EventType } from "@azure/msal-browser";
 import { loginRequest } from "../config/microsoftAuthConfig";
 
 const StudentLogin = () => {
@@ -34,6 +35,36 @@ const StudentLogin = () => {
       navigate('/student/dashboard', { replace: true });
     }
   }, [token, authLoading, navigate]);
+
+  // Handle MSAL Redirect Login
+  useEffect(() => {
+    const callbackId = instance.addEventCallback((message) => {
+      if (message.eventType === EventType.LOGIN_SUCCESS && message.payload) {
+        const payload = message.payload;
+        if (payload.accessToken) {
+          setLoading(true);
+          microsoftLogin(payload.accessToken).then((result) => {
+            setLoading(false);
+            if (result.success) {
+              toast.success('Login successful!');
+              navigate('/student/dashboard', { replace: true });
+            } else {
+              toast.error(result.message || 'Microsoft Login failed');
+            }
+          });
+        }
+      }
+      if (message.eventType === EventType.LOGIN_FAILURE) {
+        toast.error('Microsoft Login failed');
+      }
+    });
+
+    return () => {
+      if (callbackId) {
+        instance.removeEventCallback(callbackId);
+      }
+    };
+  }, [instance, microsoftLogin, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -95,13 +126,17 @@ const StudentLogin = () => {
           toast.error(result.message || 'Microsoft Login failed');
         }
       }
+      setLoading(false);
     } catch (error) {
+      setLoading(false);
       console.error('Microsoft login error:', error);
-      if (error.name !== 'BrowserAuthError' || !error.message.includes('user_cancelled')) {
+      
+      // Fallback to redirect if popup is blocked (common on mobile browsers)
+      if (error.name === 'BrowserAuthError' && (error.message.includes('popup_window_error') || error.message.includes('empty_window_error'))) {
+        instance.loginRedirect(loginRequest);
+      } else if (error.name !== 'BrowserAuthError' || (!error.message.includes('user_cancelled') && !error.message.includes('interaction_in_progress'))) {
         toast.error('Microsoft Login Failed');
       }
-    } finally {
-      setLoading(false);
     }
   };
 
