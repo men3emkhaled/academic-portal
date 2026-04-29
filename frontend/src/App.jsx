@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import PullToRefresh from './components/PullToRefresh';
 import { ThemeProvider } from './context/ThemeContext';
 import { Toaster } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
@@ -133,7 +134,9 @@ function App() {
         <StudentAuthProvider>
           <StudentDataContextProvider>
             <Router>
-              <AppContent />
+              <PullToRefresh>
+                <AppContent />
+              </PullToRefresh>
               <Toaster position="bottom-right" />
             </Router>
           </StudentDataContextProvider>
