@@ -85,10 +85,13 @@ const StudentLogin = () => {
   }, [instance, microsoftLogin, navigate]);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    // We intentionally DO NOT call e.preventDefault() here.
+    // We let the form submit to a hidden iframe so iOS Safari detects a real form submission
+    // and triggers the "Save Password" prompt in PWA standalone mode.
 
     if (loading) return;
     if (!username.trim() || !password.trim()) {
+      e.preventDefault(); // Only prevent if validation fails
       toast.error('Please enter both student ID and password');
       return;
     }
@@ -152,7 +155,7 @@ const StudentLogin = () => {
     },
     ux_mode: isStandalone ? 'redirect' : 'popup',
     redirect_uri: isStandalone ? window.location.origin + '/student/login' : undefined,
-    hint: savedGoogleHint,
+    login_hint: savedGoogleHint,
   });
 
   const handleMicrosoftLogin = async () => {
@@ -253,7 +256,10 @@ const StudentLogin = () => {
               <p className="text-gray-500 dark:text-gray-400 text-sm">Enter your credentials to access the portal.</p>
             </div>
 
-            <form onSubmit={handleSubmit} action="#" method="post" className="flex flex-col gap-6">
+            {/* Hidden iframe for iOS Safari password save trick */}
+            <iframe name="dummyframe" id="dummyframe" style={{ display: 'none' }} title="dummy"></iframe>
+
+            <form onSubmit={handleSubmit} target="dummyframe" action="/student/login-dummy" method="post" className="flex flex-col gap-6">
               {/* Student ID Field */}
               <div className="flex flex-col gap-2">
                 <label className="text-xs uppercase tracking-widest text-primary font-bold px-1" htmlFor="student-id">Student ID</label>
