@@ -38,6 +38,24 @@ const StudentLogin = () => {
 
   // Handle MSAL Redirect Login
   useEffect(() => {
+    // Process redirect response when page loads back from Microsoft login
+    instance.handleRedirectPromise().then((response) => {
+      if (response && response.accessToken) {
+        setLoading(true);
+        microsoftLogin(response.accessToken).then((result) => {
+          setLoading(false);
+          if (result.success) {
+            toast.success('Login successful!');
+            navigate('/student/dashboard', { replace: true });
+          } else {
+            toast.error(result.message || 'Microsoft Login failed');
+          }
+        });
+      }
+    }).catch((error) => {
+      console.error('MSAL redirect error:', error);
+    });
+
     const callbackId = instance.addEventCallback((message) => {
       if (message.eventType === EventType.LOGIN_SUCCESS && message.payload) {
         const payload = message.payload;
@@ -98,6 +116,9 @@ const StudentLogin = () => {
     }
   };
 
+  // Detect if running as installed PWA (standalone mode)
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
   const handleGoogleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       setLoading(true);
@@ -112,9 +133,17 @@ const StudentLogin = () => {
     onError: () => {
       toast.error('Google Login Failed');
     },
+    ux_mode: isStandalone ? 'redirect' : 'popup',
+    redirect_uri: isStandalone ? window.location.origin + '/student/login' : undefined,
   });
 
   const handleMicrosoftLogin = async () => {
+    // In PWA standalone mode, always use redirect (popups don't work)
+    if (isStandalone) {
+      instance.loginRedirect(loginRequest);
+      return;
+    }
+
     try {
       setLoading(true);
       const loginResponse = await instance.loginPopup(loginRequest);
