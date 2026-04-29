@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 const Sidebar = ({ onLogout }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isPWA, setIsPWA] = useState(false);
   const { student } = useStudentAuth();
   const { theme, toggleTheme } = useTheme();
   const { t } = useTranslation();
@@ -21,6 +22,24 @@ const Sidebar = ({ onLogout }) => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Detect PWA standalone mode
+  useEffect(() => {
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+      || window.navigator.standalone === true
+      || document.referrer.includes('android-app://');
+    setIsPWA(isStandalone);
+  }, []);
+
+  // Set CSS custom property for bottom bar height so pages can add proper padding
+  useEffect(() => {
+    if (isMobile) {
+      const barHeight = isPWA ? 80 : 70;
+      document.documentElement.style.setProperty('--bottom-bar-h', `${barHeight}px`);
+    } else {
+      document.documentElement.style.removeProperty('--bottom-bar-h');
+    }
+  }, [isMobile, isPWA]);
 
   const bottomBarItems = [
     { id: 'dashboard', label: t('sidebar.dashboard'), icon: <Home className="w-5 h-5" />, path: '/student/dashboard' },
@@ -131,7 +150,15 @@ const Sidebar = ({ onLogout }) => {
   // ============= Bottom Navigation Bar Mobile =============
   return (
     <>
-      <div className="fixed left-0 right-0 bg-white/95 dark:bg-dark-glass/95 backdrop-blur-xl border-t border-gray-200 dark:border-white/10 z-50 shadow-[0_-8px_30px_rgba(0,0,0,0.05)] dark:shadow-[0_-8px_30px_rgba(0,0,0,0.5)] px-2 pt-2 transition-colors duration-300" style={{ bottom: 0, paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 8px)' }}>
+      <div
+        className="fixed left-0 right-0 bg-white/95 dark:bg-dark-glass/95 backdrop-blur-xl border-t border-gray-200 dark:border-white/10 z-50 shadow-[0_-8px_30px_rgba(0,0,0,0.05)] dark:shadow-[0_-8px_30px_rgba(0,0,0,0.5)] px-2 pt-2 transition-colors duration-300"
+        style={{
+          bottom: 0,
+          paddingBottom: isPWA
+            ? 'max(env(safe-area-inset-bottom, 12px), 12px)'
+            : 'calc(env(safe-area-inset-bottom, 0px) + 8px)',
+        }}
+      >
         <div className="flex justify-around items-center">
           {bottomBarItems.map((item) => {
             const isActive = location.pathname === item.path;
@@ -256,6 +283,19 @@ const Sidebar = ({ onLogout }) => {
         .hidden-scrollbar::-webkit-scrollbar { display: none; }
         .hidden-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .pb-safe { padding-bottom: env(safe-area-inset-bottom, 1rem); }
+
+        /* PWA standalone: ensure fixed elements stay visible */
+        @media (display-mode: standalone) {
+          html {
+            height: 100%;
+            overflow: auto;
+          }
+          body {
+            min-height: 100%;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+          }
+        }
       `}</style>
     </>
   );

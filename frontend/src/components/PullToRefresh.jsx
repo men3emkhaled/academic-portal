@@ -126,11 +126,11 @@ const PullToRefresh = ({ children }) => {
         </div>
       </div>
 
-      {/* Page content shifts down */}
+      {/* Page content — no transform to avoid breaking position:fixed on bottom bar */}
       <div
         style={{
-          transform: `translateY(${pullDistance * 0.3}px)`,
-          transition: pulling.current ? 'none' : 'transform 0.3s cubic-bezier(0.2, 0, 0, 1)',
+          paddingTop: pullDistance > 0 ? `${pullDistance * 0.3}px` : undefined,
+          transition: pulling.current ? 'none' : 'padding-top 0.3s cubic-bezier(0.2, 0, 0, 1)',
         }}
       >
         {children}

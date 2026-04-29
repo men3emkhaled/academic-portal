@@ -143,7 +143,7 @@
 @media (max-width: 768px) {
   /* إضافة مسافة أسفل الصفحات عشان المحتوى مايختفيش تحت الـ Bottom Bar */
   .pb-safe {
-    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 70px);
+    padding-bottom: var(--bottom-bar-h, 70px);
   }
   
   /* تحسين حجم الخط في الموبايل */
@@ -162,25 +162,16 @@
   }
 }
 
-/* ============= PWA Standalone Safe Area ============= */
-@supports (padding: env(safe-area-inset-bottom)) {
-  html {
-    /* Ensure the page fills entire viewport including safe areas */
-    padding: env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);
-  }
-
-  body {
-    /* Prevent content from being cut behind system UI */
-    min-height: 100vh;
-    min-height: -webkit-fill-available;
-  }
-}
-
-/* When running as installed PWA (standalone) */
+/* PWA Standalone: ensure correct viewport height and fixed positioning */
 @media (display-mode: standalone) {
-  html, body {
+  html {
     height: 100%;
-    overflow: auto;
+    height: 100dvh;
+  }
+  body {
+    min-height: 100%;
+    min-height: 100dvh;
+    overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-y: none;
   }
