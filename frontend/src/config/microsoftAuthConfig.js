@@ -5,8 +5,9 @@ export const msalConfig = {
     redirectUri: window.location.origin,
   },
   cache: {
-    cacheLocation: "sessionStorage",
-    storeAuthStateInCookie: false,
+    // Use localStorage so PWA standalone mode retains auth state between sessions
+    cacheLocation: "localStorage",
+    storeAuthStateInCookie: true,
   },
 };
 

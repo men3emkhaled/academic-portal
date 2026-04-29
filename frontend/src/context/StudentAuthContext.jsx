@@ -131,6 +131,11 @@ export const StudentAuthProvider = ({ children }) => {
       setToken(newToken);
       setStudent(studentData);
 
+      // Save email as hint for next Google login (helps PWA skip account picker)
+      if (studentData?.email) {
+        localStorage.setItem('googleLoginHint', studentData.email);
+      }
+
       return { success: true };
     } catch (error) {
       console.error('Google login error:', error);
@@ -152,6 +157,11 @@ export const StudentAuthProvider = ({ children }) => {
 
       setToken(newToken);
       setStudent(studentData);
+
+      // Save institutional email as hint for next Microsoft login (helps PWA skip account picker)
+      if (studentData?.institutional_email) {
+        localStorage.setItem('microsoftLoginHint', studentData.institutional_email);
+      }
 
       return { success: true };
     } catch (error) {

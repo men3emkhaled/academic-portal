@@ -111,6 +111,20 @@ const StudentLogin = () => {
       } else {
         localStorage.removeItem('rememberDevice');
       }
+
+      // Save credentials for PWA password manager (iOS/Safari)
+      if (window.PasswordCredential) {
+        try {
+          const cred = new window.PasswordCredential({
+            id: username,
+            password: password,
+            name: 'ZNU CS Portal',
+          });
+          await navigator.credentials.store(cred);
+        } catch (err) {
+          // Silently fail — not all browsers support this
+        }
+      }
     } else {
       toast.error(result.message || 'Login failed');
     }
@@ -118,6 +132,9 @@ const StudentLogin = () => {
 
   // Detect if running as installed PWA (standalone mode)
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+  // Try to get a saved login_hint for Google
+  const savedGoogleHint = localStorage.getItem('googleLoginHint') || undefined;
 
   const handleGoogleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
@@ -135,12 +152,36 @@ const StudentLogin = () => {
     },
     ux_mode: isStandalone ? 'redirect' : 'popup',
     redirect_uri: isStandalone ? window.location.origin + '/student/login' : undefined,
+    hint: savedGoogleHint,
   });
 
   const handleMicrosoftLogin = async () => {
-    // In PWA standalone mode, always use redirect (popups don't work)
+    const savedMsHint = localStorage.getItem('microsoftLoginHint') || undefined;
+    const requestWithHint = savedMsHint
+      ? { ...loginRequest, loginHint: savedMsHint }
+      : loginRequest;
+
+    // In PWA standalone mode, try silent login first, then fallback to redirect
     if (isStandalone) {
-      instance.loginRedirect(loginRequest);
+      if (savedMsHint) {
+        try {
+          setLoading(true);
+          const silentResponse = await instance.ssoSilent(requestWithHint);
+          if (silentResponse?.accessToken) {
+            const result = await microsoftLogin(silentResponse.accessToken);
+            setLoading(false);
+            if (result.success) {
+              toast.success('Login successful!');
+              navigate('/student/dashboard', { replace: true });
+              return;
+            }
+          }
+        } catch (e) {
+          // ssoSilent failed, fall through to redirect
+          setLoading(false);
+        }
+      }
+      instance.loginRedirect(requestWithHint);
       return;
     }
 
@@ -212,7 +253,7 @@ const StudentLogin = () => {
               <p className="text-gray-500 dark:text-gray-400 text-sm">Enter your credentials to access the portal.</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+            <form onSubmit={handleSubmit} action="#" method="post" className="flex flex-col gap-6">
               {/* Student ID Field */}
               <div className="flex flex-col gap-2">
                 <label className="text-xs uppercase tracking-widest text-primary font-bold px-1" htmlFor="student-id">Student ID</label>
@@ -220,6 +261,7 @@ const StudentLogin = () => {
                   <Fingerprint className={`absolute left-4 w-5 h-5 transition-colors ${isFocused === 'username' ? 'text-primary' : 'text-gray-400 dark:text-gray-500'}`} />
                   <input
                     id="student-id"
+                    name="username"
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
@@ -240,6 +282,7 @@ const StudentLogin = () => {
                   <Lock className={`absolute left-4 w-5 h-5 transition-colors ${isFocused === 'password' ? 'text-primary' : 'text-gray-400 dark:text-gray-500'}`} />
                   <input
                     id="password"
+                    name="password"
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
