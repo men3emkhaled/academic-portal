@@ -374,7 +374,6 @@ const QuizManager = ({ courses }) => {
                              )}
                         </div>
                     </div>
-                </div>
 
                 {/* Sub-tabs */}
                 <div className="flex gap-2 mt-10 p-1.5 bg-gray-100 dark:bg-black/40 rounded-2xl w-fit border border-gray-200 dark:border-white/5 transition-colors">

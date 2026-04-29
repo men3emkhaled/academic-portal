@@ -52,7 +52,7 @@ dependencies:
   package_info_plus: ^9.0.1
   google_sign_in: ^6.2.2
   aad_oauth_ce: ^1.2.0
-  flutter_windowmanager: ^0.2.0
+  screen_protector: ^1.5.1
 
 dev_dependencies:
   flutter_test:

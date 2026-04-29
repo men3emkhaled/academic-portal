@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:flutter_windowmanager/flutter_windowmanager.dart';
+import 'package:screen_protector/screen_protector.dart';
 import '../services/api_service.dart';
 import '../theme.dart';
 import 'ui_helpers.dart';
@@ -44,7 +44,7 @@ class _QuizScreenState extends State<QuizScreen>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     if (_isOfficial) {
-      FlutterWindowManager.clearFlags(FlutterWindowManager.FLAG_SECURE);
+      ScreenProtector.preventScreenshotOff();
     }
     _timer?.cancel();
     super.dispose();
@@ -167,7 +167,7 @@ class _QuizScreenState extends State<QuizScreen>
         });
 
         if (_isOfficial) {
-          FlutterWindowManager.addFlags(FlutterWindowManager.FLAG_SECURE);
+          ScreenProtector.preventScreenshotOn();
         }
 
         _startTimer();
