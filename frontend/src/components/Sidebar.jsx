@@ -131,7 +131,7 @@ const Sidebar = ({ onLogout }) => {
   // ============= Bottom Navigation Bar Mobile =============
   return (
     <>
-      <div className="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-dark-glass/95 backdrop-blur-xl border-t border-gray-200 dark:border-white/10 z-50 shadow-[0_-8px_30px_rgba(0,0,0,0.05)] dark:shadow-[0_-8px_30px_rgba(0,0,0,0.5)] pb-safe px-2 pb-2 pt-2 transition-colors duration-300">
+      <div className="fixed left-0 right-0 bg-white/95 dark:bg-dark-glass/95 backdrop-blur-xl border-t border-gray-200 dark:border-white/10 z-50 shadow-[0_-8px_30px_rgba(0,0,0,0.05)] dark:shadow-[0_-8px_30px_rgba(0,0,0,0.5)] px-2 pt-2 transition-colors duration-300" style={{ bottom: 0, paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 8px)' }}>
         <div className="flex justify-around items-center">
           {bottomBarItems.map((item) => {
             const isActive = location.pathname === item.path;

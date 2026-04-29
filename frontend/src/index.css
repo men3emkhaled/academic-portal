@@ -139,11 +139,11 @@
   @apply bg-primaryDark;
 }
 
-/* ============= Mobile Bottom Bar Fix ============= */
+/* ============= Mobile & PWA Standalone Fix ============= */
 @media (max-width: 768px) {
   /* إضافة مسافة أسفل الصفحات عشان المحتوى مايختفيش تحت الـ Bottom Bar */
   .pb-safe {
-    padding-bottom: 70px;
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 70px);
   }
   
   /* تحسين حجم الخط في الموبايل */
@@ -159,6 +159,30 @@
   /* تحسين الـ cards في الموبايل */
   .glass-card {
     backdrop-filter: blur(4px);
+  }
+}
+
+/* ============= PWA Standalone Safe Area ============= */
+@supports (padding: env(safe-area-inset-bottom)) {
+  html {
+    /* Ensure the page fills entire viewport including safe areas */
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);
+  }
+
+  body {
+    /* Prevent content from being cut behind system UI */
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+  }
+}
+
+/* When running as installed PWA (standalone) */
+@media (display-mode: standalone) {
+  html, body {
+    height: 100%;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: none;
   }
 }
 
