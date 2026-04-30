@@ -377,12 +377,12 @@ const StudentDashboard = () => {
               ) : (
                 grades.map((grade, idx) => {
                   const colors = [
-                    { from: 'from-emerald-400', to: 'to-teal-500', text: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-500/10', shadow: 'hover:shadow-emerald-500/20' },
-                    { from: 'from-blue-400', to: 'to-indigo-500', text: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-500/10', shadow: 'hover:shadow-blue-500/20' },
-                    { from: 'from-violet-400', to: 'to-purple-500', text: 'text-violet-600 dark:text-violet-400', bg: 'bg-violet-500/10', shadow: 'hover:shadow-violet-500/20' },
-                    { from: 'from-amber-400', to: 'to-orange-500', text: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-500/10', shadow: 'hover:shadow-amber-500/20' },
-                    { from: 'from-rose-400', to: 'to-pink-500', text: 'text-rose-600 dark:text-rose-400', bg: 'bg-rose-500/10', shadow: 'hover:shadow-rose-500/20' },
-                    { from: 'from-cyan-400', to: 'to-sky-500', text: 'text-cyan-600 dark:text-cyan-400', bg: 'bg-cyan-500/10', shadow: 'hover:shadow-cyan-500/20' },
+                    { bg: 'bg-emerald-500/10', text: 'text-emerald-600 dark:text-emerald-400' },
+                    { bg: 'bg-blue-500/10', text: 'text-blue-600 dark:text-blue-400' },
+                    { bg: 'bg-violet-500/10', text: 'text-violet-600 dark:text-violet-400' },
+                    { bg: 'bg-amber-500/10', text: 'text-amber-600 dark:text-amber-400' },
+                    { bg: 'bg-rose-500/10', text: 'text-rose-600 dark:text-rose-400' },
+                    { bg: 'bg-cyan-500/10', text: 'text-cyan-600 dark:text-cyan-400' },
                   ];
                   const c = colors[idx % colors.length];
                   
@@ -393,57 +393,20 @@ const StudentDashboard = () => {
                     <button
                       key={idx}
                       onClick={() => handleCourseClick(grade.course_id)}
-                      className={`text-left relative overflow-hidden group rounded-[1.5rem] bg-white dark:bg-dark-card border border-gray-200 dark:border-white/5 p-5 sm:p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${c.shadow} active:scale-[0.98] flex flex-col gap-4`}
+                      className="bg-white dark:bg-dark-card border border-gray-200 dark:border-white/5 rounded-[1.5rem] p-5 flex items-center gap-4 hover:border-primary/30 dark:hover:border-primary/30 transition-all duration-300 shadow-sm group text-left w-full hover:-translate-y-1 hover:shadow-md active:scale-[0.98]"
                     >
-                      <div className={`absolute -right-12 -top-12 w-32 h-32 ${c.bg} blur-[30px] rounded-full group-hover:scale-150 transition-transform duration-700`}></div>
-                      
-                      <div className="flex justify-between items-start relative z-10 w-full">
-                        <div className={`w-12 h-12 rounded-[1rem] ${c.bg} ${c.text} flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:-rotate-3 transition-all duration-500`}>
-                          <BookOpen className="w-6 h-6" />
-                        </div>
-                        <div className={`w-8 h-8 rounded-full bg-gray-50 dark:bg-white/5 flex items-center justify-center border border-gray-100 dark:border-white/5 text-gray-400 group-hover:${c.text} group-hover:bg-white dark:group-hover:bg-white/10 transition-all duration-300`}>
-                          <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-                        </div>
+                      <div className={`w-12 h-12 rounded-2xl ${c.bg} flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300`}>
+                        <BookOpen className={`w-6 h-6 ${c.text}`} />
                       </div>
-
-                      <div className="relative z-10 w-full">
-                        <div className="flex items-center gap-2 mb-1.5">
-                          <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md ${c.bg} ${c.text}`}>
-                            Course
-                          </span>
-                          {hasScores && (
-                            <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">
-                              Graded
-                            </span>
-                          )}
-                        </div>
-                        <h4 className="font-headline font-bold text-base sm:text-lg leading-tight text-gray-900 dark:text-white line-clamp-2 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-gray-900 group-hover:to-gray-600 dark:group-hover:from-white dark:group-hover:to-gray-300 transition-all">
-                          {grade.course_name}
-                        </h4>
+                      <div className="flex-1 min-w-0">
+                        <span className={`text-[10px] font-bold uppercase tracking-wider mb-0.5 block ${c.text} opacity-80`}>
+                          {hasScores ? `Score: ${totalScore} / ${grade.max_score}` : 'Course Details'}
+                        </span>
+                        <h4 className="font-bold text-gray-900 dark:text-white text-sm sm:text-base truncate group-hover:text-primary transition-colors">{grade.course_name}</h4>
                       </div>
-
-                      {hasScores ? (
-                        <div className="mt-auto pt-4 border-t border-gray-100 dark:border-white/5 relative z-10 w-full">
-                          <div className="flex justify-between items-center mb-2">
-                            <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Current Score</span>
-                            <span className={`text-[11px] font-black ${c.text} bg-white dark:bg-white/5 px-2 py-0.5 rounded-md shadow-sm border border-gray-100 dark:border-white/5`}>
-                              {totalScore} / {grade.max_score || '-'}
-                            </span>
-                          </div>
-                          <div className="h-1.5 w-full bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden">
-                            <div 
-                              className={`h-full bg-gradient-to-r ${c.from} ${c.to} rounded-full transition-all duration-1000 ease-out`}
-                              style={{ width: `${Math.min(100, (totalScore / (grade.max_score || 100)) * 100)}%` }}
-                            ></div>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="mt-auto pt-4 border-t border-gray-100 dark:border-white/5 relative z-10 w-full">
-                           <span className="text-[11px] font-semibold text-gray-400 dark:text-gray-500 flex items-center gap-1.5">
-                             <Info className="w-3.5 h-3.5" /> No grades posted yet
-                           </span>
-                        </div>
-                      )}
+                      <div className="w-10 h-10 flex items-center justify-center text-gray-400 group-hover:text-primary transition-all bg-gray-50 dark:bg-white/5 rounded-full group-hover:bg-primary/10 flex-shrink-0">
+                        <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                      </div>
                     </button>
                   );
                 })
