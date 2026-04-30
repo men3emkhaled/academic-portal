@@ -8,7 +8,7 @@ import {
   Megaphone, QrCode, ListChecks, CheckCircle2, Circle, 
   ArrowLeft, Calendar, User, ExternalLink, Users,
   Loader2, Clock, BookOpen, X, Check, XCircle,
-  Shield, Zap, Award
+  Lock, Zap, Award
 } from 'lucide-react';
 
 const StudentCourseHub = () => {
@@ -505,7 +505,7 @@ const StudentCourseHub = () => {
 
                   <div className="mt-8 flex flex-col gap-3">
                     <div className="flex items-center justify-center gap-2 text-[11px] font-black text-emerald-600 bg-emerald-50 dark:bg-emerald-500/10 dark:text-emerald-400 py-3 rounded-2xl border border-emerald-100 dark:border-emerald-500/20 shadow-sm">
-                      <Shield className="w-4 h-4" />
+                      <Lock className="w-4 h-4" />
                       SECURE TOKEN ACTIVE
                     </div>
                     <div className="px-6 py-4 bg-gray-50 dark:bg-white/5 rounded-2xl text-left border border-gray-100 dark:border-white/5">
@@ -549,7 +549,7 @@ const StudentCourseHub = () => {
             </div>
 
             <div className="mt-8 flex items-center justify-center gap-2 text-[11px] font-black text-emerald-600 bg-emerald-50 dark:bg-emerald-500/10 dark:text-emerald-400 py-3.5 rounded-2xl border border-emerald-100 dark:border-emerald-500/20 shadow-lg shadow-emerald-500/10">
-              <Shield className="w-4 h-4" />
+              <Lock className="w-4 h-4" />
               SECURE ACCESS GRANTED
             </div>
           </div>
