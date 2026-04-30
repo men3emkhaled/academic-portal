@@ -253,7 +253,7 @@ const DoctorAttendance = ({ courses }) => {
                       </div>
                     </div>
                     <Scanner 
-                      onResult={(text) => handleScan(text)} 
+                      onScan={(detectedCodes) => handleScan(detectedCodes)} 
                       onError={(err) => console.log(err)} 
                       components={{ audio: false, finder: false }}
                     />
