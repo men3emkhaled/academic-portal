@@ -65,4 +65,16 @@ router.put('/course-progress/:id', doctorController.updateCourseProgress);
 router.patch('/course-progress/:id/toggle', doctorController.toggleCourseProgress);
 router.delete('/course-progress/:id', doctorController.deleteCourseProgress);
 
+// Attendance
+router.get('/attendance/:courseId/sessions', doctorController.getAttendanceSessions);
+router.post('/attendance/sessions', doctorController.createAttendanceSession);
+router.get('/attendance/sessions/:sessionId/records', doctorController.getAttendanceRecords);
+router.post('/attendance/scan', doctorController.scanAttendance);
+router.post('/attendance/manual', doctorController.toggleManualAttendance);
+
+// Announcements
+router.get('/announcements/:courseId', doctorController.getAnnouncements);
+router.post('/announcements', doctorController.createAnnouncement);
+router.delete('/announcements/:id', doctorController.deleteAnnouncement);
+
 module.exports = router;

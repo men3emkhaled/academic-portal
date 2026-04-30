@@ -6,6 +6,8 @@ import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
+import { QRCodeSVG } from 'qrcode.react';
+import studentApi from '../services/studentApi';
 
 // دالة تحديد النمط بناءً على محتوى الإشعار
 const getNotificationStyle = (title, content) => {
@@ -114,6 +116,10 @@ const StudentDashboard = () => {
     if (days === 0) return 'Today';
     if (days === 1) return 'Yesterday';
     return `${days} days ago`;
+  };
+
+  const handleCourseClick = (courseId) => {
+    navigate(`/student/course/${courseId}`);
   };
 
   const renderContent = (text) => {
@@ -351,12 +357,12 @@ const StudentDashboard = () => {
             </div>
           </div>
 
-          {/* Grades Section */}
+          {/* Courses & Attendance Section */}
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="font-headline font-extrabold text-2xl tracking-tight flex items-center gap-3 text-gray-900 dark:text-white">
                 <span className="w-2 h-8 bg-primary rounded-full"></span>
-                {t('dashboard.grades')}
+                My Courses (Attendance)
               </h2>
             </div>
 
@@ -367,50 +373,22 @@ const StudentDashboard = () => {
                   <p className="text-gray-500 dark:text-gray-500 text-sm mt-2">Contact your administrator to enroll in courses.</p>
                 </div>
               ) : (
-                grades.map((grade, idx) => {
-                  const total = (grade.midterm_score || 0) + (grade.practical_score || 0) + (grade.oral_score || 0);
-                  const status = getCourseStatus(grade);
-                  const statusColor = getStatusColor(status);
-
-                  return (
-                    <div key={idx} className="relative overflow-hidden group bg-white dark:bg-dark-card border border-gray-200 dark:border-white/5 rounded-[1.5rem] p-6 hover:border-primary/40 hover:-translate-y-1.5 hover:shadow-[0_12px_40px_rgba(46,204,113,0.1)] dark:hover:shadow-[0_12px_40px_rgba(142,255,113,0.15)] transition-all duration-500 shadow-sm dark:shadow-none">
-                      <div className="absolute inset-0 bg-gradient-to-br from-gray-50/50 dark:from-white/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-                      <div className="flex justify-between items-start mb-5 relative">
-                        <div>
-                          <h4 className="font-headline font-bold text-lg leading-tight mb-1 text-gray-900 dark:text-white">{grade.course_name}</h4>
-                          <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">{t('sidebar.courses_grades')?.split(' ')[0] || 'GRADES'}</span>
-                        </div>
-                        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter border ${statusColor} border-current/20`}>
-                          {status}
-                        </span>
-                      </div>
-                      <div className="grid grid-cols-3 gap-3">
-                        <div className="bg-gray-50 dark:bg-dark border border-gray-100 dark:border-white/5 shadow-sm dark:shadow-inner px-3 py-3 rounded-xl text-center group-hover:border-gray-200 dark:group-hover:border-white/10 transition-colors">
-                          <span className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Midterm</span>
-                          <span className={`text-xl font-headline font-bold ${getGradeColor(grade.midterm_score, grade.midterm_max)}`}>
-                            {formatScore(grade.midterm_score)}
-                          </span>
-                        </div>
-                        <div className="bg-gray-50 dark:bg-dark border border-gray-100 dark:border-white/5 shadow-sm dark:shadow-inner px-3 py-3 rounded-xl text-center group-hover:border-gray-200 dark:group-hover:border-white/10 transition-colors">
-                          <span className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Practical</span>
-                          <span className={`text-xl font-headline font-bold ${getGradeColor(grade.practical_score, grade.practical_max)}`}>
-                            {formatScore(grade.practical_score)}
-                          </span>
-                        </div>
-                        <div className="bg-gray-50 dark:bg-dark border border-gray-100 dark:border-white/5 shadow-sm dark:shadow-inner px-3 py-3 rounded-xl text-center group-hover:border-gray-200 dark:group-hover:border-white/10 transition-colors">
-                          <span className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Oral</span>
-                          <span className={`text-xl font-headline font-bold ${getGradeColor(grade.oral_score, grade.oral_max)}`}>
-                            {formatScore(grade.oral_score)}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="mt-3 pt-2 border-t border-gray-100 dark:border-white/5 flex justify-between items-center">
-                        <span className="text-xs text-gray-500 dark:text-gray-400">{t('dashboard.total')}</span>
-                        <span className="text-lg font-headline font-bold text-primary">{formatScore(total)} / {grade.max_score}</span>
-                      </div>
+                grades.map((grade, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => handleCourseClick(grade.course_id)}
+                    className="text-left relative overflow-hidden group bg-white dark:bg-dark-card border border-gray-200 dark:border-white/5 rounded-[1.5rem] p-6 hover:border-primary/40 hover:-translate-y-1.5 hover:shadow-[0_12px_40px_rgba(46,204,113,0.1)] dark:hover:shadow-[0_12px_40px_rgba(142,255,113,0.15)] transition-all duration-500 shadow-sm dark:shadow-none flex items-center justify-between"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-br from-gray-50/50 dark:from-white/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+                    <div>
+                      <h4 className="font-headline font-bold text-lg leading-tight mb-1 text-gray-900 dark:text-white">{grade.course_name}</h4>
+                      <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">View Course Hub</span>
                     </div>
-                  );
-                })
+                    <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <ChevronRight className="w-5 h-5" />
+                    </div>
+                  </button>
+                ))
               )}
             </div>
           </div>

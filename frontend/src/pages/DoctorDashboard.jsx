@@ -2,9 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDoctorAuth } from '../context/DoctorAuthContext';
 import {
-  BookOpen, TrendingUp, FileText, CheckSquare, Award, LogOut, GraduationCap,
   Sun, Moon, LayoutDashboard, FolderOpen, ClipboardList, BarChart3, Menu, X, ChevronRight,
-  Activity, PieChart, ListChecks
+  Activity, PieChart, ListChecks, Megaphone
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import DoctorResourceManager from '../components/doctor/DoctorResourceManager';
@@ -14,6 +13,8 @@ import DoctorGradesView from '../components/doctor/DoctorGradesView';
 import DoctorStudentProgress from '../components/doctor/DoctorStudentProgress';
 import DoctorQuizAnalytics from '../components/doctor/DoctorQuizAnalytics';
 import DoctorCourseProgress from '../components/doctor/DoctorCourseProgress';
+import DoctorAttendance from '../components/doctor/DoctorAttendance';
+import DoctorAnnouncements from '../components/doctor/DoctorAnnouncements';
 
 const DoctorDashboard = () => {
   const { doctor, token, logout, loading: authLoading, doctorApi } = useDoctorAuth();
@@ -63,6 +64,8 @@ const DoctorDashboard = () => {
     { id: 'tasks', label: 'Tasks', icon: ClipboardList, color: 'emerald' },
     { id: 'grades', label: 'Grades', icon: BarChart3, color: 'rose' },
     { id: 'syllabus', label: 'Syllabus', icon: ListChecks, color: 'teal' },
+    { id: 'announcements', label: 'Announcements', icon: Megaphone, color: 'amber' },
+    { id: 'attendance', label: 'Attendance', icon: Users, color: 'sky' },
     { id: 'progress', label: 'Student Progress', icon: Activity, color: 'purple' },
     { id: 'analytics', label: 'Analytics', icon: PieChart, color: 'indigo' },
   ];
@@ -319,6 +322,8 @@ const DoctorDashboard = () => {
           {activeTab === 'tasks' && <DoctorTaskManager courses={myCourses} />}
           {activeTab === 'grades' && <DoctorGradesView courses={myCourses} />}
           {activeTab === 'syllabus' && <DoctorCourseProgress courses={myCourses} />}
+          {activeTab === 'announcements' && <DoctorAnnouncements courses={myCourses} />}
+          {activeTab === 'attendance' && <DoctorAttendance courses={myCourses} />}
           {activeTab === 'progress' && <DoctorStudentProgress courses={myCourses} />}
           {activeTab === 'analytics' && <DoctorQuizAnalytics courses={myCourses} />}
         </div>

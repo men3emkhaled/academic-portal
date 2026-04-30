@@ -3,6 +3,7 @@ const XLSX = require('xlsx');
 const fs = require('fs');
 const db = require('../config/database');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const SALT_ROUNDS = 10;
 
 const uploadStudentsExcel = async (req, res) => {
@@ -251,6 +252,90 @@ const updateStudentRole = async (req, res) => {
   }
 };
 
+const generateAttendanceToken = async (req, res) => {
+  try {
+    const studentId = req.user.id;
+    const { courseId } = req.params;
+
+    const enrollment = await db.query(
+      'SELECT 1 FROM student_courses WHERE student_id = $1 AND course_id = $2',
+      [studentId, courseId]
+    );
+
+    if (enrollment.rows.length === 0) {
+      return res.status(403).json({ message: 'Not enrolled in this course' });
+    }
+
+    const token = jwt.sign(
+      { student_id: studentId, course_id: courseId, type: 'attendance' },
+      process.env.JWT_SECRET || 'fallback_secret'
+    );
+
+    res.json({ token });
+  } catch (error) {
+    console.error('QR Generate Error:', error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getCourseHubData = async (req, res) => {
+  try {
+    const studentId = req.user.id;
+    const { courseId } = req.params;
+
+    const enrollment = await db.query(
+      'SELECT id FROM student_courses WHERE student_id = $1 AND course_id = $2',
+      [studentId, courseId]
+    );
+
+    if (enrollment.rows.length === 0) {
+      return res.status(403).json({ message: 'Not enrolled in this course' });
+    }
+
+    const courseRes = await db.query('SELECT name, code FROM courses WHERE id = $1', [courseId]);
+    const course = courseRes.rows[0];
+
+    const token = jwt.sign(
+      { student_id: studentId, course_id: courseId, type: 'attendance' },
+      process.env.JWT_SECRET || 'fallback_secret'
+    );
+
+    const announcementsRes = await db.query(
+      `SELECT ca.*, d.name as doctor_name 
+       FROM course_announcements ca
+       JOIN doctors d ON ca.doctor_id = d.id
+       WHERE ca.course_id = $1 
+       ORDER BY ca.created_at DESC`,
+      [courseId]
+    );
+
+    const resourcesRes = await db.query(
+      'SELECT * FROM resources WHERE course_id = $1 ORDER BY created_at DESC',
+      [courseId]
+    );
+
+    const tasksRes = await db.query(
+      `SELECT t.*, 
+        CASE WHEN st.is_completed = true THEN true ELSE false END as is_completed 
+       FROM official_tasks t
+       LEFT JOIN student_official_tasks st ON st.task_id = t.id AND st.student_id = $1
+       WHERE t.course_id = $2 
+       ORDER BY t.created_at DESC`,
+      [studentId, courseId]
+    );
+
+    res.json({
+      course,
+      qrToken: token,
+      announcements: announcementsRes.rows,
+      resources: resourcesRes.rows,
+      tasks: tasksRes.rows
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   uploadStudentsExcel,
   getAllStudents,
@@ -258,5 +343,7 @@ module.exports = {
   updateStudentDepartment,
   resetStudentPassword,
   updateFcmToken,
-  updateStudentRole
+  updateStudentRole,
+  generateAttendanceToken,
+  getCourseHubData
 };

@@ -18,7 +18,9 @@ const {
   updateStudentSection, 
   updateStudentDepartment, 
   resetStudentPassword,
-  updateFcmToken 
+  updateFcmToken,
+  generateAttendanceToken,
+  getCourseHubData
 } = require('../controllers/studentController');
 const { getMyGrades } = require('../controllers/gradeController');
 const { studentAuth } = require('../middleware/studentAuth');
@@ -37,6 +39,8 @@ router.get('/me', studentAuth, getCurrentStudent);
 router.post('/change-password', studentAuth, changePassword);
 router.get('/my-grades', studentAuth, getMyGrades);
 router.post('/update-fcm', studentAuth, updateFcmToken);
+router.get('/attendance/token/:courseId', studentAuth, generateAttendanceToken);
+router.get('/course/:courseId/hub', studentAuth, getCourseHubData);
 
 // ✅ جلب الاختبارات المتاحة للطالب (مع الحقول الجديدة: التواريخ، المحاولات، عدد المحاولات السابقة)
 router.get('/my-quizzes', studentAuth, async (req, res) => {

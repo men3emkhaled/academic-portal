@@ -909,6 +909,189 @@ const deleteCourseProgress = async (req, res) => {
     }
 };
 
+// ==================== ATTENDANCE ====================
+const getAttendanceSessions = async (req, res) => {
+    try {
+        const { courseId } = req.params;
+        const hasAccess = await Doctor.hasCourseAccess(req.doctor.id, courseId);
+        if (!hasAccess) return res.status(403).json({ message: 'Access denied' });
+
+        const result = await db.query(
+            'SELECT * FROM attendance_sessions WHERE course_id = $1 ORDER BY date DESC, created_at DESC',
+            [courseId]
+        );
+        res.json(result.rows);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+const createAttendanceSession = async (req, res) => {
+    try {
+        const { courseId } = req.body;
+        const hasAccess = await Doctor.hasCourseAccess(req.doctor.id, courseId);
+        if (!hasAccess) return res.status(403).json({ message: 'Access denied' });
+
+        const result = await db.query(
+            'INSERT INTO attendance_sessions (course_id, doctor_id, date) VALUES ($1, $2, CURRENT_DATE) RETURNING *',
+            [courseId, req.doctor.id]
+        );
+        res.status(201).json(result.rows[0]);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+const getAttendanceRecords = async (req, res) => {
+    try {
+        const { sessionId } = req.params;
+        const sessionResult = await db.query('SELECT course_id FROM attendance_sessions WHERE id = $1', [sessionId]);
+        if (sessionResult.rows.length === 0) return res.status(404).json({ message: 'Session not found' });
+        
+        const hasAccess = await Doctor.hasCourseAccess(req.doctor.id, sessionResult.rows[0].course_id);
+        if (!hasAccess) return res.status(403).json({ message: 'Access denied' });
+
+        const result = await db.query(`
+            SELECT ar.id, ar.student_id, ar.status, ar.scanned_at, s.name as student_name
+            FROM attendance_records ar
+            JOIN students s ON ar.student_id = s.id
+            WHERE ar.session_id = $1
+            ORDER BY ar.scanned_at DESC
+        `, [sessionId]);
+
+        res.json(result.rows);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+const scanAttendance = async (req, res) => {
+    try {
+        const { sessionId, token } = req.body;
+        
+        const sessionResult = await db.query('SELECT course_id FROM attendance_sessions WHERE id = $1', [sessionId]);
+        if (sessionResult.rows.length === 0) return res.status(404).json({ message: 'Session not found' });
+        const courseId = sessionResult.rows[0].course_id;
+
+        const hasAccess = await Doctor.hasCourseAccess(req.doctor.id, courseId);
+        if (!hasAccess) return res.status(403).json({ message: 'Access denied' });
+
+        let decoded;
+        try {
+            decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret');
+        } catch (e) {
+            return res.status(400).json({ message: 'Invalid or expired QR Code' });
+        }
+
+        if (decoded.course_id != courseId || decoded.type !== 'attendance') {
+            return res.status(400).json({ message: 'QR Code is not for this course' });
+        }
+
+        const studentId = decoded.student_id;
+
+        const enrollResult = await db.query('SELECT 1 FROM student_courses WHERE student_id = $1 AND course_id = $2', [studentId, courseId]);
+        if (enrollResult.rows.length === 0) return res.status(400).json({ message: 'Student not enrolled in this course' });
+
+        try {
+            await db.query(
+                'INSERT INTO attendance_records (session_id, student_id, status) VALUES ($1, $2, $3)',
+                [sessionId, studentId, 'present']
+            );
+        } catch (err) {
+            if (err.code === '23505') {
+                return res.status(400).json({ message: 'Student already marked present' });
+            }
+            throw err;
+        }
+
+        const studentData = await db.query('SELECT name FROM students WHERE id = $1', [studentId]);
+
+        res.json({ message: 'Attendance recorded', student: { id: studentId, name: studentData.rows[0]?.name } });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+const toggleManualAttendance = async (req, res) => {
+    try {
+        const { sessionId, studentId } = req.body;
+        
+        const sessionResult = await db.query('SELECT course_id FROM attendance_sessions WHERE id = $1', [sessionId]);
+        if (sessionResult.rows.length === 0) return res.status(404).json({ message: 'Session not found' });
+        
+        const courseId = sessionResult.rows[0].course_id;
+        const hasAccess = await Doctor.hasCourseAccess(req.doctor.id, courseId);
+        if (!hasAccess) return res.status(403).json({ message: 'Access denied' });
+
+        const recordResult = await db.query(
+            'SELECT id FROM attendance_records WHERE session_id = $1 AND student_id = $2',
+            [sessionId, studentId]
+        );
+
+        if (recordResult.rows.length > 0) {
+            await db.query('DELETE FROM attendance_records WHERE id = $1', [recordResult.rows[0].id]);
+            res.json({ message: 'Attendance removed', status: 'absent' });
+        } else {
+            await db.query(
+                'INSERT INTO attendance_records (session_id, student_id, status) VALUES ($1, $2, $3)',
+                [sessionId, studentId, 'present']
+            );
+            res.json({ message: 'Attendance marked', status: 'present' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// ==================== COURSE ANNOUNCEMENTS ====================
+const getAnnouncements = async (req, res) => {
+    try {
+        const { courseId } = req.params;
+        const hasAccess = await Doctor.hasCourseAccess(req.doctor.id, courseId);
+        if (!hasAccess) return res.status(403).json({ message: 'Access denied' });
+
+        const result = await db.query(
+            'SELECT * FROM course_announcements WHERE course_id = $1 ORDER BY created_at DESC',
+            [courseId]
+        );
+        res.json(result.rows);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+const createAnnouncement = async (req, res) => {
+    try {
+        const { courseId, title, content } = req.body;
+        const hasAccess = await Doctor.hasCourseAccess(req.doctor.id, courseId);
+        if (!hasAccess) return res.status(403).json({ message: 'Access denied' });
+
+        const result = await db.query(
+            'INSERT INTO course_announcements (course_id, doctor_id, title, content) VALUES ($1, $2, $3, $4) RETURNING *',
+            [courseId, req.doctor.id, title, content]
+        );
+        res.status(201).json(result.rows[0]);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+const deleteAnnouncement = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const annResult = await db.query('SELECT course_id FROM course_announcements WHERE id = $1', [id]);
+        if (annResult.rows.length === 0) return res.status(404).json({ message: 'Announcement not found' });
+        
+        const hasAccess = await Doctor.hasCourseAccess(req.doctor.id, annResult.rows[0].course_id);
+        if (!hasAccess) return res.status(403).json({ message: 'Access denied' });
+
+        await db.query('DELETE FROM course_announcements WHERE id = $1', [id]);
+        res.json({ message: 'Announcement deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 // ==================== PROFILE ====================
 const getProfile = async (req, res) => {
     try {
@@ -930,4 +1113,6 @@ module.exports = {
     getPendingReviews, getAttemptForReview, gradeWrittenAnswer,
     getStudentProgress, getQuizAnalytics, getCourseStudents,
     getCourseProgress, addCourseProgress, updateCourseProgress, toggleCourseProgress, deleteCourseProgress,
+    getAttendanceSessions, createAttendanceSession, getAttendanceRecords, scanAttendance, toggleManualAttendance,
+    getAnnouncements, createAnnouncement, deleteAnnouncement
 };

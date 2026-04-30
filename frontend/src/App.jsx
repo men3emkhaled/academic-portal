@@ -11,6 +11,7 @@ import { DoctorAuthProvider } from './context/DoctorAuthContext';
 import AdminDashboard from './pages/AdminDashboard';
 import StudentLogin from './pages/StudentLogin';
 import StudentDashboard from './pages/StudentDashboard';
+import StudentCourseHub from './pages/StudentCourseHub';
 import StudentTimetable from './pages/StudentTimetable';
 import StudentGrades from './pages/StudentGrades';
 import StudentRoadmap from './pages/StudentRoadmap';
@@ -118,6 +119,7 @@ function AppContent() {
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/verify-email" element={<VerifyEmail />} />
       <Route path="/student/dashboard" element={<ProtectedStudentRoute><StudentDashboard /></ProtectedStudentRoute>} />
+      <Route path="/student/course/:courseId" element={<ProtectedStudentRoute><StudentCourseHub /></ProtectedStudentRoute>} />
       <Route path="/student/grades" element={<ProtectedStudentRoute><StudentGrades /></ProtectedStudentRoute>} />
       <Route path="/student/quizzes" element={<ProtectedStudentRoute><StudentQuizzes /></ProtectedStudentRoute>} />
       <Route path="/student/timetable" element={<ProtectedStudentRoute><StudentTimetable /></ProtectedStudentRoute>} />
