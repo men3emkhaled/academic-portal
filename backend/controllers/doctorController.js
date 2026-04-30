@@ -439,7 +439,7 @@ const getCourseGrades = async (req, res) => {
 
         const result = await db.query(
             `SELECT 
-                s.id as student_id, s.name as student_name, s.section,
+                sc.id as enrollment_id, s.id as student_id, s.name as student_name, s.section,
                 g.midterm_score, g.midterm_status,
                 g.practical_score, g.practical_status,
                 g.oral_score, g.oral_status,
@@ -457,6 +457,45 @@ const getCourseGrades = async (req, res) => {
     }
 };
 
+const updateGrade = async (req, res) => {
+    try {
+        const { courseId, enrollmentId } = req.params;
+        const { midterm_score, practical_score, oral_score } = req.body;
+
+        const hasAccess = await Doctor.hasCourseAccess(req.doctor.id, courseId);
+        if (!hasAccess) {
+            return res.status(403).json({ message: 'Access denied for this course' });
+        }
+
+        const check = await db.query('SELECT id FROM student_courses WHERE id = $1 AND course_id = $2', [enrollmentId, courseId]);
+        if (check.rows.length === 0) {
+            return res.status(404).json({ message: 'Enrollment not found in this course' });
+        }
+
+        const result = await db.query(
+            `INSERT INTO grades (enrollment_id, midterm_score, practical_score, oral_score) 
+             VALUES ($1, $2, $3, $4)
+             ON CONFLICT (enrollment_id) 
+             DO UPDATE SET 
+                midterm_score = EXCLUDED.midterm_score,
+                practical_score = EXCLUDED.practical_score,
+                oral_score = EXCLUDED.oral_score,
+                updated_at = CURRENT_TIMESTAMP
+             RETURNING *`,
+            [
+                enrollmentId, 
+                midterm_score !== '' && midterm_score !== null ? midterm_score : null, 
+                practical_score !== '' && practical_score !== null ? practical_score : null, 
+                oral_score !== '' && oral_score !== null ? oral_score : null
+            ]
+        );
+
+        res.json(result.rows[0]);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 // ==================== OFFICIAL TASKS FOR MY COURSES ====================
 const getMyTasks = async (req, res) => {
     try {
@@ -466,7 +505,7 @@ const getMyTasks = async (req, res) => {
              JOIN courses c ON ot.course_id = c.id
              JOIN doctor_courses dc ON ot.course_id = dc.course_id
              WHERE dc.doctor_id = $1
-             ORDER BY ot.due_date DESC`,
+             ORDER BY ot.deadline DESC`,
             [req.doctor.id]
         );
         res.json(result.rows);
@@ -477,15 +516,15 @@ const getMyTasks = async (req, res) => {
 
 const createTask = async (req, res) => {
     try {
-        const { course_id, title, description, due_date, priority } = req.body;
+        const { course_id, title, description, deadline, drive_link } = req.body;
         const hasAccess = await Doctor.hasCourseAccess(req.doctor.id, course_id);
         if (!hasAccess) {
             return res.status(403).json({ message: 'Access denied for this course' });
         }
         const result = await db.query(
-            `INSERT INTO official_tasks (course_id, title, description, due_date, priority)
+            `INSERT INTO official_tasks (course_id, title, description, deadline, drive_link)
              VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-            [course_id, title, description, due_date || null, priority || 'medium']
+            [course_id, title, description, deadline || null, drive_link || null]
         );
         res.status(201).json(result.rows[0]);
     } catch (error) {
@@ -496,7 +535,7 @@ const createTask = async (req, res) => {
 const updateTask = async (req, res) => {
     try {
         const { id } = req.params;
-        const { title, description, due_date, priority } = req.body;
+        const { title, description, deadline, drive_link } = req.body;
         const check = await db.query(
             `SELECT ot.id FROM official_tasks ot
              JOIN doctor_courses dc ON ot.course_id = dc.course_id
@@ -507,9 +546,9 @@ const updateTask = async (req, res) => {
             return res.status(403).json({ message: 'Access denied' });
         }
         const result = await db.query(
-            `UPDATE official_tasks SET title = $1, description = $2, due_date = $3, priority = $4, updated_at = CURRENT_TIMESTAMP
+            `UPDATE official_tasks SET title = $1, description = $2, deadline = $3, drive_link = $4, created_at = CURRENT_TIMESTAMP
              WHERE id = $5 RETURNING *`,
-            [title, description, due_date || null, priority || 'medium', id]
+            [title, description, deadline || null, drive_link || null, id]
         );
         res.json(result.rows[0]);
     } catch (error) {
@@ -648,7 +687,7 @@ module.exports = {
     getMyQuizzes, createQuiz, updateQuiz, deleteQuiz, togglePublishQuiz,
     getQuestions, addQuestion, updateQuestion, deleteQuestion, getQuizAttempts,
     getMyResources, createResource, updateResource, deleteResource,
-    getCourseGrades,
+    getCourseGrades, updateGrade,
     getMyTasks, createTask, updateTask, deleteTask,
     getPendingReviews, getAttemptForReview, gradeWrittenAnswer,
 };

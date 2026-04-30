@@ -38,8 +38,9 @@ router.post('/resources', doctorController.createResource);
 router.put('/resources/:id', doctorController.updateResource);
 router.delete('/resources/:id', doctorController.deleteResource);
 
-// Grades (View Only)
+// Grades
 router.get('/grades/:courseId', doctorController.getCourseGrades);
+router.put('/grades/:courseId/enrollments/:enrollmentId', doctorController.updateGrade);
 
 // Official Tasks
 router.get('/tasks', doctorController.getMyTasks);
