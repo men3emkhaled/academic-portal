@@ -189,7 +189,6 @@ const RoadmapManager = () => {
       <div className="grid grid-cols-1 gap-10">
         {/* Track Grid Section */}
         <div className="admin-card relative overflow-hidden group transition-colors">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 blur-[80px] rounded-full"></div>
             
             <div className="relative z-10">
                 <div className="flex items-center gap-3 mb-8">
@@ -253,7 +252,7 @@ const RoadmapManager = () => {
 
         {/* Selected Track Workspace */}
         {selectedTrack && (
-            <div className="bg-white dark:bg-[#111111]/40 border border-gray-200 dark:border-white/5 rounded-[2.5rem] overflow-hidden shadow-sm dark:shadow-2xl backdrop-blur-sm animate-fadeIn transition-colors">
+            <div className="bg-white dark:bg-[#111111]/40 border border-gray-200 dark:border-white/5 rounded-[2.5rem] overflow-hidden shadow-sm dark:shadow-2xl animate-fadeIn transition-colors">
                 <div className="p-8 border-b border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-white/[0.02] flex flex-wrap justify-between items-center gap-6">
                     <div className="flex items-center gap-4">
                         <div className="w-3 h-3 bg-indigo-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(99,102,241,0.5)]"></div>
@@ -312,7 +311,6 @@ const RoadmapManager = () => {
       {showTrackForm && (
         <div className="admin-modal-backdrop" onClick={resetTrackForm}>
           <div className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-white/10 rounded-[2.5rem] p-12 w-full max-w-lg shadow-2xl relative overflow-hidden animate-fadeInUp transition-colors" onClick={e => e.stopPropagation()}>
-            <div className="absolute -top-32 -right-32 w-80 h-80 bg-indigo-500/10 blur-[100px] rounded-full"></div>
             
             <div className="relative z-10">
                 <div className="flex items-center gap-5 mb-10">
@@ -363,7 +361,6 @@ const RoadmapManager = () => {
       {showTaskForm && selectedTrack && (
         <div className="admin-modal-backdrop" onClick={resetTaskForm}>
           <div className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-white/10 rounded-[2.5rem] p-12 w-full max-w-lg shadow-2xl relative overflow-hidden animate-fadeInUp transition-colors" onClick={e => e.stopPropagation()}>
-            <div className="absolute -top-32 -right-32 w-80 h-80 bg-emerald-500/10 blur-[100px] rounded-full"></div>
             
             <div className="relative z-10">
                 <div className="flex items-center gap-5 mb-10">

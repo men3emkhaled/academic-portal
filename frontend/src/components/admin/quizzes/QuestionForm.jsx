@@ -13,7 +13,6 @@ const QuestionForm = ({
   return (
     <div className="admin-modal-backdrop" onClick={resetQuestionForm}>
       <div className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-white/10 rounded-[2.5rem] p-12 w-full max-w-4xl shadow-2xl relative overflow-hidden animate-fadeInUp max-h-[90vh] overflow-y-auto custom-scrollbar" onClick={e => e.stopPropagation()}>
-        <div className="absolute -top-32 -right-32 w-80 h-80 bg-indigo-500/5 dark:bg-indigo-500/10 blur-[100px] rounded-full transition-colors"></div>
         
         <div className="relative z-10">
             <div className="flex items-center justify-between mb-10">

@@ -348,7 +348,7 @@ const QuizManager = ({ courses }) => {
         {/* Right Content: Selected Quiz Workspace */}
         <div className="xl:col-span-3">
           {selectedQuiz ? (
-            <div className="bg-white dark:bg-[#111111]/40 border border-gray-200 dark:border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl backdrop-blur-sm animate-fadeIn transition-colors">
+            <div className="bg-white dark:bg-[#111111]/40 border border-gray-200 dark:border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl animate-fadeIn transition-colors">
               {/* Workspace Header */}
               <div className="p-10 border-b border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-white/[0.02] transition-colors">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">

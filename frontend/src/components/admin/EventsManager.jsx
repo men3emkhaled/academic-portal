@@ -179,7 +179,6 @@ const EventsManager = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredEvents.map(event => (
             <div key={event.id} className="bg-white dark:bg-slate-900/80 border border-gray-100 dark:border-slate-700/50 rounded-[2rem] p-8 transition-all hover:border-blue-500/50 hover:translate-y-[-6px] group shadow-sm dark:shadow-2xl transition-colors relative overflow-hidden">
-               <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 blur-[40px] rounded-full pointer-events-none"></div>
                
                <div className="flex justify-between items-start mb-6 relative z-10">
                   <span className={`px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-colors ${
@@ -268,9 +267,8 @@ const EventsManager = () => {
 
       {/* Create/Edit Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/60 dark:bg-black/80 backdrop-blur-md animate-fadeIn">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/60 dark:bg-black/80 animate-fadeIn">
            <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 shadow-2xl rounded-[2.5rem] w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col transition-colors relative">
-              <div className="absolute -top-32 -right-32 w-80 h-80 bg-blue-500/5 dark:bg-blue-500/10 blur-[100px] rounded-full transition-colors"></div>
               
               {/* Modal Header */}
               <div className="p-10 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center bg-gray-50 dark:bg-slate-900/50 transition-colors relative z-10">

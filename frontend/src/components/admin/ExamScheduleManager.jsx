@@ -108,8 +108,7 @@ const ExamScheduleManager = ({ departments, selectedDepartmentId }) => {
         </button>
       </div>
 
-      <div className="bg-white dark:bg-[#111111]/40 border border-gray-200 dark:border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl backdrop-blur-sm transition-colors relative">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 blur-[80px] rounded-full pointer-events-none transition-colors"></div>
+      <div className="bg-white dark:bg-[#111111]/40 border border-gray-200 dark:border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl transition-colors relative">
         
         <div className="overflow-x-auto relative z-10">
           <table className="w-full text-left border-collapse">
@@ -185,9 +184,8 @@ const ExamScheduleManager = ({ departments, selectedDepartmentId }) => {
       </div>
 
       {showAddModal && (
-        <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-fadeIn">
+        <div className="fixed inset-0 bg-black/60 dark:bg-black/80 flex items-center justify-center z-50 p-4 animate-fadeIn">
           <div className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-white/10 rounded-[2.5rem] p-12 w-full max-w-2xl shadow-2xl relative overflow-hidden transition-colors">
-            <div className="absolute -top-32 -right-32 w-80 h-80 bg-emerald-500/5 dark:bg-emerald-500/10 blur-[100px] rounded-full transition-colors"></div>
             
             <div className="relative z-10">
                 <div className="flex items-center justify-between mb-10">

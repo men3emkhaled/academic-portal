@@ -189,7 +189,6 @@ const ResourceManager = () => {
         <div className="space-y-8">
             {/* Control Node: Selection */}
             <div className="admin-card relative overflow-hidden group transition-colors">
-                <div className="absolute top-0 right-0 w-48 h-48 bg-blue-500/5 blur-[80px] rounded-full"></div>
                 
                 <div className="relative z-10">
                     <div className="flex items-center gap-3 mb-6">
@@ -227,7 +226,6 @@ const ResourceManager = () => {
             {/* Form Node: Add/Edit */}
             {selectedCourseName && (
                 <div className="admin-card relative overflow-hidden animate-fadeInUp transition-colors">
-                    <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/5 blur-[80px] rounded-full"></div>
                     
                     <div className="relative z-10">
                         <div className="flex items-center gap-3 mb-8">

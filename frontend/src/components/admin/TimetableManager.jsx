@@ -147,7 +147,7 @@ const TimetableManager = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-3 bg-gray-100 dark:bg-white/[0.03] p-1.5 rounded-2xl border border-gray-200 dark:border-white/5 backdrop-blur-xl shadow-sm transition-colors">
+        <div className="flex items-center gap-3 bg-gray-100 dark:bg-white/[0.03] p-1.5 rounded-2xl border border-gray-200 dark:border-white/5 shadow-sm transition-colors">
           <Filter className="w-4 h-4 text-gray-400 dark:text-slate-500 ml-3" />
           <select
             value={selectedDepartmentId || ''}
@@ -165,7 +165,6 @@ const TimetableManager = ({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
         {/* Synchronize Node (Copy) */}
         <div className="admin-card relative overflow-hidden group border-blue-500/10 transition-colors">
-          <div className="absolute top-0 right-0 w-48 h-48 bg-blue-500/5 blur-[80px] rounded-full group-hover:bg-blue-500/10 transition-all duration-700"></div>
           <div className="relative z-10">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 bg-blue-500/10 dark:bg-blue-500/20 rounded-xl flex items-center justify-center border border-blue-500/20 dark:border-blue-500/30">
@@ -215,7 +214,6 @@ const TimetableManager = ({
 
         {/* Upload Data Node */}
         <div className="admin-card relative overflow-hidden group border-emerald-500/10 transition-colors">
-          <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/5 blur-[80px] rounded-full group-hover:bg-emerald-500/10 transition-all duration-700"></div>
           <div className="relative z-10">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 bg-emerald-500/10 dark:bg-emerald-500/20 rounded-xl flex items-center justify-center border border-emerald-500/20 dark:border-emerald-500/30">
@@ -284,7 +282,7 @@ const TimetableManager = ({
       </div>
 
       {/* Data Visualizer Table */}
-      <div className="bg-white dark:bg-[#111111]/40 border border-gray-200 dark:border-white/5 rounded-[2.5rem] overflow-hidden shadow-sm dark:shadow-2xl backdrop-blur-sm transition-colors">
+      <div className="bg-white dark:bg-[#111111]/40 border border-gray-200 dark:border-white/5 rounded-[2.5rem] overflow-hidden shadow-sm dark:shadow-2xl transition-colors">
         <div className="p-8 border-b border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02] flex flex-wrap justify-between items-center gap-4">
           <div className="flex items-center gap-3">
             <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>

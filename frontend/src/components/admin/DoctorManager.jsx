@@ -204,7 +204,7 @@ const DoctorManager = () => {
 
       {/* Add/Edit Modal */}
       {(modalType === 'add' || modalType === 'edit') && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
           <div className="bg-white dark:bg-[#111111] rounded-2xl w-full max-w-md p-6 relative border border-gray-200 dark:border-white/10">
             <button onClick={handleCloseModal} className="absolute right-4 top-4 p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl">
               <X className="w-5 h-5" />
@@ -265,7 +265,7 @@ const DoctorManager = () => {
 
       {/* Courses Assignment Modal */}
       {modalType === 'courses' && selectedDoctor && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
           <div className="bg-white dark:bg-[#111111] rounded-2xl w-full max-w-2xl p-6 relative border border-gray-200 dark:border-white/10 max-h-[90vh] flex flex-col">
             <button onClick={handleCloseModal} className="absolute right-4 top-4 p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl">
               <X className="w-5 h-5" />

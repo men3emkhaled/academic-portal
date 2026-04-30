@@ -85,7 +85,6 @@ const MobileAlertCenter = ({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
         <div className="space-y-6">
           <div className="admin-card border-emerald-500/10 relative overflow-hidden transition-colors">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 blur-[50px] rounded-full"></div>
             
             <div className="relative z-10 space-y-6">
                 <div className="flex items-center gap-3 mb-2">

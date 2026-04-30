@@ -95,8 +95,7 @@ const DepartmentManager = () => {
       </div>
 
       {/* Main Grid: Data Table */}
-      <div className="bg-white dark:bg-[#111111]/40 border border-gray-200 dark:border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl backdrop-blur-sm relative transition-colors">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/5 blur-[80px] rounded-full pointer-events-none transition-colors"></div>
+      <div className="bg-white dark:bg-[#111111]/40 border border-gray-200 dark:border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl relative transition-colors">
         
         <div className="p-8 border-b border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-white/[0.02] flex justify-between items-center relative z-10 transition-colors">
             <div className="flex items-center gap-3">
@@ -168,7 +167,6 @@ const DepartmentManager = () => {
       {showForm && (
         <div className="admin-modal-backdrop" onClick={resetForm}>
           <div className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-white/10 rounded-[2.5rem] p-10 w-full max-w-2xl shadow-2xl relative overflow-hidden animate-fadeInUp transition-colors" onClick={e => e.stopPropagation()}>
-            <div className="absolute -top-24 -right-24 w-64 h-64 bg-purple-500/10 blur-[100px] rounded-full transition-colors"></div>
             
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-10">

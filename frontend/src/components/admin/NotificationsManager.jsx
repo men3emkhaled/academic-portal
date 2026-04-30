@@ -219,7 +219,6 @@ const NotificationsManager = ({
 
           {/* Send to All */}
           <div className="admin-card relative overflow-hidden group border-blue-500/10 transition-colors">
-            <div className="absolute top-0 right-0 w-48 h-48 bg-blue-500/5 blur-[80px] rounded-full transition-all"></div>
             <div className="relative z-10">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 bg-blue-500/10 dark:bg-blue-500/20 rounded-xl flex items-center justify-center border border-blue-500/20 dark:border-blue-500/30 transition-colors">
@@ -259,7 +258,6 @@ const NotificationsManager = ({
 
           {/* Send to Department */}
           <div className="admin-card relative overflow-hidden group border-purple-500/10 transition-colors">
-            <div className="absolute top-0 right-0 w-48 h-48 bg-purple-500/5 blur-[80px] rounded-full transition-all"></div>
             <div className="relative z-10">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 bg-purple-500/10 dark:bg-purple-500/20 rounded-xl flex items-center justify-center border border-purple-500/20 dark:border-purple-500/30 transition-colors">
@@ -310,7 +308,6 @@ const NotificationsManager = ({
 
           {/* Send to Specific Student */}
           <div className="admin-card relative overflow-hidden group border-cyan-500/10 transition-colors">
-            <div className="absolute top-0 right-0 w-48 h-48 bg-cyan-500/5 blur-[80px] rounded-full transition-all"></div>
             <div className="relative z-10">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 bg-cyan-500/10 dark:bg-cyan-500/20 rounded-xl flex items-center justify-center border border-cyan-500/20 dark:border-cyan-500/30 transition-colors">
@@ -433,7 +430,6 @@ const NotificationsManager = ({
       {showLinkModal && (
         <div className="admin-modal-backdrop" onClick={() => setShowLinkModal(false)}>
           <div className="admin-modal-panel max-w-md relative overflow-hidden" onClick={(e) => e.stopPropagation()}>
-            <div className="absolute -top-20 -right-20 w-48 h-48 bg-blue-500/10 blur-[60px] rounded-full"></div>
             <div className="relative z-10">
               <div className="flex items-center gap-4 mb-8">
                 <div className="w-12 h-12 bg-blue-500/10 dark:bg-blue-500/20 rounded-2xl flex items-center justify-center border border-blue-500/20 dark:border-blue-500/30 transition-colors">
@@ -468,7 +464,6 @@ const NotificationsManager = ({
       {showImageModal && (
         <div className="admin-modal-backdrop" onClick={() => setShowImageModal(false)}>
           <div className="admin-modal-panel max-w-md relative overflow-hidden" onClick={(e) => e.stopPropagation()}>
-            <div className="absolute -top-20 -right-20 w-48 h-48 bg-blue-500/10 blur-[60px] rounded-full"></div>
             <div className="relative z-10">
               <div className="flex items-center gap-4 mb-8">
                 <div className="w-12 h-12 bg-blue-500/10 dark:bg-blue-500/20 rounded-2xl flex items-center justify-center border border-blue-500/20 dark:border-blue-500/30 transition-colors">
@@ -503,7 +498,6 @@ const NotificationsManager = ({
       {showEditModal && editingNotification && (
         <div className="admin-modal-backdrop" onClick={() => setShowEditModal(false)}>
           <div className="admin-modal-panel max-w-2xl relative overflow-hidden transition-colors shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            <div className="absolute -top-32 -right-32 w-80 h-80 bg-yellow-500/5 blur-[100px] rounded-full"></div>
 
             <div className="relative z-10">
               <div className="flex items-center gap-4 mb-10">

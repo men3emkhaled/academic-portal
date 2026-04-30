@@ -124,7 +124,6 @@ const StudentsManager = ({
 
       {/* Upload Section */}
       <div className="mb-12 admin-card relative overflow-hidden group transition-colors">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 blur-[80px] rounded-full group-hover:bg-emerald-500/10 transition-all duration-700"></div>
         
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-6">
@@ -163,7 +162,7 @@ const StudentsManager = ({
       </div>
 
       {/* Students Table Section */}
-      <div className="bg-white dark:bg-[#111111]/40 border border-gray-200 dark:border-white/5 rounded-[2rem] overflow-hidden shadow-sm dark:shadow-inner backdrop-blur-sm transition-colors">
+      <div className="bg-white dark:bg-[#111111]/40 border border-gray-200 dark:border-white/5 rounded-[2rem] overflow-hidden shadow-sm dark:shadow-inner transition-colors">
         <div className="p-6 border-b border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02] flex justify-between items-center">
             <div className="flex items-center gap-2">
                 <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
@@ -278,7 +277,6 @@ const StudentsManager = ({
       {showAddModal && (
         <div className="admin-modal-backdrop">
           <div className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-white/10 rounded-[2.5rem] p-10 w-full max-w-lg shadow-2xl relative overflow-hidden animate-fadeInUp transition-colors">
-            <div className="absolute -top-24 -right-24 w-64 h-64 bg-blue-500/5 dark:bg-blue-500/10 blur-[100px] rounded-full"></div>
             
             <div className="relative z-10">
               <div className="flex items-center gap-4 mb-8">

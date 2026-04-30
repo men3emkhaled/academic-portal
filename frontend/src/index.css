@@ -11,7 +11,6 @@
   
   .dark body {
     @apply bg-dark text-slate-100;
-    background-image: radial-gradient(circle at 10% 20%, rgba(52, 211, 153, 0.08) 0%, transparent 25%), radial-gradient(circle at 85% 15%, rgba(56, 189, 133, 0.1) 0%, transparent 18%);
   }
 }
 
@@ -26,15 +25,15 @@
   }
   
   .glass-card {
-    @apply bg-white/70 dark:bg-black/60 backdrop-blur-2xl border border-gray-200 dark:border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)];
+    @apply bg-white dark:bg-black/90 border border-gray-200 dark:border-white/10 shadow-lg dark:shadow-xl;
   }
   
   .admin-card {
-    @apply bg-white dark:bg-white/[0.03] backdrop-blur-3xl border border-gray-200 dark:border-white/5 rounded-[2rem] p-8 transition-all duration-300 hover:border-gray-300 dark:hover:border-white/10 shadow-sm dark:shadow-none;
+    @apply bg-white dark:bg-white/[0.03] border border-gray-200 dark:border-white/5 rounded-[2rem] p-8 transition-colors duration-200 hover:border-gray-300 dark:hover:border-white/10 shadow-sm dark:shadow-none;
   }
 
   .admin-panel {
-    @apply bg-white dark:bg-black/80 backdrop-blur-3xl border border-gray-200 dark:border-white/10 rounded-[2.5rem] shadow-xl dark:shadow-2xl;
+    @apply bg-white dark:bg-[#111111] border border-gray-200 dark:border-white/10 rounded-[2.5rem] shadow-xl dark:shadow-2xl;
   }
 
   .admin-input {
@@ -58,7 +57,7 @@
   }
 
   .admin-modal-backdrop {
-    @apply fixed inset-0 bg-gray-900/40 dark:bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4;
+    @apply fixed inset-0 bg-gray-900/40 dark:bg-black/60 flex items-center justify-center z-50 p-4;
   }
 
   .admin-modal-panel {
@@ -156,9 +155,8 @@
     overflow-x: hidden;
   }
   
-  /* تحسين الـ cards في الموبايل */
   .glass-card {
-    backdrop-filter: blur(4px);
+    /* no blur on mobile */
   }
 }
 

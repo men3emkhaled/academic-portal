@@ -80,7 +80,6 @@ const LinkedEmailsManager = () => {
         ) : (
           filteredStudents.map(student => (
             <div key={student.id} className="group bg-white dark:bg-[#111111]/40 border border-gray-200 dark:border-white/5 rounded-[2.5rem] p-8 hover:bg-gray-50 dark:hover:bg-white/[0.04] hover:border-indigo-500/30 transition-all duration-500 shadow-sm dark:shadow-2xl relative overflow-hidden transition-colors">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 blur-[40px] rounded-full group-hover:bg-indigo-500/10 transition-all"></div>
                 
                 <div className="flex items-center gap-4 mb-6 relative z-10">
                   <div className="w-14 h-14 bg-indigo-500/10 rounded-2xl flex items-center justify-center border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 shadow-inner group-hover:bg-indigo-500 group-hover:text-white transition-all duration-500">

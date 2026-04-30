@@ -112,7 +112,6 @@ const GradesUploader = ({ courses, departments }) => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
         <div className="lg:col-span-2 space-y-6">
             <div className="admin-card relative overflow-hidden group transition-colors">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/5 blur-[80px] rounded-full group-hover:bg-orange-500/10 transition-all duration-700"></div>
                 
                 <div className="relative z-10">
                     <div className="flex items-center gap-3 mb-10">

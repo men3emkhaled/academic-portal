@@ -56,7 +56,6 @@ const StudentCoursesGradesManager = ({
       <div className="grid grid-cols-1 gap-10">
         {/* Selection & Profile Card */}
         <div className="admin-card relative overflow-hidden group transition-colors">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/5 blur-[80px] rounded-full"></div>
             
             <div className="relative z-10">
                 <div className="flex flex-col md:flex-row items-end gap-8">
@@ -127,7 +126,7 @@ const StudentCoursesGradesManager = ({
         {selectedStudent && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 animate-fadeInUp">
             {/* Enrollment Ledger */}
-            <div className="bg-white dark:bg-[#111111]/40 border border-gray-200 dark:border-white/5 rounded-[2.5rem] overflow-hidden shadow-sm dark:shadow-2xl backdrop-blur-sm h-fit transition-colors">
+            <div className="bg-white dark:bg-[#111111]/40 border border-gray-200 dark:border-white/5 rounded-[2.5rem] overflow-hidden shadow-sm dark:shadow-2xl h-fit transition-colors">
                 <div className="p-8 border-b border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-white/[0.02] flex justify-between items-center">
                     <div className="flex items-center gap-3">
                         <div className="w-3 h-3 bg-cyan-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(6,182,212,0.5)]"></div>
@@ -189,7 +188,7 @@ const StudentCoursesGradesManager = ({
             </div>
 
             {/* Assessment Matrix */}
-            <div className="bg-white dark:bg-[#111111]/40 border border-gray-200 dark:border-white/5 rounded-[2.5rem] overflow-hidden shadow-sm dark:shadow-2xl backdrop-blur-sm h-fit transition-colors">
+            <div className="bg-white dark:bg-[#111111]/40 border border-gray-200 dark:border-white/5 rounded-[2.5rem] overflow-hidden shadow-sm dark:shadow-2xl h-fit transition-colors">
                 <div className="p-8 border-b border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-white/[0.02] flex justify-between items-center">
                     <div className="flex items-center gap-3">
                         <div className="w-3 h-3 bg-orange-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(249,115,22,0.5)]"></div>
@@ -266,7 +265,6 @@ const StudentCoursesGradesManager = ({
       {showAddCourseModal && selectedStudent && (
         <div className="admin-modal-backdrop" onClick={() => setShowAddCourseModal(false)}>
           <div className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-white/10 rounded-[2.5rem] p-10 w-full max-w-md shadow-2xl relative overflow-hidden animate-fadeInUp transition-colors" onClick={(e) => e.stopPropagation()}>
-            <div className="absolute -top-20 -right-20 w-48 h-48 bg-cyan-500/10 blur-[60px] rounded-full"></div>
             
             <div className="relative z-10">
                 <div className="flex items-center gap-4 mb-10">
@@ -303,7 +301,6 @@ const StudentCoursesGradesManager = ({
       {showGradeModal && editingGrade && selectedStudent && (
         <div className="admin-modal-backdrop" onClick={() => setShowGradeModal(false)}>
           <div className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-white/10 rounded-[2.5rem] p-10 w-full max-w-lg shadow-2xl relative overflow-hidden animate-fadeInUp transition-colors" onClick={(e) => e.stopPropagation()}>
-            <div className="absolute -top-24 -right-24 w-64 h-64 bg-orange-500/5 blur-[80px] rounded-full"></div>
             
             <div className="relative z-10">
                 <div className="flex items-center gap-5 mb-10">

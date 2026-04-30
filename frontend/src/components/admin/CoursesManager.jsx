@@ -125,7 +125,6 @@ const CoursesManager = ({ departments }) => {
         ) : (
           courses.map((course) => (
             <div key={course.id} className="group relative bg-white dark:bg-[#111111]/40 border border-gray-200 dark:border-white/5 rounded-[2.5rem] p-8 hover:bg-gray-50 dark:hover:bg-white/[0.04] hover:border-emerald-500/30 transition-all duration-500 shadow-sm dark:shadow-2xl overflow-hidden transition-colors">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 blur-[40px] rounded-full group-hover:bg-emerald-500/10 transition-all"></div>
                 
                 <div className="flex justify-between items-start mb-6 relative z-10">
                     <div className="flex items-center gap-3">
@@ -168,7 +167,6 @@ const CoursesManager = ({ departments }) => {
       {showForm && (
         <div className="admin-modal-backdrop" onClick={resetForm}>
           <div className="admin-modal-panel max-w-4xl" onClick={e => e.stopPropagation()}>
-             <div className="absolute -top-32 -right-32 w-80 h-80 bg-emerald-500/10 blur-[100px] rounded-full"></div>
              
              <div className="relative z-10">
                 <div className="flex items-center gap-5 mb-12">
