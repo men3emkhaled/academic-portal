@@ -1,27 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import toast from 'react-hot-toast';
-// استيراد المكونات المنفصلة من مجلد admin
-import CoursesManager from '../components/admin/CoursesManager';
-import GradesUploader from '../components/admin/GradesUploader';
-import ResourceManager from '../components/admin/ResourceManager';
-import RoadmapManager from '../components/admin/RoadmapManager';
-import StudentsManager from '../components/admin/StudentsManager';
-import StudentCoursesGradesManager from '../components/admin/StudentCoursesGradesManager';
-import TimetableManager from '../components/admin/TimetableManager';
-import NotificationsManager from '../components/admin/NotificationsManager';
-import DepartmentManager from '../components/admin/DepartmentManager';
-import QuizManager from '../components/admin/QuizManager';
-import DoctorManager from '../components/admin/DoctorManager';
-import PendingReviews from '../components/admin/quizzes/PendingReviews';
-import MobileAlertCenter from '../components/admin/MobileAlertCenter';
-import EventsManager from '../components/admin/EventsManager';
-import ProgressManager from '../components/admin/ProgressManager';
-import LogsDashboard from '../components/admin/LogsDashboard';
-import LinkedEmailsManager from '../components/admin/LinkedEmailsManager';
-import ExamScheduleManager from '../components/admin/ExamScheduleManager';
-import OfficialTaskManager from '../components/admin/OfficialTaskManager';
+// Lazy load admin components for performance
+const CoursesManager = lazy(() => import('../components/admin/CoursesManager'));
+const GradesUploader = lazy(() => import('../components/admin/GradesUploader'));
+const ResourceManager = lazy(() => import('../components/admin/ResourceManager'));
+const RoadmapManager = lazy(() => import('../components/admin/RoadmapManager'));
+const StudentsManager = lazy(() => import('../components/admin/StudentsManager'));
+const StudentCoursesGradesManager = lazy(() => import('../components/admin/StudentCoursesGradesManager'));
+const TimetableManager = lazy(() => import('../components/admin/TimetableManager'));
+const NotificationsManager = lazy(() => import('../components/admin/NotificationsManager'));
+const DepartmentManager = lazy(() => import('../components/admin/DepartmentManager'));
+const QuizManager = lazy(() => import('../components/admin/QuizManager'));
+const DoctorManager = lazy(() => import('../components/admin/DoctorManager'));
+const PendingReviews = lazy(() => import('../components/admin/quizzes/PendingReviews'));
+const MobileAlertCenter = lazy(() => import('../components/admin/MobileAlertCenter'));
+const EventsManager = lazy(() => import('../components/admin/EventsManager'));
+const ProgressManager = lazy(() => import('../components/admin/ProgressManager'));
+const LogsDashboard = lazy(() => import('../components/admin/LogsDashboard'));
+const LinkedEmailsManager = lazy(() => import('../components/admin/LinkedEmailsManager'));
+const ExamScheduleManager = lazy(() => import('../components/admin/ExamScheduleManager'));
+const OfficialTaskManager = lazy(() => import('../components/admin/OfficialTaskManager'));
 import {
   Users, BookOpen, FileText, Map as RoadmapIcon,
   Calendar, Bell, LayoutDashboard, Settings,
@@ -484,11 +484,8 @@ const AdminDashboard = () => {
   if (!token) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50 dark:bg-[#050505] relative overflow-hidden transition-colors duration-300">
-        {/* Background Decorative Elements */}
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-emerald-500/5 dark:bg-emerald-500/10 blur-[120px] rounded-full"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/5 dark:bg-blue-500/10 blur-[120px] rounded-full"></div>
 
-        <div className="w-full max-w-md bg-white/80 dark:bg-[#111111]/80 border border-gray-200 dark:border-white/10 rounded-[2.5rem] p-10 shadow-xl dark:shadow-2xl backdrop-blur-2xl animate-fadeInUp relative z-10">
+        <div className="w-full max-w-md bg-white dark:bg-[#111111] border border-gray-200 dark:border-white/10 rounded-[2.5rem] p-10 shadow-xl dark:shadow-2xl animate-fadeInUp relative z-10">
           <div className="flex justify-center mb-6">
             <div className="w-16 h-16 bg-emerald-500/10 dark:bg-emerald-500/20 rounded-2xl flex items-center justify-center border border-emerald-500/20 dark:border-emerald-500/30">
               <ShieldCheck className="w-10 h-10 text-emerald-500 dark:text-emerald-400" />
@@ -551,14 +548,9 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[#050505] text-gray-900 dark:text-slate-100 transition-colors duration-300">
-      {/* Ambient Background */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute top-[-30%] right-[-15%] w-[60%] h-[60%] bg-emerald-500/[0.03] dark:bg-emerald-500/[0.04] blur-[180px] rounded-full"></div>
-        <div className="absolute bottom-[-20%] left-[-10%] w-[50%] h-[50%] bg-blue-500/[0.02] dark:bg-blue-500/[0.03] blur-[150px] rounded-full"></div>
-      </div>
 
       {/* Top Navigation Bar */}
-      <nav className="sticky top-0 z-50 bg-white/80 dark:bg-[#0a0a0a]/80 backdrop-blur-2xl border-b border-gray-200/60 dark:border-white/5">
+      <nav className="sticky top-0 z-50 bg-white dark:bg-[#0a0a0a] border-b border-gray-200/60 dark:border-white/5">
         <div className="max-w-[1600px] mx-auto px-4 md:px-8">
           <div className="flex items-center justify-between h-16 md:h-20">
             {/* Logo & Admin Info */}
@@ -625,7 +617,7 @@ const AdminDashboard = () => {
 
         {/* Mobile Navigation Dropdown */}
         {mobileMenuOpen && (
-          <div className="lg:hidden border-t border-gray-200/50 dark:border-white/5 bg-white/95 dark:bg-[#0a0a0a]/95 backdrop-blur-2xl pb-4 px-4 max-h-[60vh] overflow-y-auto">
+          <div className="lg:hidden border-t border-gray-200/50 dark:border-white/5 bg-white dark:bg-[#0a0a0a] pb-4 px-4 max-h-[60vh] overflow-y-auto">
             <div className="pt-3 space-y-1">
               {ALL_TABS.map(tab => {
                 const hasAccess = isSuperAdmin || (tab.reqPerm !== 'admin' && userPermissions.includes(tab.reqPerm));
@@ -655,8 +647,8 @@ const AdminDashboard = () => {
       <div className="max-w-[1600px] mx-auto p-4 md:p-8 relative z-10">
 
 
-        <div className="bg-white dark:bg-[#111111]/80 backdrop-blur-2xl border border-gray-200 dark:border-white/5 shadow-xl dark:shadow-2xl rounded-[2.5rem] p-6 md:p-10 animate-fadeIn overflow-hidden min-h-[600px] relative">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 blur-[80px] rounded-full pointer-events-none"></div>
+        <div className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-white/5 shadow-sm dark:shadow-xl rounded-3xl p-6 md:p-10 min-h-[600px] relative">
+
           
           {activeTab === 'overview' && (
             <div>
@@ -741,6 +733,7 @@ const AdminDashboard = () => {
             </div>
           )}
 
+          <Suspense fallback={<div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-3 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin"></div></div>}>
           {activeTab === 'courses' && <CoursesManager departments={departments} />}
           {activeTab === 'grades' && <GradesUploader courses={courses} departments={departments} />}
           {activeTab === 'resources' && <ResourceManager />}
@@ -841,14 +834,15 @@ const AdminDashboard = () => {
           {activeTab === 'tasks' && <OfficialTaskManager courses={courses} departments={departments} />}
           {activeTab === 'emails' && <LinkedEmailsManager />}
           {activeTab === 'logs' && <LogsDashboard />}
+          </Suspense>
         </div>
       </div>
 
       {/* Edit Student Modal */}
       {showEditStudentModal && selectedStudent && (
-        <div className="fixed inset-0 bg-gray-900/40 dark:bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-gray-900/40 dark:bg-black/60 flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-white/10 rounded-[2.5rem] p-10 w-full max-w-lg shadow-2xl relative overflow-hidden animate-fadeInUp transition-colors duration-300">
-            <div className="absolute -top-24 -right-24 w-64 h-64 bg-emerald-500/5 dark:bg-emerald-500/10 blur-[100px] rounded-full"></div>
+
 
             <div className="relative z-10">
               <div className="flex items-center gap-4 mb-8">
@@ -901,9 +895,9 @@ const AdminDashboard = () => {
 
       {/* Manage Role & Permissions Modal */}
       {showRoleModal && selectedStudentForRole && (
-        <div className="fixed inset-0 bg-gray-900/40 dark:bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-gray-900/40 dark:bg-black/60 flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-white/10 rounded-[2.5rem] p-10 w-full max-w-lg shadow-2xl relative overflow-hidden animate-fadeInUp transition-colors duration-300">
-            <div className="absolute -top-24 -right-24 w-64 h-64 bg-yellow-500/5 dark:bg-yellow-500/10 blur-[100px] rounded-full"></div>
+
 
             <div className="relative z-10">
               <div className="flex items-center gap-4 mb-8">
@@ -990,9 +984,9 @@ const AdminDashboard = () => {
 
       {/* Edit Timetable Entry Modal */}
       {showEditEntryModal && editingEntry && (
-        <div className="fixed inset-0 bg-gray-900/40 dark:bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-gray-900/40 dark:bg-black/60 flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-white/10 rounded-[2.5rem] p-10 w-full max-w-xl shadow-2xl relative overflow-hidden animate-fadeInUp transition-colors duration-300">
-            <div className="absolute -top-24 -right-24 w-64 h-64 bg-emerald-500/5 dark:bg-emerald-500/10 blur-[100px] rounded-full"></div>
+
 
             <div className="relative z-10">
               <div className="flex items-center gap-4 mb-8">
