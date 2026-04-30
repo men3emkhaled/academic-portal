@@ -292,7 +292,7 @@ const getCourseHubData = async (req, res) => {
       return res.status(403).json({ message: 'Not enrolled in this course' });
     }
 
-    const courseRes = await db.query('SELECT name, code FROM courses WHERE id = $1', [courseId]);
+    const courseRes = await db.query('SELECT id, name, description FROM courses WHERE id = $1', [courseId]);
     const course = courseRes.rows[0];
 
     const token = jwt.sign(

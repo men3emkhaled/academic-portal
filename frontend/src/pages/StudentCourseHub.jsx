@@ -105,7 +105,7 @@ const StudentCourseHub = () => {
             <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="min-w-0">
                 <span className="inline-block px-3 py-1 bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest rounded-full mb-3">
-                  {course.code || 'Course'}
+                  Course Details
                 </span>
                 <h1 className="text-xl sm:text-2xl lg:text-3xl font-black tracking-tight text-gray-900 dark:text-white leading-tight">
                   {course.name}
