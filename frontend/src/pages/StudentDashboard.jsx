@@ -375,7 +375,6 @@ const StudentDashboard = () => {
                   <p className="text-gray-400 dark:text-gray-500 text-sm mt-1">Contact your administrator to enroll.</p>
                 </div>
               ) : (
-              ) : (
                 grades.map((grade, idx) => {
                   const colors = [
                     { from: 'from-emerald-400', to: 'to-teal-500', text: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-500/10', shadow: 'hover:shadow-emerald-500/10' },
