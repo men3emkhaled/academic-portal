@@ -364,32 +364,47 @@ const StudentDashboard = () => {
                 <span className="w-2 h-8 bg-primary rounded-full"></span>
                 My Courses
               </h2>
+              <span className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">{grades.length} courses</span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               {grades.length === 0 ? (
-                <div className="col-span-full text-center py-16 bg-white/50 dark:bg-dark-glass/50 backdrop-blur-md rounded-2xl border border-dashed border-gray-300 dark:border-white/10 shadow-sm dark:shadow-inner">
+                <div className="col-span-full text-center py-16 bg-white/50 dark:bg-dark-glass/50 backdrop-blur-md rounded-[1.5rem] border border-dashed border-gray-300 dark:border-white/10">
                   <BookOpen className="w-10 h-10 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
                   <p className="text-gray-600 dark:text-gray-400 text-base font-semibold">No enrolled courses found.</p>
                   <p className="text-gray-400 dark:text-gray-500 text-sm mt-1">Contact your administrator to enroll.</p>
                 </div>
               ) : (
-                grades.map((grade, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => handleCourseClick(grade.course_id)}
-                    className="text-left relative overflow-hidden group bg-white dark:bg-white/[0.03] border border-gray-200/70 dark:border-white/5 rounded-2xl p-4 sm:p-5 hover:border-primary/40 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 flex items-center gap-4 active:scale-[0.98]"
-                  >
-                    <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 text-primary flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform duration-300">
-                      <BookOpen className="w-5 h-5 sm:w-6 sm:h-6" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-bold text-sm sm:text-base leading-snug text-gray-900 dark:text-white truncate">{grade.course_name}</h4>
-                      <span className="text-[10px] sm:text-xs font-semibold text-primary/70 mt-0.5 block">View Details →</span>
-                    </div>
-                    <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-300 dark:text-gray-600 group-hover:text-primary flex-shrink-0 transition-colors" />
-                  </button>
-                ))
+                grades.map((grade, idx) => {
+                  const colors = [
+                    { from: 'from-emerald-500', to: 'to-teal-600', bg: 'bg-emerald-500/10', text: 'text-emerald-600 dark:text-emerald-400', border: 'border-emerald-500/20' },
+                    { from: 'from-blue-500', to: 'to-indigo-600', bg: 'bg-blue-500/10', text: 'text-blue-600 dark:text-blue-400', border: 'border-blue-500/20' },
+                    { from: 'from-violet-500', to: 'to-purple-600', bg: 'bg-violet-500/10', text: 'text-violet-600 dark:text-violet-400', border: 'border-violet-500/20' },
+                    { from: 'from-amber-500', to: 'to-orange-600', bg: 'bg-amber-500/10', text: 'text-amber-600 dark:text-amber-400', border: 'border-amber-500/20' },
+                    { from: 'from-rose-500', to: 'to-pink-600', bg: 'bg-rose-500/10', text: 'text-rose-600 dark:text-rose-400', border: 'border-rose-500/20' },
+                    { from: 'from-cyan-500', to: 'to-sky-600', bg: 'bg-cyan-500/10', text: 'text-cyan-600 dark:text-cyan-400', border: 'border-cyan-500/20' },
+                  ];
+                  const c = colors[idx % colors.length];
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => handleCourseClick(grade.course_id)}
+                      className={`text-left relative overflow-hidden group bg-white dark:bg-dark-card border border-gray-200 dark:border-white/5 rounded-[1.5rem] p-5 sm:p-6 hover:border-gray-300 dark:hover:border-white/10 hover:-translate-y-1 hover:shadow-lg transition-all duration-300 active:scale-[0.97]`}
+                    >
+                      <div className={`absolute top-0 left-0 w-1 h-full bg-gradient-to-b ${c.from} ${c.to} rounded-l-[1.5rem] opacity-80`}></div>
+                      <div className="flex items-center gap-4">
+                        <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-xl ${c.bg} ${c.text} flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300`}>
+                          <BookOpen className="w-5 h-5 sm:w-6 sm:h-6" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-bold text-sm sm:text-[15px] leading-snug text-gray-900 dark:text-white truncate">{grade.course_name}</h4>
+                          <span className={`text-[10px] sm:text-[11px] font-semibold ${c.text} mt-0.5 block opacity-80`}>Tap to view details</span>
+                        </div>
+                        <ChevronRight className="w-4 h-4 text-gray-300 dark:text-gray-600 group-hover:text-gray-500 dark:group-hover:text-gray-400 group-hover:translate-x-0.5 flex-shrink-0 transition-all" />
+                      </div>
+                    </button>
+                  );
+                })
               )}
             </div>
           </div>
