@@ -74,10 +74,10 @@ const StudentCourseHub = () => {
   ];
 
   return (
-    <div className="flex min-h-screen bg-gray-50 dark:bg-[#050505] text-gray-900 dark:text-slate-100 transition-colors duration-300">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#050505] text-gray-900 dark:text-slate-100 transition-colors duration-300">
       <Sidebar activePage="dashboard" />
       
-      <main className="flex-1 overflow-y-auto pb-24 lg:pb-8">
+      <main className="md:ml-64 pb-24 lg:pb-8 min-h-screen">
         {/* Top Bar - with safe area for iPhone PWA */}
         <div className="sticky top-0 z-20 bg-gray-50/80 dark:bg-[#050505]/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-white/5" style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}>
           <div className="flex items-center justify-between px-4 sm:px-6 lg:px-10 pb-3">
