@@ -17,5 +17,21 @@
       "sizes": "512x512",
       "type": "image/png"
     }
+  ],
+  "shortcuts": [
+    {
+      "name": "View Timetable",
+      "short_name": "Timetable",
+      "description": "Check your daily academic timetable",
+      "url": "/student/timetable",
+      "icons": [{ "src": "/app-icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Check Grades",
+      "short_name": "Grades",
+      "description": "View your courses and grades",
+      "url": "/student/grades",
+      "icons": [{ "src": "/app-icon-192.png", "sizes": "192x192" }]
+    }
   ]
 }
