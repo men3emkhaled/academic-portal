@@ -399,8 +399,8 @@ const StudentDashboard = () => {
                         <BookOpen className={`w-6 h-6 ${c.text}`} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <span className={`text-[10px] font-bold uppercase tracking-wider mb-0.5 block ${c.text} opacity-80`}>
-                          {hasScores ? `Score: ${totalScore} / ${grade.max_score}` : 'Course Details'}
+                        <span className={`text-[11px] font-bold uppercase tracking-wider mb-0.5 block ${c.text} opacity-80`}>
+                          {hasScores ? `${Number(totalScore.toFixed(2))} / ${grade.max_score ? Number(Number(grade.max_score).toFixed(2)) : '-'}` : 'Course Details'}
                         </span>
                         <h4 className="font-bold text-gray-900 dark:text-white text-sm sm:text-base truncate group-hover:text-primary transition-colors">{grade.course_name}</h4>
                       </div>
