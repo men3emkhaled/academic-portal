@@ -18,7 +18,13 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     // Only attach adminToken if no Authorization header is already provided
-    if (!config.headers.Authorization) {
+    const hasAuth = config.headers && (
+      config.headers.Authorization || 
+      config.headers.authorization || 
+      (config.headers.has && config.headers.has('Authorization'))
+    );
+    
+    if (!hasAuth) {
       const token = localStorage.getItem('adminToken');
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
