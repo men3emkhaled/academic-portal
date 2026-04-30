@@ -68,6 +68,8 @@ router.delete('/course-progress/:id', doctorController.deleteCourseProgress);
 // Attendance
 router.get('/attendance/:courseId/sessions', doctorController.getAttendanceSessions);
 router.post('/attendance/sessions', doctorController.createAttendanceSession);
+router.put('/attendance/sessions/:id', doctorController.updateAttendanceSession);
+router.delete('/attendance/sessions/:id', doctorController.deleteAttendanceSession);
 router.get('/attendance/sessions/:sessionId/records', doctorController.getAttendanceRecords);
 router.post('/attendance/scan', doctorController.scanAttendance);
 router.post('/attendance/manual', doctorController.toggleManualAttendance);

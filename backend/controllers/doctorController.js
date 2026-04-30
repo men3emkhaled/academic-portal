@@ -1102,6 +1102,48 @@ const getProfile = async (req, res) => {
     }
 };
 
+const updateAttendanceSession = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { title } = req.body;
+
+        const sessionResult = await db.query('SELECT course_id FROM attendance_sessions WHERE id = $1', [id]);
+        if (sessionResult.rows.length === 0) return res.status(404).json({ message: 'Session not found' });
+        
+        const courseId = sessionResult.rows[0].course_id;
+        const hasAccess = await Doctor.hasCourseAccess(req.doctor.id, courseId);
+        if (!hasAccess) return res.status(403).json({ message: 'Access denied' });
+
+        const result = await db.query(
+            'UPDATE attendance_sessions SET title = $1 WHERE id = $2 RETURNING *',
+            [title, id]
+        );
+        res.json(result.rows[0]);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+const deleteAttendanceSession = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const sessionResult = await db.query('SELECT course_id FROM attendance_sessions WHERE id = $1', [id]);
+        if (sessionResult.rows.length === 0) return res.status(404).json({ message: 'Session not found' });
+        
+        const courseId = sessionResult.rows[0].course_id;
+        const hasAccess = await Doctor.hasCourseAccess(req.doctor.id, courseId);
+        if (!hasAccess) return res.status(403).json({ message: 'Access denied' });
+
+        await db.query('DELETE FROM attendance_records WHERE session_id = $1', [id]);
+        await db.query('DELETE FROM attendance_sessions WHERE id = $1', [id]);
+        
+        res.json({ message: 'Session deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports = {
     login, getDashboardStats, getProfile,
     getMyCourses,
@@ -1114,5 +1156,6 @@ module.exports = {
     getStudentProgress, getQuizAnalytics, getCourseStudents,
     getCourseProgress, addCourseProgress, updateCourseProgress, toggleCourseProgress, deleteCourseProgress,
     getAttendanceSessions, createAttendanceSession, getAttendanceRecords, scanAttendance, toggleManualAttendance,
+    updateAttendanceSession, deleteAttendanceSession,
     getAnnouncements, createAnnouncement, deleteAnnouncement
 };

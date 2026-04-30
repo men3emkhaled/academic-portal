@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useDoctorAuth } from '../../context/DoctorAuthContext';
 import toast from 'react-hot-toast';
-import { Users, QrCode, Plus, CheckCircle2, Circle, Search, X } from 'lucide-react';
+import { Users, QrCode, Plus, CheckCircle2, Circle, Search, X, Edit2, Trash2, Save } from 'lucide-react';
 import { Scanner } from '@yudiel/react-qr-scanner';
 
 const DoctorAttendance = ({ courses }) => {
@@ -14,6 +14,8 @@ const DoctorAttendance = ({ courses }) => {
   const [loading, setLoading] = useState(false);
   const [scanning, setScanning] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isEditingSession, setIsEditingSession] = useState(false);
+  const [editSessionTitle, setEditSessionTitle] = useState('');
   const scanLock = useRef(false);
   const lastScanned = useRef('');
 
@@ -24,6 +26,7 @@ const DoctorAttendance = ({ courses }) => {
       setActiveSession(null);
       setRecords([]);
       setScanning(false);
+      setIsEditingSession(false);
     } else {
       setSessions([]);
       setStudents([]);
@@ -33,6 +36,8 @@ const DoctorAttendance = ({ courses }) => {
   useEffect(() => {
     if (activeSession) {
       fetchRecords();
+      setEditSessionTitle(activeSession.title || '');
+      setIsEditingSession(false);
     }
   }, [activeSession]);
 
@@ -128,6 +133,33 @@ const DoctorAttendance = ({ courses }) => {
     }
   };
 
+  const handleUpdateSession = async () => {
+    if (!editSessionTitle.trim()) return;
+    try {
+      const res = await doctorApi('put', `/doctor/attendance/sessions/${activeSession.id}`, {
+        title: editSessionTitle
+      });
+      setSessions(sessions.map(s => s.id === activeSession.id ? res.data : s));
+      setActiveSession(res.data);
+      setIsEditingSession(false);
+      toast.success('Session renamed successfully');
+    } catch (err) {
+      toast.error('Failed to rename session');
+    }
+  };
+
+  const handleDeleteSession = async () => {
+    if (!window.confirm('Are you sure you want to delete this session and all its attendance records?')) return;
+    try {
+      await doctorApi('delete', `/doctor/attendance/sessions/${activeSession.id}`);
+      setSessions(sessions.filter(s => s.id !== activeSession.id));
+      setActiveSession(null);
+      toast.success('Session deleted successfully');
+    } catch (err) {
+      toast.error('Failed to delete session');
+    }
+  };
+
   const presentStudentIds = records.map(r => r.student_id);
 
   const filteredStudents = students.filter(s => 
@@ -200,7 +232,7 @@ const DoctorAttendance = ({ courses }) => {
                     }`}
                   >
                     <div className="font-bold text-gray-900 dark:text-white">
-                      {new Date(session.date).toLocaleDateString()}
+                      {session.title || new Date(session.date).toLocaleDateString()}
                     </div>
                     <div className="text-xs text-gray-500 mt-1">
                       {new Date(session.created_at).toLocaleTimeString()}
@@ -220,18 +252,45 @@ const DoctorAttendance = ({ courses }) => {
               </div>
             ) : (
               <div className="bg-white dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/5 rounded-2xl p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <h3 className="font-black text-xl text-gray-900 dark:text-white">
-                      Session: {new Date(activeSession.date).toLocaleDateString()}
-                    </h3>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+                  <div className="flex-1">
+                    {isEditingSession ? (
+                      <div className="flex items-center gap-2 max-w-sm">
+                        <input
+                          type="text"
+                          value={editSessionTitle}
+                          onChange={(e) => setEditSessionTitle(e.target.value)}
+                          placeholder="Session Name (e.g. Week 1)"
+                          className="flex-1 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-1.5 text-sm focus:border-teal-500 focus:outline-none"
+                          autoFocus
+                        />
+                        <button onClick={handleUpdateSession} className="p-1.5 text-teal-600 hover:bg-teal-50 rounded-lg transition-colors">
+                          <Save className="w-4 h-4" />
+                        </button>
+                        <button onClick={() => setIsEditingSession(false)} className="p-1.5 text-gray-400 hover:bg-gray-100 rounded-lg transition-colors">
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-3">
+                        <h3 className="font-black text-xl text-gray-900 dark:text-white">
+                          {activeSession.title || `Session: ${new Date(activeSession.date).toLocaleDateString()}`}
+                        </h3>
+                        <button onClick={() => setIsEditingSession(true)} className="text-gray-400 hover:text-teal-500 transition-colors">
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                        <button onClick={handleDeleteSession} className="text-gray-400 hover:text-red-500 transition-colors">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    )}
                     <p className="text-sm text-teal-600 dark:text-teal-400 font-bold mt-1">
                       {records.length} / {students.length} Present
                     </p>
                   </div>
                   <button
                     onClick={() => setScanning(!scanning)}
-                    className={`px-4 py-2 rounded-xl font-bold flex items-center gap-2 text-sm transition-all ${
+                    className={`px-4 py-2 rounded-xl font-bold flex items-center justify-center gap-2 text-sm transition-all whitespace-nowrap ${
                       scanning 
                         ? 'bg-red-100 text-red-600 hover:bg-red-200 dark:bg-red-500/20 dark:text-red-400' 
                         : 'bg-teal-500 text-white hover:bg-teal-600 shadow-lg shadow-teal-500/20'
