@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Trophy, TrendingUp, ShieldCheck, Info, ExternalLink, GraduationCap, Layers, Users, Lock, ChevronRight } from 'lucide-react';
+import { Trophy, TrendingUp, ShieldCheck, Info, ExternalLink, GraduationCap, Layers, Users, Lock, ChevronRight, BookOpen } from 'lucide-react';
 import { useStudentAuth } from '../context/StudentAuthContext';
 import { useStudentData } from '../context/StudentDataContext';
 import { useNavigate } from 'react-router-dom';
