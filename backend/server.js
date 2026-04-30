@@ -169,12 +169,12 @@ if (process.env.NODE_ENV !== 'production') {
     let pool;
     try {
       if (process.env.DATABASE_URL) {
-        pool = new Pool({ 
+        pool = new Pool({
           connectionString: process.env.DATABASE_URL,
           ssl: { rejectUnauthorized: false }
         });
       } else {
-        pool = new Pool({ 
+        pool = new Pool({
           host: process.env.DB_HOST,
           port: process.env.DB_PORT,
           database: process.env.DB_NAME,
@@ -195,7 +195,7 @@ if (process.env.NODE_ENV !== 'production') {
 // 404 handler
 app.use((req, res) => {
   console.log('❌ 404 - Route not found:', req.method, req.originalUrl);
-  res.status(404).json({ 
+  res.status(404).json({
     message: 'Route not found'
   });
 });

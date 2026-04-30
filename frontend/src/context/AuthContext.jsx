@@ -1,17 +1,18 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import { safeGetItem, safeSetItem, safeRemoveItem } from '../utils/localStorage';
 
 const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-  const [token, setToken] = useState(localStorage.getItem('adminToken'));
+  const [token, setToken] = useState(safeGetItem('adminToken'));
 
   useEffect(() => {
     if (token) {
-      localStorage.setItem('adminToken', token);
+      safeSetItem('adminToken', token);
     } else {
-      localStorage.removeItem('adminToken');
+      safeRemoveItem('adminToken');
     }
   }, [token]);
 

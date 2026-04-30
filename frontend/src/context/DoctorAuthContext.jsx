@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
+import { safeGetItem, safeSetItem, safeRemoveItem } from '../utils/localStorage';
 import api from '../services/api';
 
 const DoctorAuthContext = createContext();
@@ -6,7 +7,7 @@ const DoctorAuthContext = createContext();
 export const useDoctorAuth = () => useContext(DoctorAuthContext);
 
 export const DoctorAuthProvider = ({ children }) => {
-  const [token, setToken] = useState(localStorage.getItem('doctorToken'));
+  const [token, setToken] = useState(safeGetItem('doctorToken'));
   const [doctor, setDoctor] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -21,7 +22,7 @@ export const DoctorAuthProvider = ({ children }) => {
 
   useEffect(() => {
     if (token) {
-      localStorage.setItem('doctorToken', token);
+      safeSetItem('doctorToken', token);
       // Fetch doctor profile
       api.get('/doctor/profile', {
         headers: { Authorization: `Bearer ${token}` }
@@ -34,11 +35,11 @@ export const DoctorAuthProvider = ({ children }) => {
           // Invalid token
           setToken(null);
           setDoctor(null);
-          localStorage.removeItem('doctorToken');
+          safeRemoveItem('doctorToken');
           setLoading(false);
         });
     } else {
-      localStorage.removeItem('doctorToken');
+      safeRemoveItem('doctorToken');
       setDoctor(null);
       setLoading(false);
     }

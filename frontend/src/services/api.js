@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { safeGetItem, safeRemoveItem } from '../utils/localStorage';
 
 // نعالج الرابط عشان لو كان موجود في البيئة بدون https:// نضيفها
 let apiUrl = import.meta.env.VITE_API_URL || 'https://academic-portal-production.up.railway.app/api';
@@ -25,7 +26,7 @@ api.interceptors.request.use(
     );
     
     if (!hasAuth) {
-      const token = localStorage.getItem('adminToken');
+      const token = safeGetItem('adminToken');
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }

@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import { safeGetItem, safeSetItem, safeRemoveItem } from '../utils/localStorage';
 import studentApi from '../services/studentApi';
 
 const StudentAuthContext = createContext();
@@ -7,7 +8,7 @@ export const useStudentAuth = () => useContext(StudentAuthContext);
 
 export const StudentAuthProvider = ({ children }) => {
   const [token, setToken] = useState(() => {
-    const savedToken = localStorage.getItem('studentToken');
+    const savedToken = safeGetItem('studentToken');
     return savedToken || null;
   });
 
@@ -16,17 +17,17 @@ export const StudentAuthProvider = ({ children }) => {
 
   useEffect(() => {
     if (token) {
-      localStorage.setItem('studentToken', token);
+      safeSetItem('studentToken', token);
       studentApi.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     } else {
-      localStorage.removeItem('studentToken');
+      safeRemoveItem('studentToken');
       delete studentApi.defaults.headers.common['Authorization'];
     }
   }, [token]);
 
   useEffect(() => {
     const initAuth = async () => {
-      const savedToken = localStorage.getItem('studentToken');
+      const savedToken = safeGetItem('studentToken');
 
       if (savedToken) {
         setToken(savedToken);
@@ -35,7 +36,7 @@ export const StudentAuthProvider = ({ children }) => {
           setStudent(response.data);
         } catch (error) {
           console.error('Session expired or invalid token:', error);
-          localStorage.removeItem('studentToken');
+          safeRemoveItem('studentToken');
           setToken(null);
           setStudent(null);
         }
@@ -77,7 +78,7 @@ export const StudentAuthProvider = ({ children }) => {
   const logout = () => {
     setToken(null);
     setStudent(null);
-    localStorage.removeItem('studentToken');
+    safeRemoveItem('studentToken');
   };
 
   const linkEmail = async (email) => {
@@ -133,7 +134,7 @@ export const StudentAuthProvider = ({ children }) => {
 
       // Save email as hint for next Google login (helps PWA skip account picker)
       if (studentData?.email) {
-        localStorage.setItem('googleLoginHint', studentData.email);
+        safeSetItem('googleLoginHint', studentData.email);
       }
 
       return { success: true };
@@ -160,7 +161,7 @@ export const StudentAuthProvider = ({ children }) => {
 
       // Save institutional email as hint for next Microsoft login (helps PWA skip account picker)
       if (studentData?.institutional_email) {
-        localStorage.setItem('microsoftLoginHint', studentData.institutional_email);
+        safeSetItem('microsoftLoginHint', studentData.institutional_email);
       }
 
       return { success: true };

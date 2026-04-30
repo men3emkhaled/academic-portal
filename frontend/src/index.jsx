@@ -9,30 +9,37 @@ import { msalConfig } from "./config/microsoftAuthConfig";
 import './i18n';
 
 const GOOGLE_CLIENT_ID = '407444968316-d0mmu1duk58gcschp0udu4vv5vavua3o.apps.googleusercontent.com';
-const msalInstance = new PublicClientApplication(msalConfig);
 
-// Initialize MSAL before rendering
-msalInstance.initialize().then(() => {
+const renderApp = (msalInstance) => {
   const root = ReactDOM.createRoot(document.getElementById('root'));
   root.render(
     <React.StrictMode>
-      <MsalProvider instance={msalInstance}>
+      {msalInstance ? (
+        <MsalProvider instance={msalInstance}>
+          <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+            <App />
+          </GoogleOAuthProvider>
+        </MsalProvider>
+      ) : (
         <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
           <App />
         </GoogleOAuthProvider>
-      </MsalProvider>
+      )}
     </React.StrictMode>
   );
-}).catch((error) => {
-  console.error("MSAL Initialization failed. Rendering app anyway to avoid black screen.", error);
-  const root = ReactDOM.createRoot(document.getElementById('root'));
-  root.render(
-    <React.StrictMode>
-      <MsalProvider instance={msalInstance}>
-        <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-          <App />
-        </GoogleOAuthProvider>
-      </MsalProvider>
-    </React.StrictMode>
-  );
-});
+};
+
+let msalInstance = null;
+
+try {
+  msalInstance = new PublicClientApplication(msalConfig);
+  msalInstance.initialize().then(() => {
+    renderApp(msalInstance);
+  }).catch((error) => {
+    console.error("MSAL Initialization failed. Rendering app anyway to avoid black screen.", error);
+    renderApp(msalInstance);
+  });
+} catch (error) {
+  console.error("MSAL creation failed (likely localStorage blocked). Rendering app without MSAL.", error);
+  renderApp(null);
+}

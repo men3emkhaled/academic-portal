@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Fingerprint, Lock, Eye, EyeOff, HelpCircle, ArrowRight, Users, Building2, Sparkles, MessageCircle, Smartphone, Download, Mail, X } from 'lucide-react';
+import { safeGetItem, safeSetItem, safeRemoveItem } from '../utils/localStorage';
 import { useNavigate } from 'react-router-dom';
 import { useStudentAuth } from '../context/StudentAuthContext';
 import toast from 'react-hot-toast';
@@ -110,9 +111,9 @@ const StudentLogin = () => {
     if (result.success) {
       toast.success('Login successful!');
       if (rememberDevice) {
-        localStorage.setItem('rememberDevice', 'true');
+        safeSetItem('rememberDevice', 'true');
       } else {
-        localStorage.removeItem('rememberDevice');
+        safeRemoveItem('rememberDevice');
       }
 
       // Save credentials for PWA password manager (iOS/Safari)
@@ -137,7 +138,7 @@ const StudentLogin = () => {
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
 
   // Try to get a saved login_hint for Google
-  const savedGoogleHint = localStorage.getItem('googleLoginHint') || undefined;
+  const savedGoogleHint = safeGetItem('googleLoginHint') || undefined;
 
   const handleGoogleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
@@ -159,7 +160,7 @@ const StudentLogin = () => {
   });
 
   const handleMicrosoftLogin = async () => {
-    const savedMsHint = localStorage.getItem('microsoftLoginHint') || undefined;
+    const savedMsHint = safeGetItem('microsoftLoginHint') || undefined;
     const requestWithHint = savedMsHint
       ? { ...loginRequest, loginHint: savedMsHint }
       : loginRequest;

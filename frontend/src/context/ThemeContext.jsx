@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { safeGetItem, safeSetItem, safeRemoveItem } from '../utils/localStorage';
 
 const ThemeContext = createContext();
 
@@ -6,7 +7,7 @@ export const ThemeProvider = ({ children }) => {
   // Default to system preference or saved preference
   const [theme, setTheme] = useState(() => {
     if (typeof window !== 'undefined') {
-      const savedTheme = localStorage.getItem('theme');
+      const savedTheme = safeGetItem('theme');
       if (savedTheme) {
         return savedTheme;
       }
@@ -25,10 +26,10 @@ export const ThemeProvider = ({ children }) => {
     if (theme === 'system') {
       const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
       root.classList.add(systemTheme);
-      localStorage.removeItem('theme'); // Optional: clear if they want strictly system
+      safeRemoveItem('theme'); // Optional: clear if they want strictly system
     } else {
       root.classList.add(theme);
-      localStorage.setItem('theme', theme);
+      safeSetItem('theme', theme);
     }
   }, [theme]);
 

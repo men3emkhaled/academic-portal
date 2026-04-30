@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { safeGetItem, safeRemoveItem } from '../utils/localStorage';
 
 const API_BASE_URL = 'https://academic-portal-production.up.railway.app/api';
 
@@ -13,7 +14,7 @@ const studentApi = axios.create({
 // إضافة التوكن تلقائياً لكل الطلبات
 studentApi.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('studentToken');
+    const token = safeGetItem('studentToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -27,7 +28,7 @@ studentApi.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('studentToken');
+      safeRemoveItem('studentToken');
       window.location.href = '/student/login';
     }
     return Promise.reject(error);
