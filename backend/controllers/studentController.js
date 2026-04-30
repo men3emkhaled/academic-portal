@@ -309,8 +309,8 @@ const getCourseHubData = async (req, res) => {
       [courseId]
     );
 
-    const resourcesRes = await db.query(
-      'SELECT * FROM resources WHERE course_id = $1 ORDER BY created_at DESC',
+    const progressRes = await db.query(
+      'SELECT * FROM course_progress WHERE course_id = $1 ORDER BY order_index ASC',
       [courseId]
     );
 
@@ -328,7 +328,7 @@ const getCourseHubData = async (req, res) => {
       course,
       qrToken: token,
       announcements: announcementsRes.rows,
-      resources: resourcesRes.rows,
+      progress: progressRes.rows,
       tasks: tasksRes.rows
     });
   } catch (error) {

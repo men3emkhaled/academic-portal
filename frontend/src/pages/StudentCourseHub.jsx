@@ -5,8 +5,8 @@ import studentApi from '../services/studentApi';
 import { QRCodeSVG } from 'qrcode.react';
 import toast from 'react-hot-toast';
 import { 
-  Megaphone, QrCode, FileText, CheckCircle2, Circle, 
-  ArrowLeft, Calendar, User, ExternalLink, Download, 
+  Megaphone, QrCode, ListChecks, CheckCircle2, Circle, 
+  ArrowLeft, Calendar, User, ExternalLink, 
   Loader2, Clock, BookOpen, X
 } from 'lucide-react';
 
@@ -62,11 +62,11 @@ const StudentCourseHub = () => {
 
   if (!data) return null;
 
-  const { course, qrToken, announcements, resources, tasks } = data;
+  const { course, qrToken, announcements, progress = [], tasks } = data;
 
   const tabs = [
     { id: 'announcements', label: 'News', icon: Megaphone, count: announcements.length },
-    { id: 'materials', label: 'Materials', icon: FileText, count: resources.length },
+    { id: 'progress', label: 'Progress', icon: ListChecks, count: progress.filter(p => p.is_completed).length + '/' + progress.length },
     { id: 'tasks', label: 'Tasks', icon: CheckCircle2, count: tasks.length }
   ];
 
@@ -114,8 +114,8 @@ const StudentCourseHub = () => {
 
               <div className="flex items-center gap-3 flex-shrink-0">
                 <div className="text-center px-3 py-2 bg-gray-50 dark:bg-black/20 rounded-xl border border-gray-100 dark:border-white/5">
-                  <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Materials</p>
-                  <p className="text-lg font-black text-gray-900 dark:text-white">{resources.length}</p>
+                  <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Progress</p>
+                  <p className="text-lg font-black text-gray-900 dark:text-white">{progress.filter(p => p.is_completed).length}/{progress.length}</p>
                 </div>
                 <div className="text-center px-3 py-2 bg-gray-50 dark:bg-black/20 rounded-xl border border-gray-100 dark:border-white/5">
                   <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Tasks</p>
@@ -178,28 +178,48 @@ const StudentCourseHub = () => {
                   </div>
                 )}
 
-                {activeTab === 'materials' && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 animate-fadeIn">
-                    {resources.length === 0 ? (
-                      <div className="col-span-full"><EmptyState icon={FileText} text="No materials uploaded" sub="Course files will appear here." /></div>
+                {activeTab === 'progress' && (
+                  <div className="space-y-2 animate-fadeIn">
+                    {progress.length === 0 ? (
+                      <EmptyState icon={ListChecks} text="No syllabus yet" sub="Your instructor hasn't added course topics." />
                     ) : (
-                      resources.map(res => (
-                        <div key={res.id} className="bg-white dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/5 rounded-2xl p-4 group flex flex-col justify-between">
-                          <div className="mb-3">
-                            <h4 className="font-bold text-sm text-gray-900 dark:text-white mb-1 leading-snug">{res.title}</h4>
-                            <p className="text-[11px] text-gray-500 dark:text-slate-400 line-clamp-2">{res.description || 'No description'}</p>
+                      <>
+                        {/* Progress Bar */}
+                        <div className="bg-white dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/5 rounded-2xl p-4 mb-3">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-xs font-bold text-gray-500">Course Progress</span>
+                            <span className="text-xs font-black text-primary">
+                              {Math.round((progress.filter(p => p.is_completed).length / progress.length) * 100)}%
+                            </span>
                           </div>
-                          <a 
-                            href={res.file_url} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="flex items-center justify-center gap-2 py-2.5 bg-gray-50 dark:bg-white/5 hover:bg-primary/10 hover:text-primary rounded-xl text-xs font-bold transition-all active:scale-95"
-                          >
-                            <Download className="w-3.5 h-3.5" />
-                            Download
-                          </a>
+                          <div className="w-full h-2.5 bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden">
+                            <div 
+                              className="h-full bg-primary rounded-full transition-all duration-500"
+                              style={{ width: `${(progress.filter(p => p.is_completed).length / progress.length) * 100}%` }}
+                            ></div>
+                          </div>
                         </div>
-                      ))
+                        {progress.map((item, idx) => (
+                          <div key={item.id} className={`flex items-center gap-3 p-3.5 rounded-xl border transition-all ${
+                            item.is_completed 
+                              ? 'bg-primary/5 border-primary/20 dark:bg-primary/5 dark:border-primary/20' 
+                              : 'bg-white dark:bg-white/[0.03] border-gray-200/60 dark:border-white/5'
+                          }`}>
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-black ${
+                              item.is_completed 
+                                ? 'bg-primary text-white' 
+                                : 'bg-gray-100 dark:bg-white/10 text-gray-400'
+                            }`}>
+                              {item.is_completed ? <CheckCircle2 className="w-4 h-4" /> : idx + 1}
+                            </div>
+                            <span className={`text-sm font-semibold flex-1 ${
+                              item.is_completed ? 'text-primary' : 'text-gray-700 dark:text-gray-300'
+                            }`}>
+                              {item.title}
+                            </span>
+                          </div>
+                        ))}
+                      </>
                     )}
                   </div>
                 )}
