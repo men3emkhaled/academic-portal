@@ -3,13 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import { useDoctorAuth } from '../context/DoctorAuthContext';
 import {
   BookOpen, TrendingUp, FileText, CheckSquare, Award, LogOut, GraduationCap,
-  Sun, Moon, LayoutDashboard, FolderOpen, ClipboardList, BarChart3, Menu, X, ChevronRight
+  Sun, Moon, LayoutDashboard, FolderOpen, ClipboardList, BarChart3, Menu, X, ChevronRight,
+  Activity, PieChart
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import DoctorResourceManager from '../components/doctor/DoctorResourceManager';
 import DoctorTaskManager from '../components/doctor/DoctorTaskManager';
 import DoctorQuizManager from '../components/doctor/DoctorQuizManager';
 import DoctorGradesView from '../components/doctor/DoctorGradesView';
+import DoctorStudentProgress from '../components/doctor/DoctorStudentProgress';
+import DoctorQuizAnalytics from '../components/doctor/DoctorQuizAnalytics';
 
 const DoctorDashboard = () => {
   const { doctor, token, logout, loading: authLoading, doctorApi } = useDoctorAuth();
@@ -58,6 +61,8 @@ const DoctorDashboard = () => {
     { id: 'quizzes', label: 'Quizzes', icon: Award, color: 'amber' },
     { id: 'tasks', label: 'Tasks', icon: ClipboardList, color: 'emerald' },
     { id: 'grades', label: 'Grades', icon: BarChart3, color: 'rose' },
+    { id: 'progress', label: 'Progress', icon: Activity, color: 'purple' },
+    { id: 'analytics', label: 'Analytics', icon: PieChart, color: 'indigo' },
   ];
 
   const STAT_CARDS = [
@@ -311,6 +316,8 @@ const DoctorDashboard = () => {
           {activeTab === 'quizzes' && <DoctorQuizManager courses={myCourses} />}
           {activeTab === 'tasks' && <DoctorTaskManager courses={myCourses} />}
           {activeTab === 'grades' && <DoctorGradesView courses={myCourses} />}
+          {activeTab === 'progress' && <DoctorStudentProgress courses={myCourses} />}
+          {activeTab === 'analytics' && <DoctorQuizAnalytics courses={myCourses} />}
         </div>
       </main>
     </div>

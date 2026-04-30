@@ -671,6 +671,153 @@ const gradeWrittenAnswer = async (req, res) => {
     }
 };
 
+// ==================== STUDENT PROGRESS ====================
+const getStudentProgress = async (req, res) => {
+    try {
+        const { courseId } = req.params;
+        const hasAccess = await Doctor.hasCourseAccess(req.doctor.id, courseId);
+        if (!hasAccess) {
+            return res.status(403).json({ message: 'Access denied for this course' });
+        }
+
+        const result = await db.query(`
+            SELECT 
+                s.id as student_id, s.name as student_name, s.section,
+                sc.progress_percentage, sc.status as enrollment_status,
+                -- Quiz stats for this student in this course
+                (SELECT COUNT(*) FROM quiz_attempts qa 
+                 JOIN quizzes q ON qa.quiz_id = q.id 
+                 WHERE qa.student_id = s.id AND q.course_id = $1 AND qa.status = 'completed') as quizzes_completed,
+                (SELECT COUNT(*) FROM quizzes q 
+                 WHERE q.course_id = $1 AND q.is_published = true) as quizzes_total,
+                -- Average quiz score
+                (SELECT ROUND(AVG(
+                    CASE WHEN qa.total_points > 0 THEN (qa.score::numeric / qa.total_points) * 100 ELSE 0 END
+                )::numeric, 1) FROM quiz_attempts qa 
+                 JOIN quizzes q ON qa.quiz_id = q.id 
+                 WHERE qa.student_id = s.id AND q.course_id = $1 AND qa.status = 'completed') as avg_quiz_score,
+                -- Task completion
+                (SELECT COUNT(*) FROM student_official_tasks sot
+                 JOIN official_tasks ot ON sot.task_id = ot.id
+                 WHERE sot.student_id = s.id AND ot.course_id = $1 AND sot.is_completed = true) as tasks_completed,
+                (SELECT COUNT(*) FROM official_tasks ot WHERE ot.course_id = $1) as tasks_total,
+                -- Grades total
+                COALESCE(g.midterm_score, 0) + COALESCE(g.practical_score, 0) + COALESCE(g.oral_score, 0) as grade_total
+            FROM student_courses sc
+            JOIN students s ON sc.student_id = s.id
+            LEFT JOIN grades g ON g.enrollment_id = sc.id
+            WHERE sc.course_id = $1
+            ORDER BY s.name
+        `, [courseId]);
+
+        res.json(result.rows);
+    } catch (error) {
+        console.error('Student progress error:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// ==================== QUIZ ANALYTICS ====================
+const getQuizAnalytics = async (req, res) => {
+    try {
+        const { courseId } = req.params;
+        const hasAccess = await Doctor.hasCourseAccess(req.doctor.id, courseId);
+        if (!hasAccess) {
+            return res.status(403).json({ message: 'Access denied for this course' });
+        }
+
+        // Per-quiz stats
+        const quizStats = await db.query(`
+            SELECT 
+                q.id, q.title, q.passing_score, q.is_published, q.time_limit_minutes,
+                COUNT(DISTINCT qa.student_id) as total_attempts,
+                COUNT(DISTINCT CASE WHEN qa.status = 'completed' THEN qa.student_id END) as completed_attempts,
+                ROUND(AVG(CASE WHEN qa.total_points > 0 AND qa.status = 'completed'
+                    THEN (qa.score::numeric / qa.total_points) * 100 ELSE NULL END)::numeric, 1) as avg_score,
+                MAX(CASE WHEN qa.total_points > 0 AND qa.status = 'completed'
+                    THEN (qa.score::numeric / qa.total_points) * 100 ELSE NULL END) as max_score,
+                MIN(CASE WHEN qa.total_points > 0 AND qa.status = 'completed'
+                    THEN (qa.score::numeric / qa.total_points) * 100 ELSE NULL END) as min_score,
+                COUNT(DISTINCT CASE WHEN qa.status = 'completed' AND qa.total_points > 0 
+                    AND (qa.score::numeric / qa.total_points) * 100 >= q.passing_score 
+                    THEN qa.student_id END) as passed_count
+            FROM quizzes q
+            LEFT JOIN quiz_attempts qa ON q.id = qa.quiz_id
+            WHERE q.course_id = $1
+            GROUP BY q.id, q.title, q.passing_score, q.is_published, q.time_limit_minutes
+            ORDER BY q.created_at DESC
+        `, [courseId]);
+
+        // Overall course quiz summary
+        const courseSummary = await db.query(`
+            SELECT 
+                COUNT(DISTINCT q.id) as total_quizzes,
+                COUNT(DISTINCT CASE WHEN q.is_published THEN q.id END) as published_quizzes,
+                COUNT(DISTINCT qa.student_id) as students_attempted,
+                ROUND(AVG(CASE WHEN qa.total_points > 0 AND qa.status = 'completed'
+                    THEN (qa.score::numeric / qa.total_points) * 100 ELSE NULL END)::numeric, 1) as overall_avg
+            FROM quizzes q
+            LEFT JOIN quiz_attempts qa ON q.id = qa.quiz_id
+            WHERE q.course_id = $1
+        `, [courseId]);
+
+        // Score distribution (0-20, 20-40, 40-60, 60-80, 80-100)
+        const distribution = await db.query(`
+            SELECT 
+                CASE 
+                    WHEN pct < 20 THEN '0-20'
+                    WHEN pct < 40 THEN '20-40'
+                    WHEN pct < 60 THEN '40-60'
+                    WHEN pct < 80 THEN '60-80'
+                    ELSE '80-100'
+                END as range,
+                COUNT(*) as count
+            FROM (
+                SELECT (qa.score::numeric / NULLIF(qa.total_points, 0)) * 100 as pct
+                FROM quiz_attempts qa
+                JOIN quizzes q ON qa.quiz_id = q.id
+                WHERE q.course_id = $1 AND qa.status = 'completed' AND qa.total_points > 0
+            ) sub
+            GROUP BY range
+            ORDER BY range
+        `, [courseId]);
+
+        res.json({
+            quizzes: quizStats.rows,
+            summary: courseSummary.rows[0],
+            distribution: distribution.rows
+        });
+    } catch (error) {
+        console.error('Quiz analytics error:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// ==================== COURSE STUDENTS ====================
+const getCourseStudents = async (req, res) => {
+    try {
+        const { courseId } = req.params;
+        const hasAccess = await Doctor.hasCourseAccess(req.doctor.id, courseId);
+        if (!hasAccess) {
+            return res.status(403).json({ message: 'Access denied for this course' });
+        }
+
+        const result = await db.query(`
+            SELECT 
+                s.id, s.name, s.email, s.section, s.level,
+                sc.progress_percentage, sc.status, sc.enrolled_at
+            FROM student_courses sc
+            JOIN students s ON sc.student_id = s.id
+            WHERE sc.course_id = $1
+            ORDER BY s.name
+        `, [courseId]);
+
+        res.json(result.rows);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 // ==================== PROFILE ====================
 const getProfile = async (req, res) => {
     try {
@@ -690,4 +837,5 @@ module.exports = {
     getCourseGrades, updateGrade,
     getMyTasks, createTask, updateTask, deleteTask,
     getPendingReviews, getAttemptForReview, gradeWrittenAnswer,
+    getStudentProgress, getQuizAnalytics, getCourseStudents,
 };

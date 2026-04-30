@@ -53,4 +53,9 @@ router.get('/reviews/pending', doctorController.getPendingReviews);
 router.get('/reviews/attempts/:attemptId', doctorController.getAttemptForReview);
 router.patch('/reviews/answers/:answerId/grade', doctorController.gradeWrittenAnswer);
 
+// Student Progress & Analytics
+router.get('/progress/:courseId', doctorController.getStudentProgress);
+router.get('/analytics/:courseId', doctorController.getQuizAnalytics);
+router.get('/students/:courseId', doctorController.getCourseStudents);
+
 module.exports = router;
