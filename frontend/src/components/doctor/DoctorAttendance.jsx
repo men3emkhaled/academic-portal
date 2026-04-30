@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useDoctorAuth } from '../../context/DoctorAuthContext';
 import toast from 'react-hot-toast';
-import { Users, QrCode, Plus, CheckCircle2, Circle, Search, X, Edit2, Trash2, Save } from 'lucide-react';
+import { Users, QrCode, Plus, CheckCircle2, Circle, Search, X, Edit2, Trash2, Save, FileSpreadsheet } from 'lucide-react';
 import { Scanner } from '@yudiel/react-qr-scanner';
 
 const DoctorAttendance = ({ courses }) => {
@@ -160,6 +160,46 @@ const DoctorAttendance = ({ courses }) => {
     }
   };
 
+  const handleExportAttendance = async () => {
+    try {
+      const res = await doctorApi('get', `/doctor/attendance/${selectedCourseId}/export`);
+      const { sessions: sessionList, data: attendanceData } = res.data;
+
+      if (!attendanceData.length) return toast.error('No data to export');
+
+      const headers = ['Student ID', 'Student Name', 'Section', ...sessionList.map(s => s.title || new Date(s.date).toLocaleDateString()), 'Total Present', 'Percentage %'];
+      
+      const csvRows = [];
+      csvRows.push(headers.join(','));
+
+      attendanceData.forEach(student => {
+        const row = [
+          student.id,
+          `"${student.name}"`,
+          `"${student.section || ''}"`,
+          ...sessionList.map(s => student.attendance[s.id]),
+          student.total_present,
+          `${student.percentage}%`
+        ];
+        csvRows.push(row.join(','));
+      });
+
+      const csvString = csvRows.join('\n');
+      const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      const courseName = courses.find(c => c.id === parseInt(selectedCourseId))?.name || 'Course';
+      link.setAttribute("href", url);
+      link.setAttribute("download", `${courseName}_Attendance_Sheet.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast.success('Attendance sheet exported');
+    } catch (err) {
+      toast.error('Failed to export attendance');
+    }
+  };
+
   const presentStudentIds = records.map(r => r.student_id);
 
   const filteredStudents = students.filter(s => 
@@ -199,6 +239,14 @@ const DoctorAttendance = ({ courses }) => {
             className="flex items-center justify-center gap-2 bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-5 rounded-xl transition-all hover:shadow-lg hover:shadow-teal-500/20 active:scale-95 text-sm"
           >
             <Plus className="w-4 h-4" /> New Session
+          </button>
+        )}
+        {selectedCourseId && sessions.length > 0 && (
+          <button
+            onClick={handleExportAttendance}
+            className="flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-5 rounded-xl transition-all hover:shadow-lg hover:shadow-emerald-500/20 active:scale-95 text-sm"
+          >
+            <FileSpreadsheet className="w-4 h-4" /> Download Sheet
           </button>
         )}
       </div>

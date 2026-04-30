@@ -63,8 +63,8 @@ const toggleTaskCompletion = async (req, res) => {
   try {
     const studentId = req.user.id;
     const { id } = req.params;
-    const { is_completed } = req.body;
-    const status = await OfficialTask.toggleComplete(id, studentId, is_completed);
+    const { is_completed, submission_url } = req.body;
+    const status = await OfficialTask.toggleComplete(id, studentId, is_completed, submission_url);
     res.json(status);
   } catch (error) {
     console.error('❌ Error in toggleTaskCompletion:', error.message);

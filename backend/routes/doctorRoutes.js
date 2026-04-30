@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const doctorController = require('../controllers/doctorController');
+const analyticsController = require('../controllers/analyticsController');
 const { doctorAuth } = require('../middleware/doctorAuth');
 
 // ==================== AUTH ====================
@@ -47,6 +48,8 @@ router.get('/tasks', doctorController.getMyTasks);
 router.post('/tasks', doctorController.createTask);
 router.put('/tasks/:id', doctorController.updateTask);
 router.delete('/tasks/:id', doctorController.deleteTask);
+router.get('/tasks/:taskId/submissions', doctorController.getTaskSubmissions);
+router.post('/tasks/:taskId/submissions/:studentId/grade', doctorController.gradeTaskSubmission);
 
 // Reviews (Written Answers)
 router.get('/reviews/pending', doctorController.getPendingReviews);
@@ -56,6 +59,7 @@ router.patch('/reviews/answers/:answerId/grade', doctorController.gradeWrittenAn
 // Student Progress & Analytics
 router.get('/progress/:courseId', doctorController.getStudentProgress);
 router.get('/analytics/:courseId', doctorController.getQuizAnalytics);
+router.get('/course-analytics/:courseId', analyticsController.getCourseAnalytics);
 router.get('/students/:courseId', doctorController.getCourseStudents);
 
 // Course Content Progress (Syllabus Tracking)
@@ -70,6 +74,7 @@ router.get('/attendance/:courseId/sessions', doctorController.getAttendanceSessi
 router.post('/attendance/sessions', doctorController.createAttendanceSession);
 router.put('/attendance/sessions/:id', doctorController.updateAttendanceSession);
 router.delete('/attendance/sessions/:id', doctorController.deleteAttendanceSession);
+router.get('/attendance/:courseId/export', doctorController.exportCourseAttendance);
 router.get('/attendance/sessions/:sessionId/records', doctorController.getAttendanceRecords);
 router.post('/attendance/scan', doctorController.scanAttendance);
 router.post('/attendance/manual', doctorController.toggleManualAttendance);

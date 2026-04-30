@@ -516,15 +516,15 @@ const getMyTasks = async (req, res) => {
 
 const createTask = async (req, res) => {
     try {
-        const { course_id, title, description, deadline, drive_link } = req.body;
+        const { course_id, title, description, deadline, drive_link, requires_submission } = req.body;
         const hasAccess = await Doctor.hasCourseAccess(req.doctor.id, course_id);
         if (!hasAccess) {
             return res.status(403).json({ message: 'Access denied for this course' });
         }
         const result = await db.query(
-            `INSERT INTO official_tasks (course_id, title, description, deadline, drive_link)
-             VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-            [course_id, title, description, deadline || null, drive_link || null]
+            `INSERT INTO official_tasks (course_id, title, description, deadline, drive_link, requires_submission)
+             VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+            [course_id, title, description, deadline || null, drive_link || null, requires_submission || false]
         );
         res.status(201).json(result.rows[0]);
     } catch (error) {
@@ -535,7 +535,7 @@ const createTask = async (req, res) => {
 const updateTask = async (req, res) => {
     try {
         const { id } = req.params;
-        const { title, description, deadline, drive_link } = req.body;
+        const { title, description, deadline, drive_link, requires_submission } = req.body;
         const check = await db.query(
             `SELECT ot.id FROM official_tasks ot
              JOIN doctor_courses dc ON ot.course_id = dc.course_id
@@ -546,9 +546,9 @@ const updateTask = async (req, res) => {
             return res.status(403).json({ message: 'Access denied' });
         }
         const result = await db.query(
-            `UPDATE official_tasks SET title = $1, description = $2, deadline = $3, drive_link = $4, created_at = CURRENT_TIMESTAMP
-             WHERE id = $5 RETURNING *`,
-            [title, description, deadline || null, drive_link || null, id]
+            `UPDATE official_tasks SET title = $1, description = $2, deadline = $3, drive_link = $4, requires_submission = $5, created_at = CURRENT_TIMESTAMP
+             WHERE id = $6 RETURNING *`,
+            [title, description, deadline || null, drive_link || null, requires_submission || false, id]
         );
         res.json(result.rows[0]);
     } catch (error) {
@@ -570,6 +570,48 @@ const deleteTask = async (req, res) => {
         }
         await db.query('DELETE FROM official_tasks WHERE id = $1', [id]);
         res.json({ message: 'Task deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+const getTaskSubmissions = async (req, res) => {
+    try {
+        const { taskId } = req.params;
+        const check = await db.query(
+            `SELECT ot.id FROM official_tasks ot
+             JOIN doctor_courses dc ON ot.course_id = dc.course_id
+             WHERE ot.id = $1 AND dc.doctor_id = $2`,
+            [taskId, req.doctor.id]
+        );
+        if (check.rows.length === 0) {
+            return res.status(403).json({ message: 'Access denied' });
+        }
+        const OfficialTask = require('../models/OfficialTask');
+        const submissions = await OfficialTask.getSubmissions(taskId);
+        res.json(submissions);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+const gradeTaskSubmission = async (req, res) => {
+    try {
+        const { taskId, studentId } = req.params;
+        const { grade, feedback } = req.body;
+        
+        const check = await db.query(
+            `SELECT ot.id FROM official_tasks ot
+             JOIN doctor_courses dc ON ot.course_id = dc.course_id
+             WHERE ot.id = $1 AND dc.doctor_id = $2`,
+            [taskId, req.doctor.id]
+        );
+        if (check.rows.length === 0) {
+            return res.status(403).json({ message: 'Access denied' });
+        }
+        const OfficialTask = require('../models/OfficialTask');
+        const updated = await OfficialTask.gradeSubmission(taskId, studentId, grade, feedback);
+        res.json(updated);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -1151,11 +1193,11 @@ module.exports = {
     getQuestions, addQuestion, updateQuestion, deleteQuestion, getQuizAttempts,
     getMyResources, createResource, updateResource, deleteResource,
     getCourseGrades, updateGrade,
-    getMyTasks, createTask, updateTask, deleteTask,
+    getMyTasks, createTask, updateTask, deleteTask, getTaskSubmissions, gradeTaskSubmission,
     getPendingReviews, getAttemptForReview, gradeWrittenAnswer,
     getStudentProgress, getQuizAnalytics, getCourseStudents,
     getCourseProgress, addCourseProgress, updateCourseProgress, toggleCourseProgress, deleteCourseProgress,
     getAttendanceSessions, createAttendanceSession, getAttendanceRecords, scanAttendance, toggleManualAttendance,
-    updateAttendanceSession, deleteAttendanceSession,
+    updateAttendanceSession, deleteAttendanceSession, exportCourseAttendance,
     getAnnouncements, createAnnouncement, deleteAnnouncement
 };

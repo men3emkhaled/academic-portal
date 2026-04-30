@@ -17,6 +17,7 @@ const StudentCourseHub = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('announcements');
   const [showQr, setShowQr] = useState(false);
+  const [submissionUrls, setSubmissionUrls] = useState({});
 
   const fetchHubData = useCallback(async () => {
     setLoading(true);
@@ -35,11 +36,17 @@ const StudentCourseHub = () => {
     fetchHubData();
   }, [fetchHubData]);
 
-  const handleToggleTask = async (taskId, currentStatus) => {
+  const handleToggleTask = async (taskId, currentStatus, requiresSubmission = false) => {
     try {
-      await studentApi.patch(`/official-tasks/${taskId}/toggle`, {
-        is_completed: !currentStatus
-      });
+      const payload = { is_completed: !currentStatus };
+      if (!currentStatus && requiresSubmission) {
+        const url = submissionUrls[taskId];
+        if (!url) return toast.error('Please enter a submission link');
+        payload.submission_url = url;
+      }
+      
+      await studentApi.patch(`/official-tasks/${taskId}/toggle`, payload);
+      if (!currentStatus) toast.success('Task submitted successfully');
       fetchHubData();
     } catch (error) {
       toast.error('Failed to update task status');
@@ -237,37 +244,92 @@ const StudentCourseHub = () => {
                       <EmptyState icon={CheckCircle2} text="No tasks assigned" sub="Official tasks will show up here." />
                     ) : (
                       tasks.map(task => (
-                        <div key={task.id} className="bg-white dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/5 rounded-xl p-4 flex items-center justify-between gap-3 group">
-                          <div className="flex items-center gap-3 min-w-0 flex-1">
-                            <button 
-                              onClick={() => handleToggleTask(task.id, task.is_completed)}
-                              className={`w-9 h-9 rounded-full flex items-center justify-center transition-all flex-shrink-0 active:scale-90 ${
-                                task.is_completed 
-                                  ? 'bg-primary text-white' 
-                                  : 'bg-gray-100 text-gray-400 hover:bg-gray-200 dark:bg-white/5 dark:hover:bg-white/10'
-                              }`}
-                            >
-                              {task.is_completed ? <CheckCircle2 className="w-4 h-4" /> : <Circle className="w-4 h-4" />}
-                            </button>
-                            <div className="min-w-0">
-                              <h4 className={`font-bold text-sm truncate ${task.is_completed ? 'line-through text-gray-400' : 'text-gray-900 dark:text-white'}`}>
-                                {task.title}
-                              </h4>
-                              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1 mt-0.5">
-                                <Calendar className="w-2.5 h-2.5" />
-                                {task.deadline ? new Date(task.deadline).toLocaleDateString() : 'No deadline'}
-                              </span>
+                        <div key={task.id} className="bg-white dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/5 rounded-xl p-4 flex flex-col gap-3 group">
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-3 min-w-0 flex-1">
+                              {!task.requires_submission && (
+                                <button 
+                                  onClick={() => handleToggleTask(task.id, task.is_completed)}
+                                  className={`w-9 h-9 rounded-full flex items-center justify-center transition-all flex-shrink-0 active:scale-90 ${
+                                    task.is_completed 
+                                      ? 'bg-primary text-white' 
+                                      : 'bg-gray-100 text-gray-400 hover:bg-gray-200 dark:bg-white/5 dark:hover:bg-white/10'
+                                  }`}
+                                >
+                                  {task.is_completed ? <CheckCircle2 className="w-4 h-4" /> : <Circle className="w-4 h-4" />}
+                                </button>
+                              )}
+                              {task.requires_submission && task.is_completed && (
+                                <div className="w-9 h-9 rounded-full flex items-center justify-center bg-primary text-white flex-shrink-0">
+                                  <CheckCircle2 className="w-4 h-4" />
+                                </div>
+                              )}
+                              <div className="min-w-0">
+                                <h4 className={`font-bold text-sm truncate ${task.is_completed ? 'line-through text-gray-400' : 'text-gray-900 dark:text-white'}`}>
+                                  {task.title}
+                                </h4>
+                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1 mt-0.5">
+                                  <Calendar className="w-2.5 h-2.5" />
+                                  {task.deadline ? new Date(task.deadline).toLocaleDateString() : 'No deadline'}
+                                  {task.requires_submission && <span className="ml-2 text-blue-500">• Requires Submission</span>}
+                                </span>
+                              </div>
                             </div>
+                            {task.drive_link && (
+                              <a 
+                                href={task.drive_link} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="p-2 text-gray-400 hover:text-primary transition-colors flex-shrink-0"
+                              >
+                                <ExternalLink className="w-4 h-4" />
+                              </a>
+                            )}
                           </div>
-                          {task.drive_link && (
-                            <a 
-                              href={task.drive_link} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="p-2 text-gray-400 hover:text-primary transition-colors flex-shrink-0"
-                            >
-                              <ExternalLink className="w-4 h-4" />
-                            </a>
+                          
+                          {/* Submission Area */}
+                          {task.requires_submission && (
+                            <div className="mt-2 pl-12">
+                              {!task.is_completed ? (
+                                <div className="flex flex-col sm:flex-row gap-2">
+                                  <input 
+                                    type="url"
+                                    placeholder="Paste your Google Drive link here..."
+                                    value={submissionUrls[task.id] || ''}
+                                    onChange={(e) => setSubmissionUrls({...submissionUrls, [task.id]: e.target.value})}
+                                    className="flex-1 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-lg p-2.5 text-sm text-gray-900 dark:text-white focus:border-primary/50 focus:outline-none"
+                                  />
+                                  <button 
+                                    onClick={() => handleToggleTask(task.id, false, true)}
+                                    className="bg-primary hover:bg-primary/90 text-white font-bold py-2.5 px-4 rounded-lg text-sm transition-colors whitespace-nowrap"
+                                  >
+                                    Submit Project
+                                  </button>
+                                </div>
+                              ) : (
+                                <div className="bg-gray-50 dark:bg-white/5 rounded-lg p-3 border border-gray-100 dark:border-white/5 space-y-2">
+                                  {task.submission_url && (
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 break-all">
+                                      <span className="font-bold text-gray-700 dark:text-gray-300">Submitted Link: </span>
+                                      <a href={task.submission_url} target="_blank" rel="noreferrer" className="text-blue-500 hover:underline">
+                                        {task.submission_url}
+                                      </a>
+                                    </p>
+                                  )}
+                                  {task.grade && (
+                                    <div className="flex items-center gap-2 mt-2">
+                                      <span className="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-1 rounded">Grade: {task.grade}</span>
+                                    </div>
+                                  )}
+                                  {task.feedback && (
+                                    <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">
+                                      <span className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 block mb-0.5">Doctor Feedback:</span>
+                                      {task.feedback}
+                                    </p>
+                                  )}
+                                </div>
+                              )}
+                            </div>
                           )}
                         </div>
                       ))

@@ -13,6 +13,7 @@ import DoctorQuizManager from '../components/doctor/DoctorQuizManager';
 import DoctorGradesView from '../components/doctor/DoctorGradesView';
 import DoctorStudentProgress from '../components/doctor/DoctorStudentProgress';
 import DoctorQuizAnalytics from '../components/doctor/DoctorQuizAnalytics';
+import DoctorAnalytics from '../components/doctor/DoctorAnalytics';
 import DoctorCourseProgress from '../components/doctor/DoctorCourseProgress';
 import DoctorAttendance from '../components/doctor/DoctorAttendance';
 import DoctorAnnouncements from '../components/doctor/DoctorAnnouncements';
@@ -68,7 +69,8 @@ const DoctorDashboard = () => {
     { id: 'announcements', label: 'Announcements', icon: Megaphone, color: 'amber' },
     { id: 'attendance', label: 'Attendance', icon: Users, color: 'sky' },
     { id: 'progress', label: 'Student Progress', icon: Activity, color: 'purple' },
-    { id: 'analytics', label: 'Analytics', icon: PieChart, color: 'indigo' },
+    { id: 'analytics', label: 'Quiz Analytics', icon: PieChart, color: 'indigo' },
+    { id: 'smart_analytics', label: 'Smart Analytics', icon: PieChart, color: 'red' },
   ];
 
   const STAT_CARDS = [
@@ -328,6 +330,7 @@ const DoctorDashboard = () => {
           {activeTab === 'attendance' && <DoctorAttendance courses={myCourses} />}
           {activeTab === 'progress' && <DoctorStudentProgress courses={myCourses} />}
           {activeTab === 'analytics' && <DoctorQuizAnalytics courses={myCourses} />}
+          {activeTab === 'smart_analytics' && <DoctorAnalytics courses={myCourses} />}
         </div>
       </main>
     </div>

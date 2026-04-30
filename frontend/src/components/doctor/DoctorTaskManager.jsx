@@ -13,10 +13,18 @@ const DoctorTaskManager = ({ courses }) => {
     title: '',
     description: '',
     deadline: '',
-    drive_link: ''
+    drive_link: '',
+    requires_submission: false
   });
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
+  
+  // Submissions Modal State
+  const [selectedTaskForSubmissions, setSelectedTaskForSubmissions] = useState(null);
+  const [submissions, setSubmissions] = useState([]);
+  const [submissionsLoading, setSubmissionsLoading] = useState(false);
+  const [gradingData, setGradingData] = useState({ grade: '', feedback: '' });
+  const [gradingStudentId, setGradingStudentId] = useState(null);
 
   useEffect(() => {
     fetchTasks();
@@ -72,7 +80,7 @@ const DoctorTaskManager = ({ courses }) => {
   const resetForm = () => {
     setEditingTask(null);
     setShowForm(false);
-    setFormData({ course_id: '', title: '', description: '', deadline: '', drive_link: '' });
+    setFormData({ course_id: '', title: '', description: '', deadline: '', drive_link: '', requires_submission: false });
   };
 
   const startEdit = (t) => {
@@ -83,13 +91,42 @@ const DoctorTaskManager = ({ courses }) => {
       title: t.title,
       description: t.description || '',
       deadline: t.deadline ? t.deadline.split('T')[0] : '',
-      drive_link: t.drive_link || ''
+      drive_link: t.drive_link || '',
+      requires_submission: t.requires_submission || false
     });
   };
 
   const isOverdue = (deadline) => {
     if (!deadline) return false;
     return new Date(deadline) < new Date();
+  };
+
+  const viewSubmissions = async (task) => {
+    setSelectedTaskForSubmissions(task);
+    setSubmissionsLoading(true);
+    try {
+      const res = await doctorApi('get', `/doctor/tasks/${task.id}/submissions`);
+      setSubmissions(res.data);
+    } catch (err) {
+      toast.error('Failed to load submissions');
+    } finally {
+      setSubmissionsLoading(false);
+    }
+  };
+
+  const handleGradeSubmit = async (studentId) => {
+    if (!gradingData.grade) return toast.error('Grade is required');
+    try {
+      await doctorApi('post', `/doctor/tasks/${selectedTaskForSubmissions.id}/submissions/${studentId}/grade`, gradingData);
+      toast.success('Grade submitted successfully');
+      setGradingStudentId(null);
+      setGradingData({ grade: '', feedback: '' });
+      // Refresh submissions
+      const res = await doctorApi('get', `/doctor/tasks/${selectedTaskForSubmissions.id}/submissions`);
+      setSubmissions(res.data);
+    } catch (err) {
+      toast.error('Failed to submit grade');
+    }
   };
 
   return (
@@ -181,6 +218,19 @@ const DoctorTaskManager = ({ courses }) => {
               </div>
             </div>
 
+            <div className="flex items-center gap-2 mt-2">
+              <input
+                type="checkbox"
+                id="requires_submission"
+                checked={formData.requires_submission}
+                onChange={(e) => setFormData({ ...formData, requires_submission: e.target.checked })}
+                className="w-4 h-4 text-emerald-500 rounded border-gray-300 focus:ring-emerald-500 dark:border-white/10 dark:bg-black/20"
+              />
+              <label htmlFor="requires_submission" className="text-sm font-bold text-gray-700 dark:text-gray-300">
+                Requires students to submit a project link/file
+              </label>
+            </div>
+
             <div className="flex gap-3 pt-2">
               <button
                 type="submit"
@@ -236,6 +286,11 @@ const DoctorTaskManager = ({ courses }) => {
                     <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2.5 py-1 rounded-lg">
                       {t.course_name}
                     </span>
+                    {t.requires_submission && (
+                      <span className="text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 px-2.5 py-1 rounded-lg">
+                        Requires Submission
+                      </span>
+                    )}
                     {isOverdue(t.deadline) && (
                       <span className="text-xs font-bold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 px-2.5 py-1 rounded-lg flex items-center gap-1">
                         <AlertTriangle className="w-3 h-3" /> Overdue
@@ -271,7 +326,15 @@ const DoctorTaskManager = ({ courses }) => {
                 </div>
 
                 {/* Actions */}
-                <div className="flex gap-2 shrink-0">
+                <div className="flex flex-wrap gap-2 shrink-0">
+                  {t.requires_submission && (
+                    <button
+                      onClick={() => viewSubmissions(t)}
+                      className="p-2.5 bg-blue-50 dark:bg-blue-500/10 border border-blue-200/60 dark:border-blue-500/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-500/20 rounded-xl transition-colors text-sm font-bold flex items-center gap-2"
+                    >
+                      <ClipboardList className="w-4 h-4" /> Submissions
+                    </button>
+                  )}
                   <button
                     onClick={() => startEdit(t)}
                     className="p-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200/60 dark:border-white/5 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-xl transition-colors"
@@ -292,6 +355,121 @@ const DoctorTaskManager = ({ courses }) => {
           ))
         )}
       </div>
+
+      {/* Submissions Modal */}
+      {selectedTaskForSubmissions && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-[#1a1a1a] rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+            <div className="p-6 border-b border-gray-200 dark:border-white/10 flex justify-between items-center bg-gray-50 dark:bg-white/5">
+              <div>
+                <h3 className="text-xl font-black text-gray-900 dark:text-white">Submissions</h3>
+                <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">{selectedTaskForSubmissions.title}</p>
+              </div>
+              <button 
+                onClick={() => setSelectedTaskForSubmissions(null)}
+                className="p-2 bg-white dark:bg-white/10 hover:bg-gray-100 dark:hover:bg-white/20 rounded-xl transition-colors text-gray-500 dark:text-slate-400"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="p-6 overflow-y-auto flex-1">
+              {submissionsLoading ? (
+                <div className="text-center py-10 text-gray-500">Loading submissions...</div>
+              ) : submissions.length === 0 ? (
+                <div className="text-center py-10 text-gray-500">No submissions yet for this task.</div>
+              ) : (
+                <div className="space-y-4">
+                  {submissions.map(sub => (
+                    <div key={sub.student_id} className="bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-5">
+                      <div className="flex flex-col md:flex-row justify-between gap-4">
+                        <div className="flex-1">
+                          <h4 className="font-bold text-gray-900 dark:text-white text-lg">{sub.student_name}</h4>
+                          <p className="text-xs text-gray-500 dark:text-slate-400 mb-3">
+                            Submitted on: {new Date(sub.completed_at).toLocaleString()}
+                          </p>
+                          
+                          {sub.submission_url && (
+                            <a 
+                              href={sub.submission_url} 
+                              target="_blank" 
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 px-3 py-2 rounded-lg text-sm font-medium hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors"
+                            >
+                              <ExternalLink className="w-4 h-4" /> View Submission Work
+                            </a>
+                          )}
+                          
+                          {(sub.grade || sub.feedback) && gradingStudentId !== sub.student_id && (
+                            <div className="mt-4 p-4 bg-white dark:bg-black/20 rounded-lg border border-emerald-100 dark:border-emerald-500/20">
+                              <div className="flex items-center gap-2 mb-2">
+                                <span className="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Current Grade:</span>
+                                <span className="font-black text-gray-900 dark:text-white">{sub.grade}</span>
+                              </div>
+                              {sub.feedback && (
+                                <div>
+                                  <span className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-slate-400 block mb-1">Feedback:</span>
+                                  <p className="text-sm text-gray-700 dark:text-gray-300">{sub.feedback}</p>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="w-full md:w-72 shrink-0">
+                          {gradingStudentId === sub.student_id ? (
+                            <div className="bg-white dark:bg-black/20 p-4 rounded-xl border border-blue-200 dark:border-blue-500/30">
+                              <h5 className="text-sm font-bold text-gray-900 dark:text-white mb-3">Evaluate Submission</h5>
+                              <input 
+                                type="text"
+                                placeholder="Grade (e.g. 10/10, A, Pass)"
+                                value={gradingData.grade}
+                                onChange={(e) => setGradingData({...gradingData, grade: e.target.value})}
+                                className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-2.5 text-sm mb-3 text-gray-900 dark:text-white focus:border-blue-500/50 focus:outline-none"
+                              />
+                              <textarea 
+                                placeholder="Feedback (Optional)"
+                                value={gradingData.feedback}
+                                onChange={(e) => setGradingData({...gradingData, feedback: e.target.value})}
+                                rows={2}
+                                className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-2.5 text-sm mb-3 text-gray-900 dark:text-white focus:border-blue-500/50 focus:outline-none resize-none"
+                              />
+                              <div className="flex gap-2">
+                                <button 
+                                  onClick={() => handleGradeSubmit(sub.student_id)}
+                                  className="flex-1 bg-blue-500 hover:bg-blue-600 text-white text-sm font-bold py-2 rounded-lg transition-colors"
+                                >
+                                  Save Grade
+                                </button>
+                                <button 
+                                  onClick={() => setGradingStudentId(null)}
+                                  className="px-3 bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/20 text-gray-700 dark:text-white text-sm font-bold rounded-lg transition-colors"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <button 
+                              onClick={() => {
+                                setGradingStudentId(sub.student_id);
+                                setGradingData({ grade: sub.grade || '', feedback: sub.feedback || '' });
+                              }}
+                              className="w-full py-2.5 bg-gray-900 dark:bg-white text-white dark:text-black font-bold rounded-xl text-sm hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors"
+                            >
+                              {sub.grade ? 'Edit Grade' : 'Grade Submission'}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
