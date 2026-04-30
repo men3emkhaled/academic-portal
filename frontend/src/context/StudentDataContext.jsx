@@ -134,7 +134,10 @@ export const StudentDataContextProvider = ({ children }) => {
   }, []);
 
   const fetchExams = useCallback(async () => {
-    if (!student?.department_id) return;
+    if (!student?.department_id) {
+      updateLoading('exams', false);
+      return;
+    }
     updateLoading('exams', true);
     try {
       const response = await studentApi.get('/exams', { params: { department_id: student.department_id } });
