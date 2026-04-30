@@ -2,22 +2,20 @@ const db = require('../config/database');
 const bcrypt = require('bcryptjs');
 
 class Doctor {
-    static async create(id, name, email, password, department_id = null) {
-        // Here we could hash the password
-        // The project seems to use plain text or simple hashes in some places. I'll use bcrypt.
+    static async create(name, email, password, department = null) {
         const hashedPassword = await bcrypt.hash(password, 10);
         
         const result = await db.query(
-            `INSERT INTO doctors (id, name, email, password, department_id)
-             VALUES ($1, $2, $3, $4, $5)
-             RETURNING id, name, email, department_id`,
-            [id, name, email, hashedPassword, department_id]
+            `INSERT INTO doctors (name, email, password, department)
+             VALUES ($1, $2, $3, $4)
+             RETURNING id, name, email, department`,
+            [name, email, hashedPassword, department]
         );
         return result.rows[0];
     }
 
     static async findById(id) {
-        const result = await db.query('SELECT id, name, email, department_id FROM doctors WHERE id = $1', [id]);
+        const result = await db.query('SELECT id, name, email, department FROM doctors WHERE id = $1', [id]);
         return result.rows[0];
     }
 
@@ -66,10 +64,9 @@ class Doctor {
 
     static async getAll() {
         const result = await db.query(`
-            SELECT d.id, d.name, d.email, d.department_id, dep.name as department_name
-            FROM doctors d
-            LEFT JOIN departments dep ON d.department_id = dep.id
-            ORDER BY d.name
+            SELECT id, name, email, department
+            FROM doctors
+            ORDER BY name
         `);
         return result.rows;
     }
