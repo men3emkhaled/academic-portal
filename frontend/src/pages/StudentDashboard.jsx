@@ -375,14 +375,15 @@ const StudentDashboard = () => {
                   <p className="text-gray-400 dark:text-gray-500 text-sm mt-1">Contact your administrator to enroll.</p>
                 </div>
               ) : (
+              ) : (
                 grades.map((grade, idx) => {
                   const colors = [
-                    { bg: 'bg-emerald-500/10', text: 'text-emerald-600 dark:text-emerald-400' },
-                    { bg: 'bg-blue-500/10', text: 'text-blue-600 dark:text-blue-400' },
-                    { bg: 'bg-violet-500/10', text: 'text-violet-600 dark:text-violet-400' },
-                    { bg: 'bg-amber-500/10', text: 'text-amber-600 dark:text-amber-400' },
-                    { bg: 'bg-rose-500/10', text: 'text-rose-600 dark:text-rose-400' },
-                    { bg: 'bg-cyan-500/10', text: 'text-cyan-600 dark:text-cyan-400' },
+                    { from: 'from-emerald-400', to: 'to-teal-500', text: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-500/10', shadow: 'hover:shadow-emerald-500/10' },
+                    { from: 'from-blue-400', to: 'to-indigo-500', text: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-500/10', shadow: 'hover:shadow-blue-500/10' },
+                    { from: 'from-violet-400', to: 'to-purple-500', text: 'text-violet-600 dark:text-violet-400', bg: 'bg-violet-500/10', shadow: 'hover:shadow-violet-500/10' },
+                    { from: 'from-amber-400', to: 'to-orange-500', text: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-500/10', shadow: 'hover:shadow-amber-500/10' },
+                    { from: 'from-rose-400', to: 'to-pink-500', text: 'text-rose-600 dark:text-rose-400', bg: 'bg-rose-500/10', shadow: 'hover:shadow-rose-500/10' },
+                    { from: 'from-cyan-400', to: 'to-sky-500', text: 'text-cyan-600 dark:text-cyan-400', bg: 'bg-cyan-500/10', shadow: 'hover:shadow-cyan-500/10' },
                   ];
                   const c = colors[idx % colors.length];
 
@@ -390,7 +391,8 @@ const StudentDashboard = () => {
                   const practical = parseFloat(grade.practical_score) || 0;
                   const oral = parseFloat(grade.oral_score) || 0;
                   const totalScore = midterm + practical + oral;
-                  const maxScore = parseFloat(grade.max_score) || 0;
+                  const maxScore = parseFloat(grade.max_score) || 100;
+                  const percentage = Math.min(100, (totalScore / maxScore) * 100);
                   
                   const hasScores = grade.midterm_score != null || grade.practical_score != null || grade.oral_score != null;
 
@@ -398,20 +400,54 @@ const StudentDashboard = () => {
                     <button
                       key={idx}
                       onClick={() => handleCourseClick(grade.course_id)}
-                      className="bg-white dark:bg-dark-card border border-gray-200 dark:border-white/5 rounded-[1.5rem] p-5 flex items-center gap-4 hover:border-primary/30 dark:hover:border-primary/30 transition-all duration-300 shadow-sm group text-left w-full hover:-translate-y-1 hover:shadow-md active:scale-[0.98]"
+                      className={`text-left relative overflow-hidden group rounded-[2rem] bg-white dark:bg-dark-card border border-gray-200 dark:border-white/5 p-6 transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl ${c.shadow} active:scale-[0.98] flex flex-col gap-5`}
                     >
-                      <div className={`w-12 h-12 rounded-2xl ${c.bg} flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300`}>
-                        <BookOpen className={`w-6 h-6 ${c.text}`} />
+                      <div className={`absolute -right-16 -top-16 w-40 h-40 ${c.bg} blur-[40px] rounded-full group-hover:scale-150 transition-transform duration-700`}></div>
+                      
+                      <div className="flex justify-between items-start relative z-10 w-full">
+                        <div className={`w-14 h-14 rounded-2xl ${c.bg} ${c.text} flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:-rotate-3 transition-all duration-500 border border-white/20 dark:border-white/5 shadow-sm`}>
+                          <BookOpen className="w-7 h-7" />
+                        </div>
+                        <div className={`w-9 h-9 rounded-full bg-gray-50 dark:bg-white/5 flex items-center justify-center border border-gray-100 dark:border-white/5 text-gray-400 group-hover:${c.text} group-hover:bg-white dark:group-hover:bg-white/10 transition-all duration-300`}>
+                          <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                        </div>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <span className={`text-[10px] font-bold uppercase tracking-wider mb-0.5 block ${c.text} opacity-80`}>
-                          {hasScores ? `Score: ${totalScore.toFixed(2)} / ${maxScore.toFixed(2)}` : 'Course Details'}
-                        </span>
-                        <h4 className="font-bold text-gray-900 dark:text-white text-sm sm:text-base truncate group-hover:text-primary transition-colors">{grade.course_name}</h4>
+
+                      <div className="relative z-10 w-full">
+                        <h4 className="font-headline font-extrabold text-lg sm:text-xl leading-tight text-gray-900 dark:text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-gray-900 group-hover:to-gray-600 dark:group-hover:from-white dark:group-hover:to-gray-300 transition-all">
+                          {grade.course_name}
+                        </h4>
                       </div>
-                      <div className="w-10 h-10 flex items-center justify-center text-gray-400 group-hover:text-primary transition-all bg-gray-50 dark:bg-white/5 rounded-full group-hover:bg-primary/10 flex-shrink-0">
-                        <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                      </div>
+
+                      {hasScores ? (
+                        <div className="mt-auto relative z-10 w-full space-y-3">
+                          <div className="flex justify-between items-end">
+                            <div className="flex flex-col">
+                              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Current Grade</span>
+                              <span className={`text-xl font-black ${c.text} tracking-tighter`}>
+                                {totalScore.toFixed(2)}
+                                <span className="text-gray-300 dark:text-gray-600 text-sm font-bold ml-1">/ {maxScore.toFixed(2)}</span>
+                              </span>
+                            </div>
+                            <span className={`text-xs font-black ${c.text} bg-white dark:bg-white/5 px-2 py-1 rounded-lg border border-gray-100 dark:border-white/5 shadow-sm`}>
+                              {percentage.toFixed(0)}%
+                            </span>
+                          </div>
+                          
+                          <div className="h-2 w-full bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden p-0.5 border border-gray-200/50 dark:border-white/5">
+                            <div 
+                              className={`h-full bg-gradient-to-r ${c.from} ${c.to} rounded-full transition-all duration-1000 ease-out shadow-sm`}
+                              style={{ width: `${percentage}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="mt-auto pt-4 border-t border-gray-100 dark:border-white/5 relative z-10 w-full">
+                           <span className="text-xs font-semibold text-gray-400 dark:text-gray-500 flex items-center gap-2">
+                             <Info className="w-4 h-4 opacity-50" /> No scores posted yet
+                           </span>
+                        </div>
+                      )}
                     </button>
                   );
                 })
