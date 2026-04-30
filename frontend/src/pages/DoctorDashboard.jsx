@@ -2,8 +2,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDoctorAuth } from '../context/DoctorAuthContext';
 import {
+  BookOpen, TrendingUp, FileText, CheckSquare, Award, LogOut, GraduationCap,
   Sun, Moon, LayoutDashboard, FolderOpen, ClipboardList, BarChart3, Menu, X, ChevronRight,
-  Activity, PieChart, ListChecks, Megaphone
+  Activity, PieChart, ListChecks, Megaphone, Users
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import DoctorResourceManager from '../components/doctor/DoctorResourceManager';
