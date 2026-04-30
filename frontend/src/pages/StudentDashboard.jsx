@@ -377,31 +377,73 @@ const StudentDashboard = () => {
               ) : (
                 grades.map((grade, idx) => {
                   const colors = [
-                    { from: 'from-emerald-500', to: 'to-teal-600', bg: 'bg-emerald-500/10', text: 'text-emerald-600 dark:text-emerald-400', border: 'border-emerald-500/20' },
-                    { from: 'from-blue-500', to: 'to-indigo-600', bg: 'bg-blue-500/10', text: 'text-blue-600 dark:text-blue-400', border: 'border-blue-500/20' },
-                    { from: 'from-violet-500', to: 'to-purple-600', bg: 'bg-violet-500/10', text: 'text-violet-600 dark:text-violet-400', border: 'border-violet-500/20' },
-                    { from: 'from-amber-500', to: 'to-orange-600', bg: 'bg-amber-500/10', text: 'text-amber-600 dark:text-amber-400', border: 'border-amber-500/20' },
-                    { from: 'from-rose-500', to: 'to-pink-600', bg: 'bg-rose-500/10', text: 'text-rose-600 dark:text-rose-400', border: 'border-rose-500/20' },
-                    { from: 'from-cyan-500', to: 'to-sky-600', bg: 'bg-cyan-500/10', text: 'text-cyan-600 dark:text-cyan-400', border: 'border-cyan-500/20' },
+                    { from: 'from-emerald-400', to: 'to-teal-500', text: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-500/10', shadow: 'hover:shadow-emerald-500/20' },
+                    { from: 'from-blue-400', to: 'to-indigo-500', text: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-500/10', shadow: 'hover:shadow-blue-500/20' },
+                    { from: 'from-violet-400', to: 'to-purple-500', text: 'text-violet-600 dark:text-violet-400', bg: 'bg-violet-500/10', shadow: 'hover:shadow-violet-500/20' },
+                    { from: 'from-amber-400', to: 'to-orange-500', text: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-500/10', shadow: 'hover:shadow-amber-500/20' },
+                    { from: 'from-rose-400', to: 'to-pink-500', text: 'text-rose-600 dark:text-rose-400', bg: 'bg-rose-500/10', shadow: 'hover:shadow-rose-500/20' },
+                    { from: 'from-cyan-400', to: 'to-sky-500', text: 'text-cyan-600 dark:text-cyan-400', bg: 'bg-cyan-500/10', shadow: 'hover:shadow-cyan-500/20' },
                   ];
                   const c = colors[idx % colors.length];
+                  
+                  const totalScore = (grade.midterm_score || 0) + (grade.practical_score || 0) + (grade.oral_score || 0);
+                  const hasScores = grade.midterm_score != null || grade.practical_score != null || grade.oral_score != null;
+
                   return (
                     <button
                       key={idx}
                       onClick={() => handleCourseClick(grade.course_id)}
-                      className={`text-left relative overflow-hidden group bg-white dark:bg-dark-card border border-gray-200 dark:border-white/5 rounded-[1.5rem] p-5 sm:p-6 hover:border-gray-300 dark:hover:border-white/10 hover:-translate-y-1 hover:shadow-lg transition-all duration-300 active:scale-[0.97]`}
+                      className={`text-left relative overflow-hidden group rounded-[1.5rem] bg-white dark:bg-dark-card border border-gray-200 dark:border-white/5 p-5 sm:p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${c.shadow} active:scale-[0.98] flex flex-col gap-4`}
                     >
-                      <div className={`absolute top-0 left-0 w-1 h-full bg-gradient-to-b ${c.from} ${c.to} rounded-l-[1.5rem] opacity-80`}></div>
-                      <div className="flex items-center gap-4">
-                        <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-xl ${c.bg} ${c.text} flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300`}>
-                          <BookOpen className="w-5 h-5 sm:w-6 sm:h-6" />
+                      <div className={`absolute -right-12 -top-12 w-32 h-32 ${c.bg} blur-[30px] rounded-full group-hover:scale-150 transition-transform duration-700`}></div>
+                      
+                      <div className="flex justify-between items-start relative z-10 w-full">
+                        <div className={`w-12 h-12 rounded-[1rem] ${c.bg} ${c.text} flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:-rotate-3 transition-all duration-500`}>
+                          <BookOpen className="w-6 h-6" />
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-bold text-sm sm:text-[15px] leading-snug text-gray-900 dark:text-white truncate">{grade.course_name}</h4>
-                          <span className={`text-[10px] sm:text-[11px] font-semibold ${c.text} mt-0.5 block opacity-80`}>Tap to view details</span>
+                        <div className={`w-8 h-8 rounded-full bg-gray-50 dark:bg-white/5 flex items-center justify-center border border-gray-100 dark:border-white/5 text-gray-400 group-hover:${c.text} group-hover:bg-white dark:group-hover:bg-white/10 transition-all duration-300`}>
+                          <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                         </div>
-                        <ChevronRight className="w-4 h-4 text-gray-300 dark:text-gray-600 group-hover:text-gray-500 dark:group-hover:text-gray-400 group-hover:translate-x-0.5 flex-shrink-0 transition-all" />
                       </div>
+
+                      <div className="relative z-10 w-full">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md ${c.bg} ${c.text}`}>
+                            Course
+                          </span>
+                          {hasScores && (
+                            <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">
+                              Graded
+                            </span>
+                          )}
+                        </div>
+                        <h4 className="font-headline font-bold text-base sm:text-lg leading-tight text-gray-900 dark:text-white line-clamp-2 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-gray-900 group-hover:to-gray-600 dark:group-hover:from-white dark:group-hover:to-gray-300 transition-all">
+                          {grade.course_name}
+                        </h4>
+                      </div>
+
+                      {hasScores ? (
+                        <div className="mt-auto pt-4 border-t border-gray-100 dark:border-white/5 relative z-10 w-full">
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Current Score</span>
+                            <span className={`text-[11px] font-black ${c.text} bg-white dark:bg-white/5 px-2 py-0.5 rounded-md shadow-sm border border-gray-100 dark:border-white/5`}>
+                              {totalScore} / {grade.max_score || '-'}
+                            </span>
+                          </div>
+                          <div className="h-1.5 w-full bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden">
+                            <div 
+                              className={`h-full bg-gradient-to-r ${c.from} ${c.to} rounded-full transition-all duration-1000 ease-out`}
+                              style={{ width: `${Math.min(100, (totalScore / (grade.max_score || 100)) * 100)}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="mt-auto pt-4 border-t border-gray-100 dark:border-white/5 relative z-10 w-full">
+                           <span className="text-[11px] font-semibold text-gray-400 dark:text-gray-500 flex items-center gap-1.5">
+                             <Info className="w-3.5 h-3.5" /> No grades posted yet
+                           </span>
+                        </div>
+                      )}
                     </button>
                   );
                 })
