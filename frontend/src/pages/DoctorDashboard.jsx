@@ -117,7 +117,7 @@ const DoctorDashboard = () => {
             </div>
 
             {/* Desktop Navigation */}
-            <div className="hidden lg:flex items-center gap-1 bg-gray-100/80 dark:bg-white/[0.03] p-1.5 rounded-2xl border border-gray-200/50 dark:border-white/5">
+            <div className="hidden lg:flex items-center gap-0.5 bg-gray-100/80 dark:bg-white/[0.03] p-1 rounded-xl border border-gray-200/50 dark:border-white/5 overflow-x-auto no-scrollbar">
               {TABS.map(tab => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.id;
@@ -125,14 +125,15 @@ const DoctorDashboard = () => {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${
+                    title={tab.label}
+                    className={`flex items-center gap-1.5 px-2.5 xl:px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-200 whitespace-nowrap ${
                       isActive
-                        ? 'bg-white dark:bg-white/10 text-gray-900 dark:text-white shadow-sm dark:shadow-none'
+                        ? 'bg-white dark:bg-white/10 text-gray-900 dark:text-white shadow-sm'
                         : 'text-gray-500 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-300'
                     }`}
                   >
-                    <Icon className={`w-4 h-4 ${isActive ? `text-${tab.color}-500` : ''}`} />
-                    {tab.label}
+                    <Icon className={`w-3.5 h-3.5 flex-shrink-0 ${isActive ? `text-${tab.color}-500` : ''}`} />
+                    <span className="hidden xl:inline">{tab.label}</span>
                   </button>
                 );
               })}
