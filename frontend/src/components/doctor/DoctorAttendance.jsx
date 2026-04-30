@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useDoctorAuth } from '../../context/DoctorAuthContext';
 import toast from 'react-hot-toast';
 import { Users, QrCode, Plus, CheckCircle2, Circle, Search, X } from 'lucide-react';
@@ -14,6 +14,8 @@ const DoctorAttendance = ({ courses }) => {
   const [loading, setLoading] = useState(false);
   const [scanning, setScanning] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const scanLock = useRef(false);
+  const lastScanned = useRef('');
 
   useEffect(() => {
     if (selectedCourseId) {
@@ -77,36 +79,35 @@ const DoctorAttendance = ({ courses }) => {
     }
   };
 
-  const handleScan = async (text) => {
-    // text might be an object/array in newer versions of the library
-    let tokenValue = '';
-    if (typeof text === 'string') {
-      tokenValue = text;
-    } else if (text && text.length > 0 && text[0].rawValue) {
-      tokenValue = text[0].rawValue;
-    } else if (text && text.rawValue) {
-      tokenValue = text.rawValue;
-    } else {
-      tokenValue = String(text);
-    }
-
-    if (!tokenValue || !activeSession) return;
+  const handleScan = async (detectedCodes) => {
+    if (!detectedCodes || detectedCodes.length === 0 || !activeSession) return;
     
-    // Play a small beep sound for feedback
-    try {
-      const audio = new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU');
-      audio.play().catch(()=>console.log('Audio blocked'));
-    } catch(e) {}
+    const tokenValue = detectedCodes[0]?.rawValue || '';
+    if (!tokenValue) return;
+
+    // Prevent duplicate scans of the same QR
+    if (scanLock.current || tokenValue === lastScanned.current) return;
+    scanLock.current = true;
+    lastScanned.current = tokenValue;
+
+    // Show instant loading feedback
+    const toastId = toast.loading('Scanning...');
 
     try {
       const res = await doctorApi('post', '/doctor/attendance/scan', {
         sessionId: activeSession.id,
         token: tokenValue
       });
-      toast.success(`${res.data.student.name} marked present!`);
-      fetchRecords(); // Refresh list
+      toast.success(`✅ ${res.data.student.name} marked present!`, { id: toastId });
+      fetchRecords();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Invalid QR Code');
+      toast.error(err.response?.data?.message || 'Invalid QR Code', { id: toastId });
+    } finally {
+      // Allow next scan after a short delay
+      setTimeout(() => {
+        scanLock.current = false;
+        lastScanned.current = '';
+      }, 1500);
     }
   };
 
@@ -255,6 +256,7 @@ const DoctorAttendance = ({ courses }) => {
                     <Scanner 
                       onScan={(detectedCodes) => handleScan(detectedCodes)} 
                       onError={(err) => console.log(err)} 
+                      scanDelay={300}
                       components={{ audio: false, finder: false }}
                     />
                   </div>
