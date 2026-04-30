@@ -8,11 +8,11 @@ async function createTables() {
         // Create doctors table
         await client.query(`
             CREATE TABLE IF NOT EXISTS doctors (
-                id VARCHAR(50) PRIMARY KEY,
+                id SERIAL PRIMARY KEY,
                 name VARCHAR(100) NOT NULL,
                 email VARCHAR(100) UNIQUE,
                 password VARCHAR(255) NOT NULL,
-                department_id INTEGER REFERENCES departments(id) ON DELETE SET NULL,
+                department VARCHAR(100),
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
@@ -23,9 +23,9 @@ async function createTables() {
         // Create doctor_courses table (Many-to-Many)
         await client.query(`
             CREATE TABLE IF NOT EXISTS doctor_courses (
-                doctor_id VARCHAR(50) REFERENCES doctors(id) ON DELETE CASCADE,
+                doctor_id INTEGER REFERENCES doctors(id) ON DELETE CASCADE,
                 course_id INTEGER REFERENCES courses(id) ON DELETE CASCADE,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 PRIMARY KEY (doctor_id, course_id)
             );
         `);
