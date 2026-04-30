@@ -6,8 +6,8 @@ import { QRCodeSVG } from 'qrcode.react';
 import toast from 'react-hot-toast';
 import { 
   Megaphone, QrCode, ListChecks, CheckCircle2, Circle, 
-  ArrowLeft, Calendar, User, ExternalLink, 
-  Loader2, Clock, BookOpen, X
+  ArrowLeft, Calendar, User, ExternalLink, Users,
+  Loader2, Clock, BookOpen, X, Check, XCircle
 } from 'lucide-react';
 
 const StudentCourseHub = () => {
@@ -62,12 +62,15 @@ const StudentCourseHub = () => {
 
   if (!data) return null;
 
-  const { course, qrToken, announcements, progress = [], tasks } = data;
+  const { course, qrToken, announcements, progress = [], tasks, attendance = [] } = data;
+
+  const attendedCount = attendance.filter(a => a.is_present).length;
 
   const tabs = [
     { id: 'announcements', label: 'News', icon: Megaphone, count: announcements.length },
     { id: 'progress', label: 'Progress', icon: ListChecks, count: progress.filter(p => p.is_completed).length + '/' + progress.length },
-    { id: 'tasks', label: 'Tasks', icon: CheckCircle2, count: tasks.length }
+    { id: 'tasks', label: 'Tasks', icon: CheckCircle2, count: tasks.length },
+    { id: 'attendance', label: 'Attendance', icon: Users, count: `${attendedCount}/${attendance.length}` }
   ];
 
   return (
@@ -120,6 +123,10 @@ const StudentCourseHub = () => {
                 <div className="text-center px-3 py-2 bg-gray-50 dark:bg-black/20 rounded-xl border border-gray-100 dark:border-white/5">
                   <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Tasks</p>
                   <p className="text-lg font-black text-gray-900 dark:text-white">{tasks.length}</p>
+                </div>
+                <div className="text-center px-3 py-2 bg-gray-50 dark:bg-black/20 rounded-xl border border-gray-100 dark:border-white/5">
+                  <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Attendance</p>
+                  <p className="text-lg font-black text-gray-900 dark:text-white">{attendedCount}/{attendance.length}</p>
                 </div>
               </div>
             </div>
@@ -264,6 +271,69 @@ const StudentCourseHub = () => {
                           )}
                         </div>
                       ))
+                    )}
+                  </div>
+                )}
+
+                {activeTab === 'attendance' && (
+                  <div className="space-y-3 animate-fadeIn">
+                    {attendance.length === 0 ? (
+                      <EmptyState icon={Users} text="No attendance records" sub="Your instructor hasn't started any sessions yet." />
+                    ) : (
+                      <>
+                        <div className="flex gap-4 mb-4">
+                          <div className="flex-1 bg-teal-50 dark:bg-teal-500/10 border border-teal-200 dark:border-teal-500/20 rounded-2xl p-4 flex items-center justify-between">
+                            <div>
+                              <p className="text-xs font-bold text-teal-600 dark:text-teal-400 uppercase tracking-widest mb-1">Present</p>
+                              <p className="text-2xl font-black text-teal-700 dark:text-teal-300">{attendedCount}</p>
+                            </div>
+                            <Check className="w-8 h-8 text-teal-500 opacity-50" />
+                          </div>
+                          <div className="flex-1 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-2xl p-4 flex items-center justify-between">
+                            <div>
+                              <p className="text-xs font-bold text-red-600 dark:text-red-400 uppercase tracking-widest mb-1">Absent</p>
+                              <p className="text-2xl font-black text-red-700 dark:text-red-300">{attendance.length - attendedCount}</p>
+                            </div>
+                            <XCircle className="w-8 h-8 text-red-500 opacity-50" />
+                          </div>
+                        </div>
+
+                        {attendance.map((record) => (
+                          <div 
+                            key={record.id} 
+                            className={`flex items-center justify-between p-4 rounded-xl border transition-colors ${
+                              record.is_present 
+                                ? 'bg-white dark:bg-white/[0.02] border-gray-200 dark:border-white/5' 
+                                : 'bg-red-50/50 dark:bg-red-500/5 border-red-100 dark:border-red-500/10'
+                            }`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                                record.is_present 
+                                  ? 'bg-teal-100 text-teal-600 dark:bg-teal-500/20 dark:text-teal-400' 
+                                  : 'bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400'
+                              }`}>
+                                {record.is_present ? <Check className="w-5 h-5" /> : <X className="w-5 h-5" />}
+                              </div>
+                              <div>
+                                <p className={`font-bold ${record.is_present ? 'text-gray-900 dark:text-white' : 'text-red-700 dark:text-red-400'}`}>
+                                  {new Date(record.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  {record.is_present ? 'You were marked present' : 'Missed session'}
+                                </p>
+                              </div>
+                            </div>
+                            <div className={`px-3 py-1 rounded-full text-xs font-bold ${
+                              record.is_present 
+                                ? 'bg-teal-50 text-teal-600 dark:bg-teal-500/10 dark:text-teal-400' 
+                                : 'bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400'
+                            }`}>
+                              {record.is_present ? 'Present' : 'Absent'}
+                            </div>
+                          </div>
+                        ))}
+                      </>
                     )}
                   </div>
                 )}

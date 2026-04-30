@@ -324,12 +324,23 @@ const getCourseHubData = async (req, res) => {
       [studentId, courseId]
     );
 
+    const attendanceRes = await db.query(
+      `SELECT s.id, s.date, 
+        CASE WHEN r.id IS NOT NULL THEN true ELSE false END as is_present
+       FROM attendance_sessions s
+       LEFT JOIN attendance_records r ON s.id = r.session_id AND r.student_id = $1
+       WHERE s.course_id = $2
+       ORDER BY s.date DESC`,
+      [studentId, courseId]
+    );
+
     res.json({
       course,
       qrToken: token,
       announcements: announcementsRes.rows,
       progress: progressRes.rows,
-      tasks: tasksRes.rows
+      tasks: tasksRes.rows,
+      attendance: attendanceRes.rows
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
