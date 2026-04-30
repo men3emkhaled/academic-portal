@@ -378,7 +378,7 @@ const StudentDashboard = () => {
                       <div className="flex justify-between items-start mb-5 relative">
                         <div>
                           <h4 className="font-headline font-bold text-lg leading-tight mb-1 text-gray-900 dark:text-white">{grade.course_name}</h4>
-                          <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">{t('sidebar.courses_grades').split(' ')[0]}</span>
+                          <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">{t('sidebar.courses_grades')?.split(' ')[0] || 'GRADES'}</span>
                         </div>
                         <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter border ${statusColor} border-current/20`}>
                           {status}

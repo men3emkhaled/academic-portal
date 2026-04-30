@@ -205,7 +205,7 @@ const Sidebar = ({ onLogout }) => {
                 <div>
                   <h3 className="text-[16px] font-extrabold text-gray-900 dark:text-white leading-none tracking-tight font-headline mb-1">ZNU Menu</h3>
                   {student && (
-                    <p className="text-[11px] text-primary/80 dark:text-primary/70 font-bold uppercase tracking-widest mt-1 truncate max-w-[120px]">{student.name.split(' ')[0]}</p>
+                    <p className="text-[11px] text-primary/80 dark:text-primary/70 font-bold uppercase tracking-widest mt-1 truncate max-w-[120px]">{student.name?.split(' ')[0] || ''}</p>
                   )}
                 </div>
               </div>

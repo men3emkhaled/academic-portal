@@ -23,4 +23,16 @@ msalInstance.initialize().then(() => {
       </MsalProvider>
     </React.StrictMode>
   );
+}).catch((error) => {
+  console.error("MSAL Initialization failed. Rendering app anyway to avoid black screen.", error);
+  const root = ReactDOM.createRoot(document.getElementById('root'));
+  root.render(
+    <React.StrictMode>
+      <MsalProvider instance={msalInstance}>
+        <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+          <App />
+        </GoogleOAuthProvider>
+      </MsalProvider>
+    </React.StrictMode>
+  );
 });
