@@ -17,9 +17,12 @@ const api = axios.create({
 // إضافة الـ Token للطلبات إذا كان المستخدم مسجلاً للدخول (Admin)
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('adminToken');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    // Only attach adminToken if no Authorization header is already provided
+    if (!config.headers.Authorization) {
+      const token = localStorage.getItem('adminToken');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
     return config;
   },
