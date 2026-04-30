@@ -55,6 +55,7 @@ const studentLogin = async (req, res) => {
         email: student.email || null,
         level: student.level,
         section: student.section,
+        department_id: student.department_id,
         role: student.role || 'student',
         permissions: student.permissions || []
       }
