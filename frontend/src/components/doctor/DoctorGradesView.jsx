@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useDoctorAuth } from '../../context/DoctorAuthContext';
 import toast from 'react-hot-toast';
-import { TrendingUp, Users, Award, Download, FileSpreadsheet } from 'lucide-react';
+import { TrendingUp, Users, Award, Download, FileSpreadsheet, Edit2, Save, X } from 'lucide-react';
 
 const DoctorGradesView = ({ courses }) => {
   const { doctorApi } = useDoctorAuth();
   const [selectedCourseId, setSelectedCourseId] = useState('');
   const [grades, setGrades] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [editingEnrollmentId, setEditingEnrollmentId] = useState(null);
+  const [editValues, setEditValues] = useState({ midterm_score: '', practical_score: '', oral_score: '' });
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (selectedCourseId) {
@@ -26,6 +29,34 @@ const DoctorGradesView = ({ courses }) => {
       toast.error('Failed to load grades');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleEditClick = (g) => {
+    setEditingEnrollmentId(g.enrollment_id);
+    setEditValues({
+      midterm_score: g.midterm_score !== null ? g.midterm_score : '',
+      practical_score: g.practical_score !== null ? g.practical_score : '',
+      oral_score: g.oral_score !== null ? g.oral_score : ''
+    });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingEnrollmentId(null);
+    setEditValues({ midterm_score: '', practical_score: '', oral_score: '' });
+  };
+
+  const handleSaveGrade = async (enrollmentId) => {
+    setSaving(true);
+    try {
+      await doctorApi('put', `/doctor/grades/${selectedCourseId}/enrollments/${enrollmentId}`, editValues);
+      toast.success('Grade updated successfully');
+      setEditingEnrollmentId(null);
+      fetchGrades();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to update grade');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -111,6 +142,7 @@ const DoctorGradesView = ({ courses }) => {
                   <th className="p-4 font-bold text-center">Practical (10)</th>
                   <th className="p-4 font-bold text-center">Oral (10)</th>
                   <th className="p-4 font-bold text-center">Total (40)</th>
+                  <th className="p-4 font-bold text-center">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -125,20 +157,73 @@ const DoctorGradesView = ({ courses }) => {
                         {g.section || '-'}
                       </span>
                     </td>
-                    <td className="p-4 text-center font-medium">
-                      {g.midterm_score !== null ? g.midterm_score : '-'}
-                    </td>
-                    <td className="p-4 text-center font-medium">
-                      {g.practical_score !== null ? g.practical_score : '-'}
-                    </td>
-                    <td className="p-4 text-center font-medium">
-                      {g.oral_score !== null ? g.oral_score : '-'}
-                    </td>
-                    <td className="p-4 text-center">
-                      <span className="font-black text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-500/10 px-3 py-1 rounded-lg">
-                        {g.total_score !== null ? g.total_score : 0}
-                      </span>
-                    </td>
+                    {editingEnrollmentId === g.enrollment_id ? (
+                      <>
+                        <td className="p-4 text-center">
+                          <input
+                            type="number"
+                            min="0"
+                            max="20"
+                            className="w-16 p-1 border rounded text-center dark:bg-black/50 dark:text-white"
+                            value={editValues.midterm_score}
+                            onChange={(e) => setEditValues({ ...editValues, midterm_score: e.target.value })}
+                          />
+                        </td>
+                        <td className="p-4 text-center">
+                          <input
+                            type="number"
+                            min="0"
+                            max="10"
+                            className="w-16 p-1 border rounded text-center dark:bg-black/50 dark:text-white"
+                            value={editValues.practical_score}
+                            onChange={(e) => setEditValues({ ...editValues, practical_score: e.target.value })}
+                          />
+                        </td>
+                        <td className="p-4 text-center">
+                          <input
+                            type="number"
+                            min="0"
+                            max="10"
+                            className="w-16 p-1 border rounded text-center dark:bg-black/50 dark:text-white"
+                            value={editValues.oral_score}
+                            onChange={(e) => setEditValues({ ...editValues, oral_score: e.target.value })}
+                          />
+                        </td>
+                        <td className="p-4 text-center text-gray-400">-</td>
+                        <td className="p-4 text-center">
+                          <div className="flex items-center justify-center gap-2">
+                            <button onClick={() => handleSaveGrade(g.enrollment_id)} disabled={saving} className="p-1.5 bg-emerald-100 text-emerald-600 rounded-lg hover:bg-emerald-200">
+                              <Save className="w-4 h-4" />
+                            </button>
+                            <button onClick={handleCancelEdit} disabled={saving} className="p-1.5 bg-red-100 text-red-600 rounded-lg hover:bg-red-200">
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </>
+                    ) : (
+                      <>
+                        <td className="p-4 text-center font-medium">
+                          {g.midterm_score !== null ? g.midterm_score : '-'}
+                        </td>
+                        <td className="p-4 text-center font-medium">
+                          {g.practical_score !== null ? g.practical_score : '-'}
+                        </td>
+                        <td className="p-4 text-center font-medium">
+                          {g.oral_score !== null ? g.oral_score : '-'}
+                        </td>
+                        <td className="p-4 text-center">
+                          <span className="font-black text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-500/10 px-3 py-1 rounded-lg">
+                            {g.total_score !== null ? g.total_score : 0}
+                          </span>
+                        </td>
+                        <td className="p-4 text-center">
+                          <button onClick={() => handleEditClick(g)} className="p-1.5 bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-violet-100 hover:text-violet-600 dark:hover:bg-violet-500/20 dark:hover:text-violet-400 transition-colors">
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                        </td>
+                      </>
+                    )}
                   </tr>
                 ))}
               </tbody>
