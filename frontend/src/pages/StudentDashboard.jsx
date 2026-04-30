@@ -386,7 +386,12 @@ const StudentDashboard = () => {
                   ];
                   const c = colors[idx % colors.length];
 
-                  const totalScore = Number(grade.midterm_score || 0) + Number(grade.practical_score || 0) + Number(grade.oral_score || 0);
+                  const midterm = parseFloat(grade.midterm_score) || 0;
+                  const practical = parseFloat(grade.practical_score) || 0;
+                  const oral = parseFloat(grade.oral_score) || 0;
+                  const totalScore = midterm + practical + oral;
+                  const maxScore = parseFloat(grade.max_score) || 0;
+                  
                   const hasScores = grade.midterm_score != null || grade.practical_score != null || grade.oral_score != null;
 
                   return (
@@ -400,7 +405,7 @@ const StudentDashboard = () => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <span className={`text-[10px] font-bold uppercase tracking-wider mb-0.5 block ${c.text} opacity-80`}>
-                          {hasScores ? `Score: ${totalScore.toFixed(2)} / ${Number(grade.max_score || 0).toFixed(2)}` : 'Course Details'}
+                          {hasScores ? `Score: ${totalScore.toFixed(2)} / ${maxScore.toFixed(2)}` : 'Course Details'}
                         </span>
                         <h4 className="font-bold text-gray-900 dark:text-white text-sm sm:text-base truncate group-hover:text-primary transition-colors">{grade.course_name}</h4>
                       </div>
