@@ -128,11 +128,10 @@ const DoctorDashboard = () => {
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
                     title={tab.label}
-                    className={`flex items-center gap-1.5 px-2.5 xl:px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-200 whitespace-nowrap ${
-                      isActive
+                    className={`flex items-center gap-1.5 px-2.5 xl:px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-200 whitespace-nowrap ${isActive
                         ? 'bg-white dark:bg-white/10 text-gray-900 dark:text-white shadow-sm'
                         : 'text-gray-500 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-300'
-                    }`}
+                      }`}
                   >
                     <Icon className={`w-3.5 h-3.5 flex-shrink-0 ${isActive ? `text-${tab.color}-500` : ''}`} />
                     <span className="hidden xl:inline">{tab.label}</span>
@@ -177,11 +176,10 @@ const DoctorDashboard = () => {
                   <button
                     key={tab.id}
                     onClick={() => { setActiveTab(tab.id); setMobileMenuOpen(false); }}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
-                      isActive
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${isActive
                         ? 'bg-violet-50 dark:bg-violet-500/10 text-violet-600 dark:text-violet-400'
                         : 'text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-white/5'
-                    }`}
+                      }`}
                   >
                     <Icon className="w-5 h-5" />
                     {tab.label}
@@ -280,7 +278,7 @@ const DoctorDashboard = () => {
                 </h3>
                 {dataLoading ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {[1,2,3].map(i => (
+                    {[1, 2, 3].map(i => (
                       <div key={i} className="bg-white dark:bg-white/5 border border-gray-200/60 dark:border-white/5 rounded-2xl p-6 animate-pulse">
                         <div className="h-5 bg-gray-200 dark:bg-white/10 rounded w-3/4 mb-3"></div>
                         <div className="h-3 bg-gray-100 dark:bg-white/5 rounded w-1/2"></div>

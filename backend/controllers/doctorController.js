@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const Doctor = require('../models/Doctor');
 const db = require('../config/database');
+const XLSX = require('xlsx');
 
 // ==================== AUTH ====================
 const login = async (req, res) => {
@@ -117,8 +118,8 @@ const getMyQuizzes = async (req, res) => {
 const createQuiz = async (req, res) => {
     try {
         const { course_id, title, description, time_limit_minutes, passing_score,
-                max_attempts, start_date, end_date, is_official } = req.body;
-        
+            max_attempts, start_date, end_date, is_official } = req.body;
+
         if (!course_id || !title || !time_limit_minutes) {
             return res.status(400).json({ message: 'Missing required fields' });
         }
@@ -135,7 +136,7 @@ const createQuiz = async (req, res) => {
                  max_attempts, start_date, end_date, is_published, is_official) 
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, false, $9) RETURNING *`,
             [course_id, title, description, time_limit_minutes, passing_score || 50,
-             max_attempts || 1, start_date || null, end_date || null, is_official || false]
+                max_attempts || 1, start_date || null, end_date || null, is_official || false]
         );
         res.status(201).json(result.rows[0]);
     } catch (error) {
@@ -147,7 +148,7 @@ const updateQuiz = async (req, res) => {
     try {
         const { id } = req.params;
         const { course_id, title, description, time_limit_minutes, passing_score,
-                max_attempts, start_date, end_date, is_official } = req.body;
+            max_attempts, start_date, end_date, is_official } = req.body;
 
         // Verify quiz belongs to doctor's courses
         const quizCheck = await db.query(
@@ -168,7 +169,7 @@ const updateQuiz = async (req, res) => {
                  is_official = $9, updated_at = CURRENT_TIMESTAMP 
              WHERE id = $10 RETURNING *`,
             [course_id, title, description, time_limit_minutes, passing_score,
-             max_attempts || 1, start_date || null, end_date || null, is_official || false, id]
+                max_attempts || 1, start_date || null, end_date || null, is_official || false, id]
         );
         res.json(result.rows[0]);
     } catch (error) {
@@ -261,7 +262,7 @@ const addQuestion = async (req, res) => {
                 (quiz_id, question_text, question_type, options, correct_answer, points, explanation, image_url) 
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
             [quizId, question_text, question_type, JSON.stringify(options),
-             correct_answer, points || 1, explanation || null, image_url || null]
+                correct_answer, points || 1, explanation || null, image_url || null]
         );
         res.status(201).json(result.rows[0]);
     } catch (error) {
@@ -290,7 +291,7 @@ const updateQuestion = async (req, res) => {
                  points = $5, explanation = $6, image_url = $7, updated_at = CURRENT_TIMESTAMP 
              WHERE id = $8 AND quiz_id = $9 RETURNING *`,
             [question_text, question_type, JSON.stringify(options), correct_answer,
-             points, explanation || null, image_url || null, questionId, quizId]
+                points, explanation || null, image_url || null, questionId, quizId]
         );
         if (result.rows.length === 0) return res.status(404).json({ message: 'Question not found' });
         res.json(result.rows[0]);
@@ -483,9 +484,9 @@ const updateGrade = async (req, res) => {
                 updated_at = CURRENT_TIMESTAMP
              RETURNING *`,
             [
-                enrollmentId, 
-                midterm_score !== '' && midterm_score !== null ? midterm_score : null, 
-                practical_score !== '' && practical_score !== null ? practical_score : null, 
+                enrollmentId,
+                midterm_score !== '' && midterm_score !== null ? midterm_score : null,
+                practical_score !== '' && practical_score !== null ? practical_score : null,
                 oral_score !== '' && oral_score !== null ? oral_score : null
             ]
         );
@@ -599,7 +600,7 @@ const gradeTaskSubmission = async (req, res) => {
     try {
         const { taskId, studentId } = req.params;
         const { grade, feedback } = req.body;
-        
+
         const check = await db.query(
             `SELECT ot.id FROM official_tasks ot
              JOIN doctor_courses dc ON ot.course_id = dc.course_id
@@ -897,10 +898,10 @@ const updateCourseProgress = async (req, res) => {
     try {
         const { id } = req.params;
         const { title, order_index } = req.body;
-        
+
         const item = await db.query('SELECT course_id FROM course_progress WHERE id = $1', [id]);
         if (item.rows.length === 0) return res.status(404).json({ message: 'Item not found' });
-        
+
         const hasAccess = await Doctor.hasCourseAccess(req.doctor.id, item.rows[0].course_id);
         if (!hasAccess) return res.status(403).json({ message: 'Access denied' });
 
@@ -921,7 +922,7 @@ const toggleCourseProgress = async (req, res) => {
 
         const item = await db.query('SELECT course_id FROM course_progress WHERE id = $1', [id]);
         if (item.rows.length === 0) return res.status(404).json({ message: 'Item not found' });
-        
+
         const hasAccess = await Doctor.hasCourseAccess(req.doctor.id, item.rows[0].course_id);
         if (!hasAccess) return res.status(403).json({ message: 'Access denied' });
 
@@ -940,7 +941,7 @@ const deleteCourseProgress = async (req, res) => {
         const { id } = req.params;
         const item = await db.query('SELECT course_id FROM course_progress WHERE id = $1', [id]);
         if (item.rows.length === 0) return res.status(404).json({ message: 'Item not found' });
-        
+
         const hasAccess = await Doctor.hasCourseAccess(req.doctor.id, item.rows[0].course_id);
         if (!hasAccess) return res.status(403).json({ message: 'Access denied' });
 
@@ -989,7 +990,7 @@ const getAttendanceRecords = async (req, res) => {
         const { sessionId } = req.params;
         const sessionResult = await db.query('SELECT course_id FROM attendance_sessions WHERE id = $1', [sessionId]);
         if (sessionResult.rows.length === 0) return res.status(404).json({ message: 'Session not found' });
-        
+
         const hasAccess = await Doctor.hasCourseAccess(req.doctor.id, sessionResult.rows[0].course_id);
         if (!hasAccess) return res.status(403).json({ message: 'Access denied' });
 
@@ -1010,7 +1011,7 @@ const getAttendanceRecords = async (req, res) => {
 const scanAttendance = async (req, res) => {
     try {
         const { sessionId, token } = req.body;
-        
+
         const sessionResult = await db.query('SELECT course_id FROM attendance_sessions WHERE id = $1', [sessionId]);
         if (sessionResult.rows.length === 0) return res.status(404).json({ message: 'Session not found' });
         const courseId = sessionResult.rows[0].course_id;
@@ -1057,10 +1058,10 @@ const scanAttendance = async (req, res) => {
 const toggleManualAttendance = async (req, res) => {
     try {
         const { sessionId, studentId } = req.body;
-        
+
         const sessionResult = await db.query('SELECT course_id FROM attendance_sessions WHERE id = $1', [sessionId]);
         if (sessionResult.rows.length === 0) return res.status(404).json({ message: 'Session not found' });
-        
+
         const courseId = sessionResult.rows[0].course_id;
         const hasAccess = await Doctor.hasCourseAccess(req.doctor.id, courseId);
         if (!hasAccess) return res.status(403).json({ message: 'Access denied' });
@@ -1123,7 +1124,7 @@ const deleteAnnouncement = async (req, res) => {
         const { id } = req.params;
         const annResult = await db.query('SELECT course_id FROM course_announcements WHERE id = $1', [id]);
         if (annResult.rows.length === 0) return res.status(404).json({ message: 'Announcement not found' });
-        
+
         const hasAccess = await Doctor.hasCourseAccess(req.doctor.id, annResult.rows[0].course_id);
         if (!hasAccess) return res.status(403).json({ message: 'Access denied' });
 
@@ -1151,7 +1152,7 @@ const updateAttendanceSession = async (req, res) => {
 
         const sessionResult = await db.query('SELECT course_id FROM attendance_sessions WHERE id = $1', [id]);
         if (sessionResult.rows.length === 0) return res.status(404).json({ message: 'Session not found' });
-        
+
         const courseId = sessionResult.rows[0].course_id;
         const hasAccess = await Doctor.hasCourseAccess(req.doctor.id, courseId);
         if (!hasAccess) return res.status(403).json({ message: 'Access denied' });
@@ -1172,16 +1173,95 @@ const deleteAttendanceSession = async (req, res) => {
 
         const sessionResult = await db.query('SELECT course_id FROM attendance_sessions WHERE id = $1', [id]);
         if (sessionResult.rows.length === 0) return res.status(404).json({ message: 'Session not found' });
-        
+
         const courseId = sessionResult.rows[0].course_id;
         const hasAccess = await Doctor.hasCourseAccess(req.doctor.id, courseId);
         if (!hasAccess) return res.status(403).json({ message: 'Access denied' });
 
         await db.query('DELETE FROM attendance_records WHERE session_id = $1', [id]);
         await db.query('DELETE FROM attendance_sessions WHERE id = $1', [id]);
-        
+
         res.json({ message: 'Session deleted successfully' });
     } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+const exportCourseAttendance = async (req, res) => {
+    try {
+        const { courseId } = req.params;
+        const hasAccess = await Doctor.hasCourseAccess(req.doctor.id, courseId);
+        if (!hasAccess) return res.status(403).json({ message: 'Access denied' });
+
+        // Get Course Name
+        const courseRes = await db.query('SELECT name FROM courses WHERE id = $1', [courseId]);
+        const courseName = courseRes.rows[0]?.name || 'Course';
+
+        // Get all students enrolled in this course
+        const students = await db.query(`
+            SELECT s.id, s.name, s.section
+            FROM student_courses sc
+            JOIN students s ON sc.student_id = s.id
+            WHERE sc.course_id = $1
+            ORDER BY s.name
+        `, [courseId]);
+
+        // Get all attendance sessions for this course
+        const sessions = await db.query(`
+            SELECT id, date, title 
+            FROM attendance_sessions 
+            WHERE course_id = $1 
+            ORDER BY date ASC, created_at ASC
+        `, [courseId]);
+
+        // Get all attendance records for these sessions
+        const records = await db.query(`
+            SELECT session_id, student_id, status 
+            FROM attendance_records 
+            WHERE session_id IN (SELECT id FROM attendance_sessions WHERE course_id = $1)
+        `, [courseId]);
+
+        // Create a lookup for records
+        const recordLookup = {};
+        records.rows.forEach(r => {
+            recordLookup[`${r.session_id}_${r.student_id}`] = r.status;
+        });
+
+        // Prepare data for Excel
+        const data = students.rows.map(student => {
+            const row = {
+                'Student Name': student.name,
+                'Student ID': student.id,
+                'Section': student.section
+            };
+
+            let presentCount = 0;
+            sessions.rows.forEach(session => {
+                const dateStr = session.title || new Date(session.date).toLocaleDateString();
+                const status = recordLookup[`${session.id}_${student.id}`] || 'Absent';
+                row[dateStr] = status;
+                if (status.toLowerCase() === 'present') presentCount++;
+            });
+
+            row['Total Present'] = presentCount;
+            row['Attendance %'] = sessions.rows.length > 0 
+                ? Math.round((presentCount / sessions.rows.length) * 100) + '%' 
+                : '0%';
+
+            return row;
+        });
+
+        const worksheet = XLSX.utils.json_to_sheet(data);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Attendance');
+
+        const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+        
+        res.setHeader('Content-Disposition', `attachment; filename=Attendance_${courseName.replace(/\s+/g, '_')}.xlsx`);
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.send(buffer);
+    } catch (error) {
+        console.error('Export attendance error:', error);
         res.status(500).json({ message: error.message });
     }
 };
