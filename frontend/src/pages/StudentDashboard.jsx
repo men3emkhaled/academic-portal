@@ -385,7 +385,7 @@ const StudentDashboard = () => {
                     { bg: 'bg-cyan-500/10', text: 'text-cyan-600 dark:text-cyan-400' },
                   ];
                   const c = colors[idx % colors.length];
-                  
+
                   const totalScore = (grade.midterm_score || 0) + (grade.practical_score || 0) + (grade.oral_score || 0);
                   const hasScores = grade.midterm_score != null || grade.practical_score != null || grade.oral_score != null;
 
@@ -399,8 +399,8 @@ const StudentDashboard = () => {
                         <BookOpen className={`w-6 h-6 ${c.text}`} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <span className={`text-[11px] font-bold uppercase tracking-wider mb-0.5 block ${c.text} opacity-80`}>
-                          {hasScores ? `${Number(totalScore.toFixed(2))} / ${grade.max_score ? Number(Number(grade.max_score).toFixed(2)) : '-'}` : 'Course Details'}
+                        <span className={`text-[10px] font-bold uppercase tracking-wider mb-0.5 block ${c.text} opacity-80`}>
+                          {hasScores ? `Score: ${totalScore.toFixed(2)} / ${(grade.max_score || 0).toFixed(2)}` : 'Course Details'}
                         </span>
                         <h4 className="font-bold text-gray-900 dark:text-white text-sm sm:text-base truncate group-hover:text-primary transition-colors">{grade.course_name}</h4>
                       </div>
