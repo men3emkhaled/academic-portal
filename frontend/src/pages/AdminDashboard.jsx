@@ -13,6 +13,7 @@ import TimetableManager from '../components/admin/TimetableManager';
 import NotificationsManager from '../components/admin/NotificationsManager';
 import DepartmentManager from '../components/admin/DepartmentManager';
 import QuizManager from '../components/admin/QuizManager';
+import DoctorManager from '../components/admin/DoctorManager';
 import PendingReviews from '../components/admin/quizzes/PendingReviews';
 import MobileAlertCenter from '../components/admin/MobileAlertCenter';
 import EventsManager from '../components/admin/EventsManager';
@@ -51,6 +52,7 @@ const AdminDashboard = () => {
     { id: 'grades', label: 'Grades', icon: <TrendingUp className="w-4 h-4" />, reqPerm: 'manage_grades' },
     { id: 'resources', label: 'Resources', icon: <FileText className="w-4 h-4" />, reqPerm: 'manage_resources' },
     { id: 'roadmap', label: 'Roadmap', icon: <RoadmapIcon className="w-4 h-4" />, reqPerm: 'manage_roadmap' },
+    { id: 'doctors', label: 'Doctors', icon: <UserCheck className="w-4 h-4" />, reqPerm: 'admin' },
     { id: 'students', label: 'Students', icon: <Users className="w-4 h-4" />, reqPerm: 'admin' },
     { id: 'student-courses', label: 'Records', icon: <Database className="w-4 h-4" />, reqPerm: 'admin' },
     { id: 'timetable', label: 'Timetable', icon: <Calendar className="w-4 h-4" />, reqPerm: 'manage_timetable' },
@@ -686,6 +688,7 @@ const AdminDashboard = () => {
           {activeTab === 'grades' && <GradesUploader courses={courses} departments={departments} />}
           {activeTab === 'resources' && <ResourceManager />}
           {activeTab === 'roadmap' && <RoadmapManager />}
+          {activeTab === 'doctors' && <DoctorManager />}
           {activeTab === 'students' && (
             <StudentsManager
               students={students}

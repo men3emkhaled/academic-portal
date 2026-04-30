@@ -3,6 +3,7 @@ const router = express.Router();
 const adminController = require('../controllers/adminController');
 const studentController = require('../controllers/studentController');
 const studentCourseController = require('../controllers/studentCourseController');
+const adminDoctorController = require('../controllers/adminDoctorController');
 const { upload, handleMulterError } = require('../middleware/upload');
 const { adminAuth, checkPermission } = require('../middleware/auth');
 const { studentCreationLimiter } = require('../middleware/rateLimiter');
@@ -112,6 +113,15 @@ router.delete('/students/:id', adminAuth, async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+
+// ==================== DOCTORS MANAGEMENT (ADMIN) ====================
+router.get('/doctors', adminAuth, adminDoctorController.getAllDoctors);
+router.post('/doctors', adminAuth, adminDoctorController.createDoctor);
+router.put('/doctors/:id', adminAuth, adminDoctorController.updateDoctor);
+router.delete('/doctors/:id', adminAuth, adminDoctorController.deleteDoctor);
+router.get('/doctors/:id/courses', adminAuth, adminDoctorController.getDoctorCourses);
+router.post('/doctors/:id/courses/:courseId', adminAuth, adminDoctorController.assignCourseToDoctor);
+router.delete('/doctors/:id/courses/:courseId', adminAuth, adminDoctorController.removeCourseFromDoctor);
 
 // ==================== QUIZ MANAGEMENT (ADMIN) ====================
 router.get('/quizzes', checkPermission('manage_quizzes'), quizController.getAllQuizzes);
