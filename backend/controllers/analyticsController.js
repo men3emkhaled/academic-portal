@@ -73,7 +73,7 @@ const getCourseAnalytics = async (req, res) => {
                 }
             });
 
-            if (totalStudents > 0) {
+            if (totalStudents > 0 && totalSessions > 0) {
                 averageAttendance = Math.round((totalAttended / (totalStudents * totalSessions)) * 100);
             }
         }
@@ -84,7 +84,7 @@ const getCourseAnalytics = async (req, res) => {
                 qa.student_id,
                 s.name as student_name,
                 s.section,
-                ROUND(AVG(CASE WHEN qa.total_points > 0 THEN (qa.score::numeric / qa.total_points) * 100 ELSE 0 END)) as avg_score
+                ROUND(AVG(CASE WHEN COALESCE(qa.total_points, 0) > 0 THEN (COALESCE(qa.score, 0)::numeric / qa.total_points) * 100 ELSE 0 END)) as avg_score
              FROM quiz_attempts qa
              JOIN quizzes q ON qa.quiz_id = q.id
              JOIN students s ON qa.student_id = s.id
@@ -94,7 +94,7 @@ const getCourseAnalytics = async (req, res) => {
         );
 
         quizStats.rows.forEach(stat => {
-            const avgScore = parseInt(stat.avg_score);
+            const avgScore = parseInt(stat.avg_score) || 0;
             if (avgScore < 50) {
                 // Check if already in At-Risk array
                 const existingIndex = atRiskStudents.findIndex(s => s.student_id === stat.student_id);
@@ -115,12 +115,19 @@ const getCourseAnalytics = async (req, res) => {
             }
         });
 
+        // Ensure all at-risk objects have at least null for missing fields to avoid frontend crashes
+        const sanitizedAtRisk = atRiskStudents.map(s => ({
+            ...s,
+            attendance_percentage: s.attendance_percentage ?? null,
+            avg_score: s.avg_score ?? null
+        }));
+
         res.json({
             total_students: totalStudents,
             total_sessions: totalSessions,
             average_attendance_percentage: averageAttendance,
-            at_risk_count: atRiskStudents.length,
-            at_risk_students: atRiskStudents
+            at_risk_count: sanitizedAtRisk.length,
+            at_risk_students: sanitizedAtRisk
         });
 
     } catch (error) {

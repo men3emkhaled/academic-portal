@@ -34,8 +34,8 @@ const DoctorAnalytics = ({ courses }) => {
   };
 
   const filteredAtRisk = data?.at_risk_students?.filter(s => 
-    s.student_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    s.student_id.toLowerCase().includes(searchTerm.toLowerCase())
+    (s.student_name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+    String(s.student_id || '').toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
 
   return (
@@ -148,12 +148,12 @@ const DoctorAnalytics = ({ courses }) => {
                           </td>
                           <td className="py-4 font-medium">{student.section || '—'}</td>
                           <td className="py-4 text-center">
-                            <span className={`text-sm font-black ${student.attendance_percentage < 50 ? 'text-red-500' : 'text-amber-500'}`}>
+                            <span className={`text-sm font-black ${student.attendance_percentage !== null && student.attendance_percentage < 50 ? 'text-red-500' : 'text-amber-500'}`}>
                               {student.attendance_percentage !== null ? `${student.attendance_percentage}%` : '—'}
                             </span>
                           </td>
                           <td className="py-4 text-center">
-                            <span className={`text-sm font-black ${student.avg_score < 50 ? 'text-red-500' : 'text-amber-500'}`}>
+                            <span className={`text-sm font-black ${student.avg_score !== null && student.avg_score < 50 ? 'text-red-500' : 'text-amber-500'}`}>
                               {student.avg_score !== null ? `${student.avg_score}%` : '—'}
                             </span>
                           </td>
