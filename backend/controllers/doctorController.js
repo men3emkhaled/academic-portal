@@ -818,6 +818,97 @@ const getCourseStudents = async (req, res) => {
     }
 };
 
+// ==================== COURSE CONTENT PROGRESS (SYLLABUS) ====================
+const getCourseProgress = async (req, res) => {
+    try {
+        const { courseId } = req.params;
+        const hasAccess = await Doctor.hasCourseAccess(req.doctor.id, courseId);
+        if (!hasAccess) return res.status(403).json({ message: 'Access denied' });
+
+        const result = await db.query(
+            'SELECT * FROM course_progress WHERE course_id = $1 ORDER BY order_index ASC, id ASC',
+            [courseId]
+        );
+        res.json(result.rows);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+const addCourseProgress = async (req, res) => {
+    try {
+        const { courseId, title, order_index } = req.body;
+        const hasAccess = await Doctor.hasCourseAccess(req.doctor.id, courseId);
+        if (!hasAccess) return res.status(403).json({ message: 'Access denied' });
+
+        const result = await db.query(
+            'INSERT INTO course_progress (course_id, title, is_completed, order_index) VALUES ($1, $2, false, COALESCE($3, 0)) RETURNING *',
+            [courseId, title, order_index || 0]
+        );
+        res.status(201).json(result.rows[0]);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+const updateCourseProgress = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { title, order_index } = req.body;
+        
+        const item = await db.query('SELECT course_id FROM course_progress WHERE id = $1', [id]);
+        if (item.rows.length === 0) return res.status(404).json({ message: 'Item not found' });
+        
+        const hasAccess = await Doctor.hasCourseAccess(req.doctor.id, item.rows[0].course_id);
+        if (!hasAccess) return res.status(403).json({ message: 'Access denied' });
+
+        const result = await db.query(
+            'UPDATE course_progress SET title = $1, order_index = COALESCE($2, order_index) WHERE id = $3 RETURNING *',
+            [title, order_index, id]
+        );
+        res.json(result.rows[0]);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+const toggleCourseProgress = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { is_completed } = req.body;
+
+        const item = await db.query('SELECT course_id FROM course_progress WHERE id = $1', [id]);
+        if (item.rows.length === 0) return res.status(404).json({ message: 'Item not found' });
+        
+        const hasAccess = await Doctor.hasCourseAccess(req.doctor.id, item.rows[0].course_id);
+        if (!hasAccess) return res.status(403).json({ message: 'Access denied' });
+
+        const result = await db.query(
+            'UPDATE course_progress SET is_completed = $1 WHERE id = $2 RETURNING *',
+            [is_completed, id]
+        );
+        res.json(result.rows[0]);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+const deleteCourseProgress = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const item = await db.query('SELECT course_id FROM course_progress WHERE id = $1', [id]);
+        if (item.rows.length === 0) return res.status(404).json({ message: 'Item not found' });
+        
+        const hasAccess = await Doctor.hasCourseAccess(req.doctor.id, item.rows[0].course_id);
+        if (!hasAccess) return res.status(403).json({ message: 'Access denied' });
+
+        await db.query('DELETE FROM course_progress WHERE id = $1', [id]);
+        res.json({ message: 'Item deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 // ==================== PROFILE ====================
 const getProfile = async (req, res) => {
     try {
@@ -838,4 +929,5 @@ module.exports = {
     getMyTasks, createTask, updateTask, deleteTask,
     getPendingReviews, getAttemptForReview, gradeWrittenAnswer,
     getStudentProgress, getQuizAnalytics, getCourseStudents,
+    getCourseProgress, addCourseProgress, updateCourseProgress, toggleCourseProgress, deleteCourseProgress,
 };

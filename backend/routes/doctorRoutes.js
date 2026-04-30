@@ -58,4 +58,11 @@ router.get('/progress/:courseId', doctorController.getStudentProgress);
 router.get('/analytics/:courseId', doctorController.getQuizAnalytics);
 router.get('/students/:courseId', doctorController.getCourseStudents);
 
+// Course Content Progress (Syllabus Tracking)
+router.get('/course-progress/:courseId', doctorController.getCourseProgress);
+router.post('/course-progress', doctorController.addCourseProgress);
+router.put('/course-progress/:id', doctorController.updateCourseProgress);
+router.patch('/course-progress/:id/toggle', doctorController.toggleCourseProgress);
+router.delete('/course-progress/:id', doctorController.deleteCourseProgress);
+
 module.exports = router;
