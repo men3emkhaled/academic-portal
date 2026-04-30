@@ -45,7 +45,7 @@ const getCourseAnalytics = async (req, res) => {
                  JOIN students s ON sc.student_id = s.id
                  LEFT JOIN attendance_records ar 
                     ON ar.student_id = sc.student_id 
-                    AND ar.is_present = true 
+                    AND ar.status = 'present' 
                     AND ar.session_id IN (SELECT id FROM attendance_sessions WHERE course_id = $1)
                  WHERE sc.course_id = $1
                  GROUP BY sc.student_id, s.name, s.section`,
