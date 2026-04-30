@@ -78,7 +78,19 @@ const DoctorAttendance = ({ courses }) => {
   };
 
   const handleScan = async (text) => {
-    if (!text || !activeSession) return;
+    // text might be an object/array in newer versions of the library
+    let tokenValue = '';
+    if (typeof text === 'string') {
+      tokenValue = text;
+    } else if (text && text.length > 0 && text[0].rawValue) {
+      tokenValue = text[0].rawValue;
+    } else if (text && text.rawValue) {
+      tokenValue = text.rawValue;
+    } else {
+      tokenValue = String(text);
+    }
+
+    if (!tokenValue || !activeSession) return;
     
     // Play a small beep sound for feedback
     try {
@@ -89,7 +101,7 @@ const DoctorAttendance = ({ courses }) => {
     try {
       const res = await doctorApi('post', '/doctor/attendance/scan', {
         sessionId: activeSession.id,
-        token: text
+        token: tokenValue
       });
       toast.success(`${res.data.student.name} marked present!`);
       fetchRecords(); // Refresh list
