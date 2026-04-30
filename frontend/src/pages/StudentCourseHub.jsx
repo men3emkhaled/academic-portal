@@ -20,7 +20,7 @@ const StudentCourseHub = () => {
   const fetchHubData = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await studentApi.get(`/course/${courseId}/hub`);
+      const res = await studentApi.get(`/student/course/${courseId}/hub`);
       setData(res.data);
     } catch (err) {
       toast.error('Failed to load course hub');
