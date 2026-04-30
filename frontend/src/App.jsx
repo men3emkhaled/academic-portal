@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { AuthProvider } from './context/AuthContext';
 import { StudentAuthProvider, useStudentAuth } from './context/StudentAuthContext';
 import { StudentDataContextProvider } from './context/StudentDataContext';
+import { DoctorAuthProvider } from './context/DoctorAuthContext';
 import AdminDashboard from './pages/AdminDashboard';
 import StudentLogin from './pages/StudentLogin';
 import StudentDashboard from './pages/StudentDashboard';
@@ -24,6 +25,10 @@ import VerifyEmail from './pages/VerifyEmail';
 import StudentQuizzes from './pages/StudentQuizzes';
 import QuizPage from './pages/QuizPage';
 import QuizResultPage from './pages/QuizResultPage';
+
+// ✅ مسارات الدكتور
+import DoctorLogin from './pages/DoctorLogin';
+import DoctorDashboard from './pages/DoctorDashboard';
 
 // مكون حماية المسارات للطلاب
 const ProtectedStudentRoute = ({ children }) => {
@@ -107,6 +112,8 @@ function AppContent() {
     <Routes>
       <Route path="/" element={<Navigate to="/student/login" replace />} />
       <Route path="/admin" element={<AdminDashboard />} />
+      <Route path="/doctor/login" element={<DoctorLogin />} />
+      <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
       <Route path="/student/login" element={<StudentLoginRedirect />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/verify-email" element={<VerifyEmail />} />
@@ -133,12 +140,14 @@ function App() {
       <AuthProvider>
         <StudentAuthProvider>
           <StudentDataContextProvider>
-            <Router>
-              <PullToRefresh>
-                <AppContent />
-              </PullToRefresh>
-              <Toaster position="bottom-right" />
-            </Router>
+            <DoctorAuthProvider>
+              <Router>
+                <PullToRefresh>
+                  <AppContent />
+                </PullToRefresh>
+                <Toaster position="bottom-right" />
+              </Router>
+            </DoctorAuthProvider>
           </StudentDataContextProvider>
         </StudentAuthProvider>
       </AuthProvider>

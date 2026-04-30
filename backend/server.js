@@ -18,6 +18,7 @@ const personalTaskRoutes = require('./routes/personalTaskRoutes');
 const eventRoutes = require('./routes/eventRoutes');
 const examScheduleRoutes = require('./routes/examScheduleRoutes');
 const officialTaskRoutes = require('./routes/officialTaskRoutes');
+const doctorRoutes = require('./routes/doctorRoutes');
 
 // ✅ استيراد مسارات الاختبارات
 const quizRoutes = require('./routes/quizRoutes');
@@ -139,6 +140,9 @@ app.use('/api/student-logs', studentLogRoutes);
 
 app.use('/api/exams', examScheduleRoutes); // ✅ جديد
 app.use('/api/official-tasks', officialTaskRoutes);
+
+// ✅ مسارات لوحة تحكم الدكاترة
+app.use('/api/doctor', doctorRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
