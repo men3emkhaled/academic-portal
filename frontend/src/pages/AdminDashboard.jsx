@@ -27,7 +27,7 @@ import {
   Calendar, Bell, LayoutDashboard, Settings,
   CheckCircle, Database, LogOut, Lock, UserCheck,
   TrendingUp, Award, Activity, ShieldCheck, ChevronRight,
-  Smartphone, Heart, ScrollText, Mail, ClipboardList, Sun, Moon, CheckSquare
+  Smartphone, Heart, ScrollText, Mail, ClipboardList, Sun, Moon, CheckSquare, Menu, X
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
@@ -48,6 +48,7 @@ const AdminDashboard = () => {
   const userPermissions = decodedToken?.permissions || [];
 
   const ALL_TABS = [
+    { id: 'overview', label: 'Overview', icon: <LayoutDashboard className="w-4 h-4" />, reqPerm: 'admin' },
     { id: 'courses', label: 'Courses', icon: <BookOpen className="w-4 h-4" />, reqPerm: 'manage_courses' },
     { id: 'grades', label: 'Grades', icon: <TrendingUp className="w-4 h-4" />, reqPerm: 'manage_grades' },
     { id: 'resources', label: 'Resources', icon: <FileText className="w-4 h-4" />, reqPerm: 'manage_resources' },
@@ -70,9 +71,9 @@ const AdminDashboard = () => {
   ];
 
   const initialTab = () => {
-    if (isSuperAdmin) return 'courses';
+    if (isSuperAdmin) return 'overview';
     const firstAvailable = ALL_TABS.find(tab => tab.reqPerm !== 'admin' && userPermissions.includes(tab.reqPerm));
-    return firstAvailable ? firstAvailable.id : 'courses';
+    return firstAvailable ? firstAvailable.id : 'overview';
   };
 
   const [activeTab, setActiveTab] = useState(initialTab());
@@ -84,6 +85,7 @@ const AdminDashboard = () => {
   const [studentsFile, setStudentsFile] = useState(null);
   const [uploadingStudents, setUploadingStudents] = useState(false);
   const [loginCredentials, setLoginCredentials] = useState({ username: '', password: '' });
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Timetable states
   const [timetableFile, setTimetableFile] = useState(null);
@@ -548,142 +550,197 @@ const AdminDashboard = () => {
 
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#050505] p-4 md:p-10 text-gray-900 dark:text-slate-100 relative overflow-hidden transition-colors duration-300">
-      {/* Background Decor */}
-      <div className="absolute top-[-20%] right-[-10%] w-[60%] h-[60%] bg-emerald-500/[0.02] dark:bg-emerald-500/[0.03] blur-[150px] rounded-full"></div>
-      <div className="absolute bottom-[-20%] left-[-10%] w-[60%] h-[60%] bg-blue-500/[0.02] dark:bg-blue-500/[0.03] blur-[150px] rounded-full"></div>
+    <div className="min-h-screen bg-gray-50 dark:bg-[#050505] text-gray-900 dark:text-slate-100 transition-colors duration-300">
+      {/* Ambient Background */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div className="absolute top-[-30%] right-[-15%] w-[60%] h-[60%] bg-emerald-500/[0.03] dark:bg-emerald-500/[0.04] blur-[180px] rounded-full"></div>
+        <div className="absolute bottom-[-20%] left-[-10%] w-[50%] h-[50%] bg-blue-500/[0.02] dark:bg-blue-500/[0.03] blur-[150px] rounded-full"></div>
+      </div>
 
-      <div className="max-w-[1600px] mx-auto relative z-10">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-2 h-8 bg-emerald-500 rounded-full shadow-[0_0_15px_rgba(16,185,129,0.5)]"></div>
-              <h1 className="text-3xl md:text-5xl font-black text-gray-900 dark:text-white tracking-tight">Admin Dashboard</h1>
+      {/* Top Navigation Bar */}
+      <nav className="sticky top-0 z-50 bg-white/80 dark:bg-[#0a0a0a]/80 backdrop-blur-2xl border-b border-gray-200/60 dark:border-white/5">
+        <div className="max-w-[1600px] mx-auto px-4 md:px-8">
+          <div className="flex items-center justify-between h-16 md:h-20">
+            {/* Logo & Admin Info */}
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/25">
+                <ShieldCheck className="w-5 h-5 text-white" />
+              </div>
+              <div className="hidden sm:block">
+                <h1 className="text-lg font-black tracking-tight text-gray-900 dark:text-white">Admin Portal</h1>
+                <p className="text-xs text-gray-500 dark:text-slate-500 font-medium -mt-0.5">
+                  {isSuperAdmin ? 'Root Admin' : 'Assistant Node'}
+                </p>
+              </div>
             </div>
-            <p className="text-gray-500 dark:text-slate-400 font-medium ml-5 text-sm uppercase tracking-[0.3em]">Institutional Management Node</p>
-          </div>
 
-          <div className="flex items-center gap-3">
-            <button onClick={toggleTheme} className="p-3 rounded-2xl bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-400 hover:text-emerald-500 transition-all shadow-sm">
-              {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-            </button>
-            <div className="flex items-center gap-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 px-4 py-2 rounded-2xl backdrop-blur-xl shadow-sm">
-              <div className="w-8 h-8 bg-emerald-500/10 rounded-full flex items-center justify-center">
-                <UserCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-              </div>
-              <span className="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-widest">
-                {isSuperAdmin ? 'Root Admin' : 'Assistant'}
-              </span>
+            {/* Desktop Navigation */}
+            <div className="hidden lg:flex items-center gap-0.5 bg-gray-100/80 dark:bg-white/[0.03] p-1 rounded-xl border border-gray-200/50 dark:border-white/5 overflow-x-auto no-scrollbar max-w-[50vw]">
+              {ALL_TABS.map(tab => {
+                const hasAccess = isSuperAdmin || (tab.reqPerm !== 'admin' && userPermissions.includes(tab.reqPerm));
+                if (!hasAccess) return null;
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    title={tab.label}
+                    className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-200 whitespace-nowrap ${
+                      isActive
+                        ? 'bg-white dark:bg-white/10 text-gray-900 dark:text-white shadow-sm'
+                        : 'text-gray-500 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-300'
+                    }`}
+                  >
+                    <span className={isActive ? 'text-emerald-500' : ''}>{tab.icon}</span>
+                    <span>{tab.label}</span>
+                  </button>
+                );
+              })}
             </div>
-            <button
-              onClick={logout}
-              className="flex items-center gap-2 bg-red-500/10 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500/20 hover:bg-red-500/20 px-5 py-3 rounded-2xl text-sm font-black transition-all shadow-sm hover:scale-105 active:scale-95"
-            >
-              Logout <LogOut className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
 
-        <div className="grid gap-6 mb-12 md:grid-cols-4 animate-fadeIn">
-          <div className="bg-white dark:bg-[#111111]/80 backdrop-blur-xl border border-gray-200 dark:border-white/5 p-6 rounded-[2rem] hover:border-emerald-500/30 transition-all duration-500 group shadow-sm dark:shadow-2xl">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center group-hover:bg-emerald-500/20 transition-all">
-                <BookOpen className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
-              </div>
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-slate-500 group-hover:text-emerald-600 dark:group-hover:text-emerald-300/70 transition-all">Courses</p>
-            </div>
-            <div className="flex items-end justify-between">
-              <p className="text-4xl font-black text-gray-900 dark:text-white">{stats.courses}</p>
-              <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 text-xs font-bold bg-emerald-500/10 px-2 py-1 rounded-lg">
-                <Activity className="w-3 h-3" /> LIVE
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-[#111111]/80 backdrop-blur-xl border border-gray-200 dark:border-white/5 p-6 rounded-[2rem] hover:border-blue-500/30 transition-all duration-500 group shadow-sm dark:shadow-2xl">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center group-hover:bg-blue-500/20 transition-all">
-                <Users className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-              </div>
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-slate-500 group-hover:text-blue-600 dark:group-hover:text-blue-300/70 transition-all">Students</p>
-            </div>
-            <div className="flex items-end justify-between">
-              <p className="text-4xl font-black text-gray-900 dark:text-white">{stats.students}</p>
-              <div className="flex items-center gap-1 text-blue-600 dark:text-blue-400 text-xs font-bold bg-blue-500/10 px-2 py-1 rounded-lg">
-                <CheckCircle className="w-3 h-3" /> SECURE
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-[#111111]/80 backdrop-blur-xl border border-gray-200 dark:border-white/5 p-6 rounded-[2rem] hover:border-purple-500/30 transition-all duration-500 group shadow-sm dark:shadow-2xl">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 bg-purple-500/10 rounded-2xl flex items-center justify-center group-hover:bg-purple-500/20 transition-all">
-                <LayoutDashboard className="w-6 h-6 text-purple-600 dark:text-purple-400" />
-              </div>
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-slate-500 group-hover:text-purple-600 dark:group-hover:text-purple-300/70 transition-all">Departments</p>
-            </div>
-            <div className="flex items-end justify-between">
-              <p className="text-4xl font-black text-gray-900 dark:text-white">{stats.departments}</p>
-              <div className="flex items-center gap-1 text-purple-600 dark:text-purple-400 text-xs font-bold bg-purple-500/10 px-2 py-1 rounded-lg">
-                <Award className="w-3 h-3" /> STABLE
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-[#111111]/80 backdrop-blur-xl border border-gray-200 dark:border-white/5 p-6 rounded-[2rem] hover:border-red-500/30 transition-all duration-500 group shadow-sm dark:shadow-2xl relative overflow-hidden">
-            {stats.unread_notifications > 0 && (
-              <div className="absolute top-4 right-4 w-2 h-2 bg-red-500 rounded-full animate-ping"></div>
-            )}
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 bg-red-500/10 rounded-2xl flex items-center justify-center group-hover:bg-red-500/20 transition-all">
-                <Bell className="w-6 h-6 text-red-600 dark:text-red-400" />
-              </div>
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-slate-500 group-hover:text-red-600 dark:group-hover:text-red-300/70 transition-all">Alerts</p>
-            </div>
-            <div className="flex items-end justify-between">
-              <p className="text-4xl font-black text-gray-900 dark:text-white">{stats.unread_notifications}</p>
+            {/* Right Actions */}
+            <div className="flex items-center gap-2">
               <button
-                onClick={() => {
-                  const hasAccess = isSuperAdmin || userPermissions.includes('manage_materials');
-                  if (hasAccess) {
-                    setActiveTab('notifications');
-                  } else {
-                    toast.error('You do not have permission to access this module');
-                  }
-                }}
-                className="text-xs font-black text-white dark:text-black bg-red-500 dark:bg-red-400 hover:bg-red-600 dark:hover:bg-red-300 px-3 py-1.5 rounded-xl transition-all active:scale-95 shadow-sm dark:shadow-[0_0_15px_rgba(248,113,113,0.3)]"
+                onClick={toggleTheme}
+                className="p-2.5 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-200/50 dark:border-white/5 text-gray-500 dark:text-gray-400 hover:text-emerald-500 transition-all"
               >
-                VIEW ALL
+                {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              </button>
+              <button
+                onClick={logout}
+                className="hidden sm:flex items-center gap-2 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border border-red-200/50 dark:border-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 px-4 py-2.5 rounded-xl text-sm font-bold transition-all"
+              >
+                <LogOut className="w-4 h-4" /> Logout
+              </button>
+              {/* Mobile menu toggle */}
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="lg:hidden p-2.5 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-200/50 dark:border-white/5 text-gray-600 dark:text-gray-400"
+              >
+                {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </button>
             </div>
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-3 mb-10 bg-white/50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/5 rounded-[2.5rem] p-3 backdrop-blur-3xl overflow-x-auto no-scrollbar shadow-sm dark:shadow-inner">
-          {ALL_TABS.map((tab) => {
-            const hasAccess = isSuperAdmin || (tab.reqPerm !== 'admin' && userPermissions.includes(tab.reqPerm));
-            return (
-              <button
-                key={tab.id}
-                onClick={() => hasAccess ? setActiveTab(tab.id) : toast.error('You do not have permission to access this module')}
-                className={`flex items-center gap-3 px-6 py-3.5 font-bold rounded-2xl transition-all text-sm whitespace-nowrap shadow-sm
-                  ${hasAccess
-                    ? (activeTab === tab.id
-                      ? 'text-white dark:text-black bg-emerald-500 dark:bg-emerald-400 shadow-[0_8px_20px_rgba(16,185,129,0.3)] scale-105'
-                      : 'text-gray-500 dark:text-slate-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 active:scale-95')
-                    : 'text-gray-400 dark:text-slate-700 bg-gray-200 dark:bg-black/20 cursor-not-allowed opacity-50 border border-gray-200 dark:border-white/5'}`}
-              >
-                {tab.icon}
-                {tab.label}
-                {!hasAccess && <Lock className="w-3 h-3 ml-2 text-red-500/50" />}
-              </button>
-            );
-          })}
-        </div>
+        {/* Mobile Navigation Dropdown */}
+        {mobileMenuOpen && (
+          <div className="lg:hidden border-t border-gray-200/50 dark:border-white/5 bg-white/95 dark:bg-[#0a0a0a]/95 backdrop-blur-2xl pb-4 px-4 max-h-[60vh] overflow-y-auto">
+            <div className="pt-3 space-y-1">
+              {ALL_TABS.map(tab => {
+                const hasAccess = isSuperAdmin || (tab.reqPerm !== 'admin' && userPermissions.includes(tab.reqPerm));
+                if (!hasAccess) return null;
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => { setActiveTab(tab.id); setMobileMenuOpen(false); }}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
+                      isActive
+                        ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                        : 'text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-white/5'
+                    }`}
+                  >
+                    {tab.icon}
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </nav>
+
+      {/* Main Content Area */}
+      <div className="max-w-[1600px] mx-auto p-4 md:p-8 relative z-10">
 
 
         <div className="bg-white dark:bg-[#111111]/80 backdrop-blur-2xl border border-gray-200 dark:border-white/5 shadow-xl dark:shadow-2xl rounded-[2.5rem] p-6 md:p-10 animate-fadeIn overflow-hidden min-h-[600px] relative">
           <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 blur-[80px] rounded-full pointer-events-none"></div>
+          
+          {activeTab === 'overview' && (
+            <div>
+              <div className="mb-8">
+                <h2 className="text-2xl font-black text-gray-900 dark:text-white">Overview</h2>
+                <p className="text-gray-500 dark:text-slate-400 font-medium text-sm">Key metrics and system status</p>
+              </div>
+              <div className="grid gap-6 md:grid-cols-4 animate-fadeIn">
+                <div className="bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/5 p-6 rounded-[2rem] hover:border-emerald-500/30 transition-all duration-500 group">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center group-hover:bg-emerald-500/20 transition-all">
+                      <BookOpen className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+                    </div>
+                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-slate-500 group-hover:text-emerald-600 dark:group-hover:text-emerald-300/70 transition-all">Courses</p>
+                  </div>
+                  <div className="flex items-end justify-between">
+                    <p className="text-4xl font-black text-gray-900 dark:text-white">{stats.courses}</p>
+                    <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 text-xs font-bold bg-emerald-500/10 px-2 py-1 rounded-lg">
+                      <Activity className="w-3 h-3" /> LIVE
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/5 p-6 rounded-[2rem] hover:border-blue-500/30 transition-all duration-500 group">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center group-hover:bg-blue-500/20 transition-all">
+                      <Users className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-slate-500 group-hover:text-blue-600 dark:group-hover:text-blue-300/70 transition-all">Students</p>
+                  </div>
+                  <div className="flex items-end justify-between">
+                    <p className="text-4xl font-black text-gray-900 dark:text-white">{stats.students}</p>
+                    <div className="flex items-center gap-1 text-blue-600 dark:text-blue-400 text-xs font-bold bg-blue-500/10 px-2 py-1 rounded-lg">
+                      <CheckCircle className="w-3 h-3" /> SECURE
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/5 p-6 rounded-[2rem] hover:border-purple-500/30 transition-all duration-500 group">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-12 h-12 bg-purple-500/10 rounded-2xl flex items-center justify-center group-hover:bg-purple-500/20 transition-all">
+                      <LayoutDashboard className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                    </div>
+                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-slate-500 group-hover:text-purple-600 dark:group-hover:text-purple-300/70 transition-all">Departments</p>
+                  </div>
+                  <div className="flex items-end justify-between">
+                    <p className="text-4xl font-black text-gray-900 dark:text-white">{stats.departments}</p>
+                    <div className="flex items-center gap-1 text-purple-600 dark:text-purple-400 text-xs font-bold bg-purple-500/10 px-2 py-1 rounded-lg">
+                      <Award className="w-3 h-3" /> STABLE
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/5 p-6 rounded-[2rem] hover:border-red-500/30 transition-all duration-500 group relative overflow-hidden">
+                  {stats.unread_notifications > 0 && (
+                    <div className="absolute top-4 right-4 w-2 h-2 bg-red-500 rounded-full animate-ping"></div>
+                  )}
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-12 h-12 bg-red-500/10 rounded-2xl flex items-center justify-center group-hover:bg-red-500/20 transition-all">
+                      <Bell className="w-6 h-6 text-red-600 dark:text-red-400" />
+                    </div>
+                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-slate-500 group-hover:text-red-600 dark:group-hover:text-red-300/70 transition-all">Alerts</p>
+                  </div>
+                  <div className="flex items-end justify-between">
+                    <p className="text-4xl font-black text-gray-900 dark:text-white">{stats.unread_notifications}</p>
+                    <button
+                      onClick={() => {
+                        const hasAccess = isSuperAdmin || userPermissions.includes('manage_materials');
+                        if (hasAccess) {
+                          setActiveTab('notifications');
+                        } else {
+                          toast.error('You do not have permission to access this module');
+                        }
+                      }}
+                      className="text-xs font-black text-white dark:text-black bg-red-500 dark:bg-red-400 hover:bg-red-600 dark:hover:bg-red-300 px-3 py-1.5 rounded-xl transition-all active:scale-95 shadow-sm dark:shadow-[0_0_15px_rgba(248,113,113,0.3)]"
+                    >
+                      VIEW ALL
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {activeTab === 'courses' && <CoursesManager departments={departments} />}
           {activeTab === 'grades' && <GradesUploader courses={courses} departments={departments} />}
           {activeTab === 'resources' && <ResourceManager />}
