@@ -7,7 +7,8 @@ import toast from 'react-hot-toast';
 import { 
   Megaphone, QrCode, ListChecks, CheckCircle2, Circle, 
   ArrowLeft, Calendar, User, ExternalLink, Users,
-  Loader2, Clock, BookOpen, X, Check, XCircle
+  Loader2, Clock, BookOpen, X, Check, XCircle,
+  Shield, Zap, Award
 } from 'lucide-react';
 
 const StudentCourseHub = () => {
