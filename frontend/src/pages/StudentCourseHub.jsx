@@ -80,7 +80,7 @@ const StudentCourseHub = () => {
           <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
               <span className="inline-block px-4 py-1.5 bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest rounded-full mb-4">
-                Course Hub
+                Course Details
               </span>
               <h1 className="text-3xl md:text-5xl font-black tracking-tight text-gray-900 dark:text-white mb-2 italic uppercase">
                 {course.name}
