@@ -37,7 +37,7 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout, unreadCount 
 
   if (!isMobile) {
     return (
-      <div className="w-72 bg-doctor-sidebar border-r border-white/5 flex flex-col h-full z-50">
+      <div className="w-72 bg-doctor-sidebar border-r border-doctor-text/5 flex flex-col h-full z-50">
         {/* Doctor Profile Section */}
         <div className="p-8 text-center">
           <div className="relative inline-block mb-4">
@@ -52,7 +52,7 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout, unreadCount 
             </div>
             <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-emerald-500 border-4 border-doctor-sidebar rounded-full"></div>
           </div>
-          <h2 className="text-white font-bold text-lg tracking-tight">Dr. {doctor?.name}</h2>
+          <h2 className="text-doctor-text font-bold text-lg tracking-tight">Dr. {doctor?.name}</h2>
           <p className="text-doctor-text-muted text-xs font-medium uppercase tracking-widest mt-1">Senior Instructor</p>
         </div>
 
@@ -60,7 +60,7 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout, unreadCount 
         <div className="px-6 mb-8">
           <button 
             onClick={() => setActiveTab('materials')}
-            className="w-full bg-doctor-primary hover:bg-doctor-primary/90 text-white font-bold py-3.5 rounded-2xl flex items-center justify-center gap-3 shadow-lg shadow-doctor-primary/20 transition-all active:scale-95"
+            className="w-full bg-doctor-primary hover:bg-doctor-primary/90 text-doctor-text font-bold py-3.5 rounded-2xl flex items-center justify-center gap-3 shadow-lg shadow-doctor-primary/20 transition-all active:scale-95"
           >
             <Upload className="w-5 h-5" />
             <span>Upload Material</span>
@@ -79,7 +79,7 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout, unreadCount 
                 className={`w-full flex items-center gap-4 px-5 py-3.5 rounded-2xl transition-all duration-300 ${
                   isActive 
                     ? 'bg-doctor-primary/10 text-doctor-primary border border-doctor-primary/20' 
-                    : 'text-doctor-text-muted hover:text-white hover:bg-white/5 border border-transparent'
+                    : 'text-doctor-text-muted hover:text-doctor-text hover:bg-doctor-text/5 border border-transparent'
                 }`}
               >
                 <Icon className={`w-5 h-5 ${isActive ? 'text-doctor-primary' : ''}`} />
@@ -93,13 +93,13 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout, unreadCount 
         </nav>
 
         {/* Bottom Menu */}
-        <div className="p-4 border-t border-white/5 space-y-1">
+        <div className="p-4 border-t border-doctor-text/5 space-y-1">
           <button 
             onClick={() => setActiveTab('notifications')}
             className={`w-full flex items-center gap-4 px-5 py-3.5 rounded-2xl transition-all ${
               activeTab === 'notifications' 
                 ? 'bg-doctor-primary/10 text-doctor-primary border border-doctor-primary/20' 
-                : 'text-doctor-text-muted hover:text-white hover:bg-white/5 border border-transparent'
+                : 'text-doctor-text-muted hover:text-doctor-text hover:bg-doctor-text/5 border border-transparent'
             }`}
           >
             <div className="relative">
@@ -118,7 +118,7 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout, unreadCount 
           <button 
             onClick={() => { setActiveTab('settings'); setIsMoreOpen(false); }}
             className={`w-full flex items-center gap-4 px-5 py-3.5 rounded-2xl transition-all ${
-              activeTab === 'settings' ? 'bg-doctor-primary/10 text-doctor-primary border border-doctor-primary/20' : 'text-doctor-text-muted hover:text-white hover:bg-white/5 border border-transparent'
+              activeTab === 'settings' ? 'bg-doctor-primary/10 text-doctor-primary border border-doctor-primary/20' : 'text-doctor-text-muted hover:text-doctor-text hover:bg-doctor-text/5 border border-transparent'
             }`}
           >
             <Settings className="w-5 h-5" />
@@ -139,7 +139,7 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout, unreadCount 
   // ============= Mobile Bottom Bar =============
   return (
     <>
-      <div className="fixed bottom-0 left-0 right-0 bg-doctor-sidebar/95 backdrop-blur-xl border-t border-white/5 z-50 flex items-center justify-around px-2 pb-safe pt-2 shadow-[0_-8px_30px_rgba(0,0,0,0.5)]">
+      <div className="fixed bottom-0 left-0 right-0 bg-doctor-sidebar/95 backdrop-blur-xl border-t border-doctor-text/5 z-50 flex items-center justify-around px-2 pb-safe pt-2 shadow-[0_-8px_30px_rgba(0,0,0,0.5)]">
         {bottomBarItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
@@ -179,7 +179,7 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout, unreadCount 
 
       {/* More Menu Content */}
       {isMoreOpen && (
-        <div className="fixed bottom-24 left-4 right-4 bg-doctor-sidebar border border-white/10 rounded-[2.5rem] shadow-2xl z-[46] p-4 animate-slideUp overflow-hidden">
+        <div className="fixed bottom-24 left-4 right-4 bg-doctor-sidebar border border-doctor-text/10 rounded-[2.5rem] shadow-2xl z-[46] p-4 animate-slideUp overflow-hidden">
           <div className="grid grid-cols-2 gap-2">
             {moreMenuItems.map((item) => {
               const Icon = item.icon;
@@ -191,7 +191,7 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout, unreadCount 
                   className={`flex items-center gap-3 px-5 py-4 rounded-2xl transition-all ${
                     isActive 
                       ? 'bg-doctor-primary/10 text-doctor-primary border border-doctor-primary/10' 
-                      : 'text-doctor-text-muted hover:bg-white/5'
+                      : 'text-doctor-text-muted hover:bg-doctor-text/5'
                   }`}
                 >
                   <Icon className="w-5 h-5" />
@@ -200,12 +200,12 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout, unreadCount 
               );
             })}
           </div>
-          <div className="h-px bg-white/5 my-4 mx-2" />
+          <div className="h-px bg-doctor-text/5 my-4 mx-2" />
           <div className="grid grid-cols-2 gap-2">
             <button 
               onClick={() => { setActiveTab('settings'); setIsMoreOpen(false); }}
               className={`flex items-center gap-3 px-5 py-4 rounded-2xl transition-all ${
-                activeTab === 'settings' ? 'bg-doctor-primary/10 text-doctor-primary border border-doctor-primary/20' : 'text-doctor-text-muted hover:bg-white/5'
+                activeTab === 'settings' ? 'bg-doctor-primary/10 text-doctor-primary border border-doctor-primary/20' : 'text-doctor-text-muted hover:bg-doctor-text/5'
               }`}
             >
               <Settings className="w-5 h-5" />

@@ -5,12 +5,34 @@
 @tailwind utilities;
 
 @layer base {
-  body {
-    @apply bg-gray-50 text-gray-900 font-sans antialiased transition-colors duration-300;
+  :root {
+    --bg-main: #f9fafb;
+    --text-main: #111827;
+    --text-muted: #6b7280;
+    --doctor-bg: #f9fafb;
+    --doctor-sidebar: #ffffff;
+    --doctor-card: #ffffff;
+    --doctor-text: #111827;
+    --doctor-text-muted: #6b7280;
+    --border-main: rgba(0, 0, 0, 0.05);
   }
-  
-  .dark body {
-    @apply bg-dark text-slate-100;
+
+  .dark {
+    --bg-main: #050505;
+    --text-main: #f1f5f9;
+    --text-muted: #94a3b8;
+    --doctor-bg: #0a0a0a;
+    --doctor-sidebar: #0f0f10;
+    --doctor-card: #161618;
+    --doctor-text: #ffffff;
+    --doctor-text-muted: #a1a1aa;
+    --border-main: rgba(255, 255, 255, 0.05);
+  }
+
+  body {
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    @apply font-sans antialiased transition-colors duration-300;
   }
 }
 

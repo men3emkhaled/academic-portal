@@ -139,20 +139,20 @@ const DoctorCourses = ({ courses, onRefresh }) => {
       {/* Top Header Section */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <h2 className="text-3xl font-black text-white tracking-tight mb-2">Courses</h2>
+          <h2 className="text-3xl font-black text-doctor-text tracking-tight mb-2">Courses</h2>
           <p className="text-doctor-text-muted font-medium">Manage your curriculum, track student progress, and organize materials.</p>
         </div>
         
-        <div className="flex items-center bg-doctor-card border border-white/5 p-1.5 rounded-2xl">
+        <div className="flex items-center bg-doctor-card border border-doctor-text/5 p-1.5 rounded-2xl">
           <button 
             onClick={() => setActiveTab('active')}
-            className={`px-8 py-2.5 rounded-xl font-bold text-sm transition-all ${activeTab === 'active' ? 'bg-doctor-primary text-white shadow-lg shadow-doctor-primary/20' : 'text-doctor-text-muted hover:text-white'}`}
+            className={`px-8 py-2.5 rounded-xl font-bold text-sm transition-all ${activeTab === 'active' ? 'bg-doctor-primary text-white shadow-lg shadow-doctor-primary/20' : 'text-doctor-text-muted hover:text-doctor-text'}`}
           >
             Active
           </button>
           <button 
             onClick={() => setActiveTab('archive')}
-            className={`px-8 py-2.5 rounded-xl font-bold text-sm transition-all ${activeTab === 'archive' ? 'bg-doctor-primary text-white shadow-lg shadow-doctor-primary/20' : 'text-doctor-text-muted hover:text-white'}`}
+            className={`px-8 py-2.5 rounded-xl font-bold text-sm transition-all ${activeTab === 'archive' ? 'bg-doctor-primary text-white shadow-lg shadow-doctor-primary/20' : 'text-doctor-text-muted hover:text-doctor-text'}`}
           >
             Archived
           </button>
@@ -174,7 +174,7 @@ const DoctorCourses = ({ courses, onRefresh }) => {
              <select 
                value={deptFilter}
                onChange={(e) => setDeptFilter(e.target.value)}
-               className="w-full bg-doctor-card border border-white/5 rounded-2xl py-3.5 pl-12 pr-10 text-white font-bold text-sm focus:outline-none focus:border-doctor-primary/50 transition-all appearance-none cursor-pointer"
+               className="w-full bg-doctor-card border border-doctor-text/5 rounded-2xl py-3.5 pl-12 pr-10 text-doctor-text font-bold text-sm focus:outline-none focus:border-doctor-primary/50 transition-all appearance-none cursor-pointer"
              >
                <option value="all">All Departments</option>
                {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
@@ -187,7 +187,7 @@ const DoctorCourses = ({ courses, onRefresh }) => {
              <select 
                value={sortBy}
                onChange={(e) => setSortBy(e.target.value)}
-               className="w-full bg-doctor-card border border-white/5 rounded-2xl py-3.5 pl-12 pr-10 text-white font-bold text-sm focus:outline-none focus:border-doctor-primary/50 transition-all appearance-none cursor-pointer"
+               className="w-full bg-doctor-card border border-doctor-text/5 rounded-2xl py-3.5 pl-12 pr-10 text-doctor-text font-bold text-sm focus:outline-none focus:border-doctor-primary/50 transition-all appearance-none cursor-pointer"
              >
                <option value="recent">Sort by: Most Recent</option>
                <option value="name">Sort by: Name</option>
@@ -207,7 +207,7 @@ const DoctorCourses = ({ courses, onRefresh }) => {
           return (
             <div 
               key={course.id}
-              className="bg-doctor-card border border-white/5 p-8 rounded-[2.5rem] hover:border-doctor-primary/30 transition-all group relative overflow-hidden"
+              className="bg-doctor-card border border-doctor-text/5 p-8 rounded-[2.5rem] hover:border-doctor-primary/30 transition-all group relative overflow-hidden shadow-sm dark:shadow-none"
             >
               {/* Top Accent Gradient */}
               <div className={`absolute top-0 right-0 w-32 h-32 bg-${accent}-500/5 blur-3xl rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none`}></div>
@@ -222,7 +222,7 @@ const DoctorCourses = ({ courses, onRefresh }) => {
                       e.stopPropagation();
                       setOpenMenuId(openMenuId === course.id ? null : course.id);
                     }}
-                    className="w-10 h-10 rounded-xl hover:bg-white/5 flex items-center justify-center text-doctor-text-muted hover:text-white transition-all"
+                    className="w-10 h-10 rounded-xl hover:bg-doctor-text/5 flex items-center justify-center text-doctor-text-muted hover:text-doctor-text transition-all"
                   >
                     <MoreVertical className="w-5 h-5" />
                   </button>
@@ -239,7 +239,7 @@ const DoctorCourses = ({ courses, onRefresh }) => {
                           setShowEditModal(course);
                           setOpenMenuId(null);
                         }}
-                        className="w-full flex items-center gap-3 px-5 py-3.5 text-sm font-bold text-white hover:bg-white/10 transition-all text-left cursor-pointer border-b border-white/5"
+                        className="w-full flex items-center gap-3 px-5 py-3.5 text-sm font-bold text-doctor-text hover:bg-doctor-text/10 transition-all text-left cursor-pointer border-b border-doctor-text/5"
                       >
                         <Edit3 className="w-4 h-4 text-doctor-primary" /> Edit Description
                       </button>
@@ -261,7 +261,7 @@ const DoctorCourses = ({ courses, onRefresh }) => {
               </div>
 
               <div className="relative z-10">
-                <h3 className="text-2xl font-bold text-white mb-1 group-hover:text-doctor-primary transition-colors truncate">{course.name}</h3>
+                <h3 className="text-2xl font-bold text-doctor-text mb-1 group-hover:text-doctor-primary transition-colors truncate">{course.name}</h3>
                 <div className="flex items-center gap-2 text-xs font-black text-doctor-text-muted uppercase tracking-widest mb-4">
                   <Calendar className="w-3 h-3" />
                   <span>Semester {course.semester}</span>
@@ -280,7 +280,7 @@ const DoctorCourses = ({ courses, onRefresh }) => {
                 </div>
 
                 {/* Progress Bar */}
-                <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+                <div className="h-2 w-full bg-doctor-text/5 rounded-full overflow-hidden">
                   <div 
                     className={`h-full bg-${accent}-500 rounded-full transition-all duration-1000 ease-out`}
                     style={{ width: `${progress}%` }}
@@ -312,7 +312,7 @@ const DoctorCourses = ({ courses, onRefresh }) => {
               <X className="w-6 h-6" />
             </button>
 
-            <h3 className="text-3xl font-black text-white mb-2">
+            <h3 className="text-3xl font-black text-doctor-text mb-2">
               {showAddModal ? 'Add Existing Course' : 'Edit Description'}
             </h3>
             <p className="text-doctor-text-muted font-medium mb-8">
@@ -328,7 +328,7 @@ const DoctorCourses = ({ courses, onRefresh }) => {
                       required
                       value={formData.department_id}
                       onChange={(e) => setFormData({...formData, department_id: e.target.value, course_id: ''})}
-                      className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:border-doctor-primary/50 transition-all font-medium appearance-none"
+                      className="w-full bg-doctor-text/5 border border-doctor-text/5 rounded-2xl py-4 px-6 text-doctor-text focus:outline-none focus:border-doctor-primary/50 transition-all font-medium appearance-none"
                     >
                       <option value="" className="bg-doctor-sidebar">Select Department</option>
                       {departments.map(d => <option key={d.id} value={d.id} className="bg-doctor-sidebar">{d.name}</option>)}
@@ -342,7 +342,7 @@ const DoctorCourses = ({ courses, onRefresh }) => {
                       disabled={!formData.department_id}
                       value={formData.course_id}
                       onChange={(e) => setFormData({...formData, course_id: e.target.value})}
-                      className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:border-doctor-primary/50 transition-all font-medium appearance-none disabled:opacity-30"
+                      className="w-full bg-doctor-text/5 border border-doctor-text/5 rounded-2xl py-4 px-6 text-doctor-text focus:outline-none focus:border-doctor-primary/50 transition-all font-medium appearance-none disabled:opacity-30"
                     >
                       <option value="" className="bg-doctor-sidebar">
                         {formData.department_id ? 'Select Course' : 'Please select a department first'}
@@ -367,7 +367,7 @@ const DoctorCourses = ({ courses, onRefresh }) => {
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
                   placeholder="Enter a brief course overview..."
-                  className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-white placeholder-doctor-text-muted focus:outline-none focus:border-doctor-primary/50 transition-all font-medium resize-none"
+                  className="w-full bg-doctor-text/5 border border-doctor-text/5 rounded-2xl py-4 px-6 text-doctor-text placeholder-doctor-text-muted focus:outline-none focus:border-doctor-primary/50 transition-all font-medium resize-none"
                 />
               </div>
 

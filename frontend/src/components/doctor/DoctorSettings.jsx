@@ -111,7 +111,7 @@ const DoctorSettings = () => {
     <div className="max-w-5xl mx-auto space-y-8 animate-fadeIn pb-20 lg:pb-0">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <h2 className="text-3xl font-black text-white tracking-tight mb-2">Settings</h2>
+          <h2 className="text-3xl font-black text-doctor-text tracking-tight mb-2">Settings</h2>
           <p className="text-doctor-text-muted font-medium">Manage your account preferences and security settings.</p>
         </div>
       </div>
@@ -129,7 +129,7 @@ const DoctorSettings = () => {
                 className={`flex items-center gap-3 px-6 py-4 rounded-2xl font-bold transition-all whitespace-nowrap ${
                   isActive 
                     ? 'bg-doctor-primary text-white shadow-lg shadow-doctor-primary/20' 
-                    : 'text-doctor-text-muted hover:text-white hover:bg-white/5'
+                    : 'text-doctor-text-muted hover:text-doctor-text hover:bg-doctor-text/5'
                 }`}
               >
                 <Icon className="w-5 h-5" />
@@ -179,7 +179,7 @@ const DoctorSettings = () => {
                       </button>
                    </div>
                    <div className="text-center md:text-left">
-                      <h4 className="text-2xl font-black text-white mb-1">{doctor?.name}</h4>
+                      <h4 className="text-2xl font-black text-doctor-text mb-1">{doctor?.name}</h4>
                       <p className="text-doctor-text-muted font-bold uppercase tracking-widest text-xs">{doctor?.department || 'Senior Instructor'}</p>
                    </div>
                 </div>
@@ -194,7 +194,7 @@ const DoctorSettings = () => {
                             type="text" 
                             value={profileData.name}
                             onChange={(e) => setProfileData({...profileData, name: e.target.value})}
-                            className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
+                            className="w-full bg-doctor-text/5 border border-doctor-text/5 rounded-2xl py-4 px-6 text-doctor-text focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
                         />
                     </div>
                     <div className="space-y-2">
@@ -205,7 +205,7 @@ const DoctorSettings = () => {
                             type="email" 
                             value={profileData.email}
                             onChange={(e) => setProfileData({...profileData, email: e.target.value})}
-                            className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
+                            className="w-full bg-doctor-text/5 border border-doctor-text/5 rounded-2xl py-4 px-6 text-doctor-text focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
                         />
                     </div>
                     <div className="space-y-2">
@@ -217,7 +217,7 @@ const DoctorSettings = () => {
                             value={profileData.phone}
                             placeholder="+20 123 456 7890"
                             onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
-                            className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
+                            className="w-full bg-doctor-text/5 border border-doctor-text/5 rounded-2xl py-4 px-6 text-doctor-text focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
                         />
                     </div>
                     <div className="space-y-2">
@@ -228,7 +228,7 @@ const DoctorSettings = () => {
                             type="text" 
                             value={doctor?.department || ''}
                             disabled
-                            className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-doctor-text-muted transition-all font-medium cursor-not-allowed"
+                            className="w-full bg-doctor-text/5 border border-doctor-text/5 rounded-2xl py-4 px-6 text-doctor-text-muted transition-all font-medium cursor-not-allowed"
                         />
                     </div>
                     </div>
@@ -240,7 +240,7 @@ const DoctorSettings = () => {
                         value={profileData.bio}
                         onChange={(e) => setProfileData({...profileData, bio: e.target.value})}
                         placeholder="Tell us about your academic background..."
-                        className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-white placeholder-doctor-text-muted focus:outline-none focus:border-doctor-primary/50 transition-all font-medium resize-none"
+                        className="w-full bg-doctor-text/5 border border-doctor-text/5 rounded-2xl py-4 px-6 text-doctor-text placeholder-doctor-text-muted focus:outline-none focus:border-doctor-primary/50 transition-all font-medium resize-none"
                     />
                     </div>
 
@@ -269,7 +269,7 @@ const DoctorSettings = () => {
                       <Shield className="w-7 h-7 text-amber-500" />
                    </div>
                    <div>
-                      <h4 className="text-xl font-black text-white">Password & Security</h4>
+                      <h4 className="text-xl font-black text-doctor-text">Password & Security</h4>
                       <p className="text-doctor-text-muted text-sm font-medium">Update your password to keep your account safe.</p>
                    </div>
                 </div>
@@ -282,7 +282,7 @@ const DoctorSettings = () => {
                         required
                         value={passwordData.currentPassword}
                         onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
-                        className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
+                        className="w-full bg-doctor-text/5 border border-doctor-text/5 rounded-2xl py-4 px-6 text-doctor-text focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
                       />
                    </div>
                    <div className="space-y-2">
@@ -292,7 +292,7 @@ const DoctorSettings = () => {
                         required
                         value={passwordData.newPassword}
                         onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
-                        className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
+                        className="w-full bg-doctor-text/5 border border-doctor-text/5 rounded-2xl py-4 px-6 text-doctor-text focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
                       />
                    </div>
                    <div className="space-y-2">
@@ -302,7 +302,7 @@ const DoctorSettings = () => {
                         required
                         value={passwordData.confirmPassword}
                         onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
-                        className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
+                        className="w-full bg-doctor-text/5 border border-doctor-text/5 rounded-2xl py-4 px-6 text-doctor-text focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
                       />
                    </div>
                 </div>
@@ -331,7 +331,7 @@ const DoctorSettings = () => {
                       <Sun className="w-7 h-7 text-indigo-500" />
                    </div>
                    <div>
-                      <h4 className="text-xl font-black text-white">Visual Preferences</h4>
+                      <h4 className="text-xl font-black text-doctor-text">Appearance Settings</h4>
                       <p className="text-doctor-text-muted text-sm font-medium">Customize how the portal looks on your device.</p>
                    </div>
                 </div>
@@ -339,32 +339,32 @@ const DoctorSettings = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                    <button 
                      onClick={() => !isDarkMode && toggleTheme()}
-                     className={`p-6 rounded-3xl border transition-all text-left group ${
-                       isDarkMode ? 'bg-doctor-primary/10 border-doctor-primary/30' : 'bg-white/5 border-white/5 hover:border-white/10'
+                     className={`p-6 rounded-3xl border transition-all text-left group relative ${
+                       isDarkMode ? 'bg-doctor-primary/10 border-doctor-primary/30' : 'bg-doctor-text/5 border-doctor-text/5 hover:border-doctor-text/10 shadow-sm'
                      }`}
                    >
                       <div className={`w-12 h-12 rounded-2xl mb-4 flex items-center justify-center transition-all ${
-                        isDarkMode ? 'bg-doctor-primary text-white' : 'bg-white/10 text-doctor-text-muted'
+                        isDarkMode ? 'bg-doctor-primary text-white' : 'bg-doctor-text/10 text-doctor-text-muted'
                       }`}>
                          <Moon className="w-6 h-6" />
                       </div>
-                      <h5 className="font-bold text-white mb-1">Dark Mode</h5>
+                      <h5 className="font-bold text-doctor-text mb-1">Dark Mode</h5>
                       <p className="text-xs text-doctor-text-muted">Easier on the eyes in low-light environments.</p>
                       {isDarkMode && <CheckCircle2 className="w-5 h-5 text-doctor-primary absolute top-6 right-6" />}
                    </button>
 
                    <button 
                      onClick={() => isDarkMode && toggleTheme()}
-                     className={`p-6 rounded-3xl border transition-all text-left group ${
-                       !isDarkMode ? 'bg-indigo-500/10 border-indigo-500/30' : 'bg-white/5 border-white/5 hover:border-white/10'
+                     className={`p-6 rounded-3xl border transition-all text-left group relative ${
+                       !isDarkMode ? 'bg-indigo-500/10 border-indigo-500/30 shadow-sm shadow-indigo-500/10' : 'bg-doctor-text/5 border-doctor-text/5 hover:border-doctor-text/10'
                      }`}
                    >
                       <div className={`w-12 h-12 rounded-2xl mb-4 flex items-center justify-center transition-all ${
-                        !isDarkMode ? 'bg-indigo-500 text-white' : 'bg-white/10 text-doctor-text-muted'
+                        !isDarkMode ? 'bg-indigo-500 text-white' : 'bg-doctor-text/10 text-doctor-text-muted'
                       }`}>
                          <Sun className="w-6 h-6" />
                       </div>
-                      <h5 className="font-bold text-white mb-1">Light Mode</h5>
+                      <h5 className="font-bold text-doctor-text mb-1">Light Mode</h5>
                       <p className="text-xs text-doctor-text-muted">Traditional clean look with high contrast.</p>
                       {!isDarkMode && <CheckCircle2 className="w-5 h-5 text-indigo-500 absolute top-6 right-6" />}
                    </button>
@@ -379,7 +379,7 @@ const DoctorSettings = () => {
                       <Bell className="w-7 h-7 text-rose-500" />
                    </div>
                    <div>
-                      <h4 className="text-xl font-black text-white">Notification Settings</h4>
+                      <h4 className="text-xl font-black text-doctor-text">Notification Settings</h4>
                       <p className="text-doctor-text-muted text-sm font-medium">Choose what updates you want to receive.</p>
                    </div>
                 </div>
@@ -390,12 +390,12 @@ const DoctorSettings = () => {
                      { id: 'push_submissions', label: 'Student Submissions', desc: 'Push notification when a student submits an assignment.' },
                      { id: 'email_announcements', label: 'Portal Announcements', desc: 'Receive major portal updates and news.' },
                    ].map((item) => (
-                     <div key={item.id} className="flex items-center justify-between p-6 rounded-3xl bg-white/5 border border-white/5">
+                     <div key={item.id} className="flex items-center justify-between p-6 rounded-3xl bg-doctor-text/5 border border-doctor-text/5">
                         <div className="flex-1 pr-4">
-                           <h5 className="font-bold text-white mb-1">{item.label}</h5>
+                           <h5 className="font-bold text-doctor-text mb-1">{item.label}</h5>
                            <p className="text-xs text-doctor-text-muted">{item.desc}</p>
                         </div>
-                        <div className="w-14 h-8 bg-white/10 rounded-full relative p-1 cursor-pointer hover:bg-white/20 transition-all">
+                        <div className="w-14 h-8 bg-doctor-text/10 rounded-full relative p-1 cursor-pointer hover:bg-doctor-text/20 transition-all">
                            <div className="w-6 h-6 bg-white rounded-full shadow-sm"></div>
                         </div>
                      </div>

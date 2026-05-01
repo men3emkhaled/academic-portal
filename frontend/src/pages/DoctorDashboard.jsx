@@ -124,7 +124,7 @@ const DoctorDashboard = () => {
   }
 
   return (
-    <div className="flex flex-col lg:flex-row h-screen bg-doctor-bg text-white font-sans overflow-hidden">
+    <div className="flex flex-col lg:flex-row h-screen bg-doctor-bg text-doctor-text font-sans overflow-hidden">
       {/* Sidebar / Bottom Bar */}
       <DoctorSidebar 
         activeTab={activeTab} 

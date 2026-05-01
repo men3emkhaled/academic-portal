@@ -214,11 +214,11 @@ const StudentSettings = () => {
             </div>
           </div>
 
-          {/* Preferences Section */}
+          {/* Appearance Section */}
           <div className="mb-8">
             <div className="flex items-end justify-between mb-4">
-              <h2 className="font-headline font-extrabold text-2xl tracking-tight text-gray-900 dark:text-white">Preferences</h2>
-              <span className="font-label text-[10px] uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500">Personalization</span>
+              <h2 className="font-headline font-extrabold text-2xl tracking-tight text-gray-900 dark:text-white">Appearance</h2>
+              <span className="font-label text-[10px] uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500">Theme and Visuals</span>
             </div>
             <div className="bg-white dark:bg-dark-card rounded-[2rem] border border-gray-200 dark:border-white/10 p-8 shadow-sm dark:shadow-2xl relative overflow-hidden group hover:border-primary/20 dark:hover:border-white/20 transition-all duration-500">
               <div className="flex items-center justify-between">

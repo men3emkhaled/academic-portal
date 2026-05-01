@@ -39,7 +39,7 @@ const DoctorOverview = ({ stats, doctor, timetable, setActiveTab }) => {
     <div className="space-y-10 animate-fadeIn">
       {/* Welcome Title */}
       <div>
-        <h1 className="text-4xl font-black text-white tracking-tight mb-2">Welcome back, Dr. {doctor?.name}</h1>
+        <h1 className="text-4xl font-black text-doctor-text tracking-tight mb-2">Welcome back, Dr. {doctor?.name}</h1>
         <p className="text-doctor-text-muted font-medium text-lg">Here is the overview of your classes and student activities today.</p>
       </div>
 
@@ -50,12 +50,12 @@ const DoctorOverview = ({ stats, doctor, timetable, setActiveTab }) => {
           return (
             <div 
               key={i}
-              className="bg-doctor-card border border-white/5 p-8 rounded-[2rem] hover:border-doctor-primary/30 transition-all group"
+              className="bg-doctor-card border border-doctor-text/5 p-8 rounded-[2rem] hover:border-doctor-primary/30 transition-all group shadow-sm dark:shadow-none"
             >
-              <div className={`w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
-                <Icon className={`w-6 h-6 text-white/50 group-hover:text-doctor-primary transition-colors`} />
+              <div className={`w-12 h-12 rounded-2xl bg-doctor-text/5 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
+                <Icon className={`w-6 h-6 text-doctor-text-muted group-hover:text-doctor-primary transition-colors`} />
               </div>
-              <p className="text-4xl font-black text-white mb-2">{stat.value}</p>
+              <p className="text-4xl font-black text-doctor-text mb-2">{stat.value}</p>
               <p className="text-doctor-text-muted text-xs font-black uppercase tracking-widest">{stat.label}</p>
             </div>
           );
@@ -67,7 +67,7 @@ const DoctorOverview = ({ stats, doctor, timetable, setActiveTab }) => {
         <div className="lg:col-span-2 space-y-8">
           {/* Quick Actions */}
           <section>
-            <h3 className="text-xl font-bold text-white mb-6">Quick Actions</h3>
+            <h3 className="text-xl font-bold text-doctor-text mb-6">Quick Actions</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {QUICK_ACTIONS.map((action, i) => {
                 const Icon = action.icon;
@@ -80,13 +80,13 @@ const DoctorOverview = ({ stats, doctor, timetable, setActiveTab }) => {
                         if (action.label === 'Grade Tasks') setActiveTab('tasks');
                         if (action.label === 'Schedule Lecture') setActiveTab('schedule');
                     }}
-                    className="bg-doctor-card border border-white/5 p-6 rounded-3xl flex items-center gap-5 hover:border-doctor-primary/30 hover:bg-white/[0.02] transition-all group text-left"
+                    className="bg-doctor-card border border-doctor-text/5 p-6 rounded-3xl flex items-center gap-5 hover:border-doctor-primary/30 hover:bg-doctor-text/[0.02] transition-all group text-left shadow-sm dark:shadow-none"
                   >
-                    <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center group-hover:bg-doctor-primary/10 transition-colors">
+                    <div className="w-14 h-14 rounded-2xl bg-doctor-text/5 flex items-center justify-center group-hover:bg-doctor-primary/10 transition-colors">
                       <Icon className="w-6 h-6 text-doctor-text-muted group-hover:text-doctor-primary transition-colors" />
                     </div>
                     <div>
-                      <p className="text-white font-bold text-lg leading-none mb-1">{action.label}</p>
+                      <p className="text-doctor-text font-bold text-lg leading-none mb-1">{action.label}</p>
                       <p className="text-doctor-text-muted text-sm">{action.desc}</p>
                     </div>
                   </button>
@@ -98,7 +98,7 @@ const DoctorOverview = ({ stats, doctor, timetable, setActiveTab }) => {
           {/* Recent Activity */}
           <section>
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-white">Recent Activity</h3>
+              <h3 className="text-xl font-bold text-doctor-text">Recent Activity</h3>
               <button 
                 onClick={() => setActiveTab('inquiries')}
                 className="text-doctor-primary font-bold text-sm hover:underline flex items-center gap-1"
@@ -122,12 +122,12 @@ const DoctorOverview = ({ stats, doctor, timetable, setActiveTab }) => {
                 activities.map((activity, i) => (
                   <div 
                     key={activity.id}
-                    className={`p-6 flex items-center justify-between hover:bg-white/5 transition-colors ${
-                      i !== activities.length - 1 ? 'border-b border-white/5' : ''
+                    className={`p-6 flex items-center justify-between hover:bg-doctor-text/5 transition-colors ${
+                      i !== activities.length - 1 ? 'border-b border-doctor-text/5' : ''
                     }`}
                   >
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center overflow-hidden">
+                      <div className="w-12 h-12 rounded-2xl bg-doctor-text/5 flex items-center justify-center overflow-hidden">
                          <img 
                             src={`https://ui-avatars.com/api/?name=${activity.user}&background=random&color=fff`} 
                             alt={activity.user}
@@ -135,7 +135,7 @@ const DoctorOverview = ({ stats, doctor, timetable, setActiveTab }) => {
                           />
                       </div>
                       <div>
-                        <p className="text-white font-bold text-[15px]">
+                        <p className="text-doctor-text font-bold text-[15px]">
                           {activity.user} <span className="text-doctor-text-muted font-medium">{activity.action}</span> "{activity.target}"
                         </p>
                         <p className="text-xs text-doctor-text-muted font-bold mt-1 uppercase tracking-widest flex items-center gap-2">
@@ -183,7 +183,7 @@ const DoctorOverview = ({ stats, doctor, timetable, setActiveTab }) => {
                           {entry.start_time.slice(0, 5)} - {entry.end_time.slice(0, 5)}
                         </span>
                       </div>
-                      <h4 className="text-white font-bold text-[15px] leading-tight mb-2 group-hover:text-doctor-primary transition-colors">
+                      <h4 className="text-doctor-text font-bold text-[15px] leading-tight mb-2 group-hover:text-doctor-primary transition-colors">
                         {entry.course_name}
                       </h4>
                       <div className="space-y-1.5">
@@ -208,7 +208,7 @@ const DoctorOverview = ({ stats, doctor, timetable, setActiveTab }) => {
 
               <button 
                 onClick={() => setActiveTab('schedule')}
-                className="w-full bg-white/5 hover:bg-white/10 text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-3 transition-all"
+                className="w-full bg-doctor-text/5 hover:bg-doctor-text/10 text-doctor-text font-bold py-4 rounded-2xl flex items-center justify-center gap-3 transition-all"
               >
                 <Calendar className="w-5 h-5 text-doctor-text-muted" />
                 <span>Open Full Schedule</span>

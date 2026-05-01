@@ -28,7 +28,7 @@ const DoctorHeader = ({
           type="text" 
           placeholder="Search..."
           onChange={(e) => onSearch(e.target.value)}
-          className="w-full bg-white/5 border border-white/5 rounded-xl lg:rounded-2xl py-2.5 lg:py-3.5 pl-11 lg:pl-14 pr-4 lg:pr-6 text-sm lg:text-base text-white placeholder-doctor-text-muted focus:outline-none focus:border-doctor-primary/50 focus:ring-4 focus:ring-doctor-primary/10 transition-all font-medium"
+          className="w-full bg-doctor-text/5 border border-doctor-text/5 rounded-xl lg:rounded-2xl py-2.5 lg:py-3.5 pl-11 lg:pl-14 pr-4 lg:pr-6 text-sm lg:text-base text-doctor-text placeholder-doctor-text-muted focus:outline-none focus:border-doctor-primary/50 focus:ring-4 focus:ring-doctor-primary/10 transition-all font-medium"
         />
       </div>
 
@@ -48,7 +48,7 @@ const DoctorHeader = ({
             <button 
               onClick={() => setShowNotifications(!showNotifications)}
               className={`w-10 h-10 lg:w-12 lg:h-12 rounded-xl lg:rounded-2xl border flex items-center justify-center transition-all relative ${
-                showNotifications ? 'bg-doctor-primary text-white border-doctor-primary' : 'bg-white/5 border-white/5 text-doctor-text-muted hover:text-white hover:bg-white/10'
+                showNotifications ? 'bg-doctor-primary text-white border-doctor-primary' : 'bg-doctor-text/5 border-doctor-text/5 text-doctor-text-muted hover:text-doctor-text hover:bg-doctor-text/10'
               }`}
             >
               <Bell className="w-4 lg:w-5 h-4 lg:h-5" />
@@ -60,9 +60,9 @@ const DoctorHeader = ({
             </button>
 
             {showNotifications && (
-              <div className="absolute top-14 lg:top-16 right-0 w-80 lg:w-96 bg-doctor-sidebar border border-white/10 rounded-3xl shadow-2xl z-50 overflow-hidden animate-slideUp">
-                <div className="p-5 border-b border-white/5 flex items-center justify-between">
-                  <h4 className="font-black text-white text-sm uppercase tracking-widest">Notifications</h4>
+              <div className="absolute top-14 lg:top-16 right-0 w-80 lg:w-96 bg-doctor-sidebar border border-doctor-text/10 rounded-3xl shadow-2xl z-50 overflow-hidden animate-slideUp">
+                <div className="p-5 border-b border-doctor-text/5 flex items-center justify-between">
+                  <h4 className="font-black text-doctor-text text-sm uppercase tracking-widest">Notifications</h4>
                   {unreadCount > 0 && (
                     <button 
                         onClick={onMarkAllRead}
@@ -124,16 +124,16 @@ const DoctorHeader = ({
             )}
           </div>
 
-          <button className="hidden lg:flex w-12 h-12 rounded-2xl bg-white/5 border border-white/5 items-center justify-center text-doctor-text-muted hover:text-white hover:bg-white/10 transition-all">
+          <button className="hidden lg:flex w-12 h-12 rounded-2xl bg-doctor-text/5 border border-doctor-text/5 items-center justify-center text-doctor-text-muted hover:text-doctor-text hover:bg-doctor-text/10 transition-all">
             <HelpCircle className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="hidden lg:block h-10 w-[1px] bg-white/5 mx-2"></div>
+        <div className="hidden lg:block h-10 w-[1px] bg-doctor-text/5 mx-2"></div>
 
         <div className="flex items-center gap-2 lg:gap-3 group cursor-pointer">
           <div className="text-right hidden sm:block">
-            <p className="text-sm font-bold text-white tracking-tight leading-none mb-1 group-hover:text-doctor-primary transition-colors">Dr. {doctor?.name?.split(' ')[0]}</p>
+            <p className="text-sm font-bold text-doctor-text tracking-tight leading-none mb-1 group-hover:text-doctor-primary transition-colors">Dr. {doctor?.name?.split(' ')[0]}</p>
             <p className="text-[10px] font-black text-doctor-text-muted uppercase tracking-widest">Active</p>
           </div>
           <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl lg:rounded-2xl bg-gradient-to-br from-doctor-primary to-doctor-secondary p-[2px] group-hover:scale-105 transition-transform">
@@ -150,8 +150,8 @@ const DoctorHeader = ({
       <style>{`
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.05); border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.1); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--border-main); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--doctor-text-muted); }
         @keyframes slideUp {
             from { opacity: 0; transform: translateY(10px) scale(0.98); }
             to { opacity: 1; transform: translateY(0) scale(1); }
