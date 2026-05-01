@@ -1,9 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useDoctorAuth } from '../../context/DoctorAuthContext';
 import toast from 'react-hot-toast';
 import { 
   Calendar, Clock, MapPin, Plus, Edit2, Trash2, 
-  ChevronLeft, ChevronRight, X, Save, Layers 
+  ChevronLeft, ChevronRight, X, Save, Layers, Building2 
 } from 'lucide-react';
 
 const DAYS = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
@@ -18,6 +18,7 @@ const DoctorSchedule = ({ timetable, onRefresh, courses }) => {
   const [editingEntry, setEditingEntry] = useState(null);
   const [loading, setLoading] = useState(false);
   const [filterDept, setFilterDept] = useState('all');
+  const [departments, setDepartments] = useState([]);
 
   const [formData, setFormData] = useState({
     course_name: '',
@@ -30,13 +31,30 @@ const DoctorSchedule = ({ timetable, onRefresh, courses }) => {
     department_id: ''
   });
 
+  useEffect(() => {
+    fetchDepartments();
+  }, []);
+
+  const fetchDepartments = async () => {
+    try {
+      const res = await doctorApi('get', '/departments');
+      setDepartments(res.data || []);
+    } catch (err) {
+      console.error('Failed to load departments');
+    }
+  };
+
   const groupedSchedule = useMemo(() => {
     const grouped = {};
     DAYS.forEach(day => {
-      grouped[day] = (timetable || []).filter(item => item.day_of_week === day);
+      grouped[day] = (timetable || []).filter(item => {
+          const isDayMatch = item.day_of_week === day;
+          const isDeptMatch = filterDept === 'all' || item.department_id?.toString() === filterDept;
+          return isDayMatch && isDeptMatch;
+      });
     });
     return grouped;
-  }, [timetable]);
+  }, [timetable, filterDept]);
 
   const handleOpenModal = (entry = null) => {
     if (entry) {
@@ -49,7 +67,7 @@ const DoctorSchedule = ({ timetable, onRefresh, courses }) => {
         end_time: entry.end_time.slice(0, 5),
         location: entry.location,
         type: entry.type,
-        department_id: entry.department_id
+        department_id: entry.department_id || ''
       });
     } else {
       setEditingEntry(null);
@@ -105,13 +123,25 @@ const DoctorSchedule = ({ timetable, onRefresh, courses }) => {
           <h2 className="text-3xl font-black text-white tracking-tight mb-2">My Academic Schedule</h2>
           <p className="text-doctor-text-muted font-medium">Manage your lectures, labs, and office hours across all departments.</p>
         </div>
-        <button 
-          onClick={() => handleOpenModal()}
-          className="bg-doctor-primary hover:bg-doctor-primary/90 text-white font-black px-8 py-4 rounded-2xl shadow-xl shadow-doctor-primary/20 flex items-center gap-3 transition-all active:scale-95"
-        >
-          <Plus className="w-5 h-5" />
-          <span>Add New Session</span>
-        </button>
+        <div className="flex flex-wrap gap-4">
+           <select 
+             value={filterDept}
+             onChange={(e) => setFilterDept(e.target.value)}
+             className="bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:border-doctor-primary/50 transition-all font-bold text-sm"
+           >
+              <option value="all" className="bg-doctor-sidebar text-white">All Departments</option>
+              {departments.map(d => (
+                <option key={d.id} value={d.id.toString()} className="bg-doctor-sidebar text-white">{d.name}</option>
+              ))}
+           </select>
+            <button 
+                onClick={() => handleOpenModal()}
+                className="bg-doctor-primary hover:bg-doctor-primary/90 text-white font-black px-8 py-4 rounded-2xl shadow-xl shadow-doctor-primary/20 flex items-center gap-3 transition-all active:scale-95"
+            >
+                <Plus className="w-5 h-5" />
+                <span>Add New Session</span>
+            </button>
+        </div>
       </div>
 
       {/* Timetable Grid */}
@@ -150,6 +180,10 @@ const DoctorSchedule = ({ timetable, onRefresh, courses }) => {
                     
                     <div className="space-y-2">
                        <div className="flex items-center gap-2 text-doctor-text-muted">
+                          <Building2 className="w-3 h-3 text-doctor-primary" />
+                          <span className="text-[9px] font-black uppercase truncate">{entry.department_name || 'General'}</span>
+                       </div>
+                       <div className="flex items-center gap-2 text-doctor-text-muted">
                           <MapPin className="w-3 h-3" />
                           <span className="text-[10px] font-bold">{entry.location}</span>
                        </div>
@@ -181,28 +215,46 @@ const DoctorSchedule = ({ timetable, onRefresh, courses }) => {
                 </button>
              </div>
              
-             <form onSubmit={handleSubmit} className="p-8 space-y-6">
+             <form onSubmit={handleSubmit} className="p-8 space-y-6 overflow-y-auto max-h-[70vh] hidden-scrollbar">
                 <div className="grid grid-cols-2 gap-4">
                    <div className="col-span-2 space-y-2">
-                      <label className="text-xs font-black text-doctor-text-muted uppercase tracking-widest ml-1">Course Name</label>
+                      <label className="text-xs font-black text-doctor-text-muted uppercase tracking-widest ml-1">Select Department</label>
                       <select 
                         required
-                        value={formData.course_name}
-                        onChange={(e) => {
-                          const course = courses.find(c => c.name === e.target.value);
-                          setFormData({
-                            ...formData, 
-                            course_name: e.target.value,
-                            department_id: course ? course.department_id : formData.department_id
-                          });
-                        }}
-                        className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
+                        value={formData.department_id}
+                        onChange={(e) => setFormData({...formData, department_id: e.target.value})}
+                        className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:border-doctor-primary/50 transition-all font-medium appearance-none"
                       >
-                         <option value="" disabled className="bg-doctor-sidebar">Select Course</option>
-                         {courses.map(c => (
-                           <option key={c.id} value={c.name} className="bg-doctor-sidebar">{c.name}</option>
+                         <option value="" disabled className="bg-doctor-sidebar">Choose Department</option>
+                         {departments.map(d => (
+                           <option key={d.id} value={d.id} className="bg-doctor-sidebar">{d.name}</option>
                          ))}
                       </select>
+                   </div>
+
+                   <div className="col-span-2 space-y-2">
+                      <label className="text-xs font-black text-doctor-text-muted uppercase tracking-widest ml-1">Course Name</label>
+                      <input 
+                        required
+                        type="text"
+                        placeholder="e.g. Introduction to Programming"
+                        value={formData.course_name}
+                        onChange={(e) => setFormData({...formData, course_name: e.target.value})}
+                        className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
+                      />
+                      <p className="text-[10px] text-doctor-text-muted ml-1">You can also pick from your assigned courses below</p>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                         {courses.map(c => (
+                            <button 
+                              key={c.id}
+                              type="button"
+                              onClick={() => setFormData({...formData, course_name: c.name, department_id: c.department_id})}
+                              className={`text-[10px] font-bold px-3 py-1.5 rounded-full border transition-all ${formData.course_name === c.name ? 'bg-doctor-primary/20 border-doctor-primary text-doctor-primary' : 'bg-white/5 border-white/5 text-doctor-text-muted hover:border-white/10'}`}
+                            >
+                               {c.name}
+                            </button>
+                         ))}
+                      </div>
                    </div>
                    
                    <div className="space-y-2">

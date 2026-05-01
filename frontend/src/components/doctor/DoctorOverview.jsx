@@ -62,6 +62,12 @@ const DoctorOverview = ({ stats, doctor, timetable, setActiveTab }) => {
                 return (
                   <button 
                     key={i}
+                    onClick={() => {
+                        if (action.label === 'Upload Material') setActiveTab('materials');
+                        if (action.label === 'Create Quiz') setActiveTab('quizzes');
+                        if (action.label === 'Grade Tasks') setActiveTab('tasks');
+                        if (action.label === 'Schedule Lecture') setActiveTab('schedule');
+                    }}
                     className="bg-doctor-card border border-white/5 p-6 rounded-3xl flex items-center gap-5 hover:border-doctor-primary/30 hover:bg-white/[0.02] transition-all group text-left"
                   >
                     <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center group-hover:bg-doctor-primary/10 transition-colors">
@@ -156,7 +162,7 @@ const DoctorOverview = ({ stats, doctor, timetable, setActiveTab }) => {
                         </div>
                         <div className="flex items-center gap-2 text-doctor-text-muted">
                            <Clock className="w-3.5 h-3.5" />
-                           <span className="text-xs font-medium">{entry.type}</span>
+                           <span className="text-xs font-medium">{entry.type} {entry.department_name && `• ${entry.department_name}`}</span>
                         </div>
                       </div>
                     </div>
