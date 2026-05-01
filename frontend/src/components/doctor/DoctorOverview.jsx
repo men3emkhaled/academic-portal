@@ -1,7 +1,7 @@
 import React from 'react';
 import { Users, BookOpen, ClipboardList, Zap, Upload, Plus, CheckSquare, Calendar, ChevronRight, Clock, MapPin } from 'lucide-react';
 
-const DoctorOverview = ({ stats, doctor, timetable }) => {
+const DoctorOverview = ({ stats, doctor, timetable, setActiveTab }) => {
   // Mock data for recent activity
   const RECENT_ACTIVITY = [
     { id: 1, user: 'Sarah Jenkins', action: 'submitted assignment', target: 'Anatomy Lab Report 3', time: '10 minutes ago', category: 'Bio-Sci 101', status: 'Submitted', type: 'assignment' },
@@ -169,9 +169,12 @@ const DoctorOverview = ({ stats, doctor, timetable }) => {
                 </div>
               )}
 
-              <button className="w-full bg-white/5 hover:bg-white/10 text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-3 transition-all">
+              <button 
+                onClick={() => setActiveTab('schedule')}
+                className="w-full bg-white/5 hover:bg-white/10 text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-3 transition-all"
+              >
                 <Calendar className="w-5 h-5 text-doctor-text-muted" />
-                <span>Open Calendar</span>
+                <span>Open Full Schedule</span>
               </button>
             </div>
           </section>

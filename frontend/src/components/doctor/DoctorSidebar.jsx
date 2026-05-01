@@ -17,6 +17,7 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout }) => {
   const MENU_ITEMS = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
     { id: 'courses', label: 'Courses', icon: BookOpen },
+    { id: 'schedule', label: 'Schedule', icon: Calendar },
     { id: 'materials', label: 'Materials', icon: FolderOpen },
     { id: 'quizzes', label: 'Quizzes', icon: Award },
     { id: 'tasks', label: 'Tasks', icon: ClipboardList },

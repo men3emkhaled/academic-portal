@@ -19,6 +19,7 @@ import DoctorCourseProgress from '../components/doctor/DoctorCourseProgress';
 import DoctorAttendance from '../components/doctor/DoctorAttendance';
 import DoctorAnnouncements from '../components/doctor/DoctorAnnouncements';
 import DoctorSettings from '../components/doctor/DoctorSettings';
+import DoctorSchedule from '../components/doctor/DoctorSchedule';
 
 const DoctorDashboard = () => {
   const { doctor, token, logout, loading: authLoading, doctorApi } = useDoctorAuth();
@@ -112,7 +113,8 @@ const DoctorDashboard = () => {
               <DoctorOverview 
                 stats={stats} 
                 doctor={doctor} 
-                timetable={timetable} 
+                timetable={timetable}
+                setActiveTab={setActiveTab}
               />
             )}
 
@@ -136,6 +138,13 @@ const DoctorDashboard = () => {
             {activeTab === 'progress' && <DoctorStudentProgress courses={myCourses} />}
             {activeTab === 'quiz_analytics' && <DoctorQuizAnalytics courses={myCourses} />}
             {activeTab === 'settings' && <DoctorSettings />}
+            {activeTab === 'schedule' && (
+              <DoctorSchedule 
+                timetable={timetable} 
+                onRefresh={fetchData} 
+                courses={myCourses}
+              />
+            )}
           </div>
         </main>
       </div>

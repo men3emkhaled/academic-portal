@@ -23,6 +23,9 @@ router.post('/courses/assign', doctorController.assignExistingCourse);
 router.put('/courses/:courseId', doctorController.updateCourse);
 router.patch('/courses/:courseId/archive', doctorController.toggleArchiveCourse);
 router.get('/timetable', doctorController.getMyTimetable);
+router.post('/timetable', doctorController.addTimetableEntry);
+router.put('/timetable/:id', doctorController.updateTimetableEntry);
+router.delete('/timetable/:id', doctorController.deleteTimetableEntry);
 
 // Quizzes
 router.get('/quizzes', doctorController.getMyQuizzes);
