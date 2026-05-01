@@ -19,6 +19,7 @@ import DoctorAnnouncements from '../components/doctor/DoctorAnnouncements';
 import DoctorSettings from '../components/doctor/DoctorSettings';
 import DoctorSchedule from '../components/doctor/DoctorSchedule';
 import DoctorInquiries from '../components/doctor/DoctorInquiries';
+import DoctorNotifications from '../components/doctor/DoctorNotifications';
 
 const DoctorDashboard = () => {
   const { doctor, token, logout, loading: authLoading, doctorApi } = useDoctorAuth();
@@ -130,6 +131,7 @@ const DoctorDashboard = () => {
         setActiveTab={setActiveTab} 
         doctor={doctor} 
         onLogout={handleLogout} 
+        unreadCount={unreadCount}
       />
 
       {/* Main Content Area */}
@@ -146,6 +148,7 @@ const DoctorDashboard = () => {
           unreadCount={unreadCount}
           onMarkRead={markNotificationAsRead}
           onMarkAllRead={markAllNotificationsAsRead}
+          setActiveTab={setActiveTab}
         />
 
         <main className="flex-1 overflow-y-auto p-6 lg:p-10 pb-32 lg:pb-10 hidden-scrollbar relative z-10">
@@ -178,6 +181,14 @@ const DoctorDashboard = () => {
             {activeTab === 'announcements' && <DoctorAnnouncements courses={myCourses} />}
             {activeTab === 'attendance' && <DoctorAttendance courses={myCourses} />}
             {activeTab === 'settings' && <DoctorSettings />}
+            {activeTab === 'notifications' && (
+              <DoctorNotifications 
+                notifications={notifications}
+                onMarkRead={markNotificationAsRead}
+                onMarkAllRead={markAllNotificationsAsRead}
+                loading={dataLoading}
+              />
+            )}
             {activeTab === 'schedule' && (
               <DoctorSchedule 
                 timetable={timetable} 

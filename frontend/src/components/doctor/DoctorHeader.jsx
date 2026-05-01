@@ -3,7 +3,8 @@ import { Search, Plus, Bell, HelpCircle, User, CheckCircle2, Clock, Inbox, Chevr
 
 const DoctorHeader = ({ 
   doctor, onSearch, onCreateQuiz, 
-  notifications = [], unreadCount = 0, onMarkRead, onMarkAllRead 
+  notifications = [], unreadCount = 0, onMarkRead, onMarkAllRead,
+  setActiveTab
 }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const notificationRef = useRef(null);
@@ -111,7 +112,10 @@ const DoctorHeader = ({
                 </div>
                 {notifications.length > 0 && (
                     <div className="p-4 bg-white/[0.02] text-center border-t border-white/5">
-                        <button className="text-[10px] font-black text-doctor-text-muted uppercase tracking-widest hover:text-white transition-colors flex items-center justify-center gap-2 w-full">
+                        <button 
+                          onClick={() => { setActiveTab('notifications'); setShowNotifications(false); }}
+                          className="text-[10px] font-black text-doctor-text-muted uppercase tracking-widest hover:text-white transition-colors flex items-center justify-center gap-2 w-full"
+                        >
                             View all activity <ChevronRight className="w-3 h-3" />
                         </button>
                     </div>

@@ -17,7 +17,7 @@ const MENU_ITEMS = [
   { id: 'analytics', label: 'Analytics', icon: PieChart },
 ];
 
-const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout }) => {
+const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout, unreadCount = 0 }) => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
   const [isMoreOpen, setIsMoreOpen] = useState(false);
 
@@ -94,9 +94,26 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout }) => {
 
         {/* Bottom Menu */}
         <div className="p-4 border-t border-white/5 space-y-1">
-          <button className="w-full flex items-center gap-4 px-5 py-3.5 rounded-2xl text-doctor-text-muted hover:text-white hover:bg-white/5 transition-all">
-            <Bell className="w-5 h-5" />
+          <button 
+            onClick={() => setActiveTab('notifications')}
+            className={`w-full flex items-center gap-4 px-5 py-3.5 rounded-2xl transition-all ${
+              activeTab === 'notifications' 
+                ? 'bg-doctor-primary/10 text-doctor-primary border border-doctor-primary/20' 
+                : 'text-doctor-text-muted hover:text-white hover:bg-white/5 border border-transparent'
+            }`}
+          >
+            <div className="relative">
+              <Bell className="w-5 h-5" />
+              {unreadCount > 0 && (
+                <div className="absolute -top-1 -right-1 w-2 h-2 bg-rose-500 rounded-full border border-doctor-sidebar"></div>
+              )}
+            </div>
             <span className="font-bold text-[15px]">Notifications</span>
+            {unreadCount > 0 && (
+              <span className="ml-auto bg-rose-500/10 text-rose-500 text-[10px] font-black px-2 py-0.5 rounded-lg border border-rose-500/20">
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </span>
+            )}
           </button>
           <button 
             onClick={() => { setActiveTab('settings'); setIsMoreOpen(false); }}
