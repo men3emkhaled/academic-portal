@@ -233,19 +233,20 @@ const DoctorCourses = ({ courses, onRefresh }) => {
                       className="absolute right-0 top-full mt-2 w-48 bg-doctor-sidebar border border-white/10 rounded-2xl shadow-2xl z-20 overflow-hidden animate-fadeIn"
                     >
                       <button 
+                        type="button"
                         onClick={() => {
                           setFormData({ department_id: course.department_id, course_id: course.id, description: course.description || '' });
                           setShowEditModal(course);
                           setOpenMenuId(null);
                         }}
-                        className="w-full flex items-center gap-3 px-5 py-3.5 text-sm font-bold text-white hover:bg-white/5 transition-all text-left"
+                        className="w-full flex items-center gap-3 px-5 py-3.5 text-sm font-bold text-white hover:bg-white/10 transition-all text-left cursor-pointer border-b border-white/5"
                       >
                         <Edit3 className="w-4 h-4 text-doctor-primary" /> Edit Description
                       </button>
                       <button 
                         type="button"
                         onClick={(e) => handleToggleArchive(e, course.id, course.is_archived)}
-                        className="w-full flex items-center gap-3 px-5 py-3.5 text-sm font-bold text-white hover:bg-white/10 transition-all text-left border-b border-white/5 last:border-0"
+                        className="w-full flex items-center gap-3 px-5 py-3.5 text-sm font-bold text-white hover:bg-white/10 transition-all text-left cursor-pointer"
                       >
                         <Archive className={`w-4 h-4 ${course.is_archived ? 'text-emerald-400' : 'text-amber-400'}`} /> 
                         <span>{course.is_archived ? 'Activate Course' : 'Archive Course'}</span>
