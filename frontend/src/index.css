@@ -21,12 +21,12 @@
     --bg-main: #050505;
     --text-main: #f1f5f9;
     --text-muted: #94a3b8;
-    --doctor-bg: #0a0a0a;
-    --doctor-sidebar: #0f0f10;
-    --doctor-card: #161618;
+    --doctor-bg: #050505;
+    --doctor-sidebar: #050505;
+    --doctor-card: #0a0a0a;
     --doctor-text: #ffffff;
-    --doctor-text-muted: #a1a1aa;
-    --border-main: rgba(255, 255, 255, 0.05);
+    --doctor-text-muted: #94a3b8;
+    --border-main: rgba(255, 255, 255, 0.03);
   }
 
   body {
@@ -47,7 +47,7 @@
   }
   
   .glass-card {
-    @apply bg-white dark:bg-black/90 border border-gray-200 dark:border-white/10 shadow-lg dark:shadow-xl;
+    @apply bg-white dark:bg-black/90 border border-gray-200 dark:border-white/5 shadow-lg dark:shadow-xl;
   }
   
   .admin-card {

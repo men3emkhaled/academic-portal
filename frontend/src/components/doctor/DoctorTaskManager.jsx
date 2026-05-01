@@ -209,20 +209,22 @@ const DoctorTaskManager = ({ courses }) => {
                   <tbody>
                     {submissions.map(sub => (
                       <tr key={sub.student_id} className="group hover:scale-[1.01] transition-all">
-                        <td className="bg-white/5 px-6 py-5 rounded-l-[1.8rem] border-y border-l border-white/5 group-hover:border-doctor-primary/30 group-hover:bg-doctor-primary/5">
+                        <td className="bg-white/[0.02] px-6 py-5 rounded-l-[1.8rem] border-y border-l border-white/[0.03] group-hover:border-doctor-primary/30 group-hover:bg-doctor-primary/5">
                             <div className="flex items-center gap-4">
-                                <img 
-                                    src={`https://ui-avatars.com/api/?name=${sub.student_name}&background=random&color=fff`} 
-                                    className="w-10 h-10 rounded-xl"
-                                    alt=""
-                                />
+                                <div className="w-10 h-10 rounded-xl overflow-hidden bg-doctor-primary/10 flex items-center justify-center font-black text-doctor-primary text-xs border border-white/10 shrink-0">
+                                    {sub.avatar_url ? (
+                                        <img src={sub.avatar_url} alt={sub.student_name} className="w-full h-full object-cover" />
+                                    ) : (
+                                        sub.student_name.charAt(0)
+                                    )}
+                                </div>
                                 <div>
                                     <p className="text-white font-bold text-sm leading-none mb-1">{sub.student_name}</p>
                                     <p className="text-[10px] font-medium text-doctor-text-muted">ID: {sub.student_id}</p>
                                 </div>
                             </div>
                         </td>
-                        <td className="bg-white/5 px-6 py-5 border-y border-white/5 group-hover:border-doctor-primary/30 group-hover:bg-doctor-primary/5">
+                        <td className="bg-white/[0.02] px-6 py-5 border-y border-white/[0.03] group-hover:border-doctor-primary/30 group-hover:bg-doctor-primary/5">
                           {sub.is_completed ? (
                             <div className="flex items-center gap-2 text-emerald-400 bg-emerald-400/10 px-3 py-1.5 rounded-xl border border-emerald-400/20 w-fit">
                               <CheckCircle2 className="w-3.5 h-3.5" />
@@ -235,7 +237,7 @@ const DoctorTaskManager = ({ courses }) => {
                             </div>
                           )}
                         </td>
-                        <td className="bg-white/5 px-6 py-5 border-y border-white/5 group-hover:border-doctor-primary/30 group-hover:bg-doctor-primary/5">
+                        <td className="bg-white/[0.02] px-6 py-5 border-y border-white/[0.03] group-hover:border-doctor-primary/30 group-hover:bg-doctor-primary/5">
                           {sub.submission_url ? (
                             <a 
                               href={sub.submission_url} 
@@ -250,7 +252,7 @@ const DoctorTaskManager = ({ courses }) => {
                             <span className="text-xs text-doctor-text-muted font-medium italic opacity-40">No submission</span>
                           )}
                         </td>
-                        <td className="bg-white/5 px-6 py-5 border-y border-white/5 group-hover:border-doctor-primary/30 group-hover:bg-doctor-primary/5">
+                        <td className="bg-white/[0.02] px-6 py-5 border-y border-white/[0.03] group-hover:border-doctor-primary/30 group-hover:bg-doctor-primary/5">
                           {sub.grade ? (
                             <div className="text-sm font-black text-white bg-white/10 px-4 py-2 rounded-xl border border-white/10 w-fit shadow-inner">
                               {sub.grade}
@@ -259,7 +261,7 @@ const DoctorTaskManager = ({ courses }) => {
                             <span className="text-[10px] font-black text-doctor-text-muted uppercase">Ungraded</span>
                           )}
                         </td>
-                        <td className="bg-white/5 px-6 py-5 rounded-r-[1.8rem] border-y border-r border-white/5 group-hover:border-doctor-primary/30 group-hover:bg-doctor-primary/5 text-right">
+                        <td className="bg-white/[0.02] px-6 py-5 rounded-r-[1.8rem] border-y border-r border-white/[0.03] group-hover:border-doctor-primary/30 group-hover:bg-doctor-primary/5 text-right">
                           <button 
                             onClick={() => {
                               setGradingStudent(sub);

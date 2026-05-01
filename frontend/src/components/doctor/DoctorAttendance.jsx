@@ -353,7 +353,7 @@ const DoctorAttendance = ({ courses }) => {
                 </div>
 
                 {scanning && (
-                  <div className="mb-6 rounded-2xl overflow-hidden border-4 border-gray-900 dark:border-black shadow-2xl relative">
+                  <div className="mb-6 rounded-2xl overflow-hidden border-4 border-doctor-sidebar dark:border-doctor-card shadow-2xl relative">
                     <div className="absolute inset-0 border-[40px] border-black/40 z-10 pointer-events-none">
                       <div className="w-full h-full border-2 border-teal-500 rounded-2xl relative">
                         {/* Scanning animation line */}

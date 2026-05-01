@@ -37,7 +37,7 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout, unreadCount 
 
   if (!isMobile) {
     return (
-      <div className="w-72 bg-doctor-sidebar border-r border-doctor-text/5 flex flex-col h-full z-50">
+      <div className="w-72 bg-doctor-sidebar border-r border-white/[0.03] flex flex-col h-full z-50">
         {/* Doctor Profile Section */}
         <div className="p-8 text-center">
           <div className="relative inline-block mb-4">
@@ -85,7 +85,7 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout, unreadCount 
                 <Icon className={`w-5 h-5 ${isActive ? 'text-doctor-primary' : ''}`} />
                 <span className="font-bold text-[15px]">{item.label}</span>
                 {isActive && (
-                  <div className="ml-auto w-1.5 h-1.5 rounded-full bg-doctor-primary shadow-[0_0_10px_#8b5cf6]" />
+                  <div className="ml-auto w-1.5 h-1.5 rounded-full bg-doctor-primary shadow-[0_0_10px_rgba(139,92,246,0.5)]" />
                 )}
               </button>
             );
@@ -93,7 +93,7 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout, unreadCount 
         </nav>
 
         {/* Bottom Menu */}
-        <div className="p-4 border-t border-doctor-text/5 space-y-1">
+        <div className="p-4 border-t border-white/[0.03] space-y-1">
           <button 
             onClick={() => setActiveTab('notifications')}
             className={`w-full flex items-center gap-4 px-5 py-3.5 rounded-2xl transition-all ${
@@ -139,7 +139,7 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout, unreadCount 
   // ============= Mobile Bottom Bar =============
   return (
     <>
-      <div className="fixed bottom-0 left-0 right-0 bg-doctor-sidebar/95 backdrop-blur-xl border-t border-doctor-text/5 z-50 flex items-center justify-around px-2 pb-safe pt-2 shadow-[0_-8px_30px_rgba(0,0,0,0.5)]">
+      <div className="fixed bottom-0 left-0 right-0 bg-doctor-sidebar/95 backdrop-blur-xl border-t border-white/[0.03] z-50 flex items-center justify-around px-2 pb-safe pt-2 shadow-[0_-8px_30px_rgba(0,0,0,0.5)]">
         {bottomBarItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;

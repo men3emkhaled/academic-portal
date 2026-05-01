@@ -139,8 +139,8 @@ const DoctorQuizManager = ({ courses }) => {
       {/* Quizzes Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
         {quizzes.length === 0 ? (
-          <div className="col-span-full bg-doctor-card border border-white/5 rounded-[2.5rem] p-20 text-center">
-            <div className="w-24 h-24 rounded-3xl bg-white/5 flex items-center justify-center mx-auto mb-6">
+            <div className="col-span-full bg-doctor-card border border-white/[0.03] rounded-[2.5rem] p-20 text-center">
+              <div className="w-24 h-24 rounded-3xl bg-white/[0.02] flex items-center justify-center mx-auto mb-6">
                 <Award className="w-10 h-10 text-white/20" />
             </div>
             <h3 className="text-2xl font-black text-white mb-2">No Quizzes Created</h3>
@@ -160,7 +160,7 @@ const DoctorQuizManager = ({ courses }) => {
               className={`group relative bg-doctor-card border transition-all rounded-[2.2rem] overflow-hidden hover:shadow-2xl hover:shadow-doctor-primary/10 ${quiz.is_published ? 'border-emerald-500/20' : 'border-white/5 opacity-90 hover:opacity-100'}`}
             >
               {/* Top Banner/Status */}
-              <div className={`h-2 w-full ${quiz.is_published ? 'bg-emerald-500/40' : 'bg-white/5'}`}></div>
+              <div className={`h-2 w-full ${quiz.is_published ? 'bg-emerald-500/40' : 'bg-white/[0.03]'}`}></div>
               
               <div className="p-7 space-y-5">
                 <div className="flex items-start justify-between gap-4">
@@ -197,7 +197,7 @@ const DoctorQuizManager = ({ courses }) => {
                 </p>
 
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-white/5 rounded-2xl p-4 flex items-center gap-3 border border-white/5">
+                  <div className="bg-white/[0.02] rounded-2xl p-4 flex items-center gap-3 border border-white/[0.03]">
                     <div className="w-8 h-8 rounded-lg bg-doctor-primary/10 flex items-center justify-center">
                       <Clock className="w-4 h-4 text-doctor-primary" />
                     </div>
@@ -206,7 +206,7 @@ const DoctorQuizManager = ({ courses }) => {
                       <p className="text-sm font-bold text-white">{quiz.time_limit_minutes}m</p>
                     </div>
                   </div>
-                  <div className="bg-white/5 rounded-2xl p-4 flex items-center gap-3 border border-white/5">
+                  <div className="bg-white/[0.02] rounded-2xl p-4 flex items-center gap-3 border border-white/[0.03]">
                     <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
                       <Target className="w-4 h-4 text-emerald-500" />
                     </div>
@@ -257,10 +257,10 @@ const DoctorQuizManager = ({ courses }) => {
       {/* Creation/Editing Modal */}
       {showFormModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
-          <div className="bg-doctor-card border border-white/10 w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden animate-slideUp">
-             <div className="p-8 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+          <div className="bg-doctor-card border border-white/[0.03] w-full max-w-lg rounded-[2.5rem] overflow-hidden animate-slideUp">
+             <div className="p-8 border-b border-white/[0.03] flex items-center justify-between bg-white/[0.02]">
                 <h3 className="text-xl font-black text-white">{editingQuiz ? 'Edit Quiz Settings' : 'Create New Assessment'}</h3>
-                <button onClick={resetForm} className="w-10 h-10 rounded-full hover:bg-white/10 flex items-center justify-center text-doctor-text-muted transition-colors">
+                <button onClick={resetForm} className="w-10 h-10 rounded-full hover:bg-white/[0.05] flex items-center justify-center text-doctor-text-muted transition-colors">
                    <X className="w-6 h-6" />
                 </button>
              </div>

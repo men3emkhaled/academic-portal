@@ -154,11 +154,15 @@ const DoctorInquiries = () => {
                                     <div className="flex items-center justify-between mb-3">
                                         <div className="flex items-center gap-3">
                                             <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center overflow-hidden">
-                                                <img 
-                                                    src={`https://ui-avatars.com/api/?name=${inq.student_name}&background=random&color=fff`} 
-                                                    alt={inq.student_name}
-                                                    className="w-full h-full object-cover opacity-80"
-                                                />
+                                                {inq.avatar_url ? (
+                                                    <img src={inq.avatar_url} alt={inq.student_name} className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <img 
+                                                        src={`https://ui-avatars.com/api/?name=${inq.student_name}&background=random&color=fff`} 
+                                                        alt={inq.student_name}
+                                                        className="w-full h-full object-cover opacity-80"
+                                                    />
+                                                )}
                                             </div>
                                             <div>
                                                 <h4 className="text-white font-bold text-[14px] leading-tight">{inq.student_name}</h4>
@@ -195,11 +199,15 @@ const DoctorInquiries = () => {
                                     <div className="flex items-center gap-4">
                                         <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-doctor-primary to-doctor-secondary p-[2px]">
                                             <div className="w-full h-full rounded-[14px] bg-doctor-card flex items-center justify-center overflow-hidden">
-                                                <img 
-                                                    src={`https://ui-avatars.com/api/?name=${selectedInquiry.student_name}&background=random&color=fff`} 
-                                                    alt={selectedInquiry.student_name}
-                                                    className="w-full h-full object-cover"
-                                                />
+                                                {selectedInquiry.avatar_url ? (
+                                                    <img src={selectedInquiry.avatar_url} alt={selectedInquiry.student_name} className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <img 
+                                                        src={`https://ui-avatars.com/api/?name=${selectedInquiry.student_name}&background=random&color=fff`} 
+                                                        alt={selectedInquiry.student_name}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                )}
                                             </div>
                                         </div>
                                         <div>

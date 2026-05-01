@@ -338,7 +338,7 @@ const getQuizAttempts = async (req, res) => {
         }
 
         const result = await db.query(
-            `SELECT qa.id, qa.student_id, s.name as student_name,
+            `SELECT qa.id, qa.student_id, s.name as student_name, s.avatar_url,
                     qa.started_at, qa.completed_at, qa.score, qa.total_points, qa.status,
                     CASE WHEN qa.total_points > 0 THEN ROUND((qa.score::numeric / qa.total_points) * 100)
                     ELSE 0 END as percentage
@@ -444,7 +444,7 @@ const getCourseGrades = async (req, res) => {
 
         const result = await db.query(
             `SELECT 
-                sc.id as enrollment_id, s.id as student_id, s.name as student_name, s.section,
+                sc.id as enrollment_id, s.id as student_id, s.name as student_name, s.section, s.avatar_url,
                 g.midterm_score, g.midterm_status,
                 g.practical_score, g.practical_status,
                 g.oral_score, g.oral_status,
@@ -729,7 +729,7 @@ const getStudentProgress = async (req, res) => {
 
         const result = await db.query(`
             SELECT 
-                s.id as student_id, s.name as student_name, s.section,
+                s.id as student_id, s.name as student_name, s.section, s.avatar_url,
                 sc.progress_percentage, sc.status as enrollment_status,
                 -- Quiz stats for this student in this course
                 (SELECT COUNT(*) FROM quiz_attempts qa 

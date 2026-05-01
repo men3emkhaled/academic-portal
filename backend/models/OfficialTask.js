@@ -145,7 +145,8 @@ class OfficialTask {
     const result = await db.query(`
       SELECT 
         sot.*,
-        s.name as student_name
+        s.name as student_name,
+        s.avatar_url
       FROM student_official_tasks sot
       JOIN students s ON sot.student_id = s.id
       WHERE sot.task_id = $1
@@ -170,6 +171,7 @@ class OfficialTask {
       SELECT 
         sot.*,
         s.name as student_name,
+        s.avatar_url,
         ot.title as task_title,
         c.name as course_name
       FROM student_official_tasks sot

@@ -121,7 +121,7 @@ const StudentSettings = () => {
               <h2 className="font-headline font-extrabold text-3xl tracking-tighter text-gray-900 dark:text-white">Profile</h2>
               <span className="font-label text-[10px] uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500">Student Records</span>
             </div>
-            <div className="bg-white dark:bg-dark-card rounded-[2rem] border border-gray-200 dark:border-white/5 p-8 shadow-sm dark:shadow-2xl relative overflow-hidden group hover:border-primary/20 dark:hover:border-white/20 transition-all duration-500">
+            <div className="bg-white dark:bg-dark-card rounded-[2rem] border border-gray-200 dark:border-white/[0.03] p-8 shadow-sm dark:shadow-2xl relative overflow-hidden group hover:border-primary/20 dark:hover:border-white/20 transition-all duration-500">
               <div className="flex items-center gap-6">
                 <div className="relative group/avatar">
                   <div 

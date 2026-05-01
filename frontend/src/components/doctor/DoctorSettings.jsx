@@ -140,7 +140,7 @@ const DoctorSettings = () => {
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 bg-doctor-card border border-white/5 rounded-[2.5rem] p-8 lg:p-12 relative overflow-hidden shadow-2xl">
+        <div className="flex-1 bg-doctor-card border border-white/[0.03] rounded-[2.5rem] p-8 lg:p-12 relative overflow-hidden shadow-2xl">
            {/* Background Decoration */}
            <div className="absolute top-0 right-0 w-64 h-64 bg-doctor-primary/5 blur-[100px] rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
 
@@ -340,7 +340,7 @@ const DoctorSettings = () => {
                    <button 
                      onClick={() => !isDarkMode && toggleTheme()}
                      className={`p-6 rounded-3xl border transition-all text-left group relative ${
-                       isDarkMode ? 'bg-doctor-primary/10 border-doctor-primary/30' : 'bg-doctor-text/5 border-doctor-text/5 hover:border-doctor-text/10 shadow-sm'
+                       isDarkMode ? 'bg-doctor-primary/10 border-doctor-primary/30' : 'bg-doctor-text/5 border-white/[0.03] hover:border-doctor-text/10 shadow-sm'
                      }`}
                    >
                       <div className={`w-12 h-12 rounded-2xl mb-4 flex items-center justify-center transition-all ${
@@ -350,13 +350,13 @@ const DoctorSettings = () => {
                       </div>
                       <h5 className="font-bold text-doctor-text mb-1">Dark Mode</h5>
                       <p className="text-xs text-doctor-text-muted">Easier on the eyes in low-light environments.</p>
-                      {isDarkMode && <CheckCircle2 className="w-5 h-5 text-doctor-primary absolute top-6 right-6" />}
+                      {isDarkMode && <div className="absolute top-6 right-6 w-3 h-3 rounded-full bg-doctor-primary shadow-[0_0_10px_rgba(139,92,246,0.8)]" />}
                    </button>
 
                    <button 
                      onClick={() => isDarkMode && toggleTheme()}
                      className={`p-6 rounded-3xl border transition-all text-left group relative ${
-                       !isDarkMode ? 'bg-indigo-500/10 border-indigo-500/30 shadow-sm shadow-indigo-500/10' : 'bg-doctor-text/5 border-doctor-text/5 hover:border-doctor-text/10'
+                       !isDarkMode ? 'bg-indigo-500/10 border-indigo-500/30 shadow-sm shadow-indigo-500/10' : 'bg-doctor-text/5 border-white/[0.03] hover:border-doctor-text/10'
                      }`}
                    >
                       <div className={`w-12 h-12 rounded-2xl mb-4 flex items-center justify-center transition-all ${
@@ -366,7 +366,7 @@ const DoctorSettings = () => {
                       </div>
                       <h5 className="font-bold text-doctor-text mb-1">Light Mode</h5>
                       <p className="text-xs text-doctor-text-muted">Traditional clean look with high contrast.</p>
-                      {!isDarkMode && <CheckCircle2 className="w-5 h-5 text-indigo-500 absolute top-6 right-6" />}
+                      {!isDarkMode && <div className="absolute top-6 right-6 w-3 h-3 rounded-full bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.8)]" />}
                    </button>
                 </div>
              </div>
@@ -390,7 +390,7 @@ const DoctorSettings = () => {
                      { id: 'push_submissions', label: 'Student Submissions', desc: 'Push notification when a student submits an assignment.' },
                      { id: 'email_announcements', label: 'Portal Announcements', desc: 'Receive major portal updates and news.' },
                    ].map((item) => (
-                     <div key={item.id} className="flex items-center justify-between p-6 rounded-3xl bg-doctor-text/5 border border-doctor-text/5">
+                     <div key={item.id} className="flex items-center justify-between p-6 rounded-3xl bg-doctor-text/5 border border-white/[0.03]">
                         <div className="flex-1 pr-4">
                            <h5 className="font-bold text-doctor-text mb-1">{item.label}</h5>
                            <p className="text-xs text-doctor-text-muted">{item.desc}</p>

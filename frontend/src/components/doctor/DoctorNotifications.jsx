@@ -10,7 +10,7 @@ const DoctorNotifications = ({
   return (
     <div className="space-y-6 animate-fadeIn">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-doctor-card border border-doctor-text/10 p-6 rounded-[2.5rem] shadow-sm dark:shadow-none">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-doctor-card border border-white/[0.03] p-6 rounded-[2.5rem] shadow-sm dark:shadow-none">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-2xl bg-doctor-primary/20 flex items-center justify-center text-doctor-primary shadow-lg shadow-doctor-primary/10">
             <Bell className="w-6 h-6" />
@@ -35,7 +35,7 @@ const DoctorNotifications = ({
       </div>
 
       {/* Notifications List */}
-      <div className="bg-doctor-card border border-doctor-text/10 rounded-[2.5rem] overflow-hidden shadow-sm dark:shadow-none">
+      <div className="bg-doctor-card border border-white/[0.03] rounded-[2.5rem] overflow-hidden shadow-sm dark:shadow-none">
         {loading ? (
           <div className="py-20 text-center">
             <div className="w-10 h-10 border-4 border-doctor-primary/20 border-t-doctor-primary rounded-full animate-spin mx-auto mb-4"></div>

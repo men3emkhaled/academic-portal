@@ -186,11 +186,10 @@ const DoctorGradesView = ({ courses }) => {
         </div>
       )}
 
-      {/* Grades View Container */}
-      <div className="bg-doctor-card border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl shadow-black/20">
-        <div className="p-8 md:p-10 border-b border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="bg-doctor-card border border-white/[0.03] rounded-[2.5rem] overflow-hidden shadow-2xl shadow-black/20 animate-fadeIn">
+        <div className="p-8 md:p-10 border-b border-white/[0.03] flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-white/[0.02] flex items-center justify-center">
                     <Filter className="w-5 h-5 text-doctor-text-muted" />
                 </div>
                 <h3 className="text-xl font-black text-white">Academic Register</h3>
@@ -204,7 +203,7 @@ const DoctorGradesView = ({ courses }) => {
                         placeholder="Search by student name or ID..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full bg-white/5 border border-white/5 rounded-[1.8rem] py-4 pl-14 pr-6 text-white text-sm focus:outline-none focus:border-doctor-primary/40 focus:bg-white/[0.08] transition-all"
+                        className="w-full bg-white/[0.02] border border-white/[0.03] rounded-[1.8rem] py-4 pl-14 pr-6 text-white text-sm focus:outline-none focus:border-doctor-primary/40 focus:bg-white/[0.08] transition-all"
                     />
                 </div>
             )}
@@ -218,7 +217,7 @@ const DoctorGradesView = ({ courses }) => {
             </div>
           ) : !selectedCourseId ? (
             <div className="flex flex-col items-center justify-center py-24 text-center">
-              <div className="w-24 h-24 bg-white/5 rounded-[2.5rem] flex items-center justify-center mb-8">
+              <div className="w-24 h-24 bg-white/[0.02] rounded-[2.5rem] flex items-center justify-center mb-8">
                 <GraduationCap className="w-12 h-12 text-white/10" />
               </div>
               <h3 className="text-2xl font-black text-white mb-2">Select a Course</h3>
@@ -226,7 +225,7 @@ const DoctorGradesView = ({ courses }) => {
             </div>
           ) : filteredGrades.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-24 text-center">
-              <div className="w-24 h-24 bg-white/5 rounded-[2.5rem] flex items-center justify-center mb-8">
+              <div className="w-24 h-24 bg-white/[0.02] rounded-[2.5rem] flex items-center justify-center mb-8">
                 <AlertCircle className="w-12 h-12 text-white/10" />
               </div>
               <h3 className="text-2xl font-black text-white mb-2">No Records Found</h3>
@@ -256,26 +255,30 @@ const DoctorGradesView = ({ courses }) => {
                         key={g.enrollment_id || g.student_id}
                         className={`group transition-all ${isEditing ? 'scale-[1.01]' : 'hover:scale-[1.005]'}`}
                       >
-                        <td className={`bg-white/5 px-6 py-5 rounded-l-[1.8rem] border-y border-l border-white/5 transition-all ${isEditing ? 'bg-doctor-primary/10 border-doctor-primary/40' : 'group-hover:bg-white/[0.08] group-hover:border-white/20'}`}>
+                        <td className={`bg-white/[0.02] px-6 py-5 rounded-l-[1.8rem] border-y border-l border-white/[0.03] transition-all ${isEditing ? 'bg-doctor-primary/10 border-doctor-primary/40' : 'group-hover:bg-white/[0.04] group-hover:border-white/20'}`}>
                             <div className="flex items-center gap-4">
-                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-doctor-primary/20 to-doctor-secondary/20 flex items-center justify-center font-black text-doctor-primary text-xs border border-white/10">
-                                    {g.student_name.charAt(0)}
+                                <div className="w-10 h-10 rounded-xl overflow-hidden bg-gradient-to-br from-doctor-primary/20 to-doctor-secondary/20 flex items-center justify-center font-black text-doctor-primary text-xs border border-white/10">
+                                    {g.avatar_url ? (
+                                        <img src={g.avatar_url} alt={g.student_name} className="w-full h-full object-cover" />
+                                    ) : (
+                                        g.student_name.charAt(0)
+                                    )}
                                 </div>
-                                <div>
-                                    <p className="text-white font-bold text-sm leading-none mb-1">{g.student_name}</p>
-                                    <p className="text-[10px] font-medium text-doctor-text-muted">ID: {g.student_id}</p>
+                                <div className="min-w-0">
+                                    <div className="text-sm font-bold text-white truncate max-w-[150px]">{g.student_name}</div>
+                                    <div className="text-[10px] font-black text-doctor-text-muted">{g.student_id}</div>
                                 </div>
                             </div>
                         </td>
-                        <td className={`bg-white/5 px-6 py-5 border-y border-white/5 transition-all text-center ${isEditing ? 'bg-doctor-primary/10 border-doctor-primary/40' : 'group-hover:bg-white/[0.08] group-hover:border-white/20'}`}>
-                            <span className="text-[10px] font-black text-doctor-text-muted bg-white/5 px-3 py-1 rounded-lg border border-white/5">
+                        <td className={`bg-white/[0.02] px-6 py-5 border-y border-white/[0.03] transition-all text-center ${isEditing ? 'bg-doctor-primary/10 border-doctor-primary/40' : 'group-hover:bg-white/[0.04] group-hover:border-white/20'}`}>
+                            <span className="text-[10px] font-black text-doctor-text-muted bg-white/[0.02] px-3 py-1 rounded-lg border border-white/[0.03]">
                                 {g.section || '—'}
                             </span>
                         </td>
 
                         {isEditing ? (
                           <>
-                            <td className="bg-white/5 px-6 py-5 border-y border-white/5 text-center bg-doctor-primary/10 border-doctor-primary/40">
+                            <td className="bg-white/[0.02] px-6 py-5 border-y border-white/[0.03] text-center bg-doctor-primary/10 border-doctor-primary/40">
                               <input
                                 type="number" min="0" max="20" step="0.5"
                                 className="w-20 bg-white/10 border border-doctor-primary/40 rounded-xl py-2 px-3 text-center text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-doctor-primary/30"
@@ -284,7 +287,7 @@ const DoctorGradesView = ({ courses }) => {
                                 autoFocus
                               />
                             </td>
-                            <td className="bg-white/5 px-6 py-5 border-y border-white/5 text-center bg-doctor-primary/10 border-doctor-primary/40">
+                            <td className="bg-white/[0.02] px-6 py-5 border-y border-white/[0.03] text-center bg-doctor-primary/10 border-doctor-primary/40">
                               <input
                                 type="number" min="0" max="10" step="0.5"
                                 className="w-20 bg-white/10 border border-doctor-primary/40 rounded-xl py-2 px-3 text-center text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-doctor-primary/30"
@@ -292,7 +295,7 @@ const DoctorGradesView = ({ courses }) => {
                                 onChange={(e) => setEditValues({ ...editValues, practical_score: e.target.value })}
                               />
                             </td>
-                            <td className="bg-white/5 px-6 py-5 border-y border-white/5 text-center bg-doctor-primary/10 border-doctor-primary/40">
+                            <td className="bg-white/[0.02] px-6 py-5 border-y border-white/[0.03] text-center bg-doctor-primary/10 border-doctor-primary/40">
                               <input
                                 type="number" min="0" max="10" step="0.5"
                                 className="w-20 bg-white/10 border border-doctor-primary/40 rounded-xl py-2 px-3 text-center text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-doctor-primary/30"
@@ -300,8 +303,8 @@ const DoctorGradesView = ({ courses }) => {
                                 onChange={(e) => setEditValues({ ...editValues, oral_score: e.target.value })}
                               />
                             </td>
-                            <td className="bg-white/5 px-6 py-5 border-y border-white/5 text-center bg-doctor-primary/10 border-doctor-primary/40 font-black text-doctor-text-muted italic">—</td>
-                            <td className="bg-white/5 px-6 py-5 rounded-r-[1.8rem] border-y border-r border-white/5 text-right bg-doctor-primary/10 border-doctor-primary/40">
+                            <td className="bg-white/[0.02] px-6 py-5 border-y border-white/[0.03] text-center bg-doctor-primary/10 border-doctor-primary/40 font-black text-doctor-text-muted italic">—</td>
+                            <td className="bg-white/[0.02] px-6 py-5 rounded-r-[1.8rem] border-y border-r border-white/[0.03] text-right bg-doctor-primary/10 border-doctor-primary/40">
                               <div className="flex items-center justify-end gap-2">
                                 <button
                                   onClick={() => handleSaveGrade(g.enrollment_id)}

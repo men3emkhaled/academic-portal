@@ -20,7 +20,7 @@ const DoctorHeader = ({
   }, []);
 
   return (
-    <header className="h-20 lg:h-24 bg-doctor-bg/80 backdrop-blur-xl border-b border-white/5 flex items-center justify-between px-4 lg:px-10 z-40">
+    <header className="h-20 lg:h-24 bg-doctor-bg/80 backdrop-blur-xl border-b border-white/[0.03] flex items-center justify-between px-4 lg:px-10 z-40">
       {/* Search Bar */}
       <div className="relative w-full max-w-[180px] sm:max-w-96 group">
         <Search className="absolute left-4 lg:left-5 top-1/2 -translate-y-1/2 w-4 lg:w-5 h-4 lg:h-5 text-doctor-text-muted group-focus-within:text-doctor-primary transition-colors" />

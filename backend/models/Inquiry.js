@@ -23,7 +23,7 @@ class Inquiry {
 
   static async getForDoctor(doctorId) {
     const result = await db.query(`
-      SELECT i.*, s.name as student_name, c.name as course_name
+      SELECT i.*, s.name as student_name, s.avatar_url, c.name as course_name
       FROM inquiries i
       JOIN students s ON i.student_id = s.id
       JOIN courses c ON i.course_id = c.id
@@ -46,7 +46,7 @@ class Inquiry {
 
   static async getRecentForDoctor(doctorId, limit = 5) {
     const result = await db.query(`
-      SELECT i.*, s.name as student_name, c.name as course_name
+      SELECT i.*, s.name as student_name, s.avatar_url, c.name as course_name
       FROM inquiries i
       JOIN students s ON i.student_id = s.id
       JOIN courses c ON i.course_id = c.id

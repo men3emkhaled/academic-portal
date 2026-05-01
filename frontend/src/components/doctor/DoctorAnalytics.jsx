@@ -139,19 +139,19 @@ const DoctorAnalytics = ({ courses }) => {
         <div className="space-y-8">
             {/* Top Insight Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-slideUp">
-                <div className="bg-doctor-card border border-white/5 rounded-[2rem] p-6 group hover:border-doctor-primary/30 transition-all overflow-hidden relative shadow-lg">
+                    <div className="bg-doctor-card border border-white/[0.03] rounded-[2rem] p-6 group hover:border-doctor-primary/30 transition-all overflow-hidden relative shadow-black/20">
                     <div className="absolute -right-6 -top-6 w-24 h-24 bg-blue-500/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <Users className="w-8 h-8 text-blue-500 mb-4" />
                     <p className="text-3xl font-black text-white">{analyticsData?.total_students || 0}</p>
                     <p className="text-[10px] font-black text-doctor-text-muted uppercase tracking-widest mt-1">Total Enrolled</p>
                 </div>
-                <div className="bg-doctor-card border border-white/5 rounded-[2rem] p-6 group hover:border-doctor-primary/30 transition-all overflow-hidden relative shadow-lg">
+                    <div className="bg-doctor-card border border-white/[0.03] rounded-[2rem] p-6 group hover:border-doctor-primary/30 transition-all overflow-hidden relative shadow-black/20">
                     <div className="absolute -right-6 -top-6 w-24 h-24 bg-emerald-500/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <UserCheck className="w-8 h-8 text-emerald-500 mb-4" />
                     <p className="text-3xl font-black text-emerald-500">{analyticsData?.average_attendance_percentage || 0}%</p>
                     <p className="text-[10px] font-black text-doctor-text-muted uppercase tracking-widest mt-1">Avg Attendance</p>
                 </div>
-                <div className="bg-doctor-card border border-white/5 rounded-[2rem] p-6 group hover:border-doctor-primary/30 transition-all overflow-hidden relative shadow-lg">
+                    <div className="bg-doctor-card border border-white/[0.03] rounded-[2rem] p-6 group hover:border-doctor-primary/30 transition-all overflow-hidden relative shadow-black/20">
                     <div className="absolute -right-6 -top-6 w-24 h-24 bg-violet-500/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <Target className="w-8 h-8 text-violet-500 mb-4" />
                     <p className="text-3xl font-black text-white">{progressData.length > 0 ? (progressData.reduce((s, x) => s + (x.avg_quiz_score || 0), 0) / progressData.length).toFixed(1) : 0}%</p>
@@ -167,7 +167,7 @@ const DoctorAnalytics = ({ courses }) => {
 
             {/* View Switcher & Actions */}
             <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6">
-                <div className="flex p-1.5 bg-white/5 rounded-[1.8rem] w-fit border border-white/5 overflow-x-auto hidden-scrollbar">
+                <div className="flex p-1.5 bg-white/[0.02] rounded-[1.8rem] w-fit border border-white/[0.03] overflow-x-auto hidden-scrollbar">
                     {[
                         { id: 'overview', label: 'Summary', icon: LayoutGrid },
                         { id: 'performance', label: 'Progress', icon: TrendingUp },
@@ -197,14 +197,14 @@ const DoctorAnalytics = ({ courses }) => {
                             placeholder="Search records..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full bg-white/5 border border-white/5 rounded-[1.8rem] py-3.5 pl-14 pr-6 text-white text-sm focus:outline-none focus:border-doctor-primary/40 focus:bg-white/[0.08] transition-all font-medium"
+                            className="w-full bg-white/[0.02] border border-white/[0.03] rounded-[1.8rem] py-3.5 pl-14 pr-6 text-white text-sm focus:outline-none focus:border-doctor-primary/40 focus:bg-white/[0.08] transition-all font-medium"
                         />
                     </div>
                     {activeView === 'performance' && (
                         <select
                             value={sortBy}
                             onChange={(e) => setSortBy(e.target.value)}
-                            className="bg-white/5 border border-white/5 rounded-2xl py-3.5 px-6 text-white text-xs font-black uppercase tracking-widest focus:outline-none focus:border-doctor-primary/40 transition-all appearance-none cursor-pointer"
+                            className="bg-white/[0.02] border border-white/[0.03] rounded-2xl py-3.5 px-6 text-white text-xs font-black uppercase tracking-widest focus:outline-none focus:border-doctor-primary/40 transition-all appearance-none cursor-pointer"
                         >
                             <option value="name" className="bg-doctor-sidebar">Sort: Name</option>
                             <option value="quiz" className="bg-doctor-sidebar">Sort: Score</option>
@@ -215,7 +215,7 @@ const DoctorAnalytics = ({ courses }) => {
             </div>
 
             {/* View Content */}
-            <div className="bg-doctor-card border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl shadow-black/20 animate-fadeIn">
+            <div className="bg-doctor-card border border-white/[0.03] rounded-[2.5rem] overflow-hidden shadow-2xl shadow-black/20 animate-fadeIn">
                 
                 {activeView === 'overview' && (
                     <div className="p-8 md:p-12">

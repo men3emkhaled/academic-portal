@@ -50,9 +50,9 @@ const DoctorOverview = ({ stats, doctor, timetable, setActiveTab }) => {
           return (
             <div 
               key={i}
-              className="bg-doctor-card border border-doctor-text/5 p-8 rounded-[2rem] hover:border-doctor-primary/30 transition-all group shadow-sm dark:shadow-none"
+              className="bg-doctor-card border border-white/[0.03] p-8 rounded-[2rem] hover:border-doctor-primary/30 transition-all group shadow-sm dark:shadow-none"
             >
-              <div className={`w-12 h-12 rounded-2xl bg-doctor-text/5 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
+              <div className={`w-12 h-12 rounded-2xl bg-white/[0.03] flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
                 <Icon className={`w-6 h-6 text-doctor-text-muted group-hover:text-doctor-primary transition-colors`} />
               </div>
               <p className="text-4xl font-black text-doctor-text mb-2">{stat.value}</p>
@@ -80,9 +80,9 @@ const DoctorOverview = ({ stats, doctor, timetable, setActiveTab }) => {
                         if (action.label === 'Grade Tasks') setActiveTab('tasks');
                         if (action.label === 'Schedule Lecture') setActiveTab('schedule');
                     }}
-                    className="bg-doctor-card border border-doctor-text/5 p-6 rounded-3xl flex items-center gap-5 hover:border-doctor-primary/30 hover:bg-doctor-text/[0.02] transition-all group text-left shadow-sm dark:shadow-none"
+                    className="bg-doctor-card border border-white/[0.03] p-6 rounded-3xl flex items-center gap-5 hover:border-doctor-primary/30 hover:bg-white/[0.03] transition-all group text-left shadow-sm dark:shadow-none"
                   >
-                    <div className="w-14 h-14 rounded-2xl bg-doctor-text/5 flex items-center justify-center group-hover:bg-doctor-primary/10 transition-colors">
+                    <div className="w-14 h-14 rounded-2xl bg-white/[0.03] flex items-center justify-center group-hover:bg-doctor-primary/10 transition-colors">
                       <Icon className="w-6 h-6 text-doctor-text-muted group-hover:text-doctor-primary transition-colors" />
                     </div>
                     <div>
