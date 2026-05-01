@@ -125,7 +125,7 @@ const StudentCourseHub = () => {
       
       <main className="md:ml-64 pb-24 md:pb-8 min-h-screen">
         {/* Top Bar */}
-        <div className="sticky top-0 z-30 bg-gray-50/80 dark:bg-dark/80 backdrop-blur-xl border-b border-gray-200 dark:border-white/5" style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}>
+        <div className="sticky top-0 z-30 bg-gray-50/80 dark:bg-[#0a0a0a]/80 backdrop-blur-xl border-b border-gray-200 dark:border-white/5" style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}>
           <div className="max-w-6xl mx-auto flex items-center justify-between px-6 pb-3">
             <button 
               onClick={() => navigate('/student/dashboard')}
@@ -650,7 +650,7 @@ const StudentCourseHub = () => {
                   <h3 className="font-headline font-black text-xl text-gray-900 dark:text-white mb-2 uppercase tracking-tight">Identity Pass</h3>
                   <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-8">Scan to verify presence</p>
                   
-                  <div className="bg-white dark:bg-white p-6 rounded-[2rem] mx-auto w-fit shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-gray-100 hover:scale-105 transition-transform duration-500 cursor-pointer">
+                  <div className="bg-white p-3 rounded-3xl mx-auto w-fit shadow-xl dark:shadow-[0_0_20px_rgba(255,255,255,0.05)] border border-gray-100 dark:border-transparent hover:scale-105 transition-transform duration-500 cursor-pointer">
                     <QRCodeSVG 
                       value={qrToken} 
                       size={180}
@@ -695,7 +695,7 @@ const StudentCourseHub = () => {
             <h3 className="font-headline font-black text-xl text-gray-900 dark:text-white mb-2 uppercase tracking-tight">Identity Pass</h3>
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-8">Attendance Verification Code</p>
             
-            <div className="bg-white dark:bg-white p-6 rounded-[2rem] mx-auto w-fit shadow-2xl border border-gray-100">
+            <div className="bg-white p-4 rounded-3xl mx-auto w-fit shadow-2xl border border-gray-100 dark:border-transparent">
               <QRCodeSVG 
                 value={qrToken} 
                 size={220}

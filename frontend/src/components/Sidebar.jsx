@@ -9,7 +9,7 @@ const Sidebar = ({ onLogout }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [isPWA, setIsPWA] = useState(false);
-  const { student } = useStudentAuth();
+  const { student, logout } = useStudentAuth();
   const { theme, toggleTheme } = useTheme();
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -61,7 +61,11 @@ const Sidebar = ({ onLogout }) => {
   }
 
   const handleLogout = () => {
-    onLogout();
+    if (onLogout) {
+      onLogout();
+    } else {
+      logout();
+    }
     navigate('/student/login');
   };
 

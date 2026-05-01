@@ -247,7 +247,7 @@ const StudentLogin = () => {
         
         {/* LOGIN FORM */}
         <div className="w-full max-w-md mx-auto mb-16 relative">
-          <div className="bg-white/90 dark:bg-dark-card/80 backdrop-blur-2xl border border-gray-200 dark:border-white/10 rounded-[2rem] p-8 md:p-10 shadow-xl dark:shadow-2xl transition-colors duration-300">
+          <div className="bg-white/90 dark:bg-[#111111]/80 backdrop-blur-2xl border border-gray-200 dark:border-white/10 rounded-[2rem] p-8 md:p-10 shadow-xl dark:shadow-2xl transition-colors duration-300">
             <div className="flex flex-col items-center mb-10 text-center">
               <div className="relative flex items-center justify-center w-20 h-20 mb-6 rounded-3xl bg-gradient-to-br from-primary to-[#5ca846] shadow-[0_0_35px_rgba(46,204,113,0.2)] dark:shadow-[0_0_35px_rgba(142,255,113,0.3)]">
                 <div className="absolute inset-[3px] bg-white dark:bg-[#111111] rounded-[1.3rem] transition-colors duration-300"></div>
@@ -404,7 +404,7 @@ const StudentLogin = () => {
         {/* INFO CARDS SECTION */}
         <div className="w-full max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           
-          <div className="bg-white/90 dark:bg-dark-card/90 backdrop-blur-lg border border-gray-200 dark:border-white/5 rounded-3xl p-6 flex items-start gap-4 hover:bg-gray-50 dark:hover:bg-dark-card hover:border-primary/30 transition-all duration-300 group shadow-sm dark:shadow-none">
+          <div className="bg-white/90 dark:bg-[#111111]/90 backdrop-blur-lg border border-gray-200 dark:border-white/5 rounded-3xl p-6 flex items-start gap-4 hover:bg-gray-50 dark:hover:bg-dark-card hover:border-primary/30 transition-all duration-300 group shadow-sm dark:shadow-none">
             <div className="p-3 bg-primary/10 rounded-2xl group-hover:scale-110 transition-transform">
               <Users className="w-8 h-8 text-primary" />
             </div>
@@ -417,7 +417,7 @@ const StudentLogin = () => {
             </div>
           </div>
 
-          <div className="bg-white/90 dark:bg-dark-card/90 backdrop-blur-lg border border-gray-200 dark:border-white/5 rounded-3xl p-6 flex items-start gap-4 hover:bg-gray-50 dark:hover:bg-dark-card hover:border-primary/30 transition-all duration-300 group shadow-sm dark:shadow-none">
+          <div className="bg-white/90 dark:bg-[#111111]/90 backdrop-blur-lg border border-gray-200 dark:border-white/5 rounded-3xl p-6 flex items-start gap-4 hover:bg-gray-50 dark:hover:bg-dark-card hover:border-primary/30 transition-all duration-300 group shadow-sm dark:shadow-none">
             <div className="p-3 bg-primary/10 rounded-2xl group-hover:scale-110 transition-transform">
               <Building2 className="w-8 h-8 text-primary" />
             </div>
@@ -429,7 +429,7 @@ const StudentLogin = () => {
             </div>
           </div>
 
-          <div className="bg-white/90 dark:bg-dark-card/90 backdrop-blur-lg border border-gray-200 dark:border-white/5 rounded-3xl p-6 flex flex-col justify-center hover:bg-gray-50 dark:hover:bg-dark-card hover:border-primary/30 transition-all duration-300 group shadow-sm dark:shadow-none">
+          <div className="bg-white/90 dark:bg-[#111111]/90 backdrop-blur-lg border border-gray-200 dark:border-white/5 rounded-3xl p-6 flex flex-col justify-center hover:bg-gray-50 dark:hover:bg-dark-card hover:border-primary/30 transition-all duration-300 group shadow-sm dark:shadow-none">
             <div className="flex items-center gap-3 mb-2">
               <Sparkles className="w-6 h-6 text-primary" />
               <h3 className="text-gray-900 dark:text-white font-bold">Portal Features</h3>
