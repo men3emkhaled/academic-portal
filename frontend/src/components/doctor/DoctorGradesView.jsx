@@ -203,7 +203,7 @@ const DoctorGradesView = ({ courses }) => {
                         placeholder="Search by student name or ID..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full bg-white border border-gray-200 dark:border-white/10 rounded-[1.8rem] py-4 pl-14 pr-6 text-gray-900 text-sm focus:outline-none focus:border-doctor-primary/40 transition-all"
+                        className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-white/10 rounded-[1.8rem] py-4 pl-14 pr-6 text-gray-900 dark:text-white text-sm focus:outline-none focus:border-doctor-primary/40 transition-all"
                     />
                 </div>
             )}

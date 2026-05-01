@@ -155,7 +155,7 @@ const DoctorResourceManager = ({ courses }) => {
                 placeholder="Search materials..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-white border border-gray-200 dark:border-white/10 rounded-2xl py-3.5 pl-11 pr-6 text-gray-900 text-sm focus:outline-none focus:border-doctor-primary/40 transition-all w-64"
+                className="bg-gray-50 dark:bg-black border border-gray-200 dark:border-white/10 rounded-2xl py-3.5 pl-11 pr-6 text-gray-900 dark:text-white text-sm focus:outline-none focus:border-doctor-primary/40 transition-all w-64"
               />
            </div>
            {selectedCourseId && (

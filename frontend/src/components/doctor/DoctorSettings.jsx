@@ -194,7 +194,7 @@ const DoctorSettings = () => {
                             type="text" 
                             value={profileData.name}
                             onChange={(e) => setProfileData({...profileData, name: e.target.value})}
-                            className="w-full bg-white border border-gray-200 dark:border-white/10 rounded-2xl py-4 px-6 text-gray-900 focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
+                            className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-white/10 rounded-2xl py-4 px-6 text-gray-900 dark:text-white focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
                         />
                     </div>
                     <div className="space-y-2">
@@ -205,7 +205,7 @@ const DoctorSettings = () => {
                             type="email" 
                             value={profileData.email}
                             onChange={(e) => setProfileData({...profileData, email: e.target.value})}
-                            className="w-full bg-white border border-gray-200 dark:border-white/10 rounded-2xl py-4 px-6 text-gray-900 focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
+                            className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-white/10 rounded-2xl py-4 px-6 text-gray-900 dark:text-white focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
                         />
                     </div>
                     <div className="space-y-2">
@@ -217,7 +217,7 @@ const DoctorSettings = () => {
                             value={profileData.phone}
                             placeholder="+20 123 456 7890"
                             onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
-                            className="w-full bg-white border border-gray-200 dark:border-white/10 rounded-2xl py-4 px-6 text-gray-900 focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
+                            className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-white/10 rounded-2xl py-4 px-6 text-gray-900 dark:text-white focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
                         />
                     </div>
                     <div className="space-y-2">
@@ -240,7 +240,7 @@ const DoctorSettings = () => {
                         value={profileData.bio}
                         onChange={(e) => setProfileData({...profileData, bio: e.target.value})}
                         placeholder="Tell us about your academic background..."
-                        className="w-full bg-white border border-gray-200 dark:border-white/10 rounded-2xl py-4 px-6 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-doctor-primary/50 transition-all font-medium resize-none"
+                        className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-white/10 rounded-2xl py-4 px-6 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-doctor-primary/50 transition-all font-medium resize-none"
                     />
                     </div>
 
@@ -282,7 +282,7 @@ const DoctorSettings = () => {
                         required
                         value={passwordData.currentPassword}
                         onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
-                        className="w-full bg-white border border-gray-200 dark:border-white/10 rounded-2xl py-4 px-6 text-gray-900 focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
+                        className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-white/10 rounded-2xl py-4 px-6 text-gray-900 dark:text-white focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
                       />
                    </div>
                    <div className="space-y-2">
@@ -292,7 +292,7 @@ const DoctorSettings = () => {
                         required
                         value={passwordData.newPassword}
                         onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
-                        className="w-full bg-white border border-gray-200 dark:border-white/10 rounded-2xl py-4 px-6 text-gray-900 focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
+                        className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-white/10 rounded-2xl py-4 px-6 text-gray-900 dark:text-white focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
                       />
                    </div>
                    <div className="space-y-2">
@@ -302,7 +302,7 @@ const DoctorSettings = () => {
                         required
                         value={passwordData.confirmPassword}
                         onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
-                        className="w-full bg-white border border-gray-200 dark:border-white/10 rounded-2xl py-4 px-6 text-gray-900 focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
+                        className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-white/10 rounded-2xl py-4 px-6 text-gray-900 dark:text-white focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
                       />
                    </div>
                 </div>
