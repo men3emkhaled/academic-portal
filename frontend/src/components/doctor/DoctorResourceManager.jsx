@@ -2,6 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useDoctorAuth } from '../../context/DoctorAuthContext';
 import { supabase } from '../../services/supabase';
 import toast from 'react-hot-toast';
+import { 
+  FolderOpen, Plus, Edit3, Trash2, Video, FileText, 
+  Mic, PlayCircle, Link as LinkIcon, Download, 
+  ExternalLink, Upload, X, Save, Search, Filter, BookOpen, Clock
+} from 'lucide-react';
 
 const DoctorResourceManager = ({ courses }) => {
   const { doctorApi } = useDoctorAuth();
