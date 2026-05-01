@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import { 
   BarChart3, Users, Award, FileSpreadsheet, Edit2, 
   Save, X, Search, Filter, BookOpen, Download, 
-  CheckCircle2, AlertCircle, ChevronRight, GraduationCap
+  CheckCircle2, AlertCircle, ChevronRight, GraduationCap, Target
 } from 'lucide-react';
 
 const DoctorGradesView = ({ courses }) => {
