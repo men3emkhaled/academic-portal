@@ -84,8 +84,8 @@ const DoctorDashboard = () => {
   }
 
   return (
-    <div className="flex h-screen bg-doctor-bg text-white font-sans overflow-hidden">
-      {/* Sidebar */}
+    <div className="flex flex-col lg:flex-row h-screen bg-doctor-bg text-white font-sans overflow-hidden">
+      {/* Sidebar / Bottom Bar */}
       <DoctorSidebar 
         activeTab={activeTab} 
         setActiveTab={setActiveTab} 
@@ -105,7 +105,7 @@ const DoctorDashboard = () => {
           onCreateQuiz={() => setActiveTab('quizzes')}
         />
 
-        <main className="flex-1 overflow-y-auto p-10 hidden-scrollbar relative z-10">
+        <main className="flex-1 overflow-y-auto p-6 lg:p-10 pb-32 lg:pb-10 hidden-scrollbar relative z-10">
           <div className="max-w-[1400px] mx-auto">
             {activeTab === 'overview' && (
               <DoctorOverview 
@@ -141,6 +141,9 @@ const DoctorDashboard = () => {
       <style>{`
         .hidden-scrollbar::-webkit-scrollbar { display: none; }
         .hidden-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        @media (max-width: 1023px) {
+          .pb-safe-content { padding-bottom: 5rem; }
+        }
       `}</style>
     </div>
   );
