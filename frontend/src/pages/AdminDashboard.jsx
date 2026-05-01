@@ -31,6 +31,9 @@ import {
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
+import AdminSidebar from '../components/admin/AdminSidebar';
+import AdminHeader from '../components/admin/AdminHeader';
+
 const AdminDashboard = () => {
   const { token, login, logout } = useAuth();
   const { isDarkMode, toggleTheme } = useTheme();
@@ -546,108 +549,37 @@ const AdminDashboard = () => {
   }
 
 
+  // Filter available tabs based on permissions
+  const availableTabs = ALL_TABS.filter(tab => isSuperAdmin || (tab.reqPerm !== 'admin' && userPermissions.includes(tab.reqPerm)));
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#050505] text-gray-900 dark:text-slate-100 transition-colors duration-300">
-
-      {/* Top Navigation Bar */}
-      <nav className="sticky top-0 z-50 bg-white dark:bg-[#0a0a0a] border-b border-gray-200/60 dark:border-white/5">
-        <div className="max-w-[1600px] mx-auto px-4 md:px-8">
-          <div className="flex items-center justify-between h-16 md:h-20">
-            {/* Logo & Admin Info */}
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/25">
-                <ShieldCheck className="w-5 h-5 text-white" />
-              </div>
-              <div className="hidden sm:block">
-                <h1 className="text-lg font-black tracking-tight text-gray-900 dark:text-white">Admin Portal</h1>
-                <p className="text-xs text-gray-500 dark:text-slate-500 font-medium -mt-0.5">
-                  {isSuperAdmin ? 'Root Admin' : 'Assistant Node'}
-                </p>
-              </div>
-            </div>
-
-            {/* Desktop Navigation */}
-            <div className="hidden lg:flex items-center gap-0.5 bg-gray-100/80 dark:bg-white/[0.03] p-1 rounded-xl border border-gray-200/50 dark:border-white/5 overflow-x-auto no-scrollbar max-w-[50vw]">
-              {ALL_TABS.map(tab => {
-                const hasAccess = isSuperAdmin || (tab.reqPerm !== 'admin' && userPermissions.includes(tab.reqPerm));
-                if (!hasAccess) return null;
-                const isActive = activeTab === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    title={tab.label}
-                    className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-200 whitespace-nowrap ${
-                      isActive
-                        ? 'bg-white dark:bg-white/10 text-gray-900 dark:text-white shadow-sm'
-                        : 'text-gray-500 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-300'
-                    }`}
-                  >
-                    <span className={isActive ? 'text-emerald-500' : ''}>{tab.icon}</span>
-                    <span>{tab.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Right Actions */}
-            <div className="flex items-center gap-2">
-              <button
-                onClick={toggleTheme}
-                className="p-2.5 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-200/50 dark:border-white/5 text-gray-500 dark:text-gray-400 hover:text-emerald-500 transition-all"
-              >
-                {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-              </button>
-              <button
-                onClick={logout}
-                className="hidden sm:flex items-center gap-2 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border border-red-200/50 dark:border-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 px-4 py-2.5 rounded-xl text-sm font-bold transition-all"
-              >
-                <LogOut className="w-4 h-4" /> Logout
-              </button>
-              {/* Mobile menu toggle */}
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="lg:hidden p-2.5 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-200/50 dark:border-white/5 text-gray-600 dark:text-gray-400"
-              >
-                {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile Navigation Dropdown */}
-        {mobileMenuOpen && (
-          <div className="lg:hidden border-t border-gray-200/50 dark:border-white/5 bg-white dark:bg-[#0a0a0a] pb-4 px-4 max-h-[60vh] overflow-y-auto">
-            <div className="pt-3 space-y-1">
-              {ALL_TABS.map(tab => {
-                const hasAccess = isSuperAdmin || (tab.reqPerm !== 'admin' && userPermissions.includes(tab.reqPerm));
-                if (!hasAccess) return null;
-                const isActive = activeTab === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => { setActiveTab(tab.id); setMobileMenuOpen(false); }}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
-                      isActive
-                        ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-                        : 'text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-white/5'
-                    }`}
-                  >
-                    {tab.icon}
-                    {tab.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-      </nav>
+    <div className="flex flex-col lg:flex-row h-screen bg-gray-50 dark:bg-[#050505] text-gray-900 dark:text-slate-100 font-sans overflow-hidden transition-colors duration-300">
+      
+      {/* Sidebar / Bottom Bar */}
+      <AdminSidebar 
+        activeTab={activeTab} 
+        setActiveTab={setActiveTab} 
+        admin={{ name: isSuperAdmin ? 'Root Admin' : 'Assistant Node', role: isSuperAdmin ? 'System Admin' : 'Assistant' }} 
+        onLogout={logout} 
+        availableTabs={availableTabs}
+      />
 
       {/* Main Content Area */}
-      <div className="max-w-[1600px] mx-auto p-4 md:p-8 relative z-10">
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+        {/* Background Glows */}
+        <div className="absolute top-[-20%] right-[-10%] w-[50%] h-[50%] bg-emerald-500/10 blur-[150px] rounded-full pointer-events-none"></div>
+        <div className="absolute bottom-[-10%] left-[-5%] w-[40%] h-[40%] bg-teal-500/5 blur-[120px] rounded-full pointer-events-none"></div>
 
+        <AdminHeader 
+          admin={{ name: isSuperAdmin ? 'Root Admin' : 'Assistant Node' }} 
+          onSearch={(query) => console.log('Global search:', query)}
+          setActiveTab={setActiveTab}
+          hasNotificationsAccess={isSuperAdmin || userPermissions.includes('manage_notifications')}
+        />
 
-        <div className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-white/5 shadow-sm dark:shadow-xl rounded-3xl p-6 md:p-10 min-h-[600px] relative">
+        <main className="flex-1 overflow-y-auto p-6 lg:p-10 pb-32 lg:pb-10 hidden-scrollbar relative z-10">
+          <div className="max-w-[1600px] mx-auto">
+            <div className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-white/5 shadow-sm dark:shadow-xl rounded-[2.5rem] p-6 md:p-10 min-h-[600px] relative transition-colors duration-300">
 
           
           {activeTab === 'overview' && (
@@ -835,7 +767,9 @@ const AdminDashboard = () => {
           {activeTab === 'emails' && <LinkedEmailsManager />}
           {activeTab === 'logs' && <LogsDashboard />}
           </Suspense>
-        </div>
+            </div>
+          </div>
+        </main>
       </div>
 
       {/* Edit Student Modal */}
