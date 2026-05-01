@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const doctorController = require('../controllers/doctorController');
 const analyticsController = require('../controllers/analyticsController');
+const inquiryController = require('../controllers/inquiryController');
 const { doctorAuth } = require('../middleware/doctorAuth');
 
 // ==================== AUTH ====================
@@ -12,6 +13,7 @@ router.use(doctorAuth); // كل المسارات اللي تحت محمية
 
 // Dashboard
 router.get('/stats', doctorController.getDashboardStats);
+router.get('/recent-activity', doctorController.getRecentActivity);
 router.get('/profile', doctorController.getProfile);
 router.put('/profile', doctorController.updateProfile);
 router.put('/change-password', doctorController.changePassword);
@@ -93,5 +95,9 @@ router.post('/attendance/manual', doctorController.toggleManualAttendance);
 router.get('/announcements/:courseId', doctorController.getAnnouncements);
 router.post('/announcements', doctorController.createAnnouncement);
 router.delete('/announcements/:id', doctorController.deleteAnnouncement);
+
+// Inquiries
+router.get('/inquiries', inquiryController.getDoctorInquiries);
+router.post('/inquiries/:id/reply', inquiryController.replyToInquiry);
 
 module.exports = router;

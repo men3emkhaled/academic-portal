@@ -8,23 +8,34 @@ import {
   Megaphone, QrCode, ListChecks, CheckCircle2, Circle, 
   ArrowLeft, Calendar, User, ExternalLink, Users,
   Loader2, Clock, BookOpen, X, Check, XCircle,
-  Lock, Zap, Award
+  Lock, Zap, Award, MessageSquare, AlertCircle, Send,
+  HelpCircle, ShieldAlert
 } from 'lucide-react';
 
 const StudentCourseHub = () => {
   const { courseId } = useParams();
   const navigate = useNavigate();
   const [data, setData] = useState(null);
+  const [inquiries, setInquiries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('announcements');
   const [showQr, setShowQr] = useState(false);
   const [submissionUrls, setSubmissionUrls] = useState({});
+  
+  // Inquiry Form State
+  const [inquiryType, setInquiryType] = useState('question');
+  const [inquirySubject, setInquirySubject] = useState('');
+  const [inquiryContent, setInquiryContent] = useState('');
+  const [submittingInquiry, setSubmittingInquiry] = useState(false);
 
   const fetchHubData = useCallback(async () => {
     setLoading(true);
     try {
       const res = await studentApi.get(`/student/course/${courseId}/hub`);
       setData(res.data);
+      
+      const inqRes = await studentApi.get('/student/my-inquiries');
+      setInquiries(inqRes.data.filter(i => String(i.course_id) === String(courseId)));
     } catch (err) {
       toast.error('Failed to load course data');
       navigate('/student/dashboard');
@@ -54,6 +65,32 @@ const StudentCourseHub = () => {
     }
   };
 
+  const handleSubmitInquiry = async (e) => {
+    e.preventDefault();
+    if (!inquiryContent.trim()) return toast.error('Please enter your message');
+    
+    setSubmittingInquiry(true);
+    try {
+      await studentApi.post('/student/inquiries', {
+        course_id: courseId,
+        type: inquiryType,
+        subject: inquirySubject,
+        content: inquiryContent
+      });
+      toast.success('Your message has been sent to the instructor');
+      setInquirySubject('');
+      setInquiryContent('');
+      
+      // Refresh inquiries
+      const inqRes = await studentApi.get('/student/my-inquiries');
+      setInquiries(inqRes.data.filter(i => String(i.course_id) === String(courseId)));
+    } catch (err) {
+      toast.error('Failed to send inquiry');
+    } finally {
+      setSubmittingInquiry(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex min-h-screen bg-gray-50 dark:bg-[#050505]">
@@ -76,9 +113,10 @@ const StudentCourseHub = () => {
 
   const tabs = [
     { id: 'announcements', label: 'News', icon: Megaphone, count: announcements.length },
-    { id: 'progress', label: 'Progress', icon: ListChecks, count: progress.filter(p => p.is_completed).length + '/' + progress.length },
+    { id: 'progress', label: 'Progress', icon: ListChecks },
     { id: 'tasks', label: 'Tasks', icon: CheckCircle2, count: tasks.length },
-    { id: 'attendance', label: 'Attendance', icon: Users, count: `${attendedCount}/${attendance.length}` }
+    { id: 'attendance', label: 'Presence', icon: Users },
+    { id: 'inquiries', label: 'Support', icon: MessageSquare, count: inquiries.length }
   ];
 
   return (
@@ -164,8 +202,8 @@ const StudentCourseHub = () => {
                    </div>
                    <div className="px-4 py-4 bg-gray-50 dark:bg-dark-glass/30 rounded-2xl border border-gray-100 dark:border-white/5 flex flex-col items-center gap-1.5 min-w-[90px] sm:min-w-[110px] hover:border-blue-500/30 transition-colors">
                       <Users className="w-4 h-4 text-blue-500/60" />
-                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Sessions</p>
-                      <p className="text-lg font-black text-gray-900 dark:text-white leading-none mt-1">{attendance.length}</p>
+                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Presence</p>
+                      <p className="text-lg font-black text-gray-900 dark:text-white leading-none mt-1">{attendedCount}</p>
                    </div>
                 </div>
               </div>
@@ -188,9 +226,9 @@ const StudentCourseHub = () => {
                     }`}
                   >
                     <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? 'animate-bounce' : ''}`} />
-                    {tab.label}
-                    {tab.count !== undefined && tab.count !== '0/0' && (
-                      <span className={`hidden sm:inline-block text-[10px] px-2 py-0.5 rounded-full font-black ml-1 ${
+                    <span className="hidden md:inline">{tab.label}</span>
+                    {tab.count !== undefined && (
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-black ml-1 ${
                         activeTab === tab.id ? 'bg-white/20' : 'bg-gray-100 dark:bg-white/10 text-gray-400'
                       }`}>
                         {tab.count}
@@ -356,7 +394,7 @@ const StudentCourseHub = () => {
                                   <div className="relative flex-1">
                                     <input 
                                       type="url"
-                                      placeholder="https://drive.google.com/..."
+                                      placeholder="Paste Google Drive / OneDrive link here..."
                                       value={submissionUrls[task.id] || ''}
                                       onChange={(e) => setSubmissionUrls({...submissionUrls, [task.id]: e.target.value})}
                                       className="w-full bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-3.5 text-sm text-gray-900 dark:text-white focus:border-primary/50 focus:ring-4 focus:ring-primary/5 focus:outline-none transition-all"
@@ -367,7 +405,7 @@ const StudentCourseHub = () => {
                                     className="bg-primary hover:bg-primary/90 text-white font-black py-3.5 px-8 rounded-2xl text-[13px] uppercase tracking-wider shadow-lg shadow-primary/20 transition-all hover:-translate-y-0.5 active:scale-95 flex items-center justify-center gap-2"
                                   >
                                     <Check className="w-4 h-4" />
-                                    Submit
+                                    Submit Work
                                   </button>
                                 </div>
                               ) : (
@@ -474,6 +512,125 @@ const StudentCourseHub = () => {
                         </div>
                       </>
                     )}
+                  </div>
+                )}
+
+                {activeTab === 'inquiries' && (
+                  <div className="space-y-8 animate-fadeIn">
+                    {/* New Inquiry Form */}
+                    <div className="bg-white dark:bg-dark-card border border-gray-200 dark:border-white/5 rounded-[2.5rem] p-8 shadow-sm">
+                      <div className="flex items-center gap-4 mb-8">
+                        <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+                          <MessageSquare className="w-6 h-6" />
+                        </div>
+                        <div>
+                          <h3 className="text-xl font-black text-gray-900 dark:text-white">Ask or Complain</h3>
+                          <p className="text-xs font-bold text-gray-400 mt-1 uppercase tracking-widest">Direct channel to your instructor</p>
+                        </div>
+                      </div>
+
+                      <form onSubmit={handleSubmitInquiry} className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Type of Message</label>
+                            <div className="flex p-1.5 bg-gray-50 dark:bg-black/20 rounded-[1.5rem] border border-gray-200 dark:border-white/5">
+                              <button
+                                type="button"
+                                onClick={() => setInquiryType('question')}
+                                className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-black transition-all ${
+                                  inquiryType === 'question' ? 'bg-white dark:bg-white/10 text-primary shadow-sm' : 'text-gray-400'
+                                }`}
+                              >
+                                <HelpCircle className="w-4 h-4" />
+                                Question
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setInquiryType('complaint')}
+                                className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-black transition-all ${
+                                  inquiryType === 'complaint' ? 'bg-white dark:bg-white/10 text-rose-500 shadow-sm' : 'text-gray-400'
+                                }`}
+                              >
+                                <ShieldAlert className="w-4 h-4" />
+                                Complaint
+                              </button>
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Subject</label>
+                            <input 
+                              type="text"
+                              value={inquirySubject}
+                              onChange={(e) => setInquirySubject(e.target.value)}
+                              placeholder="e.g. Lab requirements, Grade appeal..."
+                              className="w-full bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-[1.5rem] px-6 py-3.5 text-sm text-gray-900 dark:text-white focus:border-primary/50 focus:outline-none transition-all"
+                            />
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Message Details</label>
+                          <textarea 
+                            rows="4"
+                            value={inquiryContent}
+                            onChange={(e) => setInquiryContent(e.target.value)}
+                            placeholder="Type your message here..."
+                            className="w-full bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-[1.5rem] px-6 py-4 text-sm text-gray-900 dark:text-white focus:border-primary/50 focus:outline-none transition-all resize-none"
+                          ></textarea>
+                        </div>
+                        <div className="flex justify-end">
+                          <button 
+                            type="submit"
+                            disabled={submittingInquiry}
+                            className="bg-primary hover:bg-primary/90 text-white font-black py-4 px-10 rounded-2xl text-[13px] uppercase tracking-wider shadow-xl shadow-primary/20 transition-all hover:-translate-y-0.5 active:scale-95 flex items-center gap-3 disabled:opacity-50 disabled:translate-y-0"
+                          >
+                            {submittingInquiry ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
+                            Send Message
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+
+                    {/* Previous Inquiries */}
+                    <div className="space-y-4">
+                       <h4 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-widest ml-4">Message History</h4>
+                       {inquiries.length === 0 ? (
+                         <div className="bg-white/30 dark:bg-white/[0.01] border border-dashed border-gray-200 dark:border-white/5 rounded-[2.5rem] p-12 text-center">
+                            <p className="text-gray-400 font-bold">No previous messages.</p>
+                         </div>
+                       ) : (
+                         inquiries.map(inq => (
+                           <div key={inq.id} className="bg-white dark:bg-dark-card border border-gray-200 dark:border-white/5 rounded-3xl p-6 shadow-sm space-y-4">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                  <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider border ${
+                                    inq.type === 'complaint' ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' : 'bg-blue-500/10 text-blue-500 border-blue-500/20'
+                                  }`}>
+                                    {inq.type}
+                                  </span>
+                                  <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider border ${
+                                    inq.status === 'replied' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                                  }`}>
+                                    {inq.status}
+                                  </span>
+                                </div>
+                                <span className="text-[10px] font-bold text-gray-400">{new Date(inq.created_at).toLocaleDateString()}</span>
+                              </div>
+                              <div>
+                                <h5 className="font-bold text-gray-900 dark:text-white mb-1">{inq.subject || 'No Subject'}</h5>
+                                <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{inq.content}</p>
+                              </div>
+                              
+                              {inq.doctor_reply && (
+                                <div className="mt-4 p-5 bg-primary/5 border border-primary/10 rounded-2xl relative">
+                                  <div className="absolute -top-3 left-6 px-3 py-1 bg-primary text-white text-[9px] font-black uppercase tracking-widest rounded-lg">Instructor Reply</div>
+                                  <p className="text-sm text-gray-700 dark:text-gray-300 font-medium italic">"{inq.doctor_reply}"</p>
+                                  <p className="text-[10px] font-bold text-primary mt-2">{new Date(inq.replied_at).toLocaleDateString()}</p>
+                                </div>
+                              )}
+                           </div>
+                         ))
+                       )}
+                    </div>
                   </div>
                 )}
               </div>

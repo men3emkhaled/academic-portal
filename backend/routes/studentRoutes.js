@@ -22,6 +22,10 @@ const {
   generateAttendanceToken,
   getCourseHubData
 } = require('../controllers/studentController');
+const { 
+  createInquiry, 
+  getStudentInquiries 
+} = require('../controllers/inquiryController');
 const { getMyGrades } = require('../controllers/gradeController');
 const { studentAuth } = require('../middleware/studentAuth');
 const db = require('../config/database');
@@ -36,17 +40,19 @@ router.post('/verify-email', verifyEmail);
 router.post('/link-email', studentAuth, linkEmail);
 router.get('/portal-stats', getPortalStats);
 router.get('/me', studentAuth, getCurrentStudent);
-router.post('/change-password', studentAuth, changePassword);
 router.get('/my-grades', studentAuth, getMyGrades);
 router.post('/update-fcm', studentAuth, updateFcmToken);
 router.get('/attendance/token/:courseId', studentAuth, generateAttendanceToken);
 router.get('/course/:courseId/hub', studentAuth, getCourseHubData);
 
-// ✅ جلب الاختبارات المتاحة للطالب (مع الحقول الجديدة: التواريخ، المحاولات، عدد المحاولات السابقة)
+// --- Inquiries ---
+router.post('/inquiries', studentAuth, createInquiry);
+router.get('/my-inquiries', studentAuth, getStudentInquiries);
+
+// ✅ جلب الاختبارات المتاحة للطالب
 router.get('/my-quizzes', studentAuth, async (req, res) => {
   try {
     const studentId = req.user.id;
-
     const quizzesResult = await db.query(
       `
       SELECT 
@@ -67,8 +73,6 @@ router.get('/my-quizzes', studentAuth, async (req, res) => {
     );
 
     const quizzes = quizzesResult.rows;
-
-    // لكل اختبار، جلب المحاولات السابقة للطالب
     for (const quiz of quizzes) {
       const attemptsResult = await db.query(
         `
@@ -86,15 +90,13 @@ router.get('/my-quizzes', studentAuth, async (req, res) => {
       );
       quiz.attempts = attemptsResult.rows;
     }
-
     res.json(quizzes);
   } catch (error) {
-    console.error('Error fetching my-quizzes:', error);
     res.status(500).json({ message: error.message });
   }
 });
 
-// ✅ جلب الاختبارات المكتملة للطالب (لتبويب Completed)
+// ✅ جلب الاختبارات المكتملة للطالب
 router.get('/completed-quizzes', studentAuth, async (req, res) => {
   try {
     const studentId = req.user.id;
@@ -121,7 +123,6 @@ router.get('/completed-quizzes', studentAuth, async (req, res) => {
     );
     res.json(result.rows);
   } catch (error) {
-    console.error('Error fetching completed quizzes:', error);
     res.status(500).json({ message: error.message });
   }
 });
@@ -134,11 +135,9 @@ router.get('/my-timetable', studentAuth, async (req, res) => {
     if (!student || !student.section || !student.department_id) return res.json([]);
     const section = String(student.section);
     const deptId = student.department_id;
-    console.log('📚 /api/student/my-timetable', { studentId: req.user.id, department_id: deptId, section });
     const timetable = await Timetable.getBySection(section, deptId);
     res.json(timetable);
   } catch (error) {
-    console.error('Error fetching my-timetable:', error);
     res.status(500).json({ message: error.message });
   }
 });

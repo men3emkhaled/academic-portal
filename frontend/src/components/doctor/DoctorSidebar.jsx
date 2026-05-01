@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { 
   LayoutDashboard, BookOpen, FolderOpen, Award, ClipboardList, 
-  BarChart3, PieChart, Bell, Settings, LogOut, Upload, Menu, X, Calendar as CalendarIcon 
+  BarChart3, PieChart, Bell, Settings, LogOut, Upload, Menu, X, Calendar as CalendarIcon,
+  MessageSquare
 } from 'lucide-react';
 
 const MENU_ITEMS = [
@@ -11,6 +12,7 @@ const MENU_ITEMS = [
   { id: 'materials', label: 'Materials', icon: FolderOpen },
   { id: 'quizzes', label: 'Quizzes', icon: Award },
   { id: 'tasks', label: 'Tasks', icon: ClipboardList },
+  { id: 'inquiries', label: 'Support', icon: MessageSquare },
   { id: 'grades', label: 'Grades', icon: BarChart3 },
   { id: 'analytics', label: 'Analytics', icon: PieChart },
 ];

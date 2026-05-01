@@ -164,6 +164,25 @@ class OfficialTask {
     );
     return result.rows[0];
   }
+
+  static async getRecentSubmissionsForDoctor(doctorId, limit = 5) {
+    const result = await db.query(`
+      SELECT 
+        sot.*,
+        s.name as student_name,
+        ot.title as task_title,
+        c.name as course_name
+      FROM student_official_tasks sot
+      JOIN students s ON sot.student_id = s.id
+      JOIN official_tasks ot ON sot.task_id = ot.id
+      JOIN courses c ON ot.course_id = c.id
+      JOIN doctor_courses dc ON c.id = dc.course_id
+      WHERE dc.doctor_id = $1 AND sot.is_completed = true
+      ORDER BY sot.completed_at DESC
+      LIMIT $2
+    `, [doctorId, limit]);
+    return result.rows;
+  }
 }
 
 module.exports = OfficialTask;

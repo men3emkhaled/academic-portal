@@ -18,6 +18,7 @@ import DoctorAttendance from '../components/doctor/DoctorAttendance';
 import DoctorAnnouncements from '../components/doctor/DoctorAnnouncements';
 import DoctorSettings from '../components/doctor/DoctorSettings';
 import DoctorSchedule from '../components/doctor/DoctorSchedule';
+import DoctorInquiries from '../components/doctor/DoctorInquiries';
 
 const DoctorDashboard = () => {
   const { doctor, token, logout, loading: authLoading, doctorApi } = useDoctorAuth();
@@ -126,6 +127,7 @@ const DoctorDashboard = () => {
             {activeTab === 'materials' && <DoctorResourceManager courses={myCourses} />}
             {activeTab === 'quizzes' && <DoctorQuizManager courses={myCourses} />}
             {activeTab === 'tasks' && <DoctorTaskManager courses={myCourses} />}
+            {activeTab === 'inquiries' && <DoctorInquiries />}
             {activeTab === 'grades' && <DoctorGradesView courses={myCourses} />}
             {activeTab === 'analytics' && <DoctorAnalytics courses={myCourses} />}
             

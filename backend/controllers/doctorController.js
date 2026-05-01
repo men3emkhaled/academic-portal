@@ -1,5 +1,7 @@
 const jwt = require('jsonwebtoken');
 const Doctor = require('../models/Doctor');
+const OfficialTask = require('../models/OfficialTask');
+const Inquiry = require('../models/Inquiry');
 const db = require('../config/database');
 const XLSX = require('xlsx');
 
@@ -1408,6 +1410,42 @@ const deleteTimetableEntry = async (req, res) => {
     }
 };
 
+const getRecentActivity = async (req, res) => {
+    try {
+        const doctorId = req.doctor.id;
+        const submissions = await OfficialTask.getRecentSubmissionsForDoctor(doctorId, 5);
+        const inquiries = await Inquiry.getRecentForDoctor(doctorId, 5);
+        
+        const activities = [
+            ...submissions.map(s => ({
+                id: `sub_${s.task_id}_${s.student_id}`,
+                user: s.student_name,
+                action: 'submitted task',
+                target: s.task_title,
+                time: s.completed_at,
+                category: s.course_name,
+                status: 'Completed',
+                type: 'assignment'
+            })),
+            ...inquiries.map(i => ({
+                id: `inq_${i.id}`,
+                user: i.student_name,
+                action: i.type === 'complaint' ? 'sent a complaint' : 'asked a question',
+                target: i.subject || 'Inquiry',
+                time: i.created_at,
+                category: i.course_name,
+                status: i.status === 'replied' ? 'Replied' : 'Pending',
+                type: i.type === 'complaint' ? 'complaint' : 'question'
+            }))
+        ].sort((a, b) => new Date(b.time) - new Date(a.time)).slice(0, 10);
+
+        res.json(activities);
+    } catch (error) {
+        console.error('getRecentActivity error:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports = {
     login, getDashboardStats, getProfile,
     getMyCourses, getMyTimetable, createCourse, updateCourse, toggleArchiveCourse, assignExistingCourse,
@@ -1423,5 +1461,6 @@ module.exports = {
     getCourseProgress, addCourseProgress, updateCourseProgress, toggleCourseProgress, deleteCourseProgress,
     getAttendanceSessions, createAttendanceSession, getAttendanceRecords, scanAttendance, toggleManualAttendance,
     updateAttendanceSession, deleteAttendanceSession, exportCourseAttendance,
-    getAnnouncements, createAnnouncement, deleteAnnouncement
+    getAnnouncements, createAnnouncement, deleteAnnouncement,
+    getRecentActivity
 };
