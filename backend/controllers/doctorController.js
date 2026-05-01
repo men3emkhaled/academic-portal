@@ -1266,9 +1266,20 @@ const exportCourseAttendance = async (req, res) => {
     }
 };
 
+const getMyTimetable = async (req, res) => {
+    try {
+        const Timetable = require('../models/Timetable');
+        const timetable = await Timetable.getByInstructor(req.doctor.name);
+        res.json(timetable);
+    } catch (error) {
+        console.error('Doctor timetable error:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports = {
     login, getDashboardStats, getProfile,
-    getMyCourses,
+    getMyCourses, getMyTimetable,
     getMyQuizzes, createQuiz, updateQuiz, deleteQuiz, togglePublishQuiz,
     getQuestions, addQuestion, updateQuestion, deleteQuestion, getQuizAttempts,
     getMyResources, createResource, updateResource, deleteResource,

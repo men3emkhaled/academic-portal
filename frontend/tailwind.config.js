@@ -18,6 +18,11 @@ module.exports = {
         dark: '#0a0a0a',
         'dark-card': '#111111',
         'dark-glass': 'rgba(17, 17, 17, 0.7)',
+        'doctor-bg': '#0a0a0a',
+        'doctor-sidebar': '#0f0f10',
+        'doctor-card': '#161618',
+        'doctor-primary': '#8b5cf6',
+        'doctor-secondary': '#a78bfa',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],

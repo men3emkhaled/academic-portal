@@ -224,6 +224,30 @@ class Timetable {
     }
     return true;
   }
+
+  // ✅ جديد: جلب جدول المحاضر بناءً على اسمه
+  static async getByInstructor(instructorName) {
+    if (!instructorName) return [];
+    const result = await db.query(
+      `SELECT t.*, d.name as department_name 
+       FROM timetable t
+       LEFT JOIN departments d ON t.department_id = d.id
+       WHERE t.instructor ILIKE $1 AND t.is_hidden = false
+       ORDER BY 
+         CASE t.day_of_week
+           WHEN 'Monday' THEN 1
+           WHEN 'Tuesday' THEN 2
+           WHEN 'Wednesday' THEN 3
+           WHEN 'Thursday' THEN 4
+           WHEN 'Friday' THEN 5
+           WHEN 'Saturday' THEN 6
+           WHEN 'Sunday' THEN 7
+         END,
+         t.start_time`,
+      [\`%\${instructorName}%\`]
+    );
+    return result.rows;
+  }
 }
 
 module.exports = Timetable;

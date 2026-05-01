@@ -16,6 +16,7 @@ router.get('/profile', doctorController.getProfile);
 
 // Courses (Read Only)
 router.get('/courses', doctorController.getMyCourses);
+router.get('/timetable', doctorController.getMyTimetable);
 
 // Quizzes
 router.get('/quizzes', doctorController.getMyQuizzes);
