@@ -7,6 +7,7 @@ import { useTheme } from '../context/ThemeContext';
 import DoctorSidebar from '../components/doctor/DoctorSidebar';
 import DoctorHeader from '../components/doctor/DoctorHeader';
 import DoctorOverview from '../components/doctor/DoctorOverview';
+import DoctorCourses from '../components/doctor/DoctorCourses';
 import DoctorResourceManager from '../components/doctor/DoctorResourceManager';
 import DoctorTaskManager from '../components/doctor/DoctorTaskManager';
 import DoctorQuizManager from '../components/doctor/DoctorQuizManager';
@@ -115,41 +116,10 @@ const DoctorDashboard = () => {
             )}
 
             {activeTab === 'courses' && (
-               <div className="space-y-8 animate-fadeIn">
-                  <div>
-                    <h2 className="text-3xl font-black mb-2">My Courses</h2>
-                    <p className="text-doctor-text-muted">Manage and track progress for your assigned courses.</p>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredCourses.map((course, i) => (
-                      <div 
-                        key={course.id}
-                        className="bg-doctor-card border border-white/5 p-8 rounded-[2rem] hover:border-doctor-primary/30 transition-all group"
-                      >
-                        <div className="w-14 h-14 rounded-2xl bg-doctor-primary/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                          <BookOpen className="w-7 h-7 text-doctor-primary" />
-                        </div>
-                        <h4 className="text-xl font-bold mb-2 truncate">{course.name}</h4>
-                        <div className="flex items-center gap-2 text-doctor-text-muted text-sm font-medium mb-6">
-                          <span>{course.department_name}</span>
-                          <span>•</span>
-                          <span>Semester {course.semester || 'N/A'}</span>
-                        </div>
-                        <button 
-                          onClick={() => setActiveTab('materials')}
-                          className="w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-bold transition-all"
-                        >
-                          View Details
-                        </button>
-                      </div>
-                    ))}
-                    {filteredCourses.length === 0 && (
-                      <div className="col-span-full py-20 text-center">
-                        <p className="text-doctor-text-muted text-lg">No courses found matching "{searchQuery}"</p>
-                      </div>
-                    )}
-                  </div>
-               </div>
+              <DoctorCourses 
+                courses={myCourses} 
+                onRefresh={fetchData} 
+              />
             )}
 
             {activeTab === 'materials' && <DoctorResourceManager courses={myCourses} />}

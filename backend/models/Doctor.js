@@ -30,9 +30,12 @@ class Doctor {
 
     static async getDoctorCourses(doctorId) {
         const query = `
-            SELECT c.* 
+            SELECT c.*, dc.is_archived,
+                   (SELECT COUNT(*) FROM student_courses sc WHERE sc.course_id = c.id) as student_count,
+                   d.name as department_name
             FROM courses c
             JOIN doctor_courses dc ON c.id = dc.course_id
+            LEFT JOIN departments d ON c.department_id = d.id
             WHERE dc.doctor_id = $1
         `;
         const result = await db.query(query, [doctorId]);
@@ -60,6 +63,54 @@ class Doctor {
             'DELETE FROM doctor_courses WHERE doctor_id = $1 AND course_id = $2',
             [doctorId, courseId]
         );
+    }
+
+    static async createCourse(doctorId, name, code, department_id, description = '') {
+        const client = await db.pool.connect();
+        try {
+            await client.query('BEGIN');
+            const courseResult = await client.query(
+                `INSERT INTO courses (name, code, department_id, description)
+                 VALUES ($1, $2, $3, $4)
+                 RETURNING *`,
+                [name, code, department_id, description]
+            );
+            const course = courseResult.rows[0];
+            await client.query(
+                'INSERT INTO doctor_courses (doctor_id, course_id) VALUES ($1, $2)',
+                [doctorId, course.id]
+            );
+            await client.query('COMMIT');
+            return course;
+        } catch (error) {
+            await client.query('ROLLBACK');
+            throw error;
+        } finally {
+            client.release();
+        }
+    }
+
+    static async toggleArchiveCourse(doctorId, courseId, isArchived) {
+        const result = await db.query(
+            'UPDATE doctor_courses SET is_archived = $1 WHERE doctor_id = $2 AND course_id = $3 RETURNING *',
+            [isArchived, doctorId, courseId]
+        );
+        return result.rows[0];
+    }
+
+    static async updateCourse(courseId, updates) {
+        const { name, code, description, department_id } = updates;
+        const result = await db.query(
+            `UPDATE courses 
+             SET name = COALESCE($1, name), 
+                 code = COALESCE($2, code), 
+                 description = COALESCE($3, description),
+                 department_id = COALESCE($4, department_id),
+                 updated_at = CURRENT_TIMESTAMP
+             WHERE id = $5 RETURNING *`,
+            [name, code, description, department_id, courseId]
+        );
+        return result.rows[0];
     }
 
     static async getAll() {

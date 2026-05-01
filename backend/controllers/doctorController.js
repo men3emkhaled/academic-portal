@@ -1277,9 +1277,49 @@ const getMyTimetable = async (req, res) => {
     }
 };
 
+const createCourse = async (req, res) => {
+    try {
+        const { name, code, department_id, description } = req.body;
+        const Doctor = require('../models/Doctor');
+        const course = await Doctor.createCourse(req.doctor.id, name, code, department_id, description);
+        res.status(201).json(course);
+    } catch (error) {
+        console.error('Create course error:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
+const updateCourse = async (req, res) => {
+    try {
+        const { courseId } = req.params;
+        const Doctor = require('../models/Doctor');
+        const hasAccess = await Doctor.hasCourseAccess(req.doctor.id, courseId);
+        if (!hasAccess) return res.status(403).json({ message: 'No access to this course' });
+        
+        const course = await Doctor.updateCourse(courseId, req.body);
+        res.json(course);
+    } catch (error) {
+        console.error('Update course error:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
+const toggleArchiveCourse = async (req, res) => {
+    try {
+        const { courseId } = req.params;
+        const { is_archived } = req.body;
+        const Doctor = require('../models/Doctor');
+        const result = await Doctor.toggleArchiveCourse(req.doctor.id, courseId, is_archived);
+        res.json(result);
+    } catch (error) {
+        console.error('Toggle archive error:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports = {
     login, getDashboardStats, getProfile,
-    getMyCourses, getMyTimetable,
+    getMyCourses, getMyTimetable, createCourse, updateCourse, toggleArchiveCourse,
     getMyQuizzes, createQuiz, updateQuiz, deleteQuiz, togglePublishQuiz,
     getQuestions, addQuestion, updateQuestion, deleteQuestion, getQuizAttempts,
     getMyResources, createResource, updateResource, deleteResource,
