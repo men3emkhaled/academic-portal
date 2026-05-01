@@ -61,7 +61,9 @@ const DoctorSettings = () => {
     formData.append('avatar', file);
 
     try {
-        const res = await doctorApi('post', '/doctor/upload-avatar', formData);
+        const res = await doctorApi('post', '/doctor/upload-avatar', formData, {
+            'Content-Type': 'multipart/form-data'
+        });
         const newAvatarUrl = res.data.avatar_url;
         setProfileData(prev => ({ ...prev, avatar_url: newAvatarUrl }));
         

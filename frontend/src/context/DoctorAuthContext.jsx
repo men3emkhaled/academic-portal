@@ -11,12 +11,15 @@ export const DoctorAuthProvider = ({ children }) => {
   const [doctor, setDoctor] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const doctorApi = useCallback((method, url, data) => {
+  const doctorApi = useCallback((method, url, data, customHeaders = {}) => {
     return api({
       method,
       url,
       data,
-      headers: { Authorization: `Bearer ${token}` }
+      headers: { 
+        Authorization: `Bearer ${token}`,
+        ...customHeaders
+      }
     });
   }, [token]);
 
