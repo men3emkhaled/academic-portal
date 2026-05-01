@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Settings2, User, Edit3, Fingerprint, Lock, Moon, Sun, LogOut, Mail, Send } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Settings2, User, Edit3, Fingerprint, Lock, Moon, Sun, LogOut, Mail, Send, Camera, Loader2 } from 'lucide-react';
 import { useStudentAuth } from '../context/StudentAuthContext';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -17,7 +17,9 @@ const StudentSettings = () => {
     newPassword: '',
     confirmPassword: ''
   });
-  const { student, logout, linkEmail, changePassword } = useStudentAuth();
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const fileInputRef = useRef(null);
+  const { student, logout, linkEmail, changePassword, uploadAvatar } = useStudentAuth();
 
   const handleLogout = () => {
     logout();
@@ -71,6 +73,34 @@ const StudentSettings = () => {
     }
   };
 
+  const handleAvatarChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file');
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Image size must be less than 2MB');
+      return;
+    }
+
+    setIsUploadingAvatar(true);
+    const formData = new FormData();
+    formData.append('avatar', file);
+
+    const result = await uploadAvatar(formData);
+    setIsUploadingAvatar(false);
+
+    if (result.success) {
+      toast.success('Profile picture updated!');
+    } else {
+      toast.error(result.message);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-dark text-gray-900 dark:text-white font-body transition-colors duration-300">
       <Sidebar activePage="settings" onLogout={handleLogout} />
@@ -93,13 +123,38 @@ const StudentSettings = () => {
             </div>
             <div className="bg-white dark:bg-dark-card rounded-[2rem] border border-gray-200 dark:border-white/10 p-8 shadow-sm dark:shadow-2xl relative overflow-hidden group hover:border-primary/20 dark:hover:border-white/20 transition-all duration-500">
               <div className="flex items-center gap-6">
-                <div className="relative">
-                  <div className="w-20 h-20 rounded-full bg-gray-100 dark:bg-dark-glass backdrop-blur-md overflow-hidden border-2 border-primary/20 flex items-center justify-center text-4xl shadow-sm">
-                    👤
+                <div className="relative group/avatar">
+                  <div 
+                    className="w-24 h-24 rounded-[2rem] bg-gray-100 dark:bg-dark-glass backdrop-blur-md overflow-hidden border-2 border-primary/20 flex items-center justify-center text-4xl shadow-sm relative cursor-pointer"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    {student?.avatar_url ? (
+                      <img src={student.avatar_url} alt={student.name} className={`w-full h-full object-cover transition-opacity ${isUploadingAvatar ? 'opacity-30' : 'opacity-100'}`} />
+                    ) : (
+                      <span className="font-headline font-black text-primary/40 group-hover/avatar:scale-110 transition-transform">
+                        {student?.name?.charAt(0) || 'S'}
+                      </span>
+                    )}
+                    {isUploadingAvatar && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                      </div>
+                    )}
                   </div>
-                  <div className="absolute -bottom-1 -right-1 bg-primary text-white dark:text-[#001204] p-1 rounded-full border-4 border-white dark:border-[#001204] shadow-sm dark:shadow-lg">
-                    <Edit3 className="w-3.5 h-3.5" />
-                  </div>
+                  <input 
+                    type="file" 
+                    ref={fileInputRef} 
+                    className="hidden" 
+                    accept="image/*" 
+                    onChange={handleAvatarChange} 
+                  />
+                  <button 
+                    className="absolute -bottom-1 -right-1 bg-primary text-white dark:text-[#001204] p-2 rounded-xl border-4 border-white dark:border-dark-card shadow-lg hover:scale-110 transition-all active:scale-95"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploadingAvatar}
+                  >
+                    <Camera className="w-4 h-4" />
+                  </button>
                 </div>
                 <div className="space-y-1">
                   <div className="text-gray-900 dark:text-white font-headline font-bold text-xl">{student?.name}</div>

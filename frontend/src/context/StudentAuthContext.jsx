@@ -190,6 +190,24 @@ export const StudentAuthProvider = ({ children }) => {
     }
   };
 
+  const uploadAvatar = async (formData) => {
+    try {
+      const response = await studentApi.post('/student/upload-avatar', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      const { avatar_url } = response.data;
+      setStudent(prev => ({ ...prev, avatar_url }));
+      return { success: true, avatar_url };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to upload image'
+      };
+    }
+  };
+
   return (
     <StudentAuthContext.Provider value={{
       token,
@@ -202,7 +220,8 @@ export const StudentAuthProvider = ({ children }) => {
       linkEmail,
       forgotPassword,
       resetPassword,
-      microsoftLogin
+      microsoftLogin,
+      uploadAvatar
     }}>
       {children}
     </StudentAuthContext.Provider>

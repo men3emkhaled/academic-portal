@@ -20,7 +20,8 @@ const {
   resetStudentPassword,
   updateFcmToken,
   generateAttendanceToken,
-  getCourseHubData
+  getCourseHubData,
+  uploadAvatar
 } = require('../controllers/studentController');
 const { 
   createInquiry, 
@@ -28,6 +29,7 @@ const {
 } = require('../controllers/inquiryController');
 const { getMyGrades } = require('../controllers/gradeController');
 const { studentAuth } = require('../middleware/studentAuth');
+const { uploadAvatar: multerUploadAvatar, handleMulterError } = require('../middleware/upload');
 const db = require('../config/database');
 
 router.post('/login', studentLogin);
@@ -44,6 +46,14 @@ router.get('/my-grades', studentAuth, getMyGrades);
 router.post('/update-fcm', studentAuth, updateFcmToken);
 router.get('/attendance/token/:courseId', studentAuth, generateAttendanceToken);
 router.get('/course/:courseId/hub', studentAuth, getCourseHubData);
+router.post('/upload-avatar', studentAuth, (req, res, next) => {
+  multerUploadAvatar.single('avatar')(req, res, (err) => {
+      if (err) {
+          return handleMulterError(err, req, res, next);
+      }
+      next();
+  });
+}, uploadAvatar);
 
 // --- Inquiries ---
 router.post('/inquiries', studentAuth, createInquiry);

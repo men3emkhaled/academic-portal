@@ -56,6 +56,7 @@ const studentLogin = async (req, res) => {
         level: student.level,
         section: student.section,
         department_id: student.department_id,
+        avatar_url: student.avatar_url || null,
         role: student.role || 'student',
         permissions: student.permissions || []
       }
@@ -88,6 +89,7 @@ const getCurrentStudent = async (req, res) => {
       level: student.level,
       section: student.section,
       department_id: student.department_id,
+      avatar_url: student.avatar_url || null,
       role: student.role || 'student',
       permissions: student.permissions || []
     });
@@ -324,7 +326,8 @@ const googleLogin = async (req, res) => {
         level: student.level,
         section: student.section,
         department_id: student.department_id,
-        email: student.email
+        email: student.email,
+        avatar_url: student.avatar_url || null
       }
     });
   } catch (error) {
@@ -408,7 +411,8 @@ const microsoftLogin = async (req, res) => {
         level: student.level,
         section: student.section,
         department_id: student.department_id,
-        email: student.email
+        email: student.email,
+        avatar_url: student.avatar_url || null
       }
     });
   } catch (error) {

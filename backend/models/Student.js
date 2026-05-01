@@ -5,7 +5,7 @@ const SALT_ROUNDS = 10;
 class Student {
   static async findById(id) {
     const result = await db.query(
-      `SELECT s.id, s.name, s.email, s.level, s.section, s.department_id, s.password_hash, s.role, s.permissions,
+      `SELECT s.id, s.name, s.email, s.level, s.section, s.department_id, s.password_hash, s.role, s.permissions, s.avatar_url,
               d.name as department_name, d.code as department_code
        FROM students s
        LEFT JOIN departments d ON s.department_id = d.id
@@ -61,7 +61,7 @@ class Student {
 
   static async getAll() {
     const result = await db.query(`
-      SELECT s.id, s.name, s.email, s.level, s.section, s.department_id, s.password_hash, s.role, s.permissions,
+      SELECT s.id, s.name, s.email, s.level, s.section, s.department_id, s.password_hash, s.role, s.permissions, s.avatar_url,
              d.name as department_name, d.code as department_code
       FROM students s
       LEFT JOIN departments d ON s.department_id = d.id

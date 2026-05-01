@@ -4,6 +4,8 @@ const fs = require('fs');
 const db = require('../config/database');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const path = require('path');
+const supabase = require('../config/supabase');
 const SALT_ROUNDS = 10;
 
 const uploadStudentsExcel = async (req, res) => {
@@ -347,6 +349,49 @@ const getCourseHubData = async (req, res) => {
   }
 };
 
+const uploadAvatar = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'No file uploaded' });
+    }
+
+    const studentId = req.user.id;
+    const file = req.file;
+    const fileExt = path.extname(file.originalname);
+    const fileName = `student_${studentId}_${Date.now()}${fileExt}`;
+    const filePath = `avatars/${fileName}`;
+
+    // Upload to Supabase Storage
+    const { data, error: uploadError } = await supabase.storage
+      .from('avatars')
+      .upload(filePath, file.buffer, {
+        contentType: file.mimetype,
+        upsert: true
+      });
+
+    if (uploadError) {
+      console.error('Supabase upload error:', uploadError);
+      return res.status(500).json({ message: 'Failed to upload image to storage' });
+    }
+
+    // Get public URL
+    const { data: { publicUrl } } = supabase.storage
+      .from('avatars')
+      .getPublicUrl(filePath);
+
+    // Update student record in database
+    await db.query('UPDATE students SET avatar_url = $1 WHERE id = $2', [publicUrl, studentId]);
+
+    res.json({
+      message: 'Avatar updated successfully',
+      avatar_url: publicUrl
+    });
+  } catch (error) {
+    console.error('Upload avatar error:', error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   uploadStudentsExcel,
   getAllStudents,
@@ -356,5 +401,6 @@ module.exports = {
   updateFcmToken,
   updateStudentRole,
   generateAttendanceToken,
-  getCourseHubData
+  getCourseHubData,
+  uploadAvatar
 };

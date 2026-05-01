@@ -70,11 +70,17 @@ const Sidebar = ({ onLogout }) => {
     return (
       <div className="fixed left-0 top-0 h-full w-64 bg-white dark:bg-dark-card border-r border-gray-200 dark:border-white/5 z-40 flex flex-col shadow-[4px_0_24px_rgba(0,0,0,0.05)] dark:shadow-[4px_0_24px_rgba(0,0,0,0.5)] transition-colors duration-300">
         <div className="p-6 border-b border-gray-200 dark:border-white/5 flex items-center gap-4 bg-gradient-to-b from-gray-50 to-white dark:from-white/[0.02] dark:to-transparent">
-          <div className="relative flex flex-shrink-0 items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-green-700 shadow-[0_0_20px_rgba(142,255,113,0.3)]">
-            <div className="absolute inset-[2px] bg-white dark:bg-[#050505] rounded-xl transition-colors duration-300"></div>
-            <div className="relative font-black text-2xl text-transparent bg-clip-text bg-gradient-to-br from-gray-900 to-primary dark:from-white dark:to-primary tracking-tighter font-headline">
-              Z
-            </div>
+          <div className="relative flex flex-shrink-0 items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-green-700 shadow-[0_0_20px_rgba(142,255,113,0.3)] overflow-hidden">
+            {student?.avatar_url ? (
+              <img src={student.avatar_url} alt={student.name} className="w-full h-full object-cover" />
+            ) : (
+              <>
+                <div className="absolute inset-[2px] bg-white dark:bg-[#050505] rounded-xl transition-colors duration-300"></div>
+                <div className="relative font-black text-2xl text-transparent bg-clip-text bg-gradient-to-br from-gray-900 to-primary dark:from-white dark:to-primary tracking-tighter font-headline">
+                  {student?.name?.charAt(0) || 'Z'}
+                </div>
+              </>
+            )}
           </div>
           <div>
             <h1 className="font-extrabold text-xl text-transparent bg-clip-text bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 tracking-tight leading-none font-headline">
@@ -198,9 +204,15 @@ const Sidebar = ({ onLogout }) => {
           <div className="fixed bottom-24 left-4 right-4 bg-white dark:bg-dark-card border border-gray-200 dark:border-white/10 rounded-[2rem] shadow-2xl z-50 animate-slideUp overflow-hidden transition-colors duration-300">
             <div className="flex justify-between items-center p-5 border-b border-gray-200 dark:border-white/5 bg-gray-50 dark:bg-white/[0.02]">
               <div className="flex items-center gap-4">
-                <div className="relative flex-shrink-0 flex items-center justify-center w-12 h-12 rounded-[14px] bg-gradient-to-br from-primary to-green-700 shadow-[0_0_15px_rgba(142,255,113,0.3)]">
-                  <div className="absolute inset-[2px] bg-white dark:bg-[#050505] rounded-[12px] transition-colors duration-300"></div>
-                  <span className="relative font-black text-xl text-primary font-headline">Z</span>
+                <div className="relative flex-shrink-0 flex items-center justify-center w-12 h-12 rounded-[14px] bg-gradient-to-br from-primary to-green-700 shadow-[0_0_15px_rgba(142,255,113,0.3)] overflow-hidden">
+                  {student?.avatar_url ? (
+                    <img src={student.avatar_url} alt={student.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <>
+                      <div className="absolute inset-[2px] bg-white dark:bg-[#050505] rounded-[12px] transition-colors duration-300"></div>
+                      <span className="relative font-black text-xl text-primary font-headline">{student?.name?.charAt(0) || 'Z'}</span>
+                    </>
+                  )}
                 </div>
                 <div>
                   <h3 className="text-[16px] font-extrabold text-gray-900 dark:text-white leading-none tracking-tight font-headline mb-1">ZNU Menu</h3>
