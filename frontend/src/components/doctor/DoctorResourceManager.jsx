@@ -2,7 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useDoctorAuth } from '../../context/DoctorAuthContext';
 import { supabase } from '../../services/supabase';
 import toast from 'react-hot-toast';
-import { FolderOpen, Plus, Edit3, Trash2, Video, FileText, Mic, PlayCircle, Link as LinkIcon, Download, ExternalLink, Upload } from 'lucide-react';
+import { 
+  FolderOpen, Plus, Edit3, Trash2, Video, FileText, 
+  Mic, PlayCircle, Link as LinkIcon, Download, 
+  ExternalLink, Upload, X, Save, Search, Filter, BookOpen
+} from 'lucide-react';
 
 const DoctorResourceManager = ({ courses }) => {
   const { doctorApi } = useDoctorAuth();
@@ -14,6 +18,7 @@ const DoctorResourceManager = ({ courses }) => {
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(false);
   const [recordingFile, setRecordingFile] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     if (selectedCourseId) {
@@ -112,208 +117,308 @@ const DoctorResourceManager = ({ courses }) => {
 
   const getTypeConfig = (type) => {
     switch(type) {
-      case 'video': return { icon: Video, color: 'red', label: 'Video' };
-      case 'pdf': return { icon: FileText, color: 'orange', label: 'PDF' };
-      case 'recording': return { icon: Mic, color: 'emerald', label: 'Recording' };
-      case 'playlist': return { icon: PlayCircle, color: 'purple', label: 'Playlist' };
-      default: return { icon: LinkIcon, color: 'blue', label: 'Link' };
+      case 'video': return { icon: Video, color: 'text-rose-400', bg: 'bg-rose-400/10', border: 'border-rose-400/20', label: 'Video' };
+      case 'pdf': return { icon: FileText, color: 'text-amber-400', bg: 'bg-amber-400/10', border: 'border-amber-400/20', label: 'PDF' };
+      case 'recording': return { icon: Mic, color: 'text-emerald-400', bg: 'bg-emerald-400/10', border: 'border-emerald-400/20', label: 'Recording' };
+      case 'playlist': return { icon: PlayCircle, color: 'text-violet-400', bg: 'bg-violet-400/10', border: 'border-violet-400/20', label: 'Playlist' };
+      default: return { icon: LinkIcon, color: 'text-blue-400', bg: 'bg-blue-400/10', border: 'border-blue-400/20', label: 'Link' };
     }
   };
 
-  // Group resources by type
-  const groupedResources = resources.reduce((acc, r) => {
+  const filteredResources = resources.filter(r => 
+    r.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const groupedResources = filteredResources.reduce((acc, r) => {
     if (!acc[r.type]) acc[r.type] = [];
     acc[r.type].push(r);
     return acc;
   }, {});
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="space-y-8 animate-fadeIn">
+      {/* Header & Stats */}
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
         <div>
-          <h2 className="text-xl md:text-2xl font-black text-gray-900 dark:text-white flex items-center gap-2">
-            <FolderOpen className="w-6 h-6 text-blue-500" /> Course Materials
+          <h2 className="text-3xl font-black text-white tracking-tight mb-2 flex items-center gap-3">
+            <FolderOpen className="w-8 h-8 text-doctor-primary" />
+            Course Materials
           </h2>
-          <p className="text-sm text-gray-500 dark:text-slate-500 mt-1">Upload videos, PDFs, recordings, and links</p>
+          <p className="text-doctor-text-muted font-medium">Upload and organize learning resources for your students.</p>
+        </div>
+        
+        <div className="flex flex-wrap gap-4">
+           <div className="relative group">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-doctor-text-muted group-focus-within:text-doctor-primary transition-colors" />
+              <input 
+                type="text"
+                placeholder="Search materials..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="bg-white/5 border border-white/5 rounded-2xl py-3.5 pl-11 pr-6 text-white text-sm focus:outline-none focus:border-doctor-primary/40 focus:bg-white/[0.07] transition-all w-64"
+              />
+           </div>
+           {selectedCourseId && (
+              <button 
+                onClick={() => setShowForm(true)}
+                className="bg-doctor-primary hover:bg-doctor-primary/90 text-white font-black px-6 py-3.5 rounded-2xl shadow-lg shadow-doctor-primary/20 flex items-center gap-3 transition-all active:scale-95"
+              >
+                <Plus className="w-5 h-5" />
+                <span>Add New</span>
+              </button>
+           )}
         </div>
       </div>
 
-      {/* Course Selector + Add Button */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <select
-          value={selectedCourseId}
-          onChange={(e) => setSelectedCourseId(e.target.value)}
-          className="flex-1 bg-white dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/5 rounded-xl p-3.5 text-gray-900 dark:text-white font-medium focus:border-blue-500/50 focus:outline-none transition-colors"
-        >
-          <option value="">-- Select a Course --</option>
-          {courses.map(c => (
-            <option key={c.id} value={c.id}>{c.name}</option>
+      {/* Course Selection Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {courses.map(course => (
+              <button
+                key={course.id}
+                onClick={() => setSelectedCourseId(course.id)}
+                className={`relative p-5 rounded-[1.8rem] border transition-all text-left group overflow-hidden ${
+                    selectedCourseId === course.id 
+                    ? 'bg-doctor-primary/10 border-doctor-primary shadow-xl shadow-doctor-primary/10' 
+                    : 'bg-doctor-card border-white/5 hover:border-white/20'
+                }`}
+              >
+                  {/* Decoration */}
+                  <div className={`absolute -right-6 -bottom-6 w-24 h-24 rounded-full blur-3xl transition-opacity ${selectedCourseId === course.id ? 'bg-doctor-primary/20 opacity-100' : 'bg-white/5 opacity-0 group-hover:opacity-100'}`}></div>
+                  
+                  <div className="flex items-center gap-4 relative z-10">
+                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${selectedCourseId === course.id ? 'bg-doctor-primary text-white' : 'bg-white/5 text-doctor-text-muted group-hover:scale-110'}`}>
+                          <BookOpen className="w-6 h-6" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                          <h4 className={`font-bold truncate ${selectedCourseId === course.id ? 'text-white' : 'text-doctor-text-muted group-hover:text-white'}`}>{course.name}</h4>
+                          <p className="text-[10px] font-black uppercase tracking-widest text-doctor-text-muted opacity-60 mt-1">{course.code}</p>
+                      </div>
+                  </div>
+              </button>
           ))}
-        </select>
-        {selectedCourseId && !showForm && (
-          <button
-            onClick={() => setShowForm(true)}
-            className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-5 rounded-xl transition-all hover:shadow-lg hover:shadow-blue-500/20 active:scale-95 text-sm whitespace-nowrap"
-          >
-            <Plus className="w-4 h-4" /> Add Resource
-          </button>
-        )}
       </div>
 
-      {/* Form */}
-      {showForm && selectedCourseId && (
-        <div className="bg-white dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/5 p-6 rounded-2xl animate-fadeIn">
-          <h3 className="text-lg font-black mb-5 flex items-center gap-2 text-gray-900 dark:text-white">
-            {editingResource ? <Edit3 className="text-blue-500 w-5 h-5" /> : <Upload className="text-blue-500 w-5 h-5" />}
-            {editingResource ? 'Edit Resource' : 'Add New Resource'}
-          </h3>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-bold text-gray-500 dark:text-slate-500 mb-2 uppercase tracking-wider">Type</label>
-                <select
-                  value={formData.type}
-                  onChange={(e) => { setFormData({ ...formData, type: e.target.value }); setRecordingFile(null); }}
-                  className="w-full bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl p-3 text-gray-900 dark:text-white focus:border-blue-500/50 focus:outline-none transition-colors"
-                >
-                  <option value="video">📹 Video Link</option>
-                  <option value="pdf">📄 PDF Document</option>
-                  <option value="recording">🎙️ Audio Recording</option>
-                  <option value="playlist">▶️ Playlist</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-gray-500 dark:text-slate-500 mb-2 uppercase tracking-wider">Title *</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="e.g. Lecture 5 - Sorting Algorithms"
-                  className="w-full bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl p-3 text-gray-900 dark:text-white focus:border-blue-500/50 focus:outline-none transition-colors"
-                />
-              </div>
-            </div>
-
-            {formData.type === 'recording' ? (
-              <div>
-                <label className="block text-xs font-bold text-gray-500 dark:text-slate-500 mb-2 uppercase tracking-wider">Audio File</label>
-                <div className="relative">
-                  <input
-                    type="file"
-                    accept="audio/*,video/*"
-                    onChange={(e) => setRecordingFile(e.target.files[0])}
-                    className="w-full text-sm file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-blue-50 file:text-blue-600 hover:file:bg-blue-100 cursor-pointer text-gray-500"
-                    required={!editingResource}
-                  />
+      {/* Modal for Adding/Editing */}
+      {showForm && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
+            <div className="bg-doctor-card border border-white/10 w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden animate-slideUp">
+                <div className="p-8 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+                    <h3 className="text-xl font-black text-white">{editingResource ? 'Edit Resource' : 'Upload New Resource'}</h3>
+                    <button onClick={resetForm} className="w-10 h-10 rounded-full hover:bg-white/10 flex items-center justify-center text-doctor-text-muted transition-colors">
+                        <X className="w-6 h-6" />
+                    </button>
                 </div>
-              </div>
-            ) : (
-              <div>
-                <label className="block text-xs font-bold text-gray-500 dark:text-slate-500 mb-2 uppercase tracking-wider">URL *</label>
-                <input
-                  type="url"
-                  required
-                  value={formData.url}
-                  onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-                  placeholder="https://..."
-                  className="w-full bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl p-3 text-gray-900 dark:text-white focus:border-blue-500/50 focus:outline-none transition-colors"
-                />
-              </div>
-            )}
-
-            <div className="flex gap-3 pt-2">
-              <button
-                type="submit"
-                disabled={loading}
-                className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-xl transition-all disabled:opacity-50 hover:shadow-lg hover:shadow-blue-500/20 active:scale-[0.98]"
-              >
-                {loading ? 'Uploading...' : (editingResource ? 'Update' : 'Save Resource')}
-              </button>
-              <button
-                type="button"
-                onClick={resetForm}
-                className="px-6 py-3 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 font-bold rounded-xl transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      {/* Resources List */}
-      {!selectedCourseId ? (
-        <div className="bg-white dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/5 rounded-2xl p-12 text-center">
-          <FolderOpen className="w-12 h-12 text-gray-300 dark:text-slate-600 mx-auto mb-3" />
-          <p className="text-gray-500 dark:text-slate-500 font-medium">Select a course to view materials</p>
-        </div>
-      ) : fetchLoading ? (
-        <div className="space-y-3">
-          {[1,2,3].map(i => (
-            <div key={i} className="bg-white dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/5 rounded-2xl p-5 animate-pulse">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-gray-200 dark:bg-white/10 rounded-xl"></div>
-                <div className="flex-1">
-                  <div className="h-4 bg-gray-200 dark:bg-white/10 rounded w-1/3 mb-2"></div>
-                  <div className="h-3 bg-gray-100 dark:bg-white/5 rounded w-1/4"></div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : resources.length === 0 ? (
-        <div className="bg-white dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/5 rounded-2xl p-12 text-center">
-          <Upload className="w-12 h-12 text-gray-300 dark:text-slate-600 mx-auto mb-3" />
-          <p className="text-gray-500 dark:text-slate-500 font-medium">No materials uploaded yet</p>
-          <p className="text-xs text-gray-400 dark:text-slate-600 mt-1">Click "Add Resource" to get started</p>
-        </div>
-      ) : (
-        <div className="space-y-6">
-          {Object.entries(groupedResources).map(([type, items]) => {
-            const config = getTypeConfig(type);
-            const Icon = config.icon;
-            return (
-              <div key={type}>
-                <h4 className="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-[0.15em] mb-3 flex items-center gap-2">
-                  <Icon className={`w-4 h-4 text-${config.color}-500`} />
-                  {config.label}s ({items.length})
-                </h4>
-                <div className="space-y-2">
-                  {items.map(r => (
-                    <div
-                      key={r.id}
-                      className="group bg-white dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/5 rounded-xl p-4 flex items-center justify-between hover:border-gray-300 dark:hover:border-white/10 transition-all"
-                    >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className={`w-9 h-9 bg-${config.color}-500/10 rounded-lg flex items-center justify-center flex-shrink-0`}>
-                          <Icon className={`w-4 h-4 text-${config.color}-500`} />
+                
+                <form onSubmit={handleSubmit} className="p-8 space-y-6">
+                    <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <label className="text-xs font-black text-doctor-text-muted uppercase tracking-widest ml-1">Type</label>
+                                <select
+                                    value={formData.type}
+                                    onChange={(e) => { setFormData({ ...formData, type: e.target.value }); setRecordingFile(null); }}
+                                    className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:border-doctor-primary/50 transition-all font-medium appearance-none"
+                                >
+                                    <option value="video" className="bg-doctor-sidebar">📹 Video</option>
+                                    <option value="pdf" className="bg-doctor-sidebar">📄 PDF Document</option>
+                                    <option value="recording" className="bg-doctor-sidebar">🎙️ Audio Recording</option>
+                                    <option value="playlist" className="bg-doctor-sidebar">▶️ Playlist</option>
+                                </select>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-xs font-black text-doctor-text-muted uppercase tracking-widest ml-1">Title</label>
+                                <input
+                                    type="text"
+                                    required
+                                    value={formData.title}
+                                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                                    placeholder="e.g. Chapter 1 Intro"
+                                    className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
+                                />
+                            </div>
                         </div>
-                        <div className="min-w-0">
-                          <h5 className="font-semibold text-sm text-gray-900 dark:text-white truncate">{r.title}</h5>
-                          <a href={r.url} target="_blank" rel="noreferrer" className="text-xs text-blue-500 hover:text-blue-600 flex items-center gap-1 mt-0.5 transition-colors">
-                            {r.type === 'recording' ? <Download className="w-3 h-3" /> : <ExternalLink className="w-3 h-3" />}
-                            Open
-                          </a>
-                        </div>
-                      </div>
-                      <div className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button onClick={() => startEdit(r)} className="p-2 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-lg transition-colors" title="Edit">
-                          <Edit3 className="w-4 h-4" />
-                        </button>
-                        <button onClick={() => handleDelete(r.id)} className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors" title="Delete">
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
+
+                        {formData.type === 'recording' ? (
+                            <div className="space-y-2">
+                                <label className="text-xs font-black text-doctor-text-muted uppercase tracking-widest ml-1">Audio File</label>
+                                <div className="relative group">
+                                    <input
+                                        type="file"
+                                        accept="audio/*,video/*"
+                                        onChange={(e) => setRecordingFile(e.target.files[0])}
+                                        className="hidden"
+                                        id="audio-upload"
+                                        required={!editingResource}
+                                    />
+                                    <label 
+                                        htmlFor="audio-upload"
+                                        className="w-full bg-white/5 border border-dashed border-white/20 rounded-2xl py-8 px-6 flex flex-col items-center justify-center cursor-pointer hover:border-doctor-primary/50 hover:bg-doctor-primary/5 transition-all group"
+                                    >
+                                        <div className="w-12 h-12 rounded-full bg-doctor-primary/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                            <Upload className="w-6 h-6 text-doctor-primary" />
+                                        </div>
+                                        <span className="text-sm font-bold text-white mb-1">
+                                            {recordingFile ? recordingFile.name : 'Select or drop audio file'}
+                                        </span>
+                                        <span className="text-[10px] font-black text-doctor-text-muted uppercase">MP3, WAV, or AAC</span>
+                                    </label>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="space-y-2">
+                                <label className="text-xs font-black text-doctor-text-muted uppercase tracking-widest ml-1">Resource URL</label>
+                                <div className="relative">
+                                    <LinkIcon className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-doctor-text-muted" />
+                                    <input
+                                        type="url"
+                                        required
+                                        value={formData.url}
+                                        onChange={(e) => setFormData({ ...formData, url: e.target.value })}
+                                        placeholder="https://youtube.com/..."
+                                        className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 pl-14 pr-6 text-white focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
+                                    />
+                                </div>
+                            </div>
+                        )}
                     </div>
-                  ))}
-                </div>
-              </div>
-            );
-          })}
+
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full bg-doctor-primary hover:bg-doctor-primary/90 text-white font-black py-5 rounded-[2rem] shadow-xl shadow-doctor-primary/30 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-3"
+                    >
+                        {loading ? (
+                            <div className="w-6 h-6 border-4 border-white/20 border-t-white rounded-full animate-spin"></div>
+                        ) : (
+                            <>
+                                <Save className="w-5 h-5" />
+                                <span>{editingResource ? 'Update Resource' : 'Publish Resource'}</span>
+                            </>
+                        )}
+                    </button>
+                </form>
+            </div>
         </div>
       )}
+
+      {/* Main Content Area */}
+      <div className="min-h-[400px]">
+          {!selectedCourseId ? (
+              <div className="bg-doctor-card border border-white/5 rounded-[2.5rem] p-20 text-center animate-fadeIn">
+                  <div className="w-24 h-24 rounded-3xl bg-white/5 flex items-center justify-center mx-auto mb-6">
+                      <FolderOpen className="w-10 h-10 text-white/20" />
+                  </div>
+                  <h3 className="text-2xl font-black text-white mb-2">Select a Course</h3>
+                  <p className="text-doctor-text-muted max-w-xs mx-auto">Choose a course above to manage its learning materials and resources.</p>
+              </div>
+          ) : fetchLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {[1,2,3,4].map(i => (
+                      <div key={i} className="bg-doctor-card border border-white/5 rounded-[1.8rem] p-6 animate-pulse">
+                          <div className="flex items-center gap-4 mb-4">
+                              <div className="w-12 h-12 rounded-2xl bg-white/5"></div>
+                              <div className="flex-1 space-y-2">
+                                  <div className="h-4 bg-white/5 rounded w-3/4"></div>
+                                  <div className="h-3 bg-white/5 rounded w-1/4"></div>
+                              </div>
+                          </div>
+                          <div className="h-10 bg-white/5 rounded-xl w-full"></div>
+                      </div>
+                  ))}
+              </div>
+          ) : resources.length === 0 ? (
+              <div className="bg-doctor-card border border-white/5 rounded-[2.5rem] p-20 text-center animate-fadeIn">
+                  <div className="w-24 h-24 rounded-3xl bg-white/5 flex items-center justify-center mx-auto mb-6">
+                      <Upload className="w-10 h-10 text-white/20" />
+                  </div>
+                  <h3 className="text-2xl font-black text-white mb-2">No Materials Yet</h3>
+                  <p className="text-doctor-text-muted mb-8">Start by uploading your first lecture material or helpful link.</p>
+                  <button 
+                    onClick={() => setShowForm(true)}
+                    className="bg-white/5 hover:bg-white/10 text-white font-bold px-8 py-4 rounded-2xl transition-all inline-flex items-center gap-2"
+                  >
+                      <Plus className="w-5 h-5" />
+                      Add Material
+                  </button>
+              </div>
+          ) : (
+              <div className="space-y-12">
+                  {Object.entries(groupedResources).map(([type, items]) => {
+                      const config = getTypeConfig(type);
+                      const Icon = config.icon;
+                      return (
+                          <section key={type} className="animate-fadeIn">
+                              <div className="flex items-center gap-4 mb-6 ml-2">
+                                  <div className={`w-10 h-10 rounded-xl ${config.bg} flex items-center justify-center`}>
+                                      <Icon className={`w-5 h-5 ${config.color}`} />
+                                  </div>
+                                  <div>
+                                      <h3 className="text-lg font-black text-white">{config.label}s</h3>
+                                      <p className="text-[10px] font-black text-doctor-text-muted uppercase tracking-widest">{items.length} files available</p>
+                                  </div>
+                              </div>
+                              
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  {items.map(resource => (
+                                      <div 
+                                          key={resource.id}
+                                          className="bg-doctor-card border border-white/5 p-6 rounded-[1.8rem] hover:border-doctor-primary/30 transition-all group relative overflow-hidden"
+                                      >
+                                          <div className={`absolute top-0 left-0 bottom-0 w-1 ${config.bg.replace('/10', '')} opacity-40`}></div>
+                                          
+                                          <div className="flex items-start justify-between gap-4 mb-6">
+                                              <div className="min-w-0">
+                                                  <h4 className="text-white font-bold text-lg leading-tight truncate mb-1 group-hover:text-doctor-primary transition-colors">{resource.title}</h4>
+                                                  <p className="text-xs text-doctor-text-muted font-medium flex items-center gap-2">
+                                                      <Clock className="w-3 h-3" />
+                                                      {new Date(resource.created_at).toLocaleDateString()}
+                                                  </p>
+                                              </div>
+                                              
+                                              <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
+                                                  <button onClick={() => startEdit(resource)} className="p-2 rounded-xl hover:bg-white/10 text-amber-400">
+                                                      <Edit3 className="w-4 h-4" />
+                                                  </button>
+                                                  <button onClick={() => handleDelete(resource.id)} className="p-2 rounded-xl hover:bg-red-500/10 text-red-400">
+                                                      <Trash2 className="w-4 h-4" />
+                                                  </button>
+                                              </div>
+                                          </div>
+
+                                          <div className="flex items-center gap-3 mt-auto">
+                                              <a 
+                                                href={resource.url} 
+                                                target="_blank" 
+                                                rel="noreferrer"
+                                                className={`flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-sm transition-all ${config.bg} ${config.color} hover:brightness-125 active:scale-95`}
+                                              >
+                                                  {resource.type === 'recording' ? <Download className="w-4 h-4" /> : <ExternalLink className="w-4 h-4" />}
+                                                  <span>{resource.type === 'recording' ? 'Download Recording' : 'View Material'}</span>
+                                              </a>
+                                              <button 
+                                                onClick={() => {
+                                                    navigator.clipboard.writeText(resource.url);
+                                                    toast.success('Link copied!');
+                                                }}
+                                                className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-doctor-text-muted hover:text-white hover:bg-white/10 transition-all active:scale-95"
+                                              >
+                                                  <LinkIcon className="w-5 h-5" />
+                                              </button>
+                                          </div>
+                                      </div>
+                                  ))}
+                              </div>
+                          </section>
+                      );
+                  })}
+              </div>
+          )}
+      </div>
+
+      <style>{`
+        .hidden-scrollbar::-webkit-scrollbar { display: none; }
+        .hidden-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      `}</style>
     </div>
   );
 };
