@@ -12,8 +12,6 @@ import DoctorResourceManager from '../components/doctor/DoctorResourceManager';
 import DoctorTaskManager from '../components/doctor/DoctorTaskManager';
 import DoctorQuizManager from '../components/doctor/DoctorQuizManager';
 import DoctorGradesView from '../components/doctor/DoctorGradesView';
-import DoctorStudentProgress from '../components/doctor/DoctorStudentProgress';
-import DoctorQuizAnalytics from '../components/doctor/DoctorQuizAnalytics';
 import DoctorAnalytics from '../components/doctor/DoctorAnalytics';
 import DoctorCourseProgress from '../components/doctor/DoctorCourseProgress';
 import DoctorAttendance from '../components/doctor/DoctorAttendance';
@@ -135,8 +133,6 @@ const DoctorDashboard = () => {
             {activeTab === 'syllabus' && <DoctorCourseProgress courses={myCourses} />}
             {activeTab === 'announcements' && <DoctorAnnouncements courses={myCourses} />}
             {activeTab === 'attendance' && <DoctorAttendance courses={myCourses} />}
-            {activeTab === 'progress' && <DoctorStudentProgress courses={myCourses} />}
-            {activeTab === 'quiz_analytics' && <DoctorQuizAnalytics courses={myCourses} />}
             {activeTab === 'settings' && <DoctorSettings />}
             {activeTab === 'schedule' && (
               <DoctorSchedule 
