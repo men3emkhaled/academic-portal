@@ -494,7 +494,7 @@ const DoctorTaskManager = ({ courses }) => {
                                 placeholder="e.g. Final Project Phase 1"
                                 value={formData.title}
                                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                className="w-full bg-doctor-text/5 border border-doctor-text/5 rounded-2xl py-4 px-6 text-doctor-text focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
+                                className="w-full bg-white border border-gray-200 dark:border-white/10 rounded-2xl py-4 px-6 text-gray-900 focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
                             />
                         </div>
 
@@ -517,7 +517,7 @@ const DoctorTaskManager = ({ courses }) => {
                                         type="datetime-local"
                                         value={formData.deadline}
                                         onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
-                                        className="w-full bg-doctor-text/5 border border-doctor-text/5 rounded-2xl py-4 pl-14 pr-6 text-doctor-text focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
+                                        className="w-full bg-white border border-gray-200 dark:border-white/10 rounded-2xl py-4 pl-14 pr-6 text-gray-900 focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
                                     />
                                 </div>
                             </div>

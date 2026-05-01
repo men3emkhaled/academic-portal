@@ -28,7 +28,7 @@ const DoctorHeader = ({
           type="text" 
           placeholder="Search..."
           onChange={(e) => onSearch(e.target.value)}
-          className="w-full bg-doctor-text/5 border border-doctor-text/5 rounded-xl lg:rounded-2xl py-2.5 lg:py-3.5 pl-11 lg:pl-14 pr-4 lg:pr-6 text-sm lg:text-base text-doctor-text placeholder-doctor-text-muted focus:outline-none focus:border-doctor-primary/50 focus:ring-4 focus:ring-doctor-primary/10 transition-all font-medium"
+          className="w-full bg-white border border-gray-200 dark:border-white/10 rounded-xl lg:rounded-2xl py-2.5 lg:py-3.5 pl-11 lg:pl-14 pr-4 lg:pr-6 text-sm lg:text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-doctor-primary/10 transition-all font-medium"
         />
       </div>
 
