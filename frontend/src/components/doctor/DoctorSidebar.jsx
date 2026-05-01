@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   LayoutDashboard, BookOpen, FolderOpen, Award, ClipboardList, 
-  BarChart3, PieChart, Bell, Settings, LogOut, Upload, Menu, X 
+  BarChart3, PieChart, Bell, Settings, LogOut, Upload, Menu, X, Calendar 
 } from 'lucide-react';
 
 const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout }) => {
