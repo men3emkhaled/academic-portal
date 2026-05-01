@@ -244,7 +244,7 @@ class Timetable {
            WHEN 'Sunday' THEN 7
          END,
          t.start_time`,
-      [\`%\${instructorName}%\`]
+      [`%${instructorName}%`]
     );
     return result.rows;
   }
