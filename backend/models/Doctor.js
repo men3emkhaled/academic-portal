@@ -92,7 +92,7 @@ class Doctor {
 
     static async toggleArchiveCourse(doctorId, courseId, isArchived) {
         const result = await db.query(
-            'UPDATE doctor_courses SET is_archived = $1 WHERE doctor_id = $2 AND course_id = $3 RETURNING *',
+            'UPDATE doctor_courses SET is_archived = $1 WHERE doctor_id = $2::integer AND course_id = $3::integer RETURNING *',
             [isArchived, doctorId, courseId]
         );
         return result.rows[0];

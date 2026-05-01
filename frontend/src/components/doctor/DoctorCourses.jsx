@@ -102,12 +102,22 @@ const DoctorCourses = ({ courses, onRefresh }) => {
     }
   };
 
-  const handleToggleArchive = async (courseId, currentStatus) => {
+  const handleToggleArchive = async (e, courseId, currentStatus) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
+    // Explicitly determine next status
+    const nextStatus = currentStatus === true ? false : true;
+    
     try {
-      await doctorApi('patch', `/doctor/courses/${courseId}/archive`, { is_archived: !currentStatus });
-      toast.success(currentStatus ? 'Course unarchived' : 'Course archived');
-      onRefresh();
+      await doctorApi('patch', `/doctor/courses/${courseId}/archive`, { is_archived: nextStatus });
+      toast.success(nextStatus ? 'Course archived' : 'Course activated');
+      setOpenMenuId(null);
+      if (onRefresh) await onRefresh();
     } catch (err) {
+      console.error('Archive error:', err);
       toast.error('Failed to update course status');
     }
   };
@@ -233,14 +243,12 @@ const DoctorCourses = ({ courses, onRefresh }) => {
                         <Edit3 className="w-4 h-4 text-doctor-primary" /> Edit Description
                       </button>
                       <button 
-                        onClick={() => {
-                          handleToggleArchive(course.id, course.is_archived);
-                          setOpenMenuId(null);
-                        }}
-                        className="w-full flex items-center gap-3 px-5 py-3.5 text-sm font-bold text-white hover:bg-white/5 transition-all text-left"
+                        type="button"
+                        onClick={(e) => handleToggleArchive(e, course.id, course.is_archived)}
+                        className="w-full flex items-center gap-3 px-5 py-3.5 text-sm font-bold text-white hover:bg-white/10 transition-all text-left border-b border-white/5 last:border-0"
                       >
                         <Archive className={`w-4 h-4 ${course.is_archived ? 'text-emerald-400' : 'text-amber-400'}`} /> 
-                        {course.is_archived ? 'Activate Course' : 'Archive Course'}
+                        <span>{course.is_archived ? 'Activate Course' : 'Archive Course'}</span>
                       </button>
                     </div>
                   )}
