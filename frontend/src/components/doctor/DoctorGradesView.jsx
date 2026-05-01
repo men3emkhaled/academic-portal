@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useDoctorAuth } from '../../context/DoctorAuthContext';
 import toast from 'react-hot-toast';
-import { BarChart3, Users, Award, FileSpreadsheet, Edit2, Save, X, Search } from 'lucide-react';
+import { 
+  BarChart3, Users, Award, FileSpreadsheet, Edit2, 
+  Save, X, Search, Filter, BookOpen, Download, 
+  CheckCircle2, AlertCircle, ChevronRight, GraduationCap
+} from 'lucide-react';
 
 const DoctorGradesView = ({ courses }) => {
   const { doctorApi } = useDoctorAuth();
@@ -99,220 +103,275 @@ const DoctorGradesView = ({ courses }) => {
     : 0;
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="space-y-8 animate-fadeIn pb-24 lg:pb-0">
+      {/* Header Area */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <h2 className="text-xl md:text-2xl font-black text-gray-900 dark:text-white flex items-center gap-2">
-            <BarChart3 className="w-6 h-6 text-rose-500" /> Student Grades
+          <h2 className="text-3xl font-black text-white tracking-tight mb-2 flex items-center gap-3">
+            <BarChart3 className="w-8 h-8 text-rose-500" />
+            Performance & Grades
           </h2>
-          <p className="text-sm text-gray-500 dark:text-slate-500 mt-1">View and edit grades for your courses</p>
+          <p className="text-doctor-text-muted font-medium">Record academic results, manage course scores, and export performance reports.</p>
         </div>
+        
         {selectedCourseId && grades.length > 0 && (
           <button
             onClick={exportToCSV}
-            className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-5 rounded-xl transition-all hover:shadow-lg hover:shadow-emerald-500/20 active:scale-95 text-sm"
+            className="bg-emerald-500 hover:bg-emerald-600 text-white font-black px-8 py-4 rounded-2xl shadow-xl shadow-emerald-500/20 flex items-center gap-3 transition-all active:scale-95"
           >
-            <FileSpreadsheet className="w-4 h-4" /> Export CSV
+            <Download className="w-5 h-5" />
+            <span>Export Report</span>
           </button>
         )}
       </div>
 
-      {/* Course Selector + Search */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="flex-1">
-          <select
-            value={selectedCourseId}
-            onChange={(e) => { setSelectedCourseId(e.target.value); setSearchTerm(''); }}
-            className="w-full bg-white dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/5 rounded-xl p-3.5 text-gray-900 dark:text-white font-medium focus:border-rose-500/50 focus:outline-none transition-colors"
-          >
-            <option value="">-- Select a Course --</option>
-            {courses.map(c => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
-          </select>
-        </div>
-        {selectedCourseId && grades.length > 0 && (
-          <div className="relative sm:w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search students..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-white dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/5 rounded-xl pl-10 pr-4 py-3.5 text-gray-900 dark:text-white text-sm focus:border-rose-500/50 focus:outline-none transition-colors"
-            />
-          </div>
-        )}
+      {/* Course Selection Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {courses.map(course => (
+              <button
+                key={course.id}
+                onClick={() => setSelectedCourseId(course.id)}
+                className={`relative p-5 rounded-[1.8rem] border transition-all text-left group overflow-hidden ${
+                    selectedCourseId === course.id 
+                    ? 'bg-doctor-primary/10 border-doctor-primary shadow-xl shadow-doctor-primary/10' 
+                    : 'bg-doctor-card border-white/5 hover:border-white/20'
+                }`}
+              >
+                  {/* Decoration */}
+                  <div className={`absolute -right-6 -bottom-6 w-24 h-24 rounded-full blur-3xl transition-opacity ${selectedCourseId === course.id ? 'bg-doctor-primary/20 opacity-100' : 'bg-white/5 opacity-0 group-hover:opacity-100'}`}></div>
+                  
+                  <div className="flex items-center gap-4 relative z-10">
+                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${selectedCourseId === course.id ? 'bg-doctor-primary text-white' : 'bg-white/5 text-doctor-text-muted group-hover:scale-110'}`}>
+                          <BookOpen className="w-6 h-6" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                          <h4 className={`font-bold truncate ${selectedCourseId === course.id ? 'text-white' : 'text-doctor-text-muted group-hover:text-white'}`}>{course.name}</h4>
+                          <p className="text-[10px] font-black uppercase tracking-widest text-doctor-text-muted opacity-60 mt-1">{course.code}</p>
+                      </div>
+                  </div>
+              </button>
+          ))}
       </div>
 
-      {/* Summary Stats */}
+      {/* Stats Summary */}
       {selectedCourseId && grades.length > 0 && (
-        <div className="grid grid-cols-3 gap-3">
-          <div className="bg-white dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/5 rounded-xl p-4 text-center">
-            <p className="text-2xl font-black text-gray-900 dark:text-white">{grades.length}</p>
-            <p className="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider">Students</p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-slideUp">
+          <div className="bg-doctor-card border border-white/5 rounded-[2rem] p-6 flex items-center gap-6">
+            <div className="w-14 h-14 rounded-2xl bg-doctor-primary/10 flex items-center justify-center">
+                <Users className="w-7 h-7 text-doctor-primary" />
+            </div>
+            <div>
+                <p className="text-[10px] font-black text-doctor-text-muted uppercase tracking-widest mb-1">Enrolled Students</p>
+                <p className="text-3xl font-black text-white">{grades.length}</p>
+            </div>
           </div>
-          <div className="bg-white dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/5 rounded-xl p-4 text-center">
-            <p className="text-2xl font-black text-rose-500">{avgTotal}</p>
-            <p className="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider">Avg Total</p>
+          <div className="bg-doctor-card border border-white/5 rounded-[2rem] p-6 flex items-center gap-6">
+            <div className="w-14 h-14 rounded-2xl bg-rose-500/10 flex items-center justify-center">
+                <Target className="w-7 h-7 text-rose-500" />
+            </div>
+            <div>
+                <p className="text-[10px] font-black text-doctor-text-muted uppercase tracking-widest mb-1">Average Performance</p>
+                <p className="text-3xl font-black text-white">{avgTotal}%</p>
+            </div>
           </div>
-          <div className="bg-white dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/5 rounded-xl p-4 text-center">
-            <p className="text-2xl font-black text-emerald-500">40</p>
-            <p className="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider">Max Score</p>
+          <div className="bg-doctor-card border border-white/5 rounded-[2rem] p-6 flex items-center gap-6">
+            <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center">
+                <Award className="w-7 h-7 text-emerald-500" />
+            </div>
+            <div>
+                <p className="text-[10px] font-black text-doctor-text-muted uppercase tracking-widest mb-1">Highest Possible</p>
+                <p className="text-3xl font-black text-white">40</p>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Table */}
-      <div className="bg-white dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/5 rounded-2xl overflow-hidden">
-        {loading ? (
-          <div className="p-8">
-            <div className="space-y-3">
-              {[1,2,3,4,5].map(i => (
-                <div key={i} className="h-12 bg-gray-100 dark:bg-white/5 rounded-lg animate-pulse"></div>
-              ))}
+      {/* Grades View Container */}
+      <div className="bg-doctor-card border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl shadow-black/20">
+        <div className="p-8 md:p-10 border-b border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center">
+                    <Filter className="w-5 h-5 text-doctor-text-muted" />
+                </div>
+                <h3 className="text-xl font-black text-white">Academic Register</h3>
             </div>
-          </div>
-        ) : !selectedCourseId ? (
-          <div className="flex flex-col items-center justify-center py-20 text-gray-400 dark:text-slate-600">
-            <Users className="w-14 h-14 mb-3" />
-            <p className="font-medium text-gray-500 dark:text-slate-500">Select a course to view grades</p>
-          </div>
-        ) : filteredGrades.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-gray-400 dark:text-slate-600">
-            <Award className="w-14 h-14 mb-3" />
-            <p className="font-medium text-gray-500 dark:text-slate-500">
-              {searchTerm ? 'No students match your search' : 'No students enrolled'}
-            </p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="border-b border-gray-200/60 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.01]">
-                  <th className="p-4 text-xs font-bold text-gray-500 dark:text-slate-500 uppercase tracking-wider">Student</th>
-                  <th className="p-4 text-xs font-bold text-gray-500 dark:text-slate-500 uppercase tracking-wider text-center">Section</th>
-                  <th className="p-4 text-xs font-bold text-gray-500 dark:text-slate-500 uppercase tracking-wider text-center">Midterm (20)</th>
-                  <th className="p-4 text-xs font-bold text-gray-500 dark:text-slate-500 uppercase tracking-wider text-center">Practical (10)</th>
-                  <th className="p-4 text-xs font-bold text-gray-500 dark:text-slate-500 uppercase tracking-wider text-center">Oral (10)</th>
-                  <th className="p-4 text-xs font-bold text-gray-500 dark:text-slate-500 uppercase tracking-wider text-center">Total</th>
-                  <th className="p-4 text-xs font-bold text-gray-500 dark:text-slate-500 uppercase tracking-wider text-center w-24">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100 dark:divide-white/[0.03]">
-                {filteredGrades.map((g) => {
-                  const isEditing = editingEnrollmentId === g.enrollment_id;
+            
+            {selectedCourseId && grades.length > 0 && (
+                <div className="relative group min-w-[300px]">
+                    <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-doctor-text-muted group-focus-within:text-doctor-primary transition-colors" />
+                    <input
+                        type="text"
+                        placeholder="Search by student name or ID..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full bg-white/5 border border-white/5 rounded-[1.8rem] py-4 pl-14 pr-6 text-white text-sm focus:outline-none focus:border-doctor-primary/40 focus:bg-white/[0.08] transition-all"
+                    />
+                </div>
+            )}
+        </div>
 
-                  return (
-                    <tr
-                      key={g.enrollment_id || g.student_id}
-                      className={`transition-colors ${
-                        isEditing
-                          ? 'bg-violet-50/50 dark:bg-violet-500/[0.04]'
-                          : 'hover:bg-gray-50/50 dark:hover:bg-white/[0.01]'
-                      }`}
-                    >
-                      <td className="p-4">
-                        <div className="font-semibold text-gray-900 dark:text-white text-sm">{g.student_name}</div>
-                        <div className="text-xs text-gray-400 dark:text-slate-600">ID: {g.student_id}</div>
-                      </td>
-                      <td className="p-4 text-center">
-                        <span className="text-xs font-bold bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-400 px-2 py-1 rounded-lg">
-                          {g.section || '—'}
-                        </span>
-                      </td>
+        <div className="p-4 md:p-8 overflow-x-auto min-h-[400px]">
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-24 gap-4">
+              <div className="w-12 h-12 border-4 border-doctor-primary/20 border-t-doctor-primary rounded-full animate-spin"></div>
+              <p className="text-doctor-text-muted font-bold text-sm">Synchronizing grade data...</p>
+            </div>
+          ) : !selectedCourseId ? (
+            <div className="flex flex-col items-center justify-center py-24 text-center">
+              <div className="w-24 h-24 bg-white/5 rounded-[2.5rem] flex items-center justify-center mb-8">
+                <GraduationCap className="w-12 h-12 text-white/10" />
+              </div>
+              <h3 className="text-2xl font-black text-white mb-2">Select a Course</h3>
+              <p className="text-doctor-text-muted max-w-xs">Choose a course from the cards above to start managing student grades and performance.</p>
+            </div>
+          ) : filteredGrades.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-24 text-center">
+              <div className="w-24 h-24 bg-white/5 rounded-[2.5rem] flex items-center justify-center mb-8">
+                <AlertCircle className="w-12 h-12 text-white/10" />
+              </div>
+              <h3 className="text-2xl font-black text-white mb-2">No Records Found</h3>
+              <p className="text-doctor-text-muted">No students currently match your selection or search criteria.</p>
+            </div>
+          ) : (
+              <table className="w-full text-left border-separate border-spacing-y-3">
+                <thead>
+                  <tr className="text-doctor-text-muted">
+                    <th className="px-6 pb-2 text-[10px] font-black uppercase tracking-widest">Student Information</th>
+                    <th className="px-6 pb-2 text-[10px] font-black uppercase tracking-widest text-center">Section</th>
+                    <th className="px-6 pb-2 text-[10px] font-black uppercase tracking-widest text-center">Midterm (20)</th>
+                    <th className="px-6 pb-2 text-[10px] font-black uppercase tracking-widest text-center">Practical (10)</th>
+                    <th className="px-6 pb-2 text-[10px] font-black uppercase tracking-widest text-center">Oral (10)</th>
+                    <th className="px-6 pb-2 text-[10px] font-black uppercase tracking-widest text-center">Total Score</th>
+                    <th className="px-6 pb-2 text-[10px] font-black uppercase tracking-widest text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredGrades.map((g) => {
+                    const isEditing = editingEnrollmentId === g.enrollment_id;
+                    const isHighPerformance = (g.total_score || 0) >= 30;
+                    const isRisk = (g.total_score || 0) < 20 && g.total_score !== null;
 
-                      {isEditing ? (
-                        <>
-                          <td className="p-4 text-center">
-                            <input
-                              type="number" min="0" max="20" step="0.5"
-                              className="w-16 p-2 border border-violet-300 dark:border-violet-500/30 rounded-lg text-center text-sm font-semibold bg-white dark:bg-black/30 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/30"
-                              value={editValues.midterm_score}
-                              onChange={(e) => setEditValues({ ...editValues, midterm_score: e.target.value })}
-                              autoFocus
-                            />
-                          </td>
-                          <td className="p-4 text-center">
-                            <input
-                              type="number" min="0" max="10" step="0.5"
-                              className="w-16 p-2 border border-violet-300 dark:border-violet-500/30 rounded-lg text-center text-sm font-semibold bg-white dark:bg-black/30 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/30"
-                              value={editValues.practical_score}
-                              onChange={(e) => setEditValues({ ...editValues, practical_score: e.target.value })}
-                            />
-                          </td>
-                          <td className="p-4 text-center">
-                            <input
-                              type="number" min="0" max="10" step="0.5"
-                              className="w-16 p-2 border border-violet-300 dark:border-violet-500/30 rounded-lg text-center text-sm font-semibold bg-white dark:bg-black/30 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/30"
-                              value={editValues.oral_score}
-                              onChange={(e) => setEditValues({ ...editValues, oral_score: e.target.value })}
-                            />
-                          </td>
-                          <td className="p-4 text-center text-gray-300 dark:text-slate-600 font-bold">—</td>
-                          <td className="p-4 text-center">
-                            <div className="flex items-center justify-center gap-1.5">
-                              <button
-                                onClick={() => handleSaveGrade(g.enrollment_id)}
-                                disabled={saving}
-                                className="p-2 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors disabled:opacity-50"
-                                title="Save"
-                              >
-                                <Save className="w-4 h-4" />
-                              </button>
-                              <button
-                                onClick={handleCancelEdit}
-                                disabled={saving}
-                                className="p-2 bg-red-50 dark:bg-red-500/10 text-red-500 dark:text-red-400 rounded-lg hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors disabled:opacity-50"
-                                title="Cancel"
-                              >
-                                <X className="w-4 h-4" />
-                              </button>
+                    return (
+                      <tr 
+                        key={g.enrollment_id || g.student_id}
+                        className={`group transition-all ${isEditing ? 'scale-[1.01]' : 'hover:scale-[1.005]'}`}
+                      >
+                        <td className={`bg-white/5 px-6 py-5 rounded-l-[1.8rem] border-y border-l border-white/5 transition-all ${isEditing ? 'bg-doctor-primary/10 border-doctor-primary/40' : 'group-hover:bg-white/[0.08] group-hover:border-white/20'}`}>
+                            <div className="flex items-center gap-4">
+                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-doctor-primary/20 to-doctor-secondary/20 flex items-center justify-center font-black text-doctor-primary text-xs border border-white/10">
+                                    {g.student_name.charAt(0)}
+                                </div>
+                                <div>
+                                    <p className="text-white font-bold text-sm leading-none mb-1">{g.student_name}</p>
+                                    <p className="text-[10px] font-medium text-doctor-text-muted">ID: {g.student_id}</p>
+                                </div>
                             </div>
-                          </td>
-                        </>
-                      ) : (
-                        <>
-                          <td className="p-4 text-center text-sm font-medium text-gray-700 dark:text-slate-300">
-                            {g.midterm_score !== null ? g.midterm_score : <span className="text-gray-300 dark:text-slate-600">—</span>}
-                          </td>
-                          <td className="p-4 text-center text-sm font-medium text-gray-700 dark:text-slate-300">
-                            {g.practical_score !== null ? g.practical_score : <span className="text-gray-300 dark:text-slate-600">—</span>}
-                          </td>
-                          <td className="p-4 text-center text-sm font-medium text-gray-700 dark:text-slate-300">
-                            {g.oral_score !== null ? g.oral_score : <span className="text-gray-300 dark:text-slate-600">—</span>}
-                          </td>
-                          <td className="p-4 text-center">
-                            <span className={`inline-block min-w-[3rem] font-black text-sm px-3 py-1.5 rounded-lg ${
-                              (g.total_score || 0) >= 30
-                                ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10'
-                                : (g.total_score || 0) >= 20
-                                ? 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10'
-                                : 'text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10'
-                            }`}>
-                              {g.total_score !== null ? g.total_score : 0}
+                        </td>
+                        <td className={`bg-white/5 px-6 py-5 border-y border-white/5 transition-all text-center ${isEditing ? 'bg-doctor-primary/10 border-doctor-primary/40' : 'group-hover:bg-white/[0.08] group-hover:border-white/20'}`}>
+                            <span className="text-[10px] font-black text-doctor-text-muted bg-white/5 px-3 py-1 rounded-lg border border-white/5">
+                                {g.section || '—'}
                             </span>
-                          </td>
-                          <td className="p-4 text-center">
-                            <button
-                              onClick={() => handleEditClick(g)}
-                              className="p-2 bg-gray-50 dark:bg-white/5 border border-gray-200/60 dark:border-white/5 text-gray-500 dark:text-slate-400 rounded-lg hover:bg-violet-50 hover:text-violet-600 dark:hover:bg-violet-500/10 dark:hover:text-violet-400 transition-all"
-                              title="Edit Grades"
-                            >
-                              <Edit2 className="w-4 h-4" />
-                            </button>
-                          </td>
-                        </>
-                      )}
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
+                        </td>
+
+                        {isEditing ? (
+                          <>
+                            <td className="bg-white/5 px-6 py-5 border-y border-white/5 text-center bg-doctor-primary/10 border-doctor-primary/40">
+                              <input
+                                type="number" min="0" max="20" step="0.5"
+                                className="w-20 bg-white/10 border border-doctor-primary/40 rounded-xl py-2 px-3 text-center text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-doctor-primary/30"
+                                value={editValues.midterm_score}
+                                onChange={(e) => setEditValues({ ...editValues, midterm_score: e.target.value })}
+                                autoFocus
+                              />
+                            </td>
+                            <td className="bg-white/5 px-6 py-5 border-y border-white/5 text-center bg-doctor-primary/10 border-doctor-primary/40">
+                              <input
+                                type="number" min="0" max="10" step="0.5"
+                                className="w-20 bg-white/10 border border-doctor-primary/40 rounded-xl py-2 px-3 text-center text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-doctor-primary/30"
+                                value={editValues.practical_score}
+                                onChange={(e) => setEditValues({ ...editValues, practical_score: e.target.value })}
+                              />
+                            </td>
+                            <td className="bg-white/5 px-6 py-5 border-y border-white/5 text-center bg-doctor-primary/10 border-doctor-primary/40">
+                              <input
+                                type="number" min="0" max="10" step="0.5"
+                                className="w-20 bg-white/10 border border-doctor-primary/40 rounded-xl py-2 px-3 text-center text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-doctor-primary/30"
+                                value={editValues.oral_score}
+                                onChange={(e) => setEditValues({ ...editValues, oral_score: e.target.value })}
+                              />
+                            </td>
+                            <td className="bg-white/5 px-6 py-5 border-y border-white/5 text-center bg-doctor-primary/10 border-doctor-primary/40 font-black text-doctor-text-muted italic">—</td>
+                            <td className="bg-white/5 px-6 py-5 rounded-r-[1.8rem] border-y border-r border-white/5 text-right bg-doctor-primary/10 border-doctor-primary/40">
+                              <div className="flex items-center justify-end gap-2">
+                                <button
+                                  onClick={() => handleSaveGrade(g.enrollment_id)}
+                                  disabled={saving}
+                                  className="w-10 h-10 bg-emerald-500 text-white rounded-xl flex items-center justify-center hover:bg-emerald-600 transition-all active:scale-90 shadow-lg shadow-emerald-500/20"
+                                  title="Save Changes"
+                                >
+                                  {saving ? <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div> : <Save className="w-5 h-5" />}
+                                </button>
+                                <button
+                                  onClick={handleCancelEdit}
+                                  disabled={saving}
+                                  className="w-10 h-10 bg-white/10 text-rose-400 rounded-xl flex items-center justify-center hover:bg-rose-500/10 transition-all active:scale-90"
+                                  title="Cancel"
+                                >
+                                  <X className="w-5 h-5" />
+                                </button>
+                              </div>
+                            </td>
+                          </>
+                        ) : (
+                          <>
+                            <td className={`bg-white/5 px-6 py-5 border-y border-white/5 text-center transition-all ${isEditing ? 'bg-doctor-primary/10 border-doctor-primary/40' : 'group-hover:bg-white/[0.08] group-hover:border-white/20'}`}>
+                                <span className="text-sm font-bold text-white">
+                                    {g.midterm_score !== null ? g.midterm_score : <span className="text-white/10">—</span>}
+                                </span>
+                            </td>
+                            <td className={`bg-white/5 px-6 py-5 border-y border-white/5 text-center transition-all ${isEditing ? 'bg-doctor-primary/10 border-doctor-primary/40' : 'group-hover:bg-white/[0.08] group-hover:border-white/20'}`}>
+                                <span className="text-sm font-bold text-white">
+                                    {g.practical_score !== null ? g.practical_score : <span className="text-white/10">—</span>}
+                                </span>
+                            </td>
+                            <td className={`bg-white/5 px-6 py-5 border-y border-white/5 text-center transition-all ${isEditing ? 'bg-doctor-primary/10 border-doctor-primary/40' : 'group-hover:bg-white/[0.08] group-hover:border-white/20'}`}>
+                                <span className="text-sm font-bold text-white">
+                                    {g.oral_score !== null ? g.oral_score : <span className="text-white/10">—</span>}
+                                </span>
+                            </td>
+                            <td className={`bg-white/5 px-6 py-5 border-y border-white/5 text-center transition-all ${isEditing ? 'bg-doctor-primary/10 border-doctor-primary/40' : 'group-hover:bg-white/[0.08] group-hover:border-white/20'}`}>
+                                <div className={`inline-flex flex-col items-center justify-center min-w-[3.5rem] py-2 px-3 rounded-2xl border ${
+                                    isHighPerformance ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' :
+                                    isRisk ? 'bg-rose-500/10 border-rose-500/30 text-rose-400' :
+                                    'bg-white/5 border-white/10 text-white'
+                                }`}>
+                                    <span className="text-sm font-black leading-none">{g.total_score !== null ? g.total_score : 0}</span>
+                                    <span className="text-[8px] font-black uppercase mt-1 opacity-60">Result</span>
+                                </div>
+                            </td>
+                            <td className={`bg-white/5 px-6 py-5 rounded-r-[1.8rem] border-y border-r border-white/5 text-right transition-all ${isEditing ? 'bg-doctor-primary/10 border-doctor-primary/40' : 'group-hover:bg-white/[0.08] group-hover:border-white/20'}`}>
+                                <button
+                                    onClick={() => handleEditClick(g)}
+                                    className="w-10 h-10 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center text-doctor-text-muted hover:text-doctor-primary hover:bg-doctor-primary/10 hover:border-doctor-primary/30 transition-all active:scale-90"
+                                >
+                                    <Edit2 className="w-4 h-4" />
+                                </button>
+                            </td>
+                          </>
+                        )}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+          )}
+        </div>
       </div>
+
+      <style>{`
+        .hidden-scrollbar::-webkit-scrollbar { display: none; }
+        .hidden-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      `}</style>
     </div>
   );
 };
