@@ -5,6 +5,7 @@ const { adminAuth, checkPermission } = require(`${__dirname}/../middleware/auth`
 
 router.get('/', courseController.getAllCourses);
 router.get('/semester/:semester', courseController.getCoursesBySemester);
+router.get('/department/:departmentId', courseController.getCoursesByDepartment);
 router.get('/:id', courseController.getCourseById);
 
 // Admin routes

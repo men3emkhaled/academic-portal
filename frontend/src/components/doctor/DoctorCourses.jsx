@@ -15,13 +15,27 @@ const DoctorCourses = ({ courses, onRefresh }) => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(null);
   const [departments, setDepartments] = useState([]);
+  const [availableCourses, setAvailableCourses] = useState([]);
   
-  const [formData, setFormData] = useState({ name: '', code: '', department_id: '', description: '' });
+  const [formData, setFormData] = useState({ 
+    department_id: '', 
+    course_id: '', 
+    description: '' 
+  });
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchDepartments();
   }, []);
+
+  // Fetch courses when department changes in Add Modal
+  useEffect(() => {
+    if (showAddModal && formData.department_id) {
+      fetchCoursesByDepartment(formData.department_id);
+    } else {
+      setAvailableCourses([]);
+    }
+  }, [formData.department_id, showAddModal]);
 
   const fetchDepartments = async () => {
     try {
@@ -32,17 +46,37 @@ const DoctorCourses = ({ courses, onRefresh }) => {
     }
   };
 
-  const handleCreateCourse = async (e) => {
+  const fetchCoursesByDepartment = async (deptId) => {
+    try {
+      const res = await doctorApi('get', `/courses/department/${deptId}`);
+      // Filter out courses the doctor already has
+      const currentCourseIds = courses.map(c => c.id);
+      const filtered = (res.data || []).filter(c => !currentCourseIds.includes(c.id));
+      setAvailableCourses(filtered);
+    } catch (err) {
+      toast.error('Failed to load courses for this department');
+    }
+  };
+
+  const handleAssignCourse = async (e) => {
     e.preventDefault();
+    if (!formData.course_id) return toast.error('Please select a course');
+    
     setLoading(true);
     try {
-      await doctorApi('post', '/doctor/courses', formData);
-      toast.success('Course created successfully');
+      await doctorApi('post', '/doctor/courses/assign', { courseId: formData.course_id });
+      
+      // If there's a description, update it
+      if (formData.description) {
+         await doctorApi('put', `/doctor/courses/${formData.course_id}`, { description: formData.description });
+      }
+
+      toast.success('Course added to your list');
       setShowAddModal(false);
-      setFormData({ name: '', code: '', department_id: '', description: '' });
+      setFormData({ department_id: '', course_id: '', description: '' });
       onRefresh();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to create course');
+      toast.error(err.response?.data?.message || 'Failed to add course');
     } finally {
       setLoading(false);
     }
@@ -52,9 +86,10 @@ const DoctorCourses = ({ courses, onRefresh }) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await doctorApi('put', `/doctor/courses/${showEditModal.id}`, formData);
-      toast.success('Course updated');
+      await doctorApi('put', `/doctor/courses/${showEditModal.id}`, { description: formData.description });
+      toast.success('Description updated');
       setShowEditModal(null);
+      setFormData({ department_id: '', course_id: '', description: '' });
       onRefresh();
     } catch (err) {
       toast.error('Failed to update course');
@@ -178,7 +213,7 @@ const DoctorCourses = ({ courses, onRefresh }) => {
                   <div className="absolute right-0 top-full mt-2 w-48 bg-doctor-sidebar border border-white/10 rounded-2xl shadow-2xl opacity-0 invisible group-hover/menu:opacity-100 group-hover/menu:visible transition-all z-20 overflow-hidden">
                     <button 
                       onClick={() => {
-                        setFormData({ name: course.name, code: course.code, department_id: course.department_id, description: course.description || '' });
+                        setFormData({ department_id: course.department_id, course_id: course.id, description: course.description || '' });
                         setShowEditModal(course);
                       }}
                       className="w-full flex items-center gap-3 px-5 py-3.5 text-sm font-bold text-white hover:bg-white/5 transition-all text-left"
@@ -237,60 +272,60 @@ const DoctorCourses = ({ courses, onRefresh }) => {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-[100] p-6 animate-fadeIn">
           <div className="bg-doctor-sidebar border border-white/10 w-full max-w-xl rounded-[3rem] p-10 relative shadow-2xl">
             <button 
-              onClick={() => { setShowAddModal(false); setShowEditModal(null); }}
+              onClick={() => { setShowAddModal(false); setShowEditModal(null); setFormData({ department_id: '', course_id: '', description: '' }); }}
               className="absolute top-8 right-8 w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-doctor-text-muted hover:text-white transition-all"
             >
               <X className="w-6 h-6" />
             </button>
 
             <h3 className="text-3xl font-black text-white mb-2">
-              {showAddModal ? 'Create New Course' : 'Edit Course'}
+              {showAddModal ? 'Add Existing Course' : 'Edit Description'}
             </h3>
             <p className="text-doctor-text-muted font-medium mb-8">
-              {showAddModal ? 'Define the course parameters and starting information.' : 'Update the course details and description.'}
+              {showAddModal ? 'Select a department and then choose a course to add to your list.' : 'Update the course description.'}
             </p>
 
-            <form onSubmit={showAddModal ? handleCreateCourse : handleUpdateCourse} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-xs font-black text-doctor-text-muted uppercase tracking-widest ml-1">Course Name</label>
-                  <input 
-                    type="text"
-                    required
-                    value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    placeholder="e.g. Advanced Anatomy"
-                    className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-white placeholder-doctor-text-muted focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-black text-doctor-text-muted uppercase tracking-widest ml-1">Course Code</label>
-                  <input 
-                    type="text"
-                    required
-                    value={formData.code}
-                    onChange={(e) => setFormData({...formData, code: e.target.value})}
-                    placeholder="e.g. CS101"
-                    className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-white placeholder-doctor-text-muted focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
-                  />
-                </div>
-              </div>
+            <form onSubmit={showAddModal ? handleAssignCourse : handleUpdateCourse} className="space-y-6">
+              {showAddModal && (
+                <>
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-doctor-text-muted uppercase tracking-widest ml-1">Select Department</label>
+                    <select 
+                      required
+                      value={formData.department_id}
+                      onChange={(e) => setFormData({...formData, department_id: e.target.value, course_id: ''})}
+                      className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:border-doctor-primary/50 transition-all font-medium appearance-none"
+                    >
+                      <option value="" className="bg-doctor-sidebar">Select Department</option>
+                      {departments.map(d => <option key={d.id} value={d.id} className="bg-doctor-sidebar">{d.name}</option>)}
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-doctor-text-muted uppercase tracking-widest ml-1">Select Course</label>
+                    <select 
+                      required
+                      disabled={!formData.department_id}
+                      value={formData.course_id}
+                      onChange={(e) => setFormData({...formData, course_id: e.target.value})}
+                      className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:border-doctor-primary/50 transition-all font-medium appearance-none disabled:opacity-30"
+                    >
+                      <option value="" className="bg-doctor-sidebar">
+                        {formData.department_id ? 'Select Course' : 'Please select a department first'}
+                      </option>
+                      {availableCourses.map(c => (
+                        <option key={c.id} value={c.id} className="bg-doctor-sidebar">{c.name} ({c.code})</option>
+                      ))}
+                    </select>
+                    {formData.department_id && availableCourses.length === 0 && (
+                      <p className="text-xs text-amber-500 font-bold ml-1 mt-2">No unassigned courses available in this department.</p>
+                    )}
+                  </div>
+                </>
+              )}
 
               <div className="space-y-2">
-                <label className="text-xs font-black text-doctor-text-muted uppercase tracking-widest ml-1">Department</label>
-                <select 
-                  required
-                  value={formData.department_id}
-                  onChange={(e) => setFormData({...formData, department_id: e.target.value})}
-                  className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:border-doctor-primary/50 transition-all font-medium appearance-none"
-                >
-                  <option value="" className="bg-doctor-sidebar">Select Department</option>
-                  {departments.map(d => <option key={d.id} value={d.id} className="bg-doctor-sidebar">{d.name}</option>)}
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-black text-doctor-text-muted uppercase tracking-widest ml-1">Description</label>
+                <label className="text-xs font-black text-doctor-text-muted uppercase tracking-widest ml-1">Course Description</label>
                 <textarea 
                   rows="4"
                   value={formData.description}
@@ -302,7 +337,7 @@ const DoctorCourses = ({ courses, onRefresh }) => {
 
               <button 
                 type="submit"
-                disabled={loading}
+                disabled={loading || (showAddModal && !formData.course_id)}
                 className="w-full bg-doctor-primary hover:bg-doctor-primary/90 text-white font-black py-5 rounded-[2rem] shadow-xl shadow-doctor-primary/30 transition-all active:scale-[0.98] disabled:opacity-50 mt-4 flex items-center justify-center gap-3"
               >
                 {loading ? (
@@ -310,7 +345,7 @@ const DoctorCourses = ({ courses, onRefresh }) => {
                 ) : (
                   <>
                     <CheckCircle2 className="w-6 h-6" />
-                    <span>{showAddModal ? 'Create Course' : 'Save Changes'}</span>
+                    <span>{showAddModal ? 'Add Course' : 'Save Changes'}</span>
                   </>
                 )}
               </button>

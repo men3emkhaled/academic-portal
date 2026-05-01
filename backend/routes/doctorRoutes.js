@@ -17,6 +17,7 @@ router.get('/profile', doctorController.getProfile);
 // Courses (Read Only/Manage)
 router.get('/courses', doctorController.getMyCourses);
 router.post('/courses', doctorController.createCourse);
+router.post('/courses/assign', doctorController.assignExistingCourse);
 router.put('/courses/:courseId', doctorController.updateCourse);
 router.patch('/courses/:courseId/archive', doctorController.toggleArchiveCourse);
 router.get('/timetable', doctorController.getMyTimetable);

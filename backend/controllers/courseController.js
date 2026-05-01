@@ -25,6 +25,17 @@ const getCoursesBySemester = async (req, res) => {
     }
 };
 
+const getCoursesByDepartment = async (req, res) => {
+    try {
+        const { departmentId } = req.params;
+        const courses = await Course.findByDepartment(departmentId);
+        res.json(courses);
+    } catch (error) {
+        console.error('❌ Error in getCoursesByDepartment:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
 // جلب مادة واحدة بالمعرف مع مواردها
 const getCourseById = async (req, res) => {
     try {
@@ -139,5 +150,6 @@ module.exports = {
     createCourse,
     updateCourse,
     deleteCourse,
-    updateGradeDistribution   // اختياري
+    updateGradeDistribution,
+    getCoursesByDepartment
 };

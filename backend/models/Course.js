@@ -23,6 +23,17 @@ class Course {
     return result.rows;
   }
 
+  static async findByDepartment(departmentId) {
+    const result = await db.query(`
+      SELECT c.*, d.name as department_name
+      FROM courses c
+      LEFT JOIN departments d ON c.department_id = d.id
+      WHERE c.department_id = $1
+      ORDER BY c.name
+    `, [departmentId]);
+    return result.rows;
+  }
+
   static async findById(id) {
     const result = await db.query(`
       SELECT c.*, d.name as department_name

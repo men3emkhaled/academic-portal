@@ -1317,9 +1317,21 @@ const toggleArchiveCourse = async (req, res) => {
     }
 };
 
+const assignExistingCourse = async (req, res) => {
+    try {
+        const { courseId } = req.body;
+        const Doctor = require('../models/Doctor');
+        const result = await Doctor.assignCourse(req.doctor.id, courseId);
+        res.json(result);
+    } catch (error) {
+        console.error('Assign course error:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports = {
     login, getDashboardStats, getProfile,
-    getMyCourses, getMyTimetable, createCourse, updateCourse, toggleArchiveCourse,
+    getMyCourses, getMyTimetable, createCourse, updateCourse, toggleArchiveCourse, assignExistingCourse,
     getMyQuizzes, createQuiz, updateQuiz, deleteQuiz, togglePublishQuiz,
     getQuestions, addQuestion, updateQuestion, deleteQuestion, getQuizAttempts,
     getMyResources, createResource, updateResource, deleteResource,
