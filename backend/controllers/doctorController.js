@@ -627,7 +627,7 @@ const getPendingReviews = async (req, res) => {
     try {
         const result = await db.query(`
             SELECT 
-                qa.id as attempt_id, qa.student_id, s.name as student_name,
+                qa.id as attempt_id, qa.student_id, s.name as student_name, s.avatar_url,
                 qa.quiz_id, q.title as quiz_title, qa.started_at, qa.completed_at, qa.status,
                 (SELECT COUNT(*) FROM student_answers sa 
                  WHERE sa.attempt_id = qa.id AND sa.needs_review = true) as pending_count
@@ -851,7 +851,7 @@ const getCourseStudents = async (req, res) => {
 
         const result = await db.query(`
             SELECT 
-                s.id, s.name, s.email, s.section, s.level,
+                s.id, s.name, s.email, s.section, s.level, s.avatar_url,
                 sc.progress_percentage, sc.status, sc.enrolled_at
             FROM student_courses sc
             JOIN students s ON sc.student_id = s.id
@@ -1465,6 +1465,7 @@ const getRecentActivity = async (req, res) => {
             ...submissions.map(s => ({
                 id: `sub_${s.task_id}_${s.student_id}`,
                 user: s.student_name,
+                avatar_url: s.avatar_url,
                 action: 'submitted task',
                 target: s.task_title,
                 time: s.completed_at,
@@ -1475,6 +1476,7 @@ const getRecentActivity = async (req, res) => {
             ...inquiries.map(i => ({
                 id: `inq_${i.id}`,
                 user: i.student_name,
+                avatar_url: i.avatar_url,
                 action: i.type === 'complaint' ? 'sent a complaint' : 'asked a question',
                 target: i.subject || 'Inquiry',
                 time: i.created_at,

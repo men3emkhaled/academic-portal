@@ -40,6 +40,7 @@ const getCourseAnalytics = async (req, res) => {
                     sc.student_id, 
                     s.name as student_name,
                     s.section,
+                    s.avatar_url,
                     COUNT(ar.id) as attended_sessions
                  FROM student_courses sc
                  JOIN students s ON sc.student_id = s.id
@@ -48,7 +49,7 @@ const getCourseAnalytics = async (req, res) => {
                     AND ar.status = 'present' 
                     AND ar.session_id IN (SELECT id FROM attendance_sessions WHERE course_id = $1)
                  WHERE sc.course_id = $1
-                 GROUP BY sc.student_id, s.name, s.section`,
+                 GROUP BY sc.student_id, s.name, s.section, s.avatar_url`,
                 [courseId]
             );
 
@@ -65,6 +66,7 @@ const getCourseAnalytics = async (req, res) => {
                     atRiskStudents.push({
                         student_id: stat.student_id,
                         student_name: stat.student_name,
+                        avatar_url: stat.avatar_url,
                         section: stat.section,
                         attendance_percentage: attendancePercentage,
                         missed_sessions: totalSessions - attended,
@@ -84,12 +86,13 @@ const getCourseAnalytics = async (req, res) => {
                 qa.student_id,
                 s.name as student_name,
                 s.section,
+                s.avatar_url,
                 ROUND(AVG(CASE WHEN COALESCE(qa.total_points, 0) > 0 THEN (COALESCE(qa.score, 0)::numeric / qa.total_points) * 100 ELSE 0 END)) as avg_score
              FROM quiz_attempts qa
              JOIN quizzes q ON qa.quiz_id = q.id
              JOIN students s ON qa.student_id = s.id
              WHERE q.course_id = $1 AND qa.status = 'completed'
-             GROUP BY qa.student_id, s.name, s.section`,
+             GROUP BY qa.student_id, s.name, s.section, s.avatar_url`,
             [courseId]
         );
 
@@ -105,6 +108,7 @@ const getCourseAnalytics = async (req, res) => {
                     atRiskStudents.push({
                         student_id: stat.student_id,
                         student_name: stat.student_name,
+                        avatar_url: stat.avatar_url,
                         section: stat.section,
                         attendance_percentage: null,
                         missed_sessions: null,

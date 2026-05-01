@@ -307,8 +307,12 @@ const DoctorAnalytics = ({ courses }) => {
                                     <tr key={student.student_id} className="group hover:scale-[1.005] transition-all">
                                         <td className="bg-white/5 px-6 py-5 rounded-l-[1.8rem] border-y border-l border-white/5 group-hover:bg-white/[0.08] transition-all">
                                             <div className="flex items-center gap-4">
-                                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-doctor-primary/20 to-doctor-secondary/20 flex items-center justify-center font-black text-doctor-primary text-xs border border-white/10 shadow-sm">
-                                                    {student.student_name.charAt(0)}
+                                                <div className="w-10 h-10 rounded-xl overflow-hidden bg-gradient-to-br from-doctor-primary/20 to-doctor-secondary/20 flex items-center justify-center font-black text-doctor-primary text-xs border border-white/10 shadow-sm">
+                                                    {student.avatar_url ? (
+                                                        <img src={student.avatar_url} alt={student.student_name} className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        student.student_name.charAt(0)
+                                                    )}
                                                 </div>
                                                 <div>
                                                     <p className="text-white font-bold text-sm leading-none mb-1">{student.student_name}</p>
@@ -389,8 +393,12 @@ const DoctorAnalytics = ({ courses }) => {
                                         <tr key={student.student_id} className="group hover:scale-[1.005] transition-all">
                                             <td className="bg-white/5 px-6 py-5 rounded-l-[1.8rem] border-y border-l border-white/5 group-hover:bg-rose-500/5 transition-all">
                                                 <div className="flex items-center gap-4">
-                                                    <div className="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center font-black text-rose-500 text-xs border border-rose-500/20">
-                                                        {student.student_name.charAt(0)}
+                                                    <div className="w-10 h-10 rounded-xl overflow-hidden bg-rose-500/10 flex items-center justify-center font-black text-rose-500 text-xs border border-rose-500/20">
+                                                        {student.avatar_url ? (
+                                                            <img src={student.avatar_url} alt={student.student_name} className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            student.student_name.charAt(0)
+                                                        )}
                                                     </div>
                                                     <div>
                                                         <p className="text-white font-bold text-sm leading-none mb-1">{student.student_name}</p>

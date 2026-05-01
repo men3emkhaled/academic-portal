@@ -26,8 +26,12 @@ const AttemptsLog = ({ attempts, selectedQuiz }) => {
               <tr key={att.id} className="group hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors">
                 <td className="py-6 px-8">
                   <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-slate-900 border border-gray-200 dark:border-white/5 flex items-center justify-center text-gray-400 dark:text-slate-500 transition-colors">
-                          <User className="w-5 h-5" />
+                      <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-slate-900 border border-gray-200 dark:border-white/5 flex items-center justify-center text-gray-400 dark:text-slate-500 transition-colors overflow-hidden">
+                          {att.avatar_url ? (
+                            <img src={att.avatar_url} alt={att.student_name} className="w-full h-full object-cover" />
+                          ) : (
+                            <User className="w-5 h-5" />
+                          )}
                       </div>
                       <div>
                           <p className="text-gray-900 dark:text-white font-black tracking-tight transition-colors">{att.student_name}</p>

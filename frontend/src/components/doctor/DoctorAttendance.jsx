@@ -395,10 +395,14 @@ const DoctorAttendance = ({ courses }) => {
                         }`}
                       >
                         <div className="flex items-center gap-3">
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${
+                          <div className={`w-10 h-10 rounded-full overflow-hidden flex items-center justify-center font-bold text-sm ${
                             isPresent ? 'bg-teal-100 text-teal-700 dark:bg-teal-500/20 dark:text-teal-400' : 'bg-gray-100 text-gray-500 dark:bg-white/5 dark:text-gray-400'
                           }`}>
-                            {student.name.charAt(0)}
+                            {student.avatar_url ? (
+                              <img src={student.avatar_url} alt={student.name} className="w-full h-full object-cover" />
+                            ) : (
+                              student.name.charAt(0)
+                            )}
                           </div>
                           <div>
                             <p className={`font-bold text-sm ${isPresent ? 'text-teal-900 dark:text-teal-100' : 'text-gray-900 dark:text-white'}`}>

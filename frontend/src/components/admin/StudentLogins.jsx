@@ -74,8 +74,12 @@ const StudentLogins = () => {
             {logs.map(log => (
               <div key={log.id} className="px-8 py-5 hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-5">
-                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors shadow-sm ${log.method === 'Google' ? 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/10' : 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/10'}`}>
-                    {log.method === 'Google' ? <Globe className="w-6 h-6" /> : <Shield className="w-6 h-6" />}
+                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors shadow-sm overflow-hidden ${log.method === 'Google' ? 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/10' : 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/10'}`}>
+                    {log.avatar_url ? (
+                      <img src={log.avatar_url} alt={log.student_name} className="w-full h-full object-cover" />
+                    ) : (
+                      log.method === 'Google' ? <Globe className="w-6 h-6" /> : <Shield className="w-6 h-6" />
+                    )}
                   </div>
                   <div>
                     <p className="text-gray-900 dark:text-white text-base font-black tracking-tight transition-colors">{log.student_name}</p>

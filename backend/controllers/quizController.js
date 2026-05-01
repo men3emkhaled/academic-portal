@@ -640,6 +640,7 @@ const getQuizAttempts = async (req, res) => {
                 qa.score,
                 qa.total_points,
                 qa.status,
+                s.avatar_url,
                 CASE 
                     WHEN qa.total_points > 0 THEN ROUND((qa.score::numeric / qa.total_points) * 100)
                     ELSE 0
@@ -736,6 +737,7 @@ const getPendingReviews = async (req, res) => {
                 qa.started_at,
                 qa.completed_at,
                 qa.status,
+                s.avatar_url,
                 (SELECT COUNT(*) FROM student_answers sa 
                  WHERE sa.attempt_id = qa.id AND sa.needs_review = true) as pending_count
             FROM quiz_attempts qa

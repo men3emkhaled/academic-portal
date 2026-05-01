@@ -156,8 +156,12 @@ const DoctorStudentProgress = ({ courses }) => {
                 <div className="flex flex-col lg:flex-row lg:items-center gap-4">
                   {/* Student Info */}
                   <div className="flex items-center gap-3 lg:w-48 shrink-0">
-                    <div className="w-10 h-10 bg-violet-500/10 rounded-full flex items-center justify-center text-violet-600 dark:text-violet-400 font-black text-sm">
-                      {s.student_name?.charAt(0)?.toUpperCase() || '?'}
+                    <div className="w-10 h-10 bg-violet-500/10 rounded-full overflow-hidden flex items-center justify-center text-violet-600 dark:text-violet-400 font-black text-sm border border-violet-500/20">
+                      {s.avatar_url ? (
+                        <img src={s.avatar_url} alt={s.student_name} className="w-full h-full object-cover" />
+                      ) : (
+                        s.student_name?.charAt(0)?.toUpperCase() || '?'
+                      )}
                     </div>
                     <div className="min-w-0">
                       <p className="font-semibold text-sm text-gray-900 dark:text-white truncate">{s.student_name}</p>

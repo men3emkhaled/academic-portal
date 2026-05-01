@@ -152,9 +152,18 @@ const PendingReviews = () => {
                 }`}
               >
                 <div className="flex justify-between items-start mb-4">
-                  <div className="min-w-0">
-                    <h4 className={`font-black tracking-tight truncate transition-colors ${selectedAttempt?.attempt_id === attempt.attempt_id ? 'text-emerald-700 dark:text-emerald-400' : 'text-gray-900 dark:text-white group-hover:text-emerald-600'}`}>{attempt.student_name}</h4>
-                    <p className="text-[10px] text-gray-500 dark:text-slate-500 font-bold uppercase tracking-widest">ID: {attempt.student_id}</p>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-slate-900 border border-gray-200 dark:border-white/5 flex items-center justify-center text-gray-400 dark:text-slate-500 overflow-hidden shrink-0">
+                      {attempt.avatar_url ? (
+                        <img src={attempt.avatar_url} alt={attempt.student_name} className="w-full h-full object-cover" />
+                      ) : (
+                        <User className="w-5 h-5" />
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <h4 className={`font-black tracking-tight truncate transition-colors ${selectedAttempt?.attempt_id === attempt.attempt_id ? 'text-emerald-700 dark:text-emerald-400' : 'text-gray-900 dark:text-white group-hover:text-emerald-600'}`}>{attempt.student_name}</h4>
+                      <p className="text-[10px] text-gray-500 dark:text-slate-500 font-bold uppercase tracking-widest">ID: {attempt.student_id}</p>
+                    </div>
                   </div>
                   <span className="flex-shrink-0 w-8 h-8 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-[10px] font-black text-orange-600 dark:text-orange-400">
                     {attempt.pending_count}
@@ -188,8 +197,12 @@ const PendingReviews = () => {
                 <div className="p-10 border-b border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-white/[0.02] transition-colors">
                   <div className="flex flex-col md:flex-row justify-between items-center gap-6">
                     <div className="flex items-center gap-6">
-                        <div className="w-16 h-16 rounded-[1.5rem] bg-emerald-500/10 dark:bg-emerald-500/20 border border-emerald-500/20 dark:border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 transition-colors">
-                            <User className="w-8 h-8" />
+                        <div className="w-16 h-16 rounded-[1.5rem] bg-emerald-500/10 dark:bg-emerald-500/20 border border-emerald-500/20 dark:border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 transition-colors overflow-hidden">
+                            {selectedAttempt.avatar_url ? (
+                              <img src={selectedAttempt.avatar_url} alt={selectedAttempt.student_name} className="w-full h-full object-cover" />
+                            ) : (
+                              <User className="w-8 h-8" />
+                            )}
                         </div>
                         <div>
                             <h3 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">{selectedAttempt.student_name}</h3>

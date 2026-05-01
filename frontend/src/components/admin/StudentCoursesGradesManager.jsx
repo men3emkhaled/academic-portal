@@ -92,26 +92,35 @@ const StudentCoursesGradesManager = ({
                     </div>
 
                     {selectedStudent ? (
-                        <div className="flex-1 w-full grid grid-cols-2 md:grid-cols-4 gap-6 bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 rounded-3xl p-6 animate-fadeIn transition-colors">
-                            <div className="space-y-1">
-                                <p className="text-[10px] font-black text-gray-500 dark:text-slate-500 uppercase tracking-widest">Full Name</p>
-                                <p className="text-gray-900 dark:text-white font-black tracking-tight">{selectedStudent.name}</p>
+                        <div className="flex-1 w-full flex flex-col md:flex-row items-center gap-8 bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 rounded-3xl p-6 animate-fadeIn transition-colors">
+                            <div className="w-20 h-20 rounded-[1.5rem] bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-600 dark:text-cyan-400 overflow-hidden shrink-0">
+                                {selectedStudent.avatar_url ? (
+                                    <img src={selectedStudent.avatar_url} alt={selectedStudent.name} className="w-full h-full object-cover" />
+                                ) : (
+                                    <User className="w-8 h-8" />
+                                )}
                             </div>
-                            <div className="space-y-1">
-                                <p className="text-[10px] font-black text-gray-500 dark:text-slate-500 uppercase tracking-widest">Academic Lv</p>
-                                <span className="inline-flex items-center px-2.5 py-1 rounded-lg bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 text-xs font-black uppercase tracking-tighter border border-cyan-500/20">
-                                    LEVEL_{selectedStudent.level}
-                                </span>
-                            </div>
-                            <div className="space-y-1">
-                                <p className="text-[10px] font-black text-gray-500 dark:text-slate-500 uppercase tracking-widest">Unit Section</p>
-                                <p className="text-gray-900 dark:text-white font-black tracking-tight">{selectedStudent.section || 'N/A'}</p>
-                            </div>
-                            <div className="space-y-1">
-                                <p className="text-[10px] font-black text-gray-500 dark:text-slate-500 uppercase tracking-widest">Node ID</p>
-                                <p className="text-gray-400 dark:text-slate-400 font-bold tracking-widest text-xs flex items-center gap-1">
-                                    <Hash className="w-3 h-3" /> {selectedStudent.id}
-                                </p>
+                            <div className="flex-1 grid grid-cols-2 md:grid-cols-3 gap-6">
+                                <div className="space-y-1">
+                                    <p className="text-[10px] font-black text-gray-500 dark:text-slate-500 uppercase tracking-widest">Full Name</p>
+                                    <p className="text-gray-900 dark:text-white font-black tracking-tight">{selectedStudent.name}</p>
+                                </div>
+                                <div className="space-y-1">
+                                    <p className="text-[10px] font-black text-gray-500 dark:text-slate-500 uppercase tracking-widest">Academic Lv</p>
+                                    <span className="inline-flex items-center px-2.5 py-1 rounded-lg bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 text-xs font-black uppercase tracking-tighter border border-cyan-500/20">
+                                        LEVEL_{selectedStudent.level}
+                                    </span>
+                                </div>
+                                <div className="space-y-1">
+                                    <p className="text-[10px] font-black text-gray-500 dark:text-slate-500 uppercase tracking-widest">Unit Section</p>
+                                    <p className="text-gray-900 dark:text-white font-black tracking-tight">{selectedStudent.section || 'N/A'}</p>
+                                </div>
+                                <div className="space-y-1">
+                                    <p className="text-[10px] font-black text-gray-500 dark:text-slate-500 uppercase tracking-widest">Node ID</p>
+                                    <p className="text-gray-400 dark:text-slate-400 font-bold tracking-widest text-xs flex items-center gap-1">
+                                        <Hash className="w-3 h-3" /> {selectedStudent.id}
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     ) : (

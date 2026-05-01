@@ -127,12 +127,20 @@ const DoctorOverview = ({ stats, doctor, timetable, setActiveTab }) => {
                     }`}
                   >
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-2xl bg-doctor-text/5 flex items-center justify-center overflow-hidden">
-                         <img 
+                      <div className="w-12 h-12 rounded-2xl bg-doctor-text/5 flex items-center justify-center overflow-hidden border border-white/5 shadow-sm">
+                        {activity.avatar_url ? (
+                          <img 
+                            src={activity.avatar_url} 
+                            alt={activity.user}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <img 
                             src={`https://ui-avatars.com/api/?name=${activity.user}&background=random&color=fff`} 
                             alt={activity.user}
                             className="w-full h-full object-cover opacity-80"
                           />
+                        )}
                       </div>
                       <div>
                         <p className="text-doctor-text font-bold text-[15px]">

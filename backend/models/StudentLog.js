@@ -63,8 +63,10 @@ class StudentLog {
       const total = parseInt(countResult.rows[0].count);
 
       const result = await db.query(
-        `SELECT * FROM student_logins 
-         ORDER BY created_at DESC 
+        `SELECT l.*, s.avatar_url 
+         FROM student_logins l
+         LEFT JOIN students s ON l.student_id = s.id
+         ORDER BY l.created_at DESC 
          LIMIT $1 OFFSET $2`,
         [limit, offset]
       );

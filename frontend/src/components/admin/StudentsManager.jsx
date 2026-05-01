@@ -195,8 +195,12 @@ const StudentsManager = ({
                   <tr key={s.id} className="group hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors">
                     <td className="py-5 px-6">
                       <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-gray-100 dark:bg-slate-900 rounded-2xl flex items-center justify-center border border-gray-200 dark:border-white/5 text-gray-400 dark:text-slate-400 font-black text-xs group-hover:border-blue-500/30 transition-all transition-colors">
-                          {s.name.substring(0, 2).toUpperCase()}
+                        <div className="w-12 h-12 bg-gray-100 dark:bg-slate-900 rounded-2xl flex items-center justify-center border border-gray-200 dark:border-white/5 text-gray-400 dark:text-slate-400 font-black text-xs group-hover:border-blue-500/30 transition-all transition-colors overflow-hidden">
+                          {s.avatar_url ? (
+                            <img src={s.avatar_url} alt={s.name} className="w-full h-full object-cover" />
+                          ) : (
+                            s.name.substring(0, 2).toUpperCase()
+                          )}
                         </div>
                         <div>
                           <p className="text-gray-900 dark:text-white font-black tracking-tight">{s.name}</p>
