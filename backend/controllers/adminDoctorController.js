@@ -1,4 +1,5 @@
 const db = require('../config/database');
+const Notification = require('../models/Notification');
 const bcrypt = require('bcryptjs');
 
 const getAllDoctors = async (req, res) => {
@@ -117,6 +118,12 @@ const assignCourseToDoctor = async (req, res) => {
         }
 
         await db.query('INSERT INTO doctor_courses (doctor_id, course_id) VALUES ($1, $2)', [id, courseId]);
+        
+        // Notify doctor
+        const courseResult = await db.query('SELECT name FROM courses WHERE id = $1', [courseId]);
+        const courseName = courseResult.rows[0]?.name || 'Course';
+        await Notification.sendToDoctor(id, 'Course Assigned', `You have been assigned to course: ${courseName}`);
+
         res.status(201).json({ message: 'Course assigned successfully' });
     } catch (error) {
         res.status(500).json({ message: error.message });

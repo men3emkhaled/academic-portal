@@ -111,7 +111,7 @@ const AdminDashboard = () => {
   // Notifications states
   const [notifications, setNotifications] = useState([]);
   const [sending, setSending] = useState(false);
-  const [notificationForm, setNotificationForm] = useState({ studentId: '', title: '', content: '' });
+  const [notificationForm, setNotificationForm] = useState({ studentId: '', doctorId: '', title: '', content: '' });
   const [editingNotification, setEditingNotification] = useState(null);
   const [editNotifForm, setEditNotifForm] = useState({ title: '', content: '', is_read: false });
   const [showEditModal, setShowEditModal] = useState(false);

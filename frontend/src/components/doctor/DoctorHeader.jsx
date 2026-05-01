@@ -1,7 +1,23 @@
-import React from 'react';
-import { Search, Plus, Bell, HelpCircle, User } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Search, Plus, Bell, HelpCircle, User, CheckCircle2, Clock, Inbox, ChevronRight } from 'lucide-react';
 
-const DoctorHeader = ({ doctor, onSearch, onCreateQuiz }) => {
+const DoctorHeader = ({ 
+  doctor, onSearch, onCreateQuiz, 
+  notifications = [], unreadCount = 0, onMarkRead, onMarkAllRead 
+}) => {
+  const [showNotifications, setShowNotifications] = useState(false);
+  const notificationRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (notificationRef.current && !notificationRef.current.contains(event.target)) {
+        setShowNotifications(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   return (
     <header className="h-20 lg:h-24 bg-doctor-bg/80 backdrop-blur-xl border-b border-white/5 flex items-center justify-between px-4 lg:px-10 z-40">
       {/* Search Bar */}
@@ -26,10 +42,84 @@ const DoctorHeader = ({ doctor, onSearch, onCreateQuiz }) => {
         </button>
 
         <div className="flex items-center gap-2 lg:gap-3">
-          <button className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl lg:rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center text-doctor-text-muted hover:text-white hover:bg-white/10 transition-all relative">
-            <Bell className="w-4 lg:w-5 h-4 lg:h-5" />
-            <div className="absolute top-2.5 lg:top-3 right-2.5 lg:right-3 w-1.5 lg:w-2 h-1.5 lg:h-2 bg-red-500 rounded-full border-2 border-doctor-bg"></div>
-          </button>
+          {/* Notifications */}
+          <div className="relative" ref={notificationRef}>
+            <button 
+              onClick={() => setShowNotifications(!showNotifications)}
+              className={`w-10 h-10 lg:w-12 lg:h-12 rounded-xl lg:rounded-2xl border flex items-center justify-center transition-all relative ${
+                showNotifications ? 'bg-doctor-primary text-white border-doctor-primary' : 'bg-white/5 border-white/5 text-doctor-text-muted hover:text-white hover:bg-white/10'
+              }`}
+            >
+              <Bell className="w-4 lg:w-5 h-4 lg:h-5" />
+              {unreadCount > 0 && (
+                <div className="absolute top-2.5 lg:top-3 right-2.5 lg:right-3 w-4 h-4 bg-rose-500 rounded-full border-2 border-doctor-bg flex items-center justify-center">
+                    <span className="text-[8px] font-black text-white">{unreadCount > 9 ? '9+' : unreadCount}</span>
+                </div>
+              )}
+            </button>
+
+            {showNotifications && (
+              <div className="absolute top-14 lg:top-16 right-0 w-80 lg:w-96 bg-doctor-sidebar border border-white/10 rounded-3xl shadow-2xl z-50 overflow-hidden animate-slideUp">
+                <div className="p-5 border-b border-white/5 flex items-center justify-between">
+                  <h4 className="font-black text-white text-sm uppercase tracking-widest">Notifications</h4>
+                  {unreadCount > 0 && (
+                    <button 
+                        onClick={onMarkAllRead}
+                        className="text-[10px] font-black text-doctor-primary hover:underline uppercase tracking-widest"
+                    >
+                        Mark all as read
+                    </button>
+                  )}
+                </div>
+                <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
+                  {notifications.length === 0 ? (
+                    <div className="py-12 text-center">
+                        <Inbox className="w-10 h-10 text-white/5 mx-auto mb-3" />
+                        <p className="text-doctor-text-muted text-xs font-bold">No notifications yet</p>
+                    </div>
+                  ) : (
+                    notifications.map((n) => (
+                      <div 
+                        key={n.id}
+                        onClick={() => !n.is_read && onMarkRead(n.id)}
+                        className={`p-5 border-b border-white/5 flex gap-4 hover:bg-white/[0.02] transition-colors cursor-pointer relative group ${!n.is_read ? 'bg-doctor-primary/5' : ''}`}
+                      >
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                            !n.is_read ? 'bg-doctor-primary/20 text-doctor-primary' : 'bg-white/5 text-doctor-text-muted'
+                        }`}>
+                            <CheckCircle2 className="w-5 h-5" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between mb-1">
+                                <p className={`text-xs font-bold truncate pr-4 ${!n.is_read ? 'text-white' : 'text-doctor-text-muted'}`}>
+                                    {n.title}
+                                </p>
+                                <span className="text-[9px] text-doctor-text-muted font-bold whitespace-nowrap">
+                                    {new Date(n.created_at).toLocaleDateString([], { month: 'short', day: 'numeric' })}
+                                </span>
+                            </div>
+                            <p className="text-[11px] text-doctor-text-muted leading-relaxed line-clamp-2">
+                                {n.content}
+                            </p>
+                        </div>
+                        {!n.is_read && (
+                            <div className="absolute right-4 bottom-5 w-1.5 h-1.5 rounded-full bg-doctor-primary shadow-[0_0_8px_#8b5cf6]"></div>
+                        )}
+                      </div>
+                    ))
+                  )}
+                </div>
+                {notifications.length > 0 && (
+                    <div className="p-4 bg-white/[0.02] text-center border-t border-white/5">
+                        <button className="text-[10px] font-black text-doctor-text-muted uppercase tracking-widest hover:text-white transition-colors flex items-center justify-center gap-2 w-full">
+                            View all activity <ChevronRight className="w-3 h-3" />
+                        </button>
+                    </div>
+                )}
+              </div>
+            )}
+          </div>
+
           <button className="hidden lg:flex w-12 h-12 rounded-2xl bg-white/5 border border-white/5 items-center justify-center text-doctor-text-muted hover:text-white hover:bg-white/10 transition-all">
             <HelpCircle className="w-5 h-5" />
           </button>
@@ -53,6 +143,17 @@ const DoctorHeader = ({ doctor, onSearch, onCreateQuiz }) => {
           </div>
         </div>
       </div>
+      <style>{`
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.05); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.1); }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .animate-slideUp { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+      `}</style>
     </header>
   );
 };

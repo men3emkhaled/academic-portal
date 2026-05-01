@@ -5,7 +5,8 @@ import {
   Bell, Send, Users, User, Building2,
   Link as LinkIcon, Image as ImageIcon, Edit3,
   Trash2, History, Mail, Globe, CheckCircle,
-  Clock, Activity, ChevronRight, X, AlertCircle, Calendar
+  Clock, Activity, ChevronRight, X, AlertCircle, Calendar,
+  GraduationCap
 } from 'lucide-react';
 
 const NotificationsManager = ({
@@ -167,10 +168,55 @@ const NotificationsManager = ({
         content: notificationForm.content,
       });
       toast.success(`Encrypted packet sent to student ${notificationForm.studentId}`);
-      setNotificationForm({ studentId: '', department_id: '', title: '', content: '' });
+      setNotificationForm({ studentId: '', doctorId: '', department_id: '', title: '', content: '' });
       fetchNotifications();
     } catch (error) {
       toast.error('Direct link failure');
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const handleSendToDoctor = async (e) => {
+    e.preventDefault();
+    if (!notificationForm.doctorId || !notificationForm.title || !notificationForm.content) {
+      toast.error('Doctor ID, title, and content required');
+      return;
+    }
+    setSending(true);
+    try {
+      await api.post('/notifications/admin/send-to-doctor', {
+        doctorId: notificationForm.doctorId,
+        title: notificationForm.title,
+        content: notificationForm.content,
+      });
+      toast.success(`Notification sent to doctor ${notificationForm.doctorId}`);
+      setNotificationForm({ studentId: '', doctorId: '', department_id: '', title: '', content: '' });
+      fetchNotifications();
+    } catch (error) {
+      toast.error('Direct link failure');
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const handleSendToAllDoctors = async (e) => {
+    e.preventDefault();
+    if (!notificationForm.title || !notificationForm.content) {
+      toast.error('Title and content are required');
+      return;
+    }
+    setSending(true);
+    try {
+      await api.post('/notifications/admin/send-to-all-doctors', {
+        title: notificationForm.title,
+        content: notificationForm.content,
+      });
+      toast.success('Broadcast distributed to all doctors');
+      setNotificationForm({ studentId: '', doctorId: '', department_id: '', title: '', content: '' });
+      fetchNotifications();
+    } catch (error) {
+      toast.error('Broadcast failure');
     } finally {
       setSending(false);
     }
@@ -190,7 +236,7 @@ const NotificationsManager = ({
         content: notificationForm.content,
       });
       toast.success(res.data.message || `Unit broadcast successful`);
-      setNotificationForm({ studentId: '', department_id: '', title: '', content: '' });
+      setNotificationForm({ studentId: '', doctorId: '', department_id: '', title: '', content: '' });
       fetchNotifications();
     } catch (error) {
       toast.error('Unit broadcast failure');
@@ -226,7 +272,7 @@ const NotificationsManager = ({
                 </div>
                 <div>
                   <h3 className="text-lg font-black text-gray-900 dark:text-white tracking-tight">Global Broadcast</h3>
-                  <p className="text-[10px] text-gray-500 dark:text-slate-500 font-bold uppercase tracking-widest transition-colors">Target: All registered nodes</p>
+                  <p className="text-[10px] text-gray-500 dark:text-slate-500 font-bold uppercase tracking-widest transition-colors">Target: All registered students</p>
                 </div>
               </div>
 
@@ -251,6 +297,45 @@ const NotificationsManager = ({
 
                 <button type="submit" disabled={sending} className="w-full admin-btn-primary h-[55px] flex items-center justify-center gap-3">
                   {sending ? <Activity className="w-5 h-5 animate-spin" /> : <><Send className="w-5 h-5" /> DISTRIBUTE PACKET</>}
+                </button>
+              </form>
+            </div>
+          </div>
+
+          {/* Send to All Doctors */}
+          <div className="admin-card relative overflow-hidden group border-amber-500/10 transition-colors">
+            <div className="relative z-10">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 bg-amber-500/10 dark:bg-amber-500/20 rounded-xl flex items-center justify-center border border-amber-500/20 dark:border-amber-500/30 transition-colors">
+                  <GraduationCap className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-gray-900 dark:text-white tracking-tight">Doctor Broadcast</h3>
+                  <p className="text-[10px] text-gray-500 dark:text-slate-500 font-bold uppercase tracking-widest transition-colors">Target: All registered doctors</p>
+                </div>
+              </div>
+
+              <form onSubmit={handleSendToAllDoctors} className="space-y-5">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-gray-500 dark:text-slate-500 uppercase tracking-widest ml-4">Subject Vector</label>
+                  <input type="text" placeholder="Global doctor alert..." value={notificationForm.title} onChange={(e) => setNotificationForm({ ...notificationForm, title: e.target.value })} className="admin-input" required />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-gray-500 dark:text-slate-500 uppercase tracking-widest ml-4">Payload Content</label>
+                  <textarea id="notificationContent_all_doctors" rows="3" value={notificationForm.content} onChange={(e) => setNotificationForm({ ...notificationForm, content: e.target.value })} className="admin-input scrollbar-hide" required />
+                  <div className="flex gap-2 mt-2">
+                    <button type="button" onClick={() => openLinkModal('all_doctors')} className="px-3 py-1.5 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/5 rounded-lg text-[10px] font-black uppercase text-gray-500 dark:text-slate-400 hover:bg-amber-500/20 hover:text-amber-600 dark:hover:text-amber-400 transition-all flex items-center gap-2 tracking-widest transition-colors">
+                      <LinkIcon className="w-3 h-3" /> Link
+                    </button>
+                    <button type="button" onClick={() => openImageModal('all_doctors')} className="px-3 py-1.5 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/5 rounded-lg text-[10px] font-black uppercase text-gray-500 dark:text-slate-400 hover:bg-amber-500/20 hover:text-amber-600 dark:hover:text-amber-400 transition-all flex items-center gap-2 tracking-widest transition-colors">
+                      <ImageIcon className="w-3 h-3" /> Image
+                    </button>
+                  </div>
+                </div>
+
+                <button type="submit" disabled={sending} className="w-full admin-btn-primary bg-amber-500 h-[55px] flex items-center justify-center gap-3 border-none text-black">
+                  {sending ? <Activity className="w-5 h-5 animate-spin" /> : <><Send className="w-5 h-5" /> DISTRIBUTE TO DOCTORS</>}
                 </button>
               </form>
             </div>
@@ -314,7 +399,7 @@ const NotificationsManager = ({
                   <User className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-black text-gray-900 dark:text-white tracking-tight">Direct Link</h3>
+                  <h3 className="text-lg font-black text-gray-900 dark:text-white tracking-tight">Direct Link (Student)</h3>
                   <p className="text-[10px] text-gray-500 dark:text-slate-500 font-bold uppercase tracking-widest transition-colors">Target: Individual student node</p>
                 </div>
               </div>
@@ -350,6 +435,51 @@ const NotificationsManager = ({
               </form>
             </div>
           </div>
+
+          {/* Send to Specific Doctor */}
+          <div className="admin-card relative overflow-hidden group border-rose-500/10 transition-colors">
+            <div className="relative z-10">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 bg-rose-500/10 dark:bg-rose-500/20 rounded-xl flex items-center justify-center border border-rose-500/20 dark:border-rose-500/30 transition-colors">
+                  <GraduationCap className="w-5 h-5 text-rose-600 dark:text-rose-400" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-gray-900 dark:text-white tracking-tight">Direct Link (Doctor)</h3>
+                  <p className="text-[10px] text-gray-500 dark:text-slate-500 font-bold uppercase tracking-widest transition-colors">Target: Individual doctor node</p>
+                </div>
+              </div>
+
+              <form onSubmit={handleSendToDoctor} className="space-y-5">
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-gray-500 dark:text-slate-500 uppercase tracking-widest ml-4">Doc ID</label>
+                    <input type="text" placeholder="####" value={notificationForm.doctorId || ''} onChange={(e) => setNotificationForm({ ...notificationForm, doctorId: e.target.value })} className="admin-input transition-colors" required />
+                  </div>
+                  <div className="col-span-2 space-y-2">
+                    <label className="text-[10px] font-black text-gray-500 dark:text-slate-500 uppercase tracking-widest ml-4">Subject Vector</label>
+                    <input type="text" placeholder="Personal doc msg..." value={notificationForm.title} onChange={(e) => setNotificationForm({ ...notificationForm, title: e.target.value })} className="admin-input transition-colors" required />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-gray-500 dark:text-slate-500 uppercase tracking-widest ml-4">Payload Content</label>
+                  <textarea id="notificationContent_doctor" rows="3" value={notificationForm.content} onChange={(e) => setNotificationForm({ ...notificationForm, content: e.target.value })} className="admin-input scrollbar-hide transition-colors" required />
+                  <div className="flex gap-2 mt-2">
+                    <button type="button" onClick={() => openLinkModal('doctor')} className="px-3 py-1.5 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/5 rounded-lg text-[10px] font-black uppercase text-gray-500 dark:text-slate-400 hover:bg-rose-500/20 hover:text-rose-600 dark:hover:text-rose-400 transition-all flex items-center gap-2 tracking-widest transition-colors">
+                      <LinkIcon className="w-3 h-3" /> Link
+                    </button>
+                    <button type="button" onClick={() => openImageModal('doctor')} className="px-3 py-1.5 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/5 rounded-lg text-[10px] font-black uppercase text-gray-500 dark:text-slate-400 hover:bg-rose-500/20 hover:text-rose-600 dark:hover:text-rose-400 transition-all flex items-center gap-2 tracking-widest transition-colors">
+                      <ImageIcon className="w-3 h-3" /> Image
+                    </button>
+                  </div>
+                </div>
+
+                <button type="submit" disabled={sending} className="w-full admin-btn-primary h-[55px] bg-gradient-to-r from-rose-600 to-pink-600 border-none transition-colors shadow-lg shadow-rose-600/20">
+                  {sending ? <Activity className="w-5 h-5 animate-spin mx-auto" /> : 'OPEN DOCTOR CHANNEL'}
+                </button>
+              </form>
+            </div>
+          </div>
         </div>
 
         {/* History Log */}
@@ -378,7 +508,11 @@ const NotificationsManager = ({
                       <div className="flex items-center gap-3 flex-wrap mb-3">
                         <h4 className="font-black text-gray-900 dark:text-white tracking-tight truncate transition-colors">{notif.title}</h4>
                         <div className="flex gap-2">
-                          {notif.student_name ? (
+                          {notif.doctor_name ? (
+                            <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-[9px] font-black uppercase tracking-tight transition-colors">
+                              <GraduationCap className="w-2.5 h-2.5" /> DR: {notif.doctor_id || 'U'}
+                            </span>
+                          ) : notif.student_name ? (
                             <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-600 dark:text-cyan-400 text-[9px] font-black uppercase tracking-tight transition-colors">
                               <User className="w-2.5 h-2.5" /> ID: {notif.student_id || 'U'}
                             </span>

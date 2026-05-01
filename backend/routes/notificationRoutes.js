@@ -12,7 +12,9 @@ router.put('/read-all', studentAuth, notificationController.markAllAsRead);
 // ============= Admin Routes =============
 router.get('/admin/all', checkPermission('manage_notifications'), notificationController.getAllNotifications);
 router.post('/admin/send-to-student', checkPermission('manage_notifications'), notificationController.sendToStudent);
+router.post('/admin/send-to-doctor', checkPermission('manage_notifications'), notificationController.sendToDoctor);
 router.post('/admin/send-to-all', checkPermission('manage_notifications'), notificationController.sendToAll);
+router.post('/admin/send-to-all-doctors', checkPermission('manage_notifications'), notificationController.sendToAllDoctors);
 router.post('/admin/send-to-department', checkPermission('manage_notifications'), notificationController.sendToDepartment);
 router.put('/admin/:id', checkPermission('manage_notifications'), notificationController.updateNotification);
 router.delete('/admin/:id', checkPermission('manage_notifications'), notificationController.deleteNotification);

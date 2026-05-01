@@ -3,6 +3,7 @@ const router = express.Router();
 const doctorController = require('../controllers/doctorController');
 const analyticsController = require('../controllers/analyticsController');
 const inquiryController = require('../controllers/inquiryController');
+const notificationController = require('../controllers/notificationController');
 const { doctorAuth } = require('../middleware/doctorAuth');
 const { uploadAvatar, handleMulterError } = require('../middleware/upload');
 
@@ -29,6 +30,11 @@ router.post('/upload-avatar', (req, res, next) => {
 }, doctorController.uploadAvatar);
 
 router.put('/change-password', doctorController.changePassword);
+
+// Notifications
+router.get('/notifications', notificationController.getDoctorNotifications);
+router.patch('/notifications/:id/read', notificationController.markDoctorAsRead);
+router.post('/notifications/read-all', notificationController.markAllDoctorAsRead);
 
 // Courses (Read Only/Manage)
 router.get('/courses', doctorController.getMyCourses);

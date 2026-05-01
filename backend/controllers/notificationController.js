@@ -45,6 +45,39 @@ const markAllAsRead = async (req, res) => {
   }
 };
 
+// ============= Doctor Functions =============
+const getDoctorNotifications = async (req, res) => {
+  try {
+    const doctorId = req.doctor.id;
+    const notifications = await Notification.getByDoctorId(doctorId);
+    res.json(notifications);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const markDoctorAsRead = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const doctorId = req.doctor.id;
+    const notification = await Notification.markAsRead(id, doctorId, 'doctor');
+    if (!notification) return res.status(404).json({ message: 'Notification not found' });
+    res.json(notification);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const markAllDoctorAsRead = async (req, res) => {
+  try {
+    const doctorId = req.doctor.id;
+    const notifications = await Notification.markAllAsRead(doctorId, 'doctor');
+    res.json({ count: notifications.length });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // ============= Admin Functions =============
 const getAllNotifications = async (req, res) => {
   try {
@@ -178,10 +211,15 @@ module.exports = {
   getMyNotifications,
   markAsRead,
   markAllAsRead,
+  getDoctorNotifications,
+  markDoctorAsRead,
+  markAllDoctorAsRead,
   getAllNotifications,
   sendToStudent,
   sendToAll,
   sendToDepartment,
+  sendToDoctor,
+  sendToAllDoctors,
   updateNotification,
   deleteNotification,
 };

@@ -31,6 +31,8 @@ const DoctorDashboard = () => {
   const [timetable, setTimetable] = useState([]);
   const [dataLoading, setDataLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const fetchData = useCallback(async () => {
     if (!token) return;
@@ -51,13 +53,49 @@ const DoctorDashboard = () => {
     }
   }, [token, doctorApi]);
 
+  const fetchNotifications = useCallback(async () => {
+    if (!token) return;
+    try {
+      const res = await doctorApi('get', '/doctor/notifications');
+      setNotifications(res.data);
+      setUnreadCount(res.data.filter(n => !n.is_read).length);
+    } catch (err) {
+      console.error('Failed to load notifications', err);
+    }
+  }, [token, doctorApi]);
+
+  const markNotificationAsRead = async (id) => {
+    try {
+      await doctorApi('patch', `/doctor/notifications/${id}/read`);
+      setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    } catch (err) {
+      console.error('Failed to mark notification as read', err);
+    }
+  };
+
+  const markAllNotificationsAsRead = async () => {
+    try {
+      await doctorApi('post', '/doctor/notifications/read-all');
+      setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+      setUnreadCount(0);
+    } catch (err) {
+      console.error('Failed to mark all as read', err);
+    }
+  };
+
   useEffect(() => {
     if (!token && !authLoading) {
       navigate('/doctor/login', { replace: true });
       return;
     }
     fetchData();
-  }, [token, authLoading, navigate, fetchData]);
+    fetchNotifications();
+
+    // Polling for notifications every 30 seconds
+    const interval = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(interval);
+  }, [token, authLoading, navigate, fetchData, fetchNotifications]);
 
   const handleLogout = () => {
     logout();
@@ -104,6 +142,10 @@ const DoctorDashboard = () => {
           doctor={doctor} 
           onSearch={setSearchQuery}
           onCreateQuiz={() => setActiveTab('quizzes')}
+          notifications={notifications}
+          unreadCount={unreadCount}
+          onMarkRead={markNotificationAsRead}
+          onMarkAllRead={markAllNotificationsAsRead}
         />
 
         <main className="flex-1 overflow-y-auto p-6 lg:p-10 pb-32 lg:pb-10 hidden-scrollbar relative z-10">
