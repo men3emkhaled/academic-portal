@@ -95,7 +95,12 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout }) => {
             <Bell className="w-5 h-5" />
             <span className="font-bold text-[15px]">Notifications</span>
           </button>
-          <button className="w-full flex items-center gap-4 px-5 py-3.5 rounded-2xl text-doctor-text-muted hover:text-white hover:bg-white/5 transition-all">
+          <button 
+            onClick={() => { setActiveTab('settings'); setIsMoreOpen(false); }}
+            className={`w-full flex items-center gap-4 px-5 py-3.5 rounded-2xl transition-all ${
+              activeTab === 'settings' ? 'bg-doctor-primary/10 text-doctor-primary border border-doctor-primary/20' : 'text-doctor-text-muted hover:text-white hover:bg-white/5 border border-transparent'
+            }`}
+          >
             <Settings className="w-5 h-5" />
             <span className="font-bold text-[15px]">Settings</span>
           </button>
@@ -177,7 +182,12 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout }) => {
           </div>
           <div className="h-px bg-white/5 my-4 mx-2" />
           <div className="grid grid-cols-2 gap-2">
-            <button className="flex items-center gap-3 px-5 py-4 rounded-2xl text-doctor-text-muted hover:bg-white/5 transition-all">
+            <button 
+              onClick={() => { setActiveTab('settings'); setIsMoreOpen(false); }}
+              className={`flex items-center gap-3 px-5 py-4 rounded-2xl transition-all ${
+                activeTab === 'settings' ? 'bg-doctor-primary/10 text-doctor-primary border border-doctor-primary/20' : 'text-doctor-text-muted hover:bg-white/5'
+              }`}
+            >
               <Settings className="w-5 h-5" />
               <span className="font-bold text-sm">Settings</span>
             </button>

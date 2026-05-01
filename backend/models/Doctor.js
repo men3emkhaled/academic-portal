@@ -15,8 +15,30 @@ class Doctor {
     }
 
     static async findById(id) {
-        const result = await db.query('SELECT id, name, email, department FROM doctors WHERE id = $1', [id]);
+        const result = await db.query('SELECT id, name, email, department, bio, avatar_url, phone FROM doctors WHERE id = $1', [id]);
         return result.rows[0];
+    }
+
+    static async updateProfile(id, data) {
+        const { name, email, bio, avatar_url, phone } = data;
+        const result = await db.query(
+            `UPDATE doctors 
+             SET name = COALESCE($1, name), 
+                 email = COALESCE($2, email), 
+                 bio = COALESCE($3, bio), 
+                 avatar_url = COALESCE($4, avatar_url),
+                 phone = COALESCE($5, phone),
+                 updated_at = CURRENT_TIMESTAMP 
+             WHERE id = $6 RETURNING id, name, email, department, bio, avatar_url, phone`,
+            [name, email, bio, avatar_url, phone, id]
+        );
+        return result.rows[0];
+    }
+
+    static async updatePassword(id, newPassword) {
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        await db.query('UPDATE doctors SET password = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2', [hashedPassword, id]);
+        return true;
     }
 
     static async findByEmail(email) {

@@ -1329,9 +1329,43 @@ const assignExistingCourse = async (req, res) => {
     }
 };
 
+const updateProfile = async (req, res) => {
+    try {
+        const Doctor = require('../models/Doctor');
+        const updatedDoctor = await Doctor.updateProfile(req.doctor.id, req.body);
+        res.json(updatedDoctor);
+    } catch (error) {
+        console.error('Update profile error:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
+const changePassword = async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+        const Doctor = require('../models/Doctor');
+        
+        const doctor = await Doctor.findById(req.doctor.id);
+        // Need to fetch full doctor including password for verification
+        const fullDoctor = await Doctor.findByEmail(req.doctor.email);
+        
+        const isMatch = await Doctor.verifyPassword(fullDoctor, currentPassword);
+        if (!isMatch) {
+            return res.status(400).json({ message: 'Current password is incorrect' });
+        }
+        
+        await Doctor.updatePassword(req.doctor.id, newPassword);
+        res.json({ message: 'Password updated successfully' });
+    } catch (error) {
+        console.error('Change password error:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports = {
     login, getDashboardStats, getProfile,
     getMyCourses, getMyTimetable, createCourse, updateCourse, toggleArchiveCourse, assignExistingCourse,
+    updateProfile, changePassword,
     getMyQuizzes, createQuiz, updateQuiz, deleteQuiz, togglePublishQuiz,
     getQuestions, addQuestion, updateQuestion, deleteQuestion, getQuizAttempts,
     getMyResources, createResource, updateResource, deleteResource,

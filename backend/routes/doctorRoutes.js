@@ -13,6 +13,8 @@ router.use(doctorAuth); // كل المسارات اللي تحت محمية
 // Dashboard
 router.get('/stats', doctorController.getDashboardStats);
 router.get('/profile', doctorController.getProfile);
+router.put('/profile', doctorController.updateProfile);
+router.put('/change-password', doctorController.changePassword);
 
 // Courses (Read Only/Manage)
 router.get('/courses', doctorController.getMyCourses);
