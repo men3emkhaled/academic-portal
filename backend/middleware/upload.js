@@ -78,6 +78,20 @@ const uploadWrittenAnswer = multer({
     limits: { fileSize: 5 * 1024 * 1024 } // 5MB للصورة
 });
 
+// ---------- إعدادات رفع صور البروفايل (Memory Storage for Supabase) ----------
+const avatarStorage = multer.memoryStorage();
+const uploadAvatar = multer({
+    storage: avatarStorage,
+    limits: { fileSize: 2 * 1024 * 1024 },
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype.startsWith('image/')) {
+            cb(null, true);
+        } else {
+            cb(new Error('Only image files are allowed!'), false);
+        }
+    }
+});
+
 // ---------- معالج الأخطاء الموحد ----------
 const handleMulterError = (err, req, res, next) => {
     if (err instanceof multer.MulterError) {
@@ -92,9 +106,10 @@ const handleMulterError = (err, req, res, next) => {
     next();
 };
 
-// ✅ تصدير كلا الكائنين
+// ✅ تصدير جميع الكائنات
 module.exports = { 
     upload, 
     uploadWrittenAnswer, 
+    uploadAvatar,
     handleMulterError 
 };

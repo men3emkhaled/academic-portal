@@ -4,6 +4,7 @@ const doctorController = require('../controllers/doctorController');
 const analyticsController = require('../controllers/analyticsController');
 const inquiryController = require('../controllers/inquiryController');
 const { doctorAuth } = require('../middleware/doctorAuth');
+const { uploadAvatar } = require('../middleware/upload');
 
 // ==================== AUTH ====================
 router.post('/login', doctorController.login);
@@ -16,6 +17,7 @@ router.get('/stats', doctorController.getDashboardStats);
 router.get('/recent-activity', doctorController.getRecentActivity);
 router.get('/profile', doctorController.getProfile);
 router.put('/profile', doctorController.updateProfile);
+router.post('/upload-avatar', uploadAvatar.single('avatar'), doctorController.uploadAvatar);
 router.put('/change-password', doctorController.changePassword);
 
 // Courses (Read Only/Manage)

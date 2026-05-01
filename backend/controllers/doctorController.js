@@ -3,7 +3,9 @@ const Doctor = require('../models/Doctor');
 const OfficialTask = require('../models/OfficialTask');
 const Inquiry = require('../models/Inquiry');
 const db = require('../config/database');
+const supabase = require('../config/supabase');
 const XLSX = require('xlsx');
+const path = require('path');
 
 // ==================== AUTH ====================
 const login = async (req, res) => {
@@ -1410,6 +1412,49 @@ const deleteTimetableEntry = async (req, res) => {
     }
 };
 
+const uploadAvatar = async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ message: 'No file uploaded' });
+        }
+
+        const doctorId = req.doctor.id;
+        const file = req.file;
+        const fileExt = path.extname(file.originalname);
+        const fileName = `${doctorId}_${Date.now()}${fileExt}`;
+        const filePath = `avatars/${fileName}`;
+
+        // Upload to Supabase Storage
+        const { data, error: uploadError } = await supabase.storage
+            .from('avatars')
+            .upload(filePath, file.buffer, {
+                contentType: file.mimetype,
+                upsert: true
+            });
+
+        if (uploadError) {
+            console.error('Supabase upload error:', uploadError);
+            return res.status(500).json({ message: 'Failed to upload image to storage' });
+        }
+
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+            .from('avatars')
+            .getPublicUrl(filePath);
+
+        // Update doctor record in database
+        await db.query('UPDATE doctors SET avatar_url = $1 WHERE id = $2', [publicUrl, doctorId]);
+
+        res.json({
+            message: 'Avatar updated successfully',
+            avatar_url: publicUrl
+        });
+    } catch (error) {
+        console.error('Upload avatar error:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
 const getRecentActivity = async (req, res) => {
     try {
         const doctorId = req.doctor.id;
@@ -1462,5 +1507,5 @@ module.exports = {
     getAttendanceSessions, createAttendanceSession, getAttendanceRecords, scanAttendance, toggleManualAttendance,
     updateAttendanceSession, deleteAttendanceSession, exportCourseAttendance,
     getAnnouncements, createAnnouncement, deleteAnnouncement,
-    getRecentActivity
+    getRecentActivity, uploadAvatar
 };

@@ -45,7 +45,7 @@ const DoctorHeader = ({ doctor, onSearch, onCreateQuiz }) => {
           <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl lg:rounded-2xl bg-gradient-to-br from-doctor-primary to-doctor-secondary p-[2px] group-hover:scale-105 transition-transform">
              <div className="w-full h-full rounded-[9px] lg:rounded-[14px] bg-doctor-sidebar flex items-center justify-center overflow-hidden">
                 <img 
-                  src={`https://ui-avatars.com/api/?name=${doctor?.name}&background=8b5cf6&color=fff`} 
+                  src={doctor?.avatar_url || `https://ui-avatars.com/api/?name=${doctor?.name}&background=8b5cf6&color=fff`} 
                   alt={doctor?.name}
                   className="w-full h-full object-cover"
                 />

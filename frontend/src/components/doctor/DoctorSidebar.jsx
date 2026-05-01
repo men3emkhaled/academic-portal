@@ -44,7 +44,7 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout }) => {
             <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-doctor-primary to-doctor-secondary p-[2px] shadow-lg shadow-doctor-primary/20">
               <div className="w-full h-full rounded-[22px] bg-doctor-sidebar flex items-center justify-center overflow-hidden">
                 <img 
-                  src={`https://ui-avatars.com/api/?name=${doctor?.name}&background=8b5cf6&color=fff&size=128`} 
+                  src={doctor?.avatar_url || `https://ui-avatars.com/api/?name=${doctor?.name}&background=8b5cf6&color=fff&size=128`} 
                   alt={doctor?.name}
                   className="w-full h-full object-cover"
                 />

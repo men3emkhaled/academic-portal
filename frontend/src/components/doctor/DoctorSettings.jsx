@@ -1,18 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useDoctorAuth } from '../../context/DoctorAuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import toast from 'react-hot-toast';
 import { 
   User, Mail, Phone, Book, Shield, Moon, Sun, 
-  Camera, Save, Lock, Bell, CheckCircle2, AlertCircle 
+  Camera, Save, Lock, Bell, CheckCircle2, AlertCircle, Loader2
 } from 'lucide-react';
 
 const DoctorSettings = () => {
   const { doctor, doctorApi, login, token } = useDoctorAuth();
   const { isDarkMode, toggleTheme } = useTheme();
+  const fileInputRef = useRef(null);
   
   const [activeSection, setActiveSection] = useState('profile');
   const [loading, setLoading] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   
   const [profileData, setProfileData] = useState({
     name: doctor?.name || '',
@@ -39,6 +41,40 @@ const DoctorSettings = () => {
       toast.error(err.response?.data?.message || 'Failed to update profile');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleAvatarUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+        return toast.error('Please select an image file');
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+        return toast.error('Image size must be less than 2MB');
+    }
+
+    setUploadingAvatar(true);
+    const formData = new FormData();
+    formData.append('avatar', file);
+
+    try {
+        const res = await doctorApi('post', '/doctor/upload-avatar', formData);
+        const newAvatarUrl = res.data.avatar_url;
+        setProfileData(prev => ({ ...prev, avatar_url: newAvatarUrl }));
+        
+        // Update context
+        const updatedDoctor = { ...doctor, avatar_url: newAvatarUrl };
+        login(token, updatedDoctor);
+        
+        toast.success('Profile picture updated!');
+    } catch (err) {
+        console.error('Upload error:', err);
+        toast.error('Failed to upload image');
+    } finally {
+        setUploadingAvatar(false);
     }
   };
 
@@ -107,22 +143,35 @@ const DoctorSettings = () => {
            <div className="absolute top-0 right-0 w-64 h-64 bg-doctor-primary/5 blur-[100px] rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
 
            {activeSection === 'profile' && (
-             <form onSubmit={handleProfileUpdate} className="space-y-8 relative z-10">
+             <div className="space-y-8 relative z-10">
                 <div className="flex flex-col md:flex-row gap-8 items-center mb-10">
                    <div className="relative group">
-                      <div className="w-32 h-32 rounded-[2.5rem] bg-gradient-to-br from-doctor-primary to-doctor-secondary p-[3px] shadow-2xl">
+                      <div className="w-32 h-32 rounded-[2.5rem] bg-gradient-to-br from-doctor-primary to-doctor-secondary p-[3px] shadow-2xl relative overflow-hidden">
                          <div className="w-full h-full rounded-[2.2rem] bg-doctor-sidebar flex items-center justify-center overflow-hidden">
                             <img 
                               src={profileData.avatar_url || `https://ui-avatars.com/api/?name=${doctor?.name}&background=8b5cf6&color=fff&size=256`} 
                               alt="Avatar" 
-                              className="w-full h-full object-cover"
+                              className={`w-full h-full object-cover transition-opacity ${uploadingAvatar ? 'opacity-30' : 'opacity-100'}`}
                             />
                          </div>
+                         {uploadingAvatar && (
+                             <div className="absolute inset-0 flex items-center justify-center">
+                                 <Loader2 className="w-8 h-8 text-white animate-spin" />
+                             </div>
+                         )}
                       </div>
+                      <input 
+                        type="file" 
+                        ref={fileInputRef}
+                        className="hidden" 
+                        accept="image/*"
+                        onChange={handleAvatarUpload}
+                      />
                       <button 
                         type="button"
-                        className="absolute bottom-0 right-0 w-10 h-10 bg-doctor-primary text-white rounded-2xl flex items-center justify-center shadow-lg hover:scale-110 transition-all border-4 border-doctor-card"
-                        onClick={() => toast.success('Upload feature coming soon!')}
+                        disabled={uploadingAvatar}
+                        className="absolute bottom-0 right-0 w-10 h-10 bg-doctor-primary text-white rounded-2xl flex items-center justify-center shadow-lg hover:scale-110 transition-all border-4 border-doctor-card disabled:opacity-50"
+                        onClick={() => fileInputRef.current.click()}
                       >
                          <Camera className="w-5 h-5" />
                       </button>
@@ -133,80 +182,82 @@ const DoctorSettings = () => {
                    </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                   <div className="space-y-2">
-                      <label className="text-xs font-black text-doctor-text-muted uppercase tracking-widest ml-1 flex items-center gap-2">
-                         <User className="w-3 h-3" /> Full Name
-                      </label>
-                      <input 
-                        type="text" 
-                        value={profileData.name}
-                        onChange={(e) => setProfileData({...profileData, name: e.target.value})}
-                        className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
-                      />
-                   </div>
-                   <div className="space-y-2">
-                      <label className="text-xs font-black text-doctor-text-muted uppercase tracking-widest ml-1 flex items-center gap-2">
-                         <Mail className="w-3 h-3" /> Email Address
-                      </label>
-                      <input 
-                        type="email" 
-                        value={profileData.email}
-                        onChange={(e) => setProfileData({...profileData, email: e.target.value})}
-                        className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
-                      />
-                   </div>
-                   <div className="space-y-2">
-                      <label className="text-xs font-black text-doctor-text-muted uppercase tracking-widest ml-1 flex items-center gap-2">
-                         <Phone className="w-3 h-3" /> Phone Number
-                      </label>
-                      <input 
-                        type="text" 
-                        value={profileData.phone}
-                        placeholder="+20 123 456 7890"
-                        onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
-                        className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
-                      />
-                   </div>
-                   <div className="space-y-2">
-                      <label className="text-xs font-black text-doctor-text-muted uppercase tracking-widest ml-1 flex items-center gap-2">
-                         <Book className="w-3 h-3" /> Department
-                      </label>
-                      <input 
-                        type="text" 
-                        value={doctor?.department || ''}
-                        disabled
-                        className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-doctor-text-muted transition-all font-medium cursor-not-allowed"
-                      />
-                   </div>
-                </div>
+                <form onSubmit={handleProfileUpdate} className="space-y-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                        <label className="text-xs font-black text-doctor-text-muted uppercase tracking-widest ml-1 flex items-center gap-2">
+                            <User className="w-3 h-3" /> Full Name
+                        </label>
+                        <input 
+                            type="text" 
+                            value={profileData.name}
+                            onChange={(e) => setProfileData({...profileData, name: e.target.value})}
+                            className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-xs font-black text-doctor-text-muted uppercase tracking-widest ml-1 flex items-center gap-2">
+                            <Mail className="w-3 h-3" /> Email Address
+                        </label>
+                        <input 
+                            type="email" 
+                            value={profileData.email}
+                            onChange={(e) => setProfileData({...profileData, email: e.target.value})}
+                            className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-xs font-black text-doctor-text-muted uppercase tracking-widest ml-1 flex items-center gap-2">
+                            <Phone className="w-3 h-3" /> Phone Number
+                        </label>
+                        <input 
+                            type="text" 
+                            value={profileData.phone}
+                            placeholder="+20 123 456 7890"
+                            onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
+                            className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-xs font-black text-doctor-text-muted uppercase tracking-widest ml-1 flex items-center gap-2">
+                            <Book className="w-3 h-3" /> Department
+                        </label>
+                        <input 
+                            type="text" 
+                            value={doctor?.department || ''}
+                            disabled
+                            className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-doctor-text-muted transition-all font-medium cursor-not-allowed"
+                        />
+                    </div>
+                    </div>
 
-                <div className="space-y-2">
-                   <label className="text-xs font-black text-doctor-text-muted uppercase tracking-widest ml-1">Professional Bio</label>
-                   <textarea 
-                     rows="4"
-                     value={profileData.bio}
-                     onChange={(e) => setProfileData({...profileData, bio: e.target.value})}
-                     placeholder="Tell us about your academic background..."
-                     className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-white placeholder-doctor-text-muted focus:outline-none focus:border-doctor-primary/50 transition-all font-medium resize-none"
-                   />
-                </div>
+                    <div className="space-y-2">
+                    <label className="text-xs font-black text-doctor-text-muted uppercase tracking-widest ml-1">Professional Bio</label>
+                    <textarea 
+                        rows="4"
+                        value={profileData.bio}
+                        onChange={(e) => setProfileData({...profileData, bio: e.target.value})}
+                        placeholder="Tell us about your academic background..."
+                        className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-white placeholder-doctor-text-muted focus:outline-none focus:border-doctor-primary/50 transition-all font-medium resize-none"
+                    />
+                    </div>
 
-                <button 
-                  type="submit"
-                  disabled={loading}
-                  className="bg-doctor-primary hover:bg-doctor-primary/90 text-white font-black px-10 py-5 rounded-[2rem] shadow-xl shadow-doctor-primary/30 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-3"
-                >
-                  {loading ? (
-                    <div className="w-6 h-6 border-4 border-white/20 border-t-white rounded-full animate-spin"></div>
-                  ) : (
-                    <>
-                      <Save className="w-5 h-5" />
-                      <span>Save Profile Changes</span>
-                    </>
-                  )}
-                </button>
-             </form>
+                    <button 
+                    type="submit"
+                    disabled={loading}
+                    className="bg-doctor-primary hover:bg-doctor-primary/90 text-white font-black px-10 py-5 rounded-[2rem] shadow-xl shadow-doctor-primary/30 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-3"
+                    >
+                    {loading ? (
+                        <Loader2 className="w-6 h-6 text-white animate-spin" />
+                    ) : (
+                        <>
+                        <Save className="w-5 h-5" />
+                        <span>Save Profile Changes</span>
+                        </>
+                    )}
+                    </button>
+                </form>
+             </div>
            )}
 
            {activeSection === 'security' && (
@@ -260,7 +311,7 @@ const DoctorSettings = () => {
                   className="w-full bg-amber-500 hover:bg-amber-600 text-white font-black py-5 rounded-[2rem] shadow-xl shadow-amber-500/30 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-3"
                 >
                   {loading ? (
-                    <div className="w-6 h-6 border-4 border-white/20 border-t-white rounded-full animate-spin"></div>
+                    <Loader2 className="w-6 h-6 text-white animate-spin" />
                   ) : (
                     <>
                       <Lock className="w-5 h-5" />
