@@ -75,7 +75,7 @@ const Sidebar = ({ onLogout }) => {
               <img src={student.avatar_url} alt={student.name} className="w-full h-full object-cover" />
             ) : (
               <>
-                <div className="absolute inset-[2px] bg-white dark:bg-[#050505] rounded-xl transition-colors duration-300"></div>
+                <div className="absolute inset-[2px] bg-white dark:bg-dark-card rounded-xl transition-colors duration-300"></div>
                 <div className="relative font-black text-2xl text-transparent bg-clip-text bg-gradient-to-br from-gray-900 to-primary dark:from-white dark:to-primary tracking-tighter font-headline">
                   {student?.name?.charAt(0) || 'Z'}
                 </div>
@@ -103,10 +103,10 @@ const Sidebar = ({ onLogout }) => {
                 <span className="text-[10px] font-black tracking-widest uppercase text-white dark:text-dark bg-primary px-2 py-1 rounded-md leading-none shadow-[0_0_10px_rgba(var(--primary),0.3)]">
                   ID: {student.id}
                 </span>
-                <span className="text-[10px] font-bold tracking-widest uppercase text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-white/5 px-2 py-1 border border-gray-200 dark:border-white/10 rounded-md leading-none">
+                <span className="text-[10px] font-bold tracking-widest uppercase text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-white/5 px-2 py-1 border border-gray-200 dark:border-white/5 rounded-md leading-none">
                   Lvl {student.level}
                 </span>
-                <span className="text-[10px] font-bold tracking-widest uppercase text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-white/5 px-2 py-1 border border-gray-200 dark:border-white/10 rounded-md leading-none">
+                <span className="text-[10px] font-bold tracking-widest uppercase text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-white/5 px-2 py-1 border border-gray-200 dark:border-white/5 rounded-md leading-none">
                   Sec {student.section || '—'}
                 </span>
               </div>
@@ -136,7 +136,7 @@ const Sidebar = ({ onLogout }) => {
         <div className="p-4 border-t border-gray-200 dark:border-white/5 flex flex-col gap-2">
           <button
             onClick={toggleTheme}
-            className="flex items-center justify-center gap-3 w-full px-4 py-3 rounded-2xl text-gray-700 dark:text-gray-300 font-bold bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:bg-gray-200 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white transition-all"
+            className="flex items-center justify-center gap-3 w-full px-4 py-3 rounded-2xl text-gray-700 dark:text-gray-300 font-bold bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/5 hover:bg-gray-200 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white transition-all"
           >
             {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             <span>{theme === 'dark' ? t('sidebar.light_mode', 'Light Mode') : t('sidebar.dark_mode', 'Dark Mode')}</span>
@@ -157,7 +157,7 @@ const Sidebar = ({ onLogout }) => {
   return (
     <>
       <div
-        className="fixed left-0 right-0 bg-white/95 dark:bg-dark-glass/95 backdrop-blur-xl border-t border-gray-200 dark:border-white/10 z-50 shadow-[0_-8px_30px_rgba(0,0,0,0.05)] dark:shadow-[0_-8px_30px_rgba(0,0,0,0.5)] px-2 pt-2 transition-colors duration-300"
+        className="fixed left-0 right-0 bg-white/95 dark:bg-dark-glass/95 backdrop-blur-xl border-t border-gray-200 dark:border-white/5 z-50 shadow-[0_-8px_30px_rgba(0,0,0,0.05)] dark:shadow-[0_-8px_30px_rgba(0,0,0,0.5)] px-2 pt-2 transition-colors duration-300"
         style={{
           bottom: 0,
           paddingBottom: isPWA
@@ -201,7 +201,7 @@ const Sidebar = ({ onLogout }) => {
             className="fixed inset-0 bg-gray-900/60 dark:bg-black/80 backdrop-blur-md z-50 transition-opacity duration-300"
             onClick={() => setIsOpen(false)}
           />
-          <div className="fixed bottom-24 left-4 right-4 bg-white dark:bg-dark-card border border-gray-200 dark:border-white/10 rounded-[2rem] shadow-2xl z-50 animate-slideUp overflow-hidden transition-colors duration-300">
+          <div className="fixed bottom-24 left-4 right-4 bg-white dark:bg-dark-card border border-gray-200 dark:border-white/5 rounded-[2rem] shadow-2xl z-50 animate-slideUp overflow-hidden transition-colors duration-300">
             <div className="flex justify-between items-center p-5 border-b border-gray-200 dark:border-white/5 bg-gray-50 dark:bg-white/[0.02]">
               <div className="flex items-center gap-4">
                 <div className="relative flex-shrink-0 flex items-center justify-center w-12 h-12 rounded-[14px] bg-gradient-to-br from-primary to-green-700 shadow-[0_0_15px_rgba(142,255,113,0.3)] overflow-hidden">
@@ -209,7 +209,7 @@ const Sidebar = ({ onLogout }) => {
                     <img src={student.avatar_url} alt={student.name} className="w-full h-full object-cover" />
                   ) : (
                     <>
-                      <div className="absolute inset-[2px] bg-white dark:bg-[#050505] rounded-[12px] transition-colors duration-300"></div>
+                      <div className="absolute inset-[2px] bg-white dark:bg-dark-card rounded-[12px] transition-colors duration-300"></div>
                       <span className="relative font-black text-xl text-primary font-headline">{student?.name?.charAt(0) || 'Z'}</span>
                     </>
                   )}
@@ -223,7 +223,7 @@ const Sidebar = ({ onLogout }) => {
               </div>
               <button
                 onClick={() => setIsOpen(false)}
-                className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/10 transition-all"
+                className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/10 transition-all"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -263,7 +263,7 @@ const Sidebar = ({ onLogout }) => {
               <div className="flex gap-2">
                 <button
                   onClick={toggleTheme}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-4 rounded-2xl text-gray-700 dark:text-gray-300 font-bold bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:bg-gray-200 dark:hover:bg-white/10 transition-all"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-4 rounded-2xl text-gray-700 dark:text-gray-300 font-bold bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/5 hover:bg-gray-200 dark:hover:bg-white/10 transition-all"
                 >
                   {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
                   <span className="font-bold">{theme === 'dark' ? 'Light' : 'Dark'}</span>

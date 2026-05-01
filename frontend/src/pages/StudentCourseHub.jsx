@@ -93,7 +93,7 @@ const StudentCourseHub = () => {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen bg-gray-50 dark:bg-[#050505]">
+      <div className="flex min-h-screen bg-gray-50 dark:bg-dark-card">
         <Sidebar activePage="dashboard" />
         <div className="flex-1 flex items-center justify-center">
           <div className="flex flex-col items-center gap-3">
@@ -650,7 +650,7 @@ const StudentCourseHub = () => {
                   <h3 className="font-headline font-black text-xl text-gray-900 dark:text-white mb-2 uppercase tracking-tight">Identity Pass</h3>
                   <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-8">Scan to verify presence</p>
                   
-                  <div className="bg-white p-6 rounded-[2rem] mx-auto w-fit shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-gray-100 hover:scale-105 transition-transform duration-500 cursor-pointer">
+                  <div className="bg-white dark:bg-white p-6 rounded-[2rem] mx-auto w-fit shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-gray-100 hover:scale-105 transition-transform duration-500 cursor-pointer">
                     <QRCodeSVG 
                       value={qrToken} 
                       size={180}
@@ -695,7 +695,7 @@ const StudentCourseHub = () => {
             <h3 className="font-headline font-black text-xl text-gray-900 dark:text-white mb-2 uppercase tracking-tight">Identity Pass</h3>
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-8">Attendance Verification Code</p>
             
-            <div className="bg-white p-6 rounded-[2rem] mx-auto w-fit shadow-2xl border border-gray-100">
+            <div className="bg-white dark:bg-white p-6 rounded-[2rem] mx-auto w-fit shadow-2xl border border-gray-100">
               <QRCodeSVG 
                 value={qrToken} 
                 size={220}

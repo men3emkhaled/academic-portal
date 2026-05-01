@@ -121,11 +121,11 @@ const StudentSettings = () => {
               <h2 className="font-headline font-extrabold text-3xl tracking-tighter text-gray-900 dark:text-white">Profile</h2>
               <span className="font-label text-[10px] uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500">Student Records</span>
             </div>
-            <div className="bg-white dark:bg-dark-card rounded-[2rem] border border-gray-200 dark:border-white/10 p-8 shadow-sm dark:shadow-2xl relative overflow-hidden group hover:border-primary/20 dark:hover:border-white/20 transition-all duration-500">
+            <div className="bg-white dark:bg-dark-card rounded-[2rem] border border-gray-200 dark:border-white/5 p-8 shadow-sm dark:shadow-2xl relative overflow-hidden group hover:border-primary/20 dark:hover:border-white/20 transition-all duration-500">
               <div className="flex items-center gap-6">
                 <div className="relative group/avatar">
                   <div 
-                    className="w-24 h-24 rounded-[2rem] bg-gray-100 dark:bg-dark-glass backdrop-blur-md overflow-hidden border-2 border-primary/20 flex items-center justify-center text-4xl shadow-sm relative cursor-pointer"
+                    className="w-20 h-20 rounded-[1.5rem] bg-gray-100 dark:bg-white/5 backdrop-blur-md overflow-hidden border-2 border-primary/20 flex items-center justify-center text-3xl shadow-sm relative cursor-pointer"
                     onClick={() => fileInputRef.current?.click()}
                   >
                     {student?.avatar_url ? (
@@ -163,7 +163,7 @@ const StudentSettings = () => {
                   </div>
                 </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 pt-4 border-t border-gray-100 dark:border-white/10">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 pt-4 border-t border-gray-100 dark:border-white/5">
                 <div>
                   <label className="block text-gray-400 dark:text-gray-500 text-xs mb-1 font-bold uppercase tracking-wider">Level</label>
                   <p className="text-gray-800 dark:text-white text-base font-medium">{student?.level}</p>
@@ -183,7 +183,7 @@ const StudentSettings = () => {
               <span className="font-label text-[10px] uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500">Authentication</span>
             </div>
             
-            <div className="bg-white dark:bg-dark-card rounded-[2rem] border border-gray-200 dark:border-white/10 p-8 shadow-sm dark:shadow-2xl relative overflow-hidden group hover:border-primary/20 dark:hover:border-white/20 transition-all duration-500 mb-4">
+            <div className="bg-white dark:bg-dark-card rounded-[2rem] border border-gray-200 dark:border-white/5 p-8 shadow-sm dark:shadow-2xl relative overflow-hidden group hover:border-primary/20 dark:hover:border-white/20 transition-all duration-500 mb-4">
               <div className="mb-6">
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-1">
                   <Mail className="w-5 h-5 text-primary" /> Email Address
@@ -201,7 +201,7 @@ const StudentSettings = () => {
                   value={emailInput}
                   onChange={(e) => setEmailInput(e.target.value)}
                   placeholder={student?.email ? "Update email address..." : "Enter your email address..."}
-                  className="flex-1 bg-gray-50 dark:bg-dark text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 shadow-inner rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-primary/40 focus:outline-none transition-all placeholder:text-gray-400 dark:placeholder:text-gray-500/40"
+                  className="flex-1 bg-gray-50 dark:bg-dark text-gray-900 dark:text-white border border-gray-200 dark:border-white/5 shadow-inner rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-primary/40 focus:outline-none transition-all placeholder:text-gray-400 dark:placeholder:text-gray-500/40"
                   required
                 />
                 <button
@@ -214,7 +214,7 @@ const StudentSettings = () => {
               </form>
             </div>
 
-            <div className="bg-white dark:bg-dark-card rounded-[2rem] border border-gray-200 dark:border-white/10 p-8 shadow-sm dark:shadow-2xl relative overflow-hidden group hover:border-primary/20 dark:hover:border-white/20 transition-all duration-500">
+            <div className="bg-white dark:bg-dark-card rounded-[2rem] border border-gray-200 dark:border-white/5 p-8 shadow-sm dark:shadow-2xl relative overflow-hidden group hover:border-primary/20 dark:hover:border-white/20 transition-all duration-500">
               <div className="mb-6">
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-1">
                   <Lock className="w-5 h-5 text-primary" /> Change Password
@@ -231,7 +231,7 @@ const StudentSettings = () => {
                       value={passwordData.oldPassword}
                       onChange={(e) => setPasswordData({...passwordData, oldPassword: e.target.value})}
                       placeholder="Enter current password"
-                      className="w-full bg-gray-50 dark:bg-dark text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 shadow-inner rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-primary/40 focus:outline-none transition-all placeholder:text-gray-400 dark:placeholder:text-gray-500/40"
+                      className="w-full bg-gray-50 dark:bg-dark text-gray-900 dark:text-white border border-gray-200 dark:border-white/5 shadow-inner rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-primary/40 focus:outline-none transition-all placeholder:text-gray-400 dark:placeholder:text-gray-500/40"
                       required
                     />
                   </div>
@@ -242,7 +242,7 @@ const StudentSettings = () => {
                       value={passwordData.newPassword}
                       onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
                       placeholder="New password"
-                      className="w-full bg-gray-50 dark:bg-dark text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 shadow-inner rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-primary/40 focus:outline-none transition-all placeholder:text-gray-400 dark:placeholder:text-gray-500/40"
+                      className="w-full bg-gray-50 dark:bg-dark text-gray-900 dark:text-white border border-gray-200 dark:border-white/5 shadow-inner rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-primary/40 focus:outline-none transition-all placeholder:text-gray-400 dark:placeholder:text-gray-500/40"
                       required
                     />
                   </div>
@@ -253,7 +253,7 @@ const StudentSettings = () => {
                       value={passwordData.confirmPassword}
                       onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
                       placeholder="Confirm new password"
-                      className="w-full bg-gray-50 dark:bg-dark text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 shadow-inner rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-primary/40 focus:outline-none transition-all placeholder:text-gray-400 dark:placeholder:text-gray-500/40"
+                      className="w-full bg-gray-50 dark:bg-dark text-gray-900 dark:text-white border border-gray-200 dark:border-white/5 shadow-inner rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-primary/40 focus:outline-none transition-all placeholder:text-gray-400 dark:placeholder:text-gray-500/40"
                       required
                     />
                   </div>
@@ -275,7 +275,7 @@ const StudentSettings = () => {
               <h2 className="font-headline font-extrabold text-2xl tracking-tight text-gray-900 dark:text-white">Appearance</h2>
               <span className="font-label text-[10px] uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500">Theme and Visuals</span>
             </div>
-            <div className="bg-white dark:bg-dark-card rounded-[2rem] border border-gray-200 dark:border-white/10 p-8 shadow-sm dark:shadow-2xl relative overflow-hidden group hover:border-primary/20 dark:hover:border-white/20 transition-all duration-500">
+            <div className="bg-white dark:bg-dark-card rounded-[2rem] border border-gray-200 dark:border-white/5 p-8 shadow-sm dark:shadow-2xl relative overflow-hidden group hover:border-primary/20 dark:hover:border-white/20 transition-all duration-500">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-dark-glass backdrop-blur-md flex items-center justify-center text-primary text-xl border border-gray-200 dark:border-white/5">
