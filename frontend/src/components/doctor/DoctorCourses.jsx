@@ -3,7 +3,7 @@ import { useDoctorAuth } from '../../context/DoctorAuthContext';
 import toast from 'react-hot-toast';
 import { 
   BookOpen, Plus, MoreVertical, Users, CheckCircle2, 
-  Search, Filter, ChevronDown, Archive, Edit3, X 
+  Search, Filter, ChevronDown, Archive, Edit3, X, Calendar 
 } from 'lucide-react';
 
 const DoctorCourses = ({ courses, onRefresh }) => {
@@ -16,6 +16,7 @@ const DoctorCourses = ({ courses, onRefresh }) => {
   const [showEditModal, setShowEditModal] = useState(null);
   const [departments, setDepartments] = useState([]);
   const [availableCourses, setAvailableCourses] = useState([]);
+  const [openMenuId, setOpenMenuId] = useState(null);
   
   const [formData, setFormData] = useState({ 
     department_id: '', 
@@ -26,6 +27,13 @@ const DoctorCourses = ({ courses, onRefresh }) => {
 
   useEffect(() => {
     fetchDepartments();
+  }, []);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => setOpenMenuId(null);
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
   }, []);
 
   // Fetch courses when department changes in Add Modal
@@ -49,7 +57,6 @@ const DoctorCourses = ({ courses, onRefresh }) => {
   const fetchCoursesByDepartment = async (deptId) => {
     try {
       const res = await doctorApi('get', `/courses/department/${deptId}`);
-      // Filter out courses the doctor already has
       const currentCourseIds = courses.map(c => c.id);
       const filtered = (res.data || []).filter(c => !currentCourseIds.includes(c.id));
       setAvailableCourses(filtered);
@@ -65,12 +72,9 @@ const DoctorCourses = ({ courses, onRefresh }) => {
     setLoading(true);
     try {
       await doctorApi('post', '/doctor/courses/assign', { courseId: formData.course_id });
-      
-      // If there's a description, update it
       if (formData.description) {
          await doctorApi('put', `/doctor/courses/${formData.course_id}`, { description: formData.description });
       }
-
       toast.success('Course added to your list');
       setShowAddModal(false);
       setFormData({ department_id: '', course_id: '', description: '' });
@@ -132,18 +136,15 @@ const DoctorCourses = ({ courses, onRefresh }) => {
         <div className="flex items-center bg-doctor-card border border-white/5 p-1.5 rounded-2xl">
           <button 
             onClick={() => setActiveTab('active')}
-            className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all ${activeTab === 'active' ? 'bg-doctor-primary text-white shadow-lg shadow-doctor-primary/20' : 'text-doctor-text-muted hover:text-white'}`}
+            className={`px-8 py-2.5 rounded-xl font-bold text-sm transition-all ${activeTab === 'active' ? 'bg-doctor-primary text-white shadow-lg shadow-doctor-primary/20' : 'text-doctor-text-muted hover:text-white'}`}
           >
             Active
           </button>
           <button 
             onClick={() => setActiveTab('archive')}
-            className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all ${activeTab === 'archive' ? 'bg-doctor-primary text-white shadow-lg shadow-doctor-primary/20' : 'text-doctor-text-muted hover:text-white'}`}
+            className={`px-8 py-2.5 rounded-xl font-bold text-sm transition-all ${activeTab === 'archive' ? 'bg-doctor-primary text-white shadow-lg shadow-doctor-primary/20' : 'text-doctor-text-muted hover:text-white'}`}
           >
             Archived
-          </button>
-          <button className="px-6 py-2.5 rounded-xl font-bold text-sm text-doctor-text-muted hover:text-white transition-all cursor-not-allowed">
-            Drafts
           </button>
         </div>
       </div>
@@ -205,34 +206,54 @@ const DoctorCourses = ({ courses, onRefresh }) => {
                 <div className={`w-14 h-14 rounded-2xl bg-${accent}-500/10 flex items-center justify-center group-hover:scale-110 transition-transform`}>
                    <BookOpen className={`w-7 h-7 text-${accent}-500`} />
                 </div>
-                <div className="relative group/menu">
-                  <button className="w-10 h-10 rounded-xl hover:bg-white/5 flex items-center justify-center text-doctor-text-muted hover:text-white transition-all">
+                <div className="relative">
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setOpenMenuId(openMenuId === course.id ? null : course.id);
+                    }}
+                    className="w-10 h-10 rounded-xl hover:bg-white/5 flex items-center justify-center text-doctor-text-muted hover:text-white transition-all"
+                  >
                     <MoreVertical className="w-5 h-5" />
                   </button>
                   {/* Action Menu */}
-                  <div className="absolute right-0 top-full mt-2 w-48 bg-doctor-sidebar border border-white/10 rounded-2xl shadow-2xl opacity-0 invisible group-hover/menu:opacity-100 group-hover/menu:visible transition-all z-20 overflow-hidden">
-                    <button 
-                      onClick={() => {
-                        setFormData({ department_id: course.department_id, course_id: course.id, description: course.description || '' });
-                        setShowEditModal(course);
-                      }}
-                      className="w-full flex items-center gap-3 px-5 py-3.5 text-sm font-bold text-white hover:bg-white/5 transition-all text-left"
+                  {openMenuId === course.id && (
+                    <div 
+                      onClick={(e) => e.stopPropagation()}
+                      className="absolute right-0 top-full mt-2 w-48 bg-doctor-sidebar border border-white/10 rounded-2xl shadow-2xl z-20 overflow-hidden animate-fadeIn"
                     >
-                      <Edit3 className="w-4 h-4 text-doctor-primary" /> Edit Description
-                    </button>
-                    <button 
-                      onClick={() => handleToggleArchive(course.id, course.is_archived)}
-                      className="w-full flex items-center gap-3 px-5 py-3.5 text-sm font-bold text-white hover:bg-white/5 transition-all text-left"
-                    >
-                      <Archive className={`w-4 h-4 ${course.is_archived ? 'text-emerald-400' : 'text-amber-400'}`} /> 
-                      {course.is_archived ? 'Activate Course' : 'Archive Course'}
-                    </button>
-                  </div>
+                      <button 
+                        onClick={() => {
+                          setFormData({ department_id: course.department_id, course_id: course.id, description: course.description || '' });
+                          setShowEditModal(course);
+                          setOpenMenuId(null);
+                        }}
+                        className="w-full flex items-center gap-3 px-5 py-3.5 text-sm font-bold text-white hover:bg-white/5 transition-all text-left"
+                      >
+                        <Edit3 className="w-4 h-4 text-doctor-primary" /> Edit Description
+                      </button>
+                      <button 
+                        onClick={() => {
+                          handleToggleArchive(course.id, course.is_archived);
+                          setOpenMenuId(null);
+                        }}
+                        className="w-full flex items-center gap-3 px-5 py-3.5 text-sm font-bold text-white hover:bg-white/5 transition-all text-left"
+                      >
+                        <Archive className={`w-4 h-4 ${course.is_archived ? 'text-emerald-400' : 'text-amber-400'}`} /> 
+                        {course.is_archived ? 'Activate Course' : 'Archive Course'}
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
 
               <div className="relative z-10">
-                <h3 className="text-2xl font-bold text-white mb-3 group-hover:text-doctor-primary transition-colors truncate">{course.name}</h3>
+                <h3 className="text-2xl font-bold text-white mb-1 group-hover:text-doctor-primary transition-colors truncate">{course.name}</h3>
+                <div className="flex items-center gap-2 text-xs font-black text-doctor-text-muted uppercase tracking-widest mb-4">
+                  <Calendar className="w-3 h-3" />
+                  <span>Semester {course.semester}</span>
+                </div>
+                
                 <p className="text-doctor-text-muted text-[15px] leading-relaxed mb-8 line-clamp-2 min-h-[3rem]">
                   {course.description || `Comprehensive study of ${course.name.toLowerCase()} principles and core concepts.`}
                 </p>
@@ -314,7 +335,9 @@ const DoctorCourses = ({ courses, onRefresh }) => {
                         {formData.department_id ? 'Select Course' : 'Please select a department first'}
                       </option>
                       {availableCourses.map(c => (
-                        <option key={c.id} value={c.id} className="bg-doctor-sidebar">{c.name} ({c.code})</option>
+                        <option key={c.id} value={c.id} className="bg-doctor-sidebar">
+                          Sem {c.semester} - {c.name} ({c.code})
+                        </option>
                       ))}
                     </select>
                     {formData.department_id && availableCourses.length === 0 && (
