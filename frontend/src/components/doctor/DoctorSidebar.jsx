@@ -1,8 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { 
   LayoutDashboard, BookOpen, FolderOpen, Award, ClipboardList, 
-  BarChart3, PieChart, Bell, Settings, LogOut, Upload, Menu, X, Calendar 
+  BarChart3, PieChart, Bell, Settings, LogOut, Upload, Menu, X, Calendar as CalendarIcon 
 } from 'lucide-react';
+
+const MENU_ITEMS = [
+  { id: 'overview', label: 'Overview', icon: LayoutDashboard },
+  { id: 'courses', label: 'Courses', icon: BookOpen },
+  { id: 'schedule', label: 'Schedule', icon: CalendarIcon },
+  { id: 'materials', label: 'Materials', icon: FolderOpen },
+  { id: 'quizzes', label: 'Quizzes', icon: Award },
+  { id: 'tasks', label: 'Tasks', icon: ClipboardList },
+  { id: 'grades', label: 'Grades', icon: BarChart3 },
+  { id: 'analytics', label: 'Analytics', icon: PieChart },
+];
 
 const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout }) => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
@@ -13,17 +24,6 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout }) => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-
-  const MENU_ITEMS = [
-    { id: 'overview', label: 'Overview', icon: LayoutDashboard },
-    { id: 'courses', label: 'Courses', icon: BookOpen },
-    { id: 'schedule', label: 'Schedule', icon: Calendar },
-    { id: 'materials', label: 'Materials', icon: FolderOpen },
-    { id: 'quizzes', label: 'Quizzes', icon: Award },
-    { id: 'tasks', label: 'Tasks', icon: ClipboardList },
-    { id: 'grades', label: 'Grades', icon: BarChart3 },
-    { id: 'analytics', label: 'Analytics', icon: PieChart },
-  ];
 
   const bottomBarItems = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },

@@ -238,9 +238,11 @@ const DoctorQuizManager = ({ courses }) => {
                         Official
                       </span>
                     )}
-                    <span className={`text-[10px] font-bold uppercase px-2 py-1 rounded-md border ${q.is_published ? 'text-emerald-600 bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20' : 'text-gray-500 bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700'}`}>
-                      {q.is_published ? 'Published' : 'Draft'}
-                    </span>
+                    {q.is_published && (
+                      <span className="text-[10px] font-bold uppercase px-2 py-1 rounded-md border text-emerald-600 bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20">
+                        Published
+                      </span>
+                    )}
                   </div>
                   <h4 className="font-bold text-lg text-gray-900 dark:text-white mb-1">{q.title}</h4>
                   
