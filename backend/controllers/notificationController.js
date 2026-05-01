@@ -60,9 +60,8 @@ const markDoctorAsRead = async (req, res) => {
   try {
     const { id } = req.params;
     const doctorId = req.doctor.id;
-    const notification = await Notification.markAsRead(id, doctorId, 'doctor');
-    if (!notification) return res.status(404).json({ message: 'Notification not found' });
-    res.json(notification);
+    await Notification.markAsRead(id, null, doctorId);
+    res.json({ message: 'Notification marked as read' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -71,8 +70,8 @@ const markDoctorAsRead = async (req, res) => {
 const markAllDoctorAsRead = async (req, res) => {
   try {
     const doctorId = req.doctor.id;
-    const notifications = await Notification.markAllAsRead(doctorId, 'doctor');
-    res.json({ count: notifications.length });
+    await Notification.markAllAsRead(null, doctorId);
+    res.json({ message: 'All notifications marked as read' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -202,6 +201,48 @@ const deleteNotification = async (req, res) => {
     const { id } = req.params;
     await Notification.delete(id);
     res.json({ message: 'Notification deleted' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const sendToDoctor = async (req, res) => {
+  try {
+    const { doctorId, title, content } = req.body;
+    if (!doctorId || !title || !content) {
+      return res.status(400).json({ message: 'Doctor ID, title, and content are required' });
+    }
+    
+    const safeTitle = xss(title);
+    const safeContent = xss(content);
+    
+    const notification = await Notification.sendToDoctor(doctorId, safeTitle, safeContent);
+    res.status(201).json(notification);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const sendToAllDoctors = async (req, res) => {
+  try {
+    const { title, content } = req.body;
+    if (!title || !content) {
+      return res.status(400).json({ message: 'Title and content are required' });
+    }
+    
+    const safeTitle = xss(title);
+    const safeContent = xss(content);
+    
+    // Get all doctors
+    const doctorsResult = await db.query('SELECT id FROM doctors');
+    const notifications = [];
+    
+    for (const doctor of doctorsResult.rows) {
+        const notif = await Notification.sendToDoctor(doctor.id, safeTitle, safeContent);
+        notifications.push(notif);
+    }
+    
+    res.status(201).json({ message: `Sent to ${notifications.length} doctors`, count: notifications.length });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
