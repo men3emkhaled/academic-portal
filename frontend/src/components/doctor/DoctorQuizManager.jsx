@@ -259,7 +259,7 @@ const DoctorQuizManager = ({ courses }) => {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
           <div className="bg-doctor-card border border-white/[0.03] w-full max-w-lg rounded-[2.5rem] overflow-hidden animate-slideUp">
              <div className="p-8 border-b border-white/[0.03] flex items-center justify-between bg-white/[0.02]">
-                <h3 className="text-xl font-black text-white">{editingQuiz ? 'Edit Quiz Settings' : 'Create New Assessment'}</h3>
+                <h3 className="text-xl font-black text-doctor-text">{editingQuiz ? 'Edit Quiz Settings' : 'Create New Assessment'}</h3>
                 <button onClick={resetForm} className="w-10 h-10 rounded-full hover:bg-white/[0.05] flex items-center justify-center text-doctor-text-muted transition-colors">
                    <X className="w-6 h-6" />
                 </button>
@@ -273,7 +273,7 @@ const DoctorQuizManager = ({ courses }) => {
                         required
                         value={formData.course_id}
                         onChange={(e) => setFormData({ ...formData, course_id: e.target.value })}
-                        className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:border-doctor-primary/50 transition-all font-medium appearance-none"
+                        className="w-full bg-doctor-text/5 border border-doctor-text/5 rounded-2xl py-4 px-6 text-doctor-text focus:outline-none focus:border-doctor-primary/50 transition-all font-medium appearance-none"
                       >
                          <option value="" disabled className="bg-doctor-sidebar">Select target course</option>
                          {courses.map(c => (
@@ -290,7 +290,7 @@ const DoctorQuizManager = ({ courses }) => {
                         value={formData.title}
                         onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                         placeholder="e.g. Midterm Practice Exam"
-                        className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
+                        className="w-full bg-doctor-text/5 border border-doctor-text/5 rounded-2xl py-4 px-6 text-doctor-text focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
                       />
                    </div>
 
@@ -315,7 +315,7 @@ const DoctorQuizManager = ({ courses }) => {
                               required
                               value={formData.time_limit_minutes}
                               onChange={(e) => setFormData({ ...formData, time_limit_minutes: parseInt(e.target.value) })}
-                              className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 pl-14 pr-6 text-white focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
+                              className="w-full bg-doctor-text/5 border border-doctor-text/5 rounded-2xl py-4 pl-14 pr-6 text-doctor-text focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
                             />
                          </div>
                       </div>
@@ -330,7 +330,7 @@ const DoctorQuizManager = ({ courses }) => {
                               required
                               value={formData.passing_score}
                               onChange={(e) => setFormData({ ...formData, passing_score: parseInt(e.target.value) })}
-                              className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 pl-14 pr-6 text-white focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
+                              className="w-full bg-doctor-text/5 border border-doctor-text/5 rounded-2xl py-4 pl-14 pr-6 text-doctor-text focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
                             />
                          </div>
                       </div>

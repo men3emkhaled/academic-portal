@@ -107,7 +107,7 @@ const DoctorGradesView = ({ courses }) => {
       {/* Header Area */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <h2 className="text-3xl font-black text-white tracking-tight mb-2 flex items-center gap-3">
+          <h2 className="text-3xl font-black text-doctor-text tracking-tight mb-2 flex items-center gap-3">
             <BarChart3 className="w-8 h-8 text-rose-500" />
             Performance & Grades
           </h2>
@@ -145,7 +145,7 @@ const DoctorGradesView = ({ courses }) => {
                           <BookOpen className="w-6 h-6" />
                       </div>
                       <div className="flex-1 min-w-0">
-                          <h4 className={`font-bold truncate ${selectedCourseId === course.id ? 'text-white' : 'text-doctor-text-muted group-hover:text-white'}`}>{course.name}</h4>
+                          <h4 className={`font-bold truncate ${selectedCourseId === course.id ? 'text-white' : 'text-doctor-text-muted group-hover:text-doctor-text'}`}>{course.name}</h4>
                           <p className="text-[10px] font-black uppercase tracking-widest text-doctor-text-muted opacity-60 mt-1">{course.code}</p>
                       </div>
                   </div>
@@ -162,7 +162,7 @@ const DoctorGradesView = ({ courses }) => {
             </div>
             <div>
                 <p className="text-[10px] font-black text-doctor-text-muted uppercase tracking-widest mb-1">Enrolled Students</p>
-                <p className="text-3xl font-black text-white">{grades.length}</p>
+                <p className="text-3xl font-black text-doctor-text">{grades.length}</p>
             </div>
           </div>
           <div className="bg-doctor-card border border-white/5 rounded-[2rem] p-6 flex items-center gap-6">
@@ -171,7 +171,7 @@ const DoctorGradesView = ({ courses }) => {
             </div>
             <div>
                 <p className="text-[10px] font-black text-doctor-text-muted uppercase tracking-widest mb-1">Average Performance</p>
-                <p className="text-3xl font-black text-white">{avgTotal}%</p>
+                <p className="text-3xl font-black text-doctor-text">{avgTotal}%</p>
             </div>
           </div>
           <div className="bg-doctor-card border border-white/5 rounded-[2rem] p-6 flex items-center gap-6">
@@ -180,7 +180,7 @@ const DoctorGradesView = ({ courses }) => {
             </div>
             <div>
                 <p className="text-[10px] font-black text-doctor-text-muted uppercase tracking-widest mb-1">Highest Possible</p>
-                <p className="text-3xl font-black text-white">40</p>
+                <p className="text-3xl font-black text-doctor-text">40</p>
             </div>
           </div>
         </div>
@@ -203,7 +203,7 @@ const DoctorGradesView = ({ courses }) => {
                         placeholder="Search by student name or ID..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full bg-white/[0.02] border border-white/[0.03] rounded-[1.8rem] py-4 pl-14 pr-6 text-white text-sm focus:outline-none focus:border-doctor-primary/40 focus:bg-white/[0.08] transition-all"
+                        className="w-full bg-doctor-text/5 border border-doctor-text/5 rounded-[1.8rem] py-4 pl-14 pr-6 text-doctor-text text-sm focus:outline-none focus:border-doctor-primary/40 focus:bg-doctor-text/10 transition-all"
                     />
                 </div>
             )}
@@ -220,7 +220,7 @@ const DoctorGradesView = ({ courses }) => {
               <div className="w-24 h-24 bg-white/[0.02] rounded-[2.5rem] flex items-center justify-center mb-8">
                 <GraduationCap className="w-12 h-12 text-white/10" />
               </div>
-              <h3 className="text-2xl font-black text-white mb-2">Select a Course</h3>
+              <h3 className="text-2xl font-black text-doctor-text mb-2">Select a Course</h3>
               <p className="text-doctor-text-muted max-w-xs">Choose a course from the cards above to start managing student grades and performance.</p>
             </div>
           ) : filteredGrades.length === 0 ? (
@@ -228,7 +228,7 @@ const DoctorGradesView = ({ courses }) => {
               <div className="w-24 h-24 bg-white/[0.02] rounded-[2.5rem] flex items-center justify-center mb-8">
                 <AlertCircle className="w-12 h-12 text-white/10" />
               </div>
-              <h3 className="text-2xl font-black text-white mb-2">No Records Found</h3>
+              <h3 className="text-2xl font-black text-doctor-text mb-2">No Records Found</h3>
               <p className="text-doctor-text-muted">No students currently match your selection or search criteria.</p>
             </div>
           ) : (
@@ -265,7 +265,7 @@ const DoctorGradesView = ({ courses }) => {
                                     )}
                                 </div>
                                 <div className="min-w-0">
-                                    <div className="text-sm font-bold text-white truncate max-w-[150px]">{g.student_name}</div>
+                                    <div className="text-sm font-bold text-doctor-text truncate max-w-[150px]">{g.student_name}</div>
                                     <div className="text-[10px] font-black text-doctor-text-muted">{g.student_id}</div>
                                 </div>
                             </div>
@@ -281,7 +281,7 @@ const DoctorGradesView = ({ courses }) => {
                             <td className="bg-white/[0.02] px-6 py-5 border-y border-white/[0.03] text-center bg-doctor-primary/10 border-doctor-primary/40">
                               <input
                                 type="number" min="0" max="20" step="0.5"
-                                className="w-20 bg-white/10 border border-doctor-primary/40 rounded-xl py-2 px-3 text-center text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-doctor-primary/30"
+                                className="w-20 bg-doctor-text/5 border border-doctor-primary/40 rounded-xl py-2 px-3 text-center text-sm font-bold text-doctor-text focus:outline-none focus:ring-2 focus:ring-doctor-primary/30"
                                 value={editValues.midterm_score}
                                 onChange={(e) => setEditValues({ ...editValues, midterm_score: e.target.value })}
                                 autoFocus
@@ -290,7 +290,7 @@ const DoctorGradesView = ({ courses }) => {
                             <td className="bg-white/[0.02] px-6 py-5 border-y border-white/[0.03] text-center bg-doctor-primary/10 border-doctor-primary/40">
                               <input
                                 type="number" min="0" max="10" step="0.5"
-                                className="w-20 bg-white/10 border border-doctor-primary/40 rounded-xl py-2 px-3 text-center text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-doctor-primary/30"
+                                className="w-20 bg-doctor-text/5 border border-doctor-primary/40 rounded-xl py-2 px-3 text-center text-sm font-bold text-doctor-text focus:outline-none focus:ring-2 focus:ring-doctor-primary/30"
                                 value={editValues.practical_score}
                                 onChange={(e) => setEditValues({ ...editValues, practical_score: e.target.value })}
                               />
@@ -328,17 +328,17 @@ const DoctorGradesView = ({ courses }) => {
                         ) : (
                           <>
                             <td className={`bg-white/5 px-6 py-5 border-y border-white/5 text-center transition-all ${isEditing ? 'bg-doctor-primary/10 border-doctor-primary/40' : 'group-hover:bg-white/[0.08] group-hover:border-white/20'}`}>
-                                <span className="text-sm font-bold text-white">
+                                <span className="text-sm font-bold text-doctor-text">
                                     {g.midterm_score !== null ? g.midterm_score : <span className="text-white/10">—</span>}
                                 </span>
                             </td>
                             <td className={`bg-white/5 px-6 py-5 border-y border-white/5 text-center transition-all ${isEditing ? 'bg-doctor-primary/10 border-doctor-primary/40' : 'group-hover:bg-white/[0.08] group-hover:border-white/20'}`}>
-                                <span className="text-sm font-bold text-white">
+                                <span className="text-sm font-bold text-doctor-text">
                                     {g.practical_score !== null ? g.practical_score : <span className="text-white/10">—</span>}
                                 </span>
                             </td>
                             <td className={`bg-white/5 px-6 py-5 border-y border-white/5 text-center transition-all ${isEditing ? 'bg-doctor-primary/10 border-doctor-primary/40' : 'group-hover:bg-white/[0.08] group-hover:border-white/20'}`}>
-                                <span className="text-sm font-bold text-white">
+                                <span className="text-sm font-bold text-doctor-text">
                                     {g.oral_score !== null ? g.oral_score : <span className="text-white/10">—</span>}
                                 </span>
                             </td>

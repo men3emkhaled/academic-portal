@@ -197,7 +197,7 @@ const DoctorAnalytics = ({ courses }) => {
                             placeholder="Search records..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full bg-white/[0.02] border border-white/[0.03] rounded-[1.8rem] py-3.5 pl-14 pr-6 text-white text-sm focus:outline-none focus:border-doctor-primary/40 focus:bg-white/[0.08] transition-all font-medium"
+                            className="w-full bg-doctor-text/5 border border-doctor-text/5 rounded-[1.8rem] py-3.5 pl-14 pr-6 text-doctor-text text-sm focus:outline-none focus:border-doctor-primary/40 focus:bg-doctor-text/10 transition-all font-medium"
                         />
                     </div>
                     {activeView === 'performance' && (
@@ -315,7 +315,7 @@ const DoctorAnalytics = ({ courses }) => {
                                                     )}
                                                 </div>
                                                 <div>
-                                                    <p className="text-white font-bold text-sm leading-none mb-1">{student.student_name}</p>
+                                                    <p className="text-doctor-text font-bold text-sm leading-none mb-1">{student.student_name}</p>
                                                     <p className="text-[10px] font-medium text-doctor-text-muted">ID: {student.student_id}</p>
                                                 </div>
                                             </div>
@@ -401,7 +401,7 @@ const DoctorAnalytics = ({ courses }) => {
                                                         )}
                                                     </div>
                                                     <div>
-                                                        <p className="text-white font-bold text-sm leading-none mb-1">{student.student_name}</p>
+                                                        <p className="text-doctor-text font-bold text-sm leading-none mb-1">{student.student_name}</p>
                                                         <p className="text-[10px] font-medium text-doctor-text-muted">ID: {student.student_id}</p>
                                                     </div>
                                                 </div>

@@ -92,7 +92,7 @@ const DoctorHeader = ({
                         </div>
                         <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between mb-1">
-                                <p className={`text-xs font-bold truncate pr-4 ${!n.is_read ? 'text-white' : 'text-doctor-text-muted'}`}>
+                                <p className={`text-xs font-bold truncate pr-4 ${!n.is_read ? 'text-doctor-text' : 'text-doctor-text-muted'}`}>
                                     {n.title}
                                 </p>
                                 <span className="text-[9px] text-doctor-text-muted font-bold whitespace-nowrap">

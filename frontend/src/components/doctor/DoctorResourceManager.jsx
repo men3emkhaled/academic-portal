@@ -155,7 +155,7 @@ const DoctorResourceManager = ({ courses }) => {
                 placeholder="Search materials..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-white/5 border border-white/5 rounded-2xl py-3.5 pl-11 pr-6 text-white text-sm focus:outline-none focus:border-doctor-primary/40 focus:bg-white/[0.07] transition-all w-64"
+                className="bg-doctor-text/5 border border-doctor-text/5 rounded-2xl py-3.5 pl-11 pr-6 text-doctor-text text-sm focus:outline-none focus:border-doctor-primary/40 focus:bg-doctor-text/10 transition-all w-64"
               />
            </div>
            {selectedCourseId && (
@@ -190,7 +190,7 @@ const DoctorResourceManager = ({ courses }) => {
                           <BookOpen className="w-6 h-6" />
                       </div>
                       <div className="flex-1 min-w-0">
-                          <h4 className={`font-bold truncate ${selectedCourseId === course.id ? 'text-white' : 'text-doctor-text-muted group-hover:text-white'}`}>{course.name}</h4>
+                          <h4 className={`font-bold truncate ${selectedCourseId === course.id ? 'text-white' : 'text-doctor-text-muted group-hover:text-doctor-text'}`}>{course.name}</h4>
                           <p className="text-[10px] font-black uppercase tracking-widest text-doctor-text-muted opacity-60 mt-1">{course.code}</p>
                       </div>
                   </div>
@@ -203,7 +203,7 @@ const DoctorResourceManager = ({ courses }) => {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
             <div className="bg-doctor-card border border-white/10 w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden animate-slideUp">
                 <div className="p-8 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
-                    <h3 className="text-xl font-black text-white">{editingResource ? 'Edit Resource' : 'Upload New Resource'}</h3>
+                    <h3 className="text-xl font-black text-doctor-text">{editingResource ? 'Edit Resource' : 'Upload New Resource'}</h3>
                     <button onClick={resetForm} className="w-10 h-10 rounded-full hover:bg-white/10 flex items-center justify-center text-doctor-text-muted transition-colors">
                         <X className="w-6 h-6" />
                     </button>
@@ -217,7 +217,7 @@ const DoctorResourceManager = ({ courses }) => {
                                 <select
                                     value={formData.type}
                                     onChange={(e) => { setFormData({ ...formData, type: e.target.value }); setRecordingFile(null); }}
-                                    className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:border-doctor-primary/50 transition-all font-medium appearance-none"
+                                    className="w-full bg-doctor-text/5 border border-doctor-text/5 rounded-2xl py-4 px-6 text-doctor-text focus:outline-none focus:border-doctor-primary/50 transition-all font-medium appearance-none"
                                 >
                                     <option value="video" className="bg-doctor-sidebar">📹 Video</option>
                                     <option value="pdf" className="bg-doctor-sidebar">📄 PDF Document</option>
@@ -233,7 +233,7 @@ const DoctorResourceManager = ({ courses }) => {
                                     value={formData.title}
                                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                                     placeholder="e.g. Chapter 1 Intro"
-                                    className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
+                                    className="w-full bg-doctor-text/5 border border-doctor-text/5 rounded-2xl py-4 px-6 text-doctor-text focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
                                 />
                             </div>
                         </div>
@@ -257,7 +257,7 @@ const DoctorResourceManager = ({ courses }) => {
                                         <div className="w-12 h-12 rounded-full bg-doctor-primary/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                                             <Upload className="w-6 h-6 text-doctor-primary" />
                                         </div>
-                                        <span className="text-sm font-bold text-white mb-1">
+                                        <span className="text-sm font-bold text-doctor-text mb-1">
                                             {recordingFile ? recordingFile.name : 'Select or drop audio file'}
                                         </span>
                                         <span className="text-[10px] font-black text-doctor-text-muted uppercase">MP3, WAV, or AAC</span>
@@ -275,7 +275,7 @@ const DoctorResourceManager = ({ courses }) => {
                                         value={formData.url}
                                         onChange={(e) => setFormData({ ...formData, url: e.target.value })}
                                         placeholder="https://youtube.com/..."
-                                        className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 pl-14 pr-6 text-white focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
+                                        className="w-full bg-doctor-text/5 border border-doctor-text/5 rounded-2xl py-4 pl-14 pr-6 text-doctor-text focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
                                     />
                                 </div>
                             </div>

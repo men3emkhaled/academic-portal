@@ -377,7 +377,7 @@ const DoctorAttendance = ({ courses }) => {
                     placeholder="Search students to mark manually..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm focus:border-teal-500 focus:outline-none transition-colors dark:text-white"
+                    className="w-full bg-doctor-text/5 border border-doctor-text/5 rounded-xl pl-10 pr-4 py-3 text-sm focus:border-teal-500 focus:outline-none transition-colors text-doctor-text"
                   />
                 </div>
 

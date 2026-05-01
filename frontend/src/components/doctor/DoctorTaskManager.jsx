@@ -477,7 +477,7 @@ const DoctorTaskManager = ({ courses }) => {
                                 required
                                 value={formData.course_id}
                                 onChange={(e) => setFormData({ ...formData, course_id: e.target.value })}
-                                className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:border-doctor-primary/50 transition-all font-medium appearance-none"
+                                className="w-full bg-doctor-text/5 border border-doctor-text/5 rounded-2xl py-4 px-6 text-doctor-text focus:outline-none focus:border-doctor-primary/50 transition-all font-medium appearance-none"
                             >
                                 <option value="" disabled className="bg-doctor-sidebar">Target Course</option>
                                 {courses.map(c => (
@@ -494,7 +494,7 @@ const DoctorTaskManager = ({ courses }) => {
                                 placeholder="e.g. Final Project Phase 1"
                                 value={formData.title}
                                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
+                                className="w-full bg-doctor-text/5 border border-doctor-text/5 rounded-2xl py-4 px-6 text-doctor-text focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
                             />
                         </div>
 
@@ -504,7 +504,7 @@ const DoctorTaskManager = ({ courses }) => {
                                 placeholder="Describe the requirements and expectations..."
                                 value={formData.description}
                                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:border-doctor-primary/50 transition-all font-medium min-h-[120px] resize-none"
+                                className="w-full bg-doctor-text/5 border border-doctor-text/5 rounded-2xl py-4 px-6 text-doctor-text focus:outline-none focus:border-doctor-primary/50 transition-all font-medium min-h-[120px] resize-none"
                             />
                         </div>
 
@@ -517,7 +517,7 @@ const DoctorTaskManager = ({ courses }) => {
                                         type="datetime-local"
                                         value={formData.deadline}
                                         onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
-                                        className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 pl-14 pr-6 text-white focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
+                                        className="w-full bg-doctor-text/5 border border-doctor-text/5 rounded-2xl py-4 pl-14 pr-6 text-doctor-text focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
                                     />
                                 </div>
                             </div>
