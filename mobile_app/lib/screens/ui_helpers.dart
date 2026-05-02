@@ -40,8 +40,11 @@ class GlassContainer extends StatelessWidget {
         decoration: BoxDecoration(
           color: bg,
           borderRadius: BorderRadius.circular(borderRadius),
-          border: Border.all(color: border),
-          boxShadow: colors.isDark ? [] : [BoxShadow(color: colors.cardShadow, blurRadius: 8, offset: const Offset(0, 2))],
+          border: Border.all(color: border.withValues(alpha: 0.5), width: 0.5),
+          boxShadow: colors.isDark ? [] : [
+             BoxShadow(color: colors.cardShadow.withValues(alpha: 0.04), blurRadius: 24, spreadRadius: -2, offset: const Offset(0, 8)),
+             BoxShadow(color: colors.cardShadow.withValues(alpha: 0.02), blurRadius: 8, offset: const Offset(0, 2)),
+          ],
         ),
         child: child,
       );
@@ -56,9 +59,9 @@ class GlassContainer extends StatelessWidget {
           child: Container(
             padding: padding,
             decoration: BoxDecoration(
-              color: bg,
+              color: bg.withValues(alpha: 0.7),
               borderRadius: BorderRadius.circular(borderRadius),
-              border: Border.all(color: border),
+              border: Border.all(color: border.withValues(alpha: 0.5), width: 0.5),
             ),
             child: child,
           ),
