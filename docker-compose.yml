@@ -1,4 +1,4 @@
-version: '3.8'
+
 
 services:
   
@@ -16,6 +16,7 @@ services:
       - "${DB_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
     networks:
       - academic_network
     healthcheck:
@@ -62,6 +63,8 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       target: production
+      args:
+        VITE_API_URL: ${VITE_API_URL:-/api}
     container_name: academic_portal_frontend
     restart: unless-stopped
     ports:

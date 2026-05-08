@@ -9,12 +9,13 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
+import com.example.academicportal.BuildConfig
 
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-    private const val BASE_URL = "https://academic-portal-production.up.railway.app/api/"
+    private const val BASE_URL = BuildConfig.BASE_URL
 
     @Provides
     @Singleton

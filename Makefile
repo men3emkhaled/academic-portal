@@ -95,5 +95,7 @@ health: ## 🏥 Check service health
 
 setup: ## ⚡ First-time setup
 	@echo "⚡ Setting up Academic Portal..."
-	@test -f .env || (cp .env.example .env && echo "📝 Created .env from template — please fill in values")
-	@echo "✅ Setup complete! Run 'make dev' to start"
+	@test -f .env || (cp .env.example .env && echo "📝 Created root .env")
+	@test -f backend/.env || (cp backend/.env.example backend/.env && echo "📝 Created backend/.env")
+	@test -f frontend/.env || (cp frontend/.env.example frontend/.env && echo "📝 Created frontend/.env")
+	@echo "✅ Setup complete! Please fill in the real values in the .env files, then run 'make dev' to start"

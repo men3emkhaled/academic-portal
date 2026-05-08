@@ -44,7 +44,7 @@ const {
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// الثقة بالبروكسي (ضروري لـ Railway و Vercel)
+// الثقة بالبروكسي (ضروري لمنصات الاستضافة مثل Vercel)
 app.set('trust proxy', 1);
 
 // CORS configuration
@@ -54,6 +54,10 @@ const allowedOrigins = [
   'https://znu-cs.online',
   'https://www.znu-cs.online',
 ];
+
+if (process.env.FRONTEND_URL) {
+  allowedOrigins.push(process.env.FRONTEND_URL);
+}
 
 const isOriginAllowed = (origin) => {
   if (!origin) return true;

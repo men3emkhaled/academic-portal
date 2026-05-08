@@ -18,6 +18,9 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // قراءة رابط السيرفر من gradle.properties
+        buildConfigField("String", "BASE_URL", "\"${project.findProperty("BASE_URL") ?: "https://your-server.com/api/"}\"")
     }
 
     buildTypes {
@@ -38,6 +41,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 

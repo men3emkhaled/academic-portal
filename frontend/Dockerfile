@@ -14,6 +14,10 @@ RUN npm ci && npm cache clean --force
 # Copy source code
 COPY . .
 
+# Accept API URL as a build argument
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
+
 # Build the production bundle
 RUN npm run build
 

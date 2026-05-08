@@ -1,6 +1,6 @@
 # Development override — use with:
 #   docker compose -f docker-compose.yml -f docker-compose.dev.yml up
-version: '3.8'
+
 
 services:
   backend:
@@ -21,6 +21,8 @@ services:
     command: npm run dev -- --host 0.0.0.0
     ports:
       - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:5000/api
     volumes:
       - ./frontend:/app
       - /app/node_modules

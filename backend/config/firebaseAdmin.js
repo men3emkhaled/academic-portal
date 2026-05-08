@@ -9,7 +9,7 @@ try {
   let serviceAccount;
   
   if (process.env.FIREBASE_SERVICE_ACCOUNT_BASE64) {
-    // Parse from base64 env var (useful for Railway)
+    // Parse from base64 env var (useful for production platforms)
     const decodedStr = Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT_BASE64, 'base64').toString('utf8');
     serviceAccount = JSON.parse(decodedStr);
   } else if (fs.existsSync(serviceAccountPath)) {

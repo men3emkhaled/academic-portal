@@ -8,7 +8,7 @@ yarn-error.log*
 .env
 .env.local
 .env.production
-
+.env.example
 # Build outputs
 dist/
 build/
@@ -34,6 +34,9 @@ logs/
 *.sql
 *.sqlite
 *.sqlite3
+v1.sql
+v9.sql
+!schema.sql
 
 # Firebase & Auth Secrets
 backend/config/serviceAccountKey.json

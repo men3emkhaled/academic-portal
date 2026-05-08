@@ -2,7 +2,7 @@ const nodemailer = require('nodemailer');
 const { Resend } = require('resend');
 require('dotenv').config();
 
-// Use Resend for production (Railway blocks SMTP), Gmail for local dev
+// Use Resend for production (SMTP might be blocked), Gmail for local dev
 const useResend = !!process.env.RESEND_API_KEY;
 
 let resend;

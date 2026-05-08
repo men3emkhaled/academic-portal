@@ -2,8 +2,8 @@ import axios from 'axios';
 import { safeGetItem, safeRemoveItem } from '../utils/localStorage';
 
 // نعالج الرابط عشان لو كان موجود في البيئة بدون https:// نضيفها
-let apiUrl = import.meta.env.VITE_API_URL || 'https://academic-portal-production.up.railway.app/api';
-if (apiUrl && !apiUrl.startsWith('http://') && !apiUrl.startsWith('https://')) {
+let apiUrl = import.meta.env.VITE_API_URL || '/api';
+if (apiUrl && !apiUrl.startsWith('/') && !apiUrl.startsWith('http://') && !apiUrl.startsWith('https://')) {
   apiUrl = 'https://' + apiUrl;
 }
 

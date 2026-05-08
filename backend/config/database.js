@@ -4,7 +4,7 @@ require('dotenv').config();
 let poolConfig;
 
 if (process.env.DATABASE_URL) {
-    // Railway / Neon production
+    // Production (Neon / Supabase / etc.)
     poolConfig = {
         connectionString: process.env.DATABASE_URL,
         ssl: { rejectUnauthorized: false },

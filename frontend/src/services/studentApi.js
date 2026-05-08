@@ -1,7 +1,11 @@
 import axios from 'axios';
 import { safeGetItem, safeRemoveItem } from '../utils/localStorage';
 
-const API_BASE_URL = 'https://academic-portal-production.up.railway.app/api';
+// نقرأ الرابط من متغيرات البيئة
+let API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
+if (API_BASE_URL && !API_BASE_URL.startsWith('/') && !API_BASE_URL.startsWith('http://') && !API_BASE_URL.startsWith('https://')) {
+  API_BASE_URL = 'https://' + API_BASE_URL;
+}
 
 const studentApi = axios.create({
   baseURL: API_BASE_URL,

@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-  static const String baseUrl = String.fromEnvironment('API_URL', defaultValue: 'https://academic-portal-production.up.railway.app/api');
+  static const String baseUrl = String.fromEnvironment('API_URL', defaultValue: 'https://your-server.com/api');
   final Dio dio;
 
   ApiService()

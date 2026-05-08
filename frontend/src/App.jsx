@@ -132,6 +132,9 @@ function AppContent() {
       {/* ✅ مسارات الاختبارات */}
       <Route path="/student/quizzes/:quizId/take" element={<ProtectedStudentRoute><QuizPage /></ProtectedStudentRoute>} />
       <Route path="/student/quizzes/:quizId/result/:attemptId" element={<ProtectedStudentRoute><QuizResultPage /></ProtectedStudentRoute>} />
+      
+      {/* مسار وهمي لتفادي تحذيرات React Router عند تفعيل مدير كلمات المرور في iOS */}
+      <Route path="/student/login-dummy" element={null} />
     </Routes>
   );
 }
