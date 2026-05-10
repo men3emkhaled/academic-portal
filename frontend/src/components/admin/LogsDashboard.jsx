@@ -1,40 +1,67 @@
 import React, { useState } from 'react';
 import ActivityLogsManager from './ActivityLogsManager';
 import StudentLogins from './StudentLogins';
-import { ShieldAlert, Users } from 'lucide-react';
+import { 
+  ShieldAlert, Users, Activity, Clock, 
+  Terminal, LayoutDashboard, ChevronRight,
+  Shield, History, Fingerprint, Eye
+} from 'lucide-react';
 
 const LogsDashboard = () => {
   const [activeTab, setActiveTab] = useState('admin');
 
   return (
-    <div className="space-y-6 animate-fadeIn">
-      <div className="flex gap-4 border-b border-gray-200 dark:border-white/10 pb-4 transition-colors">
-        <button
-          onClick={() => setActiveTab('admin')}
-          className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all ${
-            activeTab === 'admin'
-              ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30'
-              : 'bg-gray-100 dark:bg-white/[0.02] text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-white/5 hover:bg-gray-200 dark:hover:bg-white/[0.05]'
-          }`}
-        >
-          <ShieldAlert className="w-5 h-5" />
-          Admin Activity Logs
-        </button>
-        <button
-          onClick={() => setActiveTab('student')}
-          className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all ${
-            activeTab === 'student'
-              ? 'bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/30'
-              : 'bg-gray-100 dark:bg-white/[0.02] text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-white/5 hover:bg-gray-200 dark:hover:bg-white/[0.05]'
-          }`}
-        >
-          <Users className="w-5 h-5" />
-          Student Logins
-        </button>
+    <div className="animate-in fade-in duration-700 pb-10">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-12">
+        <div className="flex items-center gap-5">
+          <div className="w-16 h-16 bg-amber-500/10 dark:bg-amber-500/20 rounded-3xl flex items-center justify-center border border-amber-500/20 shadow-inner group">
+            <History className="w-8 h-8 text-amber-600 dark:text-amber-400 group-hover:rotate-12 transition-transform" />
+          </div>
+          <div>
+            <h2 className="text-4xl font-black text-gray-900 dark:text-white tracking-tighter">
+              System Logs
+            </h2>
+            <div className="flex items-center gap-3 mt-1.5">
+                <span className="text-gray-500 dark:text-gray-400 text-xs font-black uppercase tracking-[0.2em]">Activity Audit Trail</span>
+                <div className="w-1 h-1 bg-gray-300 dark:bg-gray-700 rounded-full"></div>
+                <span className="text-amber-600 dark:text-amber-400 text-[10px] font-black uppercase tracking-widest">Real-time Monitoring</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Tab Switcher */}
+        <div className="flex p-1.5 bg-white/50 dark:bg-white/[0.03] border border-gray-200 dark:border-white/10 rounded-2xl shadow-sm">
+            <button
+              onClick={() => setActiveTab('admin')}
+              className={`flex items-center gap-3 px-8 py-3.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${
+                activeTab === 'admin'
+                  ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/20'
+                  : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+              }`}
+            >
+              <ShieldAlert className="w-4 h-4" />
+              Admin Actions
+            </button>
+            <button
+              onClick={() => setActiveTab('student')}
+              className={`flex items-center gap-3 px-8 py-3.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${
+                activeTab === 'student'
+                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
+                  : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+              }`}
+            >
+              <Users className="w-4 h-4" />
+              Student Access
+            </button>
+        </div>
       </div>
 
-      <div className="animate-fadeIn">
-        {activeTab === 'admin' ? <ActivityLogsManager /> : <StudentLogins />}
+      {/* Main Content Area */}
+      <div className="animate-in slide-in-from-bottom-4 duration-700">
+        <div className="bg-white/40 dark:bg-white/[0.01] border border-gray-100 dark:border-white/5 rounded-[3rem] overflow-hidden">
+            {activeTab === 'admin' ? <ActivityLogsManager /> : <StudentLogins />}
+        </div>
       </div>
     </div>
   );

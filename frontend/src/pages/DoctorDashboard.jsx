@@ -124,7 +124,7 @@ const DoctorDashboard = () => {
   }
 
   return (
-    <div className="flex flex-col lg:flex-row h-screen bg-doctor-bg text-doctor-text font-sans overflow-hidden">
+    <div className="flex h-screen bg-doctor-bg text-doctor-text font-sans overflow-hidden">
       {/* Sidebar / Bottom Bar */}
       <DoctorSidebar 
         activeTab={activeTab} 
@@ -135,7 +135,7 @@ const DoctorDashboard = () => {
       />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+      <div className="flex-1 lg:ml-[19.5rem] flex flex-col min-w-0 overflow-hidden relative transition-all duration-300">
         {/* Background Glows */}
         <div className="absolute top-[-20%] right-[-10%] w-[50%] h-[50%] bg-doctor-primary/10 blur-[150px] rounded-full pointer-events-none"></div>
         <div className="absolute bottom-[-10%] left-[-5%] w-[40%] h-[40%] bg-doctor-primary/5 blur-[120px] rounded-full pointer-events-none"></div>
@@ -176,10 +176,11 @@ const DoctorDashboard = () => {
             {activeTab === 'grades' && <DoctorGradesView courses={myCourses} />}
             {activeTab === 'analytics' && <DoctorAnalytics courses={myCourses} />}
             
+            {activeTab === 'attendance' && <DoctorAttendance courses={myCourses} />}
+            
             {/* These tabs are accessible via their respective managers but kept here for compatibility */}
             {activeTab === 'syllabus' && <DoctorCourseProgress courses={myCourses} />}
             {activeTab === 'announcements' && <DoctorAnnouncements courses={myCourses} />}
-            {activeTab === 'attendance' && <DoctorAttendance courses={myCourses} />}
             {activeTab === 'settings' && <DoctorSettings />}
             {activeTab === 'notifications' && (
               <DoctorNotifications 

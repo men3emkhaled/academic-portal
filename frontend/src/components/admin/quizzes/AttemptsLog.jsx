@@ -1,77 +1,93 @@
 import React from 'react';
-import { User, Clock, Calendar, BarChart3 } from 'lucide-react';
+import { User, Clock, Calendar, BarChart3, ChevronRight, Activity, Trophy } from 'lucide-react';
 
 const AttemptsLog = ({ attempts, selectedQuiz }) => {
   return (
-    <div className="overflow-x-auto animate-fadeIn">
-      <table className="w-full text-left border-collapse">
-        <thead>
-          <tr className="bg-gray-50 dark:bg-white/[0.01] transition-colors">
-            <th className="py-5 px-8 text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-[0.2em]">Node Principal</th>
-            <th className="py-5 px-6 text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-[0.2em]">Temporal Delta</th>
-            <th className="py-5 px-6 text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-[0.2em]">Vector Score</th>
-            <th className="py-5 px-8 text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-[0.2em] text-right">Status</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-gray-100 dark:divide-white/[0.03]">
-          {attempts.length === 0 ? (
-             <tr>
-                  <td colSpan="4" className="text-center py-24 grayscale opacity-10">
-                      <BarChart3 className="w-20 h-20 mx-auto mb-4 text-gray-400 dark:text-white" />
-                      <p className="text-sm font-black uppercase tracking-[0.3em] text-gray-500 dark:text-white">No sync logs detected</p>
-                  </td>
-             </tr>
-          ) : (
-            attempts.map((att) => (
-              <tr key={att.id} className="group hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors">
-                <td className="py-6 px-8">
-                  <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-slate-900 border border-gray-200 dark:border-white/5 flex items-center justify-center text-gray-400 dark:text-slate-500 transition-colors overflow-hidden">
-                          {att.avatar_url ? (
-                            <img src={att.avatar_url} alt={att.student_name} className="w-full h-full object-cover" />
-                          ) : (
-                            <User className="w-5 h-5" />
-                          )}
-                      </div>
-                      <div>
-                          <p className="text-gray-900 dark:text-white font-black tracking-tight transition-colors">{att.student_name}</p>
-                          <p className="text-[10px] text-gray-400 dark:text-slate-500 font-bold tracking-widest uppercase transition-colors">ID: {att.student_id}</p>
-                      </div>
-                  </div>
-                </td>
-                <td className="py-6 px-6">
-                  <div className="flex flex-col gap-1.5">
-                       <span className="text-[10px] font-black text-gray-400 dark:text-slate-400 uppercase flex items-center gap-2 transition-colors"><Clock className="w-3 h-3" /> {new Date(att.started_at).toLocaleTimeString()}</span>
-                       <span className="text-[10px] font-bold text-gray-300 dark:text-slate-600 uppercase flex items-center gap-2 transition-colors"><Calendar className="w-3 h-3" /> {new Date(att.started_at).toLocaleDateString()}</span>
-                  </div>
-                </td>
-                <td className="py-6 px-6">
-                  <div className="flex items-center gap-4">
-                      <span className="text-lg font-black text-gray-900 dark:text-white transition-colors">{att.score !== null ? att.score : '--'}</span>
-                      <div className="w-20 h-1.5 bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden transition-colors">
-                          <div className={`h-full rounded-full transition-all duration-1000 ${
-                              att.percentage >= (selectedQuiz.passing_score || 50) ? 'bg-emerald-600 dark:bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]' : 'bg-red-600 dark:bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.3)]'
-                          }`} style={{ width: `${att.percentage || 0}%` }}></div>
-                      </div>
-                      <span className={`text-xs font-black uppercase tracking-widest transition-colors ${
-                          att.percentage >= (selectedQuiz.passing_score || 50) ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'
-                      }`}>{att.percentage !== null ? `${att.percentage}%` : '??'}</span>
-                  </div>
-                </td>
-                <td className="py-6 px-8 text-right">
-                  <span className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-colors ${
-                    att.status === 'completed' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400' :
-                    att.status === 'timed_out' ? 'bg-red-500/10 border-red-500/20 text-red-600 dark:text-red-300' :
-                    'bg-yellow-500/10 border-yellow-500/20 text-yellow-600 dark:text-yellow-300'
-                  }`}>
-                    {att.status.replace('_', ' ')}
-                  </span>
-                </td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+    <div className="bg-white/80 dark:bg-black/20 border border-gray-100 dark:border-white/10 rounded-[2.5rem] overflow-hidden shadow-inner animate-in fade-in duration-500">
+      <div className="overflow-x-auto">
+        <table className="w-full text-left border-collapse">
+            <thead>
+            <tr className="bg-gray-50/50 dark:bg-white/[0.01]">
+                <th className="py-6 px-10 text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Student</th>
+                <th className="py-6 px-8 text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Date & Time</th>
+                <th className="py-6 px-8 text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Score</th>
+                <th className="py-6 px-10 text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest text-right">Status</th>
+            </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100 dark:divide-white/[0.03]">
+            {attempts.length === 0 ? (
+                <tr>
+                    <td colSpan="4" className="text-center py-32 opacity-30 grayscale">
+                        <div className="w-20 h-20 bg-gray-100 dark:bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <BarChart3 className="w-10 h-10 text-gray-400" />
+                        </div>
+                        <p className="text-xs font-black uppercase tracking-widest text-gray-500">No attempts recorded</p>
+                    </td>
+                </tr>
+            ) : (
+                attempts.map((att) => {
+                const isPassed = att.percentage >= (selectedQuiz.passing_score || 50);
+                return (
+                <tr key={att.id} className="group hover:bg-gray-50/50 dark:hover:bg-white/[0.02] transition-colors">
+                    <td className="py-6 px-10">
+                    <div className="flex items-center gap-5">
+                        <div className="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-black border border-gray-200 dark:border-white/10 flex items-center justify-center overflow-hidden shadow-inner">
+                            {att.avatar_url ? (
+                                <img src={att.avatar_url} alt={att.student_name} className="w-full h-full object-cover" />
+                            ) : (
+                                <User className="w-6 h-6 text-gray-300" />
+                            )}
+                        </div>
+                        <div>
+                            <p className="text-gray-900 dark:text-white font-black tracking-tight text-sm">{att.student_name}</p>
+                            <p className="text-[10px] text-gray-400 dark:text-gray-500 font-black tracking-widest uppercase mt-0.5">ID: {att.student_id}</p>
+                        </div>
+                    </div>
+                    </td>
+                    <td className="py-6 px-8">
+                    <div className="space-y-1.5">
+                        <div className="flex items-center gap-2 text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">
+                            <Clock className="w-3.5 h-3.5 text-indigo-500/50" /> {new Date(att.started_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </div>
+                        <div className="flex items-center gap-2 text-[10px] font-bold text-gray-400 dark:text-gray-600 uppercase tracking-widest">
+                            <Calendar className="w-3.5 h-3.5 text-indigo-500/50" /> {new Date(att.started_at).toLocaleDateString()}
+                        </div>
+                    </div>
+                    </td>
+                    <td className="py-6 px-8">
+                    <div className="flex items-center gap-4">
+                        <div className="flex flex-col">
+                            <span className="text-lg font-black text-gray-900 dark:text-white tracking-tight">{att.score !== null ? att.score : '--'}</span>
+                            <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Raw Points</span>
+                        </div>
+                        <div className="w-24 h-2 bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden shadow-inner">
+                            <div className={`h-full rounded-full transition-all duration-1000 ${
+                                isPassed ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]' : 'bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.3)]'
+                            }`} style={{ width: `${att.percentage || 0}%` }}></div>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                            <span className={`text-sm font-black tracking-tighter ${isPassed ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                                {att.percentage !== null ? `${att.percentage}%` : '??'}
+                            </span>
+                            {isPassed && <Trophy className="w-3.5 h-3.5 text-amber-500" />}
+                        </div>
+                    </div>
+                    </td>
+                    <td className="py-6 px-10 text-right">
+                    <span className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all ${
+                        att.status === 'completed' ? 'bg-emerald-500/5 border-emerald-500/20 text-emerald-600' :
+                        att.status === 'timed_out' ? 'bg-rose-500/5 border-rose-500/20 text-rose-600' :
+                        'bg-amber-500/5 border-amber-500/20 text-amber-600'
+                    }`}>
+                        {att.status.replace('_', ' ')}
+                    </span>
+                    </td>
+                </tr>
+                );})
+            )}
+            </tbody>
+        </table>
+      </div>
     </div>
   );
 };

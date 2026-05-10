@@ -56,17 +56,17 @@ const AdminDashboard = () => {
     { id: 'grades', label: 'Grades', icon: <TrendingUp className="w-4 h-4" />, reqPerm: 'manage_grades' },
     { id: 'resources', label: 'Resources', icon: <FileText className="w-4 h-4" />, reqPerm: 'manage_resources' },
     { id: 'roadmap', label: 'Roadmap', icon: <RoadmapIcon className="w-4 h-4" />, reqPerm: 'manage_roadmap' },
-    { id: 'doctors', label: 'Doctors', icon: <UserCheck className="w-4 h-4" />, reqPerm: 'admin' },
+    { id: 'doctors', label: 'Instructors', icon: <UserCheck className="w-4 h-4" />, reqPerm: 'admin' },
     { id: 'students', label: 'Students', icon: <Users className="w-4 h-4" />, reqPerm: 'admin' },
     { id: 'student-courses', label: 'Records', icon: <Database className="w-4 h-4" />, reqPerm: 'admin' },
     { id: 'timetable', label: 'Timetable', icon: <Calendar className="w-4 h-4" />, reqPerm: 'manage_timetable' },
     { id: 'exams', label: 'Exams', icon: <ClipboardList className="w-4 h-4" />, reqPerm: 'manage_timetable' },
     { id: 'notifications', label: 'Alerts', icon: <Bell className="w-4 h-4" />, reqPerm: 'manage_notifications' },
     { id: 'mobile-center', label: 'Mobile Center', icon: <Smartphone className="w-4 h-4" />, reqPerm: 'manage_notifications' },
-    { id: 'departments', label: 'Units', icon: <LayoutDashboard className="w-4 h-4" />, reqPerm: 'admin' },
+    { id: 'departments', label: 'Departments', icon: <LayoutDashboard className="w-4 h-4" />, reqPerm: 'admin' },
     { id: 'quizzes', label: 'Quizzes', icon: <Award className="w-4 h-4" />, reqPerm: 'manage_quizzes' },
     { id: 'reviews', label: 'Reviews', icon: <CheckCircle className="w-4 h-4" />, reqPerm: 'manage_quizzes' },
-    { id: 'events', label: 'University', icon: <Heart className="w-4 h-4" />, reqPerm: 'manage_events' },
+    { id: 'events', label: 'Event', icon: <Heart className="w-4 h-4" />, reqPerm: 'manage_events' },
     { id: 'progress', label: 'Progress', icon: <CheckCircle className="w-4 h-4" />, reqPerm: 'manage_progress' },
     { id: 'tasks', label: 'Tasks', icon: <CheckSquare className="w-4 h-4" />, reqPerm: 'manage_courses' },
     { id: 'emails', label: 'Emails', icon: <Mail className="w-4 h-4" />, reqPerm: 'admin' },
@@ -144,7 +144,7 @@ const AdminDashboard = () => {
     api.get('/admin/stats')
       .then(res => setStats(res.data))
       .catch(err => console.error("Stats error", err));
-      
+
     // Fetch lookup tables in background without blocking UI
     fetchCourses();
     fetchDepartments();
@@ -486,62 +486,101 @@ const AdminDashboard = () => {
 
   if (!token) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50 dark:bg-[#050505] relative overflow-hidden transition-colors duration-300">
+      <div className="min-h-screen w-full flex bg-white dark:bg-[#0a0a0a] overflow-hidden font-sans text-gray-900 dark:text-white transition-colors duration-500 relative pt-[48px]">
+        
 
-        <div className="w-full max-w-md bg-white dark:bg-[#111111] border border-gray-200 dark:border-white/10 rounded-[2.5rem] p-10 shadow-xl dark:shadow-2xl animate-fadeInUp relative z-10">
-          <div className="flex justify-center mb-6">
-            <div className="w-16 h-16 bg-emerald-500/10 dark:bg-emerald-500/20 rounded-2xl flex items-center justify-center border border-emerald-500/20 dark:border-emerald-500/30">
-              <ShieldCheck className="w-10 h-10 text-emerald-500 dark:text-emerald-400" />
+        {/* LEFT PANEL: Branding (Matches Student style) */}
+        <div className="hidden lg:flex w-1/2 relative bg-gray-50 dark:bg-[#0a0a0a] items-center justify-center p-12 overflow-hidden border-r border-gray-200 dark:border-white/5 transition-colors duration-500">
+          <div className="absolute inset-0 z-0 opacity-60 dark:opacity-40">
+            <div className="absolute top-[-10%] left-[-10%] w-[40vw] h-[40vw] bg-emerald-500/20 blur-[150px] rounded-full animate-[spin_20s_linear_infinite]"></div>
+            <div className="absolute bottom-[-10%] right-[-10%] w-[35vw] h-[35vw] bg-blue-500/10 blur-[150px] rounded-full animate-pulse-slow"></div>
+          </div>
+
+          <div className="relative z-10 w-full max-w-lg flex flex-col gap-12 text-center items-center">
+            <div className="space-y-6 animate-fadeInUp">
+              <div className="relative group">
+                <div className="absolute -inset-8 bg-emerald-500/10 blur-3xl rounded-full opacity-60"></div>
+                <div className="relative inline-flex items-center justify-center w-48 h-48 rounded-full bg-white dark:bg-white/5 border border-emerald-500/20 overflow-hidden shadow-2xl">
+                  <img src="/logo.png" alt="ZNU Logo" className="w-full h-full object-contain p-6" />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <h1 className="text-5xl font-black text-gray-900 dark:text-white tracking-tighter leading-tight">
+                  Admin <br />
+                  <span className="text-emerald-500">Portal.</span>
+                </h1>
+                <p className="text-xs font-black uppercase tracking-[0.5em] text-emerald-500/60 mt-2">Management Access</p>
+              </div>
+              
+              <p className="text-gray-600 dark:text-gray-400 text-lg leading-relaxed max-w-md mx-auto font-medium">
+                Hello, Admin! Please sign in to manage the system.
+              </p>
             </div>
           </div>
-          <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white text-center mb-2 tracking-tight">Admin Portal</h2>
-          <p className="text-gray-500 dark:text-slate-400 text-center mb-8 text-sm uppercase tracking-widest font-medium">Secure Access Node</p>
+        </div>
 
-          <form onSubmit={handleLogin} className="space-y-6">
-            <div className="space-y-2">
-              <label className="block text-gray-700 dark:text-slate-300 ml-4 text-xs font-bold uppercase tracking-widest">Username</label>
-              <div className="relative">
-                <LayoutDashboard className="absolute left-4 top-3.5 w-5 h-5 text-gray-400 dark:text-slate-500" />
-                <input
-                  type="text"
-                  value={loginCredentials.username}
-                  onChange={(e) => setLoginCredentials({ ...loginCredentials, username: e.target.value })}
-                  className="w-full bg-gray-100 dark:bg-slate-900/50 border border-gray-200 dark:border-white/5 rounded-2xl pl-12 pr-4 py-3.5 text-gray-900 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-600 focus:border-emerald-500/50 focus:outline-none transition-all"
-                  placeholder="Admin identifier"
-                  required
-                />
+        {/* RIGHT PANEL: The Form (Matches Student style) */}
+        <div className="w-full lg:w-1/2 flex flex-col relative justify-center items-center p-6 sm:p-12 lg:p-20 bg-gray-50 dark:bg-[#0a0a0a]">
+          <div className="w-full max-w-md relative z-10 animate-fadeInUp">
+            <div className="mb-10 text-center lg:text-left">
+              <div className="lg:hidden inline-flex mb-6">
+                <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-white dark:bg-white/5 border border-emerald-500/20 shadow-xl overflow-hidden">
+                  <img src="/logo.png" alt="ZNU Logo" className="w-full h-full object-contain p-4" />
+                </div>
               </div>
+              <h2 className="text-4xl font-black text-gray-900 dark:text-white tracking-tight">Login</h2>
+              <p className="text-gray-500 mt-2 text-sm font-medium">Enter your username and password.</p>
             </div>
-            <div className="space-y-2">
-              <label className="block text-gray-700 dark:text-slate-300 ml-4 text-xs font-bold uppercase tracking-widest">Password</label>
-              <div className="relative">
-                <Lock className="absolute left-4 top-3.5 w-5 h-5 text-gray-400 dark:text-slate-500" />
-                <input
-                  type="password"
-                  value={loginCredentials.password}
-                  onChange={(e) => setLoginCredentials({ ...loginCredentials, password: e.target.value })}
-                  className="w-full bg-gray-100 dark:bg-slate-900/50 border border-gray-200 dark:border-white/5 rounded-2xl pl-12 pr-4 py-3.5 text-gray-900 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-600 focus:border-emerald-500/50 focus:outline-none transition-all"
-                  placeholder="••••••••"
-                  required
-                />
+
+            <form onSubmit={handleLogin} className="space-y-6">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500 pl-1">Username</label>
+                <div className="relative flex items-center bg-white dark:bg-[#111] border border-gray-200 dark:border-white/10 rounded-2xl overflow-hidden shadow-sm">
+                  <div className="pl-5 pr-1 flex items-center justify-center shrink-0">
+                    <LayoutDashboard className={`w-6 h-6 transition-all duration-500 ${isDarkMode ? 'text-white' : 'text-black'}`} />
+                  </div>
+                  <input
+                    type="text"
+                    value={loginCredentials.username}
+                    onChange={(e) => setLoginCredentials({ ...loginCredentials, username: e.target.value })}
+                    className="w-full bg-transparent py-4 px-5 text-gray-900 dark:text-white font-bold text-xl focus:outline-none"
+                    placeholder="admin_root"
+                    required
+                  />
+                </div>
               </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500 pl-1">Password</label>
+                <div className="relative flex items-center bg-white dark:bg-[#111] border border-gray-200 dark:border-white/10 rounded-2xl overflow-hidden shadow-sm">
+                  <div className="pl-5 pr-1 flex items-center justify-center shrink-0">
+                    <Lock className={`w-6 h-6 transition-all duration-500 ${isDarkMode ? 'text-white' : 'text-black'}`} />
+                  </div>
+                  <input
+                    type="password"
+                    value={loginCredentials.password}
+                    onChange={(e) => setLoginCredentials({ ...loginCredentials, password: e.target.value })}
+                    className="w-full bg-transparent py-4 px-5 text-gray-900 dark:text-white font-bold text-xl tracking-[0.3em] placeholder:tracking-normal focus:outline-none"
+                    placeholder="••••••••"
+                    required
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="relative w-full overflow-hidden bg-emerald-600 dark:bg-emerald-500 text-white dark:text-black font-extrabold text-lg py-4 rounded-2xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 shadow-xl disabled:opacity-50 group mt-4 uppercase"
+              >
+                <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/30 dark:via-black/20 to-transparent skew-x-12"></div>
+                {loading ? 'Logging in...' : 'Login'}
+              </button>
+            </form>
+
+            <div className="mt-12 pt-6 border-t border-gray-200 dark:border-white/5 text-center">
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Authorized Admin Access Only</p>
             </div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-emerald-500 text-white dark:text-black font-bold py-4 rounded-2xl transition-all hover:scale-[1.02] hover:shadow-[0_10px_20px_rgba(16,185,129,0.2)] dark:hover:shadow-[0_0_20px_rgba(16,185,129,0.3)] active:scale-[0.98] disabled:opacity-60 disabled:hover:scale-100 mt-4 flex items-center justify-center gap-2"
-            >
-              {loading ? (
-                <div className="w-5 h-5 border-2 border-white dark:border-black/20 border-t-transparent dark:border-t-black rounded-full animate-spin" />
-              ) : (
-                <>Sign In <ChevronRight className="w-5 h-5" /></>
-              )}
-            </button>
-          </form>
-          <div className="mt-6 flex justify-center">
-            <button onClick={toggleTheme} className="p-3 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-400 hover:text-emerald-500 transition-all">
-              {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-            </button>
           </div>
         </div>
       </div>
@@ -553,25 +592,23 @@ const AdminDashboard = () => {
   const availableTabs = ALL_TABS.filter(tab => isSuperAdmin || (tab.reqPerm !== 'admin' && userPermissions.includes(tab.reqPerm)));
 
   return (
-    <div className="flex flex-col lg:flex-row h-screen bg-gray-50 dark:bg-[#050505] text-gray-900 dark:text-slate-100 font-sans overflow-hidden transition-colors duration-300">
-      
-      {/* Sidebar / Bottom Bar */}
-      <AdminSidebar 
-        activeTab={activeTab} 
-        setActiveTab={setActiveTab} 
-        admin={{ name: isSuperAdmin ? 'Root Admin' : 'Assistant Node', role: isSuperAdmin ? 'System Admin' : 'Assistant' }} 
-        onLogout={logout} 
+    <div className="flex h-screen bg-gray-50 dark:bg-[#050505] text-gray-900 dark:text-slate-100 font-sans overflow-hidden transition-colors duration-300">
+      <AdminSidebar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        admin={{ name: isSuperAdmin ? 'Root Admin' : 'Assistant Node', role: isSuperAdmin ? 'System Admin' : 'Assistant' }}
+        onLogout={logout}
         availableTabs={availableTabs}
       />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+      <div className="flex-1 lg:ml-[19.5rem] flex flex-col min-w-0 overflow-hidden relative transition-all duration-300">
         {/* Background Glows */}
         <div className="absolute top-[-20%] right-[-10%] w-[50%] h-[50%] bg-emerald-500/10 blur-[150px] rounded-full pointer-events-none"></div>
         <div className="absolute bottom-[-10%] left-[-5%] w-[40%] h-[40%] bg-teal-500/5 blur-[120px] rounded-full pointer-events-none"></div>
 
-        <AdminHeader 
-          admin={{ name: isSuperAdmin ? 'Root Admin' : 'Assistant Node' }} 
+        <AdminHeader
+          admin={{ name: isSuperAdmin ? 'Root Admin' : 'Assistant Node' }}
           onSearch={(query) => console.log('Global search:', query)}
           setActiveTab={setActiveTab}
           hasNotificationsAccess={isSuperAdmin || userPermissions.includes('manage_notifications')}
@@ -581,192 +618,246 @@ const AdminDashboard = () => {
           <div className="max-w-[1600px] mx-auto">
             <div className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-white/5 shadow-sm dark:shadow-xl rounded-[2.5rem] p-6 md:p-10 min-h-[600px] relative transition-colors duration-300">
 
-          
-          {activeTab === 'overview' && (
-            <div>
-              <div className="mb-8">
-                <h2 className="text-2xl font-black text-gray-900 dark:text-white">Overview</h2>
-                <p className="text-gray-500 dark:text-slate-400 font-medium text-sm">Key metrics and system status</p>
-              </div>
-              <div className="grid gap-6 md:grid-cols-4 animate-fadeIn">
-                <div className="bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/5 p-6 rounded-[2rem] hover:border-emerald-500/30 transition-all duration-500 group">
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center group-hover:bg-emerald-500/20 transition-all">
-                      <BookOpen className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+
+              {activeTab === 'overview' && (
+                <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+                  {/* Cinematic Command Center Header */}
+                  <div className="relative rounded-[2.5rem] bg-gray-900 dark:bg-[#0a0a0a] border border-gray-800 dark:border-white/10 overflow-hidden shadow-2xl mb-8 group">
+                    <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/20 via-transparent to-blue-500/10 mix-blend-screen opacity-50 group-hover:opacity-100 transition-opacity duration-1000"></div>
+                    <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/20 blur-[100px] rounded-full pointer-events-none mix-blend-screen"></div>
+                    <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-500/20 blur-[100px] rounded-full pointer-events-none mix-blend-screen"></div>
+
+                    <div className="relative z-10 p-8 sm:p-12 flex flex-col md:flex-row items-center md:items-start justify-between gap-8">
+                      <div>
+                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-xs font-black uppercase tracking-widest mb-6">
+                          <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div> System Online & Secure
+                        </div>
+                        <h2 className="text-4xl sm:text-5xl font-black text-white leading-tight mb-2 tracking-tight">Command Center</h2>
+                        <p className="text-gray-400 text-lg font-medium">Welcome back, {isSuperAdmin ? 'Root Admin' : 'Assistant Node'}. All systems are operating normally.</p>
+                      </div>
+
+                      {/* Decorative Tech Element */}
+                      <div className="hidden md:flex shrink-0 w-32 h-32 rounded-full border border-white/10 items-center justify-center relative">
+                        <div className="absolute inset-0 border-[3px] border-emerald-500/30 border-t-emerald-400 rounded-full animate-spin-slow"></div>
+                        <div className="absolute inset-2 border-[2px] border-blue-500/30 border-b-blue-400 rounded-full animate-spin-reverse-slow"></div>
+                        <ShieldCheck className="w-12 h-12 text-emerald-400" />
+                      </div>
                     </div>
-                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-slate-500 group-hover:text-emerald-600 dark:group-hover:text-emerald-300/70 transition-all">Courses</p>
                   </div>
-                  <div className="flex items-end justify-between">
-                    <p className="text-4xl font-black text-gray-900 dark:text-white">{stats.courses}</p>
-                    <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 text-xs font-bold bg-emerald-500/10 px-2 py-1 rounded-lg">
-                      <Activity className="w-3 h-3" /> LIVE
+
+                  {/* Bento Grid Metrics */}
+                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
+                    <div className="bg-white/80 dark:bg-[#111]/80 backdrop-blur-xl border border-gray-200 dark:border-white/10 p-6 rounded-[2.5rem] shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-emerald-500/30 dark:hover:border-emerald-500/50 transition-all duration-300 group relative overflow-hidden">
+                      <div className="absolute -right-10 -top-10 w-32 h-32 bg-emerald-500/10 rounded-full blur-[30px] group-hover:bg-emerald-500/20 transition-all"></div>
+                      <div className="flex items-center justify-between mb-4 relative z-10">
+                        <div className="w-14 h-14 bg-emerald-500/10 rounded-[1.5rem] flex items-center justify-center border border-emerald-500/20 group-hover:scale-110 transition-transform shadow-inner">
+                          <BookOpen className="w-6 h-6 text-emerald-500" />
+                        </div>
+                        <div className="flex items-center gap-1 text-emerald-500 bg-emerald-500/10 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider">
+                          <Activity className="w-3 h-3" /> Live
+                        </div>
+                      </div>
+                      <div className="relative z-10 mt-6">
+                        <p className="text-4xl font-black text-gray-900 dark:text-white mb-1">{stats.courses}</p>
+                        <p className="text-xs font-bold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Total Courses</p>
+                      </div>
+                    </div>
+
+                    <div className="bg-white/80 dark:bg-[#111]/80 backdrop-blur-xl border border-gray-200 dark:border-white/10 p-6 rounded-[2.5rem] shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-blue-500/30 dark:hover:border-blue-500/50 transition-all duration-300 group relative overflow-hidden">
+                      <div className="absolute -right-10 -top-10 w-32 h-32 bg-blue-500/10 rounded-full blur-[30px] group-hover:bg-blue-500/20 transition-all"></div>
+                      <div className="flex items-center justify-between mb-4 relative z-10">
+                        <div className="w-14 h-14 bg-blue-500/10 rounded-[1.5rem] flex items-center justify-center border border-blue-500/20 group-hover:scale-110 transition-transform shadow-inner">
+                          <Users className="w-6 h-6 text-blue-500" />
+                        </div>
+                        <div className="flex items-center gap-1 text-blue-500 bg-blue-500/10 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider">
+                          <CheckCircle className="w-3 h-3" /> Secure
+                        </div>
+                      </div>
+                      <div className="relative z-10 mt-6">
+                        <p className="text-4xl font-black text-gray-900 dark:text-white mb-1">{stats.students}</p>
+                        <p className="text-xs font-bold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Total Students</p>
+                      </div>
+                    </div>
+
+                    <div className="bg-white/80 dark:bg-[#111]/80 backdrop-blur-xl border border-gray-200 dark:border-white/10 p-6 rounded-[2.5rem] shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-purple-500/30 dark:hover:border-purple-500/50 transition-all duration-300 group relative overflow-hidden">
+                      <div className="absolute -right-10 -top-10 w-32 h-32 bg-purple-500/10 rounded-full blur-[30px] group-hover:bg-purple-500/20 transition-all"></div>
+                      <div className="flex items-center justify-between mb-4 relative z-10">
+                        <div className="w-14 h-14 bg-purple-500/10 rounded-[1.5rem] flex items-center justify-center border border-purple-500/20 group-hover:scale-110 transition-transform shadow-inner">
+                          <LayoutDashboard className="w-6 h-6 text-purple-500" />
+                        </div>
+                        <div className="flex items-center gap-1 text-purple-500 bg-purple-500/10 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider">
+                          <Award className="w-3 h-3" /> Active
+                        </div>
+                      </div>
+                      <div className="relative z-10 mt-6">
+                        <p className="text-4xl font-black text-gray-900 dark:text-white mb-1">{stats.departments}</p>
+                        <p className="text-xs font-bold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Departments</p>
+                      </div>
+                    </div>
+
+                    <div className={`bg-white/80 dark:bg-[#111]/80 backdrop-blur-xl border ${stats.unread_notifications > 0 ? 'border-rose-500/50 shadow-[0_0_30px_rgba(244,63,94,0.1)]' : 'border-gray-200 dark:border-white/10'} p-6 rounded-[2.5rem] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden`}>
+                      <div className={`absolute -right-10 -top-10 w-32 h-32 ${stats.unread_notifications > 0 ? 'bg-rose-500/20' : 'bg-rose-500/10'} rounded-full blur-[30px] transition-all`}></div>
+                      <div className="flex items-center justify-between mb-4 relative z-10">
+                        <div className="w-14 h-14 bg-rose-500/10 rounded-[1.5rem] flex items-center justify-center border border-rose-500/20 group-hover:scale-110 transition-transform shadow-inner relative">
+                          {stats.unread_notifications > 0 && <div className="absolute top-0 right-0 w-3 h-3 bg-rose-500 rounded-full animate-ping"></div>}
+                          <Bell className="w-6 h-6 text-rose-500" />
+                        </div>
+                        {stats.unread_notifications > 0 && (
+                          <button onClick={() => {
+                            const hasAccess = isSuperAdmin || userPermissions.includes('manage_notifications');
+                            if (hasAccess) setActiveTab('notifications');
+                            else toast.error('No permission');
+                          }}
+                            className="flex items-center gap-1 text-white bg-rose-500 hover:bg-rose-600 px-3 py-1.5 rounded-full text-xs font-black uppercase tracking-wider shadow-md hover:shadow-lg transition-all active:scale-95"
+                          >
+                            View
+                          </button>
+                        )}
+                      </div>
+                      <div className="relative z-10 mt-6">
+                        <p className="text-4xl font-black text-gray-900 dark:text-white mb-1">{stats.unread_notifications}</p>
+                        <p className="text-xs font-bold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Unread Alerts</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Quick Actions Panel */}
+                  <div>
+                    <h3 className="text-lg font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                      <Settings className="w-5 h-5 text-emerald-500" /> Quick Actions
+                    </h3>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <button onClick={() => setActiveTab('students')} className="group flex flex-col items-center justify-center gap-3 p-6 bg-white/50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-[2rem] hover:bg-white dark:hover:bg-white/10 hover:border-emerald-500/30 hover:shadow-lg hover:-translate-y-1 transition-all">
+                        <div className="w-12 h-12 bg-gray-100 dark:bg-black/50 rounded-[1.2rem] flex items-center justify-center group-hover:bg-emerald-500/20 group-hover:text-emerald-500 transition-colors shadow-inner">
+                          <UserCheck className="w-5 h-5" />
+                        </div>
+                        <span className="text-sm font-bold text-gray-700 dark:text-gray-300">Manage Students</span>
+                      </button>
+                      <button onClick={() => setActiveTab('grades')} className="group flex flex-col items-center justify-center gap-3 p-6 bg-white/50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-[2rem] hover:bg-white dark:hover:bg-white/10 hover:border-blue-500/30 hover:shadow-lg hover:-translate-y-1 transition-all">
+                        <div className="w-12 h-12 bg-gray-100 dark:bg-black/50 rounded-[1.2rem] flex items-center justify-center group-hover:bg-blue-500/20 group-hover:text-blue-500 transition-colors shadow-inner">
+                          <TrendingUp className="w-5 h-5" />
+                        </div>
+                        <span className="text-sm font-bold text-gray-700 dark:text-gray-300">Upload Grades</span>
+                      </button>
+                      <button onClick={() => setActiveTab('notifications')} className="group flex flex-col items-center justify-center gap-3 p-6 bg-white/50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-[2rem] hover:bg-white dark:hover:bg-white/10 hover:border-rose-500/30 hover:shadow-lg hover:-translate-y-1 transition-all">
+                        <div className="w-12 h-12 bg-gray-100 dark:bg-black/50 rounded-[1.2rem] flex items-center justify-center group-hover:bg-rose-500/20 group-hover:text-rose-500 transition-colors shadow-inner">
+                          <Bell className="w-5 h-5" />
+                        </div>
+                        <span className="text-sm font-bold text-gray-700 dark:text-gray-300">Broadcast Alert</span>
+                      </button>
+                      <button onClick={() => setActiveTab('timetable')} className="group flex flex-col items-center justify-center gap-3 p-6 bg-white/50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-[2rem] hover:bg-white dark:hover:bg-white/10 hover:border-purple-500/30 hover:shadow-lg hover:-translate-y-1 transition-all">
+                        <div className="w-12 h-12 bg-gray-100 dark:bg-black/50 rounded-[1.2rem] flex items-center justify-center group-hover:bg-purple-500/20 group-hover:text-purple-500 transition-colors shadow-inner">
+                          <Calendar className="w-5 h-5" />
+                        </div>
+                        <span className="text-sm font-bold text-gray-700 dark:text-gray-300">Edit Timetable</span>
+                      </button>
                     </div>
                   </div>
                 </div>
+              )}
 
-                <div className="bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/5 p-6 rounded-[2rem] hover:border-blue-500/30 transition-all duration-500 group">
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center group-hover:bg-blue-500/20 transition-all">
-                      <Users className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-                    </div>
-                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-slate-500 group-hover:text-blue-600 dark:group-hover:text-blue-300/70 transition-all">Students</p>
-                  </div>
-                  <div className="flex items-end justify-between">
-                    <p className="text-4xl font-black text-gray-900 dark:text-white">{stats.students}</p>
-                    <div className="flex items-center gap-1 text-blue-600 dark:text-blue-400 text-xs font-bold bg-blue-500/10 px-2 py-1 rounded-lg">
-                      <CheckCircle className="w-3 h-3" /> SECURE
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/5 p-6 rounded-[2rem] hover:border-purple-500/30 transition-all duration-500 group">
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="w-12 h-12 bg-purple-500/10 rounded-2xl flex items-center justify-center group-hover:bg-purple-500/20 transition-all">
-                      <LayoutDashboard className="w-6 h-6 text-purple-600 dark:text-purple-400" />
-                    </div>
-                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-slate-500 group-hover:text-purple-600 dark:group-hover:text-purple-300/70 transition-all">Departments</p>
-                  </div>
-                  <div className="flex items-end justify-between">
-                    <p className="text-4xl font-black text-gray-900 dark:text-white">{stats.departments}</p>
-                    <div className="flex items-center gap-1 text-purple-600 dark:text-purple-400 text-xs font-bold bg-purple-500/10 px-2 py-1 rounded-lg">
-                      <Award className="w-3 h-3" /> STABLE
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/5 p-6 rounded-[2rem] hover:border-red-500/30 transition-all duration-500 group relative overflow-hidden">
-                  {stats.unread_notifications > 0 && (
-                    <div className="absolute top-4 right-4 w-2 h-2 bg-red-500 rounded-full animate-ping"></div>
-                  )}
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="w-12 h-12 bg-red-500/10 rounded-2xl flex items-center justify-center group-hover:bg-red-500/20 transition-all">
-                      <Bell className="w-6 h-6 text-red-600 dark:text-red-400" />
-                    </div>
-                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-slate-500 group-hover:text-red-600 dark:group-hover:text-red-300/70 transition-all">Alerts</p>
-                  </div>
-                  <div className="flex items-end justify-between">
-                    <p className="text-4xl font-black text-gray-900 dark:text-white">{stats.unread_notifications}</p>
-                    <button
-                      onClick={() => {
-                        const hasAccess = isSuperAdmin || userPermissions.includes('manage_materials');
-                        if (hasAccess) {
-                          setActiveTab('notifications');
-                        } else {
-                          toast.error('You do not have permission to access this module');
-                        }
-                      }}
-                      className="text-xs font-black text-white dark:text-black bg-red-500 dark:bg-red-400 hover:bg-red-600 dark:hover:bg-red-300 px-3 py-1.5 rounded-xl transition-all active:scale-95 shadow-sm dark:shadow-[0_0_15px_rgba(248,113,113,0.3)]"
-                    >
-                      VIEW ALL
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <Suspense fallback={<div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-3 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin"></div></div>}>
-          {activeTab === 'courses' && <CoursesManager departments={departments} />}
-          {activeTab === 'grades' && <GradesUploader courses={courses} departments={departments} />}
-          {activeTab === 'resources' && <ResourceManager />}
-          {activeTab === 'roadmap' && <RoadmapManager />}
-          {activeTab === 'doctors' && <DoctorManager />}
-          {activeTab === 'students' && (
-            <StudentsManager
-              students={students}
-              fetchStudents={fetchStudents}
-              uploadingStudents={uploadingStudents}
-              setUploadingStudents={setUploadingStudents}
-              studentsFile={studentsFile}
-              setStudentsFile={setStudentsFile}
-              handleResetPassword={handleResetPassword}
-              handleDeleteStudent={handleDeleteStudent}
-              handleEditStudentInfo={handleEditStudentInfo}
-              handleManageRole={handleManageRole}
-              departments={departments}
-              onAddStudent={handleAddStudent}
-            />
-          )}
-          {activeTab === 'student-courses' && (
-            <StudentCoursesGradesManager
-              students={students}
-              selectedStudent={selectedStudent}
-              setSelectedStudent={setSelectedStudent}
-              studentCourses={studentCourses}
-              availableCourses={availableCourses}
-              studentGrades={studentGrades}
-              showAddCourseModal={showAddCourseModal}
-              setShowAddCourseModal={setShowAddCourseModal}
-              selectedCourseToAdd={selectedCourseToAdd}
-              setSelectedCourseToAdd={setSelectedCourseToAdd}
-              editingGrade={editingGrade}
-              setEditingGrade={setEditingGrade}
-              editGradeForm={editGradeForm}
-              setEditGradeForm={setEditGradeForm}
-              showGradeModal={showGradeModal}
-              setShowGradeModal={setShowGradeModal}
-              handleSelectStudent={handleSelectStudent}
-              handleRemoveCourseFromStudent={handleRemoveCourseFromStudent}
-              handleAddCourseToStudent={handleAddCourseToStudent}
-              handleEditStudentGrade={handleEditStudentGrade}
-              handleUpdateStudentGrade={handleUpdateStudentGrade}
-            />
-          )}
-          {activeTab === 'timetable' && (
-            <TimetableManager
-              allTimetables={allTimetables}
-              fetchAllTimetables={fetchAllTimetables}
-              timetableFile={timetableFile}
-              setTimetableFile={setTimetableFile}
-              uploadingTimetable={uploadingTimetable}
-              setUploadingTimetable={setUploadingTimetable}
-              handleEditEntry={handleEditEntry}
-              handleDeleteEntry={handleDeleteEntry}
-              handleDeleteSection={handleDeleteSection}
-              departments={departments}
-              selectedDepartmentId={selectedTimetableDept}
-              setSelectedDepartmentId={setSelectedTimetableDept}
-              fetchTimetableByDepartment={fetchTimetableByDepartment}
-            />
-          )}
-          {activeTab === 'exams' && <ExamScheduleManager departments={departments} selectedDepartmentId={selectedTimetableDept} />}
-          {activeTab === 'notifications' && (
-            <NotificationsManager
-              notifications={notifications.filter(n => !n.is_mobile_only)}
-              fetchNotifications={fetchNotifications}
-              sending={sending}
-              setSending={setSending}
-              notificationForm={notificationForm}
-              setNotificationForm={setNotificationForm}
-              handleUpdateNotification={handleUpdateNotification}
-              handleDeleteNotification={handleDeleteNotification}
-              showEditModal={showEditModal}
-              setShowEditModal={setShowEditModal}
-              editingNotification={editingNotification}
-              setEditingNotification={setEditingNotification}
-              editNotifForm={editNotifForm}
-              setEditNotifForm={setEditNotifForm}
-              departments={departments}
-            />
-          )}
-          {activeTab === 'mobile-center' && (
-            <MobileAlertCenter
-              notifications={notifications}
-              fetchNotifications={fetchNotifications}
-              sending={sending}
-              setSending={setSending}
-              departments={departments}
-            />
-          )}
-          {activeTab === 'departments' && <DepartmentManager />}
-          {activeTab === 'quizzes' && <QuizManager courses={courses} />}
-          {activeTab === 'reviews' && <PendingReviews />}
-          {activeTab === 'events' && <EventsManager />}
-          {activeTab === 'progress' && <ProgressManager courses={courses} />}
-          {activeTab === 'tasks' && <OfficialTaskManager courses={courses} departments={departments} />}
-          {activeTab === 'emails' && <LinkedEmailsManager />}
-          {activeTab === 'logs' && <LogsDashboard />}
-          </Suspense>
+              <Suspense fallback={<div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-3 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin"></div></div>}>
+                {activeTab === 'courses' && <CoursesManager departments={departments} />}
+                {activeTab === 'grades' && <GradesUploader courses={courses} departments={departments} />}
+                {activeTab === 'resources' && <ResourceManager />}
+                {activeTab === 'roadmap' && <RoadmapManager />}
+                {activeTab === 'doctors' && <DoctorManager />}
+                {activeTab === 'students' && (
+                  <StudentsManager
+                    students={students}
+                    fetchStudents={fetchStudents}
+                    uploadingStudents={uploadingStudents}
+                    setUploadingStudents={setUploadingStudents}
+                    studentsFile={studentsFile}
+                    setStudentsFile={setStudentsFile}
+                    handleResetPassword={handleResetPassword}
+                    handleDeleteStudent={handleDeleteStudent}
+                    handleEditStudentInfo={handleEditStudentInfo}
+                    handleManageRole={handleManageRole}
+                    departments={departments}
+                    onAddStudent={handleAddStudent}
+                  />
+                )}
+                {activeTab === 'student-courses' && (
+                  <StudentCoursesGradesManager
+                    students={students}
+                    selectedStudent={selectedStudent}
+                    setSelectedStudent={setSelectedStudent}
+                    studentCourses={studentCourses}
+                    availableCourses={availableCourses}
+                    studentGrades={studentGrades}
+                    showAddCourseModal={showAddCourseModal}
+                    setShowAddCourseModal={setShowAddCourseModal}
+                    selectedCourseToAdd={selectedCourseToAdd}
+                    setSelectedCourseToAdd={setSelectedCourseToAdd}
+                    editingGrade={editingGrade}
+                    setEditingGrade={setEditingGrade}
+                    editGradeForm={editGradeForm}
+                    setEditGradeForm={setEditGradeForm}
+                    showGradeModal={showGradeModal}
+                    setShowGradeModal={setShowGradeModal}
+                    handleSelectStudent={handleSelectStudent}
+                    handleRemoveCourseFromStudent={handleRemoveCourseFromStudent}
+                    handleAddCourseToStudent={handleAddCourseToStudent}
+                    handleEditStudentGrade={handleEditStudentGrade}
+                    handleUpdateStudentGrade={handleUpdateStudentGrade}
+                  />
+                )}
+                {activeTab === 'timetable' && (
+                  <TimetableManager
+                    allTimetables={allTimetables}
+                    fetchAllTimetables={fetchAllTimetables}
+                    timetableFile={timetableFile}
+                    setTimetableFile={setTimetableFile}
+                    uploadingTimetable={uploadingTimetable}
+                    setUploadingTimetable={setUploadingTimetable}
+                    handleEditEntry={handleEditEntry}
+                    handleDeleteEntry={handleDeleteEntry}
+                    handleDeleteSection={handleDeleteSection}
+                    departments={departments}
+                    selectedDepartmentId={selectedTimetableDept}
+                    setSelectedDepartmentId={setSelectedTimetableDept}
+                    fetchTimetableByDepartment={fetchTimetableByDepartment}
+                  />
+                )}
+                {activeTab === 'exams' && <ExamScheduleManager departments={departments} selectedDepartmentId={selectedTimetableDept} />}
+                {activeTab === 'notifications' && (
+                  <NotificationsManager
+                    notifications={notifications.filter(n => !n.is_mobile_only)}
+                    fetchNotifications={fetchNotifications}
+                    sending={sending}
+                    setSending={setSending}
+                    notificationForm={notificationForm}
+                    setNotificationForm={setNotificationForm}
+                    handleUpdateNotification={handleUpdateNotification}
+                    handleDeleteNotification={handleDeleteNotification}
+                    showEditModal={showEditModal}
+                    setShowEditModal={setShowEditModal}
+                    editingNotification={editingNotification}
+                    setEditingNotification={setEditingNotification}
+                    editNotifForm={editNotifForm}
+                    setEditNotifForm={setEditNotifForm}
+                    departments={departments}
+                  />
+                )}
+                {activeTab === 'mobile-center' && (
+                  <MobileAlertCenter
+                    notifications={notifications}
+                    fetchNotifications={fetchNotifications}
+                    sending={sending}
+                    setSending={setSending}
+                    departments={departments}
+                  />
+                )}
+                {activeTab === 'departments' && <DepartmentManager />}
+                {activeTab === 'quizzes' && <QuizManager courses={courses} />}
+                {activeTab === 'reviews' && <PendingReviews />}
+                {activeTab === 'events' && <EventsManager />}
+                {activeTab === 'progress' && <ProgressManager courses={courses} />}
+                {activeTab === 'tasks' && <OfficialTaskManager courses={courses} departments={departments} />}
+                {activeTab === 'emails' && <LinkedEmailsManager />}
+                {activeTab === 'logs' && <LogsDashboard />}
+              </Suspense>
             </div>
           </div>
         </main>
@@ -884,8 +975,8 @@ const AdminDashboard = () => {
                       ].map(perm => (
                         <label key={perm.id} htmlFor={perm.id}
                           className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${roleForm.permissions.includes(perm.id)
-                              ? 'bg-yellow-500/10 border-yellow-500/30 shadow-sm'
-                              : 'bg-white dark:bg-white/[0.02] border-gray-100 dark:border-white/5 hover:border-gray-200 dark:hover:border-white/15'
+                            ? 'bg-yellow-500/10 border-yellow-500/30 shadow-sm'
+                            : 'bg-white dark:bg-white/[0.02] border-gray-100 dark:border-white/5 hover:border-gray-200 dark:hover:border-white/15'
                             }`}>
                           <input type="checkbox" id={perm.id}
                             checked={roleForm.permissions.includes(perm.id)}

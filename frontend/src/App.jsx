@@ -1,10 +1,11 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import PortalSwitcher from './components/PortalSwitcher';
 import PullToRefresh from './components/PullToRefresh';
 import { ThemeProvider } from './context/ThemeContext';
 import { Toaster } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { StudentAuthProvider, useStudentAuth } from './context/StudentAuthContext';
 import { StudentDataContextProvider } from './context/StudentDataContext';
 import { DoctorAuthProvider } from './context/DoctorAuthContext';
@@ -53,8 +54,8 @@ const ProtectedStudentRoute = ({ children }) => {
           <div className="relative flex items-center justify-center w-20 h-20 mb-6">
             <div className="absolute inset-0 border-4 border-emerald-500/20 dark:border-emerald-500/10 rounded-full"></div>
             <div className="absolute inset-0 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-            <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center animate-pulse">
-                <span className="text-xl font-black text-emerald-500">Z</span>
+            <div className="w-12 h-12 bg-white dark:bg-white/5 rounded-full flex items-center justify-center overflow-hidden shadow-lg border border-emerald-500/20">
+              <img src="/logo.png" alt="ZNU Logo" className="w-full h-full object-contain p-1" />
             </div>
           </div>
           <p className="text-gray-900 dark:text-white font-black text-[10px] uppercase tracking-[0.4em] mb-1 animate-pulse">ZNU PORTAL</p>
@@ -85,7 +86,9 @@ const StudentLoginRedirect = () => {
 // المكون الرئيسي للتطبيق (بعد تحميل حالة المصادقة)
 function AppContent() {
   const { loading } = useStudentAuth();
+  const { token: adminToken } = useAuth();
   const { t } = useTranslation();
+  const location = useLocation();
 
   if (loading) {
     return (
@@ -98,8 +101,8 @@ function AppContent() {
           <div className="relative flex items-center justify-center w-24 h-24 mb-8">
             <div className="absolute inset-0 border-4 border-emerald-500/20 dark:border-emerald-500/10 rounded-full"></div>
             <div className="absolute inset-0 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-            <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center animate-pulse">
-                <span className="text-2xl font-black text-emerald-500">Z</span>
+            <div className="w-16 h-16 bg-white dark:bg-white/5 rounded-full flex items-center justify-center overflow-hidden shadow-xl border border-emerald-500/20">
+              <img src="/logo.png" alt="ZNU Logo" className="w-full h-full object-contain p-2" />
             </div>
           </div>
           <p className="text-gray-900 dark:text-white font-black text-xs uppercase tracking-[0.4em] mb-2 animate-pulse">ZNU PORTAL</p>
@@ -109,8 +112,17 @@ function AppContent() {
     );
   }
 
+  // Show the portal switcher on login/entry pages only, but hide it if admin is logged in on /admin
+  const showSwitcher = [
+    '/student/login',
+    '/doctor/login',
+    '/admin',
+  ].some((p) => location.pathname === p || location.pathname.startsWith(p)) && !(location.pathname.startsWith('/admin') && adminToken);
+
   return (
-    <Routes>
+    <>
+      {showSwitcher && <PortalSwitcher />}
+      <Routes>
       <Route path="/" element={<Navigate to="/student/login" replace />} />
       <Route path="/admin" element={<AdminDashboard />} />
       <Route path="/doctor/login" element={<DoctorLogin />} />
@@ -132,10 +144,11 @@ function AppContent() {
       {/* ✅ مسارات الاختبارات */}
       <Route path="/student/quizzes/:quizId/take" element={<ProtectedStudentRoute><QuizPage /></ProtectedStudentRoute>} />
       <Route path="/student/quizzes/:quizId/result/:attemptId" element={<ProtectedStudentRoute><QuizResultPage /></ProtectedStudentRoute>} />
-      
+
       {/* مسار وهمي لتفادي تحذيرات React Router عند تفعيل مدير كلمات المرور في iOS */}
       <Route path="/student/login-dummy" element={null} />
     </Routes>
+    </>
   );
 }
 

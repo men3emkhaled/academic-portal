@@ -26,6 +26,22 @@ services:
       retries: 5
       start_period: 10s
 
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: academic_portal_redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    command: redis-server --requirepass ${REDIS_PASSWORD:-redis_pass}
+    networks:
+      - academic_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   
   # Node.js Backend API
   
@@ -47,8 +63,13 @@ services:
       DB_USER: ${DB_USER:-postgres}
       DB_PASSWORD: ${DB_PASSWORD:?Database password is required}
       JWT_SECRET: ${JWT_SECRET:?JWT secret is required}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis_pass}
     depends_on:
       postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     volumes:
       - backend_uploads:/app/uploads

@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
-import { CheckCircle, Circle, Plus, Trash2, Edit3, X, ChevronDown, ChevronUp, ListChecks } from 'lucide-react';
+import { 
+  CheckCircle, Circle, Plus, Trash2, Edit3, X, 
+  ChevronDown, ChevronUp, ListChecks, Sparkles,
+  Activity, BookOpen, Clock, Save, Search, Filter,
+  LayoutGrid, List as ListIcon, MoreVertical
+} from 'lucide-react';
 
 const ProgressManager = ({ courses = [] }) => {
   const [selectedCourseId, setSelectedCourseId] = useState('');
@@ -34,7 +39,7 @@ const ProgressManager = ({ courses = [] }) => {
       const res = await api.get(`/progress/admin/course/${courseId}`);
       setProgressItems(res.data);
     } catch (error) {
-      toast.error('Failed to load progress items');
+      toast.error('Failed to load progress details');
     } finally {
       setLoading(false);
     }
@@ -62,12 +67,12 @@ const ProgressManager = ({ courses = [] }) => {
         title: newItemTitle.trim(),
         is_completed: true
       });
-      toast.success('Part added successfully');
+      toast.success('Course part added');
       setNewItemTitle('');
       fetchCourseProgress(selectedCourseId);
       fetchAllProgress();
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to add part');
+      toast.error('Failed to add part');
     } finally {
       setAdding(false);
     }
@@ -79,19 +84,19 @@ const ProgressManager = ({ courses = [] }) => {
       fetchCourseProgress(selectedCourseId);
       fetchAllProgress();
     } catch (error) {
-      toast.error('Failed to toggle status');
+      toast.error('Failed to update status');
     }
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Delete this progress item?')) return;
+    if (!window.confirm('Are you sure you want to delete this item?')) return;
     try {
       await api.delete(`/progress/admin/${id}`);
       toast.success('Item deleted');
       fetchCourseProgress(selectedCourseId);
       fetchAllProgress();
     } catch (error) {
-      toast.error('Failed to delete item');
+      toast.error('Delete failed');
     }
   };
 
@@ -105,11 +110,10 @@ const ProgressManager = ({ courses = [] }) => {
       fetchCourseProgress(selectedCourseId);
       fetchAllProgress();
     } catch (error) {
-      toast.error('Failed to update item');
+      toast.error('Update failed');
     }
   };
 
-  // تجميع الأجزاء حسب المادة (للعرض العام)
   const groupedProgress = {};
   allProgress.forEach(item => {
     const key = item.course_name;
@@ -127,170 +131,162 @@ const ProgressManager = ({ courses = [] }) => {
   const selectedCourse = courses.find(c => c.id === parseInt(selectedCourseId));
 
   return (
-    <div className="animate-fadeIn">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h2 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">Progress Tracking</h2>
-          <p className="text-gray-500 dark:text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">Manage completed parts per course</p>
+    <div className="animate-in fade-in duration-700 pb-10">
+      {/* Premium Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-12">
+        <div className="flex items-center gap-5">
+          <div className="w-16 h-16 bg-teal-500/10 dark:bg-teal-500/20 rounded-3xl flex items-center justify-center border border-teal-500/20 shadow-inner group">
+            <Activity className="w-8 h-8 text-teal-600 dark:text-teal-400 group-hover:scale-110 transition-transform" />
+          </div>
+          <div>
+            <h2 className="text-4xl font-black text-gray-900 dark:text-white tracking-tighter">
+              Progress Hub
+            </h2>
+            <div className="flex items-center gap-3 mt-1.5">
+                <span className="text-gray-500 dark:text-gray-400 text-xs font-black uppercase tracking-[0.2em]">Course Completion Audit</span>
+                <div className="w-1 h-1 bg-gray-300 dark:bg-gray-700 rounded-full"></div>
+                <span className="text-teal-600 dark:text-teal-400 text-[10px] font-black uppercase tracking-widest">{allProgress.length} Signals Tracked</span>
+            </div>
+          </div>
         </div>
-        <div className="flex items-center gap-3 bg-amber-500/10 border border-amber-500/20 px-4 py-2 rounded-2xl transition-colors">
-          <ListChecks className="w-5 h-5 text-amber-600 dark:text-amber-400" />
-          <span className="text-amber-600 dark:text-amber-400 font-bold text-sm">{allProgress.length} Total Items</span>
+
+        <div className="flex items-center gap-4 bg-teal-500/10 border border-teal-500/20 px-6 py-3 rounded-2xl">
+          <ListChecks className="w-5 h-5 text-teal-600" />
+          <span className="text-teal-600 font-black text-xs uppercase tracking-widest">{allProgress.length} Total Parts</span>
         </div>
       </div>
 
-      {/* Course Selector */}
-      <div className="mb-8">
-        <label className="block text-gray-500 dark:text-slate-300 ml-4 text-[10px] font-bold uppercase tracking-widest mb-2 transition-colors">Select Course</label>
-        <div className="relative">
+      {/* Course Selection Interface */}
+      <div className="mb-12 space-y-3">
+        <label className="block text-[10px] font-black text-teal-600 uppercase tracking-[0.2em] ml-6">Select Deployment Node</label>
+        <div className="relative group">
+          <BookOpen className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-teal-500 transition-colors" />
           <select
             value={selectedCourseId}
             onChange={(e) => handleCourseSelect(e.target.value)}
-            className="w-full bg-gray-100 dark:bg-slate-900/50 border border-gray-200 dark:border-white/5 rounded-2xl px-6 py-3.5 text-gray-900 dark:text-white focus:outline-none focus:border-emerald-500/50 transition-all font-medium appearance-none shadow-sm"
+            className="w-full bg-white/50 dark:bg-white/[0.03] border border-gray-200 dark:border-white/10 rounded-[2rem] py-5 pl-16 pr-10 text-gray-900 dark:text-white font-black text-lg focus:outline-none focus:ring-2 focus:ring-teal-500/50 transition-all appearance-none"
           >
-            <option value="" className="bg-white dark:bg-slate-900">-- Overview (All Courses) --</option>
+            <option value="">-- Overview & Analytics --</option>
             {courses.map(c => (
-              <option key={c.id} value={c.id} className="bg-white dark:bg-slate-900">
-                {c.name} (Sem {c.semester}){c.department_name ? ` — ${c.department_name}` : ''}
+              <option key={c.id} value={c.id}>
+                {c.name} (Semester {c.semester}){c.department_name ? ` • ${c.department_name}` : ''}
               </option>
             ))}
           </select>
-          <ChevronDown className="absolute right-6 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+          <ChevronDown className="absolute right-8 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
         </div>
       </div>
 
-      {/* ========== MANAGE MODE: Add/Edit items for selected course ========== */}
+      {/* Manage Mode */}
       {viewMode === 'manage' && selectedCourseId && (
-        <>
-          {/* Add New Item */}
-          <form onSubmit={handleAddItem} className="mb-8 animate-fadeIn">
-            <div className="flex gap-3">
-              <input
-                type="text"
-                value={newItemTitle}
-                onChange={(e) => setNewItemTitle(e.target.value)}
-                placeholder="e.g. Chapter 1.1 - Introduction to Arrays"
-                className="flex-1 bg-gray-100 dark:bg-slate-900/50 border border-gray-200 dark:border-white/5 rounded-2xl px-6 py-3.5 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-600 focus:outline-none focus:border-emerald-500/50 transition-all font-medium transition-colors shadow-sm"
-                required
-              />
-              <button
-                type="submit"
-                disabled={adding || !newItemTitle.trim()}
-                className="flex items-center gap-2 bg-emerald-500 text-black font-black px-6 py-3.5 rounded-2xl hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:hover:scale-100 shadow-lg shadow-emerald-500/20 whitespace-nowrap"
-              >
-                {adding ? (
-                  <div className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" />
-                ) : (
-                  <Plus className="w-4 h-4" />
-                )}
-                Add Part
-              </button>
+        <div className="animate-in slide-in-from-bottom-4 duration-500">
+          <form onSubmit={handleAddItem} className="mb-10 flex gap-4">
+            <div className="relative flex-1">
+               <input
+                 type="text"
+                 value={newItemTitle}
+                 onChange={(e) => setNewItemTitle(e.target.value)}
+                 placeholder="e.g. Chapter 01 - System Fundamentals..."
+                 className="w-full bg-white/50 dark:bg-black border border-gray-200 dark:border-white/10 rounded-2xl py-4.5 px-8 text-gray-900 dark:text-white font-bold focus:ring-2 focus:ring-teal-500/50 outline-none transition-all shadow-inner"
+                 required
+               />
             </div>
+            <button
+              type="submit"
+              disabled={adding || !newItemTitle.trim()}
+              className="flex items-center gap-3 bg-teal-600 hover:bg-teal-700 text-white font-black px-10 py-4.5 rounded-2xl shadow-xl shadow-teal-500/20 active:scale-95 transition-all disabled:opacity-50 whitespace-nowrap uppercase text-[10px] tracking-widest"
+            >
+              {adding ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+              Add Part
+            </button>
           </form>
 
-          {/* Items List */}
           {loading ? (
-            <div className="flex justify-center py-16">
-              <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+            <div className="flex flex-col items-center justify-center py-32 opacity-50">
+               <div className="w-12 h-12 border-4 border-teal-500/20 border-t-teal-500 rounded-full animate-spin mb-6"></div>
+               <p className="text-[10px] font-black uppercase tracking-widest">Hydrating Signals...</p>
             </div>
           ) : progressItems.length === 0 ? (
-            <div className="text-center py-16 bg-gray-50 dark:bg-white/[0.02] border border-dashed border-gray-200 dark:border-white/10 rounded-[2rem] transition-colors shadow-sm">
-              <ListChecks className="w-12 h-12 text-gray-300 dark:text-slate-600 mx-auto mb-4" />
-              <p className="text-gray-500 dark:text-slate-400 text-lg font-bold">No progress items yet</p>
-              <p className="text-gray-400 dark:text-slate-600 text-sm mt-1">Add the first completed part for "{selectedCourse?.name}"</p>
+            <div className="bg-white/50 dark:bg-white/[0.02] border-2 border-dashed border-gray-200 dark:border-white/10 rounded-[3rem] py-32 text-center flex flex-col items-center transition-all duration-500">
+                <Sparkles className="w-12 h-12 text-teal-400 opacity-20 mb-6" />
+                <p className="text-sm font-black uppercase tracking-widest text-gray-500">Zero progress items deployed</p>
             </div>
           ) : (
-            <div className="space-y-3 animate-fadeIn">
+            <div className="grid grid-cols-1 gap-4">
               {progressItems.map((item, index) => (
                 <div
                   key={item.id}
-                  className={`flex items-center gap-4 p-4 rounded-2xl border transition-all duration-300 group shadow-sm ${
+                  className={`group relative flex items-center gap-6 p-6 rounded-[2rem] border backdrop-blur-xl transition-all duration-500 ${
                     item.is_completed
-                      ? 'bg-emerald-500/5 dark:bg-emerald-500/5 border-emerald-500/20 hover:border-emerald-500/40'
-                      : 'bg-amber-500/5 dark:bg-amber-500/5 border-amber-500/20 hover:border-amber-500/40'
+                      ? 'bg-emerald-500/5 dark:bg-emerald-500/5 border-emerald-500/20 hover:border-emerald-500/40 shadow-emerald-500/5'
+                      : 'bg-teal-500/5 dark:bg-teal-500/5 border-teal-500/20 hover:border-teal-500/40 shadow-teal-500/5'
                   }`}
                 >
-                  {/* Toggle Button */}
                   <button
                     onClick={() => handleToggle(item.id)}
-                    className="shrink-0 transition-all hover:scale-110"
-                    title={item.is_completed ? 'Mark as pending' : 'Mark as completed'}
+                    className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${
+                        item.is_completed 
+                        ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30 rotate-[360deg]' 
+                        : 'bg-white dark:bg-white/5 border border-teal-500/30 text-teal-400'
+                    }`}
                   >
-                    {item.is_completed ? (
-                      <CheckCircle className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
-                    ) : (
-                      <Circle className="w-6 h-6 text-amber-600 dark:text-amber-400" />
-                    )}
+                    {item.is_completed ? <CheckCircle className="w-6 h-6" /> : <Circle className="w-6 h-6" />}
                   </button>
 
-                  {/* Number */}
-                  <span className="text-xs font-black text-gray-400 dark:text-slate-600 bg-gray-100 dark:bg-white/5 w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-colors">
+                  <div className="w-8 h-8 rounded-lg bg-white/50 dark:bg-white/5 border border-gray-100 dark:border-white/10 flex items-center justify-center text-[10px] font-black text-gray-400">
                     {index + 1}
-                  </span>
+                  </div>
 
-                  {/* Title */}
                   {editingId === item.id ? (
-                    <div className="flex-1 flex gap-2">
+                    <div className="flex-1 flex gap-3">
                       <input
                         type="text"
                         value={editTitle}
                         onChange={(e) => setEditTitle(e.target.value)}
-                        className="flex-1 bg-white dark:bg-slate-900/50 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2 text-gray-900 dark:text-white text-sm focus:outline-none focus:border-emerald-500/50 transition-colors"
+                        className="flex-1 bg-white dark:bg-black border border-teal-500/50 rounded-xl px-5 py-2 text-sm font-bold focus:outline-none shadow-inner"
                         autoFocus
-                        onKeyDown={(e) => { if (e.key === 'Enter') handleEditSave(item.id); if (e.key === 'Escape') setEditingId(null); }}
                       />
-                      <button onClick={() => handleEditSave(item.id)} className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 dark:hover:text-emerald-300 px-2 font-bold text-sm">Save</button>
-                      <button onClick={() => setEditingId(null)} className="text-gray-400 dark:text-slate-400 hover:text-gray-600 dark:hover:text-slate-300 px-2 transition-colors">
-                        <X className="w-4 h-4" />
-                      </button>
+                      <button onClick={() => handleEditSave(item.id)} className="bg-teal-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-teal-500/20">Save</button>
+                      <button onClick={() => setEditingId(null)} className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-rose-500 transition-colors"><X className="w-5 h-5" /></button>
                     </div>
                   ) : (
-                    <span className={`flex-1 font-bold text-sm transition-colors ${item.is_completed ? 'text-gray-900 dark:text-white' : 'text-amber-700 dark:text-amber-200'}`}>
-                      {item.title}
-                    </span>
+                    <div className="flex-1">
+                        <span className={`text-base font-black transition-all ${item.is_completed ? 'text-gray-900 dark:text-white' : 'text-teal-700 dark:text-teal-300'}`}>
+                          {item.title}
+                        </span>
+                        <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mt-1">Status: {item.is_completed ? 'Authenticated' : 'Pending Deployment'}</p>
+                    </div>
                   )}
 
-                  {/* Status Badge */}
-                  <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-lg shrink-0 transition-colors ${
-                    item.is_completed
-                      ? 'bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400'
-                      : 'bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400'
-                  }`}>
-                    {item.is_completed ? 'Done' : 'Pending'}
-                  </span>
-
-                  {/* Action Buttons */}
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-4 group-hover:translate-x-0">
                     <button
                       onClick={() => { setEditingId(item.id); setEditTitle(item.title); }}
-                      className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-white/10 text-gray-400 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white transition-all"
-                      title="Edit"
+                      className="w-10 h-10 flex items-center justify-center bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 text-gray-400 hover:text-teal-600 rounded-xl transition-all shadow-sm"
                     >
-                      <Edit3 className="w-3.5 h-3.5" />
+                      <Edit3 className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => handleDelete(item.id)}
-                      className="p-2 rounded-lg hover:bg-red-500/20 text-gray-400 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-all"
-                      title="Delete"
+                      className="w-10 h-10 flex items-center justify-center bg-rose-500/10 text-rose-600 hover:bg-rose-600 hover:text-white rounded-xl transition-all shadow-sm"
                     >
-                      <Trash2 className="w-3.5 h-3.5" />
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
               ))}
             </div>
           )}
-        </>
+        </div>
       )}
 
-      {/* ========== OVERVIEW MODE: Show all courses with their progress ========== */}
+      {/* Overview Mode */}
       {viewMode === 'overview' && (
-        <div className="space-y-4 animate-fadeIn">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-in slide-in-from-bottom-4 duration-700">
           {Object.keys(groupedProgress).length === 0 ? (
-            <div className="text-center py-16 bg-gray-50 dark:bg-white/[0.02] border border-dashed border-gray-200 dark:border-white/10 rounded-[2rem] transition-colors shadow-sm">
-              <ListChecks className="w-12 h-12 text-gray-300 dark:text-slate-600 mx-auto mb-4" />
-              <p className="text-gray-500 dark:text-slate-400 text-lg font-bold">No progress data yet</p>
-              <p className="text-gray-400 dark:text-slate-600 text-sm mt-1">Select a course above and start adding completed parts</p>
+            <div className="col-span-full bg-white/50 dark:bg-white/[0.02] border-2 border-dashed border-gray-200 dark:border-white/10 rounded-[3rem] py-48 text-center flex flex-col items-center transition-all duration-500">
+                <LayoutGrid className="w-16 h-16 text-teal-400 opacity-20 mb-8" />
+                <h4 className="text-xl font-black uppercase tracking-widest text-gray-900 dark:text-white">System Standby</h4>
+                <p className="text-sm font-bold mt-4 tracking-widest text-gray-500">Select a course to initialize progress tracking.</p>
             </div>
           ) : (
             Object.entries(groupedProgress).map(([courseName, data]) => {
@@ -300,54 +296,63 @@ const ProgressManager = ({ courses = [] }) => {
               const isExpanded = expandedCourse === courseName;
 
               return (
-                <div key={courseName} className="bg-white dark:bg-white/[0.02] border border-gray-200 dark:border-white/5 rounded-2xl overflow-hidden hover:border-emerald-500/30 dark:hover:border-emerald-500/20 transition-all shadow-sm transition-colors">
-                  <button
-                    onClick={() => setExpandedCourse(isExpanded ? null : courseName)}
-                    className="w-full flex items-center justify-between p-5 text-left group"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center transition-colors">
-                        <ListChecks className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                      </div>
-                      <div>
-                        <h3 className="text-gray-900 dark:text-white font-bold text-sm transition-colors group-hover:text-emerald-600 transition-colors">{courseName}</h3>
-                        <p className="text-gray-500 dark:text-slate-500 text-xs mt-0.5 transition-colors">
-                          Sem {data.semester}{data.department_name ? ` • ${data.department_name}` : ''}
-                        </p>
-                      </div>
+                <div key={courseName} className="group relative bg-white/80 dark:bg-black/20 backdrop-blur-xl border border-gray-100 dark:border-white/10 rounded-[2.5rem] p-10 transition-all duration-500 hover:border-teal-500/40 hover:shadow-2xl hover:shadow-teal-500/5">
+                  <div className="flex items-center justify-between mb-10">
+                    <div className="flex items-center gap-5">
+                       <div className="w-14 h-14 bg-teal-500/10 rounded-2xl flex items-center justify-center border border-teal-500/20 text-teal-600 shadow-inner group-hover:scale-110 transition-transform">
+                          <BookOpen className="w-7 h-7" />
+                       </div>
+                       <div>
+                          <h3 className="text-lg font-black text-gray-900 dark:text-white tracking-tight group-hover:text-teal-600 transition-colors">{courseName}</h3>
+                          <div className="flex items-center gap-2 mt-1">
+                             <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Sem {data.semester}</span>
+                             {data.department_name && (
+                                <>
+                                   <div className="w-1 h-1 bg-gray-300 dark:bg-gray-700 rounded-full"></div>
+                                   <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest truncate max-w-[120px]">{data.department_name}</span>
+                                </>
+                             )}
+                          </div>
+                       </div>
                     </div>
-                    <div className="flex items-center gap-4">
-                      {/* Progress Bar */}
-                      <div className="hidden sm:flex items-center gap-3">
-                        <div className="w-32 h-2 bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden transition-colors">
-                          <div
-                            className="h-full bg-gradient-to-r from-emerald-600 to-emerald-400 dark:from-emerald-500 dark:to-emerald-400 rounded-full transition-all duration-500"
-                            style={{ width: `${pct}%` }}
-                          />
-                        </div>
-                        <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 whitespace-nowrap transition-colors">{completed}/{total}</span>
-                      </div>
-                      {isExpanded ? (
-                        <ChevronUp className="w-4 h-4 text-gray-400 dark:text-slate-400" />
-                      ) : (
-                        <ChevronDown className="w-4 h-4 text-gray-400 dark:text-slate-400" />
-                      )}
+                    <div className="text-right">
+                       <p className="text-3xl font-black text-teal-600 tracking-tighter">{pct}%</p>
+                       <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Efficiency</p>
                     </div>
-                  </button>
+                  </div>
+
+                  {/* Progressive Bar */}
+                  <div className="relative w-full h-3 bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden mb-10 shadow-inner">
+                    <div
+                      className="absolute left-0 top-0 h-full bg-gradient-to-r from-teal-600 to-emerald-400 rounded-full transition-all duration-1000 group-hover:shadow-[0_0_15px_rgba(20,184,166,0.5)]"
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                     <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl">
+                        <span className="text-[10px] font-black text-teal-600 uppercase tracking-widest">{completed} / {total} Active Signals</span>
+                     </div>
+                     <button
+                       onClick={() => setExpandedCourse(isExpanded ? null : courseName)}
+                       className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all ${isExpanded ? 'bg-teal-600 text-white' : 'bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 text-gray-400 hover:text-teal-600'}`}
+                     >
+                       {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+                     </button>
+                  </div>
 
                   {isExpanded && (
-                    <div className="border-t border-gray-100 dark:border-white/5 p-4 space-y-2 bg-gray-50/30 dark:bg-transparent transition-colors animate-fadeIn">
+                    <div className="mt-8 pt-8 border-t border-gray-50 dark:border-white/5 space-y-4 animate-in fade-in slide-in-from-top-2 duration-500">
                       {data.items.map((item, idx) => (
-                        <div key={item.id} className="flex items-center gap-3 px-3 py-2">
-                          {item.is_completed ? (
-                            <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                          ) : (
-                            <Circle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
-                          )}
-                          <span className="text-xs font-bold text-gray-400 dark:text-slate-600 transition-colors">{idx + 1}.</span>
-                          <span className={`text-sm font-medium transition-colors ${item.is_completed ? 'text-gray-700 dark:text-slate-300' : 'text-amber-700 dark:text-amber-300'}`}>
-                            {item.title}
-                          </span>
+                        <div key={item.id} className="flex items-center justify-between group/item">
+                          <div className="flex items-center gap-3">
+                             <div className={`w-2 h-2 rounded-full ${item.is_completed ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-teal-500/20'}`}></div>
+                             <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{idx + 1}.</span>
+                             <span className={`text-sm font-bold transition-colors ${item.is_completed ? 'text-gray-900 dark:text-gray-300' : 'text-gray-400 dark:text-gray-600'}`}>
+                               {item.title}
+                             </span>
+                          </div>
+                          {item.is_completed && <CheckCircle className="w-3.5 h-3.5 text-emerald-500" />}
                         </div>
                       ))}
                     </div>

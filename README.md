@@ -1,4 +1,4 @@
-# 🎓 ZNU Academic Portal
+#  ZNU Academic Portal
 
 Welcome to the ZNU Academic Portal! This project is a full-stack web application designed to manage university student accounts, doctors, courses, timetables, and quizzes. 
 
@@ -6,7 +6,7 @@ The application is fully containerized using Docker, making it incredibly easy t
 
 ---
 
-## 🛠️ Prerequisites
+##  Prerequisites
 
 Before you begin, ensure you have the following installed on your machine:
 
@@ -18,7 +18,7 @@ Before you begin, ensure you have the following installed on your machine:
 
 ---
 
-## 🚀 Getting Started
+##  Getting Started
 
 Follow these steps to get your local development environment up and running.
 
@@ -45,7 +45,7 @@ Copy-Item backend\.env.example backend\.env
 Copy-Item frontend\.env.example frontend\.env
 ```
 
-**⚠️ Important:** Open the newly created `.env` files (in the root, `backend/`, and `frontend/` folders) and fill in your actual passwords and API keys (like your Supabase keys, JWT secret, etc.).
+** Important:** Open the newly created `.env` files (in the root, `backend/`, and `frontend/` folders) and fill in your actual passwords and API keys (like your Supabase keys, JWT secret, etc.).
 
 ### 3. Start the Application
 
@@ -64,14 +64,14 @@ docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 
 ---
 
-## 🗄️ Database Initialization
+##  Database Initialization
 
 You **do not** need to manually create tables or insert schemas!
 On the very first run, Docker will detect that the PostgreSQL database is empty and will automatically execute the `schema.sql` file to build the entire database structure for you. 
 
 ---
 
-## 🌐 Accessing the Portal
+##  Accessing the Portal
 
 Once the terminal says that the frontend and backend are running, open your browser:
 
@@ -81,7 +81,7 @@ Once the terminal says that the frontend and backend are running, open your brow
 
 ---
 
-## 🧹 Useful Commands (Makefile)
+##  Useful Commands (Makefile)
 
 If you are using Mac/Linux/WSL, we provide a handy `Makefile` to simplify common tasks:
 
@@ -97,7 +97,7 @@ If you are using Mac/Linux/WSL, we provide a handy `Makefile` to simplify common
 
 ---
 
-## 🏗️ Architecture Stack
+## Architecture Stack
 
 - **Frontend:** React, Vite, TailwindCSS
 - **Backend:** Node.js, Express.js
@@ -105,4 +105,3 @@ If you are using Mac/Linux/WSL, we provide a handy `Makefile` to simplify common
 - **Containerization:** Docker & Docker Compose
 - **Authentication:** JWT, Supabase, Google/Microsoft OAuth
 
-Happy Coding! 🚀

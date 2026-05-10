@@ -19,10 +19,10 @@ help: ## 📋 Show available commands
 # ── Development ───────────────────────────────
 
 dev: ## 🔧 Start development environment
-	docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+	docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build -V
 
 dev-d: ## 🔧 Start development (detached)
-	docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build -d
+	docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build -d -V
 
 # ── Production ────────────────────────────────
 

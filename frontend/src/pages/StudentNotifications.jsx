@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Trophy, TrendingUp, ShieldCheck, Info, CheckCircle2, CheckCircle } from 'lucide-react';
+import { Trophy, TrendingUp, ShieldCheck, Info, CheckCircle2, CheckCircle, Bell } from 'lucide-react';
 import { useStudentAuth } from '../context/StudentAuthContext';
 import { useStudentData } from '../context/StudentDataContext';
 import { useNavigate } from 'react-router-dom';
@@ -45,7 +45,11 @@ const StudentNotifications = () => {
     const now = new Date();
     const diff = now - date;
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    if (days === 0) return 'Today';
+    if (days === 0) {
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      if (hours === 0) return 'Just now';
+      return `${hours}h ago`;
+    }
     if (days === 1) return 'Yesterday';
     if (days < 7) return `${days} days ago`;
     return date.toLocaleDateString();
@@ -54,85 +58,85 @@ const StudentNotifications = () => {
   const getNotificationStyle = (title, content) => {
     const lowerTitle = title.toLowerCase();
     const lowerContent = content.toLowerCase();
-    if (lowerTitle.includes('contest') || lowerContent.includes('contest')) {
-      return { emoji: <Trophy className="w-6 h-6 text-primary" />, category: 'Event', borderColor: 'bg-primary', iconBg: 'bg-primary/10 dark:bg-primary/20', textColor: 'text-primary' };
+    if (lowerTitle.includes('contest') || lowerContent.includes('contest') || lowerTitle.includes('event')) {
+      return {
+        emoji: <Trophy className="w-6 h-6 text-emerald-500" />,
+        category: 'Event',
+        borderColor: 'border-emerald-500/50',
+        glow: 'shadow-[0_0_20px_rgba(16,185,129,0.3)] dark:shadow-[0_0_30px_rgba(16,185,129,0.2)]',
+        iconBg: 'bg-emerald-500/10',
+        textColor: 'text-emerald-500'
+      };
     }
-    if (lowerTitle.includes('grade') || lowerContent.includes('grade')) {
-      return { emoji: <TrendingUp className="w-6 h-6 text-secondary" />, category: 'Grades', borderColor: 'bg-secondary', iconBg: 'bg-secondary/10 dark:bg-secondary/20', textColor: 'text-secondary' };
+    if (lowerTitle.includes('grade') || lowerContent.includes('grade') || lowerTitle.includes('score')) {
+      return {
+        emoji: <TrendingUp className="w-6 h-6 text-blue-500" />,
+        category: 'Grades',
+        borderColor: 'border-blue-500/50',
+        glow: 'shadow-[0_0_20px_rgba(59,130,246,0.3)] dark:shadow-[0_0_30px_rgba(59,130,246,0.2)]',
+        iconBg: 'bg-blue-500/10',
+        textColor: 'text-blue-500'
+      };
     }
-    if (lowerTitle.includes('security') || lowerContent.includes('login')) {
-      return { emoji: <ShieldCheck className="w-6 h-6 text-tertiary" />, category: 'Security', borderColor: 'bg-tertiary', iconBg: 'bg-tertiary/10 dark:bg-tertiary/20', textColor: 'text-tertiary' };
+    if (lowerTitle.includes('security') || lowerContent.includes('login') || lowerTitle.includes('password')) {
+      return {
+        emoji: <ShieldCheck className="w-6 h-6 text-rose-500" />,
+        category: 'Security',
+        borderColor: 'border-rose-500/50',
+        glow: 'shadow-[0_0_20px_rgba(244,63,94,0.3)] dark:shadow-[0_0_30px_rgba(244,63,94,0.2)]',
+        iconBg: 'bg-rose-500/10',
+        textColor: 'text-rose-500'
+      };
     }
-    return { emoji: <Info className="w-6 h-6 text-primary" />, category: 'Info', borderColor: 'bg-primary', iconBg: 'bg-primary/10 dark:bg-primary/20', textColor: 'text-primary' };
+    return {
+      emoji: <Info className="w-6 h-6 text-primary" />,
+      category: 'Info',
+      borderColor: 'border-primary/50',
+      glow: 'shadow-[0_0_20px_rgba(46,204,113,0.3)] dark:shadow-[0_0_30px_rgba(46,204,113,0.2)]',
+      iconBg: 'bg-primary/10',
+      textColor: 'text-primary'
+    };
   };
 
-  // دالة متقدمة لتحويل النص وتصميم الروابط بشكل جميل
   const renderContent = (text) => {
     if (!text) return '';
-
     const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
     const parts = [];
     let lastIndex = 0;
     let match;
 
     while ((match = linkRegex.exec(text)) !== null) {
-      // Add text before link
       if (match.index > lastIndex) {
         const textBefore = text.substring(lastIndex, match.index).trim();
-        if (textBefore) {
-          parts.push(
-            <span key={`text-${lastIndex}`} className="inline">
-              {textBefore}{' '}
-            </span>
-          );
-        }
+        if (textBefore) parts.push(<span key={`text-${lastIndex}`} className="inline">{textBefore}{' '}</span>);
       }
-      // Add styled link as button
       parts.push(
         <a
           key={`link-${match.index}`}
           href={match[2]}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 bg-gradient-to-r from-green-100 to-green-50 text-green-700 dark:from-green-500/30 dark:to-green-500/15 dark:text-green-300 font-semibold px-5 py-2.5 rounded-xl border border-green-300 dark:border-green-500/50 backdrop-blur-lg hover:border-green-400 dark:hover:border-green-400/70 hover:from-green-200 hover:to-green-100 dark:hover:from-green-500/40 dark:hover:to-green-500/25 transition-all shadow-sm hover:shadow-md mx-1"
+          className="inline-flex items-center gap-1.5 bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white font-bold px-3 py-1.5 rounded-lg border border-gray-200 dark:border-white/20 backdrop-blur-md hover:bg-primary hover:text-white dark:hover:bg-primary hover:border-primary transition-all shadow-sm mx-1 text-sm mt-2 mb-1"
         >
-          🔗 {match[1]}
+          {match[1]} <span className="text-[10px]">↗</span>
         </a>
       );
       lastIndex = linkRegex.lastIndex;
     }
-
-    // Add remaining text
     if (lastIndex < text.length) {
       const textAfter = text.substring(lastIndex).trim();
-      if (textAfter) {
-        parts.push(
-          <span key={`text-${lastIndex}`} className="inline">
-            {' '}{textAfter}
-          </span>
-        );
-      }
+      if (textAfter) parts.push(<span key={`text-${lastIndex}`} className="inline">{' '}{textAfter}</span>);
     }
-
     return parts.length > 0 ? parts : text;
   };
 
   if (loading) {
     return (
-      <div className="flex flex-col justify-center items-center h-screen bg-gray-50 dark:bg-[#050505] transition-colors duration-500 overflow-hidden relative">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-emerald-500/5 dark:bg-emerald-500/10 blur-[120px] rounded-full animate-pulse-slow"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/5 dark:bg-blue-500/10 blur-[120px] rounded-full animate-pulse-slow"></div>
-
+      <div className="flex flex-col justify-center items-center h-screen bg-gray-50 dark:bg-[#0a0a0a] transition-colors duration-500 overflow-hidden relative">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 blur-[120px] rounded-full animate-pulse-slow"></div>
         <div className="relative z-10 flex flex-col items-center">
-          <div className="relative flex items-center justify-center w-20 h-20 mb-6">
-            <div className="absolute inset-0 border-4 border-emerald-500/20 dark:border-emerald-500/10 rounded-full"></div>
-            <div className="absolute inset-0 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-            <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center animate-pulse">
-                <span className="text-xl font-black text-emerald-500">Z</span>
-            </div>
-          </div>
-          <p className="text-gray-900 dark:text-white font-black text-[10px] uppercase tracking-[0.4em] mb-1 animate-pulse">ZNU PORTAL</p>
-          <p className="text-gray-500 dark:text-gray-400 font-bold text-xs tracking-wide">جاري تحميل الجلسة...</p>
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+          <p className="mt-4 text-gray-500 dark:text-gray-400 font-bold text-xs tracking-wide">Loading Alerts...</p>
         </div>
       </div>
     );
@@ -141,87 +145,107 @@ const StudentNotifications = () => {
   const unreadCount = notifications.filter(n => !n.is_read).length;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-dark text-gray-900 dark:text-white font-body transition-colors duration-300">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a0a] text-gray-900 dark:text-white font-sans transition-colors duration-500 relative overflow-hidden">
+      {/* Background Ambient Orbs */}
+      <div className="fixed top-0 left-0 w-full h-full pointer-events-none z-0 overflow-hidden">
+        <div className="absolute top-[20%] right-[-10%] w-[40%] h-[40%] bg-blue-500/5 dark:bg-blue-500/10 blur-[150px] rounded-full mix-blend-multiply dark:mix-blend-screen"></div>
+        <div className="absolute bottom-[-20%] left-[-10%] w-[50%] h-[50%] bg-primary/5 dark:bg-primary/10 blur-[150px] rounded-full mix-blend-multiply dark:mix-blend-screen"></div>
+      </div>
+
       <Sidebar activePage="notifications" onLogout={handleLogout} />
 
-      <div className="md:ml-64 pb-24 md:pb-8">
-        <div className="max-w-3xl mx-auto px-6 py-8">
-          <div className="flex items-center justify-between mb-8">
-            <h1 className="font-headline text-4xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-gray-900 to-gray-500 dark:from-white dark:to-white/70 leading-tight pb-2 mb-2">
-              Notifications
-            </h1>
+      <div className="md:ml-64 pb-24 md:pb-12 relative z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-2">
+            <div className="flex items-center gap-4">
+              <div className="bg-primary/10 dark:bg-primary/20 p-3 rounded-2xl border border-primary/20 shadow-sm relative">
+                <Bell className="w-8 h-8 text-primary" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-2 -right-2 w-5 h-5 bg-rose-500 text-white text-[10px] font-black flex items-center justify-center rounded-full border-2 border-white dark:border-[#0a0a0a]">
+                    {unreadCount}
+                  </span>
+                )}
+              </div>
+              <div>
+                <h1 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white tracking-tight">Notifications</h1>
+                <p className="text-gray-500 dark:text-gray-400 font-semibold mt-1">Stay updated with your latest alerts.</p>
+              </div>
+            </div>
+
             {unreadCount > 0 && (
               <button
                 onClick={markAllAsRead}
-                className="px-4 py-2 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:bg-primary/20 hover:text-primary hover:border-primary/40 shadow-sm dark:shadow-inner rounded-full text-xs font-bold uppercase tracking-wider transition-all"
+                className="bg-white/80 dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10 backdrop-blur-md px-6 py-3 rounded-2xl text-sm font-bold shadow-sm transition-all flex items-center justify-center gap-2"
               >
-                Mark all read
+                <CheckCircle2 className="w-4 h-4" /> Mark all as read
               </button>
             )}
           </div>
 
+          {/* Masonry Grid Layout */}
           {notifications.length === 0 ? (
-            <div className="text-center mt-16 opacity-70">
-              <div className="mb-4 inline-flex items-center justify-center w-20 h-20 rounded-full border-2 border-dashed border-gray-300 dark:border-white/10 bg-white/50 dark:bg-dark-glass/50 shadow-sm dark:shadow-inner">
-                <span className="text-4xl text-gray-500">✅</span>
+            <div className="py-20 bg-white/50 dark:bg-white/5 backdrop-blur-xl rounded-[2.5rem] border-2 border-dashed border-gray-300 dark:border-white/10 text-center shadow-sm flex flex-col items-center justify-center max-w-3xl mx-auto mt-12">
+              <div className="w-24 h-24 rounded-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 flex items-center justify-center mb-6">
+                <CheckCircle className="w-12 h-12 text-gray-300 dark:text-gray-600" />
               </div>
-              <h4 className="font-headline font-bold text-xl text-gray-900 dark:text-white">All caught up!</h4>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 max-w-[200px] mx-auto">
-                No new alerts. Your kinetic schedule is running smoothly.
-              </p>
+              <h4 className="font-black text-2xl text-gray-900 dark:text-white mb-2">All caught up!</h4>
+              <p className="text-gray-500 dark:text-gray-400 font-medium">You have no new alerts at the moment.</p>
             </div>
           ) : (
-            <div className="space-y-5">
+            <div className="columns-1 md:columns-2 xl:columns-3 gap-6 space-y-6 mt-8">
               {notifications.map((notification) => {
-                const { emoji, category, borderColor, iconBg, textColor } = getNotificationStyle(notification.title, notification.content);
+                const { emoji, category, borderColor, glow, iconBg, textColor } = getNotificationStyle(notification.title, notification.content);
                 const isUnread = !notification.is_read;
+
                 return (
                   <div
                     key={notification.id}
-                    className={`relative rounded-xl p-6 backdrop-blur-sm transition-all duration-200 shadow-sm dark:shadow-none ${
-                      isUnread
-                        ? 'bg-white dark:bg-dark-card border border-primary/30 shadow-[0_4px_15px_rgba(46,204,113,0.15)] dark:shadow-[0_12px_40px_rgba(142,255,113,0.15)] -translate-y-1 hover:shadow-[0_8px_20px_rgba(46,204,113,0.2)] dark:hover:shadow-[0_15px_50px_rgba(142,255,113,0.2)] hover:-translate-y-1.5 transition-all duration-300'
-                        : 'bg-white/60 dark:bg-dark-glass border border-gray-200 dark:border-white/5 opacity-80 hover:opacity-100'
-                    }`}
+                    className={`break-inside-avoid relative overflow-hidden bg-white/90 dark:bg-[#111]/90 backdrop-blur-xl rounded-[2rem] p-6 sm:p-8 cursor-pointer transition-all duration-500 ${isUnread
+                        ? `border-2 ${borderColor} ${glow} hover:-translate-y-2 hover:scale-[1.02]`
+                        : 'border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-lg hover:-translate-y-1 opacity-80 hover:opacity-100'
+                      }`}
                     onClick={() => isUnread && markAsRead(notification.id)}
                   >
+                    {/* Unread Glow Background */}
                     {isUnread && (
-                      <div className={`absolute top-0 left-0 w-1 h-full ${borderColor} rounded-l-xl shadow-[0_0_10px_rgba(46,204,113,0.5)] dark:shadow-[0_0_20px_rgba(142,255,113,0.6)]`} />
+                      <div className={`absolute -right-20 -top-20 w-48 h-48 rounded-full blur-[50px] opacity-20 pointer-events-none ${iconBg.replace('bg-', 'bg-')}`}></div>
                     )}
-                    
-                    <div className="flex justify-between items-start gap-4">
-                      <div className="flex items-start gap-4">
-                        <div className={`w-12 h-12 rounded-full ${iconBg} flex items-center justify-center`}>
+
+                    <div className="relative z-10">
+                      <div className="flex justify-between items-start gap-4 mb-4">
+                        <div className={`w-14 h-14 rounded-[1.2rem] shrink-0 ${iconBg} flex items-center justify-center border border-white/5 shadow-inner`}>
                           {emoji}
                         </div>
-                        <div>
-                          <h3 className={`font-headline font-bold text-xl ${isUnread ? 'text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-400'}`}>
-                            {notification.title}
-                          </h3>
-                          <p className={`text-xs font-label uppercase tracking-widest mt-0.5 ${textColor}`}>
-                            {category}
-                          </p>
+                        <div className="text-right shrink-0">
+                          <span className="inline-block px-3 py-1 rounded-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">
+                            {formatDate(notification.created_at)}
+                          </span>
                         </div>
                       </div>
-                      <span className="text-[10px] font-label text-gray-500 dark:text-gray-400/60 uppercase tracking-tighter">
-                        {formatDate(notification.created_at)}
-                      </span>
-                    </div>
-                    
-                    <div className="text-gray-600 dark:text-gray-400 text-base leading-relaxed mt-4 whitespace-pre-wrap" dir="auto">
-                      {renderContent(notification.content)}
-                    </div>
-                    
-                    {isUnread && (
-                      <div className="mt-4 flex justify-end">
-                        <button
-                          onClick={(e) => { e.stopPropagation(); markAsRead(notification.id); }}
-                          className="text-xs font-bold text-primary/80 dark:text-primary/70 hover:text-primary transition-colors uppercase tracking-wider px-3 py-1.5 rounded-full bg-primary/10 hover:bg-primary/20"
-                        >
-                          Mark as read
-                        </button>
+
+                      <div className="mb-4">
+                        <span className={`text-[10px] font-black uppercase tracking-widest mb-1 block ${textColor}`}>
+                          {category}
+                        </span>
+                        <h3 className={`text-xl font-black leading-tight ${isUnread ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300'}`}>
+                          {notification.title}
+                        </h3>
                       </div>
-                    )}
+
+                      <div className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed whitespace-pre-wrap font-medium">
+                        {renderContent(notification.content)}
+                      </div>
+
+                      {isUnread && (
+                        <div className="mt-6 pt-4 border-t border-gray-100 dark:border-white/10 flex justify-end">
+                          <div className={`text-xs font-bold ${textColor} flex items-center gap-2 group-hover:underline`}>
+                            <CheckCircle2 className="w-4 h-4" /> Click to mark read
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 );
               })}
@@ -229,10 +253,6 @@ const StudentNotifications = () => {
           )}
         </div>
       </div>
-      <style>{`
-        .font-headline { font-family: 'Manrope', 'Inter', sans-serif; }
-        .bg-dark-glass { background: rgba(17, 17, 17, 0.7); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
-      `}</style>
     </div>
   );
 };

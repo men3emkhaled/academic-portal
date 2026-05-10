@@ -4,7 +4,7 @@ const { ipKeyGenerator } = require('express-rate-limit'); // ✅ استيراد 
 // ============= إعدادات عامة =============
 const standardLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 دقيقة
-    max: 100, // الحد الأقصى: 100 طلب لكل IP
+    max: 1000, // الحد الأقصى: 1000 طلب لكل IP (لضمان عمل لوحة التحكم بسلاسة)
     standardHeaders: true,
     legacyHeaders: false,
     message: {

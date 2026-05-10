@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useDoctorAuth } from '../../context/DoctorAuthContext';
 import toast from 'react-hot-toast';
-import { Users, QrCode, Plus, CheckCircle2, Circle, Search, X, Edit2, Trash2, Save, FileSpreadsheet } from 'lucide-react';
+import { Users, QrCode, Plus, CheckCircle2, Circle, Search, X, Edit2, Trash2, Save, FileSpreadsheet, Calendar, Clock, ChevronRight, UserPlus, History, BarChart2 } from 'lucide-react';
 import { Scanner } from '@yudiel/react-qr-scanner';
 
 const DoctorAttendance = ({ courses }) => {
@@ -90,13 +90,11 @@ const DoctorAttendance = ({ courses }) => {
     const tokenValue = detectedCodes[0]?.rawValue || '';
     if (!tokenValue) return;
 
-    // Prevent duplicate scans of the same QR
     if (scanLock.current || tokenValue === lastScanned.current) return;
     scanLock.current = true;
     lastScanned.current = tokenValue;
 
-    // Show instant loading feedback
-    const toastId = toast.loading('Scanning...');
+    const toastId = toast.loading('Processing Scan...');
 
     try {
       const res = await doctorApi('post', '/doctor/attendance/scan', {
@@ -108,7 +106,6 @@ const DoctorAttendance = ({ courses }) => {
     } catch (err) {
       toast.error(err.response?.data?.message || 'Invalid QR Code', { id: toastId });
     } finally {
-      // Allow next scan after a short delay
       setTimeout(() => {
         scanLock.current = false;
         lastScanned.current = '';
@@ -149,7 +146,7 @@ const DoctorAttendance = ({ courses }) => {
   };
 
   const handleDeleteSession = async () => {
-    if (!window.confirm('Are you sure you want to delete this session and all its attendance records?')) return;
+    if (!window.confirm('Are you sure you want to delete this session?')) return;
     try {
       await doctorApi('delete', `/doctor/attendance/sessions/${activeSession.id}`);
       setSessions(sessions.filter(s => s.id !== activeSession.id));
@@ -164,281 +161,343 @@ const DoctorAttendance = ({ courses }) => {
     try {
       const res = await doctorApi('get', `/doctor/attendance/${selectedCourseId}/export`);
       const { sessions: sessionList, data: attendanceData } = res.data;
-
       if (!attendanceData.length) return toast.error('No data to export');
 
       const headers = ['Student ID', 'Student Name', 'Section', ...sessionList.map(s => s.title || new Date(s.date).toLocaleDateString()), 'Total Present', 'Percentage %'];
-      
-      const csvRows = [];
-      csvRows.push(headers.join(','));
+      const csvRows = [headers.join(',')];
 
       attendanceData.forEach(student => {
-        const row = [
-          student.id,
-          `"${student.name}"`,
-          `"${student.section || ''}"`,
-          ...sessionList.map(s => student.attendance[s.id]),
-          student.total_present,
-          `${student.percentage}%`
-        ];
+        const row = [student.id, `"${student.name}"`, `"${student.section || ''}"`, ...sessionList.map(s => student.attendance[s.id]), student.total_present, `${student.percentage}%`];
         csvRows.push(row.join(','));
       });
 
-      const csvString = csvRows.join('\n');
-      const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+      const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       const courseName = courses.find(c => c.id === parseInt(selectedCourseId))?.name || 'Course';
       link.setAttribute("href", url);
-      link.setAttribute("download", `${courseName}_Attendance_Sheet.csv`);
+      link.setAttribute("download", `${courseName}_Attendance.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      toast.success('Attendance sheet exported');
+      toast.success('Sheet exported successfully');
     } catch (err) {
-      toast.error('Failed to export attendance');
+      toast.error('Export failed');
     }
   };
 
   const presentStudentIds = records.map(r => r.student_id);
-
   const filteredStudents = students.filter(s => 
-    s.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    s.id.includes(searchQuery)
+    s.name.toLowerCase().includes(searchQuery.toLowerCase()) || s.id.includes(searchQuery)
   );
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-xl md:text-2xl font-black text-gray-900 dark:text-white flex items-center gap-2">
-            <Users className="w-6 h-6 text-teal-500" /> Attendance Management
-          </h2>
-          <p className="text-sm text-gray-500 dark:text-slate-500 mt-1">
-            Scan student QR codes or mark them manually
-          </p>
+    <div className="max-w-[1600px] mx-auto animate-fadeIn duration-700">
+      {/* Premium Header */}
+      <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-700 p-8 md:p-12 mb-8 shadow-2xl shadow-emerald-500/20">
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute top-[-10%] right-[-5%] w-64 h-64 bg-white rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-[-20%] left-[-10%] w-96 h-96 bg-cyan-400 rounded-full blur-3xl"></div>
         </div>
-      </div>
-
-      {/* Course Selector */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <select
-          value={selectedCourseId}
-          onChange={(e) => setSelectedCourseId(e.target.value)}
-          className="flex-1 bg-white dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/5 rounded-xl p-3.5 text-gray-900 dark:text-white font-medium focus:border-teal-500/50 focus:outline-none transition-colors"
-        >
-          <option value="">-- Select a Course --</option>
-          {courses.map(c => (
-            <option key={c.id} value={c.id}>{c.name}</option>
-          ))}
-        </select>
-        {selectedCourseId && (
-          <button
-            onClick={handleCreateSession}
-            className="flex items-center justify-center gap-2 bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-5 rounded-xl transition-all hover:shadow-lg hover:shadow-teal-500/20 active:scale-95 text-sm"
-          >
-            <Plus className="w-4 h-4" /> New Session
-          </button>
-        )}
-        {selectedCourseId && sessions.length > 0 && (
-          <button
-            onClick={handleExportAttendance}
-            className="flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-5 rounded-xl transition-all hover:shadow-lg hover:shadow-emerald-500/20 active:scale-95 text-sm"
-          >
-            <FileSpreadsheet className="w-4 h-4" /> Download Sheet
-          </button>
-        )}
-      </div>
-
-      {!selectedCourseId ? (
-        <div className="bg-white dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/5 rounded-2xl p-12 text-center">
-          <QrCode className="w-12 h-12 text-gray-300 dark:text-slate-600 mx-auto mb-3" />
-          <p className="text-gray-500 dark:text-slate-500 font-medium">Select a course to manage attendance</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Sessions List Sidebar */}
-          <div className="lg:col-span-1 space-y-3">
-            <h3 className="font-bold text-gray-900 dark:text-white mb-4">Past Sessions</h3>
-            {loading ? (
-              <div className="animate-pulse space-y-3">
-                {[1,2,3].map(i => <div key={i} className="h-16 bg-white dark:bg-white/5 rounded-xl"></div>)}
+        
+        <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
+          <div className="flex items-center gap-6">
+            <div className="w-16 h-16 md:w-20 md:h-20 rounded-3xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-inner">
+              <Users className="w-8 h-8 md:w-10 md:h-10 text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl md:text-5xl font-black text-white tracking-tight uppercase leading-none">Attendance</h1>
+              <div className="flex items-center gap-3 mt-3">
+                <span className="px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-white/90 text-[10px] font-black uppercase tracking-widest">Real-time Sync</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
               </div>
-            ) : sessions.length === 0 ? (
-              <p className="text-sm text-gray-500">No sessions yet. Create one to start.</p>
-            ) : (
-              <div className="space-y-2 max-h-[500px] overflow-y-auto pr-2">
-                {sessions.map(session => (
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-3">
+            {selectedCourseId && (
+              <>
+                <button
+                  onClick={handleCreateSession}
+                  className="group flex items-center gap-3 bg-white text-emerald-600 px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all hover:scale-105 active:scale-95 shadow-xl shadow-black/10"
+                >
+                  <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
+                  New Session
+                </button>
+                <button
+                  onClick={handleExportAttendance}
+                  className="flex items-center gap-3 bg-emerald-400/20 backdrop-blur-md border border-emerald-400/30 text-white px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all hover:bg-emerald-400/30 shadow-xl"
+                >
+                  <FileSpreadsheet className="w-5 h-5" />
+                  Export Sheet
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* Course & Sessions Sidebar */}
+        <div className="lg:col-span-4 space-y-6">
+          <div className="bg-white dark:bg-[#0a0a0a] border border-gray-100 dark:border-white/5 rounded-[2rem] p-6 shadow-sm">
+            <h3 className="text-[11px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-4 px-2">Source Control</h3>
+            <div className="relative group">
+              <select
+                value={selectedCourseId}
+                onChange={(e) => setSelectedCourseId(e.target.value)}
+                className="w-full bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 rounded-2xl p-4 pr-12 text-gray-900 dark:text-white font-bold focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500/50 outline-none transition-all appearance-none cursor-pointer"
+              >
+                <option value="">Select Target Course</option>
+                {courses.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+              <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 rotate-90" />
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-[#0a0a0a] border border-gray-100 dark:border-white/5 rounded-[2rem] p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-6 px-2">
+              <h3 className="text-[11px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-[0.2em]">Session History</h3>
+              <History className="w-4 h-4 text-gray-400" />
+            </div>
+            
+            <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+              {!selectedCourseId ? (
+                <div className="py-8 text-center border-2 border-dashed border-gray-100 dark:border-white/5 rounded-3xl">
+                  <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">Awaiting Course</p>
+                </div>
+              ) : loading ? (
+                Array(4).fill(0).map((_, i) => (
+                  <div key={i} className="h-20 bg-gray-50 dark:bg-white/5 rounded-2xl animate-pulse"></div>
+                ))
+              ) : sessions.length === 0 ? (
+                <div className="py-8 text-center text-gray-400 text-xs font-bold uppercase tracking-widest">No Active Logs</div>
+              ) : (
+                sessions.map(session => (
                   <button
                     key={session.id}
                     onClick={() => setActiveSession(session)}
-                    className={`w-full text-left p-4 rounded-xl border transition-all ${
+                    className={`w-full group text-left p-5 rounded-2xl border transition-all duration-300 relative overflow-hidden ${
                       activeSession?.id === session.id
-                        ? 'bg-teal-50 dark:bg-teal-500/10 border-teal-200 dark:border-teal-500/30'
-                        : 'bg-white dark:bg-white/[0.03] border-gray-200/60 dark:border-white/5 hover:border-teal-500/30'
+                        ? 'bg-emerald-500/5 border-emerald-500/30 dark:bg-emerald-500/10 shadow-lg shadow-emerald-500/5'
+                        : 'bg-white dark:bg-transparent border-gray-100 dark:border-white/5 hover:border-emerald-500/20'
                     }`}
                   >
-                    <div className="font-bold text-gray-900 dark:text-white">
-                      {session.title || new Date(session.date).toLocaleDateString()}
+                    {activeSession?.id === session.id && (
+                      <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500"></div>
+                    )}
+                    <div className="flex justify-between items-start">
+                      <div className="font-black text-sm text-gray-900 dark:text-white uppercase tracking-tight group-hover:text-emerald-500 transition-colors">
+                        {session.title || `Session #${session.id}`}
+                      </div>
+                      <span className="text-[10px] font-black text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-lg">LIVE</span>
                     </div>
-                    <div className="text-xs text-gray-500 mt-1">
-                      {new Date(session.created_at).toLocaleTimeString()}
+                    <div className="flex items-center gap-4 mt-3">
+                      <div className="flex items-center gap-1.5 text-gray-400 dark:text-slate-500">
+                        <Calendar className="w-3.5 h-3.5" />
+                        <span className="text-[10px] font-bold">{new Date(session.date).toLocaleDateString()}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-gray-400 dark:text-slate-500">
+                        <Clock className="w-3.5 h-3.5" />
+                        <span className="text-[10px] font-bold">{new Date(session.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                      </div>
                     </div>
                   </button>
-                ))}
-              </div>
-            )}
+                ))
+              )}
+            </div>
           </div>
+        </div>
 
-          {/* Active Session Area */}
-          <div className="lg:col-span-2">
-            {!activeSession ? (
-              <div className="bg-white dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/5 rounded-2xl p-12 text-center h-full flex flex-col items-center justify-center">
-                <Users className="w-12 h-12 text-gray-300 dark:text-slate-600 mb-3" />
-                <p className="text-gray-500 font-medium">Select a session from the list to view or scan attendance</p>
+        {/* Workspace Area */}
+        <div className="lg:col-span-8">
+          {!activeSession ? (
+            <div className="bg-white dark:bg-[#0a0a0a] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-16 text-center shadow-sm h-full flex flex-col items-center justify-center min-h-[600px]">
+              <div className="w-32 h-32 rounded-full bg-emerald-50 dark:bg-emerald-500/5 flex items-center justify-center mb-8 animate-bounce-slow">
+                <BarChart2 className="w-16 h-16 text-emerald-500/30" />
               </div>
-            ) : (
-              <div className="bg-white dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/5 rounded-2xl p-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+              <h3 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-widest mb-4">Workspace Inactive</h3>
+              <p className="text-sm text-gray-500 dark:text-slate-500 max-w-sm mx-auto font-medium">
+                Initialize or select a session to begin real-time attendance tracking and student management.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {/* Session Control Panel */}
+              <div className="bg-white dark:bg-[#0a0a0a] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-8 shadow-sm relative overflow-hidden">
+                <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-8 relative z-10">
                   <div className="flex-1">
                     {isEditingSession ? (
-                      <div className="flex items-center gap-2 max-w-sm">
+                      <div className="flex items-center gap-4 max-w-lg">
                         <input
                           type="text"
                           value={editSessionTitle}
                           onChange={(e) => setEditSessionTitle(e.target.value)}
-                          placeholder="Session Name (e.g. Week 1)"
-                          className="flex-1 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-1.5 text-sm focus:border-teal-500 focus:outline-none"
+                          className="flex-1 bg-gray-50 dark:bg-black/40 border-2 border-emerald-500/30 rounded-2xl px-5 py-3 text-sm font-bold focus:ring-4 focus:ring-emerald-500/10 outline-none text-gray-900 dark:text-white"
                           autoFocus
                         />
-                        <button onClick={handleUpdateSession} className="p-1.5 text-teal-600 hover:bg-teal-50 rounded-lg transition-colors">
-                          <Save className="w-4 h-4" />
-                        </button>
-                        <button onClick={() => setIsEditingSession(false)} className="p-1.5 text-gray-400 hover:bg-gray-100 rounded-lg transition-colors">
-                          <X className="w-4 h-4" />
-                        </button>
+                        <button onClick={handleUpdateSession} className="p-3 bg-emerald-500 text-white rounded-xl hover:scale-105 transition-all"><Save className="w-5 h-5" /></button>
+                        <button onClick={() => setIsEditingSession(false)} className="p-3 bg-gray-100 dark:bg-white/5 text-gray-400 rounded-xl"><X className="w-5 h-5" /></button>
                       </div>
                     ) : (
-                      <div className="flex items-center gap-3">
-                        <h3 className="font-black text-xl text-gray-900 dark:text-white">
-                          {activeSession.title || `Session: ${new Date(activeSession.date).toLocaleDateString()}`}
-                        </h3>
-                        <button onClick={() => setIsEditingSession(true)} className="text-gray-400 hover:text-teal-500 transition-colors">
-                          <Edit2 className="w-4 h-4" />
-                        </button>
-                        <button onClick={handleDeleteSession} className="text-gray-400 hover:text-red-500 transition-colors">
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                      <div className="flex items-center gap-4 group">
+                        <h2 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
+                          {activeSession.title || 'Live Session Log'}
+                        </h2>
+                        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button onClick={() => setIsEditingSession(true)} className="p-2 text-gray-400 hover:text-emerald-500 transition-colors"><Edit2 className="w-4 h-4" /></button>
+                          <button onClick={handleDeleteSession} className="p-2 text-gray-400 hover:text-rose-500 transition-colors"><Trash2 className="w-4 h-4" /></button>
+                        </div>
                       </div>
                     )}
-                    <p className="text-sm text-teal-600 dark:text-teal-400 font-bold mt-1">
-                      {records.length} / {students.length} Present
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => setScanning(!scanning)}
-                    className={`px-4 py-2 rounded-xl font-bold flex items-center justify-center gap-2 text-sm transition-all whitespace-nowrap ${
-                      scanning 
-                        ? 'bg-red-100 text-red-600 hover:bg-red-200 dark:bg-red-500/20 dark:text-red-400' 
-                        : 'bg-teal-500 text-white hover:bg-teal-600 shadow-lg shadow-teal-500/20'
-                    }`}
-                  >
-                    {scanning ? (
-                      <><X className="w-4 h-4" /> Stop Scanning</>
-                    ) : (
-                      <><QrCode className="w-4 h-4" /> Start Scanner</>
-                    )}
-                  </button>
-                </div>
-
-                {scanning && (
-                  <div className="mb-6 rounded-2xl overflow-hidden border-4 border-doctor-sidebar dark:border-doctor-card shadow-2xl relative">
-                    <div className="absolute inset-0 border-[40px] border-black/40 z-10 pointer-events-none">
-                      <div className="w-full h-full border-2 border-teal-500 rounded-2xl relative">
-                        {/* Scanning animation line */}
-                        <div className="absolute top-0 left-0 w-full h-0.5 bg-teal-500 shadow-[0_0_10px_rgba(20,184,166,1)] animate-[scan_2s_ease-in-out_infinite]"></div>
+                    
+                    <div className="flex items-center gap-6 mt-6">
+                      <div className="px-6 py-4 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl">
+                        <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-1">Present Students</p>
+                        <p className="text-2xl font-black text-gray-900 dark:text-white leading-none">
+                          {records.length} <span className="text-sm text-gray-400 font-medium">/ {students.length}</span>
+                        </p>
+                      </div>
+                      <div className="px-6 py-4 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl">
+                        <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-1">Attendance Rate</p>
+                        <p className="text-2xl font-black text-gray-900 dark:text-white leading-none">
+                          {students.length ? Math.round((records.length / students.length) * 100) : 0}%
+                        </p>
                       </div>
                     </div>
-                    <Scanner 
-                      onScan={(detectedCodes) => handleScan(detectedCodes)} 
-                      onError={(err) => console.log(err)} 
-                      scanDelay={300}
-                      components={{ audio: false, finder: false }}
-                    />
                   </div>
-                )}
 
-                {/* Search Bar */}
-                <div className="relative mb-4">
-                  <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Search students to mark manually..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm focus:border-teal-500 focus:outline-none transition-colors text-gray-900 dark:text-white"
-                  />
-                </div>
-
-                {/* Students List */}
-                <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2">
-                  {filteredStudents.map(student => {
-                    const isPresent = presentStudentIds.includes(student.id);
-                    return (
-                      <div 
-                        key={student.id}
-                        className={`flex items-center justify-between p-3 rounded-xl border transition-colors ${
-                          isPresent 
-                            ? 'bg-teal-50/50 dark:bg-teal-500/5 border-teal-200/50 dark:border-teal-500/20' 
-                            : 'bg-white dark:bg-transparent border-gray-100 dark:border-white/5 hover:border-gray-200 dark:hover:border-white/10'
-                        }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className={`w-10 h-10 rounded-full overflow-hidden flex items-center justify-center font-bold text-sm ${
-                            isPresent ? 'bg-teal-100 text-teal-700 dark:bg-teal-500/20 dark:text-teal-400' : 'bg-gray-100 text-gray-500 dark:bg-white/5 dark:text-gray-400'
-                          }`}>
-                            {student.avatar_url ? (
-                              <img src={student.avatar_url} alt={student.name} className="w-full h-full object-cover" />
-                            ) : (
-                              student.name.charAt(0)
-                            )}
-                          </div>
-                          <div>
-                            <p className={`font-bold text-sm ${isPresent ? 'text-teal-900 dark:text-teal-100' : 'text-gray-900 dark:text-white'}`}>
-                              {student.name}
-                            </p>
-                            <p className="text-xs text-gray-500">{student.id}</p>
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => handleManualToggle(student.id)}
-                          className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
-                            isPresent
-                              ? 'bg-teal-500 text-white'
-                              : 'bg-gray-100 text-gray-400 hover:bg-gray-200 dark:bg-white/10 dark:hover:bg-white/20'
-                          }`}
-                        >
-                          {isPresent ? <CheckCircle2 className="w-5 h-5" /> : <Circle className="w-5 h-5" />}
-                        </button>
-                      </div>
-                    );
-                  })}
+                  <button
+                    onClick={() => setScanning(!scanning)}
+                    className={`h-24 px-10 rounded-[2rem] font-black flex items-center justify-center gap-4 transition-all hover:scale-[1.02] active:scale-95 shadow-2xl ${
+                      scanning 
+                        ? 'bg-rose-500 text-white shadow-rose-500/20' 
+                        : 'bg-emerald-500 text-white shadow-emerald-500/20'
+                    }`}
+                  >
+                    {scanning ? <X className="w-8 h-8" /> : <QrCode className="w-8 h-8" />}
+                    <div className="text-left">
+                      <p className="text-[10px] font-black uppercase tracking-widest opacity-80">{scanning ? 'Emergency' : 'Automatic'}</p>
+                      <p className="text-lg leading-tight uppercase tracking-widest">{scanning ? 'Stop' : 'Scan'}</p>
+                    </div>
+                  </button>
                 </div>
               </div>
-            )}
-          </div>
+
+              {scanning && (
+                <div className="animate-fadeIn duration-500 rounded-[3rem] overflow-hidden border-8 border-white dark:border-[#0a0a0a] shadow-2xl relative">
+                  <div className="absolute inset-0 border-[60px] border-black/40 z-10 pointer-events-none">
+                    <div className="w-full h-full border-2 border-emerald-400/50 rounded-[2rem] relative">
+                      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-emerald-400 to-transparent shadow-[0_0_20px_rgba(52,211,153,1)] animate-scan-y"></div>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-32 h-32 border border-emerald-400/30 rounded-full animate-ping"></div>
+                      </div>
+                    </div>
+                  </div>
+                  <Scanner 
+                    onScan={handleScan} 
+                    onError={(err) => console.log(err)} 
+                    scanDelay={300}
+                    components={{ audio: false, finder: false }}
+                  />
+                </div>
+              )}
+
+              {/* Student Management Area */}
+              <div className="bg-white dark:bg-[#0a0a0a] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-8 shadow-sm">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-8">
+                  <div className="flex items-center gap-3">
+                    <UserPlus className="w-5 h-5 text-emerald-500" />
+                    <h3 className="font-black text-gray-900 dark:text-white uppercase tracking-widest">Student Manifest</h3>
+                  </div>
+                  <div className="relative group w-full sm:w-96">
+                    <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-emerald-500 transition-colors" />
+                    <input
+                      type="text"
+                      placeholder="Search identifier or name..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full bg-gray-50 dark:bg-black/40 border border-gray-100 dark:border-white/10 rounded-2xl pl-12 pr-6 py-3.5 text-sm font-bold focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500/30 outline-none transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+                  {filteredStudents.length === 0 ? (
+                    <div className="col-span-full py-16 text-center">
+                      <Search className="w-12 h-12 text-gray-100 dark:text-white/5 mx-auto mb-4" />
+                      <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">No Records Found</p>
+                    </div>
+                  ) : (
+                    filteredStudents.map(student => {
+                      const isPresent = presentStudentIds.includes(student.id);
+                      return (
+                        <div 
+                          key={student.id}
+                          onClick={() => handleManualToggle(student.id)}
+                          className={`flex items-center justify-between p-4 rounded-3xl border cursor-pointer transition-all duration-300 active:scale-95 group ${
+                            isPresent 
+                              ? 'bg-emerald-500/5 border-emerald-500/20 shadow-inner' 
+                              : 'bg-white dark:bg-transparent border-gray-100 dark:border-white/5 hover:border-emerald-500/20'
+                          }`}
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className={`w-14 h-14 rounded-2xl overflow-hidden flex items-center justify-center font-black transition-all ${
+                              isPresent ? 'bg-emerald-500 text-white rotate-6' : 'bg-gray-100 text-gray-400 dark:bg-white/5 group-hover:bg-emerald-500 group-hover:text-white group-hover:rotate-6'
+                            }`}>
+                              {student.avatar_url ? (
+                                <img src={student.avatar_url} alt={student.name} className="w-full h-full object-cover" />
+                              ) : (
+                                student.name.charAt(0)
+                              )}
+                            </div>
+                            <div>
+                              <p className={`font-black text-sm uppercase tracking-tight ${isPresent ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-900 dark:text-white'}`}>
+                                {student.name}
+                              </p>
+                              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-0.5">{student.id}</p>
+                            </div>
+                          </div>
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
+                            isPresent ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30' : 'bg-gray-100 dark:bg-white/5 text-gray-300'
+                          }`}>
+                            {isPresent ? <CheckCircle2 className="w-6 h-6" /> : <Circle className="w-6 h-6" />}
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-      )}
+      </div>
+
       <style>{`
-        @keyframes scan {
-          0% { top: 0; }
-          50% { top: 100%; }
-          100% { top: 0; }
+        @keyframes scan-y {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(350px); }
         }
+        .animate-scan-y { animation: scan-y 2.5s ease-in-out infinite; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { 
+          background: rgba(16, 185, 129, 0.2); 
+          border-radius: 10px; 
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { 
+          background: rgba(16, 185, 129, 0.4); 
+        }
+        @keyframes bounce-slow {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-20px); }
+        }
+        .animate-bounce-slow { animation: bounce-slow 4s ease-in-out infinite; }
       `}</style>
     </div>
   );
 };
 
 export default DoctorAttendance;
+

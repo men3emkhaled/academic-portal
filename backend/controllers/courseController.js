@@ -1,11 +1,26 @@
 const Course = require('../models/Course');
 const Resource = require('../models/Resource');
 const xss = require('xss');
+const { getCache, setCache, clearCachePattern } = require('../utils/cache');
+
+// مفتاح الكاش لجميع المواد
+const COURSES_CACHE_KEY = 'courses:all';
 
 // جلب جميع المواد (مع معلومات القسم إذا وجد)
 const getAllCourses = async (req, res) => {
     try {
+        // 1. التحقق من وجود الداتا في الكاش
+        const cachedCourses = await getCache(COURSES_CACHE_KEY);
+        if (cachedCourses) {
+            return res.json(cachedCourses);
+        }
+
+        // 2. إذا لم تكن في الكاش، جلبها من الداتابيز
         const courses = await Course.findAll();
+        
+        // 3. تخزين النتيجة في الكاش لمدة ساعة (3600 ثانية)
+        await setCache(COURSES_CACHE_KEY, courses, 3600);
+        
         res.json(courses);
     } catch (error) {
         console.error('❌ Error in getAllCourses:', error);
@@ -79,6 +94,9 @@ const createCourse = async (req, res) => {
             finalDepartmentId
         );
         
+        // مسح الكاش لأن البيانات تغيرت
+        await clearCachePattern('courses:*');
+        
         res.status(201).json(course);
     } catch (error) {
         console.error('❌ Error in createCourse:', error);
@@ -109,6 +127,10 @@ const updateCourse = async (req, res) => {
         );
         
         if (!course) return res.status(404).json({ message: 'Course not found' });
+        
+        // مسح الكاش لأن البيانات تغيرت
+        await clearCachePattern('courses:*');
+        
         res.json(course);
     } catch (error) {
         console.error('❌ Error in updateCourse:', error);
@@ -122,6 +144,10 @@ const deleteCourse = async (req, res) => {
         const { id } = req.params;
         await Resource.deleteByCourseId(id);
         await Course.delete(id);
+        
+        // مسح الكاش لأن البيانات تغيرت
+        await clearCachePattern('courses:*');
+        
         res.json({ message: 'Course deleted successfully' });
     } catch (error) {
         console.error('❌ Error in deleteCourse:', error);

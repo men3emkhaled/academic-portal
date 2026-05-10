@@ -126,7 +126,7 @@ const StudentTimetable = () => {
             <div className="absolute inset-0 border-4 border-emerald-500/20 dark:border-emerald-500/10 rounded-full"></div>
             <div className="absolute inset-0 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
             <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center animate-pulse">
-                <span className="text-xl font-black text-emerald-500">Z</span>
+              <span className="text-xl font-black text-emerald-500">Z</span>
             </div>
           </div>
           <p className="text-gray-900 dark:text-white font-black text-[10px] uppercase tracking-[0.4em] mb-1 animate-pulse">ZNU PORTAL</p>
@@ -164,8 +164,8 @@ const StudentTimetable = () => {
                 <button
                   onClick={() => setViewMode('my-section')}
                   className={`px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest transition-all duration-300 ${viewMode === 'my-section'
-                      ? 'bg-primary text-white dark:text-dark shadow-md'
-                      : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-5'
+                    ? 'bg-primary text-white dark:text-dark shadow-md'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-5'
                     }`}
                 >
                   My Section ({student?.section || '?'})
@@ -174,8 +174,8 @@ const StudentTimetable = () => {
                   onClick={() => setViewMode('all-sections')}
                   disabled={!student?.department_id}
                   className={`px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest transition-all duration-300 ${viewMode === 'all-sections'
-                      ? 'bg-primary text-white dark:text-dark shadow-md'
-                      : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-5'
+                    ? 'bg-primary text-white dark:text-dark shadow-md'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-5'
                     } ${!student?.department_id ? 'opacity-50 cursor-not-allowed' : ''}`}
                   title={!student?.department_id ? 'لا يوجد قسم محدد لك' : 'عرض كل سكاشن القسم'}
                 >
@@ -190,151 +190,151 @@ const StudentTimetable = () => {
 
           {/* Main Toggle (Lectures vs Exams) */}
           <div className="flex bg-white dark:bg-dark-glass p-1.5 rounded-full border border-gray-200 dark:border-white/10 shadow-sm dark:shadow-inner overflow-hidden mb-8">
-             <button
-                onClick={() => setScheduleType('lectures')}
-                className={`flex-1 py-3 rounded-full text-xs font-bold uppercase tracking-widest transition-all duration-300 ${scheduleType === 'lectures' ? 'bg-primary text-white dark:text-dark shadow-md' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
-             >
-                Lectures & Labs
-             </button>
-             <button
-                onClick={() => setScheduleType('exams')}
-                className={`flex-1 py-3 rounded-full text-xs font-bold uppercase tracking-widest transition-all duration-300 ${scheduleType === 'exams' ? 'bg-primary text-white dark:text-dark shadow-md' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
-             >
-                Practical & Final Exams
-             </button>
+            <button
+              onClick={() => setScheduleType('lectures')}
+              className={`flex-1 py-3 rounded-full text-xs font-bold uppercase tracking-widest transition-all duration-300 ${scheduleType === 'lectures' ? 'bg-primary text-white dark:text-dark shadow-md' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
+            >
+              Lectures & Labs
+            </button>
+            <button
+              onClick={() => setScheduleType('exams')}
+              className={`flex-1 py-3 rounded-full text-xs font-bold uppercase tracking-widest transition-all duration-300 ${scheduleType === 'exams' ? 'bg-primary text-white dark:text-dark shadow-md' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
+            >
+              Practical & Final Exams
+            </button>
           </div>
 
           {scheduleType === 'lectures' ? (
             <>
               {/* Days Selector */}
-          <div className="flex justify-between items-center bg-white dark:bg-dark-card border border-gray-200 dark:border-white/10 shadow-sm dark:shadow-inner p-2 rounded-[2rem] overflow-x-auto no-scrollbar gap-2 mb-12">
-            {days.map((day) => {
-              const isActive = selectedDay === day.id;
-              return (
-                <button
-                  key={day.id}
-                  onClick={() => setSelectedDay(day.id)}
-                  className={`flex-1 min-w-[4rem] flex flex-col items-center py-4 rounded-2xl transition-all duration-300 ${isActive ? 'bg-primary text-white dark:text-dark shadow-[0_4px_15px_rgba(46,204,113,0.3)] dark:shadow-[0_0_20px_rgba(142,255,113,0.4)] scale-105' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white'}`}
-                >
-                  <span className="text-[9px] font-black uppercase tracking-widest mb-1">
-                    {day.short}
-                  </span>
-                  <span className="text-lg font-black font-headline">
-                    {new Date(currentWeekStart).getDate() + days.indexOf(day)}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Schedule List */}
-          <div className="space-y-8">
-            {!hasEntries ? (
-              <div className="text-center py-16 bg-white/50 dark:bg-dark-glass/50 backdrop-blur-md rounded-[2rem] border border-dashed border-gray-300 dark:border-white/10 shadow-sm dark:shadow-inner">
-                <div className="flex justify-center mb-6"><Coffee className="w-16 h-16 text-primary/40" /></div>
-                <p className="text-gray-500 dark:text-gray-400 text-lg">Holiday - No Classes</p>
-                <p className="text-gray-400 dark:text-gray-500 text-sm mt-2">Enjoy your day off!</p>
-              </div>
-            ) : (
-              currentDayEntries.map((entry, idx) => {
-                const completed = isLectureCompleted(entry);
-                const isNow = isLectureNow(entry);
-                const isToday = selectedDay === days[new Date().getDay()]?.id;
-
-                const startFormatted = formatTime(entry.start_time);
-                const endFormatted = formatTime(entry.end_time);
-
-                let bgColor = '';
-                let statusBadge = null;
-
-
-                if (isNow && isToday) {
-                  bgColor = 'bg-primary/10 border border-primary/50 shadow-[0_4px_20px_rgba(46,204,113,0.1)] dark:shadow-[0_0_40px_rgba(142,255,113,0.15)] ring-1 ring-primary/20 scale-[1.02]';
-                  statusBadge = (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/20 text-primary border border-primary/50 text-[10px] uppercase tracking-widest font-black shadow-[0_0_15px_rgba(46,204,113,0.3)] dark:shadow-[0_0_15px_rgba(142,255,113,0.3)] animate-pulse">
-                      <span className="w-2 h-2 rounded-full bg-primary"></span> Live Now
-                    </span>
-                  );
-                } else if (completed && isToday) {
-                  bgColor = 'bg-gray-100/50 dark:bg-dark-glass/40 border border-gray-200 dark:border-white/5 opacity-60 grayscale-[0.5] hover:opacity-100 transition-opacity';
-                  statusBadge = (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-gray-200 dark:bg-white/5 text-gray-500 border border-gray-300 dark:border-white/10 text-[10px] uppercase tracking-widest font-black">
-                      ✓ Finished
-                    </span>
-                  );
-                } else {
-                  bgColor = 'bg-white dark:bg-dark-card border border-gray-200 dark:border-white/10 shadow-sm dark:shadow-xl group hover:border-primary/40 hover:-translate-y-1 hover:shadow-md dark:hover:shadow-2xl transition-all duration-500';
-                  statusBadge = null;
-                }
-
-                return (
-                  <div key={idx} className="relative">
-                    <div
-                      className={`relative overflow-hidden ${bgColor} p-6 sm:p-8 rounded-[2rem] backdrop-blur-md transition-all`}
+              <div className="flex justify-between items-center bg-white dark:bg-dark-card border border-gray-200 dark:border-white/10 shadow-sm dark:shadow-inner p-2 rounded-[2rem] overflow-x-auto no-scrollbar gap-2 mb-12">
+                {days.map((day) => {
+                  const isActive = selectedDay === day.id;
+                  return (
+                    <button
+                      key={day.id}
+                      onClick={() => setSelectedDay(day.id)}
+                      className={`flex-1 min-w-[4rem] flex flex-col items-center py-4 rounded-2xl transition-all duration-300 ${isActive ? 'bg-primary text-white dark:text-dark shadow-[0_4px_15px_rgba(46,204,113,0.3)] dark:shadow-[0_0_20px_rgba(142,255,113,0.4)] scale-105' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white'}`}
                     >
-                      <div className="flex justify-between items-start mb-5">
-                        <div className="space-y-2">
-                          <span
-                            className={`inline-block px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest mb-2 ${entry.type === 'Lecture' ? 'bg-blue-100 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20' : 'bg-purple-100 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-500/20'}`}
-                          >
-                            {entry.type || 'Lecture'}
-                          </span>
-                          <h3 className="text-2xl font-headline font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-gray-900 to-gray-500 dark:from-white dark:to-gray-400 leading-tight tracking-tight">
-                            {entry.course_name}
-                          </h3>
-                          {/* عرض السكاشن المجمعة في وضع "كل السكاشن" */}
-                          {viewMode === 'all-sections' && entry.sections_text && (
-                            <div className="text-xs text-gray-700 dark:text-white/80 bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/20 inline-block px-3 py-1 mt-2 rounded-full font-bold">
-                              Section: {entry.sections_text}
-                            </div>
-                          )}
-                        </div>
-                        <div className="text-right">
-                          {statusBadge ? (
-                            statusBadge
-                          ) : (
-                            <>
-                              <p className="font-headline font-black text-3xl text-gray-900 dark:text-white tracking-tighter">
-                                {startFormatted.split(' ')[0]}
-                              </p>
-                              <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 mt-1 uppercase tracking-widest opacity-80 dark:opacity-60">
-                                {startFormatted.split(' ')[1]}
-                              </p>
-                            </>
-                          )}
-                          {entry.is_quiz && (
-                            <div className="mt-2">
-                              <span className="inline-block px-2 py-0.5 rounded-full bg-yellow-100 dark:bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 text-[10px] font-bold uppercase tracking-wider">
-                                <span className="flex items-center gap-1"><ClipboardList className="w-3 h-3" /> Quiz</span>
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
+                      <span className="text-[9px] font-black uppercase tracking-widest mb-1">
+                        {day.short}
+                      </span>
+                      <span className="text-lg font-black font-headline">
+                        {new Date(currentWeekStart).getDate() + days.indexOf(day)}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
 
-                      <div className="flex flex-wrap gap-5 items-center mt-4 pt-4 border-t border-gray-100 dark:border-white/5">
-                        {entry.instructor && (
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-semibold text-gray-500 dark:text-gray-400">
-                              <UserCheck className="w-4 h-4 text-primary" /> {entry.instructor}
-                            </span>
-                          </div>
-                        )}
-                        {entry.location && (
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-semibold text-gray-500 dark:text-gray-400">
-                              <MapPin className="w-4 h-4 text-secondary" /> {entry.location}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
+              {/* Schedule List */}
+              <div className="space-y-8">
+                {!hasEntries ? (
+                  <div className="text-center py-16 bg-white/50 dark:bg-dark-glass/50 backdrop-blur-md rounded-[2rem] border border-dashed border-gray-300 dark:border-white/10 shadow-sm dark:shadow-inner">
+                    <div className="flex justify-center mb-6"><Coffee className="w-16 h-16 text-primary/40" /></div>
+                    <p className="text-gray-500 dark:text-gray-400 text-lg">Holiday - No Classes</p>
+                    <p className="text-gray-400 dark:text-gray-500 text-sm mt-2">Enjoy your day off!</p>
                   </div>
-                );
-              })
-            )}
-          </div>
-          </>
+                ) : (
+                  currentDayEntries.map((entry, idx) => {
+                    const completed = isLectureCompleted(entry);
+                    const isNow = isLectureNow(entry);
+                    const isToday = selectedDay === days[new Date().getDay()]?.id;
+
+                    const startFormatted = formatTime(entry.start_time);
+                    const endFormatted = formatTime(entry.end_time);
+
+                    let bgColor = '';
+                    let statusBadge = null;
+
+
+                    if (isNow && isToday) {
+                      bgColor = 'bg-primary/10 border border-primary/50 shadow-[0_4px_20px_rgba(46,204,113,0.1)] dark:shadow-[0_0_40px_rgba(142,255,113,0.15)] ring-1 ring-primary/20 scale-[1.02]';
+                      statusBadge = (
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/20 text-primary border border-primary/50 text-[10px] uppercase tracking-widest font-black shadow-[0_0_15px_rgba(46,204,113,0.3)] dark:shadow-[0_0_15px_rgba(142,255,113,0.3)] animate-pulse">
+                          <span className="w-2 h-2 rounded-full bg-primary"></span> Live Now
+                        </span>
+                      );
+                    } else if (completed && isToday) {
+                      bgColor = 'bg-gray-100/50 dark:bg-dark-glass/40 border border-gray-200 dark:border-white/5 opacity-60 grayscale-[0.5] hover:opacity-100 transition-opacity';
+                      statusBadge = (
+                        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-gray-200 dark:bg-white/5 text-gray-500 border border-gray-300 dark:border-white/10 text-[10px] uppercase tracking-widest font-black">
+                          ✓ Finished
+                        </span>
+                      );
+                    } else {
+                      bgColor = 'bg-white dark:bg-dark-card border border-gray-200 dark:border-white/10 shadow-sm dark:shadow-xl group hover:border-primary/40 hover:-translate-y-1 hover:shadow-md dark:hover:shadow-2xl transition-all duration-500';
+                      statusBadge = null;
+                    }
+
+                    return (
+                      <div key={idx} className="relative">
+                        <div
+                          className={`relative overflow-hidden ${bgColor} p-6 sm:p-8 rounded-[2rem] backdrop-blur-md transition-all`}
+                        >
+                          <div className="flex justify-between items-start mb-5">
+                            <div className="space-y-2">
+                              <span
+                                className={`inline-block px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest mb-2 ${entry.type === 'Lecture' ? 'bg-blue-100 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20' : 'bg-purple-100 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-500/20'}`}
+                              >
+                                {entry.type || 'Lecture'}
+                              </span>
+                              <h3 className="text-2xl font-headline font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-gray-900 to-gray-500 dark:from-white dark:to-gray-400 leading-tight tracking-tight">
+                                {entry.course_name}
+                              </h3>
+                              {/* عرض السكاشن المجمعة في وضع "كل السكاشن" */}
+                              {viewMode === 'all-sections' && entry.sections_text && (
+                                <div className="text-xs text-gray-700 dark:text-white/80 bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/20 inline-block px-3 py-1 mt-2 rounded-full font-bold">
+                                  Section: {entry.sections_text}
+                                </div>
+                              )}
+                            </div>
+                            <div className="text-right">
+                              {statusBadge ? (
+                                statusBadge
+                              ) : (
+                                <>
+                                  <p className="font-headline font-black text-3xl text-gray-900 dark:text-white tracking-tighter">
+                                    {startFormatted.split(' ')[0]}
+                                  </p>
+                                  <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 mt-1 uppercase tracking-widest opacity-80 dark:opacity-60">
+                                    {startFormatted.split(' ')[1]}
+                                  </p>
+                                </>
+                              )}
+                              {entry.is_quiz && (
+                                <div className="mt-2">
+                                  <span className="inline-block px-2 py-0.5 rounded-full bg-yellow-100 dark:bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 text-[10px] font-bold uppercase tracking-wider">
+                                    <span className="flex items-center gap-1"><ClipboardList className="w-3 h-3" /> Quiz</span>
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="flex flex-wrap gap-5 items-center mt-4 pt-4 border-t border-gray-100 dark:border-white/5">
+                            {entry.instructor && (
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-semibold text-gray-500 dark:text-gray-400">
+                                  <UserCheck className="w-4 h-4 text-primary" /> {entry.instructor}
+                                </span>
+                              </div>
+                            )}
+                            {entry.location && (
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-semibold text-gray-500 dark:text-gray-400">
+                                  <MapPin className="w-4 h-4 text-secondary" /> {entry.location}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </>
           ) : (
             <div className="space-y-8">
               {!exams || exams.length === 0 ? (
@@ -367,7 +367,7 @@ const StudentTimetable = () => {
                             <div>
                               <p className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest">Day & Date</p>
                               <p className="text-sm font-bold text-gray-700 dark:text-gray-200">
-                                {new Date(exam.exam_date).toLocaleDateString('en-GB', { weekday: 'long' })}<br/>
+                                {new Date(exam.exam_date).toLocaleDateString('en-GB', { weekday: 'long' })}<br />
                                 <span className="text-xs text-gray-500 dark:text-gray-400">{new Date(exam.exam_date).toLocaleDateString('en-GB')}</span>
                               </p>
                             </div>

@@ -1,10 +1,3 @@
-# ============================================
-# 🚀 CI/CD Pipeline — University Academic Portal
-# ============================================
-# Triggers on push/PR to main branch
-# Jobs: Lint → Test → Build → Deploy
-# ============================================
-
 name: CI/CD Pipeline
 
 on:
@@ -22,9 +15,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # ============================================
-  # 🔍 Job 1: Lint & Security Check
-  # ============================================
+
   lint:
     name: 🔍 Lint & Security
     runs-on: ubuntu-latest
@@ -69,9 +60,6 @@ jobs:
             echo "✅ No hardcoded secrets detected"
           fi
 
-  # ============================================
-  # 🏗️ Job 2: Build & Verify
-  # ============================================
   build:
     name: 🏗️ Build
     runs-on: ubuntu-latest
@@ -112,9 +100,6 @@ jobs:
           path: frontend/dist/
           retention-days: 7
 
-  # ============================================
-  # 🐳 Job 3: Docker Build & Push
-  # ============================================
   docker:
     name: 🐳 Docker Build
     runs-on: ubuntu-latest
@@ -162,10 +147,7 @@ jobs:
             ${{ secrets.DOCKER_USERNAME }}/academic-portal-frontend:${{ steps.meta.outputs.sha_short }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-  # ============================================
-  # 🚀 Job 4: Deploy to Production
-  # ============================================
+          
   deploy:
     name: 🚀 Deploy
     runs-on: ubuntu-latest

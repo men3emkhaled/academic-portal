@@ -39,7 +39,7 @@ const DoctorOverview = ({ stats, doctor, timetable, setActiveTab }) => {
     <div className="space-y-10 animate-fadeIn">
       {/* Welcome Title */}
       <div>
-        <h1 className="text-4xl font-black text-doctor-text tracking-tight mb-2">Welcome back, Dr. {doctor?.name}</h1>
+        <h1 className="text-4xl font-black text-doctor-text tracking-tight mb-2">Welcome back, Inst. {doctor?.name}</h1>
         <p className="text-doctor-text-muted font-medium text-lg">Here is the overview of your classes and student activities today.</p>
       </div>
 

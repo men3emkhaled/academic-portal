@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, Edit3, X, Activity, Shield } from 'lucide-react';
+import { Plus, Edit3, X, Activity, Shield, Calendar, Clock, Target, RotateCcw, Info } from 'lucide-react';
 
 const QuizForm = ({
   quizForm,
@@ -11,113 +11,136 @@ const QuizForm = ({
   courses
 }) => {
   return (
-    <div className="admin-modal-backdrop" onClick={resetQuizForm}>
-      <div className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-white/10 rounded-[2.5rem] p-12 w-full max-w-4xl shadow-2xl relative overflow-hidden animate-fadeInUp max-h-[90vh] overflow-y-auto custom-scrollbar" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 bg-gray-900/60 dark:bg-black/80 backdrop-blur-md flex items-center justify-center z-[60] p-4 animate-in fade-in duration-300" onClick={resetQuizForm}>
+      <div className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-white/10 rounded-[2.5rem] p-10 w-full max-w-4xl shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-300 max-h-[95vh] overflow-y-auto no-scrollbar" onClick={e => e.stopPropagation()}>
         
+        {/* Decorative background glow */}
+        <div className="absolute -left-24 -top-24 w-80 h-80 bg-indigo-500/5 rounded-full blur-[80px] pointer-events-none"></div>
+
         <div className="relative z-10">
-            <div className="flex items-center justify-between mb-10">
+            <div className="flex items-center justify-between mb-10 pb-6 border-b border-gray-100 dark:border-white/10">
                 <div className="flex items-center gap-5">
-                    <div className="w-16 h-16 bg-indigo-500/10 dark:bg-indigo-500/20 rounded-2xl flex items-center justify-center border border-indigo-500/20 dark:border-indigo-500/30 text-indigo-600 dark:text-indigo-400 transition-colors">
+                    <div className="w-16 h-16 bg-indigo-500/10 dark:bg-indigo-500/20 rounded-2xl flex items-center justify-center border border-indigo-500/20 shadow-inner text-indigo-600 dark:text-indigo-400">
                         {editingQuiz ? <Edit3 className="w-8 h-8" /> : <Plus className="w-8 h-8" />}
                     </div>
                     <div>
-                        <h3 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight transition-colors">
-                            {editingQuiz ? 'Recalibrate Quiz' : 'Initialize Matrix'}
+                        <h3 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">
+                            {editingQuiz ? 'Edit Quiz' : 'Add New Quiz'}
                         </h3>
-                        <p className="text-gray-500 dark:text-slate-500 text-xs font-bold uppercase tracking-widest transition-colors">Core Assessment Node Identity</p>
+                        <p className="text-gray-500 dark:text-gray-400 text-sm font-bold mt-1 uppercase tracking-widest">Quiz Details</p>
                     </div>
                 </div>
-                <button onClick={resetQuizForm} className="w-12 h-12 flex items-center justify-center rounded-2xl bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+                <button onClick={resetQuizForm} className="w-12 h-12 flex items-center justify-center rounded-2xl bg-gray-100 dark:bg-white/5 text-gray-500 hover:text-rose-600 transition-colors">
                     <X className="w-6 h-6" />
                 </button>
             </div>
 
             <form onSubmit={handleSaveQuiz} className="space-y-10">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-8 bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/5 rounded-[2rem] transition-colors shadow-sm">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    {/* Basic Info */}
                     <div className="space-y-6">
-                        <h5 className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-[0.3em] mb-4 transition-colors">Identity Matrix</h5>
+                        <div className="flex items-center gap-3 mb-2">
+                            <Info className="w-4 h-4 text-indigo-500" />
+                            <h5 className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-widest">Basic Information</h5>
+                        </div>
                         <div className="space-y-2">
-                            <label className="text-[10px] font-black text-gray-500 dark:text-slate-500 uppercase tracking-widest ml-4 transition-colors">Deployment Course *</label>
+                            <label className="text-xs font-bold text-gray-700 dark:text-gray-300 ml-1">Select Course <span className="text-rose-500">*</span></label>
                             <select
                                 value={quizForm.course_id}
                                 onChange={(e) => setQuizForm({ ...quizForm, course_id: e.target.value })}
-                                className="admin-input appearance-none"
+                                className="w-full bg-gray-50/50 dark:bg-black/50 text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-4 font-semibold focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all appearance-none shadow-inner"
                                 required
                             >
-                                <option value="" className="bg-white dark:bg-slate-900">-- Catalog Select --</option>
+                                <option value="">-- Select --</option>
                                 {courses.map(c => (
-                                    <option key={c.id} value={c.id} className="bg-white dark:bg-slate-900">{c.name} (S{c.semester})</option>
+                                    <option key={c.id} value={c.id}>{c.name} (S{c.semester})</option>
                                 ))}
                             </select>
                         </div>
                         <div className="space-y-2">
-                            <label className="text-[10px] font-black text-gray-500 dark:text-slate-500 uppercase tracking-widest ml-4 transition-colors">Vector Title *</label>
+                            <label className="text-xs font-bold text-gray-700 dark:text-gray-300 ml-1">Quiz Title <span className="text-rose-500">*</span></label>
                             <input
                                 type="text"
-                                placeholder="e.g. Logic Foundations IV"
+                                placeholder="e.g. Midterm Assessment"
                                 value={quizForm.title}
                                 onChange={(e) => setQuizForm({ ...quizForm, title: e.target.value })}
-                                className="admin-input"
+                                className="w-full bg-gray-50/50 dark:bg-black/50 text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-4 font-semibold focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all shadow-inner"
                                 required
                             />
                         </div>
                     </div>
 
+                    {/* Settings */}
                     <div className="space-y-6">
-                        <h5 className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-[0.3em] mb-4 transition-colors">Constraints</h5>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="flex items-center gap-3 mb-2">
+                            <Target className="w-4 h-4 text-indigo-500" />
+                            <h5 className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-widest">Quiz Settings</h5>
+                        </div>
+                        <div className="grid grid-cols-2 gap-6">
                             <div className="space-y-2">
-                                <label className="text-[10px] font-black text-gray-500 dark:text-slate-500 uppercase tracking-widest ml-4 transition-colors">Time Min *</label>
-                                <input type="number" value={quizForm.time_limit_minutes} onChange={(e) => setQuizForm({ ...quizForm, time_limit_minutes: e.target.value })} className="admin-input" required />
+                                <label className="text-xs font-bold text-gray-700 dark:text-gray-300 ml-1">Time Limit (Min) <span className="text-rose-500">*</span></label>
+                                <div className="relative">
+                                    <input type="number" value={quizForm.time_limit_minutes} onChange={(e) => setQuizForm({ ...quizForm, time_limit_minutes: e.target.value })} className="w-full bg-gray-50/50 dark:bg-black/50 text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-4 font-semibold outline-none pr-12 shadow-inner" required />
+                                    <Clock className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                </div>
                             </div>
                             <div className="space-y-2">
-                                <label className="text-[10px] font-black text-gray-500 dark:text-slate-500 uppercase tracking-widest ml-4 transition-colors">Pass % *</label>
-                                <input type="number" value={quizForm.passing_score} onChange={(e) => setQuizForm({ ...quizForm, passing_score: e.target.value })} className="admin-input" required />
+                                <label className="text-xs font-bold text-gray-700 dark:text-gray-300 ml-1">Passing Grade (%) <span className="text-rose-500">*</span></label>
+                                <div className="relative">
+                                    <input type="number" value={quizForm.passing_score} onChange={(e) => setQuizForm({ ...quizForm, passing_score: e.target.value })} className="w-full bg-gray-50/50 dark:bg-black/50 text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-4 font-semibold outline-none pr-12 shadow-inner" required />
+                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 font-black text-gray-400">%</span>
+                                </div>
                             </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-2 gap-6">
                             <div className="space-y-2">
-                                <label className="text-[10px] font-black text-gray-500 dark:text-slate-500 uppercase tracking-widest ml-4 transition-colors">Attempt Recurrence</label>
-                                <input type="number" value={quizForm.max_attempts} onChange={(e) => setQuizForm({ ...quizForm, max_attempts: e.target.value })} className="admin-input" />
+                                <label className="text-xs font-bold text-gray-700 dark:text-gray-300 ml-1">Max Attempts</label>
+                                <div className="relative">
+                                    <input type="number" value={quizForm.max_attempts} onChange={(e) => setQuizForm({ ...quizForm, max_attempts: e.target.value })} className="w-full bg-gray-50/50 dark:bg-black/50 text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-4 font-semibold outline-none pr-12 shadow-inner" />
+                                    <RotateCcw className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                </div>
                             </div>
-                            <div className="space-y-2 flex flex-col justify-end pb-2">
-                                <label className="flex items-center gap-3 cursor-pointer">
-                                    <div className="relative">
-                                        <input type="checkbox" className="sr-only" checked={quizForm.is_official} onChange={(e) => setQuizForm({ ...quizForm, is_official: e.target.checked })} />
-                                        <div className={`block w-10 h-6 rounded-full transition-colors ${quizForm.is_official ? 'bg-red-500' : 'bg-gray-300 dark:bg-slate-700'}`}></div>
-                                        <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${quizForm.is_official ? 'transform translate-x-4' : ''}`}></div>
+                            <div className="space-y-2 flex flex-col justify-end">
+                                <label className="flex items-center gap-3 cursor-pointer group w-fit pb-4">
+                                    <div className={`w-10 h-6 rounded-full p-1 transition-all duration-300 ${quizForm.is_official ? 'bg-rose-500 shadow-lg shadow-rose-500/20' : 'bg-gray-200 dark:bg-gray-800'}`}>
+                                        <div className={`w-4 h-4 bg-white rounded-full transition-transform duration-300 ${quizForm.is_official ? 'translate-x-4' : 'translate-x-0'}`}></div>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                      <Shield className="w-4 h-4 text-red-500" />
-                                      <span className="text-[10px] font-black text-gray-500 dark:text-slate-500 uppercase tracking-widest transition-colors">Strict / Official Mode</span>
+                                      <Shield className="w-4 h-4 text-rose-500" />
+                                      <span className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest group-hover:text-rose-500 transition-colors">Official Exam Mode</span>
                                     </div>
+                                    <input type="checkbox" className="sr-only" checked={quizForm.is_official} onChange={(e) => setQuizForm({ ...quizForm, is_official: e.target.checked })} />
                                 </label>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-10 p-8 bg-gray-50/50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/10 rounded-[2rem] shadow-inner">
                     <div className="space-y-2">
-                        <label className="text-[10px] font-black text-gray-500 dark:text-slate-500 uppercase tracking-widest ml-4 transition-colors">Window Start</label>
-                        <input type="datetime-local" value={quizForm.start_date} onChange={(e) => setQuizForm({ ...quizForm, start_date: e.target.value })} className="admin-input" />
+                        <label className="text-xs font-bold text-gray-700 dark:text-gray-300 ml-1 uppercase tracking-widest flex items-center gap-2">
+                            <Calendar className="w-4 h-4 text-indigo-500" /> Start Date
+                        </label>
+                        <input type="datetime-local" value={quizForm.start_date} onChange={(e) => setQuizForm({ ...quizForm, start_date: e.target.value })} className="w-full bg-white dark:bg-black text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-4 font-semibold focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all" />
                     </div>
                     <div className="space-y-2">
-                        <label className="text-[10px] font-black text-gray-500 dark:text-slate-500 uppercase tracking-widest ml-4 transition-colors">Window Termination</label>
-                        <input type="datetime-local" value={quizForm.end_date} onChange={(e) => setQuizForm({ ...quizForm, end_date: e.target.value })} className="admin-input" />
+                        <label className="text-xs font-bold text-gray-700 dark:text-gray-300 ml-1 uppercase tracking-widest flex items-center gap-2">
+                            <Calendar className="w-4 h-4 text-rose-500" /> End Date
+                        </label>
+                        <input type="datetime-local" value={quizForm.end_date} onChange={(e) => setQuizForm({ ...quizForm, end_date: e.target.value })} className="w-full bg-white dark:bg-black text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-4 font-semibold focus:ring-2 focus:ring-rose-500/50 outline-none transition-all" />
                     </div>
                 </div>
 
                 <div className="space-y-2">
-                    <label className="text-[10px] font-black text-gray-500 dark:text-slate-500 uppercase tracking-widest ml-4 transition-colors">Deployment Rationale</label>
-                    <textarea placeholder="Brief summary for students..." value={quizForm.description} onChange={(e) => setQuizForm({ ...quizForm, description: e.target.value })} className="admin-input scrollbar-hide" rows="3" />
+                    <label className="text-xs font-bold text-gray-700 dark:text-gray-300 ml-1 uppercase tracking-widest">Description</label>
+                    <textarea placeholder="Tell students what this quiz is about..." value={quizForm.description} onChange={(e) => setQuizForm({ ...quizForm, description: e.target.value })} className="w-full bg-gray-50/50 dark:bg-black/50 text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-4 font-semibold focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all shadow-inner resize-none" rows="3" />
                 </div>
 
-                <div className="flex gap-4 pt-6">
-                    <button type="submit" disabled={loading} className="flex-1 admin-btn-primary h-[70px] font-black uppercase tracking-widest shadow-lg shadow-indigo-500/20">
-                        {loading ? <Activity className="w-6 h-6 animate-spin mx-auto" /> : (editingQuiz ? 'APPLY RECALIBRATION' : 'DEPLOY PROTOCOL')}
+                <div className="flex gap-4 pt-6 border-t border-gray-100 dark:border-white/10">
+                    <button type="submit" disabled={loading} className="flex-1 py-5 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-sm uppercase tracking-widest rounded-2xl shadow-lg shadow-indigo-500/20 transition-all flex items-center justify-center gap-3">
+                        {loading ? <Activity className="w-6 h-6 animate-spin" /> : (editingQuiz ? 'Save Changes' : 'Create Quiz')}
                     </button>
-                    <button type="button" onClick={resetQuizForm} className="px-12 admin-btn-secondary h-[70px] font-bold uppercase transition-colors">ABORT</button>
+                    <button type="button" onClick={resetQuizForm} className="px-12 py-5 bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-300 font-bold uppercase tracking-widest rounded-2xl transition-all">Cancel</button>
                 </div>
             </form>
         </div>

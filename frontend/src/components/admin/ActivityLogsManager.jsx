@@ -4,7 +4,8 @@ import toast from 'react-hot-toast';
 import {
   Activity, Search, Filter, RefreshCw, Trash2,
   ChevronLeft, ChevronRight, Clock, User, Shield,
-  Database, BarChart3, Users, AlertTriangle
+  Database, BarChart3, Users, AlertTriangle, X,
+  Terminal, Eye, ArrowUpRight, Calendar
 } from 'lucide-react';
 
 const MODULE_COLORS = {
@@ -24,14 +25,14 @@ const MODULE_COLORS = {
 };
 
 const METHOD_COLORS = {
-  'POST': 'bg-green-500/10 dark:bg-green-500/20 text-green-600 dark:text-green-400',
-  'PUT': 'bg-yellow-500/10 dark:bg-yellow-500/20 text-yellow-600 dark:text-yellow-400',
-  'DELETE': 'bg-red-500/10 dark:bg-red-500/20 text-red-600 dark:text-red-400',
-  'PATCH': 'bg-orange-500/10 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400',
-  'GET': 'bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400',
+  'POST': 'bg-green-500/10 dark:bg-green-500/20 text-green-600 dark:text-green-400 border-green-500/20',
+  'PUT': 'bg-yellow-500/10 dark:bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 border-yellow-500/20',
+  'DELETE': 'bg-red-500/10 dark:bg-red-500/20 text-red-600 dark:text-red-400 border-red-500/20',
+  'PATCH': 'bg-orange-500/10 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400 border-orange-500/20',
+  'GET': 'bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 border-blue-500/20',
 };
 
-const getModuleColor = (mod) => MODULE_COLORS[mod] || { bg: 'bg-gray-100 dark:bg-slate-500/10', text: 'text-gray-500 dark:text-slate-400', border: 'border-gray-200 dark:border-slate-500/20' };
+const getModuleColor = (mod) => MODULE_COLORS[mod] || { bg: 'bg-gray-100 dark:bg-white/5', text: 'text-gray-500 dark:text-slate-400', border: 'border-gray-200 dark:border-white/10' };
 
 const ActivityLogsManager = () => {
   const [logs, setLogs] = useState([]);
@@ -71,7 +72,7 @@ const ActivityLogsManager = () => {
   useEffect(() => { fetchLogs(); fetchStats(); }, [fetchLogs, fetchStats]);
 
   const handleCleanup = async () => {
-    if (!window.confirm('Delete all logs older than 90 days?')) return;
+    if (!window.confirm('Are you sure you want to delete logs older than 90 days?')) return;
     try {
       const res = await api.delete('/admin-logs/cleanup?days=90');
       toast.success(res.data.message);
@@ -95,259 +96,270 @@ const ActivityLogsManager = () => {
   };
 
   return (
-    <div className="space-y-8 animate-fadeIn">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h2 className="text-2xl md:text-3xl font-black text-gray-900 dark:text-white flex items-center gap-3">
-            <Activity className="w-7 h-7 text-amber-500" /> Activity Logs
-          </h2>
-          <p className="text-gray-500 dark:text-slate-500 text-sm mt-1 font-medium">Track all admin operations across the system</p>
-        </div>
-        <div className="flex gap-2">
-          <button onClick={() => setShowFilters(!showFilters)}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${showFilters ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20' : 'bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-slate-300 border border-gray-200 dark:border-white/10 hover:bg-gray-200 dark:hover:bg-white/10'}`}>
-            <Filter className="w-4 h-4" /> Filters
+    <div className="p-8 space-y-12">
+      {/* Action Bar */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+          <div className="flex items-center gap-4">
+              <button 
+                onClick={() => setShowFilters(!showFilters)}
+                className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border ${
+                  showFilters 
+                    ? 'bg-amber-500 text-white border-amber-500 shadow-lg shadow-amber-500/20' 
+                    : 'bg-white dark:bg-white/5 text-gray-500 border-gray-100 dark:border-white/10 hover:border-amber-500/30'
+                }`}
+              >
+                <Filter className="w-3.5 h-3.5" /> Filter Signals
+              </button>
+              <button 
+                onClick={() => { fetchLogs(); fetchStats(); }}
+                className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest text-gray-500 hover:border-amber-500/30 transition-all"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} /> Sync Data
+              </button>
+          </div>
+          <button 
+            onClick={handleCleanup}
+            className="flex items-center gap-2 px-6 py-3 bg-rose-500/5 hover:bg-rose-500 text-rose-600 hover:text-white border border-rose-500/10 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all"
+          >
+            <Trash2 className="w-3.5 h-3.5" /> Purge Registry
           </button>
-          <button onClick={() => { fetchLogs(); fetchStats(); }}
-            className="flex items-center gap-2 px-4 py-2.5 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-gray-700 dark:text-slate-300 text-sm font-bold hover:bg-gray-200 dark:hover:bg-white/10 transition-all">
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> Refresh
-          </button>
-          <button onClick={handleCleanup}
-            className="flex items-center gap-2 px-4 py-2.5 bg-red-500/10 border border-red-500/20 rounded-xl text-red-600 dark:text-red-400 text-sm font-bold hover:bg-red-500/20 transition-all">
-            <Trash2 className="w-4 h-4" /> Cleanup
-          </button>
-        </div>
       </div>
 
-      {/* Stats Cards */}
+      {/* Stats Bento Grid */}
       {stats && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {[
-            { label: 'Total Actions', value: stats.total_actions, icon: <Database className="w-5 h-5" />, color: 'emerald', borderClass: 'hover:border-emerald-500/30' },
-            { label: 'Today', value: stats.today_actions, icon: <Clock className="w-5 h-5" />, color: 'amber', borderClass: 'hover:border-amber-500/30' },
-            { label: 'This Week', value: stats.week_actions, icon: <BarChart3 className="w-5 h-5" />, color: 'blue', borderClass: 'hover:border-blue-500/30' },
-            { label: 'Active Admins', value: stats.unique_admins, icon: <Users className="w-5 h-5" />, color: 'purple', borderClass: 'hover:border-purple-500/30' },
+            { label: 'Total Operations', value: stats.total_actions, icon: <Database className="w-5 h-5" />, color: 'emerald' },
+            { label: 'Today Signals', value: stats.today_actions, icon: <Clock className="w-5 h-5" />, color: 'amber' },
+            { label: 'Weekly Intensity', value: stats.week_actions, icon: <BarChart3 className="w-5 h-5" />, color: 'blue' },
+            { label: 'Authorized Nodes', value: stats.unique_admins, icon: <Shield className="w-5 h-5" />, color: 'purple' },
           ].map((s, i) => (
-            <div key={i} className={`bg-white dark:bg-white/[0.03] border border-gray-200 dark:border-white/5 rounded-2xl p-5 ${s.borderClass} transition-all transition-colors shadow-sm`}>
-              <div className={`flex items-center gap-2 mb-3 text-${s.color}-600 dark:text-${s.color}-400`}>
-                {s.icon}
-                <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-slate-500">{s.label}</span>
-              </div>
-              <p className="text-3xl font-black text-gray-900 dark:text-white">{s.value || 0}</p>
+            <div key={i} className="group relative bg-white dark:bg-black/20 border border-gray-100 dark:border-white/5 rounded-[2rem] p-8 overflow-hidden hover:border-amber-500/30 transition-all duration-500 shadow-sm">
+                <div className={`absolute -right-4 -bottom-4 w-24 h-24 text-${s.color}-500/5 group-hover:scale-125 transition-transform duration-500`}>
+                    {s.icon}
+                </div>
+                <div className={`w-10 h-10 bg-${s.color}-500/10 rounded-xl flex items-center justify-center text-${s.color}-600 dark:text-${s.color}-400 mb-6 border border-${s.color}-500/20`}>
+                    {s.icon}
+                </div>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-2">{s.label}</p>
+                <p className="text-3xl font-black text-gray-900 dark:text-white tracking-tighter">{s.value || 0}</p>
             </div>
           ))}
         </div>
       )}
 
-      {/* Filters Panel */}
+      {/* Filters Interface */}
       {showFilters && (
-        <div className="bg-white dark:bg-white/[0.03] border border-gray-200 dark:border-white/10 rounded-2xl p-6 space-y-4 animate-fadeIn transition-colors shadow-sm">
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            <div className="space-y-1">
-              <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-slate-500 ml-2">Admin</label>
-              <input type="text" placeholder="Admin ID..." value={filters.admin_id}
-                onChange={e => setFilters({ ...filters, admin_id: e.target.value })}
-                className="w-full bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/5 rounded-xl px-4 py-2.5 text-gray-900 dark:text-white text-sm focus:border-amber-500/50 focus:outline-none transition-colors" />
-            </div>
-            <div className="space-y-1">
-              <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-slate-500 ml-2">Module</label>
-              <select value={filters.module} onChange={e => setFilters({ ...filters, module: e.target.value })}
-                className="w-full bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/5 rounded-xl px-4 py-2.5 text-gray-900 dark:text-white text-sm focus:border-amber-500/50 focus:outline-none appearance-none transition-colors">
-                <option value="" className="bg-white dark:bg-slate-900">All Modules</option>
-                {Object.keys(MODULE_COLORS).map(m => <option key={m} value={m} className="bg-white dark:bg-slate-900">{m}</option>)}
-              </select>
-            </div>
-            <div className="space-y-1">
-              <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-slate-500 ml-2">Action</label>
-              <input type="text" placeholder="Search action..." value={filters.action}
-                onChange={e => setFilters({ ...filters, action: e.target.value })}
-                className="w-full bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/5 rounded-xl px-4 py-2.5 text-gray-900 dark:text-white text-sm focus:border-amber-500/50 focus:outline-none transition-colors" />
-            </div>
-            <div className="space-y-1">
-              <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-slate-500 ml-2">From</label>
-              <input type="date" value={filters.date_from}
-                onChange={e => setFilters({ ...filters, date_from: e.target.value })}
-                className="w-full bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/5 rounded-xl px-4 py-2.5 text-gray-900 dark:text-white text-sm focus:border-amber-500/50 focus:outline-none transition-colors" />
-            </div>
-            <div className="space-y-1">
-              <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-slate-500 ml-2">To</label>
-              <input type="date" value={filters.date_to}
-                onChange={e => setFilters({ ...filters, date_to: e.target.value })}
-                className="w-full bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/5 rounded-xl px-4 py-2.5 text-gray-900 dark:text-white text-sm focus:border-amber-500/50 focus:outline-none transition-colors" />
-            </div>
-          </div>
-          <div className="flex gap-2">
-            <button onClick={() => fetchLogs(1)} className="px-5 py-2.5 bg-amber-500 text-black font-bold rounded-xl text-sm hover:scale-[1.02] active:scale-95 transition-all shadow-md shadow-amber-500/20">
-              <Search className="w-4 h-4 inline mr-1" /> Apply
-            </button>
-            <button onClick={() => { setFilters({ admin_id: '', module: '', action: '', date_from: '', date_to: '' }); }}
-              className="px-5 py-2.5 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-700 dark:text-slate-300 font-bold rounded-xl text-sm hover:bg-gray-200 dark:hover:bg-white/10 transition-all">
-              Clear
-            </button>
-          </div>
+        <div className="bg-white/50 dark:bg-black/40 border border-gray-100 dark:border-white/10 rounded-[2.5rem] p-10 space-y-8 animate-in slide-in-from-top-4 duration-500">
+           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
+              <div className="space-y-3">
+                 <label className="text-[10px] font-black uppercase tracking-widest text-amber-600 ml-5">Authorized Admin</label>
+                 <div className="relative">
+                    <User className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <input type="text" placeholder="Search ID..." value={filters.admin_id}
+                      onChange={e => setFilters({ ...filters, admin_id: e.target.value })}
+                      className="w-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl py-4 pl-14 pr-6 text-sm font-bold focus:ring-2 focus:ring-amber-500/50 outline-none transition-all" />
+                 </div>
+              </div>
+              <div className="space-y-3">
+                 <label className="text-[10px] font-black uppercase tracking-widest text-amber-600 ml-5">Module Matrix</label>
+                 <select value={filters.module} onChange={e => setFilters({ ...filters, module: e.target.value })}
+                   className="w-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl py-4 px-6 text-sm font-bold focus:ring-2 focus:ring-amber-500/50 outline-none appearance-none transition-all">
+                   <option value="">All Modules</option>
+                   {Object.keys(MODULE_COLORS).map(m => <option key={m} value={m}>{m}</option>)}
+                 </select>
+              </div>
+              <div className="space-y-3">
+                 <label className="text-[10px] font-black uppercase tracking-widest text-amber-600 ml-5">Operation Type</label>
+                 <input type="text" placeholder="Action..." value={filters.action}
+                   onChange={e => setFilters({ ...filters, action: e.target.value })}
+                   className="w-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl py-4 px-6 text-sm font-bold focus:ring-2 focus:ring-amber-500/50 outline-none transition-all" />
+              </div>
+              <div className="space-y-3">
+                 <label className="text-[10px] font-black uppercase tracking-widest text-amber-600 ml-5">Temporal From</label>
+                 <input type="date" value={filters.date_from}
+                   onChange={e => setFilters({ ...filters, date_from: e.target.value })}
+                   className="w-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl py-4 px-6 text-sm font-bold focus:ring-2 focus:ring-amber-500/50 outline-none transition-all" />
+              </div>
+              <div className="space-y-3">
+                 <label className="text-[10px] font-black uppercase tracking-widest text-amber-600 ml-5">Temporal To</label>
+                 <input type="date" value={filters.date_to}
+                   onChange={e => setFilters({ ...filters, date_to: e.target.value })}
+                   className="w-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl py-4 px-6 text-sm font-bold focus:ring-2 focus:ring-amber-500/50 outline-none transition-all" />
+              </div>
+           </div>
+           <div className="flex gap-4 pt-4">
+              <button onClick={() => fetchLogs(1)} className="px-10 py-4 bg-amber-500 text-white font-black rounded-2xl text-[10px] uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-amber-500/20">
+                Execute Filter
+              </button>
+              <button onClick={() => setFilters({ admin_id: '', module: '', action: '', date_from: '', date_to: '' })}
+                className="px-10 py-4 bg-white dark:bg-white/5 text-gray-500 font-black rounded-2xl text-[10px] uppercase tracking-widest border border-gray-100 dark:border-white/10 hover:border-amber-500/30 transition-all">
+                Reset
+              </button>
+           </div>
         </div>
       )}
 
-      {/* Top Admins & Module Stats */}
-      {(topAdmins.length > 0 || moduleStats.length > 0) && (
-        <div className="grid md:grid-cols-2 gap-6">
-          {topAdmins.length > 0 && (
-            <div className="bg-white dark:bg-white/[0.03] border border-gray-200 dark:border-white/5 rounded-2xl p-6 shadow-sm transition-colors">
-              <h3 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-widest mb-4 flex items-center gap-2">
-                <Shield className="w-4 h-4 text-amber-500" /> Top Admins
-              </h3>
-              <div className="space-y-2">
-                {topAdmins.slice(0, 5).map((a, i) => (
-                  <div key={i} className="flex items-center justify-between bg-gray-50 dark:bg-white/[0.02] rounded-xl px-4 py-3 transition-colors">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-amber-500/10 dark:bg-amber-500/20 rounded-lg flex items-center justify-center text-amber-600 dark:text-amber-400 text-xs font-black">{i + 1}</div>
-                      <div>
-                        <p className="text-gray-900 dark:text-white text-sm font-bold">{a.admin_name}</p>
-                        <p className="text-gray-500 dark:text-slate-500 text-[10px] font-bold uppercase">{a.admin_role}</p>
-                      </div>
-                    </div>
-                    <span className="text-amber-600 dark:text-amber-400 font-black text-lg">{a.total_actions}</span>
-                  </div>
-                ))}
-              </div>
+      {/* Main Table View */}
+      <div className="bg-white/80 dark:bg-black/40 backdrop-blur-xl border border-gray-100 dark:border-white/10 rounded-[3rem] overflow-hidden shadow-2xl transition-all duration-500">
+        <div className="px-10 py-8 border-b border-gray-50 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.01] flex justify-between items-center">
+            <div className="flex items-center gap-4">
+                <div className="w-10 h-10 bg-amber-500/10 rounded-xl flex items-center justify-center border border-amber-500/20">
+                    <Terminal className="w-5 h-5 text-amber-600" />
+                </div>
+                <h3 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">Signal Registry</h3>
             </div>
-          )}
-          {moduleStats.length > 0 && (
-            <div className="bg-white dark:bg-white/[0.03] border border-gray-200 dark:border-white/5 rounded-2xl p-6 shadow-sm transition-colors">
-              <h3 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-widest mb-4 flex items-center gap-2">
-                <BarChart3 className="w-4 h-4 text-blue-600 dark:text-blue-400" /> Module Activity
-              </h3>
-              <div className="space-y-2">
-                {moduleStats.slice(0, 7).map((m, i) => {
-                  const mc = getModuleColor(m.module);
-                  const max = moduleStats[0]?.total_actions || 1;
-                  return (
-                    <div key={i} className="flex items-center gap-3">
-                      <span className={`text-xs font-bold ${mc.text} w-28 truncate`}>{m.module}</span>
-                      <div className="flex-1 h-6 bg-gray-100 dark:bg-white/[0.03] rounded-lg overflow-hidden transition-colors">
-                        <div className={`h-full ${mc.bg} rounded-lg flex items-center px-2 transition-all duration-700`}
-                          style={{ width: `${Math.max((m.total_actions / max) * 100, 8)}%` }}>
-                          <span className="text-[10px] font-black text-gray-800 dark:text-white">{m.total_actions}</span>
-                        </div>
-                      </div>
-                      <span className="text-emerald-600 dark:text-emerald-400 text-[10px] font-bold w-12 text-right">+{m.today || 0} today</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Logs Table */}
-      <div className="bg-white dark:bg-white/[0.02] border border-gray-200 dark:border-white/5 rounded-2xl overflow-hidden shadow-sm transition-colors">
-        <div className="px-6 py-4 border-b border-gray-100 dark:border-white/5 flex justify-between items-center bg-gray-50/50 dark:bg-transparent transition-colors">
-          <p className="text-gray-500 dark:text-slate-400 text-sm font-bold">
-            Showing <span className="text-gray-900 dark:text-white">{logs.length}</span> of <span className="text-gray-900 dark:text-white">{pagination.total}</span> entries
-          </p>
+            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+              Scan: <span className="text-amber-500">{logs.length}</span> / {pagination.total} entries
+            </p>
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="w-8 h-8 border-2 border-amber-500/30 border-t-amber-500 rounded-full animate-spin" />
+          <div className="flex flex-col items-center justify-center py-32 opacity-50">
+             <div className="w-12 h-12 border-4 border-amber-500/20 border-t-amber-500 rounded-full animate-spin mb-6"></div>
+             <p className="text-[10px] font-black uppercase tracking-widest">Syncing Signals...</p>
           </div>
         ) : logs.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-gray-400 dark:text-slate-500 transition-colors">
-            <AlertTriangle className="w-10 h-10 mb-3 text-gray-200 dark:text-slate-600" />
-            <p className="font-bold">No activity logs found</p>
-            <p className="text-sm mt-1">Admin actions will appear here automatically</p>
+          <div className="flex flex-col items-center justify-center py-32 text-gray-400">
+            <AlertTriangle className="w-12 h-12 mb-4 opacity-20" />
+            <p className="font-black text-sm uppercase tracking-widest">Zero Signals Logged</p>
           </div>
         ) : (
-          <div className="divide-y divide-gray-100 dark:divide-white/5">
-            {logs.map(log => {
-              const mc = getModuleColor(log.module);
-              return (
-                <div key={log.id}
-                  onClick={() => setSelectedLog(selectedLog?.id === log.id ? null : log)}
-                  className="px-6 py-4 hover:bg-gray-50 dark:hover:bg-white/[0.02] cursor-pointer transition-all">
-                  <div className="flex items-center gap-4">
-                    {/* Method Badge */}
-                    <span className={`text-[10px] font-black px-2 py-1 rounded-lg ${METHOD_COLORS[log.method] || 'bg-gray-200 dark:bg-slate-500/20 text-gray-600 dark:text-slate-400'}`}>
-                      {log.method}
-                    </span>
-
-                    {/* Module Badge */}
-                    <span className={`text-[10px] font-bold px-2.5 py-1 rounded-lg ${mc.bg} ${mc.text} border ${mc.border}`}>
-                      {log.module}
-                    </span>
-
-                    {/* Action */}
-                    <p className="text-gray-900 dark:text-white text-sm font-bold flex-1 truncate">{log.action}</p>
-
-                    {/* Admin Info */}
-                    <div className="hidden md:flex items-center gap-2 text-gray-500 dark:text-slate-400 transition-colors">
-                      <User className="w-3.5 h-3.5" />
-                      <span className="text-xs font-bold">{log.admin_name}</span>
-                      {log.admin_role !== 'admin' && (
-                        <span className="text-[9px] bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 px-1.5 py-0.5 rounded-md font-bold uppercase">{log.admin_role}</span>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-gray-50/50 dark:bg-transparent border-b border-gray-50 dark:border-white/5">
+                  <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Method</th>
+                  <th className="px-6 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Module</th>
+                  <th className="px-6 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Operation</th>
+                  <th className="px-6 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Authorized Admin</th>
+                  <th className="px-6 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Temporal</th>
+                  <th className="px-10 py-6 text-right"></th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50 dark:divide-white/5">
+                {logs.map(log => {
+                  const mc = getModuleColor(log.module);
+                  const isExpanded = selectedLog?.id === log.id;
+                  return (
+                    <React.Fragment key={log.id}>
+                      <tr 
+                        onClick={() => setSelectedLog(isExpanded ? null : log)}
+                        className={`group cursor-pointer transition-all ${isExpanded ? 'bg-amber-500/5 dark:bg-amber-500/10' : 'hover:bg-gray-50 dark:hover:bg-white/[0.02]'}`}
+                      >
+                        <td className="px-10 py-6">
+                           <span className={`text-[9px] font-black px-2.5 py-1 rounded-lg border ${METHOD_COLORS[log.method] || 'bg-gray-100 text-gray-500 border-gray-200'}`}>
+                             {log.method}
+                           </span>
+                        </td>
+                        <td className="px-6 py-6">
+                           <span className={`text-[9px] font-black px-2.5 py-1 rounded-lg border ${mc.bg} ${mc.text} ${mc.border} whitespace-nowrap`}>
+                             {log.module}
+                           </span>
+                        </td>
+                        <td className="px-6 py-6">
+                           <p className="text-sm font-bold text-gray-900 dark:text-white truncate max-w-[200px]">{log.action}</p>
+                        </td>
+                        <td className="px-6 py-6">
+                           <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center border border-gray-200 dark:border-white/10 group-hover:border-amber-500/30 transition-colors">
+                                 <User className="w-4 h-4 text-gray-400 group-hover:text-amber-500 transition-colors" />
+                              </div>
+                              <div>
+                                 <p className="text-xs font-black text-gray-700 dark:text-gray-300">{log.admin_name}</p>
+                                 <p className="text-[8px] font-black text-amber-600 uppercase tracking-widest">{log.admin_role}</p>
+                              </div>
+                           </div>
+                        </td>
+                        <td className="px-6 py-6 whitespace-nowrap">
+                           <div className="flex flex-col">
+                              <span className="text-xs font-bold text-gray-900 dark:text-white">{timeAgo(log.created_at)}</span>
+                              <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest">{new Date(log.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                           </div>
+                        </td>
+                        <td className="px-10 py-6 text-right">
+                           <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${isExpanded ? 'bg-amber-500 text-white rotate-180' : 'bg-gray-100 dark:bg-white/5 text-gray-400 group-hover:text-amber-500'}`}>
+                              <ChevronRight className="w-4 h-4" />
+                           </div>
+                        </td>
+                      </tr>
+                      {isExpanded && (
+                        <tr>
+                          <td colSpan="6" className="px-10 pb-10 pt-4 bg-amber-500/5 dark:bg-amber-500/10">
+                             <div className="grid grid-cols-1 md:grid-cols-4 gap-8 bg-white dark:bg-black/60 border border-amber-500/20 rounded-[2rem] p-8 animate-in zoom-in-95 duration-300">
+                                <div className="space-y-4">
+                                   <div>
+                                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1 flex items-center gap-2"><Fingerprint className="w-3 h-3 text-amber-500" /> Administrative ID</p>
+                                      <p className="text-sm font-black text-gray-900 dark:text-white">#{log.admin_id}</p>
+                                   </div>
+                                   <div>
+                                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1 flex items-center gap-2"><Globe className="w-3 h-3 text-amber-500" /> Source Address</p>
+                                      <p className="text-sm font-black text-gray-900 dark:text-white">{log.ip_address || 'Internal'}</p>
+                                   </div>
+                                </div>
+                                <div className="space-y-4">
+                                   <div>
+                                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1 flex items-center gap-2"><Activity className="w-3 h-3 text-emerald-500" /> Signal Status</p>
+                                      <p className={`text-sm font-black ${log.status_code < 400 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                                        {log.status_code || '200 OK'} • Authorized
+                                      </p>
+                                   </div>
+                                   <div>
+                                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1 flex items-center gap-2"><Calendar className="w-3 h-3 text-amber-500" /> Full Timestamp</p>
+                                      <p className="text-sm font-black text-gray-900 dark:text-white">{formatDate(log.created_at)}</p>
+                                   </div>
+                                </div>
+                                <div className="md:col-span-2 space-y-4">
+                                   <div>
+                                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1 flex items-center gap-2"><ArrowUpRight className="w-3 h-3 text-amber-500" /> Resource Mapping</p>
+                                      <code className="text-[10px] font-mono font-black text-amber-600 bg-amber-500/5 dark:bg-amber-500/10 px-3 py-1.5 rounded-lg border border-amber-500/10 block break-all">
+                                        {log.endpoint}
+                                      </code>
+                                   </div>
+                                   {log.details && Object.keys(log.details).length > 0 && (
+                                      <div>
+                                         <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Payload Matrix</p>
+                                         <div className="max-h-48 overflow-y-auto no-scrollbar bg-black dark:bg-black/40 rounded-xl p-4 border border-white/5">
+                                            <pre className="text-[10px] font-mono text-emerald-400 leading-relaxed whitespace-pre-wrap">
+                                               {JSON.stringify(log.details, null, 2)}
+                                            </pre>
+                                         </div>
+                                      </div>
+                                   )}
+                                </div>
+                             </div>
+                          </td>
+                        </tr>
                       )}
-                    </div>
-
-                    {/* Time */}
-                    <span className="text-gray-400 dark:text-slate-500 text-xs font-bold whitespace-nowrap hidden lg:block transition-colors">{timeAgo(log.created_at)}</span>
-                  </div>
-
-                  {/* Expanded Details */}
-                  {selectedLog?.id === log.id && (
-                    <div className="mt-4 bg-gray-50 dark:bg-black/30 rounded-xl p-4 space-y-3 animate-fadeIn border border-gray-100 dark:border-white/5 transition-colors">
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
-                        <div>
-                          <span className="text-gray-500 dark:text-slate-500 font-bold uppercase block mb-1">Admin ID</span>
-                          <span className="text-gray-900 dark:text-white font-bold">{log.admin_id}</span>
-                        </div>
-                        <div>
-                          <span className="text-gray-500 dark:text-slate-500 font-bold uppercase block mb-1">Status</span>
-                          <span className={`font-bold ${log.status_code < 400 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>{log.status_code || 'N/A'}</span>
-                        </div>
-                        <div>
-                          <span className="text-gray-500 dark:text-slate-500 font-bold uppercase block mb-1">IP</span>
-                          <span className="text-gray-900 dark:text-white font-bold">{log.ip_address || 'N/A'}</span>
-                        </div>
-                        <div>
-                          <span className="text-gray-500 dark:text-slate-500 font-bold uppercase block mb-1">Time</span>
-                          <span className="text-gray-900 dark:text-white font-bold">{formatDate(log.created_at)}</span>
-                        </div>
-                      </div>
-                      <div>
-                        <span className="text-gray-500 dark:text-slate-500 text-xs font-bold uppercase block mb-1">Endpoint</span>
-                        <code className="text-amber-600 dark:text-amber-400 text-xs font-mono bg-white dark:bg-white/[0.03] px-3 py-1.5 rounded-lg block border border-gray-200 dark:border-none">{log.endpoint}</code>
-                      </div>
-                      {log.details && Object.keys(log.details).length > 0 && (
-                        <div>
-                          <span className="text-gray-500 dark:text-slate-500 text-xs font-bold uppercase block mb-1">Details</span>
-                          <pre className="text-gray-700 dark:text-slate-300 text-xs font-mono bg-white dark:bg-white/[0.03] px-3 py-2 rounded-lg overflow-x-auto border border-gray-200 dark:border-none">
-                            {JSON.stringify(log.details, null, 2)}
-                          </pre>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+                    </React.Fragment>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         )}
 
-        {/* Pagination */}
+        {/* Pagination Console */}
         {pagination.totalPages > 1 && (
-          <div className="px-6 py-4 border-t border-gray-100 dark:border-white/5 flex items-center justify-between transition-colors">
-            <button onClick={() => fetchLogs(pagination.page - 1)} disabled={pagination.page <= 1}
-              className="flex items-center gap-1 px-4 py-2 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-gray-700 dark:text-slate-300 text-sm font-bold hover:bg-gray-200 dark:hover:bg-white/10 transition-all disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
-              <ChevronLeft className="w-4 h-4" /> Prev
+          <div className="px-10 py-8 border-t border-gray-50 dark:border-white/5 flex items-center justify-between bg-gray-50/30 dark:bg-white/[0.01]">
+            <button 
+              onClick={() => fetchLogs(pagination.page - 1)} 
+              disabled={pagination.page <= 1}
+              className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-500 hover:border-amber-500/30 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              <ChevronLeft className="w-4 h-4" /> Previous Frame
             </button>
-            <span className="text-gray-500 dark:text-slate-400 text-sm font-bold">
-              Page <span className="text-gray-900 dark:text-white">{pagination.page}</span> of <span className="text-gray-900 dark:text-white">{pagination.totalPages}</span>
-            </span>
-            <button onClick={() => fetchLogs(pagination.page + 1)} disabled={pagination.page >= pagination.totalPages}
-              className="flex items-center gap-1 px-4 py-2 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-gray-700 dark:text-slate-300 text-sm font-bold hover:bg-gray-200 dark:hover:bg-white/10 transition-all disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
-              Next <ChevronRight className="w-4 h-4" />
+            <div className="flex items-center gap-4">
+               <div className="px-4 py-2 bg-amber-500/10 border border-amber-500/20 rounded-xl">
+                  <span className="text-xs font-black text-amber-600">Frame {pagination.page} / {pagination.totalPages}</span>
+               </div>
+            </div>
+            <button 
+              onClick={() => fetchLogs(pagination.page + 1)} 
+              disabled={pagination.page >= pagination.totalPages}
+              className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-500 hover:border-amber-500/30 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              Next Frame <ChevronRight className="w-4 h-4" />
             </button>
           </div>
         )}

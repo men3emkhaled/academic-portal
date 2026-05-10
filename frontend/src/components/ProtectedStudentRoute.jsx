@@ -22,8 +22,8 @@ const ProtectedStudentRoute = ({ children }) => {
           <div className="relative flex items-center justify-center w-20 h-20">
             <div className="absolute inset-0 border-4 border-emerald-500/20 dark:border-emerald-500/10 rounded-full"></div>
             <div className="absolute inset-0 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-            <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center animate-pulse">
-                <span className="text-xl font-black text-emerald-500">Z</span>
+            <div className="w-12 h-12 bg-white dark:bg-white/5 rounded-full flex items-center justify-center overflow-hidden shadow-lg border border-emerald-500/20">
+                <img src="/logo.png" alt="ZNU Logo" className="w-full h-full object-contain p-1" />
             </div>
           </div>
         </div>

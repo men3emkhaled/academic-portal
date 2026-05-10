@@ -31,8 +31,8 @@ const Dashboard = () => {
       // جلب جدول اليوم
       const timetableRes = await api.get('/timetable/today').catch(() => ({ data: [] }));
       setTodaySchedule(timetableRes.data || [
-        { id: 1, course_name: 'Machine Learning', start_time: '09:00', end_time: '11:00', location: 'Main Hall 4 - Building B', lecturer: 'Dr. Sarah Johnson', type: 'lecture' },
-        { id: 2, course_name: 'Cryptography', start_time: '13:00', end_time: '14:30', location: 'Lab 302 - IT Center', lecturer: 'Dr. Mike Sterling', type: 'lecture' },
+        { id: 1, course_name: 'Machine Learning', start_time: '09:00', end_time: '11:00', location: 'Main Hall 4 - Building B', lecturer: 'Inst. Sarah Johnson', type: 'lecture' },
+        { id: 2, course_name: 'Cryptography', start_time: '13:00', end_time: '14:30', location: 'Lab 302 - IT Center', lecturer: 'Inst. Mike Sterling', type: 'lecture' },
       ]);
 
     } catch (error) {

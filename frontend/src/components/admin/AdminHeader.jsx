@@ -23,13 +23,7 @@ const AdminHeader = ({
       {/* Right Actions */}
       <div className="flex items-center gap-3 lg:gap-6">
         
-        {/* Theme Toggle */}
-        <button 
-          onClick={toggleTheme}
-          className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl lg:rounded-2xl border bg-gray-50 border-gray-200 text-gray-500 hover:text-emerald-500 hover:bg-gray-100 dark:bg-white/5 dark:border-white/5 dark:text-slate-400 dark:hover:text-emerald-400 dark:hover:bg-white/10 flex items-center justify-center transition-all"
-        >
-          {isDarkMode ? <Sun className="w-4 lg:w-5 h-4 lg:h-5" /> : <Moon className="w-4 lg:w-5 h-4 lg:h-5" />}
-        </button>
+
 
         {/* Alerts Shortcut */}
         {hasNotificationsAccess && (

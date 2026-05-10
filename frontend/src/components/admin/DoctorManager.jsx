@@ -74,12 +74,12 @@ const DoctorManager = () => {
       if (modalType === 'add') {
         if (!formData.password) return toast.error('Password is required');
         await api.post('/admin/doctors', formData);
-        toast.success('Doctor added successfully');
+        toast.success('Instructor added successfully');
       } else if (modalType === 'edit') {
         const payload = { ...formData };
         if (!payload.password) delete payload.password;
         await api.put(`/admin/doctors/${selectedDoctor.id}`, payload);
-        toast.success('Doctor updated successfully');
+        toast.success('Instructor updated successfully');
       }
       handleCloseModal();
       fetchDoctors();
@@ -92,7 +92,7 @@ const DoctorManager = () => {
     if (!window.confirm('Are you sure you want to delete this doctor? All related courses will be unassigned.')) return;
     try {
       await api.delete(`/admin/doctors/${id}`);
-      toast.success('Doctor deleted');
+      toast.success('Instructor deleted');
       fetchDoctors();
     } catch (error) {
       toast.error('Failed to delete doctor');
@@ -133,7 +133,7 @@ const DoctorManager = () => {
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-black text-gray-900 dark:text-white flex items-center gap-2">
-            <GraduationCap className="text-blue-500 w-6 h-6" /> Doctor Management
+            <GraduationCap className="text-blue-500 w-6 h-6" /> Instructor Management
           </h2>
           <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Manage faculty accounts and course assignments</p>
         </div>
@@ -141,7 +141,7 @@ const DoctorManager = () => {
           onClick={() => handleOpenModal('add')}
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg shadow-blue-500/30"
         >
-          <Plus className="w-5 h-5" /> Add Doctor
+          <Plus className="w-5 h-5" /> Add Instructor
         </button>
       </div>
 
@@ -210,7 +210,7 @@ const DoctorManager = () => {
               <X className="w-5 h-5" />
             </button>
             <h3 className="text-xl font-black mb-6 text-gray-900 dark:text-white">
-              {modalType === 'add' ? 'Add New Doctor' : 'Edit Doctor'}
+              {modalType === 'add' ? 'Add New Instructor' : 'Edit Instructor'}
             </h3>
             
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -256,7 +256,7 @@ const DoctorManager = () => {
               </div>
               
               <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl mt-4">
-                {modalType === 'add' ? 'Create Doctor' : 'Save Changes'}
+                {modalType === 'add' ? 'Create Instructor' : 'Save Changes'}
               </button>
             </form>
           </div>
@@ -273,7 +273,7 @@ const DoctorManager = () => {
             <h3 className="text-xl font-black mb-1 text-gray-900 dark:text-white">
               Assign Courses
             </h3>
-            <p className="text-gray-500 text-sm mb-6">Dr. {selectedDoctor.name}</p>
+            <p className="text-gray-500 text-sm mb-6">Inst. {selectedDoctor.name}</p>
             
             <div className="flex-1 overflow-y-auto pr-2 space-y-2">
               {courses.map(course => (

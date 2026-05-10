@@ -133,7 +133,7 @@ const DoctorHeader = ({
 
         <div className="flex items-center gap-2 lg:gap-3 group cursor-pointer">
           <div className="text-right hidden sm:block">
-            <p className="text-sm font-bold text-doctor-text tracking-tight leading-none mb-1 group-hover:text-doctor-primary transition-colors">Dr. {doctor?.name?.split(' ')[0]}</p>
+            <p className="text-sm font-bold text-doctor-text tracking-tight leading-none mb-1 group-hover:text-doctor-primary transition-colors">Inst. {doctor?.name?.split(' ')[0]}</p>
             <p className="text-[10px] font-black text-doctor-text-muted uppercase tracking-widest">Active</p>
           </div>
           <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl lg:rounded-2xl bg-gradient-to-br from-doctor-primary to-doctor-secondary p-[2px] group-hover:scale-105 transition-transform">

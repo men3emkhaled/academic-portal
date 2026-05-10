@@ -36,7 +36,7 @@ logs/
 *.sqlite3
 v1.sql
 v9.sql
-!schema.sql
+
 
 # Firebase & Auth Secrets
 backend/config/serviceAccountKey.json

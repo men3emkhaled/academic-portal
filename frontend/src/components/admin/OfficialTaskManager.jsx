@@ -3,7 +3,9 @@ import api from '../../services/api';
 import toast from 'react-hot-toast';
 import { 
   CheckSquare, Plus, Trash2, Edit, ExternalLink, 
-  BookOpen, Calendar, Link as LinkIcon, Search, Filter, Layers 
+  BookOpen, Calendar, Link as LinkIcon, Search, Filter, Layers,
+  Activity, Clock, FileText, ChevronRight, X, Save, Sparkles,
+  Database, Briefcase
 } from 'lucide-react';
 
 const OfficialTaskManager = ({ courses = [], departments = [] }) => {
@@ -29,7 +31,7 @@ const OfficialTaskManager = ({ courses = [], departments = [] }) => {
       const response = await api.get('/official-tasks/admin');
       setTasks(response.data || []);
     } catch (error) {
-      toast.error('Failed to fetch tasks');
+      toast.error('Failed to load task registry');
     } finally {
       setLoading(false);
     }
@@ -42,7 +44,7 @@ const OfficialTaskManager = ({ courses = [], departments = [] }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.course_id || !formData.title || !formData.drive_link) {
-      toast.error('Please fill required fields');
+      toast.error('Required fields are missing');
       return;
     }
 
@@ -54,17 +56,15 @@ const OfficialTaskManager = ({ courses = [], departments = [] }) => {
 
       if (editingTask) {
         await api.put(`/official-tasks/admin/${editingTask.id}`, dataToSend);
-        toast.success('Task updated');
+        toast.success('Task details updated');
       } else {
         await api.post('/official-tasks/admin', dataToSend);
-        toast.success('Task created');
+        toast.success('New task added to registry');
       }
-      setShowForm(false);
-      setEditingTask(null);
-      setFormData({ course_id: '', department_id: '', title: '', description: '', drive_link: '', deadline: '' });
+      closeForm();
       fetchTasks();
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Operation failed');
+      toast.error('Operation failed');
     }
   };
 
@@ -81,11 +81,17 @@ const OfficialTaskManager = ({ courses = [], departments = [] }) => {
     setShowForm(true);
   };
 
+  const closeForm = () => {
+    setShowForm(false);
+    setEditingTask(null);
+    setFormData({ course_id: '', department_id: '', title: '', description: '', drive_link: '', deadline: '' });
+  };
+
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this task?')) return;
     try {
       await api.delete(`/official-tasks/admin/${id}`);
-      toast.success('Task deleted');
+      toast.success('Task removed');
       fetchTasks();
     } catch (error) {
       toast.error('Delete failed');
@@ -100,44 +106,51 @@ const OfficialTaskManager = ({ courses = [], departments = [] }) => {
   });
 
   return (
-    <div className="animate-fadeIn">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
-        <div className="flex items-center gap-4">
-          <div className="w-2 h-10 bg-emerald-500 rounded-full shadow-[0_0_15px_rgba(16,185,129,0.5)]"></div>
+    <div className="animate-in fade-in duration-700 pb-10">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-12">
+        <div className="flex items-center gap-5">
+          <div className="w-16 h-16 bg-emerald-500/10 dark:bg-emerald-500/20 rounded-3xl flex items-center justify-center border border-emerald-500/20 shadow-inner group">
+            <CheckSquare className="w-8 h-8 text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform" />
+          </div>
           <div>
-            <h2 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight flex items-center gap-3">
-              <CheckSquare className="w-6 h-6 text-emerald-500 dark:text-emerald-400" /> Official Tasks
+            <h2 className="text-4xl font-black text-gray-900 dark:text-white tracking-tighter">
+              Official Tasks
             </h2>
-            <p className="text-gray-500 dark:text-slate-500 text-xs font-bold uppercase tracking-[0.2em] mt-1">Curriculum Assignments & Links</p>
+            <div className="flex items-center gap-3 mt-1.5">
+                <span className="text-gray-500 dark:text-gray-400 text-xs font-black uppercase tracking-[0.2em]">Curriculum Assignments</span>
+                <div className="w-1 h-1 bg-gray-300 dark:bg-gray-700 rounded-full"></div>
+                <span className="text-emerald-600 dark:text-emerald-400 text-[10px] font-black uppercase tracking-widest">{tasks.length} Active Tasks</span>
+            </div>
           </div>
         </div>
 
         <button
-          onClick={() => { setShowForm(true); setEditingTask(null); setFormData({ course_id: '', department_id: '', title: '', description: '', drive_link: '', deadline: '' }); }}
-          className="admin-btn-primary h-[50px] px-6"
+          onClick={() => { setShowForm(true); setEditingTask(null); }}
+          className="px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs uppercase tracking-widest rounded-2xl shadow-xl shadow-emerald-500/20 transition-all active:scale-95 flex items-center gap-2 shrink-0"
         >
-          <Plus className="w-5 h-5" /> CREATE TASK
+          <Plus className="w-4 h-4" /> Add Task
         </button>
       </div>
 
-      {/* Filters */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+      {/* Filters Bar */}
+      <div className="flex flex-col md:flex-row gap-4 mb-10">
+        <div className="relative flex-1 group">
+          <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-emerald-500 transition-colors" />
           <input 
             type="text" 
             placeholder="Search tasks or courses..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="admin-input pl-12 h-[55px]"
+            className="w-full bg-white/50 dark:bg-white/[0.03] border border-gray-200 dark:border-white/10 rounded-2xl py-4 pl-14 pr-6 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all"
           />
         </div>
-        <div className="relative">
-          <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <div className="relative md:w-72 group">
+          <Filter className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-emerald-500 transition-colors" />
           <select 
             value={selectedCourseId}
             onChange={(e) => setSelectedCourseId(e.target.value)}
-            className="admin-input pl-12 h-[55px] appearance-none"
+            className="w-full bg-white/50 dark:bg-white/[0.03] border border-gray-200 dark:border-white/10 rounded-2xl py-4 pl-14 pr-10 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all appearance-none"
           >
             <option value="">All Courses</option>
             {courses.map(course => (
@@ -148,61 +161,78 @@ const OfficialTaskManager = ({ courses = [], departments = [] }) => {
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-20">
-          <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+        <div className="flex flex-col items-center justify-center py-48 opacity-50">
+           <div className="w-16 h-16 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin mb-8"></div>
+           <p className="text-xs font-black uppercase tracking-[0.3em] text-gray-500">Scanning Tasks...</p>
         </div>
       ) : filteredTasks.length === 0 ? (
-        <div className="admin-card text-center py-20 border-dashed border-2">
-          <div className="w-16 h-16 bg-gray-100 dark:bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <CheckSquare className="w-8 h-8 text-gray-400" />
-          </div>
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white">No tasks found</h3>
-          <p className="text-gray-500 dark:text-slate-500 mt-2">Start by creating the first official task for a course.</p>
+        <div className="bg-white/50 dark:bg-white/[0.02] border-2 border-dashed border-gray-200 dark:border-white/10 rounded-[3rem] py-48 text-center flex flex-col items-center group transition-all duration-500">
+            <div className="w-24 h-24 bg-emerald-500/5 dark:bg-emerald-500/10 rounded-full flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-500">
+                <Sparkles className="w-12 h-12 text-emerald-400 opacity-50" />
+            </div>
+            <h4 className="text-xl font-black uppercase tracking-[0.3em] text-gray-900 dark:text-white">No Tasks Found</h4>
+            <p className="text-sm font-bold mt-4 tracking-widest text-gray-500">Start by creating a task for your students.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
           {filteredTasks.map(task => (
-            <div key={task.id} className="admin-card group hover:border-emerald-500/30 transition-all duration-300">
-              <div className="flex justify-between items-start mb-4">
+            <div 
+              key={task.id} 
+              className="group relative bg-white/80 dark:bg-[#111]/80 backdrop-blur-xl border border-gray-100 dark:border-white/10 rounded-[2.5rem] p-10 transition-all duration-500 hover:border-emerald-500/40 hover:shadow-2xl hover:shadow-emerald-500/5"
+            >
+              <div className="flex justify-between items-start mb-6">
                 <div className="flex flex-wrap gap-2">
-                  <span className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-widest border border-emerald-500/20">
+                  <span className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[9px] font-black px-3 py-1.5 rounded-xl uppercase tracking-widest border border-emerald-500/20">
                     {task.course_name}
                   </span>
                   {task.department_name && (
-                    <span className="bg-blue-500/10 text-blue-600 dark:text-blue-400 text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-widest border border-blue-500/20">
+                    <span className="bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[9px] font-black px-3 py-1.5 rounded-xl uppercase tracking-widest border border-indigo-500/20">
                       {task.department_name}
                     </span>
                   )}
                 </div>
-                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button onClick={() => handleEdit(task)} className="p-2 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-500 hover:text-white transition-all">
-                    <Edit className="w-4 h-4" />
+                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                  <button 
+                    onClick={() => handleEdit(task)} 
+                    className="w-9 h-9 flex items-center justify-center bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-400 hover:text-emerald-600 rounded-xl transition-all shadow-sm"
+                  >
+                    <Edit className="w-3.5 h-3.5" />
                   </button>
-                  <button onClick={() => handleDelete(task.id)} className="p-2 bg-red-500/10 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-500 hover:text-white transition-all">
-                    <Trash2 className="w-4 h-4" />
+                  <button 
+                    onClick={() => handleDelete(task.id)} 
+                    className="w-9 h-9 flex items-center justify-center bg-rose-500/10 text-rose-600 hover:bg-rose-600 hover:text-white rounded-xl transition-all shadow-sm"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 leading-tight">{task.title}</h3>
+
+              <h3 className="text-2xl font-black text-gray-900 dark:text-white leading-tight mb-4 group-hover:text-emerald-600 transition-colors min-h-[4rem] line-clamp-2">{task.title}</h3>
+              
               {task.description && (
-                <p className="text-sm text-gray-500 dark:text-slate-400 line-clamp-2 mb-4">{task.description}</p>
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400 line-clamp-2 mb-8 italic leading-relaxed">
+                  {task.description}
+                </p>
               )}
-              <div className="space-y-3 pt-4 border-t border-gray-100 dark:border-white/5">
-                <div className="flex items-center gap-2 text-xs font-bold text-gray-600 dark:text-slate-400">
-                  <Calendar className="w-3.5 h-3.5 text-gray-400" />
-                  {task.deadline ? `Due: ${new Date(task.deadline).toLocaleDateString()}` : 'No deadline'}
+
+              <div className="space-y-4 pt-6 border-t border-gray-50 dark:border-white/5">
+                <div className="flex items-center gap-3 text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                  <Clock className="w-3.5 h-3.5 text-emerald-500" />
+                  {task.deadline ? `Deadline: ${new Date(task.deadline).toLocaleDateString()}` : 'Open Deadline'}
                 </div>
                 <a 
                   href={task.drive_link} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="flex items-center justify-between gap-2 p-3 bg-gray-50 dark:bg-slate-900/50 rounded-xl border border-gray-200 dark:border-white/5 hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-all group/link"
+                  className="flex items-center justify-between gap-4 p-4 bg-gray-50/50 dark:bg-white/[0.02] rounded-2xl border border-gray-100 dark:border-white/5 hover:border-emerald-500/50 hover:bg-white dark:hover:bg-white/5 transition-all group/link"
                 >
-                  <div className="flex items-center gap-2 overflow-hidden">
-                    <LinkIcon className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-                    <span className="text-xs font-bold text-gray-700 dark:text-slate-300 truncate">Drive Asset Link</span>
+                  <div className="flex items-center gap-3 overflow-hidden">
+                    <div className="w-10 h-10 bg-white dark:bg-black border border-gray-200 dark:border-white/10 rounded-xl flex items-center justify-center shadow-inner">
+                        <LinkIcon className="w-4 h-4 text-emerald-500" />
+                    </div>
+                    <span className="text-xs font-bold text-gray-700 dark:text-gray-300 truncate">Drive Asset Link</span>
                   </div>
-                  <ExternalLink className="w-3.5 h-3.5 text-gray-400 group-hover/link:text-emerald-500 transition-colors" />
+                  <ExternalLink className="w-4 h-4 text-gray-400 group-hover/link:text-emerald-500 transition-colors" />
                 </a>
               </div>
             </div>
@@ -210,113 +240,138 @@ const OfficialTaskManager = ({ courses = [], departments = [] }) => {
         </div>
       )}
 
-      {/* Form Modal */}
+      {/* Cinematic Form Modal */}
       {showForm && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 animate-fadeIn">
-          <div className="bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-white/10 w-full max-w-lg rounded-[2.5rem] overflow-hidden shadow-2xl transition-colors duration-300">
-            <div className="p-8 border-b border-gray-100 dark:border-white/5 flex items-center justify-between bg-gray-50/50 dark:bg-white/[0.02]">
-              <div>
-                <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
-                  {editingTask ? 'Edit Task' : 'Create Task'}
-                </h3>
-                <p className="text-gray-500 dark:text-slate-500 text-[10px] font-black uppercase tracking-widest mt-1">Official Curriculum Sync</p>
-              </div>
-              <button onClick={() => setShowForm(false)} className="p-2 hover:bg-gray-200 dark:hover:bg-white/10 rounded-xl transition-colors">
-                <Trash2 className="w-6 h-6 text-gray-400" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSubmit} className="p-8 space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-emerald-500 uppercase tracking-widest ml-4">Target Course</label>
-                  <div className="relative">
-                    <BookOpen className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <select
-                      value={formData.course_id}
-                      onChange={(e) => setFormData({ ...formData, course_id: e.target.value })}
-                      className="admin-input pl-12 h-[55px] appearance-none"
-                      required
-                    >
-                      <option value="">Select course</option>
-                      {courses.map(course => (
-                        <option key={course.id} value={course.id}>{course.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-blue-500 uppercase tracking-widest ml-4">Target Department</label>
-                  <div className="relative">
-                    <Layers className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <select
-                      value={formData.department_id}
-                      onChange={(e) => setFormData({ ...formData, department_id: e.target.value })}
-                      className="admin-input pl-12 h-[55px] appearance-none"
-                    >
-                      <option value="">All Departments</option>
-                      {departments.map(dept => (
-                        <option key={dept.id} value={dept.id}>{dept.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/60 dark:bg-black/90 backdrop-blur-md animate-in fade-in duration-300">
+           <div 
+             className="bg-white dark:bg-[#111] border border-gray-200 dark:border-white/10 shadow-[0_32px_64px_rgba(0,0,0,0.4)] rounded-[3rem] w-full max-w-2xl overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-10 duration-500"
+             onClick={e => e.stopPropagation()}
+           >
+              {/* Modal Header */}
+              <div className="p-10 border-b border-gray-100 dark:border-white/10 bg-gray-50/50 dark:bg-white/[0.02] flex justify-between items-center">
+                 <div className="flex items-center gap-5">
+                    <div className="w-14 h-14 bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-500/20">
+                        <Activity className="w-6 h-6 text-emerald-600" />
+                    </div>
+                    <div>
+                        <h2 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">{editingTask ? 'Edit Task' : 'New Task'}</h2>
+                        <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mt-1">Curriculum Assignment Details</p>
+                    </div>
+                 </div>
+                 <button onClick={closeForm} className="w-12 h-12 flex items-center justify-center bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-500 rounded-2xl hover:text-emerald-600 transition-all shadow-sm">
+                    <X className="w-6 h-6" />
+                 </button>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-emerald-500 uppercase tracking-widest ml-4">Task Title</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Logic Design Sheet #4"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="admin-input h-[55px]"
-                  required
-                />
+              {/* Modal Body */}
+              <div className="p-10 space-y-8 max-h-[70vh] overflow-y-auto no-scrollbar">
+                 <form id="task-form" onSubmit={handleSubmit} className="space-y-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                       <div className="space-y-3">
+                          <label className="block text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em] ml-5">Target Course</label>
+                          <div className="relative">
+                             <BookOpen className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300" />
+                             <select
+                               value={formData.course_id}
+                               onChange={(e) => setFormData({ ...formData, course_id: e.target.value })}
+                               className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-white/10 rounded-[1.5rem] py-5 pl-16 pr-8 text-gray-900 dark:text-white font-bold focus:ring-2 focus:ring-emerald-500/50 outline-none transition-all shadow-inner appearance-none"
+                               required
+                             >
+                               <option value="">Select course</option>
+                               {courses.map(course => (
+                                 <option key={course.id} value={course.id}>{course.name}</option>
+                               ))}
+                             </select>
+                          </div>
+                       </div>
+                       <div className="space-y-3">
+                          <label className="block text-[10px] font-black text-indigo-500 uppercase tracking-[0.2em] ml-5">Target Department</label>
+                          <div className="relative">
+                             <Layers className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300" />
+                             <select
+                               value={formData.department_id}
+                               onChange={(e) => setFormData({ ...formData, department_id: e.target.value })}
+                               className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-white/10 rounded-[1.5rem] py-5 pl-16 pr-8 text-gray-900 dark:text-white font-bold focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all shadow-inner appearance-none"
+                             >
+                               <option value="">All Departments</option>
+                               {departments.map(dept => (
+                                 <option key={dept.id} value={dept.id}>{dept.name}</option>
+                               ))}
+                             </select>
+                          </div>
+                       </div>
+                    </div>
+
+                    <div className="space-y-3">
+                       <label className="block text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em] ml-5">Task Title</label>
+                       <div className="relative">
+                          <Edit className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300" />
+                          <input
+                            type="text"
+                            placeholder="e.g. Laboratory Sheet #02"
+                            value={formData.title}
+                            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                            className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-white/10 rounded-[1.5rem] py-5 pl-16 pr-8 text-gray-900 dark:text-white text-lg font-black focus:ring-2 focus:ring-emerald-500/50 outline-none transition-all shadow-inner"
+                            required
+                          />
+                       </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                       <div className="space-y-3">
+                          <label className="block text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em] ml-5">Resource Link</label>
+                          <div className="relative">
+                             <LinkIcon className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-emerald-500" />
+                             <input
+                               type="url"
+                               placeholder="Google Drive / URL"
+                               value={formData.drive_link}
+                               onChange={(e) => setFormData({ ...formData, drive_link: e.target.value })}
+                               className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-white/10 rounded-[1.5rem] py-5 pl-16 pr-8 text-gray-900 dark:text-white font-bold focus:ring-2 focus:ring-emerald-500/50 outline-none transition-all shadow-inner"
+                               required
+                             />
+                          </div>
+                       </div>
+                       <div className="space-y-3">
+                          <label className="block text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em] ml-5">Deadline</label>
+                          <div className="relative">
+                             <Calendar className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300" />
+                             <input
+                               type="date"
+                               value={formData.deadline}
+                               onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
+                               className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-white/10 rounded-[1.5rem] py-5 pl-16 pr-8 text-gray-900 dark:text-white font-bold focus:ring-2 focus:ring-emerald-500/50 outline-none transition-all shadow-inner"
+                             />
+                          </div>
+                       </div>
+                    </div>
+
+                    <div className="space-y-3">
+                       <label className="block text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em] ml-5">Additional Info</label>
+                       <textarea
+                         placeholder="Optional instructions or details..."
+                         rows="3"
+                         value={formData.description}
+                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                         className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-white/10 rounded-[1.5rem] p-8 text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-emerald-500/50 outline-none transition-all shadow-inner resize-none"
+                       />
+                    </div>
+                 </form>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-emerald-500 uppercase tracking-widest ml-4">Drive Link</label>
-                <div className="relative">
-                  <LinkIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500" />
-                  <input
-                    type="url"
-                    placeholder="https://drive.google.com/..."
-                    value={formData.drive_link}
-                    onChange={(e) => setFormData({ ...formData, drive_link: e.target.value })}
-                    className="admin-input pl-12 h-[55px]"
-                    required
-                  />
-                </div>
+              {/* Modal Footer */}
+              <div className="p-10 border-t border-gray-100 dark:border-white/10 flex justify-end gap-5 bg-gray-50/50 dark:bg-white/[0.02]">
+                 <button onClick={closeForm} className="px-10 py-5 rounded-2xl font-black text-gray-500 hover:text-gray-900 transition-all uppercase text-[10px] tracking-[0.2em]">Cancel</button>
+                 <button 
+                   type="submit" 
+                   form="task-form"
+                   className="flex items-center gap-3 bg-emerald-600 hover:bg-emerald-700 text-white px-12 py-5 rounded-2xl font-black transition-all shadow-xl shadow-emerald-500/20 active:scale-95 uppercase text-[10px] tracking-[0.3em]"
+                 >
+                   <Save className="w-5 h-5" />
+                   {editingTask ? 'Save Changes' : 'Add Task'}
+                 </button>
               </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-emerald-500 uppercase tracking-widest ml-4">Deadline</label>
-                <input
-                  type="date"
-                  value={formData.deadline}
-                  onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
-                  className="admin-input h-[55px]"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-emerald-500 uppercase tracking-widest ml-4">Description (Optional)</label>
-                <textarea
-                  placeholder="Task details or instructions..."
-                  rows="3"
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="admin-input py-4 min-h-[100px]"
-                />
-              </div>
-
-              <button type="submit" className="w-full admin-btn-primary h-[60px] text-lg mt-4 shadow-[0_10px_30px_rgba(16,185,129,0.3)]">
-                {editingTask ? 'UPDATE TASK' : 'CREATE TASK'}
-              </button>
-            </form>
-          </div>
+           </div>
         </div>
       )}
     </div>
