@@ -91,7 +91,7 @@
   }
 
   .admin-table-head th {
-    @apply text-left py-3 px-4 text-primary;
+    @apply text-start py-3 px-4 text-primary;
   }
 
   .admin-table-row {
@@ -143,6 +143,11 @@
 
   .animate-scaleUp {
     animation: scaleUp 0.3s ease-out;
+  }
+
+  .fade-in-up {
+    animation: fadeInUp 0.3s ease-out both;
+    will-change: transform, opacity;
   }
 }
 
@@ -322,4 +327,34 @@ input[type=number]::-webkit-outer-spin-button {
 
 input[type=number] {
   -moz-appearance: textfield;
+}
+
+/* ============= Mesh Gradient Animation ============= */
+@keyframes mesh-gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.mesh-bg {
+  background: linear-gradient(-45deg, #10b981, #3b82f6, #6366f1, #2dd4bf);
+  background-size: 400% 400%;
+  animation: mesh-gradient 15s ease infinite;
+}
+
+.dark .mesh-bg-dark {
+  background: linear-gradient(-45deg, #050505, #0a0a0a, #111, #050505);
+  background-size: 400% 400%;
+  animation: mesh-gradient 15s ease infinite;
+}
+
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+/* ============= Shimmer Animation ============= */
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
 }

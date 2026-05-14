@@ -4,6 +4,7 @@ const adminController = require('../controllers/adminController');
 const studentController = require('../controllers/studentController');
 const studentCourseController = require('../controllers/studentCourseController');
 const adminDoctorController = require('../controllers/adminDoctorController');
+const gradeController = require('../controllers/gradeController');
 const { upload, handleMulterError } = require('../middleware/upload');
 const { adminAuth, checkPermission } = require('../middleware/auth');
 const { studentCreationLimiter } = require('../middleware/rateLimiter');
@@ -69,8 +70,13 @@ router.put('/students/:id/section', adminAuth, studentController.updateStudentSe
 router.put('/students/:id/role', adminAuth, studentController.updateStudentRole);
 router.put('/students/:id/reset-password', adminAuth, studentController.resetStudentPassword);
 
+// ✅ جديد: إدارة درجات الطالب الفردي
+router.get('/students/:studentId/grades', adminAuth, gradeController.getGradesByStudentId);
+router.put('/students/:studentId/grades/:courseId', adminAuth, gradeController.updateStudentGradeByCourseId);
+
 // ------------------- Student Courses Management -------------------
 router.get('/students/:studentId/courses', adminAuth, studentCourseController.getStudentCourses);
+router.post('/students/:studentId/courses', adminAuth, studentCourseController.addCourseToStudent);
 router.get('/students/:studentId/available-courses', adminAuth, studentCourseController.getAvailableCourses);
 router.post('/students/:studentId/courses/:courseId', adminAuth, studentCourseController.addCourseToStudent);
 router.delete('/students/:studentId/courses/:courseId', adminAuth, studentCourseController.removeCourseFromStudent);

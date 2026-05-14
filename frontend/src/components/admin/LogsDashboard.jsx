@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import ActivityLogsManager from './ActivityLogsManager';
 import StudentLogins from './StudentLogins';
+import { useTranslation } from 'react-i18next';
 import { 
   ShieldAlert, Users, Activity, Clock, 
   Terminal, LayoutDashboard, ChevronRight,
@@ -8,6 +9,7 @@ import {
 } from 'lucide-react';
 
 const LogsDashboard = () => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('admin');
 
   return (
@@ -20,12 +22,12 @@ const LogsDashboard = () => {
           </div>
           <div>
             <h2 className="text-4xl font-black text-gray-900 dark:text-white tracking-tighter">
-              System Logs
+              {t('admin.logs.title')}
             </h2>
             <div className="flex items-center gap-3 mt-1.5">
-                <span className="text-gray-500 dark:text-gray-400 text-xs font-black uppercase tracking-[0.2em]">Activity Audit Trail</span>
+                <span className="text-gray-500 dark:text-gray-400 text-xs font-black uppercase tracking-[0.2em]">{t('admin.logs.audit_trail')}</span>
                 <div className="w-1 h-1 bg-gray-300 dark:bg-gray-700 rounded-full"></div>
-                <span className="text-amber-600 dark:text-amber-400 text-[10px] font-black uppercase tracking-widest">Real-time Monitoring</span>
+                <span className="text-amber-600 dark:text-amber-400 text-[10px] font-black uppercase tracking-widest">{t('admin.logs.real_time')}</span>
             </div>
           </div>
         </div>
@@ -41,7 +43,7 @@ const LogsDashboard = () => {
               }`}
             >
               <ShieldAlert className="w-4 h-4" />
-              Admin Actions
+              {t('admin.logs.admin_tab')}
             </button>
             <button
               onClick={() => setActiveTab('student')}
@@ -52,7 +54,7 @@ const LogsDashboard = () => {
               }`}
             >
               <Users className="w-4 h-4" />
-              Student Access
+              {t('admin.logs.student_tab')}
             </button>
         </div>
       </div>

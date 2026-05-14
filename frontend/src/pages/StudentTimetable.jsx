@@ -5,8 +5,10 @@ import { useStudentData } from '../context/StudentDataContext';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import Sidebar from '../components/Sidebar';
+import { useTranslation } from 'react-i18next';
 
 const StudentTimetable = () => {
+  const { t, i18n } = useTranslation();
   const { student, logout } = useStudentAuth();
   const { timetable: myTimetable, departmentTimetable, exams, loadingTimetable, loadingExams } = useStudentData();
   const navigate = useNavigate();
@@ -16,13 +18,13 @@ const StudentTimetable = () => {
   const [scheduleType, setScheduleType] = useState('lectures'); // 'lectures' or 'exams'
 
   const days = [
-    { id: 'Sunday', name: 'Sunday', short: 'Sun', arabic: 'الأحد' },
-    { id: 'Monday', name: 'Monday', short: 'Mon', arabic: 'الإثنين' },
-    { id: 'Tuesday', name: 'Tuesday', short: 'Tue', arabic: 'الثلاثاء' },
-    { id: 'Wednesday', name: 'Wednesday', short: 'Wed', arabic: 'الأربعاء' },
-    { id: 'Thursday', name: 'Thursday', short: 'Thu', arabic: 'الخميس' },
-    { id: 'Friday', name: 'Friday', short: 'Fri', arabic: 'الجمعة' },
-    { id: 'Saturday', name: 'Saturday', short: 'Sat', arabic: 'السبت' },
+    { id: 'Sunday', name: t('days.sunday'), short: t('days.sun'), arabic: 'الأحد' },
+    { id: 'Monday', name: t('days.monday'), short: t('days.mon'), arabic: 'الإثنين' },
+    { id: 'Tuesday', name: t('days.tuesday'), short: t('days.tue'), arabic: 'الثلاثاء' },
+    { id: 'Wednesday', name: t('days.wednesday'), short: t('days.wed'), arabic: 'الأربعاء' },
+    { id: 'Thursday', name: t('days.thursday'), short: t('days.thu'), arabic: 'الخميس' },
+    { id: 'Friday', name: t('days.friday'), short: t('days.fri'), arabic: 'الجمعة' },
+    { id: 'Saturday', name: t('days.saturday'), short: t('days.sat'), arabic: 'السبت' },
   ];
 
   const getStartOfWeek = (date) => {
@@ -55,7 +57,7 @@ const StudentTimetable = () => {
 
   useEffect(() => {
     const today = new Date();
-    const todayName = days[today.getDay()].id;
+    const todayName = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][today.getDay()];
     setSelectedDay(todayName);
     const weekStart = getStartOfWeek(today);
     setCurrentWeekStart(weekStart);
@@ -99,14 +101,14 @@ const StudentTimetable = () => {
   const handleLogout = () => {
     logout();
     navigate('/student/login');
-    toast.success('Logged out successfully');
+    toast.success(t('sidebar.logout') + ' ' + t('auth.success'));
   };
 
   const formatTime = (time) => {
     if (!time) return '—';
     const [hours, minutes] = time.split(':');
     const hour = parseInt(hours);
-    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const ampm = hour >= 12 ? t('common.pm') : t('common.am');
     const hour12 = hour % 12 || 12;
     return `${hour12}:${minutes} ${ampm}`;
   };
@@ -130,7 +132,7 @@ const StudentTimetable = () => {
             </div>
           </div>
           <p className="text-gray-900 dark:text-white font-black text-[10px] uppercase tracking-[0.4em] mb-1 animate-pulse">ZNU PORTAL</p>
-          <p className="text-gray-500 dark:text-gray-400 font-bold text-xs tracking-wide">جاري تحميل الجلسة...</p>
+          <p className="text-gray-500 dark:text-gray-400 font-bold text-xs tracking-wide">{t('common.loading')}</p>
         </div>
       </div>
     );
@@ -152,10 +154,10 @@ const StudentTimetable = () => {
     <div className="min-h-screen bg-gray-50 dark:bg-dark text-gray-900 dark:text-white font-body transition-colors duration-300">
       <Sidebar onLogout={handleLogout} />
 
-      <div className="md:ml-64 pb-24 md:pb-8">
+      <div className="md:ps-96 pb-24 md:pb-8">
         <div className="max-w-2xl mx-auto px-6 py-8">
           {/* Header with toggle buttons */}
-          <div className="mb-8">
+          <div className="mb-8 text-start">
             <div className="flex items-baseline justify-between mb-6 flex-wrap gap-2">
               <h2 className="font-headline font-extrabold text-5xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-gray-900 to-gray-500 dark:from-white dark:to-gray-400">
                 {currentDayName}
@@ -168,7 +170,7 @@ const StudentTimetable = () => {
                     : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-5'
                     }`}
                 >
-                  My Section ({student?.section || '?'})
+                  {t('timetable.my_section')} ({student?.section || '?'})
                 </button>
                 <button
                   onClick={() => setViewMode('all-sections')}
@@ -177,14 +179,14 @@ const StudentTimetable = () => {
                     ? 'bg-primary text-white dark:text-dark shadow-md'
                     : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-5'
                     } ${!student?.department_id ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  title={!student?.department_id ? 'لا يوجد قسم محدد لك' : 'عرض كل سكاشن القسم'}
+                  title={!student?.department_id ? t('timetable.no_dept') : t('timetable.all_sections_desc')}
                 >
-                  All Sections
+                  {t('timetable.all_sections')}
                 </button>
               </div>
             </div>
             <span className="font-label text-xs font-bold uppercase tracking-[0.2em] text-primary/90 dark:text-primary/70">
-              Week {weekNumber}
+              {t('timetable.week')} {weekNumber}
             </span>
           </div>
 
@@ -194,13 +196,13 @@ const StudentTimetable = () => {
               onClick={() => setScheduleType('lectures')}
               className={`flex-1 py-3 rounded-full text-xs font-bold uppercase tracking-widest transition-all duration-300 ${scheduleType === 'lectures' ? 'bg-primary text-white dark:text-dark shadow-md' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
             >
-              Lectures & Labs
+              {t('timetable.lectures')}
             </button>
             <button
               onClick={() => setScheduleType('exams')}
               className={`flex-1 py-3 rounded-full text-xs font-bold uppercase tracking-widest transition-all duration-300 ${scheduleType === 'exams' ? 'bg-primary text-white dark:text-dark shadow-md' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
             >
-              Practical & Final Exams
+              {t('timetable.exams')}
             </button>
           </div>
 
@@ -220,7 +222,7 @@ const StudentTimetable = () => {
                         {day.short}
                       </span>
                       <span className="text-lg font-black font-headline">
-                        {new Date(currentWeekStart).getDate() + days.indexOf(day)}
+                        {new Date(currentWeekStart).getDate() + days.findIndex(d => d.id === day.id)}
                       </span>
                     </button>
                   );
@@ -232,14 +234,14 @@ const StudentTimetable = () => {
                 {!hasEntries ? (
                   <div className="text-center py-16 bg-white/50 dark:bg-dark-glass/50 backdrop-blur-md rounded-[2rem] border border-dashed border-gray-300 dark:border-white/10 shadow-sm dark:shadow-inner">
                     <div className="flex justify-center mb-6"><Coffee className="w-16 h-16 text-primary/40" /></div>
-                    <p className="text-gray-500 dark:text-gray-400 text-lg">Holiday - No Classes</p>
-                    <p className="text-gray-400 dark:text-gray-500 text-sm mt-2">Enjoy your day off!</p>
+                    <p className="text-gray-500 dark:text-gray-400 text-lg">{t('timetable.holiday')}</p>
+                    <p className="text-gray-400 dark:text-gray-500 text-sm mt-2">{t('timetable.holiday_desc')}</p>
                   </div>
                 ) : (
                   currentDayEntries.map((entry, idx) => {
                     const completed = isLectureCompleted(entry);
                     const isNow = isLectureNow(entry);
-                    const isToday = selectedDay === days[new Date().getDay()]?.id;
+                    const isToday = selectedDay === ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][new Date().getDay()];
 
                     const startFormatted = formatTime(entry.start_time);
                     const endFormatted = formatTime(entry.end_time);
@@ -252,14 +254,14 @@ const StudentTimetable = () => {
                       bgColor = 'bg-primary/10 border border-primary/50 shadow-[0_4px_20px_rgba(46,204,113,0.1)] dark:shadow-[0_0_40px_rgba(142,255,113,0.15)] ring-1 ring-primary/20 scale-[1.02]';
                       statusBadge = (
                         <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/20 text-primary border border-primary/50 text-[10px] uppercase tracking-widest font-black shadow-[0_0_15px_rgba(46,204,113,0.3)] dark:shadow-[0_0_15px_rgba(142,255,113,0.3)] animate-pulse">
-                          <span className="w-2 h-2 rounded-full bg-primary"></span> Live Now
+                          <span className="w-2 h-2 rounded-full bg-primary"></span> {t('timetable.live')}
                         </span>
                       );
                     } else if (completed && isToday) {
                       bgColor = 'bg-gray-100/50 dark:bg-dark-glass/40 border border-gray-200 dark:border-white/5 opacity-60 grayscale-[0.5] hover:opacity-100 transition-opacity';
                       statusBadge = (
                         <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-gray-200 dark:bg-white/5 text-gray-500 border border-gray-300 dark:border-white/10 text-[10px] uppercase tracking-widest font-black">
-                          ✓ Finished
+                          ✓ {t('timetable.finished')}
                         </span>
                       );
                     } else {
@@ -270,14 +272,14 @@ const StudentTimetable = () => {
                     return (
                       <div key={idx} className="relative">
                         <div
-                          className={`relative overflow-hidden ${bgColor} p-6 sm:p-8 rounded-[2rem] backdrop-blur-md transition-all`}
+                          className={`relative overflow-hidden ${bgColor} p-6 sm:p-8 rounded-[2rem] backdrop-blur-md transition-all text-start`}
                         >
                           <div className="flex justify-between items-start mb-5">
                             <div className="space-y-2">
                               <span
                                 className={`inline-block px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest mb-2 ${entry.type === 'Lecture' ? 'bg-blue-100 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20' : 'bg-purple-100 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-500/20'}`}
                               >
-                                {entry.type || 'Lecture'}
+                                {entry.type === 'Lecture' ? t('timetable.type_lecture') : (entry.type === 'Lab' ? t('timetable.type_lab') : (entry.type === 'Section' ? t('timetable.type_section') : entry.type))}
                               </span>
                               <h3 className="text-2xl font-headline font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-gray-900 to-gray-500 dark:from-white dark:to-gray-400 leading-tight tracking-tight">
                                 {entry.course_name}
@@ -285,11 +287,11 @@ const StudentTimetable = () => {
                               {/* عرض السكاشن المجمعة في وضع "كل السكاشن" */}
                               {viewMode === 'all-sections' && entry.sections_text && (
                                 <div className="text-xs text-gray-700 dark:text-white/80 bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/20 inline-block px-3 py-1 mt-2 rounded-full font-bold">
-                                  Section: {entry.sections_text}
+                                  {t('timetable.section')}: {entry.sections_text}
                                 </div>
                               )}
                             </div>
-                            <div className="text-right">
+                            <div className="text-end">
                               {statusBadge ? (
                                 statusBadge
                               ) : (
@@ -305,7 +307,7 @@ const StudentTimetable = () => {
                               {entry.is_quiz && (
                                 <div className="mt-2">
                                   <span className="inline-block px-2 py-0.5 rounded-full bg-yellow-100 dark:bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 text-[10px] font-bold uppercase tracking-wider">
-                                    <span className="flex items-center gap-1"><ClipboardList className="w-3 h-3" /> Quiz</span>
+                                    <span className={`flex items-center gap-1 ${i18n.language === 'ar' ? 'flex-row-reverse' : ''}`}><ClipboardList className="w-3 h-3" /> {t('timetable.quiz')}</span>
                                   </span>
                                 </div>
                               )}
@@ -314,15 +316,15 @@ const StudentTimetable = () => {
 
                           <div className="flex flex-wrap gap-5 items-center mt-4 pt-4 border-t border-gray-100 dark:border-white/5">
                             {entry.instructor && (
-                              <div className="flex items-center gap-2">
-                                <span className="text-sm font-semibold text-gray-500 dark:text-gray-400">
+                              <div className={`flex items-center gap-2 ${i18n.language === 'ar' ? 'flex-row-reverse' : ''}`}>
+                                <span className="text-sm font-semibold text-gray-500 dark:text-gray-400 flex items-center gap-2">
                                   <UserCheck className="w-4 h-4 text-primary" /> {entry.instructor}
                                 </span>
                               </div>
                             )}
                             {entry.location && (
-                              <div className="flex items-center gap-2">
-                                <span className="text-sm font-semibold text-gray-500 dark:text-gray-400">
+                              <div className={`flex items-center gap-2 ${i18n.language === 'ar' ? 'flex-row-reverse' : ''}`}>
+                                <span className="text-sm font-semibold text-gray-500 dark:text-gray-400 flex items-center gap-2">
                                   <MapPin className="w-4 h-4 text-secondary" /> {entry.location}
                                 </span>
                               </div>
@@ -340,19 +342,19 @@ const StudentTimetable = () => {
               {!exams || exams.length === 0 ? (
                 <div className="text-center py-16 bg-white/50 dark:bg-dark-glass/50 backdrop-blur-md rounded-[2rem] border border-dashed border-gray-300 dark:border-white/10 shadow-sm dark:shadow-inner">
                   <div className="flex justify-center mb-6"><ClipboardList className="w-16 h-16 text-primary/40" /></div>
-                  <p className="text-gray-500 dark:text-gray-400 text-lg">No Exams Scheduled</p>
-                  <p className="text-gray-400 dark:text-gray-500 text-sm mt-2">Check back later for updates</p>
+                  <p className="text-gray-500 dark:text-gray-400 text-lg">{t('timetable.no_exams')}</p>
+                  <p className="text-gray-400 dark:text-gray-500 text-sm mt-2">{t('timetable.no_exams_desc')}</p>
                 </div>
               ) : (
                 exams.map((exam, idx) => {
                   const isPractical = exam.exam_type === 'Practical';
                   return (
                     <div key={idx} className="relative">
-                      <div className="relative overflow-hidden bg-white dark:bg-dark-card border border-gray-200 dark:border-white/10 shadow-sm dark:shadow-xl group hover:border-primary/40 hover:-translate-y-1 hover:shadow-md dark:hover:shadow-2xl transition-all duration-500 p-6 sm:p-8 rounded-[2rem] backdrop-blur-md">
-                        <div className="flex justify-between items-start mb-5">
+                      <div className={`relative overflow-hidden bg-white dark:bg-dark-card border border-gray-200 dark:border-white/10 shadow-sm dark:shadow-xl group hover:border-primary/40 hover:-translate-y-1 hover:shadow-md dark:hover:shadow-2xl transition-all duration-500 p-6 sm:p-8 rounded-[2rem] backdrop-blur-md text-start`}>
+                        <div className={`flex justify-between items-start mb-5 ${i18n.language === 'ar' ? 'flex-row-reverse' : ''}`}>
                           <div className="space-y-2">
                             <span className={`inline-block px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest mb-2 ${isPractical ? 'bg-orange-100 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-500/20' : 'bg-red-100 dark:bg-red-500/10 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500/20'}`}>
-                              {exam.exam_type}
+                              {isPractical ? t('timetable.type_practical') : t('timetable.type_final')}
                             </span>
                             <h3 className="text-xl sm:text-2xl font-extrabold font-headline leading-tight pr-4 text-gray-900 dark:text-white">
                               {exam.course_name}
@@ -364,20 +366,20 @@ const StudentTimetable = () => {
                             <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-white/5 flex items-center justify-center flex-shrink-0">
                               <Calendar className="w-4 h-4 text-primary" />
                             </div>
-                            <div>
-                              <p className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest">Day & Date</p>
+                            <div className="text-start">
+                              <p className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest">{t('timetable.exam_day')}</p>
                               <p className="text-sm font-bold text-gray-700 dark:text-gray-200">
-                                {new Date(exam.exam_date).toLocaleDateString('en-GB', { weekday: 'long' })}<br />
-                                <span className="text-xs text-gray-500 dark:text-gray-400">{new Date(exam.exam_date).toLocaleDateString('en-GB')}</span>
+                                {new Date(exam.exam_date).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'en-GB', { weekday: 'long' })}<br />
+                                <span className="text-xs text-gray-500 dark:text-gray-400">{new Date(exam.exam_date).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'en-GB')}</span>
                               </p>
                             </div>
                           </div>
-                          <div className="flex items-center gap-3 w-full sm:w-auto sm:ml-4">
+                          <div className="flex items-center gap-3 w-full sm:w-auto sm:ms-4">
                             <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-white/5 flex items-center justify-center flex-shrink-0">
                               <Coffee className="w-4 h-4 text-primary" />
                             </div>
-                            <div>
-                              <p className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest">Time</p>
+                            <div className="text-start">
+                              <p className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest">{t('timetable.exam_time')}</p>
                               <p className="text-sm font-bold text-gray-700 dark:text-gray-200">{formatTime(exam.start_time)} - {formatTime(exam.end_time)}</p>
                             </div>
                           </div>

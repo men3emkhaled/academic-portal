@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDoctorAuth } from '../context/DoctorAuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from 'react-i18next';
 
 // Components
 import DoctorSidebar from '../components/doctor/DoctorSidebar';
@@ -22,6 +23,7 @@ import DoctorInquiries from '../components/doctor/DoctorInquiries';
 import DoctorNotifications from '../components/doctor/DoctorNotifications';
 
 const DoctorDashboard = () => {
+  const { t, i18n } = useTranslation();
   const { doctor, token, logout, loading: authLoading, doctorApi } = useDoctorAuth();
   const { isDarkMode, toggleTheme } = useTheme();
   const navigate = useNavigate();
@@ -103,7 +105,7 @@ const DoctorDashboard = () => {
     navigate('/doctor/login');
   };
 
-  const filteredCourses = myCourses.filter(course => 
+  const filteredCourses = myCourses.filter(course =>
     course.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     course.department_name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -126,22 +128,22 @@ const DoctorDashboard = () => {
   return (
     <div className="flex h-screen bg-doctor-bg text-doctor-text font-sans overflow-hidden">
       {/* Sidebar / Bottom Bar */}
-      <DoctorSidebar 
-        activeTab={activeTab} 
-        setActiveTab={setActiveTab} 
-        doctor={doctor} 
-        onLogout={handleLogout} 
+      <DoctorSidebar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        doctor={doctor}
+        onLogout={handleLogout}
         unreadCount={unreadCount}
       />
 
       {/* Main Content Area */}
-      <div className="flex-1 lg:ml-[19.5rem] flex flex-col min-w-0 overflow-hidden relative transition-all duration-300">
+      <div className="flex-1 lg:ps-96 flex flex-col min-w-0 overflow-hidden relative transition-all duration-300">
         {/* Background Glows */}
         <div className="absolute top-[-20%] right-[-10%] w-[50%] h-[50%] bg-doctor-primary/10 blur-[150px] rounded-full pointer-events-none"></div>
         <div className="absolute bottom-[-10%] left-[-5%] w-[40%] h-[40%] bg-doctor-primary/5 blur-[120px] rounded-full pointer-events-none"></div>
 
-        <DoctorHeader 
-          doctor={doctor} 
+        <DoctorHeader
+          doctor={doctor}
           onSearch={setSearchQuery}
           onCreateQuiz={() => setActiveTab('quizzes')}
           notifications={notifications}
@@ -154,18 +156,18 @@ const DoctorDashboard = () => {
         <main className="flex-1 overflow-y-auto p-6 lg:p-10 pb-32 lg:pb-10 hidden-scrollbar relative z-10">
           <div className="max-w-[1400px] mx-auto">
             {activeTab === 'overview' && (
-              <DoctorOverview 
-                stats={stats} 
-                doctor={doctor} 
+              <DoctorOverview
+                stats={stats}
+                doctor={doctor}
                 timetable={timetable}
                 setActiveTab={setActiveTab}
               />
             )}
 
             {activeTab === 'courses' && (
-              <DoctorCourses 
-                courses={myCourses} 
-                onRefresh={fetchData} 
+              <DoctorCourses
+                courses={myCourses}
+                onRefresh={fetchData}
               />
             )}
 
@@ -175,15 +177,15 @@ const DoctorDashboard = () => {
             {activeTab === 'inquiries' && <DoctorInquiries />}
             {activeTab === 'grades' && <DoctorGradesView courses={myCourses} />}
             {activeTab === 'analytics' && <DoctorAnalytics courses={myCourses} />}
-            
+
             {activeTab === 'attendance' && <DoctorAttendance courses={myCourses} />}
-            
+
             {/* These tabs are accessible via their respective managers but kept here for compatibility */}
             {activeTab === 'syllabus' && <DoctorCourseProgress courses={myCourses} />}
             {activeTab === 'announcements' && <DoctorAnnouncements courses={myCourses} />}
             {activeTab === 'settings' && <DoctorSettings />}
             {activeTab === 'notifications' && (
-              <DoctorNotifications 
+              <DoctorNotifications
                 notifications={notifications}
                 onMarkRead={markNotificationAsRead}
                 onMarkAllRead={markAllNotificationsAsRead}
@@ -191,9 +193,9 @@ const DoctorDashboard = () => {
               />
             )}
             {activeTab === 'schedule' && (
-              <DoctorSchedule 
-                timetable={timetable} 
-                onRefresh={fetchData} 
+              <DoctorSchedule
+                timetable={timetable}
+                onRefresh={fetchData}
                 courses={myCourses}
               />
             )}

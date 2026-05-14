@@ -1,19 +1,21 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { HelpCircle, Plus, Edit3, Trash2, CheckCircle2, Circle, Type, FileText, ImageIcon } from 'lucide-react';
 
 const QuestionBank = ({ questions, setShowQuestionForm, editQuestion, handleDeleteQuestion }) => {
+  const { t } = useTranslation();
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="flex justify-between items-center">
           <div className="flex items-center gap-3">
               <div className="w-2.5 h-2.5 bg-indigo-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(99,102,241,0.5)]"></div>
-              <span className="text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">Question List</span>
+              <span className="text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">{t('admin.quizzes.questions.list_title')}</span>
           </div>
           <button
               onClick={() => setShowQuestionForm(true)}
               className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 shadow-md shadow-indigo-500/10"
           >
-              <Plus className="w-3.5 h-3.5" /> Add Question
+              <Plus className="w-3.5 h-3.5" /> {t('admin.quizzes.questions.add_btn')}
           </button>
       </div>
 
@@ -22,7 +24,7 @@ const QuestionBank = ({ questions, setShowQuestionForm, editQuestion, handleDele
               <div className="w-20 h-20 bg-gray-100 dark:bg-white/5 rounded-full flex items-center justify-center mb-6">
                 <HelpCircle className="w-10 h-10 text-gray-400" />
               </div>
-              <p className="text-sm font-black uppercase tracking-widest text-gray-500">No questions added yet</p>
+              <p className="text-sm font-black uppercase tracking-widest text-gray-500">{t('admin.quizzes.questions.no_questions')}</p>
           </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -32,8 +34,8 @@ const QuestionBank = ({ questions, setShowQuestionForm, editQuestion, handleDele
                   <div className="flex items-center gap-3">
                       <span className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-xs font-black text-indigo-600 dark:text-indigo-400 shadow-inner">{idx + 1}</span>
                       <div className="flex flex-col">
-                        <span className="px-2 py-0.5 rounded-lg bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-[8px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1">{q.question_type.replace('_', ' ')}</span>
-                        <span className="text-[10px] font-black text-indigo-600/60 dark:text-indigo-400/60 uppercase">Points: {q.points}</span>
+                        <span className="px-2 py-0.5 rounded-lg bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-[8px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1">{t(`admin.quizzes.questions.form.types.${q.question_type}`)}</span>
+                        <span className="text-[10px] font-black text-indigo-600/60 dark:text-indigo-400/60 uppercase">{t('admin.quizzes.questions.points_label', { count: q.points })}</span>
                       </div>
                   </div>
                   <div className="flex gap-2">
@@ -49,7 +51,7 @@ const QuestionBank = ({ questions, setShowQuestionForm, editQuestion, handleDele
                       <img src={q.image_url} alt="Question visual" className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-700" />
                       <div className="absolute top-4 right-4 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 flex items-center gap-2">
                         <ImageIcon className="w-3.5 h-3.5 text-white" />
-                        <span className="text-[10px] font-black text-white uppercase tracking-widest">Image Matrix</span>
+                        <span className="text-[10px] font-black text-white uppercase tracking-widest">{t('admin.quizzes.questions.image_matrix')}</span>
                       </div>
                   </div>
                )}
@@ -84,7 +86,7 @@ const QuestionBank = ({ questions, setShowQuestionForm, editQuestion, handleDele
                                 : 'bg-gray-50/50 dark:bg-black/20 border-gray-100 dark:border-white/5 text-gray-400'
                             }`}>
                                 {isCorrect && <CheckCircle2 className="w-4 h-4" />}
-                                {val}
+                                {t(`admin.quizzes.questions.form.${val}`)}
                             </div>
                           );
                       })}

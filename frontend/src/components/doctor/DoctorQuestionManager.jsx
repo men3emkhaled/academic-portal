@@ -2,7 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useDoctorAuth } from '../../context/DoctorAuthContext';
 import { supabase } from '../../services/supabase';
 import toast from 'react-hot-toast';
-import { ArrowLeft, Plus, Edit3, Trash2, ListChecks, Type, Image as ImageIcon } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  ArrowLeft, Plus, Edit3, Trash2, ListChecks, Type, Image as ImageIcon, 
+  ChevronRight, Save, X, HelpCircle, Target, Sparkles, Zap, Layout,
+  CheckCircle2, AlertCircle, FileText, UploadCloud, Eye, Microscope
+} from 'lucide-react';
 
 const DoctorQuestionManager = ({ quiz, onBack }) => {
     const { doctorApi } = useDoctorAuth();
@@ -53,7 +58,6 @@ const DoctorQuestionManager = ({ quiz, onBack }) => {
             const payload = { ...formData };
             if (imageUrl) payload.image_url = imageUrl;
 
-            // Clean up options based on type
             if (payload.question_type === 'true_false') {
                 payload.options = ['True', 'False'];
                 if (payload.correct_answer !== 'True' && payload.correct_answer !== 'False') {
@@ -117,6 +121,7 @@ const DoctorQuestionManager = ({ quiz, onBack }) => {
             explanation: q.explanation || ''
         });
         setImageFile(null);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     const handleOptionChange = (index, value) => {
@@ -125,215 +130,297 @@ const DoctorQuestionManager = ({ quiz, onBack }) => {
         setFormData({ ...formData, options: newOptions });
     };
 
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
+    };
+
+    const itemVariants = {
+        hidden: { x: -20, opacity: 0 },
+        visible: { x: 0, opacity: 1, transition: { type: 'spring', stiffness: 100 } }
+    };
+
     return (
-        <div className="space-y-6">
-            <div className="flex items-center gap-4">
-                <button onClick={onBack} className="p-2 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl hover:bg-gray-50 dark:hover:bg-white/10 transition-colors">
-                    <ArrowLeft className="w-5 h-5" />
-                </button>
-                <div>
-                    <h2 className="text-2xl font-black">{quiz.title} - Questions</h2>
-                    <p className="text-sm text-gray-500 font-medium">Manage questions for this quiz</p>
+        <div className="max-w-[1600px] mx-auto pb-20 space-y-10 px-4">
+            {/* Header Area */}
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                <div className="flex items-center gap-6">
+                    <motion.button 
+                        whileHover={{ scale: 1.1, x: -5 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={onBack} 
+                        className="w-14 h-14 rounded-2xl bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 flex items-center justify-center text-gray-400 hover:text-violet-500 transition-all shadow-sm"
+                    >
+                        <ArrowLeft className="w-6 h-6" />
+                    </motion.button>
+                    <div>
+                        <div className="flex items-center gap-3 mb-1">
+                            <h2 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">{quiz.title}</h2>
+                            <span className="px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-[9px] font-black text-violet-500 uppercase tracking-widest">Questions</span>
+                        </div>
+                        <p className="text-sm text-gray-400 font-bold uppercase tracking-widest flex items-center gap-2">
+                            <Layout className="w-4 h-4" /> Edit Mode
+                        </p>
+                    </div>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-                <div className="xl:col-span-1 space-y-6">
-                    <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-6 rounded-[2rem]">
-                        <h3 className="text-xl font-black mb-6 flex items-center gap-2">
-                            {editingQuestion ? <Edit3 className="text-violet-500" /> : <Plus className="text-violet-500" />}
-                            {editingQuestion ? 'Edit Question' : 'Add Question'}
-                        </h3>
-
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <div>
-                                <label className="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider">Type</label>
-                                <select
-                                    value={formData.question_type}
-                                    onChange={(e) => setFormData({ ...formData, question_type: e.target.value })}
-                                    className="w-full bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl p-3"
-                                >
-                                    <option value="multiple_choice">Multiple Choice</option>
-                                    <option value="true_false">True / False</option>
-                                    <option value="written">Written (Manual Review)</option>
-                                </select>
+            <div className="grid grid-cols-1 xl:grid-cols-12 gap-10">
+                {/* Form Column */}
+                <div className="xl:col-span-4 space-y-8">
+                    <div className="sticky top-10">
+                        <motion.div 
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="bg-white dark:bg-[#080808] border border-gray-100 dark:border-white/5 p-8 rounded-[3rem] shadow-2xl relative overflow-hidden"
+                        >
+                            <div className="absolute top-0 right-0 p-8 opacity-5">
+                                <Zap className="w-24 h-24 text-violet-500" />
                             </div>
 
-                            <div>
-                                <label className="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider">Points</label>
-                                <input
-                                    type="number"
-                                    min="1"
-                                    value={formData.points}
-                                    onChange={(e) => setFormData({ ...formData, points: parseInt(e.target.value) })}
-                                    className="w-full bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl p-3"
-                                    required
-                                />
-                            </div>
+                            <h3 className="text-2xl font-black mb-10 flex items-center gap-4 text-gray-900 dark:text-white uppercase tracking-tight">
+                                <div className="w-10 h-10 rounded-xl bg-violet-600 flex items-center justify-center shadow-lg shadow-violet-600/20">
+                                    {editingQuestion ? <Edit3 className="w-5 h-5 text-white" /> : <Plus className="w-5 h-5 text-white" />}
+                                </div>
+                                {editingQuestion ? 'Edit Question' : 'Add Question'}
+                            </h3>
 
-                            <div>
-                                <label className="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider">Question Text</label>
-                                <textarea
-                                    value={formData.question_text}
-                                    onChange={(e) => setFormData({ ...formData, question_text: e.target.value })}
-                                    className="w-full bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl p-3 min-h-[100px]"
-                                    required
-                                />
-                            </div>
+                            <form onSubmit={handleSubmit} className="space-y-8">
+                                <div className="grid grid-cols-2 gap-6">
+                                    <div className="space-y-3">
+                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Question Type</label>
+                                        <select
+                                            value={formData.question_type}
+                                            onChange={(e) => setFormData({ ...formData, question_type: e.target.value })}
+                                            className="w-full bg-gray-50 dark:bg-white/[0.05] border border-gray-100 dark:border-white/10 rounded-2xl py-4 px-5 text-sm font-black appearance-none cursor-pointer outline-none focus:ring-4 focus:ring-violet-500/10 dark:text-white [color-scheme:dark]"
+                                        >
+                                            <option value="multiple_choice" className="dark:bg-[#0A0A0A]">MCQ</option>
+                                            <option value="true_false" className="dark:bg-[#0A0A0A]">True / False</option>
+                                            <option value="written" className="dark:bg-[#0A0A0A]">Written</option>
+                                        </select>
+                                    </div>
 
-                            <div>
-                                <label className="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider flex items-center gap-1">
-                                    <ImageIcon className="w-3 h-3" /> Image (Optional)
-                                </label>
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={(e) => setImageFile(e.target.files[0])}
-                                    className="w-full text-sm"
-                                />
-                                {editingQuestion?.image_url && !imageFile && (
-                                    <p className="text-xs text-violet-500 mt-1">Current image will be kept if no new image is selected.</p>
-                                )}
-                            </div>
-
-                            {formData.question_type === 'multiple_choice' && (
-                                <div className="space-y-3 bg-gray-50 dark:bg-black/10 p-4 rounded-2xl border border-gray-200 dark:border-white/5">
-                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider">Options & Correct Answer</label>
-                                    {formData.options.map((opt, i) => (
-                                        <div key={i} className="flex items-center gap-3">
+                                    <div className="space-y-3">
+                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Points</label>
+                                        <div className="relative">
+                                            <Target className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500" />
                                             <input
-                                                type="radio"
-                                                name="correct_answer"
-                                                checked={formData.correct_answer === String(i)}
-                                                onChange={() => setFormData({ ...formData, correct_answer: String(i) })}
-                                                className="text-violet-500 focus:ring-violet-500"
-                                                title="Mark as correct answer"
-                                            />
-                                            <input
-                                                type="text"
-                                                value={opt}
-                                                onChange={(e) => handleOptionChange(i, e.target.value)}
-                                                placeholder={`Option ${i + 1}`}
-                                                className="flex-1 bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl p-2.5 text-sm"
+                                                type="number"
+                                                min="1"
+                                                value={formData.points}
+                                                onChange={(e) => setFormData({ ...formData, points: parseInt(e.target.value) })}
+                                                className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/10 rounded-2xl py-4 pl-12 pr-5 text-sm font-black outline-none focus:ring-4 focus:ring-violet-500/10 dark:text-white"
                                                 required
                                             />
                                         </div>
-                                    ))}
+                                    </div>
                                 </div>
-                            )}
 
-                            {formData.question_type === 'true_false' && (
-                                <div className="space-y-3 bg-gray-50 dark:bg-black/10 p-4 rounded-2xl border border-gray-200 dark:border-white/5">
-                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider">Correct Answer</label>
-                                    <select
-                                        value={formData.correct_answer}
-                                        onChange={(e) => setFormData({ ...formData, correct_answer: e.target.value })}
-                                        className="w-full bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl p-3"
-                                    >
-                                        <option value="True">True</option>
-                                        <option value="False">False</option>
-                                    </select>
+                                <div className="space-y-3">
+                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Question Text</label>
+                                    <textarea
+                                        value={formData.question_text}
+                                        onChange={(e) => setFormData({ ...formData, question_text: e.target.value })}
+                                        className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/10 rounded-3xl py-5 px-6 text-sm font-semibold min-h-[120px] resize-none outline-none focus:ring-4 focus:ring-violet-500/10 dark:text-white"
+                                        placeholder="Enter your question here..."
+                                        required
+                                    />
                                 </div>
-                            )}
 
-                            {formData.question_type === 'written' && (
-                                <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 p-4 rounded-2xl">
-                                    <p className="text-xs text-amber-700 dark:text-amber-400 font-medium flex items-start gap-2">
-                                        <Type className="w-4 h-4 shrink-0" />
-                                        Students will upload an image or type their answer. You will need to review and grade this question manually.
-                                    </p>
-                                </div>
-                            )}
-
-                            <div className="flex gap-4 pt-4">
-                                <button
-                                    type="submit"
-                                    disabled={loading}
-                                    className="flex-1 bg-violet-500 hover:bg-violet-600 text-white font-bold py-3 rounded-xl transition-colors disabled:opacity-50"
-                                >
-                                    {loading ? 'Saving...' : 'Save Question'}
-                                </button>
-                                {editingQuestion && (
-                                    <button
-                                        type="button"
-                                        onClick={resetForm}
-                                        className="flex-1 bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/20 text-gray-900 dark:text-white font-bold py-3 rounded-xl transition-colors"
-                                    >
-                                        Cancel
-                                    </button>
-                                )}
-                            </div>
-                        </form>
-                    </div>
-                </div>
-
-                <div className="xl:col-span-2 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-[2rem] p-6 h-[800px] flex flex-col">
-                    <h3 className="text-xl font-black mb-6 flex items-center gap-2">
-                        <ListChecks className="text-violet-500" /> Question List ({questions.length})
-                    </h3>
-
-                    <div className="flex-1 overflow-y-auto space-y-4 pr-2">
-                        {questions.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center h-full opacity-50">
-                                <ListChecks className="w-16 h-16 mb-4 text-gray-400" />
-                                <p>No questions added yet</p>
-                            </div>
-                        ) : (
-                            questions.map((q, idx) => (
-                                <div key={q.id} className="bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-2xl p-5">
-                                    <div className="flex justify-between items-start gap-4 mb-3">
-                                        <div className="flex items-start gap-3">
-                                            <div className="bg-violet-100 dark:bg-violet-500/20 text-violet-600 dark:text-violet-400 font-black w-8 h-8 rounded-lg flex items-center justify-center shrink-0">
-                                                {idx + 1}
-                                            </div>
-                                            <div>
-                                                <div className="flex gap-2 mb-1">
-                                                    <span className="text-[10px] font-bold uppercase text-gray-500 bg-gray-200 dark:bg-gray-800 px-2 py-0.5 rounded">
-                                                        {q.question_type.replace('_', ' ')}
-                                                    </span>
-                                                    <span className="text-[10px] font-bold uppercase text-emerald-600 bg-emerald-100 dark:bg-emerald-500/20 px-2 py-0.5 rounded">
-                                                        {q.points} Points
-                                                    </span>
+                                <div className="space-y-3">
+                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Image (Optional)</label>
+                                    <div className="relative group">
+                                        <div className={`flex flex-col items-center justify-center w-full min-h-[100px] border-2 border-dashed rounded-[2rem] transition-all cursor-pointer ${imageFile ? 'bg-emerald-500/5 border-emerald-500/30' : 'bg-gray-50 dark:bg-white/[0.02] border-gray-200 dark:border-white/10 hover:border-violet-500/30'}`}>
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={(e) => setImageFile(e.target.files[0])}
+                                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                            />
+                                            {imageFile ? (
+                                                <div className="flex items-center gap-3 text-emerald-500">
+                                                    <CheckCircle2 className="w-5 h-5" />
+                                                    <span className="text-xs font-black uppercase tracking-widest truncate max-w-[150px]">{imageFile.name}</span>
                                                 </div>
-                                                <h4 className="font-bold text-gray-900 dark:text-white text-sm md:text-base">{q.question_text}</h4>
-                                                {q.image_url && (
-                                                    <img src={q.image_url} alt="Question" className="mt-3 rounded-lg max-h-32 object-contain border border-gray-200 dark:border-white/10" />
-                                                )}
-                                            </div>
-                                        </div>
-                                        <div className="flex gap-2 shrink-0">
-                                            <button onClick={() => startEdit(q)} className="p-2 text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-500/10 rounded-lg">
-                                                <Edit3 className="w-4 h-4" />
-                                            </button>
-                                            <button onClick={() => handleDelete(q.id)} className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg">
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
+                                            ) : (
+                                                <div className="flex flex-col items-center gap-2 text-gray-400">
+                                                    <UploadCloud className="w-6 h-6 group-hover:text-violet-500 transition-colors" />
+                                                    <span className="text-[9px] font-black uppercase tracking-[0.2em]">Upload Image</span>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
+                                </div>
 
-                                    {q.question_type === 'multiple_choice' && (
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-4 ml-11">
-                                            {q.options?.map((opt, i) => (
-                                                <div key={i} className={`p-2 rounded-lg text-sm border ${q.correct_answer === String(i) ? 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400 font-bold' : 'bg-white dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-300'}`}>
-                                                    {String.fromCharCode(65 + i)}. {opt}
+                                {formData.question_type === 'multiple_choice' && (
+                                    <div className="space-y-4 pt-4">
+                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Options</label>
+                                        <div className="space-y-3">
+                                            {formData.options.map((opt, i) => (
+                                                <div key={i} className={`flex items-center gap-4 p-3 rounded-2xl border transition-all ${formData.correct_answer === String(i) ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-white dark:bg-white/5 border-gray-100 dark:border-white/5'}`}>
+                                                    <input
+                                                        type="radio"
+                                                        name="correct_answer"
+                                                        checked={formData.correct_answer === String(i)}
+                                                        onChange={() => setFormData({ ...formData, correct_answer: String(i) })}
+                                                        className="w-5 h-5 accent-emerald-500 cursor-pointer"
+                                                    />
+                                                    <input
+                                                        type="text"
+                                                        value={opt}
+                                                        onChange={(e) => handleOptionChange(i, e.target.value)}
+                                                        placeholder={`Option ${i + 1}`}
+                                                        className="flex-1 bg-transparent border-none outline-none text-sm font-bold placeholder-gray-300 dark:text-white"
+                                                        required
+                                                    />
                                                 </div>
                                             ))}
                                         </div>
-                                    )}
+                                    </div>
+                                )}
 
-                                    {q.question_type === 'true_false' && (
-                                        <div className="flex gap-2 mt-4 ml-11">
-                                            <span className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400 font-bold text-sm px-3 py-1.5 rounded-lg">
-                                                Correct: {q.correct_answer}
-                                            </span>
-                                        </div>
+                                {formData.question_type === 'true_false' && (
+                                    <div className="grid grid-cols-2 gap-4 pt-4">
+                                        {['True', 'False'].map((val) => (
+                                            <button
+                                                key={val}
+                                                type="button"
+                                                onClick={() => setFormData({ ...formData, correct_answer: val })}
+                                                className={`py-4 rounded-2xl border-2 font-black text-xs uppercase tracking-widest transition-all ${formData.correct_answer === val ? 'bg-emerald-500 text-white border-emerald-500 shadow-lg shadow-emerald-500/20' : 'bg-gray-50 dark:bg-white/5 border-gray-100 dark:border-white/5 text-gray-400 hover:border-gray-300'}`}
+                                            >
+                                                {val}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+
+                                <div className="flex gap-4 pt-10">
+                                    <motion.button
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        type="submit"
+                                        disabled={loading}
+                                        className="flex-1 bg-violet-600 hover:bg-violet-700 text-white font-black py-5 rounded-[1.5rem] shadow-xl shadow-violet-600/20 disabled:opacity-50 flex items-center justify-center gap-3 text-xs uppercase tracking-widest"
+                                    >
+                                        {loading ? <div className="w-5 h-5 border-4 border-white/20 border-t-white rounded-full animate-spin"></div> : <><Save className="w-4 h-4" /> Save Question</>}
+                                    </motion.button>
+                                    {editingQuestion && (
+                                        <button
+                                            type="button"
+                                            onClick={resetForm}
+                                            className="px-8 bg-gray-100 dark:bg-white/5 hover:bg-rose-500/10 hover:text-rose-500 text-gray-400 font-black py-5 rounded-[1.5rem] transition-all text-xs uppercase tracking-widest"
+                                        >
+                                            Cancel
+                                        </button>
                                     )}
                                 </div>
-                            ))
-                        )}
+                            </form>
+                        </motion.div>
+                    </div>
+                </div>
+
+                {/* List Column */}
+                <div className="xl:col-span-8">
+                    <div className="bg-white dark:bg-[#080808] border border-gray-100 dark:border-white/5 rounded-[3.5rem] p-10 min-h-[900px] flex flex-col shadow-sm">
+                        <div className="flex items-center justify-between mb-12">
+                            <h3 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter flex items-center gap-4">
+                                <div className="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                                    <ListChecks className="w-5 h-5 text-white" />
+                                </div>
+                                Questions List <span className="text-gray-300 font-bold">/ {questions.length} Items</span>
+                            </h3>
+                            <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5">
+                                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Auto-save active</span>
+                            </div>
+                        </div>
+
+                        <motion.div 
+                            variants={containerVariants}
+                            initial="hidden"
+                            animate="visible"
+                            className="flex-1 space-y-6 pr-2 overflow-y-auto hidden-scrollbar"
+                        >
+                            {questions.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center h-full opacity-30 py-32">
+                                    <Microscope className="w-24 h-24 mb-6 text-gray-400" />
+                                    <p className="text-xl font-black uppercase tracking-widest">No Questions Found</p>
+                                </div>
+                            ) : (
+                                questions.map((q, idx) => (
+                                    <motion.div 
+                                        variants={itemVariants}
+                                        key={q.id} 
+                                        className="group bg-gray-50 dark:bg-white/[0.01] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-8 transition-all hover:border-violet-500/30 hover:bg-white dark:hover:bg-white/[0.02] hover:shadow-2xl hover:shadow-violet-500/5"
+                                    >
+                                        <div className="flex justify-between items-start gap-8">
+                                            <div className="flex items-start gap-6 flex-1 min-w-0">
+                                                <div className="bg-white dark:bg-white/5 text-violet-600 dark:text-violet-400 font-black w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 border border-gray-100 dark:border-white/10 shadow-sm text-lg">
+                                                    {idx + 1}
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex flex-wrap gap-2 mb-4">
+                                                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-400 bg-white dark:bg-white/5 px-3 py-1.5 rounded-xl border border-gray-100 dark:border-white/10">
+                                                            {q.question_type.replace('_', ' ')}
+                                                        </span>
+                                                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-emerald-500 bg-emerald-500/5 px-3 py-1.5 rounded-xl border border-emerald-500/10">
+                                                            {q.points} Points
+                                                        </span>
+                                                    </div>
+                                                    <h4 className="text-xl font-bold text-gray-900 dark:text-white leading-relaxed mb-6">
+                                                        {q.question_text}
+                                                    </h4>
+                                                    
+                                                    {q.image_url && (
+                                                        <div className="mb-6 relative group/img inline-block">
+                                                            <img src={q.image_url} alt="Question" className="rounded-3xl max-h-48 object-cover border-4 border-white dark:border-white/5 shadow-2xl transition-transform group-hover/img:scale-105" />
+                                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity rounded-3xl flex items-center justify-center">
+                                                                <Eye className="text-white w-8 h-8" />
+                                                            </div>
+                                                        </div>
+                                                    )}
+
+                                                    {q.question_type === 'multiple_choice' && (
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
+                                                            {q.options?.map((opt, i) => (
+                                                                <div key={i} className={`p-4 rounded-2xl text-xs font-bold border transition-all ${q.correct_answer === String(i) ? 'bg-emerald-500 text-white border-emerald-500 shadow-lg shadow-emerald-500/10' : 'bg-white dark:bg-white/5 border-gray-100 dark:border-white/10 text-gray-400'}`}>
+                                                                    <span className="opacity-40 mr-2">{String.fromCharCode(65 + i)} .</span> {opt}
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
+
+                                                    {q.question_type === 'true_false' && (
+                                                        <div className="mt-4">
+                                                            <span className="inline-flex items-center gap-3 bg-emerald-500 text-white font-black text-[10px] px-5 py-2.5 rounded-2xl shadow-lg shadow-emerald-500/20 uppercase tracking-widest">
+                                                                <CheckCircle2 className="w-4 h-4" /> Correct Answer: {q.correct_answer}
+                                                            </span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all -translate-y-2 group-hover:translate-y-0">
+                                                <button onClick={() => startEdit(q)} className="w-12 h-12 bg-white dark:bg-white/5 hover:bg-violet-500 hover:text-white border border-gray-100 dark:border-white/10 rounded-xl flex items-center justify-center text-gray-400 transition-all shadow-xl shadow-black/5">
+                                                    <Edit3 className="w-5 h-5" />
+                                                </button>
+                                                <button onClick={() => handleDelete(q.id)} className="w-12 h-12 bg-white dark:bg-white/5 hover:bg-rose-500 hover:text-white border border-gray-100 dark:border-white/10 rounded-xl flex items-center justify-center text-rose-400 transition-all shadow-xl shadow-black/5">
+                                                    <Trash2 className="w-5 h-5" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                ))
+                            )}
+                        </motion.div>
                     </div>
                 </div>
             </div>
+
+            <style>{`
+                .hidden-scrollbar::-webkit-scrollbar { display: none; }
+                .hidden-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+            `}</style>
         </div>
     );
 };

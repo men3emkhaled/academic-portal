@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { LayoutDashboard, BookOpen, FolderOpen, Award, ClipboardList, BarChart3, PieChart, Bell, Settings, LogOut, Upload, Menu, X, Calendar as CalendarIcon, MessageSquare, Sun, Moon, UserCheck } from 'lucide-react';
+import { LayoutDashboard, BookOpen, FolderOpen, Award, ClipboardList, BarChart3, PieChart, Bell, Settings, LogOut, Upload, Menu, X, Calendar as CalendarIcon, MessageSquare, Sun, Moon, UserCheck, Languages } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+import { useTranslation } from 'react-i18next';
 
 const MENU_ITEMS = [
   { id: 'overview', label: 'Overview', icon: <LayoutDashboard className="w-5 h-5" /> },
@@ -16,6 +17,7 @@ const MENU_ITEMS = [
 ];
 
 const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout, unreadCount = 0 }) => {
+  const { t, i18n } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
   const { theme, toggleTheme } = useTheme();
@@ -39,7 +41,7 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout, unreadCount 
   ];
 
   const menuItems = MENU_ITEMS.filter(item => !bottomBarItems.find(b => b.id === item.id));
-  
+
   // Also add notifications and settings to menu items for mobile
   menuItems.push({ id: 'notifications', label: 'Notifications', icon: <Bell className="w-5 h-5" /> });
   menuItems.push({ id: 'settings', label: 'Settings', icon: <Settings className="w-5 h-5" /> });
@@ -53,13 +55,13 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout, unreadCount 
 
   if (!isMobile) {
     return (
-      <div className="fixed left-6 top-10 bottom-10 w-72 z-50 transition-all duration-700">
+      <div className="fixed inset-inline-start-14 top-10 bottom-10 w-72 z-50 transition-all duration-700">
         <div className="h-full bg-white/70 dark:bg-[#080808]/70 backdrop-blur-3xl border border-white/20 dark:border-white/5 rounded-[3rem] shadow-[0_32px_64px_rgba(0,0,0,0.1)] dark:shadow-[0_32px_64px_rgba(0,0,0,0.4)] flex flex-col overflow-hidden relative group/sidebar">
 
           <div className="p-8 pb-4 text-center">
             <div className="inline-flex items-center justify-center w-20 h-20 rounded-full overflow-hidden shadow-2xl bg-white dark:bg-white/5 border border-white/20 transition-transform duration-500 group-hover/sidebar:scale-110">
-              <img 
-                src={doctor?.avatar_url || `https://ui-avatars.com/api/?name=${doctor?.name}&background=8b5cf6&color=fff&size=128`} 
+              <img
+                src={doctor?.avatar_url || `https://ui-avatars.com/api/?name=${doctor?.name}&background=8b5cf6&color=fff&size=128`}
                 alt={doctor?.name}
                 className="w-full h-full object-cover"
               />
@@ -69,7 +71,7 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout, unreadCount 
           </div>
 
           <div className="px-6 mb-4">
-            <button 
+            <button
               onClick={() => setActiveTab('materials')}
               className="w-full bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold py-3.5 rounded-2xl flex items-center justify-center gap-3 shadow-lg shadow-[#8b5cf6]/20 transition-all active:scale-95 text-sm uppercase tracking-widest"
             >
@@ -97,7 +99,7 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout, unreadCount 
                   </span>
                   <span className="relative z-10 text-[11px] font-black uppercase tracking-[0.2em]">{item.label}</span>
                   {isActive && (
-                    <div className="absolute left-0 w-1 h-6 bg-[#8b5cf6] rounded-full shadow-[4px_0_15px_rgba(139,92,246,0.5)]" />
+                    <div className="absolute inset-inline-start-0 w-1 h-6 bg-[#8b5cf6] rounded-full shadow-[4px_0_15px_rgba(139,92,246,0.5)]" />
                   )}
                 </button>
               );
@@ -105,7 +107,7 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout, unreadCount 
           </nav>
 
           <div className="p-6 pt-0 relative z-10 border-t border-gray-100 dark:border-white/5 pt-4">
-            <button 
+            <button
               onClick={() => setActiveTab('notifications')}
               className={`w-full relative group/item flex items-center gap-4 px-6 py-3 rounded-2xl transition-all duration-500 mb-2
                 ${activeTab === 'notifications' ? 'text-gray-900 dark:text-white font-black' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-200'}
@@ -120,6 +122,9 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout, unreadCount 
               {unreadCount > 0 && <span className="ml-auto bg-rose-500/10 text-rose-500 text-[10px] font-black px-2 py-0.5 rounded-lg">{unreadCount > 99 ? '99+' : unreadCount}</span>}
             </button>
             <div className="bg-gray-50/50 dark:bg-white/[0.02] rounded-[2rem] p-2 flex gap-1 border border-gray-100 dark:border-white/5">
+              <button onClick={() => { const newLang = i18n.language === 'ar' ? 'en' : 'ar'; i18n.changeLanguage(newLang); }} className="flex-1 h-12 flex items-center justify-center rounded-xl hover:bg-white dark:hover:bg-white/5 transition-all text-gray-400 hover:text-[#8b5cf6]">
+                <Languages className="w-5 h-5" />
+              </button>
               <button onClick={() => setActiveTab('settings')} className={`flex-1 h-12 flex items-center justify-center rounded-xl hover:bg-white dark:hover:bg-white/5 transition-all ${activeTab === 'settings' ? 'text-[#8b5cf6]' : 'text-gray-400 hover:text-[#8b5cf6]'}`}>
                 <Settings className="w-5 h-5" />
               </button>
@@ -168,13 +173,13 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout, unreadCount 
 
   // Animation Logic for the Indicator (Jelly / Liquid effect)
   let translateX = 0;
-  let indicatorWidthPercent = itemWidthPercent; 
+  let indicatorWidthPercent = itemWidthPercent;
   let stretchOrigin = 'center';
 
   if (dragPosition !== null) {
     // 1. Center of the finger
     const fingerPercent = Math.max(0, Math.min(dragPosition, 100));
-    
+
     // 2. Center of the closest tab
     const closestIndex = Math.floor(fingerPercent / itemWidthPercent);
     const safeClosestIndex = Math.max(0, Math.min(closestIndex, bottomBarItems.length - 1));
@@ -183,18 +188,18 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout, unreadCount 
     // 3. Distance from closest tab
     const distanceFromCenter = fingerPercent - closestTabCenterPercent;
     const absDistance = Math.abs(distanceFromCenter);
-    
+
     // 4. Stretch factor (peaks exactly halfway between two tabs)
     const stretchFactor = Math.min(absDistance / (itemWidthPercent / 2), 1);
-    
+
     // 5. Calculate width (base is full tab width, stretch adds up to ~80% more width)
-    const maxStretchPercent = itemWidthPercent * 1.8; 
+    const maxStretchPercent = itemWidthPercent * 1.8;
     indicatorWidthPercent = itemWidthPercent + (maxStretchPercent - itemWidthPercent) * stretchFactor;
 
     // 6. Set transform origin based on drag direction to anchor the stretch
     if (distanceFromCenter > 0) {
       stretchOrigin = 'left'; // Stretching to the right
-      translateX = closestTabCenterPercent; 
+      translateX = closestTabCenterPercent;
     } else {
       stretchOrigin = 'right'; // Stretching to the left
       translateX = closestTabCenterPercent;
@@ -214,9 +219,9 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout, unreadCount 
 
   return (
     <>
-      <div className="fixed left-0 right-0 bottom-4 z-50 flex items-center justify-center gap-3 px-4 pointer-events-none">
+      <div className="fixed inset-inline-start-0 inset-inline-end-0 bottom-4 z-50 flex items-center justify-center gap-3 px-4 pointer-events-none">
         {/* Main Capsule */}
-        <div 
+        <div
           ref={dockRef}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
@@ -224,13 +229,13 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout, unreadCount 
           className="flex-1 flex items-center relative bg-[#1c1c1e] dark:bg-[#1c1c1e] backdrop-blur-3xl border border-white/[0.06] dark:border-white/[0.06] rounded-[2rem] py-3 shadow-[0_8px_32px_rgba(0,0,0,0.5)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.6)] pointer-events-auto touch-none select-none overflow-hidden [.light_&]:bg-white/80 [.light_&]:border-black/[0.06] [.light_&]:shadow-[0_8px_32px_rgba(0,0,0,0.12)]"
         >
           {/* Animated Jelly Indicator */}
-          <div 
+          <div
             ref={indicatorRef}
             className={`absolute top-1/2 -translate-y-1/2 h-14 bg-white/[0.15] dark:bg-white/[0.15] rounded-[1.75rem] z-0 [.light_&]:bg-black/[0.07] ${dragPosition === null && !isAnimatingRef.current ? 'transition-all duration-[350ms] cubic-bezier(0.34,1.56,0.64,1)' : ''}`}
-            style={{ 
+            style={{
               width: `${indicatorWidthPercent}%`,
-              left: `${translateX}%`,
-              transform: `translate(-50%, -50%)`,
+              insetInlineStart: `${translateX}%`,
+              transform: `translate(${i18n.language === 'ar' ? '50%' : '-50%'}, -50%)`,
               transformOrigin: stretchOrigin,
               transition: dragPosition !== null ? 'none' : undefined,
             }}
@@ -238,34 +243,34 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout, unreadCount 
 
           {bottomBarItems.map((item, idx) => {
             const isHighlighted = activeIndex === idx;
-            
+
             return (
               <div
                 key={item.id}
                 onClick={() => {
                   if (idx === currentIndex || isAnimatingRef.current) return;
-                  
+
                   const el = indicatorRef.current;
                   if (!el) return;
-                  
+
                   isAnimatingRef.current = true;
-                  
+
                   const startPercent = (currentIndex * itemWidthPercent) + (itemWidthPercent / 2);
                   const endPercent = (idx * itemWidthPercent) + (itemWidthPercent / 2);
-                  
+
                   let startTime = null;
                   const duration = 400;
-                  
+
                   // Direct DOM animation - bypasses React completely
                   const animateSlide = (timestamp) => {
                     if (!startTime) startTime = timestamp;
                     const elapsed = timestamp - startTime;
                     const progress = Math.min(elapsed / duration, 1);
-                    
+
                     // Easing (cubic out)
                     const eased = 1 - Math.pow(1 - progress, 3);
                     const fingerPercent = startPercent + (endPercent - startPercent) * eased;
-                    
+
                     // Calculate jelly stretch (same logic as drag)
                     const closestIdx = Math.floor(fingerPercent / itemWidthPercent);
                     const safeIdx = Math.max(0, Math.min(closestIdx, bottomBarItems.length - 1));
@@ -276,13 +281,20 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout, unreadCount 
                     const maxW = itemWidthPercent * 1.8;
                     const w = itemWidthPercent + (maxW - itemWidthPercent) * stretch;
                     const pos = tabCenter + (dist * 0.5);
-                    
+
                     // Apply directly to DOM
                     el.style.transition = 'none';
                     el.style.width = `${w}%`;
-                    el.style.left = `${pos}%`;
-                    el.style.transformOrigin = dist > 0 ? 'left' : dist < 0 ? 'right' : 'center';
-                    
+                    if (i18n.language === 'ar') {
+                      el.style.insetInlineStart = `${pos}%`;
+                      el.style.transform = `translate(50%, -50%)`;
+                      el.style.transformOrigin = dist > 0 ? 'right' : dist < 0 ? 'left' : 'center';
+                    } else {
+                      el.style.insetInlineStart = `${pos}%`;
+                      el.style.transform = `translate(-50%, -50%)`;
+                      el.style.transformOrigin = dist > 0 ? 'left' : dist < 0 ? 'right' : 'center';
+                    }
+
                     if (progress < 1) {
                       requestAnimationFrame(animateSlide);
                     } else {
@@ -292,7 +304,7 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout, unreadCount 
                       setActiveTab(item.id); setIsOpen(false);
                     }
                   };
-                  
+
                   requestAnimationFrame(animateSlide);
                 }}
                 className="relative flex-1 flex flex-col items-center gap-1.5 cursor-pointer z-10"
@@ -320,7 +332,7 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout, unreadCount 
       {isOpen && (
         <>
           <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[60]" onClick={() => setIsOpen(false)} />
-          <div className="fixed bottom-32 left-6 right-6 bg-white dark:bg-[#111] border border-gray-200 dark:border-white/10 rounded-[2.5rem] shadow-2xl z-[70] animate-slideUp overflow-hidden">
+          <div className="fixed bottom-32 inset-inline-start-6 inset-inline-end-6 bg-white dark:bg-[#111] border border-gray-200 dark:border-white/10 rounded-[2.5rem] shadow-2xl z-[70] animate-slideUp overflow-hidden">
             <div className="p-4 pt-6 text-center border-b border-gray-100 dark:border-white/5">
               <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-widest">Menu</h3>
             </div>
@@ -339,7 +351,16 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout, unreadCount 
                   </button>
                 ))}
 
-                {/* Theme Toggle */}
+                {/* Theme & Language Toggles */}
+                <button
+                  onClick={() => { const newLang = i18n.language === 'ar' ? 'en' : 'ar'; i18n.changeLanguage(newLang); }}
+                  className="flex flex-col items-center justify-center gap-2 px-3 py-4 rounded-2xl transition-all text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 border border-gray-100 dark:border-white/5"
+                >
+                  <Languages className="w-5 h-5" />
+                  <span className="font-bold text-[11px] uppercase tracking-wide text-center leading-tight">
+                    {i18n.language === 'ar' ? 'English' : 'العربية'}
+                  </span>
+                </button>
                 <button
                   onClick={toggleTheme}
                   className="flex flex-col items-center justify-center gap-2 px-3 py-4 rounded-2xl transition-all text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 border border-gray-100 dark:border-white/5"
@@ -364,7 +385,7 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout, unreadCount 
         </>
       )}
 
-      
+
       <style>{`
         @keyframes slideUp {
           from { opacity: 0; transform: translateY(20px); }

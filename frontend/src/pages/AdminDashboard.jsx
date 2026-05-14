@@ -1,8 +1,13 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import toast from 'react-hot-toast';
-// Lazy load admin components for performance
+import { useTheme } from '../context/ThemeContext';
+import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+
+// Lazy load admin components
 const CoursesManager = lazy(() => import('../components/admin/CoursesManager'));
 const GradesUploader = lazy(() => import('../components/admin/GradesUploader'));
 const ResourceManager = lazy(() => import('../components/admin/ResourceManager'));
@@ -22,21 +27,30 @@ const LogsDashboard = lazy(() => import('../components/admin/LogsDashboard'));
 const LinkedEmailsManager = lazy(() => import('../components/admin/LinkedEmailsManager'));
 const ExamScheduleManager = lazy(() => import('../components/admin/ExamScheduleManager'));
 const OfficialTaskManager = lazy(() => import('../components/admin/OfficialTaskManager'));
+
 import {
   Users, BookOpen, FileText, Map as RoadmapIcon,
   Calendar, Bell, LayoutDashboard, Settings,
   CheckCircle, Database, LogOut, Lock, UserCheck,
   TrendingUp, Award, Activity, ShieldCheck, ChevronRight,
-  Smartphone, Heart, ScrollText, Mail, ClipboardList, Sun, Moon, CheckSquare, Menu, X
+  Smartphone, Heart, ScrollText, Mail, ClipboardList, Sun, Moon, CheckSquare, Menu, X,
+  Terminal, Shield
 } from 'lucide-react';
-import { useTheme } from '../context/ThemeContext';
 
 import AdminSidebar from '../components/admin/AdminSidebar';
 import AdminHeader from '../components/admin/AdminHeader';
 
 const AdminDashboard = () => {
-  const { token, login, logout } = useAuth();
+  const { t, i18n } = useTranslation();
+  const { token, logout } = useAuth();
   const { isDarkMode, toggleTheme } = useTheme();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!token) {
+      navigate('/admin/login', { replace: true });
+    }
+  }, [token, navigate]);
 
   const parseJwt = (t) => {
     try {
@@ -51,26 +65,26 @@ const AdminDashboard = () => {
   const userPermissions = decodedToken?.permissions || [];
 
   const ALL_TABS = [
-    { id: 'overview', label: 'Overview', icon: <LayoutDashboard className="w-4 h-4" />, reqPerm: 'admin' },
-    { id: 'courses', label: 'Courses', icon: <BookOpen className="w-4 h-4" />, reqPerm: 'manage_courses' },
-    { id: 'grades', label: 'Grades', icon: <TrendingUp className="w-4 h-4" />, reqPerm: 'manage_grades' },
-    { id: 'resources', label: 'Resources', icon: <FileText className="w-4 h-4" />, reqPerm: 'manage_resources' },
-    { id: 'roadmap', label: 'Roadmap', icon: <RoadmapIcon className="w-4 h-4" />, reqPerm: 'manage_roadmap' },
-    { id: 'doctors', label: 'Instructors', icon: <UserCheck className="w-4 h-4" />, reqPerm: 'admin' },
-    { id: 'students', label: 'Students', icon: <Users className="w-4 h-4" />, reqPerm: 'admin' },
-    { id: 'student-courses', label: 'Records', icon: <Database className="w-4 h-4" />, reqPerm: 'admin' },
-    { id: 'timetable', label: 'Timetable', icon: <Calendar className="w-4 h-4" />, reqPerm: 'manage_timetable' },
-    { id: 'exams', label: 'Exams', icon: <ClipboardList className="w-4 h-4" />, reqPerm: 'manage_timetable' },
-    { id: 'notifications', label: 'Alerts', icon: <Bell className="w-4 h-4" />, reqPerm: 'manage_notifications' },
-    { id: 'mobile-center', label: 'Mobile Center', icon: <Smartphone className="w-4 h-4" />, reqPerm: 'manage_notifications' },
-    { id: 'departments', label: 'Departments', icon: <LayoutDashboard className="w-4 h-4" />, reqPerm: 'admin' },
-    { id: 'quizzes', label: 'Quizzes', icon: <Award className="w-4 h-4" />, reqPerm: 'manage_quizzes' },
-    { id: 'reviews', label: 'Reviews', icon: <CheckCircle className="w-4 h-4" />, reqPerm: 'manage_quizzes' },
-    { id: 'events', label: 'Event', icon: <Heart className="w-4 h-4" />, reqPerm: 'manage_events' },
-    { id: 'progress', label: 'Progress', icon: <CheckCircle className="w-4 h-4" />, reqPerm: 'manage_progress' },
-    { id: 'tasks', label: 'Tasks', icon: <CheckSquare className="w-4 h-4" />, reqPerm: 'manage_courses' },
-    { id: 'emails', label: 'Emails', icon: <Mail className="w-4 h-4" />, reqPerm: 'admin' },
-    { id: 'logs', label: 'Logs', icon: <ScrollText className="w-4 h-4" />, reqPerm: 'admin' },
+    { id: 'overview', label: t('admin.sidebar.tabs.overview'), icon: <LayoutDashboard className="w-4 h-4" />, reqPerm: 'admin' },
+    { id: 'courses', label: t('admin.sidebar.tabs.courses'), icon: <BookOpen className="w-4 h-4" />, reqPerm: 'manage_courses' },
+    { id: 'grades', label: t('admin.sidebar.tabs.grades'), icon: <TrendingUp className="w-4 h-4" />, reqPerm: 'manage_grades' },
+    { id: 'resources', label: t('admin.sidebar.tabs.resources'), icon: <FileText className="w-4 h-4" />, reqPerm: 'manage_resources' },
+    { id: 'roadmap', label: t('admin.sidebar.tabs.roadmap'), icon: <RoadmapIcon className="w-4 h-4" />, reqPerm: 'manage_roadmap' },
+    { id: 'doctors', label: t('admin.sidebar.tabs.doctors'), icon: <UserCheck className="w-4 h-4" />, reqPerm: 'admin' },
+    { id: 'students', label: t('admin.sidebar.tabs.students'), icon: <Users className="w-4 h-4" />, reqPerm: 'admin' },
+    { id: 'records', label: t('admin.sidebar.tabs.records'), icon: <Database className="w-4 h-4" />, reqPerm: 'admin' },
+    { id: 'timetable', label: t('admin.sidebar.tabs.timetable'), icon: <Calendar className="w-4 h-4" />, reqPerm: 'manage_timetable' },
+    { id: 'exams', label: t('admin.sidebar.tabs.exams'), icon: <ClipboardList className="w-4 h-4" />, reqPerm: 'manage_timetable' },
+    { id: 'notifications', label: t('admin.sidebar.tabs.notifications'), icon: <Bell className="w-4 h-4" />, reqPerm: 'manage_notifications' },
+    { id: 'mobile_center', label: t('admin.sidebar.tabs.mobile_center'), icon: <Smartphone className="w-4 h-4" />, reqPerm: 'manage_notifications' },
+    { id: 'departments', label: t('admin.sidebar.tabs.departments'), icon: <LayoutDashboard className="w-4 h-4" />, reqPerm: 'admin' },
+    { id: 'quizzes', label: t('admin.sidebar.tabs.quizzes'), icon: <Award className="w-4 h-4" />, reqPerm: 'manage_quizzes' },
+    { id: 'reviews', label: t('admin.sidebar.tabs.reviews'), icon: <CheckCircle className="w-4 h-4" />, reqPerm: 'manage_quizzes' },
+    { id: 'events', label: t('admin.sidebar.tabs.events'), icon: <Heart className="w-4 h-4" />, reqPerm: 'manage_events' },
+    { id: 'progress', label: t('admin.sidebar.tabs.progress'), icon: <CheckCircle className="w-4 h-4" />, reqPerm: 'manage_progress' },
+    { id: 'tasks', label: t('admin.sidebar.tabs.tasks'), icon: <CheckSquare className="w-4 h-4" />, reqPerm: 'manage_courses' },
+    { id: 'emails', label: t('admin.sidebar.tabs.emails'), icon: <Mail className="w-4 h-4" />, reqPerm: 'admin' },
+    { id: 'logs', label: t('admin.sidebar.tabs.logs'), icon: <ScrollText className="w-4 h-4" />, reqPerm: 'admin' },
   ];
 
   const initialTab = () => {
@@ -80,95 +94,31 @@ const AdminDashboard = () => {
   };
 
   const [activeTab, setActiveTab] = useState(initialTab());
-  const [courses, setCourses] = useState([]);
   const [students, setStudents] = useState([]);
   const [departments, setDepartments] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [initialDataLoading, setInitialDataLoading] = useState(false);
-  const [studentsFile, setStudentsFile] = useState(null);
-  const [uploadingStudents, setUploadingStudents] = useState(false);
-  const [loginCredentials, setLoginCredentials] = useState({ username: '', password: '' });
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  // Timetable states
-  const [timetableFile, setTimetableFile] = useState(null);
-  const [uploadingTimetable, setUploadingTimetable] = useState(false);
-  const [allTimetables, setAllTimetables] = useState([]);
-  const [selectedTimetableDept, setSelectedTimetableDept] = useState('');
-  const [editingEntry, setEditingEntry] = useState(null);
-  const [editEntryForm, setEditEntryForm] = useState({
-    section: '',
-    day_of_week: '',
-    start_time: '',
-    end_time: '',
-    course_name: '',
-    location: '',
-    instructor: '',
-    type: '',
-    is_quiz: false,
-    is_hidden: false,
-    department_id: ''
-  });
-  const [showEditEntryModal, setShowEditEntryModal] = useState(false);
-
-  // Notifications states
+  const [courses, setCourses] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [sending, setSending] = useState(false);
-  const [notificationForm, setNotificationForm] = useState({ studentId: '', doctorId: '', title: '', content: '' });
+  const [notificationForm, setNotificationForm] = useState({ title: '', content: '', studentId: '', doctorId: '', department_id: '' });
+  const [showEditModal, setShowEditModal] = useState(false);
   const [editingNotification, setEditingNotification] = useState(null);
   const [editNotifForm, setEditNotifForm] = useState({ title: '', content: '', is_read: false });
-  const [showEditModal, setShowEditModal] = useState(false);
+  const [studentsFile, setStudentsFile] = useState(null);
 
-  // Student management states (for student-courses tab)
-  const [selectedStudent, setSelectedStudent] = useState(null);
-  const [studentCourses, setStudentCourses] = useState([]);
-  const [availableCourses, setAvailableCourses] = useState([]);
-  const [studentGrades, setStudentGrades] = useState([]);
-  const [stats, setStats] = useState({ courses: 0, students: 0, departments: 0, unread_notifications: 0 });
-  const [showAddCourseModal, setShowAddCourseModal] = useState(false);
-  const [selectedCourseToAdd, setSelectedCourseToAdd] = useState('');
-  const [editingGrade, setEditingGrade] = useState(null);
-  const [editGradeForm, setEditGradeForm] = useState({ examType: 'midterm', score: '', status: 'completed' });
-  const [showGradeModal, setShowGradeModal] = useState(false);
-  const [showEditStudentModal, setShowEditStudentModal] = useState(false);
-  const [editStudentForm, setEditStudentForm] = useState({ name: '', level: '', section: '', department_id: '' });
-
-  // Role & Permissions states
-  const [showRoleModal, setShowRoleModal] = useState(false);
-  const [selectedStudentForRole, setSelectedStudentForRole] = useState(null);
-  const [roleForm, setRoleForm] = useState({ role: 'student', permissions: [] });
-
-  // ------------------- Fetch Data -------------------
+  // Lazy fetch: only load data needed for the active tab
   useEffect(() => {
     if (!token) return;
-    api.get('/admin/stats')
-      .then(res => setStats(res.data))
-      .catch(err => console.error("Stats error", err));
-
-    // Fetch lookup tables in background without blocking UI
-    fetchCourses();
+    // Departments are needed across multiple tabs — always fetch
     fetchDepartments();
   }, [token]);
 
   useEffect(() => {
-    if (activeTab === 'notifications') fetchNotifications();
-    if (activeTab === 'students' || activeTab === 'student-courses') fetchStudents();
-  }, [activeTab]);
-
-  useEffect(() => {
-    if (activeTab === 'timetable') {
-      fetchTimetableByDepartment(selectedTimetableDept);
-    }
-  }, [selectedTimetableDept, activeTab]);
-
-  const fetchCourses = async () => {
-    try {
-      const res = await api.get('/courses');
-      setCourses(res.data);
-    } catch (error) {
-      toast.error('Error loading courses');
-    }
-  };
+    if (!token) return;
+    if (activeTab === 'students' || activeTab === 'records') fetchStudents();
+    if (activeTab === 'grades' || activeTab === 'courses' || activeTab === 'records') fetchCourses();
+    if (activeTab === 'notifications' || activeTab === 'mobile_center') fetchNotifications();
+    if (activeTab === 'overview') { fetchStudents(); fetchCourses(); }
+  }, [token, activeTab]);
 
   const fetchStudents = async () => {
     try {
@@ -176,27 +126,6 @@ const AdminDashboard = () => {
       setStudents(res.data);
     } catch (error) {
       console.error('Error fetching students:', error);
-    }
-  };
-
-  const fetchTimetableByDepartment = async (deptId) => {
-    try {
-      const url = deptId ? `/timetable/admin/all?department_id=${deptId}` : '/timetable/admin/all';
-      const res = await api.get(url);
-      setAllTimetables(res.data);
-    } catch (error) {
-      console.error('Error fetching timetables:', error);
-    }
-  };
-
-  const fetchAllTimetables = () => fetchTimetableByDepartment(selectedTimetableDept);
-
-  const fetchNotifications = async () => {
-    try {
-      const res = await api.get('/notifications/admin/all');
-      setNotifications(res.data);
-    } catch (error) {
-      console.error('Error fetching notifications:', error);
     }
   };
 
@@ -209,884 +138,255 @@ const AdminDashboard = () => {
     }
   };
 
-  // Student management functions
-  const fetchStudentCourses = async (studentId) => {
+  const fetchCourses = async () => {
     try {
-      const res = await api.get(`/admin/students/${studentId}/courses`);
-      setStudentCourses(res.data);
+      const res = await api.get('/courses');
+      setCourses(res.data);
     } catch (error) {
-      toast.error('Failed to load student courses');
+      console.error('Error fetching courses:', error);
     }
   };
 
-  const fetchAvailableCourses = async (studentId) => {
+  const fetchNotifications = async () => {
     try {
-      const res = await api.get(`/admin/students/${studentId}/available-courses`);
-      setAvailableCourses(res.data);
+      const res = await api.get('/notifications/admin/all');
+      setNotifications(res.data);
     } catch (error) {
-      console.error(error);
+      console.error(t('common.error'), error);
     }
   };
 
-  const fetchStudentGrades = async (studentId) => {
-    try {
-      const res = await api.get(`/grades/student/${studentId}`);
-      setStudentGrades(res.data.grades || []);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const handleSelectStudent = (studentId) => {
-    const student = students.find(s => s.id === studentId);
-    setSelectedStudent(student);
-    if (student) {
-      fetchStudentCourses(student.id);
-      fetchAvailableCourses(student.id);
-      fetchStudentGrades(student.id);
-    }
-  };
-
-  const handleResetPassword = async (studentId) => {
-    const newPassword = prompt('Enter new password for student (min 4 characters):');
-    if (!newPassword || newPassword.length < 4) {
-      toast.error('Password must be at least 4 characters');
-      return;
-    }
-    try {
-      await api.put(`/admin/students/${studentId}/reset-password`, { newPassword });
-      toast.success(`Password for ${studentId} reset successfully`);
-      fetchStudents();
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to reset password');
-    }
-  };
-
-  const handleDeleteStudent = async (studentId, studentName) => {
-    if (!window.confirm(`Are you sure you want to delete student "${studentName}" (${studentId})? This action cannot be undone.`)) return;
-    try {
-      await api.delete(`/admin/students/${studentId}`);
-      toast.success(`Student ${studentId} deleted`);
-      fetchStudents();
-      if (selectedStudent?.id === studentId) setSelectedStudent(null);
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to delete student');
-    }
-  };
-
-  const handleEditStudentInfo = (student) => {
-    setSelectedStudent(student);
-    setEditStudentForm({
-      name: student.name,
-      level: student.level,
-      section: student.section || '',
-      department_id: student.department_id || ''
-    });
-    setShowEditStudentModal(true);
-  };
-
-  const handleUpdateStudentInfo = async (e) => {
-    e.preventDefault();
-    try {
-      const payload = {
-        name: editStudentForm.name,
-        level: editStudentForm.level,
-        section: editStudentForm.section,
-        department_id: editStudentForm.department_id || null
-      };
-      await api.put(`/admin/students/${selectedStudent.id}`, payload);
-      toast.success('Student information updated');
-      setShowEditStudentModal(false);
-      fetchStudents();
-      setSelectedStudent({ ...selectedStudent, ...editStudentForm });
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Update failed');
-    }
-  };
-
-  const handleManageRole = (student) => {
-    setSelectedStudentForRole(student);
-    setRoleForm({
-      role: student.role || 'student',
-      permissions: student.permissions || []
-    });
-    setShowRoleModal(true);
-  };
-
-  const handleUpdateRole = async (e) => {
-    e.preventDefault();
-    try {
-      await api.put(`/admin/students/${selectedStudentForRole.id}/role`, roleForm);
-      toast.success('Role and permissions updated successfully');
-      setShowRoleModal(false);
-      fetchStudents();
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to update role. Admin access required.');
-    }
-  };
-
-  const handleAddStudent = async (studentData) => {
-    const payload = {
-      id: studentData.id,
-      name: studentData.name,
-      password: studentData.password || '123456',
-      level: parseInt(studentData.level) || 1,
-      section: studentData.section || null,
-      department_id: studentData.department_id || null
-    };
-    await api.post('/admin/students', payload);
-  };
-
-  const handleAddCourseToStudent = async () => {
-    if (!selectedCourseToAdd) return toast.error('Please select a course');
-    try {
-      await api.post(`/admin/students/${selectedStudent.id}/courses/${selectedCourseToAdd}`);
-      toast.success('Course added successfully');
-      setShowAddCourseModal(false);
-      setSelectedCourseToAdd('');
-      fetchStudentCourses(selectedStudent.id);
-      fetchAvailableCourses(selectedStudent.id);
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to add course');
-    }
-  };
-
-  const handleRemoveCourseFromStudent = async (courseId, courseName) => {
-    if (!window.confirm(`Remove "${courseName}" from student ${selectedStudent.name}? This will also delete all grades for this course.`)) return;
-    try {
-      await api.delete(`/admin/students/${selectedStudent.id}/courses/${courseId}`);
-      toast.success('Course removed successfully');
-      fetchStudentCourses(selectedStudent.id);
-      fetchAvailableCourses(selectedStudent.id);
-      fetchStudentGrades(selectedStudent.id);
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to remove course');
-    }
-  };
-
-  const handleEditStudentGrade = (grade) => {
-    setEditingGrade(grade);
-    setEditGradeForm({
-      examType: 'midterm',
-      score: grade.midterm_score || '',
-      status: grade.midterm_status || 'pending'
-    });
-    setShowGradeModal(true);
-  };
-
-  const handleUpdateStudentGrade = async (e) => {
-    e.preventDefault();
-    try {
-      await api.put('/grades/admin/update-single', {
-        studentId: selectedStudent.id,
-        courseName: editingGrade.course_name,
-        examType: editGradeForm.examType,
-        score: editGradeForm.score ? parseFloat(editGradeForm.score) : null,
-        status: editGradeForm.status
-      });
-      toast.success('Grade updated successfully');
-      setShowGradeModal(false);
-      fetchStudentGrades(selectedStudent.id);
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Update failed');
-    }
-  };
-
-  // Timetable functions
-  const handleEditEntry = (entry) => {
-    setEditingEntry(entry);
-    setEditEntryForm({
-      section: entry.section,
-      day_of_week: entry.day_of_week,
-      start_time: entry.start_time?.substring(0, 5) || '',
-      end_time: entry.end_time?.substring(0, 5) || '',
-      course_name: entry.course_name,
-      location: entry.location || '',
-      instructor: entry.instructor || '',
-      type: entry.type || 'Lecture',
-      is_quiz: entry.is_quiz || false,
-      is_hidden: entry.is_hidden || false,
-      department_id: entry.department_id || ''
-    });
-    setShowEditEntryModal(true);
-  };
-
-  const handleUpdateEntry = async (e) => {
-    e.preventDefault();
-    try {
-      await api.put(`/timetable/admin/${editingEntry.id}`, editEntryForm);
-      toast.success('Entry updated');
-      setShowEditEntryModal(false);
-      fetchAllTimetables();
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Update failed');
-    }
-  };
-
-  const handleDeleteEntry = async (id) => {
-    if (!window.confirm('Delete this timetable entry?')) return;
-    try {
-      await api.delete(`/timetable/admin/${id}`);
-      toast.success('Entry deleted');
-      fetchAllTimetables();
-    } catch (error) {
-      toast.error('Delete failed');
-    }
-  };
-
-  const handleDeleteSection = async (section, departmentId) => {
-    if (!window.confirm(`Delete entire timetable for Section ${section} in this department?`)) return;
-    try {
-      await api.delete(`/timetable/admin/section/${section}?department_id=${departmentId}`);
-      toast.success(`Section ${section} timetable deleted`);
-      fetchTimetableByDepartment(selectedTimetableDept);
-    } catch (error) {
-      toast.error('Delete failed');
-    }
-  };
-
-  // Notifications functions
   const handleUpdateNotification = async (e) => {
     e.preventDefault();
     try {
-      await api.put(`/notifications/admin/${editingNotification.id}`, editNotifForm);
-      toast.success('Notification updated');
+      await api.put(`/notifications/admin/update/${editingNotification.id}`, editNotifForm);
+      toast.success(t('common.success'));
       setShowEditModal(false);
       fetchNotifications();
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Update failed');
+      toast.error(t('admin.messages.update_notif_failed'));
     }
   };
 
   const handleDeleteNotification = async (id) => {
-    if (!window.confirm('Delete this notification?')) return;
+    if (!window.confirm(t('admin.messages.delete_notif_confirm'))) return;
     try {
-      await api.delete(`/notifications/admin/${id}`);
-      toast.success('Notification deleted');
+      await api.delete(`/notifications/admin/delete/${id}`);
+      toast.success(t('common.success'));
       fetchNotifications();
     } catch (error) {
-      toast.error('Delete failed');
+      toast.error(t('admin.messages.delete_notif_failed'));
     }
   };
 
-  // Admin Login
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+  const handleResetPassword = async (id) => {
+    if (!window.confirm(t('admin.messages.reset_pass_confirm'))) return;
     try {
-      const res = await api.post('/admin/login', loginCredentials);
-      login(res.data.token);
-      toast.success('Login successful');
+      await api.post(`/admin/reset-password/${id}`);
+      toast.success(t('common.success'));
     } catch (error) {
-      toast.error('Invalid credentials');
-    } finally {
-      setLoading(false);
+      toast.error(t('admin.messages.reset_pass_failed'));
     }
   };
 
-  if (!token) {
-    return (
-      <div className="min-h-screen w-full flex bg-white dark:bg-[#0a0a0a] overflow-hidden font-sans text-gray-900 dark:text-white transition-colors duration-500 relative pt-[48px]">
-        
+  const handleDeleteStudent = async (id, name) => {
+    if (!window.confirm(t('admin.messages.delete_student_confirm', { name }))) return;
+    try {
+      await api.delete(`/admin/students/${id}`);
+      toast.success(t('common.success'));
+      fetchStudents();
+    } catch (error) {
+      toast.error(t('admin.messages.delete_student_failed'));
+    }
+  };
 
-        {/* LEFT PANEL: Branding (Matches Student style) */}
-        <div className="hidden lg:flex w-1/2 relative bg-gray-50 dark:bg-[#0a0a0a] items-center justify-center p-12 overflow-hidden border-r border-gray-200 dark:border-white/5 transition-colors duration-500">
-          <div className="absolute inset-0 z-0 opacity-60 dark:opacity-40">
-            <div className="absolute top-[-10%] left-[-10%] w-[40vw] h-[40vw] bg-emerald-500/20 blur-[150px] rounded-full animate-[spin_20s_linear_infinite]"></div>
-            <div className="absolute bottom-[-10%] right-[-10%] w-[35vw] h-[35vw] bg-blue-500/10 blur-[150px] rounded-full animate-pulse-slow"></div>
+  const handleEditStudentInfo = (student) => {
+    // Placeholder for edit student info modal/logic
+    toast.info(t('admin.messages.edit_requested'));
+  };
+
+  const handleManageRole = (student) => {
+    // Placeholder for role management logic
+    toast.info(t('admin.messages.role_requested'));
+  };
+
+  const handleAddStudent = async (studentData) => {
+    await api.post('/admin/students', studentData);
+    fetchStudents();
+  };
+
+  if (!token) return null;
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'courses': return <Suspense fallback={<div className="p-10 text-gray-400">{t('common.loading')}</div>}><CoursesManager departments={departments} refreshCourses={fetchCourses} /></Suspense>;
+      case 'grades': return <Suspense fallback={<div className="p-10 text-gray-400">{t('common.loading')}</div>}><GradesUploader courses={courses} departments={departments} /></Suspense>;
+      case 'resources': return <Suspense fallback={<div className="p-10 text-gray-400">{t('common.loading')}</div>}><ResourceManager /></Suspense>;
+      case 'roadmap': return <Suspense fallback={<div className="p-10 text-gray-400">{t('common.loading')}</div>}><RoadmapManager /></Suspense>;
+      case 'doctors': return <Suspense fallback={<div className="p-10 text-gray-400">{t('common.loading')}</div>}><DoctorManager /></Suspense>;
+      case 'students': return (
+        <Suspense fallback={<div className="p-10 text-gray-400">{t('common.loading')}</div>}>
+          <StudentsManager
+            students={students}
+            fetchStudents={fetchStudents}
+            departments={departments}
+            onAddStudent={handleAddStudent}
+            handleResetPassword={handleResetPassword}
+            handleDeleteStudent={handleDeleteStudent}
+            handleEditStudentInfo={handleEditStudentInfo}
+            handleManageRole={handleManageRole}
+            studentsFile={studentsFile}
+            setStudentsFile={setStudentsFile}
+          />
+        </Suspense>
+      );
+      case 'records': return <Suspense fallback={<div className="p-10 text-gray-400">{t('common.loading')}</div>}><StudentCoursesGradesManager students={students} refreshStudents={fetchStudents} /></Suspense>;
+      case 'timetable': return <Suspense fallback={<div className="p-10 text-gray-400">{t('common.loading')}</div>}><TimetableManager /></Suspense>;
+      case 'notifications': return (
+        <Suspense fallback={<div className="p-10 text-gray-400">{t('common.loading')}</div>}>
+          <NotificationsManager
+            notifications={notifications}
+            fetchNotifications={fetchNotifications}
+            sending={sending}
+            setSending={setSending}
+            notificationForm={notificationForm}
+            setNotificationForm={setNotificationForm}
+            handleUpdateNotification={handleUpdateNotification}
+            handleDeleteNotification={handleDeleteNotification}
+            showEditModal={showEditModal}
+            setShowEditModal={setShowEditModal}
+            editingNotification={editingNotification}
+            setEditingNotification={setEditingNotification}
+            editNotifForm={editNotifForm}
+            setEditNotifForm={setEditNotifForm}
+            departments={departments}
+          />
+        </Suspense>
+      );
+      case 'mobile_center': return (
+        <Suspense fallback={<div className="p-10 text-gray-400">{t('common.loading')}</div>}>
+          <MobileAlertCenter
+            notifications={notifications}
+            fetchNotifications={fetchNotifications}
+            sending={sending}
+            setSending={setSending}
+            departments={departments}
+          />
+        </Suspense>
+      );
+      case 'departments': return <Suspense fallback={<div className="p-10 text-gray-400">{t('common.loading')}</div>}><DepartmentManager /></Suspense>;
+      case 'quizzes': return <Suspense fallback={<div className="p-10 text-gray-400">{t('common.loading')}</div>}><QuizManager /></Suspense>;
+      case 'reviews': return <Suspense fallback={<div className="p-10 text-gray-400">{t('common.loading')}</div>}><PendingReviews /></Suspense>;
+      case 'events': return <Suspense fallback={<div className="p-10 text-gray-400">{t('common.loading')}</div>}><EventsManager /></Suspense>;
+      case 'progress': return <Suspense fallback={<div className="p-10 text-gray-400">{t('common.loading')}</div>}><ProgressManager /></Suspense>;
+      case 'tasks': return <Suspense fallback={<div className="p-10 text-gray-400">{t('common.loading')}</div>}><OfficialTaskManager /></Suspense>;
+      case 'emails': return <Suspense fallback={<div className="p-10 text-gray-400">{t('common.loading')}</div>}><LinkedEmailsManager /></Suspense>;
+      case 'logs': return <Suspense fallback={<div className="p-10 text-gray-400">{t('common.loading')}</div>}><LogsDashboard /></Suspense>;
+      case 'exams': return <Suspense fallback={<div className="p-10 text-gray-400">{t('common.loading')}</div>}><ExamScheduleManager /></Suspense>;
+       default: return (
+        <div className="p-6 lg:p-10 space-y-8 lg:space-y-12 relative z-10">
+          {/* Bento Grid Stats */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-8">
+            {[
+              { label: t('admin.stats.system_load'), value: '12%', icon: Activity, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+              { label: t('admin.stats.active_users'), value: students.length + 42, icon: Users, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+              { label: t('admin.stats.database'), value: t('admin.stats.syncing'), icon: Database, color: 'text-amber-500', bg: 'bg-amber-500/10' },
+              { label: t('admin.stats.protocol'), value: 'v4.0.2', icon: Shield, color: 'text-rose-500', bg: 'bg-rose-500/10' },
+            ].map((stat, i) => (
+              <div
+                key={i}
+                style={{ animationDelay: `${i * 60}ms` }}
+                className="group relative bg-white/80 dark:bg-white/[0.03] border border-gray-100 dark:border-white/5 p-6 lg:p-8 rounded-[2rem] lg:rounded-[2.5rem] shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden fade-in-up">
+                <div className={`w-10 h-10 lg:w-12 lg:h-12 rounded-2xl ${stat.bg} ${stat.color} flex items-center justify-center mb-6 relative z-10 group-hover:scale-105 transition-transform duration-200 will-change-transform`}>
+                  <stat.icon className="w-5 lg:w-6 h-5 lg:h-6" />
+                </div>
+                <p className="text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-1">{stat.label}</p>
+                <p className="text-2xl lg:text-3xl font-black text-gray-900 dark:text-white">{stat.value}</p>
+              </div>
+            ))}
           </div>
 
-          <div className="relative z-10 w-full max-w-lg flex flex-col gap-12 text-center items-center">
-            <div className="space-y-6 animate-fadeInUp">
-              <div className="relative group">
-                <div className="absolute -inset-8 bg-emerald-500/10 blur-3xl rounded-full opacity-60"></div>
-                <div className="relative inline-flex items-center justify-center w-48 h-48 rounded-full bg-white dark:bg-white/5 border border-emerald-500/20 overflow-hidden shadow-2xl">
-                  <img src="/logo.png" alt="ZNU Logo" className="w-full h-full object-contain p-6" />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10">
+            <div className="bg-white dark:bg-[#080808] backdrop-blur-md border border-gray-100 dark:border-white/5 rounded-[3rem] lg:rounded-[3.5rem] p-8 lg:p-12 shadow-sm relative overflow-hidden group">
+              <div className="absolute top-0 inset-inline-end-0 w-64 h-64 bg-emerald-500/5 blur-[100px] rounded-full translate-x-1/2 -translate-y-1/2 group-hover:scale-110 transition-transform duration-1000" />
+              <h4 className="text-2xl font-black mb-2 uppercase tracking-tight relative z-10">{t('admin.overview.control_tower')}</h4>
+              <p className="text-sm text-gray-400 font-bold uppercase tracking-widest mb-10 relative z-10">{t('admin.overview.central_node')}</p>
+              <div className="space-y-3 relative z-10">
+                {ALL_TABS.slice(1, 5).map(tab => (
+                  <button key={tab.id} onClick={() => setActiveTab(tab.id)} className="w-full flex items-center justify-between p-5 lg:p-6 rounded-[2rem] bg-gray-50/50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 hover:border-emerald-500/30 transition-[border-color,background-color] duration-200 group/item">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-white dark:bg-white/5 flex items-center justify-center text-gray-400 group-hover/item:text-emerald-500 transition-colors duration-200 shadow-sm">
+                        {tab.icon}
+                      </div>
+                      <span className="font-black text-xs uppercase tracking-widest text-gray-600 dark:text-gray-300">{tab.label}</span>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-gray-300 group-hover/item:translate-x-1 transition-all rtl:rotate-180" />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-white dark:bg-[#080808] backdrop-blur-md border border-gray-100 dark:border-white/5 rounded-[3rem] lg:rounded-[3.5rem] p-8 lg:p-12 shadow-sm relative overflow-hidden group">
+              <div className="absolute top-0 inset-inline-end-0 w-64 h-64 bg-blue-500/5 blur-[100px] rounded-full translate-x-1/2 -translate-y-1/2 group-hover:scale-110 transition-transform duration-700 will-change-transform" />
+              
+              <div className="flex items-center gap-4 mb-8 relative z-10">
+                <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500 transition-transform duration-200 group-hover:scale-105 will-change-transform">
+                  <TrendingUp className="w-6 h-6" />
+                </div>
+                <div>
+                  <h4 className="text-2xl font-black uppercase tracking-tight">{t('quizzes.quick_stats')}</h4>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{t('admin.overview.terminal_hint')}</p>
                 </div>
               </div>
-              
-              <div className="space-y-2">
-                <h1 className="text-5xl font-black text-gray-900 dark:text-white tracking-tighter leading-tight">
-                  Admin <br />
-                  <span className="text-emerald-500">Portal.</span>
-                </h1>
-                <p className="text-xs font-black uppercase tracking-[0.5em] text-emerald-500/60 mt-2">Management Access</p>
+
+              <div className="grid grid-cols-2 gap-4 relative z-10">
+                <div className="bg-gray-50/50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 rounded-3xl p-6 hover:border-blue-500/20 transition-all">
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">{t('admin.sidebar.tabs.students')}</p>
+                  <p className="text-2xl font-black text-gray-900 dark:text-white">{students.length}</p>
+                </div>
+                <div className="bg-gray-50/50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 rounded-3xl p-6 hover:border-emerald-500/20 transition-all">
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">{t('admin.sidebar.tabs.courses')}</p>
+                  <p className="text-2xl font-black text-gray-900 dark:text-white">{courses.length}</p>
+                </div>
+                <div className="bg-gray-50/50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 rounded-3xl p-6 hover:border-amber-500/20 transition-all">
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">{t('admin.sidebar.tabs.departments')}</p>
+                  <p className="text-2xl font-black text-gray-900 dark:text-white">{departments.length}</p>
+                </div>
+                <div className="bg-gray-50/50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 rounded-3xl p-6 hover:border-rose-500/20 transition-all">
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">{t('admin.sidebar.tabs.notifications')}</p>
+                  <p className="text-2xl font-black text-gray-900 dark:text-white">{notifications.length}</p>
+                </div>
               </div>
-              
-              <p className="text-gray-600 dark:text-gray-400 text-lg leading-relaxed max-w-md mx-auto font-medium">
-                Hello, Admin! Please sign in to manage the system.
-              </p>
             </div>
           </div>
         </div>
+      );
+    }
+  };
 
-        {/* RIGHT PANEL: The Form (Matches Student style) */}
-        <div className="w-full lg:w-1/2 flex flex-col relative justify-center items-center p-6 sm:p-12 lg:p-20 bg-gray-50 dark:bg-[#0a0a0a]">
-          <div className="w-full max-w-md relative z-10 animate-fadeInUp">
-            <div className="mb-10 text-center lg:text-left">
-              <div className="lg:hidden inline-flex mb-6">
-                <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-white dark:bg-white/5 border border-emerald-500/20 shadow-xl overflow-hidden">
-                  <img src="/logo.png" alt="ZNU Logo" className="w-full h-full object-contain p-4" />
-                </div>
-              </div>
-              <h2 className="text-4xl font-black text-gray-900 dark:text-white tracking-tight">Login</h2>
-              <p className="text-gray-500 mt-2 text-sm font-medium">Enter your username and password.</p>
-            </div>
-
-            <form onSubmit={handleLogin} className="space-y-6">
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500 pl-1">Username</label>
-                <div className="relative flex items-center bg-white dark:bg-[#111] border border-gray-200 dark:border-white/10 rounded-2xl overflow-hidden shadow-sm">
-                  <div className="pl-5 pr-1 flex items-center justify-center shrink-0">
-                    <LayoutDashboard className={`w-6 h-6 transition-all duration-500 ${isDarkMode ? 'text-white' : 'text-black'}`} />
-                  </div>
-                  <input
-                    type="text"
-                    value={loginCredentials.username}
-                    onChange={(e) => setLoginCredentials({ ...loginCredentials, username: e.target.value })}
-                    className="w-full bg-transparent py-4 px-5 text-gray-900 dark:text-white font-bold text-xl focus:outline-none"
-                    placeholder="admin_root"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500 pl-1">Password</label>
-                <div className="relative flex items-center bg-white dark:bg-[#111] border border-gray-200 dark:border-white/10 rounded-2xl overflow-hidden shadow-sm">
-                  <div className="pl-5 pr-1 flex items-center justify-center shrink-0">
-                    <Lock className={`w-6 h-6 transition-all duration-500 ${isDarkMode ? 'text-white' : 'text-black'}`} />
-                  </div>
-                  <input
-                    type="password"
-                    value={loginCredentials.password}
-                    onChange={(e) => setLoginCredentials({ ...loginCredentials, password: e.target.value })}
-                    className="w-full bg-transparent py-4 px-5 text-gray-900 dark:text-white font-bold text-xl tracking-[0.3em] placeholder:tracking-normal focus:outline-none"
-                    placeholder="••••••••"
-                    required
-                  />
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="relative w-full overflow-hidden bg-emerald-600 dark:bg-emerald-500 text-white dark:text-black font-extrabold text-lg py-4 rounded-2xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 shadow-xl disabled:opacity-50 group mt-4 uppercase"
-              >
-                <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/30 dark:via-black/20 to-transparent skew-x-12"></div>
-                {loading ? 'Logging in...' : 'Login'}
-              </button>
-            </form>
-
-            <div className="mt-12 pt-6 border-t border-gray-200 dark:border-white/5 text-center">
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Authorized Admin Access Only</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-
-  // Filter available tabs based on permissions
   const availableTabs = ALL_TABS.filter(tab => isSuperAdmin || (tab.reqPerm !== 'admin' && userPermissions.includes(tab.reqPerm)));
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-[#050505] text-gray-900 dark:text-slate-100 font-sans overflow-hidden transition-colors duration-300">
-      <AdminSidebar
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        admin={{ name: isSuperAdmin ? 'Root Admin' : 'Assistant Node', role: isSuperAdmin ? 'System Admin' : 'Assistant' }}
-        onLogout={logout}
-        availableTabs={availableTabs}
-      />
+    <div className="min-h-screen bg-gray-50 dark:bg-black transition-colors duration-500 font-sans relative overflow-hidden" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
+      <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} onLogout={logout} admin={decodedToken} availableTabs={availableTabs} />
 
-      {/* Main Content Area */}
-      <div className="flex-1 lg:ml-[19.5rem] flex flex-col min-w-0 overflow-hidden relative transition-all duration-300">
-        {/* Background Glows */}
-        <div className="absolute top-[-20%] right-[-10%] w-[50%] h-[50%] bg-emerald-500/10 blur-[150px] rounded-full pointer-events-none"></div>
-        <div className="absolute bottom-[-10%] left-[-5%] w-[40%] h-[40%] bg-teal-500/5 blur-[120px] rounded-full pointer-events-none"></div>
-
-        <AdminHeader
-          admin={{ name: isSuperAdmin ? 'Root Admin' : 'Assistant Node' }}
-          onSearch={(query) => console.log('Global search:', query)}
-          setActiveTab={setActiveTab}
-          hasNotificationsAccess={isSuperAdmin || userPermissions.includes('manage_notifications')}
-        />
-
-        <main className="flex-1 overflow-y-auto p-6 lg:p-10 pb-32 lg:pb-10 hidden-scrollbar relative z-10">
-          <div className="max-w-[1600px] mx-auto">
-            <div className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-white/5 shadow-sm dark:shadow-xl rounded-[2.5rem] p-6 md:p-10 min-h-[600px] relative transition-colors duration-300">
-
-
-              {activeTab === 'overview' && (
-                <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-                  {/* Cinematic Command Center Header */}
-                  <div className="relative rounded-[2.5rem] bg-gray-900 dark:bg-[#0a0a0a] border border-gray-800 dark:border-white/10 overflow-hidden shadow-2xl mb-8 group">
-                    <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/20 via-transparent to-blue-500/10 mix-blend-screen opacity-50 group-hover:opacity-100 transition-opacity duration-1000"></div>
-                    <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/20 blur-[100px] rounded-full pointer-events-none mix-blend-screen"></div>
-                    <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-500/20 blur-[100px] rounded-full pointer-events-none mix-blend-screen"></div>
-
-                    <div className="relative z-10 p-8 sm:p-12 flex flex-col md:flex-row items-center md:items-start justify-between gap-8">
-                      <div>
-                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-xs font-black uppercase tracking-widest mb-6">
-                          <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div> System Online & Secure
-                        </div>
-                        <h2 className="text-4xl sm:text-5xl font-black text-white leading-tight mb-2 tracking-tight">Command Center</h2>
-                        <p className="text-gray-400 text-lg font-medium">Welcome back, {isSuperAdmin ? 'Root Admin' : 'Assistant Node'}. All systems are operating normally.</p>
-                      </div>
-
-                      {/* Decorative Tech Element */}
-                      <div className="hidden md:flex shrink-0 w-32 h-32 rounded-full border border-white/10 items-center justify-center relative">
-                        <div className="absolute inset-0 border-[3px] border-emerald-500/30 border-t-emerald-400 rounded-full animate-spin-slow"></div>
-                        <div className="absolute inset-2 border-[2px] border-blue-500/30 border-b-blue-400 rounded-full animate-spin-reverse-slow"></div>
-                        <ShieldCheck className="w-12 h-12 text-emerald-400" />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Bento Grid Metrics */}
-                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
-                    <div className="bg-white/80 dark:bg-[#111]/80 backdrop-blur-xl border border-gray-200 dark:border-white/10 p-6 rounded-[2.5rem] shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-emerald-500/30 dark:hover:border-emerald-500/50 transition-all duration-300 group relative overflow-hidden">
-                      <div className="absolute -right-10 -top-10 w-32 h-32 bg-emerald-500/10 rounded-full blur-[30px] group-hover:bg-emerald-500/20 transition-all"></div>
-                      <div className="flex items-center justify-between mb-4 relative z-10">
-                        <div className="w-14 h-14 bg-emerald-500/10 rounded-[1.5rem] flex items-center justify-center border border-emerald-500/20 group-hover:scale-110 transition-transform shadow-inner">
-                          <BookOpen className="w-6 h-6 text-emerald-500" />
-                        </div>
-                        <div className="flex items-center gap-1 text-emerald-500 bg-emerald-500/10 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider">
-                          <Activity className="w-3 h-3" /> Live
-                        </div>
-                      </div>
-                      <div className="relative z-10 mt-6">
-                        <p className="text-4xl font-black text-gray-900 dark:text-white mb-1">{stats.courses}</p>
-                        <p className="text-xs font-bold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Total Courses</p>
-                      </div>
-                    </div>
-
-                    <div className="bg-white/80 dark:bg-[#111]/80 backdrop-blur-xl border border-gray-200 dark:border-white/10 p-6 rounded-[2.5rem] shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-blue-500/30 dark:hover:border-blue-500/50 transition-all duration-300 group relative overflow-hidden">
-                      <div className="absolute -right-10 -top-10 w-32 h-32 bg-blue-500/10 rounded-full blur-[30px] group-hover:bg-blue-500/20 transition-all"></div>
-                      <div className="flex items-center justify-between mb-4 relative z-10">
-                        <div className="w-14 h-14 bg-blue-500/10 rounded-[1.5rem] flex items-center justify-center border border-blue-500/20 group-hover:scale-110 transition-transform shadow-inner">
-                          <Users className="w-6 h-6 text-blue-500" />
-                        </div>
-                        <div className="flex items-center gap-1 text-blue-500 bg-blue-500/10 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider">
-                          <CheckCircle className="w-3 h-3" /> Secure
-                        </div>
-                      </div>
-                      <div className="relative z-10 mt-6">
-                        <p className="text-4xl font-black text-gray-900 dark:text-white mb-1">{stats.students}</p>
-                        <p className="text-xs font-bold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Total Students</p>
-                      </div>
-                    </div>
-
-                    <div className="bg-white/80 dark:bg-[#111]/80 backdrop-blur-xl border border-gray-200 dark:border-white/10 p-6 rounded-[2.5rem] shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-purple-500/30 dark:hover:border-purple-500/50 transition-all duration-300 group relative overflow-hidden">
-                      <div className="absolute -right-10 -top-10 w-32 h-32 bg-purple-500/10 rounded-full blur-[30px] group-hover:bg-purple-500/20 transition-all"></div>
-                      <div className="flex items-center justify-between mb-4 relative z-10">
-                        <div className="w-14 h-14 bg-purple-500/10 rounded-[1.5rem] flex items-center justify-center border border-purple-500/20 group-hover:scale-110 transition-transform shadow-inner">
-                          <LayoutDashboard className="w-6 h-6 text-purple-500" />
-                        </div>
-                        <div className="flex items-center gap-1 text-purple-500 bg-purple-500/10 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider">
-                          <Award className="w-3 h-3" /> Active
-                        </div>
-                      </div>
-                      <div className="relative z-10 mt-6">
-                        <p className="text-4xl font-black text-gray-900 dark:text-white mb-1">{stats.departments}</p>
-                        <p className="text-xs font-bold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Departments</p>
-                      </div>
-                    </div>
-
-                    <div className={`bg-white/80 dark:bg-[#111]/80 backdrop-blur-xl border ${stats.unread_notifications > 0 ? 'border-rose-500/50 shadow-[0_0_30px_rgba(244,63,94,0.1)]' : 'border-gray-200 dark:border-white/10'} p-6 rounded-[2.5rem] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden`}>
-                      <div className={`absolute -right-10 -top-10 w-32 h-32 ${stats.unread_notifications > 0 ? 'bg-rose-500/20' : 'bg-rose-500/10'} rounded-full blur-[30px] transition-all`}></div>
-                      <div className="flex items-center justify-between mb-4 relative z-10">
-                        <div className="w-14 h-14 bg-rose-500/10 rounded-[1.5rem] flex items-center justify-center border border-rose-500/20 group-hover:scale-110 transition-transform shadow-inner relative">
-                          {stats.unread_notifications > 0 && <div className="absolute top-0 right-0 w-3 h-3 bg-rose-500 rounded-full animate-ping"></div>}
-                          <Bell className="w-6 h-6 text-rose-500" />
-                        </div>
-                        {stats.unread_notifications > 0 && (
-                          <button onClick={() => {
-                            const hasAccess = isSuperAdmin || userPermissions.includes('manage_notifications');
-                            if (hasAccess) setActiveTab('notifications');
-                            else toast.error('No permission');
-                          }}
-                            className="flex items-center gap-1 text-white bg-rose-500 hover:bg-rose-600 px-3 py-1.5 rounded-full text-xs font-black uppercase tracking-wider shadow-md hover:shadow-lg transition-all active:scale-95"
-                          >
-                            View
-                          </button>
-                        )}
-                      </div>
-                      <div className="relative z-10 mt-6">
-                        <p className="text-4xl font-black text-gray-900 dark:text-white mb-1">{stats.unread_notifications}</p>
-                        <p className="text-xs font-bold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Unread Alerts</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Quick Actions Panel */}
-                  <div>
-                    <h3 className="text-lg font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                      <Settings className="w-5 h-5 text-emerald-500" /> Quick Actions
-                    </h3>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <button onClick={() => setActiveTab('students')} className="group flex flex-col items-center justify-center gap-3 p-6 bg-white/50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-[2rem] hover:bg-white dark:hover:bg-white/10 hover:border-emerald-500/30 hover:shadow-lg hover:-translate-y-1 transition-all">
-                        <div className="w-12 h-12 bg-gray-100 dark:bg-black/50 rounded-[1.2rem] flex items-center justify-center group-hover:bg-emerald-500/20 group-hover:text-emerald-500 transition-colors shadow-inner">
-                          <UserCheck className="w-5 h-5" />
-                        </div>
-                        <span className="text-sm font-bold text-gray-700 dark:text-gray-300">Manage Students</span>
-                      </button>
-                      <button onClick={() => setActiveTab('grades')} className="group flex flex-col items-center justify-center gap-3 p-6 bg-white/50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-[2rem] hover:bg-white dark:hover:bg-white/10 hover:border-blue-500/30 hover:shadow-lg hover:-translate-y-1 transition-all">
-                        <div className="w-12 h-12 bg-gray-100 dark:bg-black/50 rounded-[1.2rem] flex items-center justify-center group-hover:bg-blue-500/20 group-hover:text-blue-500 transition-colors shadow-inner">
-                          <TrendingUp className="w-5 h-5" />
-                        </div>
-                        <span className="text-sm font-bold text-gray-700 dark:text-gray-300">Upload Grades</span>
-                      </button>
-                      <button onClick={() => setActiveTab('notifications')} className="group flex flex-col items-center justify-center gap-3 p-6 bg-white/50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-[2rem] hover:bg-white dark:hover:bg-white/10 hover:border-rose-500/30 hover:shadow-lg hover:-translate-y-1 transition-all">
-                        <div className="w-12 h-12 bg-gray-100 dark:bg-black/50 rounded-[1.2rem] flex items-center justify-center group-hover:bg-rose-500/20 group-hover:text-rose-500 transition-colors shadow-inner">
-                          <Bell className="w-5 h-5" />
-                        </div>
-                        <span className="text-sm font-bold text-gray-700 dark:text-gray-300">Broadcast Alert</span>
-                      </button>
-                      <button onClick={() => setActiveTab('timetable')} className="group flex flex-col items-center justify-center gap-3 p-6 bg-white/50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-[2rem] hover:bg-white dark:hover:bg-white/10 hover:border-purple-500/30 hover:shadow-lg hover:-translate-y-1 transition-all">
-                        <div className="w-12 h-12 bg-gray-100 dark:bg-black/50 rounded-[1.2rem] flex items-center justify-center group-hover:bg-purple-500/20 group-hover:text-purple-500 transition-colors shadow-inner">
-                          <Calendar className="w-5 h-5" />
-                        </div>
-                        <span className="text-sm font-bold text-gray-700 dark:text-gray-300">Edit Timetable</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <Suspense fallback={<div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-3 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin"></div></div>}>
-                {activeTab === 'courses' && <CoursesManager departments={departments} />}
-                {activeTab === 'grades' && <GradesUploader courses={courses} departments={departments} />}
-                {activeTab === 'resources' && <ResourceManager />}
-                {activeTab === 'roadmap' && <RoadmapManager />}
-                {activeTab === 'doctors' && <DoctorManager />}
-                {activeTab === 'students' && (
-                  <StudentsManager
-                    students={students}
-                    fetchStudents={fetchStudents}
-                    uploadingStudents={uploadingStudents}
-                    setUploadingStudents={setUploadingStudents}
-                    studentsFile={studentsFile}
-                    setStudentsFile={setStudentsFile}
-                    handleResetPassword={handleResetPassword}
-                    handleDeleteStudent={handleDeleteStudent}
-                    handleEditStudentInfo={handleEditStudentInfo}
-                    handleManageRole={handleManageRole}
-                    departments={departments}
-                    onAddStudent={handleAddStudent}
-                  />
-                )}
-                {activeTab === 'student-courses' && (
-                  <StudentCoursesGradesManager
-                    students={students}
-                    selectedStudent={selectedStudent}
-                    setSelectedStudent={setSelectedStudent}
-                    studentCourses={studentCourses}
-                    availableCourses={availableCourses}
-                    studentGrades={studentGrades}
-                    showAddCourseModal={showAddCourseModal}
-                    setShowAddCourseModal={setShowAddCourseModal}
-                    selectedCourseToAdd={selectedCourseToAdd}
-                    setSelectedCourseToAdd={setSelectedCourseToAdd}
-                    editingGrade={editingGrade}
-                    setEditingGrade={setEditingGrade}
-                    editGradeForm={editGradeForm}
-                    setEditGradeForm={setEditGradeForm}
-                    showGradeModal={showGradeModal}
-                    setShowGradeModal={setShowGradeModal}
-                    handleSelectStudent={handleSelectStudent}
-                    handleRemoveCourseFromStudent={handleRemoveCourseFromStudent}
-                    handleAddCourseToStudent={handleAddCourseToStudent}
-                    handleEditStudentGrade={handleEditStudentGrade}
-                    handleUpdateStudentGrade={handleUpdateStudentGrade}
-                  />
-                )}
-                {activeTab === 'timetable' && (
-                  <TimetableManager
-                    allTimetables={allTimetables}
-                    fetchAllTimetables={fetchAllTimetables}
-                    timetableFile={timetableFile}
-                    setTimetableFile={setTimetableFile}
-                    uploadingTimetable={uploadingTimetable}
-                    setUploadingTimetable={setUploadingTimetable}
-                    handleEditEntry={handleEditEntry}
-                    handleDeleteEntry={handleDeleteEntry}
-                    handleDeleteSection={handleDeleteSection}
-                    departments={departments}
-                    selectedDepartmentId={selectedTimetableDept}
-                    setSelectedDepartmentId={setSelectedTimetableDept}
-                    fetchTimetableByDepartment={fetchTimetableByDepartment}
-                  />
-                )}
-                {activeTab === 'exams' && <ExamScheduleManager departments={departments} selectedDepartmentId={selectedTimetableDept} />}
-                {activeTab === 'notifications' && (
-                  <NotificationsManager
-                    notifications={notifications.filter(n => !n.is_mobile_only)}
-                    fetchNotifications={fetchNotifications}
-                    sending={sending}
-                    setSending={setSending}
-                    notificationForm={notificationForm}
-                    setNotificationForm={setNotificationForm}
-                    handleUpdateNotification={handleUpdateNotification}
-                    handleDeleteNotification={handleDeleteNotification}
-                    showEditModal={showEditModal}
-                    setShowEditModal={setShowEditModal}
-                    editingNotification={editingNotification}
-                    setEditingNotification={setEditingNotification}
-                    editNotifForm={editNotifForm}
-                    setEditNotifForm={setEditNotifForm}
-                    departments={departments}
-                  />
-                )}
-                {activeTab === 'mobile-center' && (
-                  <MobileAlertCenter
-                    notifications={notifications}
-                    fetchNotifications={fetchNotifications}
-                    sending={sending}
-                    setSending={setSending}
-                    departments={departments}
-                  />
-                )}
-                {activeTab === 'departments' && <DepartmentManager />}
-                {activeTab === 'quizzes' && <QuizManager courses={courses} />}
-                {activeTab === 'reviews' && <PendingReviews />}
-                {activeTab === 'events' && <EventsManager />}
-                {activeTab === 'progress' && <ProgressManager courses={courses} />}
-                {activeTab === 'tasks' && <OfficialTaskManager courses={courses} departments={departments} />}
-                {activeTab === 'emails' && <LinkedEmailsManager />}
-                {activeTab === 'logs' && <LogsDashboard />}
-              </Suspense>
-            </div>
-          </div>
+      <div className="lg:ps-[22rem] min-h-screen">
+        <AdminHeader admin={decodedToken} setActiveTab={setActiveTab} hasNotificationsAccess={userPermissions.includes('manage_notifications')} />
+        <main className="pt-24 pb-12">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              className="flex-1 lg:ps-8 flex flex-col min-w-0 overflow-hidden relative"
+            >
+              {renderTabContent()}
+            </motion.div>
+          </AnimatePresence>
         </main>
       </div>
-
-      {/* Edit Student Modal */}
-      {showEditStudentModal && selectedStudent && (
-        <div className="fixed inset-0 bg-gray-900/40 dark:bg-black/60 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-white/10 rounded-[2.5rem] p-10 w-full max-w-lg shadow-2xl relative overflow-hidden animate-fadeInUp transition-colors duration-300">
-
-
-            <div className="relative z-10">
-              <div className="flex items-center gap-4 mb-8">
-                <div className="w-12 h-12 bg-emerald-500/10 dark:bg-emerald-500/20 rounded-2xl flex items-center justify-center border border-emerald-500/20 dark:border-emerald-500/30">
-                  <UserCheck className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
-                </div>
-                <div>
-                  <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">Edit Student</h3>
-                  <p className="text-gray-500 dark:text-slate-400 text-xs font-bold uppercase tracking-widest">{selectedStudent.id}</p>
-                </div>
-              </div>
-
-              <form onSubmit={handleUpdateStudentInfo} className="space-y-6">
-                <div className="space-y-2">
-                  <label className="block text-gray-600 dark:text-slate-300 ml-4 text-[10px] font-bold uppercase tracking-widest">Full Name</label>
-                  <input type="text" value={editStudentForm.name} onChange={(e) => setEditStudentForm({ ...editStudentForm, name: e.target.value })} className="w-full bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/5 rounded-2xl px-6 py-3.5 text-gray-900 dark:text-white focus:outline-none focus:border-emerald-500/50 transition-all font-medium" required />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="block text-gray-600 dark:text-slate-300 ml-4 text-[10px] font-bold uppercase tracking-widest">Level</label>
-                    <input type="number" value={editStudentForm.level} onChange={(e) => setEditStudentForm({ ...editStudentForm, level: e.target.value })} className="w-full bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/5 rounded-2xl px-6 py-3.5 text-gray-900 dark:text-white focus:outline-none focus:border-emerald-500/50 transition-all font-medium" required />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="block text-gray-600 dark:text-slate-300 ml-4 text-[10px] font-bold uppercase tracking-widest">Section</label>
-                    <input type="text" value={editStudentForm.section} onChange={(e) => setEditStudentForm({ ...editStudentForm, section: e.target.value })} className="w-full bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/5 rounded-2xl px-6 py-3.5 text-gray-900 dark:text-white focus:outline-none focus:border-emerald-500/50 transition-all font-medium" />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <label className="block text-gray-600 dark:text-slate-300 ml-4 text-[10px] font-bold uppercase tracking-widest">Department</label>
-                  <select
-                    value={editStudentForm.department_id || ''}
-                    onChange={(e) => setEditStudentForm({ ...editStudentForm, department_id: e.target.value })}
-                    className="w-full bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/5 rounded-2xl px-6 py-3.5 text-gray-900 dark:text-white focus:outline-none focus:border-emerald-500/50 transition-all font-medium appearance-none"
-                  >
-                    <option value="">-- Select Department --</option>
-                    {departments.map(d => (
-                      <option key={d.id} value={d.id}>{d.name} ({d.code})</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="flex gap-4 pt-4">
-                  <button type="submit" className="flex-1 bg-emerald-500 text-white dark:text-black font-black py-4 rounded-2xl hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-emerald-500/20">SAVE CHANGES</button>
-                  <button type="button" onClick={() => setShowEditStudentModal(false)} className="px-8 py-4 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl text-gray-600 dark:text-slate-300 font-bold hover:bg-gray-200 dark:hover:bg-white/10 transition-all">CANCEL</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Manage Role & Permissions Modal */}
-      {showRoleModal && selectedStudentForRole && (
-        <div className="fixed inset-0 bg-gray-900/40 dark:bg-black/60 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-white/10 rounded-[2.5rem] p-10 w-full max-w-lg shadow-2xl relative overflow-hidden animate-fadeInUp transition-colors duration-300">
-
-
-            <div className="relative z-10">
-              <div className="flex items-center gap-4 mb-8">
-                <div className="w-12 h-12 bg-yellow-500/10 dark:bg-yellow-500/20 rounded-2xl flex items-center justify-center border border-yellow-500/20 dark:border-yellow-500/30">
-                  <ShieldCheck className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
-                </div>
-                <div>
-                  <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">Manage Roles</h3>
-                  <p className="text-gray-500 dark:text-slate-400 text-xs font-bold uppercase tracking-widest">{selectedStudentForRole.name}</p>
-                </div>
-              </div>
-
-              <form onSubmit={handleUpdateRole} className="space-y-6">
-                <div className="space-y-2">
-                  <label className="block text-gray-600 dark:text-slate-300 ml-4 text-[10px] font-bold uppercase tracking-widest">User Role</label>
-                  <select
-                    value={roleForm.role}
-                    onChange={(e) => setRoleForm({ ...roleForm, role: e.target.value })}
-                    className="w-full bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/5 rounded-2xl px-6 py-3.5 text-gray-900 dark:text-white focus:outline-none focus:border-yellow-500/50 transition-all font-medium appearance-none"
-                  >
-                    <option value="student">Student (Standard)</option>
-                    <option value="assistant">Assistant (Limited Admin)</option>
-                    <option value="admin">Admin (Full Access)</option>
-                  </select>
-                </div>
-
-                {roleForm.role === 'assistant' && (
-                  <div className="space-y-4 bg-gray-50 dark:bg-white/[0.02] p-5 rounded-2xl border border-gray-200 dark:border-white/5">
-                    <label className="block text-gray-600 dark:text-slate-300 text-[10px] font-bold uppercase tracking-widest mb-2">Module Permissions</label>
-
-                    {/* Select All / Deselect All */}
-                    <div className="flex gap-2 mb-3">
-                      <button type="button" onClick={() => setRoleForm({ ...roleForm, permissions: ['manage_courses', 'manage_grades', 'manage_resources', 'manage_roadmap', 'manage_timetable', 'manage_notifications', 'manage_quizzes', 'manage_events', 'manage_progress'] })}
-                        className="text-[10px] font-bold px-3 py-1.5 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border border-yellow-200 dark:border-yellow-500/20 rounded-lg hover:bg-yellow-500/20 transition-all">Select All</button>
-                      <button type="button" onClick={() => setRoleForm({ ...roleForm, permissions: [] })}
-                        className="text-[10px] font-bold px-3 py-1.5 bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-slate-400 border border-gray-200 dark:border-white/10 rounded-lg hover:bg-gray-200 dark:hover:bg-white/10 transition-all">Deselect All</button>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      {[
-                        { id: 'manage_courses', label: '📚 Courses', desc: 'Add/edit/delete courses' },
-                        { id: 'manage_grades', label: '📊 Grades', desc: 'Upload & manage grades' },
-                        { id: 'manage_quizzes', label: '🏆 Quizzes & Reviews', desc: 'Create quizzes & grade answers' },
-                        { id: 'manage_resources', label: '📄 Resources', desc: 'Upload study materials' },
-                        { id: 'manage_roadmap', label: '🗺️ Roadmap', desc: 'Manage career tracks' },
-                        { id: 'manage_timetable', label: '📅 Timetable', desc: 'Upload & edit schedules' },
-                        { id: 'manage_notifications', label: '🔔 Alerts & Mobile', desc: 'Send notifications' },
-                        { id: 'manage_events', label: '🎓 University Events', desc: 'Manage events' },
-                        { id: 'manage_progress', label: '✅ Progress', desc: 'Track course progress' },
-                      ].map(perm => (
-                        <label key={perm.id} htmlFor={perm.id}
-                          className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${roleForm.permissions.includes(perm.id)
-                            ? 'bg-yellow-500/10 border-yellow-500/30 shadow-sm'
-                            : 'bg-white dark:bg-white/[0.02] border-gray-100 dark:border-white/5 hover:border-gray-200 dark:hover:border-white/15'
-                            }`}>
-                          <input type="checkbox" id={perm.id}
-                            checked={roleForm.permissions.includes(perm.id)}
-                            onChange={(e) => {
-                              const newPerms = e.target.checked
-                                ? [...roleForm.permissions, perm.id]
-                                : roleForm.permissions.filter(p => p !== perm.id);
-                              setRoleForm({ ...roleForm, permissions: newPerms });
-                            }}
-                            className="w-4 h-4 rounded border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-slate-900 text-yellow-500 focus:ring-yellow-500/20 cursor-pointer flex-shrink-0" />
-                          <div>
-                            <p className="text-gray-900 dark:text-white text-sm font-bold">{perm.label}</p>
-                            <p className="text-gray-500 dark:text-slate-500 text-[10px] font-medium">{perm.desc}</p>
-                          </div>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex gap-4 pt-4">
-                  <button type="submit" className="flex-1 bg-yellow-500 text-white dark:text-black font-black py-4 rounded-2xl hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-yellow-500/20 uppercase">Save Permissions</button>
-                  <button type="button" onClick={() => setShowRoleModal(false)} className="px-8 py-4 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl text-gray-600 dark:text-slate-300 font-bold hover:bg-gray-200 dark:hover:bg-white/10 transition-all uppercase">Cancel</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Edit Timetable Entry Modal */}
-      {showEditEntryModal && editingEntry && (
-        <div className="fixed inset-0 bg-gray-900/40 dark:bg-black/60 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-white/10 rounded-[2.5rem] p-10 w-full max-w-xl shadow-2xl relative overflow-hidden animate-fadeInUp transition-colors duration-300">
-
-
-            <div className="relative z-10">
-              <div className="flex items-center gap-4 mb-8">
-                <div className="w-12 h-12 bg-emerald-500/10 dark:bg-emerald-500/20 rounded-2xl flex items-center justify-center border border-emerald-500/20 dark:border-emerald-500/30">
-                  <Calendar className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
-                </div>
-                <div>
-                  <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">Edit Timetable Entry</h3>
-                  <p className="text-gray-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em]">{editingEntry.course_name}</p>
-                </div>
-              </div>
-
-              <form onSubmit={handleUpdateEntry} className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="block text-gray-600 dark:text-slate-300 ml-4 text-[10px] font-bold uppercase tracking-widest">Section</label>
-                    <input type="text" placeholder="Section" value={editEntryForm.section} onChange={(e) => setEditEntryForm({ ...editEntryForm, section: e.target.value })} className="w-full bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/5 rounded-2xl px-6 py-3.5 text-gray-900 dark:text-white focus:outline-none focus:border-emerald-500/50 transition-all font-medium" required />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="block text-gray-600 dark:text-slate-300 ml-4 text-[10px] font-bold uppercase tracking-widest">Day</label>
-                    <input type="text" placeholder="Day (e.g., Monday)" value={editEntryForm.day_of_week} onChange={(e) => setEditEntryForm({ ...editEntryForm, day_of_week: e.target.value })} className="w-full bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/5 rounded-2xl px-6 py-3.5 text-gray-900 dark:text-white focus:outline-none focus:border-emerald-500/50 transition-all font-medium" required />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="block text-gray-600 dark:text-slate-300 ml-4 text-[10px] font-bold uppercase tracking-widest">Start Time</label>
-                    <input type="time" placeholder="Start Time" value={editEntryForm.start_time} onChange={(e) => setEditEntryForm({ ...editEntryForm, start_time: e.target.value })} className="w-full bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/5 rounded-2xl px-6 py-3.5 text-gray-900 dark:text-white focus:outline-none focus:border-emerald-500/50 transition-all font-medium" required />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="block text-gray-600 dark:text-slate-300 ml-4 text-[10px] font-bold uppercase tracking-widest">End Time</label>
-                    <input type="time" placeholder="End Time" value={editEntryForm.end_time} onChange={(e) => setEditEntryForm({ ...editEntryForm, end_time: e.target.value })} className="w-full bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/5 rounded-2xl px-6 py-3.5 text-gray-900 dark:text-white focus:outline-none focus:border-emerald-500/50 transition-all font-medium" required />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="block text-gray-600 dark:text-slate-300 ml-4 text-[10px] font-bold uppercase tracking-widest">Course Name</label>
-                  <input type="text" placeholder="Course Name" value={editEntryForm.course_name} onChange={(e) => setEditEntryForm({ ...editEntryForm, course_name: e.target.value })} className="w-full bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/5 rounded-2xl px-6 py-3.5 text-gray-900 dark:text-white focus:outline-none focus:border-emerald-500/50 transition-all font-medium" required />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="block text-gray-600 dark:text-slate-300 ml-4 text-[10px] font-bold uppercase tracking-widest">Location</label>
-                    <input type="text" placeholder="Location" value={editEntryForm.location} onChange={(e) => setEditEntryForm({ ...editEntryForm, location: e.target.value })} className="w-full bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/5 rounded-2xl px-6 py-3.5 text-gray-900 dark:text-white focus:outline-none focus:border-emerald-500/50 transition-all font-medium" />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="block text-gray-600 dark:text-slate-300 ml-4 text-[10px] font-bold uppercase tracking-widest">Instructor</label>
-                    <input type="text" placeholder="Instructor" value={editEntryForm.instructor} onChange={(e) => setEditEntryForm({ ...editEntryForm, instructor: e.target.value })} className="w-full bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/5 rounded-2xl px-6 py-3.5 text-gray-900 dark:text-white focus:outline-none focus:border-emerald-500/50 transition-all font-medium" />
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between gap-6">
-                  <div className="space-y-2 flex-1">
-                    <label className="block text-gray-600 dark:text-slate-300 ml-4 text-[10px] font-bold uppercase tracking-widest">Session Type</label>
-                    <select value={editEntryForm.type} onChange={(e) => setEditEntryForm({ ...editEntryForm, type: e.target.value })} className="w-full bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/5 rounded-2xl px-6 py-3.5 text-gray-900 dark:text-white focus:outline-none focus:border-emerald-500/50 transition-all font-medium appearance-none">
-                      <option value="Lecture">Lecture</option>
-                      <option value="Lab">Lab</option>
-                      <option value="Tutorial">Tutorial</option>
-                    </select>
-                  </div>
-                  <div className="flex items-center space-x-3 pt-6">
-                    <input type="checkbox" id="isQuiz" checked={editEntryForm.is_quiz} onChange={(e) => setEditEntryForm({ ...editEntryForm, is_quiz: e.target.checked })} className="w-6 h-6 rounded-lg border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-slate-900 text-emerald-500 focus:ring-emerald-500/20 cursor-pointer" />
-                    <label htmlFor="isQuiz" className="text-gray-700 dark:text-slate-300 font-bold text-sm cursor-pointer whitespace-nowrap">📝 Quiz Event?</label>
-                  </div>
-                </div>
-
-                <div className="flex gap-4 pt-4">
-                  <button type="submit" className="flex-1 bg-emerald-500 text-white dark:text-black font-black py-4 rounded-2xl hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-emerald-500/20 uppercase">Update Entry</button>
-                  <button type="button" onClick={() => setShowEditEntryModal(false)} className="px-8 py-4 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl text-gray-600 dark:text-slate-300 font-bold hover:bg-gray-200 dark:hover:bg-white/10 transition-all uppercase">Cancel</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

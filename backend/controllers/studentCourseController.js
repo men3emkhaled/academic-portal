@@ -40,7 +40,8 @@ const getAvailableCourses = async (req, res) => {
 
 const addCourseToStudent = async (req, res) => {
   try {
-    const { studentId, courseId } = req.params;
+    const { studentId } = req.params;
+    const courseId = req.params.courseId || req.body.course_id;
     const student = await Student.findById(studentId);
     if (!student) return res.status(404).json({ message: 'Student not found' });
     const course = await Course.findById(courseId);

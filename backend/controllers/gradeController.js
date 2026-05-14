@@ -333,10 +333,43 @@ const clearCourseGrades = async (req, res) => {
   }
 };
 
+// تعديل درجة طالب لمادة معينة عبر ID المادة
+const updateStudentGradeByCourseId = async (req, res) => {
+  try {
+    const { studentId, courseId } = req.params;
+    const { examType, score, status } = req.body;
+    
+    if (!studentId || !courseId || !examType) {
+      return res.status(400).json({ message: 'Student ID, course ID, and exam type are required' });
+    }
+    
+    // البحث عن enrollment_id
+    const enrollment = await db.query(
+      `SELECT id FROM student_courses WHERE student_id = $1 AND course_id = $2`,
+      [studentId, courseId]
+    );
+    
+    if (enrollment.rows.length === 0) {
+      return res.status(404).json({ message: 'Student is not enrolled in this course' });
+    }
+    
+    const enrollmentId = enrollment.rows[0].id;
+    const updatedGrade = await Grade.updateSingleGradeWithEnrollment(enrollmentId, examType, score, status);
+    
+    res.json({ 
+      message: 'Grade updated successfully',
+      grade: updatedGrade
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getGradesByStudentId,
   uploadAdvancedGrades,
   updateSingleGrade,
+  updateStudentGradeByCourseId, // ✅ جديد
   getAllGrades,
   getMyGrades,
   clearCourseGrades

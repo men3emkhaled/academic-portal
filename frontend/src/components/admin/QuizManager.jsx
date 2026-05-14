@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 import { 
@@ -16,6 +17,7 @@ import AttemptsLog from './quizzes/AttemptsLog';
 import PendingReviews from './quizzes/PendingReviews';
 
 const QuizManager = ({ courses }) => {
+  const { t } = useTranslation();
   const [quizzes, setQuizzes] = useState([]);
   const [selectedQuiz, setSelectedQuiz] = useState(null);
   const [questions, setQuestions] = useState([]);
@@ -58,7 +60,7 @@ const QuizManager = ({ courses }) => {
       const res = await api.get('/admin/quizzes');
       setQuizzes(res.data);
     } catch (error) {
-      toast.error('Failed to load quizzes');
+      toast.error(t('admin.quizzes.load_failed') || 'Failed to load quizzes');
     } finally {
       setLoading(false);
     }
@@ -69,7 +71,7 @@ const QuizManager = ({ courses }) => {
       const res = await api.get(`/admin/quizzes/${quizId}/questions`);
       setQuestions(res.data);
     } catch (error) {
-      toast.error('Failed to load questions');
+      toast.error(t('admin.quizzes.questions.load_failed') || 'Failed to load questions');
     }
   };
 
@@ -78,7 +80,7 @@ const QuizManager = ({ courses }) => {
       const res = await api.get(`/admin/quizzes/${quizId}/attempts`);
       setAttempts(res.data);
     } catch (error) {
-      toast.error('Failed to load attempts');
+      toast.error(t('admin.quizzes.attempts.load_failed') || 'Failed to load attempts');
     }
   };
 
@@ -106,29 +108,29 @@ const QuizManager = ({ courses }) => {
       };
       if (editingQuiz) {
         await api.put(`/admin/quizzes/${editingQuiz.id}`, payload);
-        toast.success('Quiz details updated');
+        toast.success(t('admin.quizzes.update_success') || 'Quiz details updated');
       } else {
         await api.post('/admin/quizzes', payload);
-        toast.success('New quiz created successfully');
+        toast.success(t('admin.quizzes.create_success') || 'New quiz created successfully');
       }
       resetQuizForm();
       fetchQuizzes();
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Operation failed');
+      toast.error(error.response?.data?.message || t('common.error') || 'Operation failed');
     } finally {
       setLoading(false);
     }
   };
 
   const handleDeleteQuiz = async (quiz) => {
-    if (!window.confirm(`Delete quiz "${quiz.title}"? This cannot be undone.`)) return;
+    if (!window.confirm(t('admin.quizzes.delete_confirm', { title: quiz.title }))) return;
     try {
       await api.delete(`/admin/quizzes/${quiz.id}`);
-      toast.success('Quiz deleted successfully');
+      toast.success(t('admin.quizzes.delete_success') || 'Quiz deleted successfully');
       if (selectedQuiz?.id === quiz.id) setSelectedQuiz(null);
       fetchQuizzes();
     } catch (error) {
-      toast.error('Failed to delete quiz');
+      toast.error(t('admin.quizzes.delete_failed') || 'Failed to delete quiz');
     }
   };
 
@@ -169,17 +171,17 @@ const QuizManager = ({ courses }) => {
     try {
       const newStatus = !quiz.is_published;
       await api.patch(`/admin/quizzes/${quiz.id}/publish`, { is_published: newStatus });
-      toast.success(newStatus ? 'Quiz is now live' : 'Quiz moved to drafts');
+      toast.success(newStatus ? t('admin.quizzes.publish_success') : t('admin.quizzes.draft_success'));
       fetchQuizzes();
     } catch (error) {
-      toast.error('Failed to update status');
+      toast.error(t('admin.quizzes.update_failed'));
     }
   };
 
   // ---------- Question CRUD ----------
   const handleSaveQuestion = async (e) => {
     e.preventDefault();
-    if (!selectedQuiz) return toast.error('Select a quiz first');
+    if (!selectedQuiz) return toast.error(t('admin.quizzes.questions.select_quiz_error') || 'Select a quiz first');
     setLoading(true);
     try {
       const payload = {
@@ -190,28 +192,28 @@ const QuizManager = ({ courses }) => {
       };
       if (editingQuestion) {
         await api.put(`/admin/quizzes/${selectedQuiz.id}/questions/${editingQuestion.id}`, payload);
-        toast.success('Question updated');
+        toast.success(t('admin.quizzes.questions.update_success') || 'Question updated');
       } else {
         await api.post(`/admin/quizzes/${selectedQuiz.id}/questions`, payload);
-        toast.success('Question added to quiz');
+        toast.success(t('admin.quizzes.questions.add_success') || 'Question added to quiz');
       }
       resetQuestionForm();
       fetchQuestions(selectedQuiz.id);
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to save question');
+      toast.error(error.response?.data?.message || t('admin.quizzes.questions.save_failed') || 'Failed to save question');
     } finally {
       setLoading(false);
     }
   };
 
   const handleDeleteQuestion = async (question) => {
-    if (!window.confirm(`Delete this question?`)) return;
+    if (!window.confirm(t('admin.quizzes.questions.delete_confirm') || `Delete this question?`)) return;
     try {
       await api.delete(`/admin/quizzes/${selectedQuiz.id}/questions/${question.id}`);
-      toast.success('Question removed');
+      toast.success(t('admin.quizzes.questions.delete_success') || 'Question removed');
       fetchQuestions(selectedQuiz.id);
     } catch (error) {
-      toast.error('Failed to delete question');
+      toast.error(t('admin.quizzes.questions.delete_failed') || 'Failed to delete question');
     }
   };
 
@@ -259,9 +261,9 @@ const QuizManager = ({ courses }) => {
           </div>
           <div>
             <h2 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">
-              Quizzes & Reviews
+              {t('admin.quizzes.title')}
             </h2>
-            <p className="text-gray-500 dark:text-gray-400 text-sm font-bold mt-1">Create and manage student assessments</p>
+            <p className="text-gray-500 dark:text-gray-400 text-sm font-bold mt-1">{t('admin.quizzes.description')}</p>
           </div>
         </div>
         <div className="flex gap-3">
@@ -269,7 +271,7 @@ const QuizManager = ({ courses }) => {
                 onClick={() => setShowQuizForm(true)}
                 className="px-6 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs uppercase tracking-widest rounded-2xl shadow-lg shadow-indigo-500/20 transition-all flex items-center gap-2"
             >
-                <Plus className="w-4 h-4" /> Add New Quiz
+                <Plus className="w-4 h-4" /> {t('admin.quizzes.add_btn')}
             </button>
         </div>
       </div>
@@ -286,7 +288,7 @@ const QuizManager = ({ courses }) => {
             }`}
           >
             <LayoutDashboard className="w-5 h-5" />
-            <span className="font-black text-sm uppercase tracking-widest">All Quizzes</span>
+            <span className="font-black text-sm uppercase tracking-widest">{t('admin.quizzes.all_quizzes_tab')}</span>
           </button>
 
           <div className="h-px bg-gray-200 dark:bg-white/5 my-4 mx-4"></div>
@@ -294,7 +296,7 @@ const QuizManager = ({ courses }) => {
           {quizzes.length === 0 ? (
               <div className="bg-white/50 dark:bg-black/20 border-2 border-dashed border-gray-200 dark:border-white/5 rounded-[2rem] py-20 text-center opacity-40">
                   <ClipboardList className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                  <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">No quizzes found</p>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">{t('admin.quizzes.no_quizzes')}</p>
               </div>
           ) : (
             quizzes.map((quiz) => (
@@ -317,10 +319,10 @@ const QuizManager = ({ courses }) => {
                     
                     <div className="flex flex-wrap gap-2">
                         <span className="inline-flex items-center gap-1 text-[8px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 px-2 py-1 rounded-lg border border-indigo-400/20">
-                            <Clock className="w-2.5 h-2.5" /> {quiz.time_limit_minutes}m
+                            <Clock className="w-2.5 h-2.5" /> {t('admin.quizzes.time_limit', { count: quiz.time_limit_minutes })}
                         </span>
                         <span className="inline-flex items-center gap-1 text-[8px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded-lg border border-emerald-400/20">
-                            <Target className="w-2.5 h-2.5" /> {quiz.passing_score}%
+                            <Target className="w-2.5 h-2.5" /> {t('admin.quizzes.passing_score', { count: quiz.passing_score })}
                         </span>
                     </div>
                   </div>
@@ -368,7 +370,7 @@ const QuizManager = ({ courses }) => {
                                 ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 shadow-inner' 
                                 : 'bg-gray-100 dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-400'
                             }`}>
-                                {selectedQuiz.is_published ? 'Published' : 'Draft'}
+                                {selectedQuiz.is_published ? t('admin.quizzes.published') : t('admin.quizzes.draft')}
                             </span>
                         </div>
                         <div className="flex flex-wrap gap-6">
@@ -376,11 +378,11 @@ const QuizManager = ({ courses }) => {
                                 <LayoutDashboard className="w-4 h-4 text-indigo-500/50" /> {selectedQuiz.course_name}
                              </div>
                              <div className="flex items-center gap-2 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">
-                                <RotateCcw className="w-4 h-4 text-indigo-500/50" /> {selectedQuiz.max_attempts || 1} Attempts
+                                <RotateCcw className="w-4 h-4 text-indigo-500/50" /> {t('admin.quizzes.attempts_label', { count: selectedQuiz.max_attempts || 1 })}
                              </div>
                              {selectedQuiz.is_official && (
                                <div className="flex items-center gap-2 text-xs font-black text-rose-600 dark:text-rose-500 uppercase tracking-widest">
-                                  <Shield className="w-4 h-4" /> Official Exam Mode
+                                  <Shield className="w-4 h-4" /> {t('admin.quizzes.official_mode')}
                                </div>
                              )}
                         </div>
@@ -395,7 +397,7 @@ const QuizManager = ({ courses }) => {
                             activeSubTab === 'questions' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-gray-500 hover:text-indigo-600'
                         }`}
                     >
-                        <FileText className="w-3.5 h-3.5" /> Questions ({questions.length})
+                        <FileText className="w-3.5 h-3.5" /> {t('admin.quizzes.questions_tab', { count: questions.length })}
                     </button>
                     <button
                         onClick={() => setActiveSubTab('attempts')}
@@ -403,7 +405,7 @@ const QuizManager = ({ courses }) => {
                             activeSubTab === 'attempts' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-gray-500 hover:text-indigo-600'
                         }`}
                     >
-                        <BarChart3 className="w-3.5 h-3.5" /> Attempts ({attempts.length})
+                        <BarChart3 className="w-3.5 h-3.5" /> {t('admin.quizzes.attempts_tab', { count: attempts.length })}
                     </button>
                     <button
                         onClick={() => setActiveSubTab('reviews')}
@@ -411,7 +413,7 @@ const QuizManager = ({ courses }) => {
                             activeSubTab === 'reviews' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/20' : 'text-gray-500 hover:text-emerald-600'
                         }`}
                     >
-                        <CheckSquare className="w-3.5 h-3.5" /> Grade Reviews
+                        <CheckSquare className="w-3.5 h-3.5" /> {t('admin.quizzes.reviews_tab')}
                     </button>
                 </div>
               </div>
@@ -441,8 +443,8 @@ const QuizManager = ({ courses }) => {
                 <div className="w-24 h-24 bg-indigo-500/5 dark:bg-indigo-500/10 rounded-full flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-500">
                     <ClipboardList className="w-12 h-12 text-indigo-400 opacity-50" />
                 </div>
-                <h4 className="text-xl font-black uppercase tracking-[0.3em] text-gray-900 dark:text-white">Workspace Idle</h4>
-                <p className="text-sm font-bold mt-4 tracking-widest text-gray-500 max-w-xs">Select a quiz from the list to manage its questions and grades.</p>
+                <h4 className="text-xl font-black uppercase tracking-[0.3em] text-gray-900 dark:text-white">{t('admin.quizzes.workspace_idle_title')}</h4>
+                <p className="text-sm font-bold mt-4 tracking-widest text-gray-500 max-w-xs">{t('admin.quizzes.workspace_idle_desc')}</p>
             </div>
           )}
         </div>

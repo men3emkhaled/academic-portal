@@ -1,42 +1,42 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { GraduationCap, Briefcase, Shield, Sun, Moon } from 'lucide-react';
+import { GraduationCap, Briefcase, Shield, Sun, Moon, Languages } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from 'react-i18next';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const portals = [
   {
     id: 'student',
-    label: 'Student',
+    label: 'portals.student',
     icon: GraduationCap,
     path: '/student/login',
-    color: 'from-emerald-500 to-green-400',
-    activeClass: 'bg-white dark:bg-[#1a1a1a] text-emerald-600 dark:text-emerald-400 shadow-sm border border-gray-200 dark:border-white/5',
-    hoverClass: 'hover:bg-gray-50/50 dark:hover:bg-white/5 hover:text-emerald-600 dark:hover:text-emerald-400',
+    color: 'emerald',
+    glowColor: 'rgba(16,185,129,0.3)',
   },
   {
     id: 'doctor',
-    label: 'Instructor',
+    label: 'portals.doctor',
     icon: Briefcase,
     path: '/doctor/login',
-    color: 'from-blue-500 to-cyan-400',
-    activeClass: 'bg-white dark:bg-[#1a1a1a] text-blue-600 dark:text-blue-400 shadow-sm border border-gray-200 dark:border-white/5',
-    hoverClass: 'hover:bg-gray-50/50 dark:hover:bg-white/5 hover:text-blue-600 dark:hover:text-blue-400',
+    color: 'violet',
+    glowColor: 'rgba(139,92,246,0.3)',
   },
   {
     id: 'admin',
-    label: 'Admin',
+    label: 'portals.admin',
     icon: Shield,
-    path: '/admin',
-    color: 'from-violet-500 to-purple-400',
-    activeClass: 'bg-white dark:bg-[#1a1a1a] text-violet-600 dark:text-violet-400 shadow-sm border border-gray-200 dark:border-white/5',
-    hoverClass: 'hover:bg-gray-50/50 dark:hover:bg-white/5 hover:text-violet-600 dark:hover:text-violet-400',
+    path: '/admin/login',
+    color: 'emerald',
+    glowColor: 'rgba(16,185,129,0.3)',
   },
 ];
 
 const PortalSwitcher = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { theme, toggleTheme } = useTheme();
+  const { toggleTheme, isDarkMode } = useTheme();
+  const { t, i18n } = useTranslation();
   const [hoveredId, setHoveredId] = useState(null);
 
   const getActivePortal = () => {
@@ -48,60 +48,77 @@ const PortalSwitcher = () => {
 
   const activeId = getActivePortal();
 
-  const handleSwitch = (portal) => {
-    if (portal.id !== activeId) {
-      navigate(portal.path);
-    }
+  const toggleLanguage = () => {
+    const newLang = i18n.language === 'ar' ? 'en' : 'ar';
+    i18n.changeLanguage(newLang);
   };
 
   return (
-    <div className="fixed top-4 sm:top-6 inset-x-0 flex justify-center z-[100] animate-fadeIn pointer-events-none px-4">
-      <div className="pointer-events-auto flex items-center justify-center gap-1 sm:gap-2 bg-white/50 dark:bg-[#0a0a0a]/50 backdrop-blur-xl border border-gray-200/50 dark:border-white/10 rounded-full p-1 sm:p-1.5 shadow-xl shadow-black/5 dark:shadow-white/5">
-        {portals.map((portal) => {
-          const Icon = portal.icon;
-          const isActive = portal.id === activeId;
-          const isHovered = portal.id === hoveredId;
+    <div className="fixed top-8 inset-x-0 flex justify-center z-[200] pointer-events-none px-4">
+      <motion.div 
+        initial={{ y: -50, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className={`pointer-events-auto flex items-center border rounded-full p-1.5 shadow-2xl transition-colors duration-700 ${isDarkMode ? 'bg-black/40 border-white/10 shadow-black/50' : 'bg-white/70 border-gray-100 shadow-gray-200/50 backdrop-blur-2xl'}`}
+      >
+        <button
+          onClick={toggleLanguage}
+          className={`px-4 py-3 rounded-full flex items-center gap-2 transition-all duration-300 ${isDarkMode ? 'text-white/40 hover:text-white hover:bg-white/5' : 'text-gray-400 hover:text-gray-900 hover:bg-gray-50'}`}
+        >
+          <Languages className="w-4 h-4" />
+          <span className="text-[10px] font-black uppercase tracking-widest">{i18n.language === 'ar' ? 'EN' : 'العربية'}</span>
+        </button>
 
-          return (
-            <button
-              key={portal.id}
-              onClick={() => handleSwitch(portal)}
-              onMouseEnter={() => setHoveredId(portal.id)}
-              onMouseLeave={() => setHoveredId(null)}
-              disabled={isActive}
-              className={`
-                relative flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-full text-[11px] sm:text-xs font-bold
-                transition-all duration-300 whitespace-nowrap
-                ${isActive
-                  ? `${portal.activeClass} cursor-default scale-100`
-                  : `border border-transparent text-gray-500 dark:text-gray-400 ${portal.hoverClass} cursor-pointer scale-[0.98] sm:scale-95 hover:scale-100`
-                }
-              `}
-              title={`Switch to ${portal.label} Portal`}
-            >
-              {isActive && (
-                <div className={`absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-gradient-to-r ${portal.color} blur-[1px]`} />
-              )}
-              
-              <Icon
-                className={`w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0 transition-transform duration-300 ${isHovered && !isActive ? 'scale-110' : ''}`}
-              />
+        <div className={`w-px h-6 mx-1 transition-colors ${isDarkMode ? 'bg-white/10' : 'bg-gray-100'}`} />
 
-              <span className="tracking-wide">{portal.label}</span>
-            </button>
-          );
-        })}
+        <div className="flex items-center gap-1 relative">
+          {portals.map((portal) => {
+            const Icon = portal.icon;
+            const isActive = portal.id === activeId;
+            
+            return (
+              <button
+                key={portal.id}
+                onClick={() => navigate(portal.path)}
+                onMouseEnter={() => setHoveredId(portal.id)}
+                onMouseLeave={() => setHoveredId(null)}
+                className={`
+                  relative flex items-center gap-2 px-6 py-2.5 rounded-full text-[11px] font-black uppercase tracking-widest
+                  transition-colors duration-500 z-10
+                  ${isActive 
+                    ? (isDarkMode ? 'text-white' : 'text-gray-900') 
+                    : (isDarkMode ? 'text-white/30 hover:text-white/70' : 'text-gray-400 hover:text-gray-900')}
+                `}
+              >
+                {isActive && (
+                  <motion.div
+                    layoutId="active-pill"
+                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                    className={`absolute inset-0 rounded-full -z-10 border transition-colors ${isDarkMode ? 'bg-white/10 border-white/10' : 'bg-gray-100 border-gray-200'}`}
+                    style={{ boxShadow: `0 0 25px ${portal.glowColor}` }}
+                  >
+                     <motion.div 
+                        layoutId="active-dot"
+                        className={`absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full shadow-[0_0_10px_rgba(255,255,255,0.8)] ${isDarkMode ? 'bg-white' : 'bg-gray-800'}`}
+                     />
+                  </motion.div>
+                )}
+                
+                <Icon className={`w-4 h-4 transition-transform duration-500 ${isActive ? 'scale-110' : 'scale-100 opacity-50'}`} />
+                <span className="hidden sm:inline">{t(portal.label)}</span>
+              </button>
+            );
+          })}
+        </div>
 
-        <div className="w-px h-6 bg-gray-200/50 dark:border-white/10 mx-1" />
+        <div className={`w-px h-6 mx-3 transition-colors ${isDarkMode ? 'bg-white/10' : 'bg-gray-100'}`} />
 
         <button
           onClick={toggleTheme}
-          className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-50/50 dark:hover:bg-white/5 transition-all duration-300"
-          title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
+          className={`p-3 rounded-full transition-all duration-300 ${isDarkMode ? 'text-white/40 hover:text-white hover:bg-white/5' : 'text-gray-400 hover:text-gray-900 hover:bg-gray-50'}`}
         >
-          {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
         </button>
-      </div>
+      </motion.div>
     </div>
   );
 };

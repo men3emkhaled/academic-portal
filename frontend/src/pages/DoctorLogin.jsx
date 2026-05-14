@@ -3,20 +3,29 @@ import { useNavigate } from 'react-router-dom';
 import { useDoctorAuth } from '../context/DoctorAuthContext';
 import api from '../services/api';
 import toast from 'react-hot-toast';
-import { GraduationCap, Lock, Mail, ChevronRight, Sun, Moon } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from 'react-i18next';
+import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import { Mail, Lock, ArrowRight, GraduationCap, Microscope, BookOpen } from 'lucide-react';
 
 const DoctorLogin = () => {
   const { token, login } = useDoctorAuth();
-  const { isDarkMode, toggleTheme } = useTheme();
+  const { isDarkMode } = useTheme();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [credentials, setCredentials] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
 
+  // 3D Tilt Values
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const springX = useSpring(x, { stiffness: 100, damping: 20 });
+  const springY = useSpring(y, { stiffness: 100, damping: 20 });
+  const rotateX = useTransform(springY, [-0.5, 0.5], ["7deg", "-7deg"]);
+  const rotateY = useTransform(springX, [-0.5, 0.5], ["-7deg", "7deg"]);
+
   useEffect(() => {
-    if (token) {
-      navigate('/doctor/dashboard', { replace: true });
-    }
+    if (token) navigate('/doctor/dashboard', { replace: true });
   }, [token, navigate]);
 
   const handleLogin = async (e) => {
@@ -25,114 +34,136 @@ const DoctorLogin = () => {
     try {
       const res = await api.post('/doctor/login', credentials);
       login(res.data.token, res.data.doctor);
-      toast.success('Welcome back, Inst. ' + res.data.doctor.name);
+      toast.success(t('auth.instructor_portal') + ' Authorized');
       navigate('/doctor/dashboard', { replace: true });
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Invalid credentials');
+      toast.error(t('auth.login_failed'));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen w-full flex bg-white dark:bg-[#0a0a0a] overflow-hidden font-sans text-gray-900 dark:text-white transition-colors duration-500 relative pt-[48px]">
-      
-
-      {/* LEFT PANEL: Branding (Matches Student style) */}
-      <div className="hidden lg:flex w-1/2 relative bg-gray-50 dark:bg-[#0a0a0a] items-center justify-center p-12 overflow-hidden border-r border-gray-200 dark:border-white/5 transition-colors duration-500">
-        <div className="absolute inset-0 z-0 opacity-60 dark:opacity-40">
-          <div className="absolute top-[-10%] left-[-10%] w-[40vw] h-[40vw] bg-violet-500/20 blur-[150px] rounded-full animate-[spin_20s_linear_infinite]"></div>
-          <div className="absolute bottom-[-10%] right-[-10%] w-[35vw] h-[35vw] bg-indigo-500/10 blur-[150px] rounded-full animate-pulse-slow"></div>
-        </div>
-
-        <div className="relative z-10 w-full max-w-lg flex flex-col gap-12 text-center items-center">
-          <div className="space-y-6 animate-fadeInUp">
-            <div className="relative group">
-              <div className="absolute -inset-8 bg-violet-500/10 blur-3xl rounded-full opacity-60"></div>
-              <div className="relative inline-flex items-center justify-center w-48 h-48 rounded-full bg-white dark:bg-white/5 border border-violet-500/20 overflow-hidden shadow-2xl">
-                <img src="/logo.png" alt="ZNU Logo" className="w-full h-full object-contain p-6" />
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <h1 className="text-5xl font-black text-gray-900 dark:text-white tracking-tighter leading-tight">
-                Instructor <br />
-                <span className="text-violet-500">Portal.</span>
-              </h1>
-              <p className="text-xs font-black uppercase tracking-[0.5em] text-violet-500/60 mt-2">Faculty Login</p>
-            </div>
-            
-            <p className="text-gray-600 dark:text-gray-400 text-lg leading-relaxed max-w-md mx-auto font-medium">
-              Welcome, Instructor! Login to manage your courses and students.
-            </p>
-          </div>
-        </div>
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className={`min-h-screen w-full flex overflow-hidden font-sans transition-colors duration-700 relative ${isDarkMode ? 'bg-[#010101] text-white' : 'bg-[#fafafa] text-gray-900'}`}
+    >
+      {/* Background Living Layer */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <motion.div 
+          layoutId="bg-glow-1"
+          animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
+          transition={{ duration: 14, repeat: Infinity }}
+          className={`absolute top-[-10%] right-[-5%] w-[60vw] h-[60vw] blur-[150px] rounded-full ${isDarkMode ? 'bg-violet-600/10' : 'bg-violet-600/5'}`}
+        />
+        <div className={`absolute inset-0 ${isDarkMode ? 'bg-[radial-gradient(circle_at_center,#ffffff02_1px,transparent_1px)]' : 'bg-[radial-gradient(circle_at_center,#00000003_1px,transparent_1px)]'} bg-[size:5rem_5rem]`}></div>
       </div>
 
-      {/* RIGHT PANEL: The Form (Matches Student style) */}
-      <div className="w-full lg:w-1/2 flex flex-col relative justify-center items-center p-6 sm:p-12 lg:p-20 bg-gray-50 dark:bg-[#0a0a0a]">
-        <div className="w-full max-w-md relative z-10 animate-fadeInUp">
-          <div className="mb-10 text-center lg:text-left">
-            <div className="lg:hidden inline-flex mb-6">
-              <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-white dark:bg-white/5 border border-violet-500/20 shadow-xl overflow-hidden">
-                <img src="/logo.png" alt="ZNU Logo" className="w-full h-full object-contain p-4" />
+      <div className="w-full flex relative z-10">
+        {/* LEFT PANEL: CENTERED FACULTY PRESTIGE */}
+        <motion.div 
+          layoutId="hero-panel"
+          className={`hidden lg:flex w-[50%] flex-col justify-center items-center text-center p-24 border-e transition-colors ${isDarkMode ? 'border-white/5 bg-black/20' : 'border-gray-100 bg-white/40'} backdrop-blur-3xl`}
+        >
+           <motion.div 
+             style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
+             onMouseMove={(e) => {
+               const rect = e.currentTarget.getBoundingClientRect();
+               x.set((e.clientX - rect.left) / rect.width - 0.5);
+               y.set((e.clientY - rect.top) / rect.height - 0.5);
+             }}
+             onMouseLeave={() => { x.set(0); y.set(0); }}
+             className="flex flex-col items-center space-y-16"
+           >
+              {/* MAGNIFIED LOGO - NO BACKGROUND */}
+              <motion.div layoutId="logo-container" className="relative w-max">
+                 <div className={`absolute -inset-20 blur-[100px] rounded-full ${isDarkMode ? 'bg-violet-600/20' : 'bg-violet-600/10'}`}></div>
+                 <motion.div 
+                   whileHover={{ scale: 1.05 }}
+                   className="relative w-56 h-56 flex items-center justify-center p-0"
+                 >
+                    <img src="/logo.png" className="w-full h-full object-contain drop-shadow-[0_0_30px_rgba(255,255,255,0.3)]" alt="ZNU" />
+                 </motion.div>
+              </motion.div>
+
+              <div className="space-y-6">
+                 <motion.h1 layoutId="portal-title" className="text-8xl font-black tracking-tighter leading-none">
+                    {t('auth.instructor_portal').split(' ')[0]} <br />
+                    <span className="text-violet-500 font-black">{t('auth.instructor_portal').split(' ')[1]}.</span>
+                 </motion.h1>
+                 <motion.p layoutId="portal-desc" className={`text-2xl font-medium transition-colors ${isDarkMode ? 'text-white/30' : 'text-gray-400'}`}>
+                    {t('auth.next_gen_node')}.
+                 </motion.p>
               </div>
-            </div>
-            <h2 className="text-4xl font-black text-gray-900 dark:text-white tracking-tight">Login</h2>
-            <p className="text-gray-500 mt-2 text-sm font-medium">Please enter your email and password.</p>
-          </div>
 
-          <form onSubmit={handleLogin} className="space-y-6">
-            <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500 pl-1">Email Address</label>
-              <div className="relative flex items-center bg-white dark:bg-[#111] border border-gray-200 dark:border-white/10 rounded-2xl overflow-hidden shadow-sm">
-                <div className="pl-5 pr-1 flex items-center justify-center shrink-0">
-                  <Mail className={`w-6 h-6 transition-all duration-500 ${isDarkMode ? 'text-white' : 'text-black'}`} />
-                </div>
-                <input
-                  type="email"
-                  value={credentials.email}
-                  onChange={(e) => setCredentials({ ...credentials, email: e.target.value })}
-                  className="w-full bg-transparent py-4 px-5 text-gray-900 dark:text-white font-bold text-xl focus:outline-none"
-                  placeholder="doctor@university.edu"
-                  required
-                />
+              <div className="flex gap-6">
+                 {[GraduationCap, Microscope, BookOpen].map((Icon, i) => (
+                    <div key={i} className={`w-16 h-16 rounded-2xl border flex items-center justify-center transition-all ${isDarkMode ? 'bg-white/[0.02] border-white/5 text-violet-500/40' : 'bg-white/60 border-gray-100 text-violet-600/60'}`}>
+                       <Icon className="w-7 h-7" />
+                    </div>
+                 ))}
               </div>
-            </div>
+           </motion.div>
+        </motion.div>
 
-            <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500 pl-1">Password</label>
-              <div className="relative flex items-center bg-white dark:bg-[#111] border border-gray-200 dark:border-white/10 rounded-2xl overflow-hidden shadow-sm">
-                <div className="pl-5 pr-1 flex items-center justify-center shrink-0">
-                  <Lock className={`w-6 h-6 transition-all duration-500 ${isDarkMode ? 'text-white' : 'text-black'}`} />
-                </div>
-                <input
-                  type="password"
-                  value={credentials.password}
-                  onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
-                  className="w-full bg-transparent py-4 px-5 text-gray-900 dark:text-white font-bold text-xl tracking-[0.3em] placeholder:tracking-normal focus:outline-none"
-                  placeholder="••••••••"
-                  required
-                />
+        {/* RIGHT PANEL: SECURE ACCESS */}
+        <motion.div 
+          layoutId="form-panel"
+          className={`flex-1 flex flex-col items-center justify-center p-8 lg:p-24 backdrop-blur-md ${isDarkMode ? 'bg-[#010101]/50' : 'bg-white/40'}`}
+        >
+           <div className="w-full max-w-sm space-y-12">
+              <div className="space-y-3 text-center lg:text-start">
+                 <div className="flex items-center justify-center lg:justify-start gap-2">
+                    <div className="w-2 h-2 rounded-full bg-violet-500 shadow-[0_0_10px_#8b5cf6]"></div>
+                    <span className="text-[10px] font-black uppercase tracking-[0.6em] text-violet-400">{t('auth.institutional_access')}</span>
+                 </div>
+                 <h2 className="text-5xl font-black uppercase tracking-tighter">{t('auth.sign_in')}.</h2>
               </div>
-            </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="relative w-full overflow-hidden bg-violet-600 dark:bg-violet-500 text-white dark:text-black font-extrabold text-lg py-4 rounded-2xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 shadow-xl disabled:opacity-50 group mt-4"
-            >
-              <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/30 dark:via-black/20 to-transparent skew-x-12"></div>
-              {loading ? 'Logging in...' : 'Login'}
-            </button>
-          </form>
+              <form onSubmit={handleLogin} className="space-y-8">
+                 <div className="space-y-4">
+                    <label className={`text-[10px] font-black uppercase tracking-widest ml-1 ${isDarkMode ? 'text-white/30' : 'text-gray-400'}`}>{t('auth.instructor_id')}</label>
+                    <div className={`relative flex items-center border rounded-[2rem] transition-all focus-within:ring-4 focus-within:ring-violet-500/10 ${isDarkMode ? 'bg-white/[0.02] border-white/10 focus-within:border-violet-500/50' : 'bg-gray-50 border-gray-100 focus-within:border-violet-500/50'}`}>
+                       <Mail className={`ms-7 w-6 h-6 ${isDarkMode ? 'text-white/20' : 'text-gray-300'}`} />
+                       <input 
+                         type="email"
+                         value={credentials.email}
+                         onChange={(e) => setCredentials({...credentials, email: e.target.value})}
+                         placeholder="staff@znu.edu"
+                         className="w-full bg-transparent py-6 px-8 text-xl font-bold outline-none"
+                       />
+                    </div>
+                 </div>
 
-          <div className="mt-12 pt-6 border-t border-gray-200 dark:border-white/5 text-center">
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Authorized Faculty Use Only</p>
-          </div>
-        </div>
+                 <div className="space-y-4">
+                    <label className={`text-[10px] font-black uppercase tracking-widest ml-1 ${isDarkMode ? 'text-white/30' : 'text-gray-400'}`}>{t('auth.access_key')}</label>
+                    <div className={`relative flex items-center border rounded-[2rem] transition-all focus-within:ring-4 focus-within:ring-violet-500/10 ${isDarkMode ? 'bg-white/[0.02] border-white/10 focus-within:border-violet-500/50' : 'bg-gray-50 border-gray-100 focus-within:border-violet-500/50'}`}>
+                       <Lock className={`ms-7 w-6 h-6 ${isDarkMode ? 'text-white/20' : 'text-gray-300'}`} />
+                       <input 
+                         type="password"
+                         value={credentials.password}
+                         onChange={(e) => setCredentials({...credentials, password: e.target.value})}
+                         placeholder="••••••••"
+                         className="w-full bg-transparent py-6 px-8 text-xl font-bold outline-none tracking-widest"
+                       />
+                    </div>
+                 </div>
+
+                 <motion.button 
+                   whileHover={{ scale: 1.02, y: -2 }}
+                   whileTap={{ scale: 0.98 }}
+                   className={`w-full font-black py-6 rounded-[2.5rem] flex items-center justify-center gap-4 text-xs uppercase tracking-[0.5em] shadow-2xl transition-all relative overflow-hidden group ${isDarkMode ? 'bg-violet-600 text-white' : 'bg-gray-900 text-white'}`}
+                 >
+                    <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                    {loading ? "..." : <>{t('auth.sign_in')} <ArrowRight className="w-5 h-5" /></>}
+                 </motion.button>
+              </form>
+           </div>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

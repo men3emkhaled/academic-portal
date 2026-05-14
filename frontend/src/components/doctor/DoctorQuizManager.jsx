@@ -1,422 +1,399 @@
 import React, { useState, useEffect } from 'react';
 import { useDoctorAuth } from '../../context/DoctorAuthContext';
 import toast from 'react-hot-toast';
-import { 
-  Award, Plus, Edit3, Trash2, Eye, EyeOff, 
-  FileQuestion, Users, Clock, Target, CheckCircle2, 
-  AlertCircle, ChevronRight, X, Save, BookOpen, Settings2,
-  FileText, ArrowRight, Layers, Layout, Info
+import { useTranslation } from 'react-i18next';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+    Plus, Edit3, Trash2, ListChecks, Timer, Zap,
+    BarChart3, ShieldCheck, Clock, Target, X, Microscope, Layout, FileText, Save
 } from 'lucide-react';
 import DoctorQuestionManager from './DoctorQuestionManager';
 
-const DoctorQuizManager = ({ courses }) => {
-  const { doctorApi } = useDoctorAuth();
-  const [quizzes, setQuizzes] = useState([]);
-  const [editingQuiz, setEditingQuiz] = useState(null);
-  const [selectedQuizForQuestions, setSelectedQuizForQuestions] = useState(null);
-  const [showFormModal, setShowFormModal] = useState(false);
-  
-  const [formData, setFormData] = useState({
-    course_id: '',
-    title: '',
-    description: '',
-    time_limit_minutes: 30,
-    passing_score: 50,
-    is_official: false
-  });
-  const [loading, setLoading] = useState(false);
+const DoctorQuizManager = () => {
+    const { doctorApi } = useDoctorAuth();
+    const { t } = useTranslation();
+    const [quizzes, setQuizzes] = useState([]);
+    const [courses, setCourses] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [showFormModal, setShowFormModal] = useState(false);
+    const [editingQuiz, setEditingQuiz] = useState(null);
+    const [selectedQuiz, setSelectedQuiz] = useState(null);
 
-  useEffect(() => {
-    fetchQuizzes();
-  }, []);
-
-  const fetchQuizzes = async () => {
-    try {
-      const res = await doctorApi('get', '/doctor/quizzes');
-      setQuizzes(res.data);
-    } catch (err) {
-      toast.error('Failed to load quizzes');
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!formData.course_id || !formData.title) {
-      return toast.error('Course and Title are required');
-    }
-
-    setLoading(true);
-    try {
-      if (editingQuiz) {
-        await doctorApi('put', `/doctor/quizzes/${editingQuiz.id}`, formData);
-        toast.success('Quiz updated');
-      } else {
-        await doctorApi('post', '/doctor/quizzes', formData);
-        toast.success('Quiz created');
-      }
-      resetForm();
-      fetchQuizzes();
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to save quiz');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDelete = async (id) => {
-    if (!window.confirm('Delete this quiz? All associated questions and attempts will be lost.')) return;
-    try {
-      await doctorApi('delete', `/doctor/quizzes/${id}`);
-      toast.success('Quiz deleted');
-      if (selectedQuizForQuestions && selectedQuizForQuestions.id === id) {
-        setSelectedQuizForQuestions(null);
-      }
-      fetchQuizzes();
-    } catch (err) {
-      toast.error('Failed to delete quiz');
-    }
-  };
-
-  const togglePublish = async (quiz) => {
-    try {
-      await doctorApi('patch', `/doctor/quizzes/${quiz.id}/publish`, {
-        is_published: !quiz.is_published
-      });
-      toast.success(`Quiz ${!quiz.is_published ? 'published' : 'unpublished'}`);
-      fetchQuizzes();
-    } catch (err) {
-      toast.error('Failed to update publish status');
-    }
-  };
-
-  const resetForm = () => {
-    setEditingQuiz(null);
-    setFormData({ course_id: '', title: '', description: '', time_limit_minutes: 30, passing_score: 50, is_official: false });
-    setShowFormModal(false);
-  };
-
-  const startEdit = (q) => {
-    setEditingQuiz(q);
-    setFormData({
-      course_id: q.course_id,
-      title: q.title,
-      description: q.description || '',
-      time_limit_minutes: q.time_limit_minutes,
-      passing_score: q.passing_score,
-      is_official: q.is_official
+    const [formData, setFormData] = useState({
+        course_id: '',
+        title: '',
+        description: '',
+        time_limit_minutes: 30,
+        passing_score: 50,
+        is_published: false,
+        is_official: false
     });
-    setShowFormModal(true);
-  };
 
-  if (selectedQuizForQuestions) {
-    return (
-      <DoctorQuestionManager 
-        quiz={selectedQuizForQuestions} 
-        onBack={() => setSelectedQuizForQuestions(null)} 
-      />
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    const fetchData = async () => {
+        try {
+            const [quizzesRes, coursesRes] = await Promise.all([
+                doctorApi('get', '/doctor/quizzes'),
+                doctorApi('get', '/doctor/courses')
+            ]);
+            setQuizzes(quizzesRes.data);
+            setCourses(coursesRes.data);
+        } catch (err) {
+            toast.error(t('common.error'));
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            if (editingQuiz) {
+                await doctorApi('put', `/doctor/quizzes/${editingQuiz.id}`, formData);
+                toast.success(t('doctor.quizzes.deleted_success').replace('deleted', 'updated')); // Temporary or add key
+            } else {
+                await doctorApi('post', '/doctor/quizzes', formData);
+                toast.success(t('doctor.quizzes.create_btn') + ' ' + t('common.success'));
+            }
+            resetForm();
+            fetchData();
+        } catch (err) {
+            toast.error(t('common.error'));
+        }
+    };
+
+    const handleDelete = async (id) => {
+        if (!window.confirm(t('doctor.quizzes.delete_confirm'))) return;
+        try {
+            await doctorApi('delete', `/doctor/quizzes/${id}`);
+            toast.success(t('doctor.quizzes.deleted_success'));
+            fetchData();
+        } catch (err) {
+            toast.error(t('common.error'));
+        }
+    };
+
+    const resetForm = () => {
+        setFormData({
+            course_id: '',
+            title: '',
+            description: '',
+            time_limit_minutes: 30,
+            passing_score: 50,
+            is_published: false,
+            is_official: false
+        });
+        setEditingQuiz(null);
+        setShowFormModal(false);
+    };
+
+    const startEdit = (quiz) => {
+        setEditingQuiz(quiz);
+        setFormData({
+            course_id: quiz.course_id,
+            title: quiz.title,
+            description: quiz.description || '',
+            time_limit_minutes: quiz.time_limit_minutes,
+            passing_score: quiz.passing_score,
+            is_published: quiz.is_published,
+            is_official: quiz.is_official
+        });
+        setShowFormModal(true);
+    };
+
+    if (loading) return (
+        <div className="flex items-center justify-center min-h-[60vh]">
+            <div className="w-16 h-16 border-4 border-violet-600/20 border-t-violet-600 rounded-full animate-spin"></div>
+        </div>
     );
-  }
 
-  return (
-    <div className="max-w-[1600px] mx-auto animate-fadeIn duration-700">
-      {/* Premium Header */}
-      <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-[#8b5cf6] via-[#7c3aed] to-[#6d28d9] p-8 md:p-12 mb-8 shadow-2xl shadow-purple-500/20">
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute top-[-10%] right-[-5%] w-64 h-64 bg-white rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-[-20%] left-[-10%] w-96 h-96 bg-purple-400 rounded-full blur-3xl"></div>
-        </div>
-        
-        <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
-          <div className="flex items-center gap-6">
-            <div className="w-16 h-16 md:w-20 md:h-20 rounded-3xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-inner">
-              <Award className="w-8 h-8 md:w-10 md:h-10 text-white" />
-            </div>
-            <div>
-              <h1 className="text-3xl md:text-5xl font-black text-white tracking-tight uppercase leading-none">Assessment</h1>
-              <div className="flex items-center gap-3 mt-3">
-                <span className="px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-white/90 text-[10px] font-black uppercase tracking-widest">Quiz Engine v2.0</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
-              </div>
-            </div>
-          </div>
+    return (
+        <div className="max-w-[1600px] mx-auto pb-20 px-4">
+            {!selectedQuiz ? (
+                <div className="space-y-12">
+                    {/* Header Section */}
+                    <div className="bg-white dark:bg-[#080808] border border-gray-100 dark:border-white/5 rounded-[3.5rem] p-10 shadow-sm">
+                        <div className="flex items-center gap-8 mb-12">
+                            <div className="w-20 h-20 rounded-3xl bg-violet-600 flex items-center justify-center shadow-2xl shadow-violet-600/30">
+                                <BarChart3 className="w-10 h-10 text-white" />
+                            </div>
+                            <div>
+                                <div className="flex items-center gap-3 mb-1">
+                                    <h2 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">{t('doctor.quizzes.title')}</h2>
+                                    <span className="px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-[9px] font-black text-violet-500 uppercase tracking-widest">{t('doctor.quizzes.management')}</span>
+                                </div>
+                                <p className="text-sm text-gray-400 font-bold uppercase tracking-widest flex items-center gap-2">
+                                    <Layout className="w-4 h-4" /> {t('doctor.quizzes.assessment_center')}
+                                </p>
+                            </div>
+                        </div>
 
-          <button 
-            onClick={() => setShowFormModal(true)}
-            className="group flex items-center gap-3 bg-white text-purple-600 px-8 py-5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all hover:scale-105 active:scale-95 shadow-xl shadow-black/10"
-          >
-            <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
-            Create New Quiz
-          </button>
-        </div>
-      </div>
-
-      {/* Quizzes Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
-        {quizzes.length === 0 ? (
-          <div className="col-span-full bg-white dark:bg-[#0a0a0a] border border-gray-100 dark:border-white/[0.03] rounded-[3rem] p-24 text-center shadow-sm">
-            <div className="w-32 h-32 rounded-[2.5rem] bg-gray-50 dark:bg-white/[0.02] flex items-center justify-center mx-auto mb-8 border border-gray-100 dark:border-white/5">
-              <FileText className="w-12 h-12 text-gray-300 dark:text-white/10" />
-            </div>
-            <h3 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-widest mb-4">No Assessments Active</h3>
-            <p className="text-sm text-gray-500 dark:text-slate-500 max-w-sm mx-auto font-medium mb-10">You haven't initiated any quizzes yet. Create your first assessment to begin tracking student performance.</p>
-            <button 
-              onClick={() => setShowFormModal(true)}
-              className="bg-purple-600 hover:bg-purple-700 text-white font-black px-10 py-5 rounded-2xl shadow-xl shadow-purple-600/20 flex items-center gap-3 transition-all active:scale-95 mx-auto uppercase text-xs tracking-widest"
-            >
-              <Plus className="w-5 h-5" />
-              Start First Quiz
-            </button>
-          </div>
-        ) : (
-          quizzes.map(quiz => (
-            <div 
-              key={quiz.id} 
-              className={`group relative bg-white dark:bg-[#0a0a0a] border transition-all duration-500 rounded-[2.5rem] overflow-hidden hover:shadow-2xl hover:shadow-purple-500/10 ${
-                quiz.is_published ? 'border-emerald-500/20' : 'border-gray-100 dark:border-white/5'
-              }`}
-            >
-              {/* Status Header */}
-              <div className="p-8 pb-0">
-                <div className="flex justify-between items-start mb-6">
-                  <div className="flex flex-wrap gap-2">
-                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-purple-600 bg-purple-50 dark:text-purple-400 dark:bg-purple-400/10 px-3 py-1.5 rounded-xl border border-purple-100 dark:border-purple-400/20">
-                      {quiz.course_name}
-                    </span>
-                    {quiz.is_official && (
-                      <span className="text-[9px] font-black uppercase tracking-[0.2em] text-rose-500 bg-rose-50 dark:text-rose-400 dark:bg-rose-400/10 px-3 py-1.5 rounded-xl border border-rose-100 dark:border-rose-400/20">
-                        Official Exam
-                      </span>
-                    )}
-                  </div>
-                  <div className={`px-3 py-1.5 rounded-xl border text-[9px] font-black uppercase tracking-[0.2em] flex items-center gap-2 ${
-                    quiz.is_published ? 'bg-emerald-50 border-emerald-100 text-emerald-600' : 'bg-gray-50 border-gray-100 text-gray-400'
-                  }`}>
-                    {quiz.is_published && <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></div>}
-                    {quiz.is_published ? 'Live' : 'Draft'}
-                  </div>
-                </div>
-                
-                <h4 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tight group-hover:text-purple-600 transition-colors line-clamp-1">{quiz.title}</h4>
-                <p className="text-sm text-gray-500 dark:text-slate-500 mt-3 line-clamp-2 font-medium h-10">
-                  {quiz.description || "No specific instructions provided for this assessment."}
-                </p>
-              </div>
-
-              <div className="p-8">
-                <div className="grid grid-cols-2 gap-4 mb-8">
-                  <div className="bg-gray-50 dark:bg-white/[0.02] rounded-2xl p-5 border border-gray-100 dark:border-white/5 group-hover:border-purple-500/20 transition-all">
-                    <div className="flex items-center gap-3 mb-2">
-                      <Clock className="w-4 h-4 text-purple-500" />
-                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Duration</p>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {[
+                                { label: t('doctor.quizzes.total'), value: quizzes.length, icon: FileText, color: 'text-violet-500', bg: 'bg-violet-500/10' },
+                                { label: t('doctor.quizzes.drafts'), value: quizzes.filter(q => !q.is_published).length, icon: Edit3, color: 'text-amber-500', bg: 'bg-amber-500/10' },
+                                { label: t('doctor.quizzes.live'), value: quizzes.filter(q => q.is_published).length, icon: Zap, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+                            ].map((stat, i) => (
+                                <div key={i} className="bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 p-6 rounded-[2rem] flex items-center gap-5">
+                                    <div className={`w-12 h-12 rounded-2xl ${stat.bg} flex items-center justify-center shadow-sm ${stat.color}`}>
+                                        <stat.icon className="w-6 h-6" />
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1">{stat.label}</p>
+                                        <p className="text-2xl font-black text-gray-900 dark:text-white">{stat.value}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     </div>
-                    <p className="text-lg font-black text-gray-900 dark:text-white leading-none">{quiz.time_limit_minutes} <span className="text-xs font-bold text-gray-400 uppercase">min</span></p>
-                  </div>
-                  <div className="bg-gray-50 dark:bg-white/[0.02] rounded-2xl p-5 border border-gray-100 dark:border-white/5 group-hover:border-emerald-500/20 transition-all">
-                    <div className="flex items-center gap-3 mb-2">
-                      <Target className="w-4 h-4 text-emerald-500" />
-                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Passing</p>
-                    </div>
-                    <p className="text-lg font-black text-gray-900 dark:text-white leading-none">{quiz.passing_score} <span className="text-xs font-bold text-gray-400 uppercase">%</span></p>
-                  </div>
-                </div>
 
-                <div className="flex items-center gap-3">
-                  <button 
-                    onClick={() => setSelectedQuizForQuestions(quiz)}
-                    className="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-black py-4 rounded-2xl transition-all flex items-center justify-center gap-3 shadow-lg shadow-purple-600/10 active:scale-95 text-[11px] uppercase tracking-widest"
-                  >
-                    <Layers className="w-4 h-4" />
-                    Manage Questions
-                  </button>
-                  
-                  <div className="flex gap-2">
-                    <button 
-                      onClick={() => togglePublish(quiz)} 
-                      className={`p-4 rounded-2xl border transition-all active:scale-90 ${
-                        quiz.is_published ? 'bg-amber-50 border-amber-100 text-amber-500' : 'bg-emerald-50 border-emerald-100 text-emerald-500'
-                      }`}
-                    >
-                      {quiz.is_published ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                    </button>
-                    <button 
-                      onClick={() => startEdit(quiz)}
-                      className="p-4 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-2xl text-gray-400 hover:text-purple-600 transition-all active:scale-90"
-                    >
-                      <Settings2 className="w-5 h-5" />
-                    </button>
-                    <button 
-                      onClick={() => handleDelete(quiz.id)}
-                      className="p-4 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-2xl text-rose-400 hover:bg-rose-50 transition-all active:scale-90"
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
-
-      {/* Spacious Premium Modal */}
-      {showFormModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 bg-black/40 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-white/10 w-full max-w-4xl rounded-[3rem] shadow-2xl overflow-hidden animate-slideUp flex flex-col max-h-[90vh]">
-             {/* Modal Header */}
-             <div className="p-8 md:p-10 border-b border-gray-100 dark:border-white/5 flex items-center justify-between">
-                <div className="flex items-center gap-5">
-                  <div className="w-12 h-12 rounded-2xl bg-purple-600 flex items-center justify-center shadow-lg shadow-purple-600/20">
-                    <Layout className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tight">{editingQuiz ? 'Edit Config' : 'Initialize Quiz'}</h3>
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">Configure assessment parameters</p>
-                  </div>
-                </div>
-                <button onClick={resetForm} className="w-12 h-12 rounded-2xl bg-gray-50 dark:bg-white/5 hover:bg-rose-50 hover:text-rose-500 flex items-center justify-center text-gray-400 transition-all duration-300">
-                   <X className="w-6 h-6" />
-                </button>
-             </div>
-             
-             {/* Modal Form */}
-             <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-8 md:p-10 space-y-10 custom-scrollbar">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                   {/* Left Column */}
-                   <div className="space-y-8">
-                      <div className="space-y-3">
-                         <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">Target Course</label>
-                         <div className="relative group">
-                            <select
-                              required
-                              value={formData.course_id}
-                              onChange={(e) => setFormData({ ...formData, course_id: e.target.value })}
-                              className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/5 rounded-2xl py-5 px-6 text-gray-900 dark:text-white focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500/50 outline-none transition-all font-bold appearance-none cursor-pointer"
+                    {/* Quiz Grid */}
+                    <div className="bg-white dark:bg-[#080808] border border-gray-100 dark:border-white/5 rounded-[3.5rem] p-10 shadow-sm">
+                        <div className="flex items-center justify-between mb-12">
+                            <h3 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter flex items-center gap-4">
+                                <div className="w-10 h-10 rounded-xl bg-violet-600 flex items-center justify-center shadow-lg shadow-violet-600/20">
+                                    <ListChecks className="w-5 h-5 text-white" />
+                                </div>
+                                {t('doctor.quizzes.list')}
+                            </h3>
+                            <motion.button
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                onClick={() => setShowFormModal(true)}
+                                className="bg-violet-600 hover:bg-violet-700 text-white px-8 py-4 rounded-2xl flex items-center gap-3 shadow-xl shadow-violet-600/20 transition-all text-xs font-black uppercase tracking-widest"
                             >
-                               <option value="" disabled>Select target course</option>
-                               {courses.map(c => (
-                                 <option key={c.id} value={c.id}>{c.name}</option>
-                               ))}
-                            </select>
-                            <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 rotate-90 pointer-events-none" />
-                         </div>
-                      </div>
+                                <Plus className="w-4 h-4" /> {t('doctor.quizzes.create')}
+                            </motion.button>
+                        </div>
 
-                      <div className="space-y-3">
-                         <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">Quiz Identifier</label>
-                         <input
-                           type="text"
-                           required
-                           value={formData.title}
-                           onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                           placeholder="e.g. Midterm Practice Exam"
-                           className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/5 rounded-2xl py-5 px-6 text-gray-900 dark:text-white focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500/50 outline-none transition-all font-bold"
-                         />
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-6">
-                         <div className="space-y-3">
-                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">Time Limit (min)</label>
-                            <div className="relative">
-                               <Clock className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-purple-500" />
-                               <input
-                                 type="number"
-                                 min="1"
-                                 required
-                                 value={formData.time_limit_minutes}
-                                 onChange={(e) => setFormData({ ...formData, time_limit_minutes: parseInt(e.target.value) })}
-                                 className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/5 rounded-2xl py-5 pl-14 pr-6 text-gray-900 dark:text-white focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500/50 outline-none transition-all font-bold"
-                               />
+                        {quizzes.length === 0 ? (
+                            <div className="text-center py-20 opacity-30">
+                                <Microscope className="w-20 h-20 mx-auto mb-6" />
+                                <p className="text-xl font-black uppercase tracking-widest">{t('doctor.quizzes.no_found')}</p>
                             </div>
-                         </div>
-                         <div className="space-y-3">
-                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">Pass Score (%)</label>
-                            <div className="relative">
-                               <Target className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500" />
-                               <input
-                                 type="number"
-                                 min="1"
-                                 max="100"
-                                 required
-                                 value={formData.passing_score}
-                                 onChange={(e) => setFormData({ ...formData, passing_score: parseInt(e.target.value) })}
-                                 className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/5 rounded-2xl py-5 pl-14 pr-6 text-gray-900 dark:text-white focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500/50 outline-none transition-all font-bold"
-                               />
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-8">
+                                {quizzes.map((quiz) => (
+                                    <motion.div
+                                        layout
+                                        key={quiz.id}
+                                        className="group bg-gray-50 dark:bg-white/[0.01] border border-gray-100 dark:border-white/5 rounded-[3rem] p-8 hover:border-violet-500/30 transition-all hover:bg-white dark:hover:bg-white/[0.02] hover:shadow-2xl hover:shadow-violet-500/5 relative overflow-hidden"
+                                    >
+                                        <div className="flex justify-between items-start mb-8">
+                                            <div className="px-4 py-2 rounded-xl bg-violet-500/5 border border-violet-500/10 text-[9px] font-black text-violet-500 uppercase tracking-widest">
+                                                {courses.find(c => c.id === quiz.course_id)?.name || 'Course'}
+                                            </div>
+                                            {quiz.is_official && (
+                                                <div className="px-4 py-2 rounded-xl bg-rose-500/5 border border-rose-500/10 text-[9px] font-black text-rose-500 uppercase tracking-widest">
+                                                    {t('doctor.quizzes.official')}
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <h4 className="text-2xl font-black text-gray-900 dark:text-white mb-4 line-clamp-1 uppercase tracking-tight">
+                                            {quiz.title}
+                                        </h4>
+                                        <p className="text-sm text-gray-400 font-semibold mb-8 line-clamp-2 h-10">
+                                            {quiz.description || t('doctor.quizzes.standard_desc')}
+                                        </p>
+
+                                        <div className="grid grid-cols-2 gap-4 mb-10">
+                                            <div className="p-5 rounded-3xl bg-white dark:bg-white/5 border border-gray-100 dark:border-white/5">
+                                                <div className="flex items-center gap-3 mb-2">
+                                                    <Clock className="w-4 h-4 text-violet-500" />
+                                                    <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">{t('common.time')}</span>
+                                                </div>
+                                                <p className="text-xl font-black text-gray-900 dark:text-white uppercase">
+                                                    {quiz.time_limit_minutes} <span className="text-xs font-bold text-gray-400">{t('quizzes.mins')}</span>
+                                                </p>
+                                            </div>
+                                            <div className="p-5 rounded-3xl bg-white dark:bg-white/5 border border-gray-100 dark:border-white/5">
+                                                <div className="flex items-center gap-3 mb-2">
+                                                    <Target className="w-4 h-4 text-emerald-500" />
+                                                    <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">{t('quizzes.pass')}</span>
+                                                </div>
+                                                <p className="text-xl font-black text-gray-900 dark:text-white uppercase">
+                                                    {quiz.passing_score}<span className="text-xs font-bold text-gray-400">%</span>
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex gap-3">
+                                            <button
+                                                onClick={() => setSelectedQuiz(quiz)}
+                                                className="flex-1 bg-violet-600 hover:bg-violet-700 text-white font-black py-5 rounded-2xl shadow-xl shadow-violet-600/10 transition-all text-[11px] uppercase tracking-widest flex items-center justify-center gap-3"
+                                            >
+                                                <ListChecks className="w-4 h-4" /> {t('doctor.quizzes.questions_btn')}
+                                            </button>
+                                            <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                                                <button onClick={() => startEdit(quiz)} className="w-12 h-12 bg-white dark:bg-white/5 hover:bg-violet-500 hover:text-white border border-gray-100 dark:border-white/10 rounded-xl flex items-center justify-center text-gray-400 transition-all">
+                                                    <Edit3 className="w-5 h-5" />
+                                                </button>
+                                                <button onClick={() => handleDelete(quiz.id)} className="w-12 h-12 bg-white dark:bg-white/5 hover:bg-rose-500 hover:text-white border border-gray-100 dark:border-white/10 rounded-xl flex items-center justify-center text-rose-400 transition-all">
+                                                    <Trash2 className="w-5 h-5" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                ))}
                             </div>
-                         </div>
-                      </div>
-                   </div>
-
-                   {/* Right Column */}
-                   <div className="space-y-8">
-                      <div className="space-y-3">
-                         <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">Description & Rules</label>
-                         <textarea
-                           value={formData.description}
-                           onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                           placeholder="Provide details for your students..."
-                           className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/5 rounded-3xl py-6 px-6 text-gray-900 dark:text-white focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500/50 outline-none transition-all font-medium min-h-[220px] resize-none"
-                         />
-                      </div>
-
-                      <div className="pt-2">
-                         <label className={`flex items-center gap-5 p-6 rounded-3xl border-2 transition-all cursor-pointer ${
-                           formData.is_official 
-                             ? 'bg-rose-500/5 border-rose-500/30' 
-                             : 'bg-gray-50 dark:bg-white/[0.03] border-transparent hover:border-gray-200 dark:hover:border-white/10'
-                         }`}>
-                           <div className="relative flex items-center">
-                             <input
-                               type="checkbox"
-                               checked={formData.is_official}
-                               onChange={(e) => setFormData({ ...formData, is_official: e.target.checked })}
-                               className="peer sr-only"
-                             />
-                             <div className="w-14 h-8 bg-gray-200 dark:bg-white/10 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-rose-500 shadow-inner"></div>
-                           </div>
-                           <div>
-                             <p className={`text-sm font-black uppercase tracking-tight ${formData.is_official ? 'text-rose-600' : 'text-gray-900 dark:text-white'}`}>Official Exam</p>
-                             <p className="text-[10px] text-gray-400 uppercase font-black tracking-widest mt-0.5">Strict Grading Rules</p>
-                           </div>
-                           <AlertCircle className={`w-5 h-5 ml-auto ${formData.is_official ? 'text-rose-500' : 'text-gray-300'}`} />
-                         </label>
-                      </div>
-                   </div>
+                        )}
+                    </div>
                 </div>
+            ) : (
+                <DoctorQuestionManager quiz={selectedQuiz} onBack={() => setSelectedQuiz(null)} />
+            )}
 
-                <div className="pt-6">
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full bg-purple-600 hover:bg-purple-700 text-white font-black py-6 rounded-[2.5rem] shadow-2xl shadow-purple-600/20 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-4 text-xs uppercase tracking-[0.2em]"
-                  >
-                    {loading ? (
-                      <div className="w-6 h-6 border-4 border-white/20 border-t-white rounded-full animate-spin"></div>
-                    ) : (
-                      <>
-                        <Save className="w-6 h-6" />
-                        <span>{editingQuiz ? 'Confirm Updates' : 'Initialize Quiz Engine'}</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-             </form>
-          </div>
+            {/* Form Modal */}
+            <AnimatePresence>
+                {showFormModal && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={resetForm}
+                            className="absolute inset-0 bg-gray-900/60 backdrop-blur-xl"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            className="relative w-full max-w-4xl bg-white dark:bg-[#0A0A0A] border border-gray-100 dark:border-white/10 rounded-[3rem] shadow-2xl overflow-hidden"
+                        >
+                            <div className="p-10">
+                                <div className="flex items-center justify-between mb-10">
+                                    <div className="flex items-center gap-5">
+                                        <div className="w-16 h-16 rounded-2xl bg-violet-600 flex items-center justify-center shadow-2xl shadow-violet-600/20">
+                                            <Edit3 className="w-8 h-8 text-white" />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">
+                                                {editingQuiz ? t('doctor.quizzes.edit') : t('doctor.quizzes.create')}
+                                            </h3>
+                                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">{t('doctor.quizzes.settings')}</p>
+                                        </div>
+                                    </div>
+                                    <button onClick={resetForm} className="w-14 h-14 rounded-2xl bg-gray-50 dark:bg-white/5 hover:bg-rose-500/10 hover:text-rose-500 flex items-center justify-center text-gray-400 transition-all">
+                                        <X className="w-6 h-6" />
+                                    </button>
+                                </div>
+
+                                <form onSubmit={handleSubmit} className="space-y-8">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                        <div className="space-y-3">
+                                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('doctor.quizzes.course_label')}</label>
+                                            <select
+                                                value={formData.course_id}
+                                                onChange={(e) => setFormData({ ...formData, course_id: e.target.value })}
+                                                className="w-full bg-gray-50 dark:bg-white/[0.05] border border-gray-100 dark:border-white/10 rounded-[1.5rem] py-5 px-6 text-gray-900 dark:text-white focus:ring-4 focus:ring-violet-500/10 outline-none transition-all font-black [color-scheme:dark]"
+                                                required
+                                            >
+                                                <option value="" className="dark:bg-[#0A0A0A]">{t('doctor.quizzes.course_label')}</option>
+                                                {courses.map(c => <option key={c.id} value={c.id} className="dark:bg-[#0A0A0A]">{c.name}</option>)}
+                                            </select>
+                                        </div>
+
+                                        <div className="space-y-3">
+                                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('doctor.quizzes.quiz_title_label')}</label>
+                                            <input
+                                                type="text"
+                                                required
+                                                value={formData.title}
+                                                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                                                placeholder="e.g. Midterm Exam"
+                                                className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/5 rounded-[1.5rem] py-5 px-6 text-gray-900 dark:text-white focus:ring-4 focus:ring-violet-500/10 outline-none transition-all font-black"
+                                            />
+                                        </div>
+
+                                        <div className="space-y-3">
+                                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('doctor.quizzes.time_limit_label')}</label>
+                                            <div className="relative">
+                                                <Clock className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-violet-500" />
+                                                <input
+                                                    type="number"
+                                                    required
+                                                    value={formData.time_limit_minutes}
+                                                    onChange={(e) => setFormData({ ...formData, time_limit_minutes: parseInt(e.target.value) })}
+                                                    className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/5 rounded-[1.5rem] py-5 pl-14 pr-6 text-gray-900 dark:text-white focus:ring-4 focus:ring-violet-500/10 outline-none transition-all font-black"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-3">
+                                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('doctor.quizzes.passing_score_label')}</label>
+                                            <div className="relative">
+                                                <Target className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500" />
+                                                <input
+                                                    type="number"
+                                                    required
+                                                    value={formData.passing_score}
+                                                    onChange={(e) => setFormData({ ...formData, passing_score: parseInt(e.target.value) })}
+                                                    className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/5 rounded-[1.5rem] py-5 pl-14 pr-6 text-gray-900 dark:text-white focus:ring-4 focus:ring-violet-500/10 outline-none transition-all font-black"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-3">
+                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('doctor.quizzes.desc_label')}</label>
+                                        <textarea
+                                            value={formData.description}
+                                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                            placeholder={t('doctor.quizzes.desc_placeholder')}
+                                            className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/5 rounded-[1.5rem] py-5 px-6 text-gray-900 dark:text-white focus:ring-4 focus:ring-violet-500/10 outline-none transition-all font-semibold min-h-[120px] resize-none"
+                                        />
+                                    </div>
+
+                                    <div className="bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 p-6 rounded-[2rem] flex items-center justify-between">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-12 h-12 rounded-2xl bg-white dark:bg-white/5 flex items-center justify-center shadow-sm">
+                                                <ShieldCheck className="w-6 h-6 text-rose-500" />
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tight">{t('doctor.quizzes.official_exam')}</p>
+                                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{t('doctor.quizzes.official_desc')}</p>
+                                            </div>
+                                        </div>
+                                        <label className="relative inline-flex items-center cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={formData.is_official}
+                                                onChange={(e) => setFormData({ ...formData, is_official: e.target.checked })}
+                                                className="sr-only peer"
+                                            />
+                                            <div className="w-14 h-8 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-white/10 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-violet-600 shadow-sm"></div>
+                                        </label>
+                                    </div>
+
+                                    <div className="flex gap-4 pt-4">
+                                        <motion.button
+                                            whileHover={{ scale: 1.02 }}
+                                            whileTap={{ scale: 0.98 }}
+                                            type="submit"
+                                            className="flex-1 bg-violet-600 hover:bg-violet-700 text-white font-black py-5 rounded-[1.5rem] shadow-xl shadow-violet-600/20 flex items-center justify-center gap-3 text-xs uppercase tracking-widest"
+                                        >
+                                            <Save className="w-4 h-4" /> {editingQuiz ? t('doctor.quizzes.update_btn') : t('doctor.quizzes.create_btn')}
+                                        </motion.button>
+                                        <button
+                                            type="button"
+                                            onClick={resetForm}
+                                            className="px-10 bg-gray-100 dark:bg-white/5 text-gray-400 font-black py-5 rounded-[1.5rem] hover:bg-rose-500/10 hover:text-rose-500 transition-all text-xs uppercase tracking-widest"
+                                        >
+                                            {t('common.cancel')}
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
-      )}
-
-      <style>{`
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { 
-          background: rgba(139, 92, 246, 0.2); 
-          border-radius: 10px; 
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { 
-          background: rgba(139, 92, 246, 0.4); 
-        }
-      `}</style>
-    </div>
-  );
+    );
 };
 
 export default DoctorQuizManager;

@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import { 
   Mail, Search, RefreshCw, AlertTriangle, User, ShieldCheck, 
   ChevronRight, Fingerprint, Sparkles, Activity, X, 
-  CheckCircle2, Globe, Shield, CreditCard
+  CheckCircle2, Globe, Shield, CreditCard, Zap, Link as LinkIcon
 } from 'lucide-react';
 
 const LinkedEmailsManager = () => {
+  const { t } = useTranslation();
   const [studentsWithEmail, setStudentsWithEmail] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -36,115 +39,150 @@ const LinkedEmailsManager = () => {
   );
 
   return (
-    <div className="animate-in fade-in duration-700 pb-10">
-      {/* Premium Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-12">
-        <div className="flex items-center gap-5">
-          <div className="w-16 h-16 bg-indigo-500/10 dark:bg-indigo-500/20 rounded-3xl flex items-center justify-center border border-indigo-500/20 shadow-inner group">
-            <Mail className="w-8 h-8 text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform" />
+    <div className="space-y-8 lg:space-y-10 animate-in fade-in duration-700 pb-10">
+      {/* Header Bento Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 flex items-center gap-6 bg-white/50 dark:bg-white/[0.02] backdrop-blur-md border border-gray-100 dark:border-white/5 p-8 rounded-[2.5rem] shadow-sm">
+          <div className="w-16 h-16 bg-indigo-500/10 dark:bg-indigo-500/20 rounded-2xl flex items-center justify-center border border-indigo-500/20 shadow-inner group transition-transform duration-500 hover:scale-110">
+            <Mail className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
           </div>
           <div>
-            <h2 className="text-4xl font-black text-gray-900 dark:text-white tracking-tighter">
-              Linked Accounts
+            <h2 className="text-2xl lg:text-3xl font-black text-gray-900 dark:text-white tracking-tight">
+              {t('admin.emails.title')}
             </h2>
-            <div className="flex items-center gap-3 mt-1.5">
-                <span className="text-gray-500 dark:text-gray-400 text-xs font-black uppercase tracking-[0.2em]">Student Identity Mapping</span>
-                <div className="w-1 h-1 bg-gray-300 dark:bg-gray-700 rounded-full"></div>
-                <span className="text-indigo-600 dark:text-indigo-400 text-[10px] font-black uppercase tracking-widest">{studentsWithEmail.length} Verified Emails</span>
-            </div>
+            <p className="text-gray-500 dark:text-slate-500 text-sm font-bold mt-1 uppercase tracking-widest">{t('admin.emails.description')}</p>
           </div>
         </div>
+        
+        <div className="bg-indigo-600 text-white p-8 rounded-[2.5rem] shadow-lg shadow-indigo-600/20 flex flex-col justify-between relative overflow-hidden group">
+          <div className="absolute inset-inline-end-0 top-0 w-32 h-32 bg-white/10 blur-[40px] rounded-full translate-x-1/2 -translate-y-1/2 group-hover:scale-150 transition-transform duration-700"></div>
+          <div className="flex justify-between items-start relative z-10">
+            <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center">
+              <Shield className="w-5 h-5" />
+            </div>
+            <span className="text-[10px] font-black uppercase tracking-widest bg-black/10 px-3 py-1 rounded-full">Identity Hub</span>
+          </div>
+          <div className="mt-4 relative z-10">
+            <p className="text-4xl font-black">{studentsWithEmail.length}</p>
+            <p className="text-[10px] font-black uppercase tracking-widest opacity-60 mt-1">{t('admin.emails.active_emails', { count: '' })}</p>
+          </div>
+        </div>
+      </div>
 
+      {/* Actions & Search Bar */}
+      <div className="flex flex-col lg:flex-row justify-between items-stretch gap-6">
+        <div className="relative flex-1 group">
+          <Search className="absolute inset-inline-start-6 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
+          <input 
+            type="text"
+            placeholder={t('admin.emails.search_placeholder')}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full bg-white dark:bg-white/[0.02] border border-gray-100 dark:border-white/10 rounded-[2rem] ps-16 pe-8 py-5 text-gray-900 dark:text-white font-black focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all shadow-inner uppercase tracking-widest text-[11px]"
+          />
+        </div>
+        
         <button 
           onClick={fetchEmails}
           disabled={loading}
-          className="px-8 py-4 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white font-black text-xs uppercase tracking-widest rounded-2xl shadow-sm hover:bg-gray-50 dark:hover:bg-white/10 transition-all active:scale-95 flex items-center gap-2"
+          className="flex items-center justify-center gap-3 bg-white dark:bg-white/[0.05] border border-gray-100 dark:border-white/10 text-gray-900 dark:text-white font-black py-4.5 px-10 rounded-[2rem] shadow-sm hover:bg-gray-50 dark:hover:bg-white/[0.08] active:scale-95 transition-all whitespace-nowrap group"
         >
-          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> Refresh Registry
+          <RefreshCw className={`w-5 h-5 group-hover:rotate-180 transition-transform duration-700 ${loading ? 'animate-spin text-indigo-500' : ''}`} /> 
+          <span className="uppercase tracking-widest text-xs">{t('admin.emails.refresh_button')}</span>
         </button>
       </div>
 
-      {/* Search Interface */}
-      <div className="relative mb-12 group">
-        <div className="absolute left-6 top-1/2 -translate-y-1/2 flex items-center gap-3 pointer-events-none">
-            <Search className="w-5 h-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
-            <div className="w-px h-4 bg-gray-200 dark:bg-white/10 group-focus-within:bg-indigo-500/50 transition-colors"></div>
-        </div>
-        <input 
-          type="text"
-          placeholder="Filter by name, student ID, or email address..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full bg-white/50 dark:bg-white/[0.03] border border-gray-200 dark:border-white/10 rounded-[2rem] pl-20 pr-8 py-5 text-gray-900 dark:text-white font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all placeholder:text-gray-400 dark:placeholder:text-gray-600"
-        />
-      </div>
-
-      {/* Main Grid */}
+      <AnimatePresence mode="wait">
       {loading ? (
-        <div className="flex flex-col items-center justify-center py-48 opacity-50">
-           <div className="w-16 h-16 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin mb-8"></div>
-           <p className="text-xs font-black uppercase tracking-[0.3em] text-gray-500">Syncing Identity Data...</p>
-        </div>
+        <motion.div 
+            key="loading"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="flex flex-col items-center justify-center py-48 opacity-50"
+        >
+           <Activity className="w-16 h-16 text-indigo-500 animate-spin mb-8" />
+           <p className="text-[11px] font-black uppercase tracking-[0.3em] text-gray-500">{t('admin.emails.loading')}</p>
+        </motion.div>
       ) : filteredStudents.length === 0 ? (
-        <div className="bg-white/50 dark:bg-white/[0.02] border-2 border-dashed border-gray-200 dark:border-white/10 rounded-[3rem] py-48 text-center flex flex-col items-center group transition-all duration-500 shadow-sm">
+        <motion.div 
+            key="empty"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white/50 dark:bg-white/[0.01] border-2 border-dashed border-gray-100 dark:border-white/5 rounded-[3rem] py-48 text-center flex flex-col items-center group transition-all duration-500 shadow-sm"
+        >
             <div className="w-24 h-24 bg-indigo-500/5 dark:bg-indigo-500/10 rounded-full flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-500">
-                <AlertTriangle className="w-12 h-12 text-indigo-400 opacity-50" />
+                <AlertTriangle className="w-12 h-12 text-indigo-400/30" />
             </div>
-            <h4 className="text-xl font-black uppercase tracking-[0.3em] text-gray-900 dark:text-white">Zero Results Detected</h4>
-            <p className="text-sm font-bold mt-4 tracking-widest text-gray-500">No linked student accounts match your current search.</p>
-        </div>
+            <h4 className="text-xl font-black uppercase tracking-[0.3em] text-gray-900 dark:text-white">{t('admin.emails.no_results')}</h4>
+            <p className="text-[10px] font-black mt-4 uppercase tracking-widest text-gray-400">{t('admin.emails.no_results_hint')}</p>
+        </motion.div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-          {filteredStudents.map(student => (
-            <div 
+        <motion.div 
+            key="grid"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8"
+        >
+          {filteredStudents.map((student, idx) => (
+            <motion.div 
               key={student.id} 
-              className="group relative bg-white/80 dark:bg-[#111]/80 backdrop-blur-xl border border-gray-100 dark:border-white/10 rounded-[2.5rem] p-10 transition-all duration-500 hover:border-indigo-500/40 hover:shadow-2xl hover:shadow-indigo-500/5"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.05 }}
+              className="group relative bg-white dark:bg-white/[0.01] backdrop-blur-xl border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-10 transition-all duration-500 hover:border-indigo-500/30 hover:shadow-2xl hover:shadow-indigo-500/10"
             >
-                <div className="flex items-center gap-5 mb-8">
-                  <div className="w-16 h-16 bg-indigo-500/10 rounded-2xl flex items-center justify-center border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 shadow-inner group-hover:bg-indigo-500 group-hover:text-white transition-all duration-500">
+                <div className="flex items-center gap-5 mb-8 relative z-10">
+                  <div className="w-16 h-16 bg-indigo-500/5 dark:bg-indigo-500/10 rounded-2xl flex items-center justify-center border border-indigo-500/10 text-indigo-600 dark:text-indigo-400 shadow-inner group-hover:bg-indigo-600 group-hover:text-white transition-all duration-700">
                     <User className="w-8 h-8" />
                   </div>
-                  <div>
-                    <h3 className="text-xl font-black text-gray-900 dark:text-white tracking-tight leading-tight group-hover:text-indigo-600 transition-colors">{student.name}</h3>
-                    <div className="flex items-center gap-2 mt-1">
-                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Level {student.level}</span>
-                        <div className="w-1 h-1 bg-gray-300 dark:bg-gray-700 rounded-full"></div>
-                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Section {student.section}</span>
+                  <div className="min-w-0">
+                    <h3 className="text-xl font-black text-gray-900 dark:text-white tracking-tight leading-tight group-hover:text-indigo-600 transition-colors uppercase truncate">{student.name}</h3>
+                    <div className="flex items-center gap-2 mt-1.5 overflow-hidden">
+                        <span className="text-[9px] font-black text-gray-400 dark:text-slate-600 uppercase tracking-widest whitespace-nowrap">{t('admin.emails.level', { num: student.level })}</span>
+                        <div className="w-1 h-1 bg-gray-200 dark:bg-slate-800 rounded-full shrink-0"></div>
+                        <span className="text-[9px] font-black text-gray-400 dark:text-slate-600 uppercase tracking-widest whitespace-nowrap">{t('admin.emails.section', { num: student.section })}</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="space-y-4">
-                   <div className="flex items-center justify-between bg-gray-50 dark:bg-black/40 border border-gray-100 dark:border-white/5 px-6 py-4 rounded-2xl group-hover:border-indigo-500/20 transition-all">
+                <div className="space-y-4 relative z-10">
+                   <div className="flex items-center justify-between bg-gray-50/50 dark:bg-black/30 border border-gray-100 dark:border-white/5 px-6 py-4 rounded-2xl group-hover:border-indigo-500/20 transition-all shadow-inner">
                       <div className="flex items-center gap-3">
-                        <Fingerprint className="w-4 h-4 text-gray-400" />
-                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Student ID</span>
+                        <Fingerprint className="w-4 h-4 text-gray-400 dark:text-slate-700" />
+                        <span className="text-[9px] font-black text-gray-400 dark:text-slate-600 uppercase tracking-widest">{t('admin.emails.student_id')}</span>
                       </div>
-                      <span className="text-xs font-mono font-black text-gray-900 dark:text-white tracking-widest">{student.id}</span>
+                      <span className="text-xs font-black text-gray-900 dark:text-white tracking-[0.2em]">{student.id}</span>
                    </div>
                    
-                   <div className="flex items-center justify-between bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/10 dark:border-emerald-500/20 px-6 py-4 rounded-2xl group-hover:border-emerald-500/30 transition-all">
+                   <div className="flex items-center justify-between bg-emerald-500/5 dark:bg-emerald-500/[0.02] border border-emerald-500/10 dark:border-white/5 px-6 py-4 rounded-2xl group-hover:border-emerald-500/30 transition-all shadow-inner">
                       <div className="flex items-center gap-3">
-                        <Mail className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                        <span className="text-[10px] font-black text-emerald-600/60 dark:text-emerald-400/60 uppercase tracking-widest">Email</span>
+                        <Mail className="w-4 h-4 text-emerald-500" />
+                        <span className="text-[9px] font-black text-emerald-500/60 uppercase tracking-widest">{t('admin.emails.email_label')}</span>
                       </div>
-                      <span className="text-xs font-bold text-emerald-700 dark:text-emerald-300 truncate max-w-[140px]">{student.email}</span>
+                      <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400/80 truncate max-w-[150px]">{student.email}</span>
                    </div>
                 </div>
 
-                <div className="mt-10 pt-6 border-t border-gray-50 dark:border-white/5 flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-emerald-500">
-                        <ShieldCheck className="w-4 h-4" />
-                        <span className="text-[9px] font-black uppercase tracking-[0.2em]">Active Account</span>
+                <div className="mt-10 pt-8 border-t border-gray-100 dark:border-white/5 flex items-center justify-between relative z-10">
+                    <div className="flex items-center gap-2.5">
+                        <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
+                        <span className="text-[9px] font-black uppercase tracking-[0.3em] text-emerald-600 dark:text-emerald-400">{t('admin.emails.active_account')}</span>
                     </div>
-                    <div className="w-8 h-8 rounded-full border border-gray-100 dark:border-white/10 flex items-center justify-center text-gray-300 dark:text-gray-700 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-all">
-                        <ChevronRight className="w-4 h-4" />
+                    <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/10 flex items-center justify-center text-gray-300 dark:text-slate-800 group-hover:text-indigo-500 group-hover:border-indigo-500/30 group-hover:bg-white dark:group-hover:bg-white/5 transition-all shadow-sm">
+                        <ChevronRight className="w-5 h-5 transition-transform group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5" />
                     </div>
                 </div>
-            </div>
+
+                {/* Subtle Identity Glyph */}
+                <div className="absolute inset-inline-end-10 bottom-10 opacity-0 group-hover:opacity-5 transition-opacity duration-1000 pointer-events-none">
+                    <Fingerprint className="w-24 h-24 text-indigo-500" />
+                </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       )}
+      </AnimatePresence>
     </div>
   );
 };

@@ -2,12 +2,17 @@ import React, { useState, useRef } from 'react';
 import { useDoctorAuth } from '../../context/DoctorAuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import toast from 'react-hot-toast';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   User, Mail, Phone, Book, Shield, Moon, Sun, 
-  Camera, Save, Lock, Bell, CheckCircle2, AlertCircle, Loader2
+  Camera, Save, Lock, Bell, CheckCircle2, AlertCircle, Loader2,
+  Settings as SettingsIcon, Layout, Palette, Zap, Globe, ShieldCheck,
+  Building2, GraduationCap, Sparkles, Languages
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const DoctorSettings = () => {
+  const { t, i18n } = useTranslation();
   const { doctor, doctorApi, login, token } = useDoctorAuth();
   const { isDarkMode, toggleTheme } = useTheme();
   const fileInputRef = useRef(null);
@@ -35,10 +40,10 @@ const DoctorSettings = () => {
     setLoading(true);
     try {
       const res = await doctorApi('put', '/doctor/profile', profileData);
-      login(token, res.data); // Update context with new doctor data
-      toast.success('Profile updated successfully');
+      login(token, res.data);
+      toast.success('Profile updated');
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to update profile');
+      toast.error('Update failed');
     } finally {
       setLoading(false);
     }
@@ -47,14 +52,6 @@ const DoctorSettings = () => {
   const handleAvatarUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
-    if (!file.type.startsWith('image/')) {
-        return toast.error('Please select an image file');
-    }
-
-    if (file.size > 2 * 1024 * 1024) {
-        return toast.error('Image size must be less than 2MB');
-    }
 
     setUploadingAvatar(true);
     const formData = new FormData();
@@ -66,15 +63,11 @@ const DoctorSettings = () => {
         });
         const newAvatarUrl = res.data.avatar_url;
         setProfileData(prev => ({ ...prev, avatar_url: newAvatarUrl }));
-        
-        // Update context
         const updatedDoctor = { ...doctor, avatar_url: newAvatarUrl };
         login(token, updatedDoctor);
-        
-        toast.success('Profile picture updated!');
+        toast.success('Picture updated');
     } catch (err) {
-        console.error('Upload error:', err);
-        toast.error('Failed to upload image');
+        toast.error('Upload failed');
     } finally {
         setUploadingAvatar(false);
     }
@@ -83,7 +76,7 @@ const DoctorSettings = () => {
   const handlePasswordChange = async (e) => {
     e.preventDefault();
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      return toast.error('Passwords do not match');
+      return toast.error('Passwords mismatch');
     }
     setLoading(true);
     try {
@@ -91,325 +84,305 @@ const DoctorSettings = () => {
         currentPassword: passwordData.currentPassword,
         newPassword: passwordData.newPassword
       });
-      toast.success('Password changed successfully');
+      toast.success('Security updated');
       setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to change password');
+      toast.error('Failed to change');
     } finally {
       setLoading(false);
     }
   };
 
   const SECTIONS = [
-    { id: 'profile', label: 'Profile Info', icon: User },
-    { id: 'security', label: 'Security', icon: Shield },
-    { id: 'appearance', label: 'Appearance', icon: isDarkMode ? Moon : Sun },
-    { id: 'notifications', label: 'Notifications', icon: Bell },
+    { id: 'profile', label: t('settings.profile'), icon: User, color: 'text-violet-500', bg: 'bg-violet-500/10' },
+    { id: 'security', label: t('settings.security'), icon: Shield, color: 'text-amber-500', bg: 'bg-amber-500/10' },
+    { id: 'appearance', label: t('settings.appearance'), icon: Palette, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+    { id: 'notifications', label: t('settings.notifications'), icon: Bell, color: 'text-rose-500', bg: 'bg-rose-500/10' },
   ];
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 animate-fadeIn pb-20 lg:pb-0">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div>
-          <h2 className="text-3xl font-black text-doctor-text tracking-tight mb-2">Settings</h2>
-          <p className="text-doctor-text-muted font-medium">Manage your account preferences and security settings.</p>
-        </div>
+    <div className="max-w-[1400px] mx-auto pb-20 space-y-10 px-4">
+      {/* Header Hub */}
+      <div className="bg-white dark:bg-[#080808] border border-gray-100 dark:border-white/5 rounded-[3.5rem] p-10 shadow-sm">
+          <div className="flex items-center gap-8">
+              <div className="w-20 h-20 rounded-3xl bg-violet-600 flex items-center justify-center shadow-2xl shadow-violet-600/30">
+                  <SettingsIcon className="w-10 h-10 text-white" />
+              </div>
+              <div>
+                  <div className="flex items-center gap-3 mb-1">
+                      <h2 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">{t('settings.title')}</h2>
+                      <span className="px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-[9px] font-black text-violet-500 uppercase tracking-widest">{t('sidebar.menu')}</span>
+                  </div>
+                  <p className="text-sm text-gray-400 font-bold uppercase tracking-widest flex items-center gap-2">
+                      <Zap className="w-4 h-4" /> {t('settings.desc')}
+                  </p>
+              </div>
+          </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-8">
-        {/* Navigation Sidebar */}
-        <div className="lg:w-64 flex flex-row lg:flex-col gap-2 overflow-x-auto pb-4 lg:pb-0 hidden-scrollbar">
-          {SECTIONS.map((section) => {
-            const Icon = section.icon;
-            const isActive = activeSection === section.id;
-            return (
-              <button
-                key={section.id}
-                onClick={() => setActiveSection(section.id)}
-                className={`flex items-center gap-3 px-6 py-4 rounded-2xl font-bold transition-all whitespace-nowrap ${
-                  isActive 
-                    ? 'bg-doctor-primary text-white shadow-lg shadow-doctor-primary/20' 
-                    : 'text-doctor-text-muted hover:text-doctor-text hover:bg-doctor-text/5'
-                }`}
-              >
-                <Icon className="w-5 h-5" />
-                <span>{section.label}</span>
-              </button>
-            );
-          })}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        {/* Navigation Rail */}
+        <div className="lg:col-span-3 space-y-4">
+            {SECTIONS.map((section) => {
+                const Icon = section.icon;
+                const isActive = activeSection === section.id;
+                return (
+                    <motion.button
+                        key={section.id}
+                        whileHover={{ x: 5 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => setActiveSection(section.id)}
+                        className={`w-full flex items-center gap-4 px-8 py-5 rounded-[2rem] font-black transition-all text-[11px] uppercase tracking-widest border text-start ${
+                            isActive 
+                                ? 'bg-white dark:bg-white/5 text-violet-600 dark:text-white border-gray-100 dark:border-white/10 shadow-xl shadow-black/5' 
+                                : 'text-gray-400 border-transparent hover:bg-gray-50 dark:hover:bg-white/[0.02]'
+                        }`}
+                    >
+                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${isActive ? section.bg + ' ' + section.color : 'bg-gray-100 dark:bg-white/5 text-gray-400'}`}>
+                            <Icon className="w-4 h-4" />
+                        </div>
+                        <span>{section.label}</span>
+                    </motion.button>
+                );
+            })}
         </div>
 
-        {/* Content Area */}
-        <div className="flex-1 bg-doctor-card border border-white/[0.03] rounded-[2.5rem] p-8 lg:p-12 relative overflow-hidden shadow-2xl">
-           {/* Background Decoration */}
-           <div className="absolute top-0 right-0 w-64 h-64 bg-doctor-primary/5 blur-[100px] rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
-
-           {activeSection === 'profile' && (
-             <div className="space-y-8 relative z-10">
-                <div className="flex flex-col md:flex-row gap-8 items-center mb-10">
-                   <div className="relative group">
-                      <div className="w-32 h-32 rounded-[2.5rem] bg-gradient-to-br from-doctor-primary to-doctor-secondary p-[3px] shadow-2xl relative overflow-hidden">
-                         <div className="w-full h-full rounded-[2.2rem] bg-doctor-sidebar flex items-center justify-center overflow-hidden">
-                            <img 
-                              src={profileData.avatar_url || `https://ui-avatars.com/api/?name=${doctor?.name}&background=8b5cf6&color=fff&size=256`} 
-                              alt="Avatar" 
-                              className={`w-full h-full object-cover transition-opacity ${uploadingAvatar ? 'opacity-30' : 'opacity-100'}`}
-                            />
-                         </div>
-                         {uploadingAvatar && (
-                             <div className="absolute inset-0 flex items-center justify-center">
-                                 <Loader2 className="w-8 h-8 text-white animate-spin" />
-                             </div>
-                         )}
-                      </div>
-                      <input 
-                        type="file" 
-                        ref={fileInputRef}
-                        className="hidden" 
-                        accept="image/*"
-                        onChange={handleAvatarUpload}
-                      />
-                      <button 
-                        type="button"
-                        disabled={uploadingAvatar}
-                        className="absolute bottom-0 right-0 w-10 h-10 bg-doctor-primary text-white rounded-2xl flex items-center justify-center shadow-lg hover:scale-110 transition-all border-4 border-doctor-card disabled:opacity-50"
-                        onClick={() => fileInputRef.current.click()}
-                      >
-                         <Camera className="w-5 h-5" />
-                      </button>
-                   </div>
-                   <div className="text-center md:text-left">
-                      <h4 className="text-2xl font-black text-doctor-text mb-1">{doctor?.name}</h4>
-                      <p className="text-doctor-text-muted font-bold uppercase tracking-widest text-xs">{doctor?.department || 'Senior Instructor'}</p>
-                   </div>
-                </div>
-
-                <form onSubmit={handleProfileUpdate} className="space-y-8">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                        <label className="text-xs font-black text-doctor-text-muted uppercase tracking-widest ml-1 flex items-center gap-2">
-                            <User className="w-3 h-3" /> Full Name
-                        </label>
-                        <input 
-                            type="text" 
-                            value={profileData.name}
-                            onChange={(e) => setProfileData({...profileData, name: e.target.value})}
-                            className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-white/10 rounded-2xl py-4 px-6 text-gray-900 dark:text-white focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <label className="text-xs font-black text-doctor-text-muted uppercase tracking-widest ml-1 flex items-center gap-2">
-                            <Mail className="w-3 h-3" /> Email Address
-                        </label>
-                        <input 
-                            type="email" 
-                            value={profileData.email}
-                            onChange={(e) => setProfileData({...profileData, email: e.target.value})}
-                            className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-white/10 rounded-2xl py-4 px-6 text-gray-900 dark:text-white focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <label className="text-xs font-black text-doctor-text-muted uppercase tracking-widest ml-1 flex items-center gap-2">
-                            <Phone className="w-3 h-3" /> Phone Number
-                        </label>
-                        <input 
-                            type="text" 
-                            value={profileData.phone}
-                            placeholder="+20 123 456 7890"
-                            onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
-                            className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-white/10 rounded-2xl py-4 px-6 text-gray-900 dark:text-white focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <label className="text-xs font-black text-doctor-text-muted uppercase tracking-widest ml-1 flex items-center gap-2">
-                            <Book className="w-3 h-3" /> Department
-                        </label>
-                        <input 
-                            type="text" 
-                            value={doctor?.department || ''}
-                            disabled
-                            className="w-full bg-doctor-text/5 border border-doctor-text/5 rounded-2xl py-4 px-6 text-doctor-text-muted transition-all font-medium cursor-not-allowed"
-                        />
-                    </div>
-                    </div>
-
-                    <div className="space-y-2">
-                    <label className="text-xs font-black text-doctor-text-muted uppercase tracking-widest ml-1">Professional Bio</label>
-                    <textarea 
-                        rows="4"
-                        value={profileData.bio}
-                        onChange={(e) => setProfileData({...profileData, bio: e.target.value})}
-                        placeholder="Tell us about your academic background..."
-                        className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-white/10 rounded-2xl py-4 px-6 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-doctor-primary/50 transition-all font-medium resize-none"
-                    />
-                    </div>
-
-                    <button 
-                    type="submit"
-                    disabled={loading}
-                    className="bg-doctor-primary hover:bg-doctor-primary/90 text-white font-black px-10 py-5 rounded-[2rem] shadow-xl shadow-doctor-primary/30 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-3"
-                    >
-                    {loading ? (
-                        <Loader2 className="w-6 h-6 text-white animate-spin" />
-                    ) : (
-                        <>
-                        <Save className="w-5 h-5" />
-                        <span>Save Profile Changes</span>
-                        </>
-                    )}
-                    </button>
-                </form>
-             </div>
-           )}
-
-           {activeSection === 'security' && (
-             <form onSubmit={handlePasswordChange} className="space-y-8 relative z-10 max-w-xl">
-                <div className="flex items-center gap-4 mb-8">
-                   <div className="w-14 h-14 rounded-2xl bg-amber-500/10 flex items-center justify-center">
-                      <Shield className="w-7 h-7 text-amber-500" />
-                   </div>
-                   <div>
-                      <h4 className="text-xl font-black text-doctor-text">Password & Security</h4>
-                      <p className="text-doctor-text-muted text-sm font-medium">Update your password to keep your account safe.</p>
-                   </div>
-                </div>
-
-                <div className="space-y-6">
-                   <div className="space-y-2">
-                      <label className="text-xs font-black text-doctor-text-muted uppercase tracking-widest ml-1">Current Password</label>
-                      <input 
-                        type="password" 
-                        required
-                        value={passwordData.currentPassword}
-                        onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
-                        className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-white/10 rounded-2xl py-4 px-6 text-gray-900 dark:text-white focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
-                      />
-                   </div>
-                   <div className="space-y-2">
-                      <label className="text-xs font-black text-doctor-text-muted uppercase tracking-widest ml-1">New Password</label>
-                      <input 
-                        type="password" 
-                        required
-                        value={passwordData.newPassword}
-                        onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
-                        className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-white/10 rounded-2xl py-4 px-6 text-gray-900 dark:text-white focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
-                      />
-                   </div>
-                   <div className="space-y-2">
-                      <label className="text-xs font-black text-doctor-text-muted uppercase tracking-widest ml-1">Confirm New Password</label>
-                      <input 
-                        type="password" 
-                        required
-                        value={passwordData.confirmPassword}
-                        onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
-                        className="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-white/10 rounded-2xl py-4 px-6 text-gray-900 dark:text-white focus:outline-none focus:border-doctor-primary/50 transition-all font-medium"
-                      />
-                   </div>
-                </div>
-
-                <button 
-                  type="submit"
-                  disabled={loading}
-                  className="w-full bg-amber-500 hover:bg-amber-600 text-white font-black py-5 rounded-[2rem] shadow-xl shadow-amber-500/30 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-3"
-                >
-                  {loading ? (
-                    <Loader2 className="w-6 h-6 text-white animate-spin" />
-                  ) : (
-                    <>
-                      <Lock className="w-5 h-5" />
-                      <span>Update Password</span>
-                    </>
-                  )}
-                </button>
-             </form>
-           )}
-
-           {activeSection === 'appearance' && (
-             <div className="space-y-8 relative z-10">
-                <div className="flex items-center gap-4 mb-8">
-                   <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 flex items-center justify-center">
-                      <Sun className="w-7 h-7 text-indigo-500" />
-                   </div>
-                   <div>
-                      <h4 className="text-xl font-black text-doctor-text">Appearance Settings</h4>
-                      <p className="text-doctor-text-muted text-sm font-medium">Customize how the portal looks on your device.</p>
-                   </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                   <button 
-                     onClick={() => !isDarkMode && toggleTheme()}
-                     className={`p-6 rounded-3xl border transition-all text-left group relative ${
-                       isDarkMode ? 'bg-doctor-primary/10 border-doctor-primary/30' : 'bg-doctor-text/5 border-white/[0.03] hover:border-doctor-text/10 shadow-sm'
-                     }`}
-                   >
-                      <div className={`w-12 h-12 rounded-2xl mb-4 flex items-center justify-center transition-all ${
-                        isDarkMode ? 'bg-doctor-primary text-white' : 'bg-doctor-text/10 text-doctor-text-muted'
-                      }`}>
-                         <Moon className="w-6 h-6" />
-                      </div>
-                      <h5 className="font-bold text-doctor-text mb-1">Dark Mode</h5>
-                      <p className="text-xs text-doctor-text-muted">Easier on the eyes in low-light environments.</p>
-                      {isDarkMode && <div className="absolute top-6 right-6 w-3 h-3 rounded-full bg-doctor-primary shadow-[0_0_10px_rgba(139,92,246,0.8)]" />}
-                   </button>
-
-                   <button 
-                     onClick={() => isDarkMode && toggleTheme()}
-                     className={`p-6 rounded-3xl border transition-all text-left group relative ${
-                       !isDarkMode ? 'bg-indigo-500/10 border-indigo-500/30 shadow-sm shadow-indigo-500/10' : 'bg-doctor-text/5 border-white/[0.03] hover:border-doctor-text/10'
-                     }`}
-                   >
-                      <div className={`w-12 h-12 rounded-2xl mb-4 flex items-center justify-center transition-all ${
-                        !isDarkMode ? 'bg-indigo-500 text-white' : 'bg-doctor-text/10 text-doctor-text-muted'
-                      }`}>
-                         <Sun className="w-6 h-6" />
-                      </div>
-                      <h5 className="font-bold text-doctor-text mb-1">Light Mode</h5>
-                      <p className="text-xs text-doctor-text-muted">Traditional clean look with high contrast.</p>
-                      {!isDarkMode && <div className="absolute top-6 right-6 w-3 h-3 rounded-full bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.8)]" />}
-                   </button>
-                </div>
-             </div>
-           )}
-
-           {activeSection === 'notifications' && (
-             <div className="space-y-8 relative z-10">
-                <div className="flex items-center gap-4 mb-8">
-                   <div className="w-14 h-14 rounded-2xl bg-rose-500/10 flex items-center justify-center">
-                      <Bell className="w-7 h-7 text-rose-500" />
-                   </div>
-                   <div>
-                      <h4 className="text-xl font-black text-doctor-text">Notification Settings</h4>
-                      <p className="text-doctor-text-muted text-sm font-medium">Choose what updates you want to receive.</p>
-                   </div>
-                </div>
-
-                <div className="space-y-4">
-                   {[
-                     { id: 'email_tasks', label: 'Email for new tasks', desc: 'Get an email whenever an admin assigns a task.' },
-                     { id: 'push_submissions', label: 'Student Submissions', desc: 'Push notification when a student submits an assignment.' },
-                     { id: 'email_announcements', label: 'Portal Announcements', desc: 'Receive major portal updates and news.' },
-                   ].map((item) => (
-                     <div key={item.id} className="flex items-center justify-between p-6 rounded-3xl bg-doctor-text/5 border border-white/[0.03]">
-                        <div className="flex-1 pr-4">
-                           <h5 className="font-bold text-doctor-text mb-1">{item.label}</h5>
-                           <p className="text-xs text-doctor-text-muted">{item.desc}</p>
+        {/* Content Bento */}
+        <div className="lg:col-span-9">
+            <motion.div 
+                key={activeSection}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white dark:bg-[#080808] border border-gray-100 dark:border-white/5 rounded-[4rem] p-12 shadow-sm relative overflow-hidden min-h-[700px]"
+            >
+                {/* Profile Section */}
+                {activeSection === 'profile' && (
+                    <div className="space-y-12">
+                        <div className="flex flex-col md:flex-row gap-10 items-center">
+                            <div className="relative group">
+                                <div className="w-40 h-40 rounded-[3rem] bg-gradient-to-br from-violet-600 to-fuchsia-600 p-1.5 shadow-2xl relative overflow-hidden">
+                                    <div className="w-full h-full rounded-[2.8rem] bg-white dark:bg-[#0A0A0A] flex items-center justify-center overflow-hidden">
+                                        <img 
+                                            src={profileData.avatar_url || `https://ui-avatars.com/api/?name=${doctor?.name}&background=8b5cf6&color=fff&size=256`} 
+                                            alt="Avatar" 
+                                            className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-110 ${uploadingAvatar ? 'opacity-30' : 'opacity-100'}`}
+                                        />
+                                    </div>
+                                    {uploadingAvatar && (
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                            <Loader2 className="w-10 h-10 text-white animate-spin" />
+                                        </div>
+                                    )}
+                                </div>
+                                <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleAvatarUpload} />
+                                <motion.button 
+                                    whileHover={{ scale: 1.1 }}
+                                    whileTap={{ scale: 0.9 }}
+                                    onClick={() => fileInputRef.current.click()}
+                                    className="absolute bottom-2 end-2 w-12 h-12 bg-violet-600 text-white rounded-2xl flex items-center justify-center shadow-2xl border-4 border-white dark:border-[#080808]"
+                                >
+                                    <Camera className="w-5 h-5" />
+                                </motion.button>
+                            </div>
+                            <div className="text-center md:text-start">
+                                <h4 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-2">{doctor?.name}</h4>
+                                <div className="flex flex-wrap justify-center md:justify-start gap-3">
+                                    <span className="px-4 py-1.5 rounded-xl bg-violet-500/5 border border-violet-500/10 text-[9px] font-black text-violet-500 uppercase tracking-widest flex items-center gap-2">
+                                        <Building2 className="w-3 h-3" /> {doctor?.department || 'Faculty Member'}
+                                    </span>
+                                    <span className="px-4 py-1.5 rounded-xl bg-emerald-500/5 border border-emerald-500/10 text-[9px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-2">
+                                        <ShieldCheck className="w-3 h-3" /> Verified Instructor
+                                    </span>
+                                </div>
+                            </div>
                         </div>
-                        <div className="w-14 h-8 bg-doctor-text/10 rounded-full relative p-1 cursor-pointer hover:bg-doctor-text/20 transition-all">
-                           <div className="w-6 h-6 bg-white rounded-full shadow-sm"></div>
-                        </div>
-                     </div>
-                   ))}
-                </div>
 
-                <div className="bg-rose-500/10 border border-rose-500/20 p-6 rounded-3xl flex items-start gap-4 mt-8">
-                   <AlertCircle className="w-6 h-6 text-rose-500 flex-shrink-0 mt-0.5" />
-                   <p className="text-sm text-rose-200 font-medium leading-relaxed">
-                      Push notifications are currently disabled in your browser settings. Please enable them to receive real-time updates.
-                   </p>
-                </div>
-             </div>
-           )}
+                        <form onSubmit={handleProfileUpdate} className="space-y-10">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                {[
+                                    { label: 'Full Name', icon: User, value: profileData.name, key: 'name' },
+                                    { label: 'Email Address', icon: Mail, value: profileData.email, key: 'email' },
+                                    { label: 'Phone Number', icon: Phone, value: profileData.phone, key: 'phone', placeholder: '+20 1XX XXX XXXX' },
+                                    { label: 'Instructor ID', icon: GraduationCap, value: doctor?.id, disabled: true },
+                                ].map((field, i) => (
+                                    <div key={i} className="space-y-3">
+                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ms-1 flex items-center gap-2">
+                                            <field.icon className="w-3 h-3 text-violet-500" /> {field.label}
+                                        </label>
+                                        <input 
+                                            type="text" 
+                                            value={field.value}
+                                            disabled={field.disabled}
+                                            placeholder={field.placeholder}
+                                            onChange={(e) => !field.disabled && setProfileData({...profileData, [field.key]: e.target.value})}
+                                            className={`w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/10 rounded-[1.5rem] py-5 px-6 text-gray-900 dark:text-white focus:ring-4 focus:ring-violet-500/10 outline-none transition-all font-black ${field.disabled ? 'opacity-40 cursor-not-allowed' : ''}`}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="space-y-3">
+                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ms-1">Professional Bio</label>
+                                <textarea 
+                                    rows="4"
+                                    value={profileData.bio}
+                                    onChange={(e) => setProfileData({...profileData, bio: e.target.value})}
+                                    placeholder="Brief introduction..."
+                                    className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/10 rounded-[1.5rem] py-5 px-6 text-gray-900 dark:text-white focus:ring-4 focus:ring-violet-500/10 outline-none transition-all font-semibold resize-none"
+                                />
+                            </div>
+
+                            <motion.button 
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                type="submit"
+                                disabled={loading}
+                                className="bg-violet-600 hover:bg-violet-700 text-white font-black px-12 py-5 rounded-[1.8rem] shadow-2xl shadow-violet-600/30 flex items-center justify-center gap-3 text-xs uppercase tracking-widest disabled:opacity-50"
+                            >
+                                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Save className="w-4 h-4" /> Update Profile</>}
+                            </motion.button>
+                        </form>
+                    </div>
+                )}
+
+                {/* Security Section */}
+                {activeSection === 'security' && (
+                    <div className="space-y-12 max-w-xl">
+                        <div className="flex items-center gap-6">
+                            <div className="w-16 h-16 rounded-2xl bg-amber-500/10 flex items-center justify-center shadow-inner">
+                                <Shield className="w-8 h-8 text-amber-500" />
+                            </div>
+                            <div>
+                                <h4 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">Security Protocol</h4>
+                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">Manage your access keys</p>
+                            </div>
+                        </div>
+
+                        <form onSubmit={handlePasswordChange} className="space-y-8">
+                            {[
+                                { label: 'Current Access Key', key: 'currentPassword' },
+                                { label: 'New Access Key', key: 'newPassword' },
+                                { label: 'Confirm New Key', key: 'confirmPassword' },
+                            ].map((f, i) => (
+                                <div key={i} className="space-y-3">
+                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ms-1">{f.label}</label>
+                                    <input 
+                                        type="password" 
+                                        required
+                                        value={passwordData[f.key]}
+                                        onChange={(e) => setPasswordData({...passwordData, [f.key]: e.target.value})}
+                                        className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/10 rounded-[1.5rem] py-5 px-6 text-gray-900 dark:text-white focus:ring-4 focus:ring-amber-500/10 outline-none transition-all font-black"
+                                    />
+                                </div>
+                            ))}
+
+                            <motion.button 
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                type="submit"
+                                disabled={loading}
+                                className="w-full bg-amber-500 hover:bg-amber-600 text-white font-black py-5 rounded-[1.8rem] shadow-2xl shadow-amber-500/30 flex items-center justify-center gap-3 text-xs uppercase tracking-widest"
+                            >
+                                <Lock className="w-4 h-4" /> Change Access Key
+                            </motion.button>
+                        </form>
+                    </div>
+                )}
+
+                {/* Appearance Section */}
+                {activeSection === 'appearance' && (
+                    <div className="space-y-12">
+                        <div className="flex items-center gap-6">
+                            <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 flex items-center justify-center">
+                                <Palette className="w-8 h-8 text-emerald-500" />
+                            </div>
+                            <div>
+                                <h4 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">Look & Feel</h4>
+                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">Interface Customization</p>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <button 
+                                onClick={() => !isDarkMode && toggleTheme()}
+                                className={`group p-8 rounded-[2.5rem] border transition-all text-start relative overflow-hidden ${isDarkMode ? 'bg-violet-600 border-violet-600 shadow-2xl shadow-violet-600/20' : 'bg-gray-50 dark:bg-white/5 border-gray-100 dark:border-white/10 hover:border-violet-500/30'}`}
+                            >
+                                <div className={`w-12 h-12 rounded-2xl mb-6 flex items-center justify-center transition-all ${isDarkMode ? 'bg-white/20 text-white' : 'bg-white dark:bg-white/10 text-gray-400 group-hover:text-violet-500'}`}>
+                                    <Moon className="w-6 h-6" />
+                                </div>
+                                <h5 className={`text-lg font-black uppercase tracking-tight mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900 dark:text-white'}`}>Obsidian Dark</h5>
+                                <p className={`text-[10px] font-bold ${isDarkMode ? 'text-white/60' : 'text-gray-400'}`}>Premium dark interface for focus.</p>
+                                {isDarkMode && <Sparkles className="absolute top-4 end-4 w-4 h-4 text-white/40" />}
+                            </button>
+
+                            <button 
+                                onClick={() => isDarkMode && toggleTheme()}
+                                className={`group p-8 rounded-[2.5rem] border transition-all text-start relative overflow-hidden ${!isDarkMode ? 'bg-indigo-600 border-indigo-600 shadow-2xl shadow-indigo-600/20' : 'bg-gray-50 dark:bg-white/5 border-gray-100 dark:border-white/10 hover:border-indigo-500/30'}`}
+                            >
+                                <div className={`w-12 h-12 rounded-2xl mb-6 flex items-center justify-center transition-all ${!isDarkMode ? 'bg-white/20 text-white' : 'bg-white dark:bg-white/10 text-gray-400 group-hover:text-indigo-500'}`}>
+                                    <Sun className="w-6 h-6" />
+                                </div>
+                                <h5 className={`text-lg font-black uppercase tracking-tight mb-2 ${!isDarkMode ? 'text-white' : 'text-gray-900 dark:text-white'}`}>Crystal Light</h5>
+                                <p className={`text-[10px] font-bold ${!isDarkMode ? 'text-white/60' : 'text-gray-400'}`}>Clean and bright high-contrast view.</p>
+                                {!isDarkMode && <Sparkles className="absolute top-4 end-4 w-4 h-4 text-white/40" />}
+                            </button>
+
+                            {/* Language Selector */}
+                            <button 
+                                onClick={() => {
+                                    const newLang = i18n.language === 'ar' ? 'en' : 'ar';
+                                    i18n.changeLanguage(newLang);
+                                    toast.success(t('settings.update_success'));
+                                }}
+                                className="group p-8 rounded-[2.5rem] border transition-all text-start relative overflow-hidden bg-primary/10 border-primary/20 hover:bg-primary/20"
+                            >
+                                <div className="w-12 h-12 rounded-2xl mb-6 bg-primary/20 text-primary flex items-center justify-center">
+                                    <Languages className="w-6 h-6" />
+                                </div>
+                                <h5 className="text-lg font-black uppercase tracking-tight mb-2 text-primary">
+                                    {i18n.language === 'ar' ? 'English' : 'العربية'}
+                                </h5>
+                                <p className="text-[10px] font-bold text-primary/60">Switch system language.</p>
+                                <Sparkles className="absolute top-4 end-4 w-4 h-4 text-primary/40" />
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* Alerts Section */}
+                {activeSection === 'notifications' && (
+                    <div className="space-y-12">
+                        <div className="flex items-center gap-6">
+                            <div className="w-16 h-16 rounded-2xl bg-rose-500/10 flex items-center justify-center">
+                                <Bell className="w-8 h-8 text-rose-500" />
+                            </div>
+                            <div>
+                                <h4 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">Notification Alerts</h4>
+                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">Stay updated with the portal</p>
+                            </div>
+                        </div>
+
+                        <div className="space-y-4">
+                            {[
+                                { id: 'email_tasks', label: 'Task Assignments', desc: 'Email when admins assign new tasks.' },
+                                { id: 'push_submissions', label: 'Student Uploads', desc: 'Alert when students submit work.' },
+                                { id: 'email_announcements', label: 'System News', desc: 'Receive portal updates and announcements.' },
+                            ].map((item) => (
+                                <div key={item.id} className="flex items-center justify-between p-8 rounded-[2.5rem] bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 group hover:border-rose-500/20 transition-all">
+                                    <div className="flex-1 pe-10">
+                                        <h5 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tight mb-1">{item.label}</h5>
+                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{item.desc}</p>
+                                    </div>
+                                    <label className="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" className="sr-only peer" defaultChecked />
+                                        <div className="w-14 h-8 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-white/10 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-rose-500 shadow-sm"></div>
+                                    </label>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+            </motion.div>
         </div>
       </div>
     </div>

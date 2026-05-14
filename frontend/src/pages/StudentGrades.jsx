@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useStudentAuth } from '../context/StudentAuthContext';
 import { useStudentData } from '../context/StudentDataContext';
 import { useNavigate } from 'react-router-dom';
@@ -9,6 +10,7 @@ import Sidebar from '../components/Sidebar';
 const StudentGrades = () => {
   const { student, logout } = useStudentAuth();
   const { gradesData, loadingGrades } = useStudentData();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
 
   const grades = gradesData.grades;
@@ -24,7 +26,7 @@ const StudentGrades = () => {
   const handleLogout = () => {
     logout();
     navigate('/student/login');
-    toast.success('Logged out successfully');
+    toast.success(t('sidebar.logout') + ' ' + t('auth.success'));
   };
 
   const getGradeColor = (score, maxScore) => {
@@ -47,17 +49,17 @@ const StudentGrades = () => {
     const total = (grade.midterm_score || 0) + (grade.practical_score || 0) + (grade.oral_score || 0);
     if (midtermExists && practicalExists && oralExists) {
       const percentage = (total / grade.max_score) * 100;
-      return percentage >= 50 ? 'Passing' : 'Failing';
+      return percentage >= 50 ? t('grades.passing') : t('grades.failing');
     }
-    return 'Pending';
+    return t('grades.pending');
   };
 
   const getStatusUI = (status) => {
-    if (status === 'Passing') return {
+    if (status === t('grades.passing')) return {
       bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', text: 'text-emerald-600 dark:text-emerald-400',
       glow: 'from-emerald-500/20', icon: <CheckCircle2 className="w-4 h-4" />
     };
-    if (status === 'Failing') return {
+    if (status === t('grades.failing')) return {
       bg: 'bg-rose-500/10', border: 'border-rose-500/20', text: 'text-rose-600 dark:text-rose-400',
       glow: 'from-rose-500/20', icon: <AlertCircle className="w-4 h-4" />
     };
@@ -74,7 +76,7 @@ const StudentGrades = () => {
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/10 blur-[120px] rounded-full animate-pulse-slow"></div>
         <div className="relative z-10 flex flex-col items-center">
           <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-          <p className="mt-4 text-gray-500 dark:text-gray-400 font-bold text-xs tracking-wide">Loading Grades...</p>
+          <p className="mt-4 text-gray-500 dark:text-gray-400 font-bold text-xs tracking-wide">{t('common.loading')}</p>
         </div>
       </div>
     );
@@ -109,7 +111,7 @@ const StudentGrades = () => {
         </svg>
         <div className="absolute bottom-6 flex flex-col items-center">
           <span className="text-5xl font-black text-gray-900 dark:text-white drop-shadow-sm">{percentage}%</span>
-          <span className="text-xs font-bold text-primary uppercase tracking-widest mt-1">Overall</span>
+          <span className="text-xs font-bold text-primary uppercase tracking-widest mt-1">{t('grades.overall')}</span>
         </div>
       </div>
     );
@@ -125,16 +127,16 @@ const StudentGrades = () => {
 
       <Sidebar activePage="grades" onLogout={handleLogout} />
 
-      <div className="md:ml-64 pb-24 md:pb-12 relative z-10">
+      <div className="md:ps-96 pb-24 md:pb-12 relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
 
-          <div className="flex items-center gap-4 mb-2">
+          <div className="flex items-center gap-4 mb-2 text-start">
             <div className="bg-primary/10 dark:bg-primary/20 p-3 rounded-2xl border border-primary/20 shadow-sm">
               <BarChart3 className="w-8 h-8 text-primary" />
             </div>
             <div>
-              <h1 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white tracking-tight">Academic Performance</h1>
-              <p className="text-gray-500 dark:text-gray-400 font-semibold mt-1">Detailed breakdown of your grades and standing.</p>
+              <h1 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white tracking-tight">{t('grades.title')}</h1>
+              <p className="text-gray-500 dark:text-gray-400 font-semibold mt-1">{t('grades.desc')}</p>
             </div>
           </div>
 
@@ -147,10 +149,10 @@ const StudentGrades = () => {
 
                 <div className="w-full flex justify-between items-start absolute top-8 px-8">
                   <h2 className="text-xl font-black text-gray-900 dark:text-white flex items-center gap-2">
-                    <Target className="w-5 h-5 text-primary" /> Current Standing
+                    <Target className="w-5 h-5 text-primary" /> {t('grades.standing')}
                   </h2>
                   <div className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border border-emerald-500/20">
-                    Active Term
+                    {t('grades.active_term')}
                   </div>
                 </div>
 
@@ -161,12 +163,12 @@ const StudentGrades = () => {
 
               {/* Smaller Stat Widgets (Stacked) */}
               <div className="flex flex-col gap-6">
-                <div className="bg-white/80 dark:bg-[#111]/80 backdrop-blur-2xl rounded-[2rem] border border-gray-200 dark:border-white/10 p-6 shadow-sm hover:border-primary/30 transition-colors flex items-center gap-5 group">
+                <div className="bg-white/80 dark:bg-[#111]/80 backdrop-blur-2xl rounded-[2rem] border border-gray-200 dark:border-white/10 p-6 shadow-sm hover:border-primary/30 transition-colors flex items-center gap-5 group text-start">
                   <div className="w-14 h-14 rounded-2xl bg-primary/10 dark:bg-white/5 flex items-center justify-center text-primary group-hover:scale-110 transition-transform shadow-inner">
                     <Award className="w-7 h-7" />
                   </div>
                   <div>
-                    <p className="text-gray-500 dark:text-gray-400 text-xs font-bold uppercase tracking-widest mb-1">Total Score</p>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs font-bold uppercase tracking-widest mb-1">{t('grades.total_score')}</p>
                     <h3 className="text-2xl font-black text-gray-900 dark:text-white">
                       {formatScore(summary.totalEarned || 0)}
                       <span className="text-sm text-gray-400 font-semibold ml-1">/ {formatScore(summary.totalPossible || 0)}</span>
@@ -174,26 +176,26 @@ const StudentGrades = () => {
                   </div>
                 </div>
 
-                <div className="bg-white/80 dark:bg-[#111]/80 backdrop-blur-2xl rounded-[2rem] border border-gray-200 dark:border-white/10 p-6 shadow-sm hover:border-emerald-500/30 transition-colors flex items-center gap-5 group">
+                <div className="bg-white/80 dark:bg-[#111]/80 backdrop-blur-2xl rounded-[2rem] border border-gray-200 dark:border-white/10 p-6 shadow-sm hover:border-emerald-500/30 transition-colors flex items-center gap-5 group text-start">
                   <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 dark:bg-white/5 flex items-center justify-center text-emerald-500 group-hover:scale-110 transition-transform shadow-inner">
                     <CheckCircle2 className="w-7 h-7" />
                   </div>
                   <div>
-                    <p className="text-gray-500 dark:text-gray-400 text-xs font-bold uppercase tracking-widest mb-1">Passed</p>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs font-bold uppercase tracking-widest mb-1">{t('grades.passed')}</p>
                     <h3 className="text-2xl font-black text-gray-900 dark:text-white">
-                      {summary.coursesPassed || 0} <span className="text-sm text-gray-400 font-semibold ml-1">courses</span>
+                      {summary.coursesPassed || 0} <span className="text-sm text-gray-400 font-semibold ml-1">{t('grades.courses')}</span>
                     </h3>
                   </div>
                 </div>
 
-                <div className="bg-white/80 dark:bg-[#111]/80 backdrop-blur-2xl rounded-[2rem] border border-gray-200 dark:border-white/10 p-6 shadow-sm hover:border-blue-500/30 transition-colors flex items-center gap-5 group">
+                <div className="bg-white/80 dark:bg-[#111]/80 backdrop-blur-2xl rounded-[2rem] border border-gray-200 dark:border-white/10 p-6 shadow-sm hover:border-blue-500/30 transition-colors flex items-center gap-5 group text-start">
                   <div className="w-14 h-14 rounded-2xl bg-blue-500/10 dark:bg-white/5 flex items-center justify-center text-blue-500 group-hover:scale-110 transition-transform shadow-inner">
                     <BookOpen className="w-7 h-7" />
                   </div>
                   <div>
-                    <p className="text-gray-500 dark:text-gray-400 text-xs font-bold uppercase tracking-widest mb-1">Enrolled</p>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs font-bold uppercase tracking-widest mb-1">{t('grades.enrolled')}</p>
                     <h3 className="text-2xl font-black text-gray-900 dark:text-white">
-                      {summary.totalCourses || grades.length} <span className="text-sm text-gray-400 font-semibold ml-1">total</span>
+                      {summary.totalCourses || grades.length} <span className="text-sm text-gray-400 font-semibold ml-1">{t('grades.overall')}</span>
                     </h3>
                   </div>
                 </div>
@@ -203,12 +205,12 @@ const StudentGrades = () => {
 
           {/* COURSES GRID */}
           <div className="mt-12">
-            <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-6">Course Breakdown</h2>
+            <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-6 text-start">{t('grades.breakdown')}</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {grades.length === 0 ? (
                 <div className="col-span-full py-20 bg-white/50 dark:bg-white/5 backdrop-blur-xl rounded-[2rem] border-2 border-dashed border-gray-300 dark:border-white/10 text-center shadow-sm">
-                  <p className="text-gray-500 dark:text-gray-400 text-xl font-bold">No enrolled courses found.</p>
+                  <p className="text-gray-500 dark:text-gray-400 text-xl font-bold">{t('dashboard.no_courses')}</p>
                 </div>
               ) : (
                 grades.map((grade, idx) => {
@@ -217,7 +219,7 @@ const StudentGrades = () => {
                   const ui = getStatusUI(status);
 
                   return (
-                    <div key={idx} className="relative overflow-hidden group bg-white/90 dark:bg-[#111]/90 backdrop-blur-xl border border-gray-200 dark:border-white/10 rounded-[2rem] p-6 sm:p-8 hover:shadow-xl hover:-translate-y-2 transition-all duration-500 flex flex-col">
+                    <div key={idx} className="relative overflow-hidden group bg-white/90 dark:bg-[#111]/90 backdrop-blur-xl border border-gray-200 dark:border-white/10 rounded-[2rem] p-6 sm:p-8 hover:shadow-xl hover:-translate-y-2 transition-all duration-500 flex flex-col text-start">
                       {/* Dynamic Background Glow */}
                       <div className={`absolute -right-20 -top-20 w-64 h-64 bg-gradient-to-br ${ui.glow} to-transparent opacity-20 dark:opacity-40 rounded-full blur-[60px] group-hover:opacity-50 transition-opacity pointer-events-none`}></div>
 
@@ -233,19 +235,19 @@ const StudentGrades = () => {
                         {/* Embossed Inner Scores Grid */}
                         <div className="grid grid-cols-3 gap-3 mb-6">
                           <div className="bg-gray-100/50 dark:bg-black/30 border border-gray-200/50 dark:border-white/5 rounded-2xl p-4 flex flex-col items-center justify-center shadow-inner group-hover:bg-white dark:group-hover:bg-white/5 transition-colors">
-                            <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1">Mid</span>
+                            <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1">{t('grades.midterm')}</span>
                             <span className={`text-xl font-black ${getGradeColor(grade.midterm_score, grade.midterm_max)}`}>
                               {formatScore(grade.midterm_score)}
                             </span>
                           </div>
                           <div className="bg-gray-100/50 dark:bg-black/30 border border-gray-200/50 dark:border-white/5 rounded-2xl p-4 flex flex-col items-center justify-center shadow-inner group-hover:bg-white dark:group-hover:bg-white/5 transition-colors">
-                            <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1">Prac</span>
+                            <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1">{t('grades.practical')}</span>
                             <span className={`text-xl font-black ${getGradeColor(grade.practical_score, grade.practical_max)}`}>
                               {formatScore(grade.practical_score)}
                             </span>
                           </div>
                           <div className="bg-gray-100/50 dark:bg-black/30 border border-gray-200/50 dark:border-white/5 rounded-2xl p-4 flex flex-col items-center justify-center shadow-inner group-hover:bg-white dark:group-hover:bg-white/5 transition-colors">
-                            <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1">Oral</span>
+                            <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1">{t('grades.oral')}</span>
                             <span className={`text-xl font-black ${getGradeColor(grade.oral_score, grade.oral_max)}`}>
                               {formatScore(grade.oral_score)}
                             </span>
@@ -255,7 +257,7 @@ const StudentGrades = () => {
 
                       {/* Footer: Total Score */}
                       <div className="relative z-10 pt-5 border-t border-gray-100 dark:border-white/10 flex justify-between items-center mt-auto">
-                        <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Total Score</span>
+                        <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">{t('grades.total_score')}</span>
                         <div className="flex items-baseline gap-1">
                           <span className={`text-3xl font-black ${getGradeColor(total, grade.max_score)}`}>
                             {formatScore(total)}

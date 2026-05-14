@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useStudentAuth } from '../context/StudentAuthContext';
 import { useStudentData } from '../context/StudentDataContext';
 import studentApi from '../services/studentApi';
@@ -8,6 +9,7 @@ import toast from 'react-hot-toast';
 import Sidebar from '../components/Sidebar';
 
 const StudentQuizzes = () => {
+  const { t, i18n } = useTranslation();
   const { student, logout } = useStudentAuth();
   const { quizzes, completedQuizzes, loadingQuizzes, fetchQuizzes } = useStudentData();
   const navigate = useNavigate();
@@ -26,7 +28,7 @@ const StudentQuizzes = () => {
   const handleLogout = () => {
     logout();
     navigate('/student/login');
-    toast.success('Logged out successfully');
+    toast.success(t('sidebar.logout') + ' ' + t('auth.success'));
   };
 
   const handleStartOrResume = async (quiz) => {
@@ -37,14 +39,14 @@ const StudentQuizzes = () => {
       if (error.response?.status === 403) {
         const data = error.response.data;
         if (data.reason === 'active_attempt_exists' && data.attempt_id) {
-          if (window.confirm(`${data.message}\n\nDo you want to resume it?`)) {
+          if (window.confirm(`${data.message}\n\n${t('quizzes.resume_confirm')}`)) {
             navigate(`/student/quizzes/${quiz.id}/take?resume=${data.attempt_id}`);
           }
         } else {
           toast.error(data.message || 'Quiz not available');
         }
       } else {
-        toast.error('Failed to start quiz');
+        toast.error(t('quizzes.start_failed'));
       }
     }
   };
@@ -60,11 +62,11 @@ const StudentQuizzes = () => {
     const attemptsCount = quiz.attempts_count || 0;
     const maxAttempts = quiz.max_attempts || 1;
 
-    if (!quiz.is_published) return { available: false, reason: 'Not published' };
-    if (startDate && now < startDate) return { available: false, reason: `Starts ${startDate.toLocaleDateString()}` };
-    if (endDate && now > endDate) return { available: false, reason: 'Ended' };
-    if (attemptsCount >= maxAttempts) return { available: false, reason: 'No attempts left' };
-    return { available: true, reason: null };
+    if (!quiz.is_published) return { available: false, key: 'quizzes.status_not_published' };
+    if (startDate && now < startDate) return { available: false, key: 'quizzes.status_starts', params: { date: startDate.toLocaleDateString() } };
+    if (endDate && now > endDate) return { available: false, key: 'quizzes.status_ended' };
+    if (attemptsCount >= maxAttempts) return { available: false, key: 'quizzes.status_no_attempts' };
+    return { available: true, key: null };
   };
 
   const formatDate = (dateString) => dateString ? new Date(dateString).toLocaleDateString() : null;
@@ -102,7 +104,7 @@ const StudentQuizzes = () => {
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/10 blur-[120px] rounded-full animate-pulse-slow"></div>
         <div className="relative z-10 flex flex-col items-center">
           <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-          <p className="mt-4 text-gray-500 dark:text-gray-400 font-bold text-xs tracking-wide">Loading Quizzes...</p>
+          <p className="mt-4 text-gray-500 dark:text-gray-400 font-bold text-xs tracking-wide">{t('quizzes.loading')}</p>
         </div>
       </div>
     );
@@ -135,8 +137,8 @@ const StudentQuizzes = () => {
   };
 
   const tabs = [
-    { id: 'available', label: 'Available', icon: <FileQuestion className="w-4 h-4" />, count: quizzes.length },
-    { id: 'completed', label: 'Completed', icon: <CheckCircle2 className="w-4 h-4" />, count: completedCount }
+    { id: 'available', label: t('quizzes.available'), icon: <FileQuestion className="w-4 h-4" />, count: quizzes.length },
+    { id: 'completed', label: t('quizzes.completed'), icon: <CheckCircle2 className="w-4 h-4" />, count: completedCount }
   ];
 
   return (
@@ -148,16 +150,16 @@ const StudentQuizzes = () => {
 
       <Sidebar activePage="quizzes" onLogout={handleLogout} />
 
-      <div className="md:ml-64 pb-24 md:pb-12 relative z-10">
+      <div className="md:ps-96 pb-24 md:pb-12 relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
           
           <div className="flex items-center gap-4 mb-2">
             <div className="bg-primary/10 dark:bg-primary/20 p-3 rounded-2xl border border-primary/20 shadow-sm">
               <ClipboardList className="w-8 h-8 text-primary" />
             </div>
-            <div>
-              <h1 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white tracking-tight">Assessments</h1>
-              <p className="text-gray-500 dark:text-gray-400 font-semibold mt-1">Manage your active and completed quizzes.</p>
+            <div className="text-start">
+              <h1 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white tracking-tight">{t('quizzes.title')}</h1>
+              <p className="text-gray-500 dark:text-gray-400 font-semibold mt-1">{t('quizzes.desc')}</p>
             </div>
           </div>
 
@@ -192,12 +194,12 @@ const StudentQuizzes = () => {
 
             {/* Search Bar */}
             <div className="relative w-full md:w-80 group">
-              <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+              <div className="absolute inset-y-0 start-4 flex items-center pointer-events-none">
                 <Search className="w-5 h-5 text-gray-400 group-focus-within:text-primary transition-colors" />
               </div>
               <input
-                className="w-full bg-white dark:bg-[#111] text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 rounded-2xl py-3 pl-12 pr-4 font-bold focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all placeholder:text-gray-400 shadow-sm"
-                placeholder="Search assessments..."
+                className="w-full bg-white dark:bg-[#111] text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 rounded-2xl py-3 ps-12 pe-4 font-bold focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all placeholder:text-gray-400 shadow-sm text-start"
+                placeholder={t('quizzes.search_placeholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -209,7 +211,7 @@ const StudentQuizzes = () => {
               {filteredQuizzes.length === 0 ? (
                 <div className="col-span-full py-20 bg-white/50 dark:bg-white/5 backdrop-blur-xl rounded-[2rem] border-2 border-dashed border-gray-300 dark:border-white/10 text-center shadow-sm">
                   <FileQuestion className="w-12 h-12 text-gray-400 mx-auto mb-4 opacity-50" />
-                  <p className="text-gray-500 dark:text-gray-400 text-xl font-bold">No quizzes available right now.</p>
+                  <p className="text-gray-500 dark:text-gray-400 text-xl font-bold">{t('quizzes.no_available')}</p>
                 </div>
               ) : (
                 <>
@@ -222,9 +224,9 @@ const StudentQuizzes = () => {
                         <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-blue-500/10 mix-blend-screen opacity-50 group-hover:opacity-100 transition-opacity duration-1000"></div>
                         <div className="absolute top-0 right-0 w-96 h-96 bg-primary/20 blur-[100px] rounded-full pointer-events-none mix-blend-screen"></div>
 
-                        <div className="relative z-10 p-8 sm:p-12">
+                        <div className="relative z-10 p-8 sm:p-12 text-start">
                           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/20 border border-primary/30 text-primary text-xs font-black uppercase tracking-widest mb-6">
-                            <Zap className="w-4 h-4 fill-primary" /> Up Next
+                            <Zap className="w-4 h-4 fill-primary" /> {t('quizzes.up_next')}
                           </div>
                           
                           <h2 className="text-3xl sm:text-5xl font-black text-gray-900 dark:text-white leading-tight mb-4">{mainQuiz.title}</h2>
@@ -233,16 +235,16 @@ const StudentQuizzes = () => {
                           <div className="flex flex-wrap gap-4 mb-10">
                             <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gray-50/80 dark:bg-white/10 backdrop-blur-md text-gray-700 dark:text-white text-sm font-bold border border-gray-200 dark:border-white/10">
                               <Clock className="w-4 h-4 text-primary" />
-                              <span>{mainQuiz.time_limit_minutes} Mins</span>
+                              <span>{mainQuiz.time_limit_minutes} {t('quizzes.mins')}</span>
                             </div>
                             <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gray-50/80 dark:bg-white/10 backdrop-blur-md text-gray-700 dark:text-white text-sm font-bold border border-gray-200 dark:border-white/10">
                               <RotateCcw className="w-4 h-4 text-primary" />
-                              <span>{mainQuiz.attempts_count || 0}/{mainQuiz.max_attempts || 1} Tries</span>
+                              <span>{mainQuiz.attempts_count || 0}/{mainQuiz.max_attempts || 1} {t('quizzes.tries')}</span>
                             </div>
                             {(mainQuiz.start_date || mainQuiz.end_date) && (
                               <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gray-50/80 dark:bg-white/10 backdrop-blur-md text-gray-700 dark:text-white text-sm font-bold border border-gray-200 dark:border-white/10">
                                 <Calendar className="w-4 h-4 text-primary" />
-                                <span>{mainQuiz.end_date ? `Due ${formatDate(mainQuiz.end_date)}` : `Starts ${formatDate(mainQuiz.start_date)}`}</span>
+                                <span>{mainQuiz.end_date ? `${t('quizzes.due')} ${formatDate(mainQuiz.end_date)}` : `${t('quizzes.starts')} ${formatDate(mainQuiz.start_date)}`}</span>
                               </div>
                             )}
                           </div>
@@ -252,25 +254,25 @@ const StudentQuizzes = () => {
                               onClick={() => handleStartOrResume(mainQuiz)}
                               className="group/btn relative inline-flex items-center justify-center gap-3 bg-primary hover:bg-primary/90 text-gray-900 font-black text-lg px-8 py-4 rounded-2xl shadow-[0_0_40px_rgba(46,204,113,0.4)] hover:shadow-[0_0_60px_rgba(46,204,113,0.6)] transition-all hover:scale-105 active:scale-95"
                             >
-                              <PlayCircle className="w-6 h-6" /> Start Assessment
+                              <PlayCircle className="w-6 h-6 rtl:rotate-180" /> {t('quizzes.start_assessment')}
                             </button>
                           ) : (
                             <div className="inline-flex items-center gap-2 bg-gray-100 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 font-bold px-8 py-4 rounded-2xl">
-                              <AlertCircle className="w-5 h-5" /> {availability.reason}
+                              <AlertCircle className="w-5 h-5" /> {t(availability.key, availability.params)}
                             </div>
                           )}
                         </div>
 
                         {/* Previous Attempts Bar inside Featured Quiz */}
                         {mainQuiz.attempts?.length > 0 && (
-                          <div className="relative z-10 bg-gray-50/80 dark:bg-black/40 backdrop-blur-md border-t border-gray-100 dark:border-white/10 p-6 sm:px-12">
-                            <h4 className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-4">Past Attempts</h4>
+                          <div className="relative z-10 bg-gray-50/80 dark:bg-black/40 backdrop-blur-md border-t border-gray-100 dark:border-white/10 p-6 sm:px-12 text-start">
+                            <h4 className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-4">{t('quizzes.past_attempts')}</h4>
                             <div className="flex flex-wrap gap-4">
                               {mainQuiz.attempts.slice(0, 2).map((att) => (
                                 <div key={att.id} className="flex items-center gap-4 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 hover:border-primary/30 transition-colors">
                                   <div>
                                     <span className="text-gray-900 dark:text-white font-bold text-lg">{att.percentage}%</span>
-                                    <span className="text-gray-500 text-xs ml-2">({att.score}/{att.total_points})</span>
+                                    <span className="text-gray-500 text-xs ms-2">({att.score}/{att.total_points})</span>
                                   </div>
                                   <button onClick={() => handleViewResult(mainQuiz.id, att.id)} className="p-2 bg-primary/20 text-primary rounded-lg hover:bg-primary hover:text-gray-900 transition-colors">
                                     <Eye className="w-4 h-4" />
@@ -288,24 +290,24 @@ const StudentQuizzes = () => {
                   <div className="lg:col-span-1 space-y-6 flex flex-col">
                     
                     {/* Bento Box Stats */}
-                    <div className="bg-white/80 dark:bg-[#111]/80 backdrop-blur-xl rounded-[2rem] border border-gray-200 dark:border-white/10 p-6 shadow-sm">
-                      <h4 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-4">Quick Stats</h4>
+                    <div className="bg-white/80 dark:bg-[#111]/80 backdrop-blur-xl rounded-[2rem] border border-gray-200 dark:border-white/10 p-6 shadow-sm text-start">
+                      <h4 className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-4">{t('quizzes.quick_stats')}</h4>
                       <div className="space-y-3">
                         <div className="flex justify-between items-center bg-gray-50 dark:bg-white/5 p-3 rounded-xl border border-gray-200/50 dark:border-white/5">
                           <div className="flex items-center gap-2 text-sm font-bold text-gray-600 dark:text-gray-300">
-                            <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Done
+                            <CheckCircle2 className="w-4 h-4 text-emerald-500" /> {t('quizzes.done')}
                           </div>
                           <span className="text-lg font-black text-gray-900 dark:text-white">{completedCount}</span>
                         </div>
                         <div className="flex justify-between items-center bg-primary/5 dark:bg-primary/10 p-3 rounded-xl border border-primary/20">
                           <div className="flex items-center gap-2 text-sm font-bold text-primary">
-                            <FileQuestion className="w-4 h-4" /> Pending
+                            <FileQuestion className="w-4 h-4" /> {t('quizzes.pending')}
                           </div>
                           <span className="text-lg font-black text-primary">{pendingCount}</span>
                         </div>
                         <div className="flex justify-between items-center bg-gray-50 dark:bg-white/5 p-3 rounded-xl border border-gray-200/50 dark:border-white/5">
                           <div className="flex items-center gap-2 text-sm font-bold text-gray-600 dark:text-gray-300">
-                            <Award className="w-4 h-4 text-amber-500" /> Avg Score
+                            <Award className="w-4 h-4 text-amber-500" /> {t('quizzes.avg_score')}
                           </div>
                           <span className="text-lg font-black text-gray-900 dark:text-white">{averageScore}%</span>
                         </div>
@@ -317,24 +319,24 @@ const StudentQuizzes = () => {
                       {sideQuizzes.map((quiz) => {
                         const availability = getQuizAvailability(quiz);
                         return (
-                          <div key={quiz.id} className="bg-white/80 dark:bg-[#111]/80 backdrop-blur-xl rounded-[2rem] p-6 border border-gray-200 dark:border-white/10 hover:shadow-xl hover:-translate-y-1 transition-all group shadow-sm flex flex-col justify-between h-[160px]">
+                          <div key={quiz.id} className="bg-white/80 dark:bg-[#111]/80 backdrop-blur-xl rounded-[2rem] p-6 border border-gray-200 dark:border-white/10 hover:shadow-xl hover:-translate-y-1 transition-all group shadow-sm flex flex-col justify-between h-[160px] text-start">
                             <div>
                               <h4 className="font-black text-gray-900 dark:text-white mb-1 line-clamp-1">{quiz.title}</h4>
                               <p className="text-xs text-primary font-bold">{quiz.course_name}</p>
                             </div>
                             <div className="flex justify-between items-end border-t border-gray-100 dark:border-white/5 pt-3">
                               <span className="text-xs text-gray-500 dark:text-gray-400 font-bold">
-                                {quiz.time_limit_minutes} min
+                                {quiz.time_limit_minutes} {t('quizzes.mins')}
                               </span>
                               {availability.available ? (
                                 <button
                                   onClick={() => handleStartOrResume(quiz)}
                                   className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center hover:bg-primary hover:text-white dark:hover:text-dark transition-colors"
                                 >
-                                  <ArrowRight className="w-5 h-5" />
+                                  <ArrowRight className="w-5 h-5 rtl:rotate-180" />
                                 </button>
                               ) : (
-                                <span className="text-xs text-gray-400 flex items-center gap-1"><Clock className="w-3.5 h-3.5"/> N/A</span>
+                                <span className="text-xs text-gray-400 flex items-center gap-1"><Clock className="w-3.5 h-3.5"/> {t('quizzes.n_a')}</span>
                               )}
                             </div>
                           </div>
@@ -352,12 +354,12 @@ const StudentQuizzes = () => {
               {filteredCompleted.length === 0 ? (
                 <div className="col-span-full py-20 bg-white/50 dark:bg-white/5 backdrop-blur-xl rounded-[2rem] border-2 border-dashed border-gray-300 dark:border-white/10 text-center shadow-sm">
                   <CheckCircle2 className="w-12 h-12 text-gray-400 mx-auto mb-4 opacity-50" />
-                  <p className="text-gray-500 dark:text-gray-400 text-xl font-bold">No completed quizzes yet.</p>
+                  <p className="text-gray-500 dark:text-gray-400 text-xl font-bold">{t('quizzes.no_completed')}</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {filteredCompleted.map((item) => (
-                    <div key={item.attempt_id} className="group flex items-center gap-5 p-6 bg-white/80 dark:bg-[#111]/80 backdrop-blur-xl rounded-[2rem] border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                    <div key={item.attempt_id} className="group flex items-center gap-5 p-6 bg-white/80 dark:bg-[#111]/80 backdrop-blur-xl rounded-[2rem] border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-start">
                       
                       {/* Circular Gauge Score */}
                       <ScoreGauge percentage={item.percentage} passing={item.passing_score} />
@@ -374,9 +376,9 @@ const StudentQuizzes = () => {
                       <button
                         onClick={() => handleViewResult(item.quiz_id, item.attempt_id)}
                         className="w-12 h-12 shrink-0 rounded-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-500 dark:text-gray-400 flex items-center justify-center group-hover:bg-primary group-hover:text-white dark:group-hover:text-dark group-hover:border-primary transition-all"
-                        title="Review Answers"
+                        title={t('quizzes.review_answers')}
                       >
-                        <ArrowRight className="w-5 h-5" />
+                        <ArrowRight className="w-5 h-5 rtl:rotate-180" />
                       </button>
                     </div>
                   ))}

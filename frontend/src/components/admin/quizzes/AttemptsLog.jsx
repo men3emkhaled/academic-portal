@@ -1,17 +1,19 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { User, Clock, Calendar, BarChart3, ChevronRight, Activity, Trophy } from 'lucide-react';
 
 const AttemptsLog = ({ attempts, selectedQuiz }) => {
+  const { t } = useTranslation();
   return (
     <div className="bg-white/80 dark:bg-black/20 border border-gray-100 dark:border-white/10 rounded-[2.5rem] overflow-hidden shadow-inner animate-in fade-in duration-500">
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
             <thead>
             <tr className="bg-gray-50/50 dark:bg-white/[0.01]">
-                <th className="py-6 px-10 text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Student</th>
-                <th className="py-6 px-8 text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Date & Time</th>
-                <th className="py-6 px-8 text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Score</th>
-                <th className="py-6 px-10 text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest text-right">Status</th>
+                <th className="py-6 px-10 text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">{t('admin.quizzes.attempts.student_col')}</th>
+                <th className="py-6 px-8 text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">{t('admin.quizzes.attempts.date_col')}</th>
+                <th className="py-6 px-8 text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">{t('admin.quizzes.attempts.score_col')}</th>
+                <th className="py-6 px-10 text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest text-right">{t('admin.quizzes.attempts.status_col')}</th>
             </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-white/[0.03]">
@@ -21,7 +23,7 @@ const AttemptsLog = ({ attempts, selectedQuiz }) => {
                         <div className="w-20 h-20 bg-gray-100 dark:bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
                             <BarChart3 className="w-10 h-10 text-gray-400" />
                         </div>
-                        <p className="text-xs font-black uppercase tracking-widest text-gray-500">No attempts recorded</p>
+                        <p className="text-xs font-black uppercase tracking-widest text-gray-500">{t('admin.quizzes.attempts.no_attempts')}</p>
                     </td>
                 </tr>
             ) : (
@@ -58,7 +60,7 @@ const AttemptsLog = ({ attempts, selectedQuiz }) => {
                     <div className="flex items-center gap-4">
                         <div className="flex flex-col">
                             <span className="text-lg font-black text-gray-900 dark:text-white tracking-tight">{att.score !== null ? att.score : '--'}</span>
-                            <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Raw Points</span>
+                            <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest">{t('admin.quizzes.attempts.raw_points')}</span>
                         </div>
                         <div className="w-24 h-2 bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden shadow-inner">
                             <div className={`h-full rounded-full transition-all duration-1000 ${
@@ -79,7 +81,7 @@ const AttemptsLog = ({ attempts, selectedQuiz }) => {
                         att.status === 'timed_out' ? 'bg-rose-500/5 border-rose-500/20 text-rose-600' :
                         'bg-amber-500/5 border-amber-500/20 text-amber-600'
                     }`}>
-                        {att.status.replace('_', ' ')}
+                        {t(`admin.quizzes.attempts.statuses.${att.status}`)}
                     </span>
                     </td>
                 </tr>

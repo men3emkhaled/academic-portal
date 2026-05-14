@@ -154,20 +154,27 @@ class Timetable {
 
   // جلب كل الجداول (للأدمن) – مع إمكانية التصفية حسب القسم
   static async getAll(includeHidden = true, departmentId = null) {
-    let query = 'SELECT *, is_quiz, is_hidden FROM timetable';
+    let query = `
+      SELECT 
+        t.*,
+        d.name as department_name,
+        d.code as department_code
+      FROM timetable t
+      LEFT JOIN departments d ON t.department_id = d.id
+    `;
     const conditions = [];
     const params = [];
     if (!includeHidden) {
-      conditions.push('is_hidden = false');
+      conditions.push('t.is_hidden = false');
     }
     if (departmentId) {
-      conditions.push(`department_id = $${params.length + 1}`);
+      conditions.push(`t.department_id = $${params.length + 1}`);
       params.push(departmentId);
     }
     if (conditions.length) {
       query += ' WHERE ' + conditions.join(' AND ');
     }
-    query += ' ORDER BY department_id, section, day_of_week, start_time';
+    query += ' ORDER BY d.name, t.section, t.day_of_week, t.start_time';
     const result = await db.query(query, params);
     return result.rows;
   }

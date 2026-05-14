@@ -77,7 +77,7 @@ const DoctorAnnouncements = ({ courses }) => {
         <form onSubmit={handleCreateAnnouncement} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest ml-1">Select Course</label>
+              <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest ms-1">Select Course</label>
               <select
                 value={selectedCourseId}
                 onChange={(e) => setSelectedCourseId(e.target.value)}
@@ -90,7 +90,7 @@ const DoctorAnnouncements = ({ courses }) => {
               </select>
             </div>
             <div className="space-y-2">
-              <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest ml-1">Announcement Title</label>
+              <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest ms-1">Announcement Title</label>
               <input
                 type="text"
                 placeholder="e.g., Lecture Cancelled, Assignment Update"
@@ -101,7 +101,7 @@ const DoctorAnnouncements = ({ courses }) => {
             </div>
           </div>
           <div className="space-y-2">
-            <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest ml-1">Announcement Content</label>
+            <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest ms-1">Announcement Content</label>
             <textarea
               placeholder="Write your message here..."
               rows="4"

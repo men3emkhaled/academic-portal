@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { flushSync } from 'react-dom';
-import { Home, Calendar, Library, BarChart3, FileText, Map, Bell, CheckSquare, Settings, LogOut, Menu, X, ShieldCheck, Sun, Moon, LayoutDashboard, BookOpen, TrendingUp } from 'lucide-react';
+import { Home, Calendar, Library, BarChart3, FileText, Map, Bell, CheckSquare, Settings, LogOut, Menu, X, ShieldCheck, Sun, Moon, LayoutDashboard, BookOpen, TrendingUp, Languages } from 'lucide-react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useStudentAuth } from '../context/StudentAuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -11,7 +11,7 @@ const Sidebar = ({ onLogout }) => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const { student, logout } = useStudentAuth();
   const { theme, toggleTheme } = useTheme();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -43,8 +43,13 @@ const Sidebar = ({ onLogout }) => {
   ];
 
   if (student && (student.role === 'assistant' || student.role === 'admin')) {
-    menuItems.push({ id: 'admin-panel', label: 'Admin Panel', icon: <ShieldCheck className="w-5 h-5 text-emerald-400" />, path: '/admin' });
+    menuItems.push({ id: 'admin-panel', label: t('sidebar.admin_panel'), icon: <ShieldCheck className="w-5 h-5 text-emerald-400" />, path: '/admin' });
   }
+
+  const toggleLanguage = () => {
+    const newLang = i18n.language === 'ar' ? 'en' : 'ar';
+    i18n.changeLanguage(newLang);
+  };
 
   const handleLogout = () => {
     if (onLogout) onLogout();
@@ -55,7 +60,7 @@ const Sidebar = ({ onLogout }) => {
   // ============= Sidebar Desktop =============
   if (!isMobile) {
     return (
-      <div className="fixed left-6 top-10 bottom-10 w-72 z-50 transition-all duration-700">
+      <div className="fixed z-50 transition-all duration-700 w-72" style={{ insetInlineStart: '1.5rem', top: '1rem', bottom: '1rem' }}>
         <div className="h-full bg-white/70 dark:bg-[#080808]/70 backdrop-blur-3xl border border-white/20 dark:border-white/5 rounded-[3rem] shadow-[0_32px_64px_rgba(0,0,0,0.1)] dark:shadow-[0_32px_64px_rgba(0,0,0,0.4)] flex flex-col overflow-hidden relative group/sidebar">
 
           <div className="p-8 pb-4 text-center">
@@ -85,7 +90,7 @@ const Sidebar = ({ onLogout }) => {
                     </span>
                     <span className="relative z-10 text-[11px] font-black uppercase tracking-[0.2em]">{item.label}</span>
                     {isActive && (
-                      <div className="absolute left-0 w-1 h-6 bg-primary rounded-full shadow-[4px_0_15px_rgba(46,204,113,0.5)]" />
+                      <div className="absolute inset-inline-start-0 w-1 h-6 bg-primary rounded-full shadow-[4px_0_15px_rgba(46,204,113,0.5)]" />
                     )}
                   </>
                 )}
@@ -95,6 +100,9 @@ const Sidebar = ({ onLogout }) => {
 
           <div className="p-6 pt-0 relative z-10">
             <div className="bg-gray-50/50 dark:bg-white/[0.02] rounded-[2rem] p-2 flex gap-1 border border-gray-100 dark:border-white/5">
+              <button onClick={toggleLanguage} className="flex-1 h-12 flex items-center justify-center rounded-xl hover:bg-white dark:hover:bg-white/5 transition-all text-gray-400 hover:text-primary">
+                <Languages className="w-5 h-5" />
+              </button>
               <button onClick={toggleTheme} className="flex-1 h-12 flex items-center justify-center rounded-xl hover:bg-white dark:hover:bg-white/5 transition-all text-gray-400 hover:text-primary">
                 {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </button>
@@ -141,13 +149,13 @@ const Sidebar = ({ onLogout }) => {
 
   // Animation Logic for the Indicator (Jelly / Liquid effect)
   let translateX = 0;
-  let indicatorWidthPercent = itemWidthPercent; 
+  let indicatorWidthPercent = itemWidthPercent;
   let stretchOrigin = 'center';
 
   if (dragPosition !== null) {
     // 1. Center of the finger
     const fingerPercent = Math.max(0, Math.min(dragPosition, 100));
-    
+
     // 2. Center of the closest tab
     const closestIndex = Math.floor(fingerPercent / itemWidthPercent);
     const safeClosestIndex = Math.max(0, Math.min(closestIndex, bottomBarItems.length - 1));
@@ -156,18 +164,18 @@ const Sidebar = ({ onLogout }) => {
     // 3. Distance from closest tab
     const distanceFromCenter = fingerPercent - closestTabCenterPercent;
     const absDistance = Math.abs(distanceFromCenter);
-    
+
     // 4. Stretch factor (peaks exactly halfway between two tabs)
     const stretchFactor = Math.min(absDistance / (itemWidthPercent / 2), 1);
-    
+
     // 5. Calculate width (base is full tab width, stretch adds up to ~80% more width)
-    const maxStretchPercent = itemWidthPercent * 1.8; 
+    const maxStretchPercent = itemWidthPercent * 1.8;
     indicatorWidthPercent = itemWidthPercent + (maxStretchPercent - itemWidthPercent) * stretchFactor;
 
     // 6. Set transform origin based on drag direction to anchor the stretch
     if (distanceFromCenter > 0) {
       stretchOrigin = 'left'; // Stretching to the right
-      translateX = closestTabCenterPercent; 
+      translateX = closestTabCenterPercent;
     } else {
       stretchOrigin = 'right'; // Stretching to the left
       translateX = closestTabCenterPercent;
@@ -187,9 +195,9 @@ const Sidebar = ({ onLogout }) => {
 
   return (
     <>
-      <div className="fixed left-0 right-0 bottom-4 z-50 flex items-center justify-center gap-3 px-4 pointer-events-none">
+      <div className="fixed inset-inline-start-0 inset-inline-end-0 bottom-4 z-50 flex items-center justify-center gap-3 px-4 pointer-events-none">
         {/* Main Capsule */}
-        <div 
+        <div
           ref={dockRef}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
@@ -197,13 +205,13 @@ const Sidebar = ({ onLogout }) => {
           className="flex-1 flex items-center relative bg-[#1c1c1e] dark:bg-[#1c1c1e] backdrop-blur-3xl border border-white/[0.06] dark:border-white/[0.06] rounded-[2rem] py-3 shadow-[0_8px_32px_rgba(0,0,0,0.5)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.6)] pointer-events-auto touch-none select-none overflow-hidden [.light_&]:bg-white/80 [.light_&]:border-black/[0.06] [.light_&]:shadow-[0_8px_32px_rgba(0,0,0,0.12)]"
         >
           {/* Animated Jelly Indicator */}
-          <div 
+          <div
             ref={indicatorRef}
             className={`absolute top-1/2 -translate-y-1/2 h-14 bg-white/[0.15] dark:bg-white/[0.15] rounded-[1.75rem] z-0 [.light_&]:bg-black/[0.07] ${dragPosition === null && !isAnimatingRef.current ? 'transition-all duration-[350ms] cubic-bezier(0.34,1.56,0.64,1)' : ''}`}
-            style={{ 
+            style={{
               width: `${indicatorWidthPercent}%`,
-              left: `${translateX}%`,
-              transform: `translate(-50%, -50%)`,
+              insetInlineStart: `${translateX}%`,
+              transform: `translate(${i18n.language === 'ar' ? '50%' : '-50%'}, -50%)`,
               transformOrigin: stretchOrigin,
               transition: dragPosition !== null ? 'none' : undefined,
             }}
@@ -211,34 +219,34 @@ const Sidebar = ({ onLogout }) => {
 
           {bottomBarItems.map((item, idx) => {
             const isHighlighted = activeIndex === idx;
-            
+
             return (
               <div
                 key={item.id}
                 onClick={() => {
                   if (idx === currentIndex || isAnimatingRef.current) return;
-                  
+
                   const el = indicatorRef.current;
                   if (!el) return;
-                  
+
                   isAnimatingRef.current = true;
-                  
+
                   const startPercent = (currentIndex * itemWidthPercent) + (itemWidthPercent / 2);
                   const endPercent = (idx * itemWidthPercent) + (itemWidthPercent / 2);
-                  
+
                   let startTime = null;
                   const duration = 400;
-                  
+
                   // Direct DOM animation - bypasses React completely
                   const animateSlide = (timestamp) => {
                     if (!startTime) startTime = timestamp;
                     const elapsed = timestamp - startTime;
                     const progress = Math.min(elapsed / duration, 1);
-                    
+
                     // Easing (cubic out)
                     const eased = 1 - Math.pow(1 - progress, 3);
                     const fingerPercent = startPercent + (endPercent - startPercent) * eased;
-                    
+
                     // Calculate jelly stretch (same logic as drag)
                     const closestIdx = Math.floor(fingerPercent / itemWidthPercent);
                     const safeIdx = Math.max(0, Math.min(closestIdx, bottomBarItems.length - 1));
@@ -249,13 +257,20 @@ const Sidebar = ({ onLogout }) => {
                     const maxW = itemWidthPercent * 1.8;
                     const w = itemWidthPercent + (maxW - itemWidthPercent) * stretch;
                     const pos = tabCenter + (dist * 0.5);
-                    
+
                     // Apply directly to DOM
                     el.style.transition = 'none';
                     el.style.width = `${w}%`;
-                    el.style.left = `${pos}%`;
-                    el.style.transformOrigin = dist > 0 ? 'left' : dist < 0 ? 'right' : 'center';
-                    
+                    if (i18n.language === 'ar') {
+                      el.style.insetInlineStart = `${pos}%`;
+                      el.style.transform = `translate(50%, -50%)`;
+                      el.style.transformOrigin = dist > 0 ? 'right' : dist < 0 ? 'left' : 'center';
+                    } else {
+                      el.style.insetInlineStart = `${pos}%`;
+                      el.style.transform = `translate(-50%, -50%)`;
+                      el.style.transformOrigin = dist > 0 ? 'left' : dist < 0 ? 'right' : 'center';
+                    }
+
                     if (progress < 1) {
                       requestAnimationFrame(animateSlide);
                     } else {
@@ -265,7 +280,7 @@ const Sidebar = ({ onLogout }) => {
                       navigate(item.path);
                     }
                   };
-                  
+
                   requestAnimationFrame(animateSlide);
                 }}
                 className="relative flex-1 flex flex-col items-center gap-1.5 cursor-pointer z-10"
@@ -293,9 +308,9 @@ const Sidebar = ({ onLogout }) => {
       {isOpen && (
         <>
           <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[60]" onClick={() => setIsOpen(false)} />
-          <div className="fixed bottom-32 left-6 right-6 bg-white dark:bg-[#111] border border-gray-200 dark:border-white/10 rounded-[2.5rem] shadow-2xl z-[70] animate-slideUp overflow-hidden">
+          <div className="fixed bottom-32 inset-inline-start-6 inset-inline-end-6 bg-white dark:bg-[#111] border border-gray-200 dark:border-white/10 rounded-[2.5rem] shadow-2xl z-[70] animate-slideUp overflow-hidden">
             <div className="p-4 pt-6 text-center border-b border-gray-100 dark:border-white/5">
-              <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-widest">Menu</h3>
+              <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-widest">{t('sidebar.menu')}</h3>
             </div>
             <div className="p-3 max-h-[50vh] overflow-y-auto hidden-scrollbar">
               <div className="grid grid-cols-1 gap-1">
@@ -316,13 +331,17 @@ const Sidebar = ({ onLogout }) => {
               </div>
               <div className="my-3 mx-2 h-px bg-gray-100 dark:bg-white/5" />
               <div className="flex gap-2 p-1">
+                <button onClick={toggleLanguage} className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl bg-gray-50 dark:bg-white/5 text-gray-600 dark:text-gray-400 font-bold border border-gray-200 dark:border-white/5">
+                  <Languages className="w-5 h-5" />
+                  <span>{i18n.language === 'ar' ? 'English' : 'العربية'}</span>
+                </button>
                 <button onClick={toggleTheme} className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl bg-gray-50 dark:bg-white/5 text-gray-600 dark:text-gray-400 font-bold border border-gray-200 dark:border-white/5">
                   {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-                  <span>{theme === 'dark' ? 'Light' : 'Dark'}</span>
+                  <span>{theme === 'dark' ? t('sidebar.light') : t('sidebar.dark')}</span>
                 </button>
                 <button onClick={handleLogout} className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl bg-rose-50 dark:bg-rose-500/10 text-rose-500 font-bold border border-rose-100 dark:border-rose-500/20">
                   <LogOut className="w-5 h-5" />
-                  <span>Logout</span>
+                  <span>{t('sidebar.logout')}</span>
                 </button>
               </div>
             </div>

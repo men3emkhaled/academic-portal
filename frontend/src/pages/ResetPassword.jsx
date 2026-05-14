@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Lock, CheckCircle, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { useStudentAuth } from '../context/StudentAuthContext';
+import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 
 const ResetPassword = () => {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
   const navigate = useNavigate();
@@ -18,7 +20,7 @@ const ResetPassword = () => {
 
   useEffect(() => {
     if (!token) {
-      toast.error('Invalid or missing reset token.');
+      toast.error(t('auth.reset_password.error_invalid_token'));
       navigate('/student/login');
     }
   }, [token, navigate]);

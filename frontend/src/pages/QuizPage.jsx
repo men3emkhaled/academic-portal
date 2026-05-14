@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import studentApi from "../services/studentApi";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 import { useStudentAuth } from "../context/StudentAuthContext";
 import {
   Clock,
@@ -38,6 +39,7 @@ const QuizPage = () => {
   const { quizId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
   const { logout } = useStudentAuth();
 
   const queryParams = new URLSearchParams(location.search);
@@ -78,7 +80,7 @@ const QuizPage = () => {
           }
         }
       } catch (error) {
-        toast.error(error.response?.data?.message || "Failed to start quiz");
+        toast.error(error.response?.data?.message || t("quizzes.no_available"));
         navigate("/student/quizzes", { replace: true });
       } finally {
         setLoading(false);
@@ -91,8 +93,7 @@ const QuizPage = () => {
     const handleBeforeUnload = (e) => {
       if (!hasSubmittedRef.current && attemptIdRef.current) {
         e.preventDefault();
-        e.returnValue =
-          "You have an ongoing quiz. Are you sure you want to leave?";
+        e.returnValue = t("quizzes.leave_confirm");
       }
     };
     window.addEventListener("beforeunload", handleBeforeUnload);
@@ -110,7 +111,7 @@ const QuizPage = () => {
         } else if (warningsCountRef.current >= 2) {
           setShowWarningModal(false);
           toast.error(
-            "You left the quiz again. Auto-submitting due to strict mode.",
+            t("quizzes.strict_mode_leave"),
           );
           submitQuiz(true);
         }
@@ -120,7 +121,7 @@ const QuizPage = () => {
     const handleContextMenu = (e) => e.preventDefault();
     const handleCopy = (e) => {
       e.preventDefault();
-      toast.error("Copying is disabled in strict mode");
+      toast.error(t("quizzes.strict_mode_copy"));
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
@@ -139,7 +140,7 @@ const QuizPage = () => {
       if (submitting || hasSubmittedRef.current) return;
       const attemptId = attemptIdRef.current;
       if (!attemptId) {
-        toast.error("Invalid attempt");
+        toast.error(t("common.error"));
         navigate("/student/quizzes", { replace: true });
         return;
       }
@@ -151,9 +152,9 @@ const QuizPage = () => {
         );
         const data = response.data;
         if (data.status === "pending_review") {
-          toast.success("Quiz submitted for review!");
+          toast.success(t("quizzes.submitted_review"));
         } else {
-          toast.success(`Quiz submitted! Score: ${data.percentage}%`);
+          toast.success(t("quizzes.submitted_score", { percentage: data.percentage }));
         }
         navigate(`/student/quizzes/${quizId}/result/${attemptId}`, {
           replace: true,
@@ -170,9 +171,9 @@ const QuizPage = () => {
 
   const handleTimeOut = useCallback(async () => {
     if (timerRef.current) clearInterval(timerRef.current);
-    toast.error("Time is up! Submitting quiz...");
+    toast.error(t("quizzes.time_up"));
     await submitQuiz(true);
-  }, [submitQuiz]);
+  }, [submitQuiz, t]);
 
   useEffect(() => {
     if (timeLeft <= 0 || !quizData) return;
@@ -210,9 +211,9 @@ const QuizPage = () => {
       );
       setAnswers((prev) => ({ ...prev, [questionId]: file || text }));
       setWrittenText((prev) => ({ ...prev, [questionId]: text }));
-      toast.success("Answer saved");
+      toast.success(t("quizzes.answer_saved"));
     } catch (error) {
-      toast.error("Failed to save answer");
+      toast.error(t("quizzes.save_failed"));
     }
   };
 
@@ -233,9 +234,9 @@ const QuizPage = () => {
   const handleAnswerSelect = useCallback((questionId, answer) => {
     setAnswers((prev) => ({ ...prev, [questionId]: answer }));
     saveAnswerToServer(questionId, answer).catch(() => {
-      toast.error("Failed to save answer. Please check your connection.");
+      toast.error(t("quizzes.connection_error"));
     });
-  }, []);
+  }, [t]);
 
   const handleNext = () => {
     if (!quizData?.questions) return;
@@ -252,7 +253,7 @@ const QuizPage = () => {
 
   const handleSubmitClick = () => {
     if (hasSubmittedRef.current) return;
-    if (window.confirm("Are you sure you want to submit?")) {
+    if (window.confirm(t("quizzes.submit_confirm"))) {
       submitQuiz();
     }
   };
@@ -275,7 +276,7 @@ const QuizPage = () => {
             ZNU PORTAL
           </p>
           <p className="text-gray-500 dark:text-gray-400 font-bold text-xs tracking-wide">
-            جاري تحميل الجلسة...
+            {t("quizzes.loading")}
           </p>
         </div>
       </div>
@@ -285,15 +286,15 @@ const QuizPage = () => {
   if (!quizData || !quizData.questions || quizData.questions.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-dark text-gray-900 dark:text-white flex flex-col items-center justify-center p-6 transition-colors duration-300">
-        <p className="text-xl mb-4">
-          <AlertCircle className="w-8 h-8 text-primary mx-auto mb-4" /> No
-          questions available
-        </p>
+        <div className="text-xl mb-4 text-center">
+          <AlertCircle className="w-8 h-8 text-primary mx-auto mb-4" /> 
+          <p>{t("quizzes.no_questions")}</p>
+        </div>
         <button
           onClick={() => navigate("/student/quizzes")}
           className="px-6 py-3 bg-primary text-white dark:text-dark rounded-xl font-bold"
         >
-          Back to Quizzes
+          {t("quizzes.back_to_list")}
         </button>
       </div>
     );
@@ -330,7 +331,7 @@ const QuizPage = () => {
               {quizData.questions.length}
             </span>
             <span className="text-xs font-label font-medium text-primary/60 dark:text-primary/40 tracking-wider">
-              PROGRESS
+              {t("quizzes.progress_label")}
             </span>
           </div>
           <div className="h-1.5 w-full bg-primary/20 dark:bg-primary/10 rounded-full overflow-hidden">
@@ -434,11 +435,11 @@ const QuizPage = () => {
           ) : (
             <div className="bg-white dark:bg-dark-glass p-6 rounded-2xl border border-primary/20 shadow-sm dark:shadow-none">
               <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm">
-                Write your answer or upload/take a photo
+                {t("quizzes.written_instruction")}
               </p>
 
               <textarea
-                placeholder="Type your answer here..."
+                placeholder={t("quizzes.type_here")}
                 value={writtenText[currentQuestion.id] || ""}
                 onChange={(e) =>
                   setWrittenText((prev) => ({
@@ -470,7 +471,7 @@ const QuizPage = () => {
                     <FolderUp className="w-8 h-8 text-gray-400 dark:text-gray-500 mx-auto mb-2" />
                   </span>
                   <span className="text-primary text-sm font-medium">
-                    Choose File
+                    {t("quizzes.choose_file")}
                   </span>
                 </label>
 
@@ -494,7 +495,7 @@ const QuizPage = () => {
                     <Camera className="w-8 h-8 text-gray-400 dark:text-gray-500 mx-auto mb-2" />
                   </span>
                   <span className="text-primary text-sm font-medium">
-                    Take Photo
+                    {t("quizzes.take_photo")}
                   </span>
                 </label>
               </div>
@@ -518,7 +519,7 @@ const QuizPage = () => {
                       : null;
                   if (!text && !file) {
                     toast.error(
-                      "Please provide an answer or upload/take a photo",
+                      t("quizzes.written_instruction"),
                     );
                     return;
                   }
@@ -526,7 +527,7 @@ const QuizPage = () => {
                 }}
                 className="mt-4 bg-primary/10 dark:bg-primary/20 text-primary font-bold px-4 py-2 rounded-lg text-sm hover:bg-primary/20 dark:hover:bg-primary/30 transition"
               >
-                Save Answer
+                {t("quizzes.save_answer")}
               </button>
             </div>
           )}
@@ -539,7 +540,7 @@ const QuizPage = () => {
               disabled={currentIndex === 0}
               className="flex-1 py-4 bg-white dark:bg-dark-glass text-gray-600 dark:text-gray-400 font-headline font-bold text-lg rounded-xl border border-gray-200 dark:border-white/10/30 hover:bg-gray-50 dark:hover:bg-primary/10 transition disabled:opacity-50 disabled:bg-gray-100 dark:disabled:opacity-30 disabled:cursor-not-allowed shadow-sm dark:shadow-none"
             >
-              ← Previous
+              ← {t("quizzes.prev")}
             </button>
             {currentIndex === quizData.questions.length - 1 ? (
               <button
@@ -547,14 +548,14 @@ const QuizPage = () => {
                 disabled={submitting || hasSubmittedRef.current}
                 className="flex-1 py-4 bg-primary text-white dark:text-dark font-headline font-black text-lg rounded-xl shadow-[0_4px_15px_rgba(46,204,113,0.3)] dark:shadow-[0_12px_40px_rgba(var(--primary),0.25)] hover:scale-[1.02] active:scale-95 transition-all uppercase tracking-tight"
               >
-                {submitting ? "Submitting..." : "Submit"}
+                {submitting ? t("quizzes.submitting") : t("quizzes.submit")}
               </button>
             ) : (
               <button
                 onClick={handleNext}
                 className="flex-1 py-4 bg-primary text-white dark:text-dark font-headline font-black text-lg rounded-xl shadow-[0_4px_15px_rgba(46,204,113,0.3)] dark:shadow-[0_12px_40px_rgba(var(--primary),0.25)] hover:scale-[1.02] active:scale-95 transition-all uppercase tracking-tight"
               >
-                Next →
+                {t("quizzes.next")} →
               </button>
             )}
           </div>
@@ -563,7 +564,7 @@ const QuizPage = () => {
               onClick={handleNext}
               className="text-primary/80 dark:text-primary/60 font-label font-bold text-xs uppercase tracking-[0.2em] hover:text-primary transition-colors py-2"
             >
-              Skip for now
+              {t("quizzes.skip")}
             </button>
           )}
         </div>
@@ -597,18 +598,16 @@ const QuizPage = () => {
                 <AlertCircle className="w-10 h-10 text-red-500" />
               </div>
               <h3 className="text-2xl font-black text-center text-gray-900 dark:text-white mb-2">
-                STRICT MODE WARNING
+                {t("quizzes.strict_warning_title")}
               </h3>
               <p className="text-center text-gray-600 dark:text-gray-300 mb-8 font-bold">
-                You have left the quiz window. This is your first and final
-                warning. If you leave the window again, your quiz will be
-                automatically submitted.
+                {t("quizzes.strict_warning_msg")}
               </p>
               <button
                 onClick={() => setShowWarningModal(false)}
                 className="w-full py-4 bg-red-500 text-white font-black text-lg rounded-xl hover:bg-red-600 transition-colors uppercase tracking-widest"
               >
-                I Understand
+                {t("quizzes.understand")}
               </button>
             </div>
           </div>

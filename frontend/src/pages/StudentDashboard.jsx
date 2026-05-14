@@ -25,14 +25,14 @@ const getNotificationStyle = (title, content) => {
 
 const getGreeting = () => {
   const hour = new Date().getHours();
-  if (hour < 12) return 'Good Morning';
-  if (hour < 18) return 'Good Afternoon';
-  return 'Good Evening';
+  if (hour < 12) return 'dashboard.greeting_morning';
+  if (hour < 18) return 'dashboard.greeting_afternoon';
+  return 'dashboard.greeting_evening';
 };
 
 const StudentDashboard = () => {
   const { student, logout } = useStudentAuth();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const {
     gradesData, loadingGrades,
     notifications: allNotifications, loadingNotifications, markNotificationAsRead,
@@ -45,10 +45,10 @@ const StudentDashboard = () => {
   const [isCardExpanded, setIsCardExpanded] = useState(false);
 
   useEffect(() => {
-    setGreeting(getGreeting());
-    const interval = setInterval(() => setGreeting(getGreeting()), 60000);
+    setGreeting(t(getGreeting()));
+    const interval = setInterval(() => setGreeting(t(getGreeting())), 60000);
     return () => clearInterval(interval);
-  }, []);
+  }, [t]);
 
   const notifications = useMemo(() => {
     const threeDaysAgo = new Date();
@@ -75,16 +75,16 @@ const StudentDashboard = () => {
     try {
       await studentApi.patch(`/official-tasks/${taskId}/toggle`, { is_completed: !currentStatus });
       fetchOfficialTasks();
-      toast.success(!currentStatus ? 'Task completed! 🎉' : 'Marked as incomplete');
+      toast.success(!currentStatus ? t('tasks.mark_done') : t('tasks.mark_undone'));
     } catch (error) {
-      toast.error('Failed to update task');
+      toast.error(t('tasks.error_update'));
     }
   };
 
   const handleLogout = () => {
     logout();
     navigate('/student/login');
-    toast.success('Logged out successfully');
+    toast.success(`${t('sidebar.logout')} ${t('auth.success')}`);
   };
 
   const formatDate = (dateString) => {
@@ -92,9 +92,9 @@ const StudentDashboard = () => {
     const now = new Date();
     const diff = now - date;
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    if (days === 0) return 'Today';
-    if (days === 1) return 'Yesterday';
-    return `${days}d ago`;
+    if (days === 0) return t('common.today');
+    if (days === 1) return t('common.yesterday');
+    return t('common.days_ago', { count: days });
   };
 
   const renderContent = (text) => {
@@ -136,7 +136,7 @@ const StudentDashboard = () => {
 
       <Sidebar onLogout={handleLogout} />
 
-      <div className="md:ml-64 pb-24 md:pb-12 relative z-10">
+      <div className="md:ps-96 pb-24 md:pb-12 relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
 
           {/* HEADER / HERO SECTION */}
@@ -146,30 +146,27 @@ const StudentDashboard = () => {
               onClick={() => setIsCardExpanded(true)}
               className="lg:col-span-2 relative overflow-hidden rounded-[2rem] bg-white/70 dark:bg-white/5 backdrop-blur-2xl border border-gray-200 dark:border-white/10 p-6 sm:p-10 shadow-sm dark:shadow-[0_8px_30px_rgba(0,0,0,0.5)] group transition-all duration-500 cursor-pointer hover:shadow-xl hover:-translate-y-1"
             >
-              <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 blur-[80px] rounded-full -translate-y-1/2 translate-x-1/3 group-hover:scale-110 transition-transform duration-700"></div>
+              <div className="absolute top-0 inset-inline-end-0 w-64 h-64 bg-primary/10 blur-[80px] rounded-full -translate-y-1/2 translate-x-1/3 group-hover:scale-110 transition-transform duration-700"></div>
 
               <div className="relative z-10 h-full flex flex-col justify-between">
                 <div>
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest mb-4">
-                    <Clock className="w-4 h-4" /> {greeting}
-                  </div>
                   <h1 className="text-4xl sm:text-5xl font-black text-gray-900 dark:text-white tracking-tight leading-tight mb-2">
-                    {student?.name?.split(' ')[0]} <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-[#58d68d]">{student?.name?.split(' ').slice(1).join(' ')}</span>
+                    {student?.name}
                   </h1>
                   <p className="text-gray-500 dark:text-gray-400 text-base font-medium max-w-lg">
-                    Ready to conquer the day? Here is what's happening in your academic workspace.
+                    {t('dashboard.welcome_msg')}
                   </p>
                 </div>
 
                 <div className="flex flex-wrap gap-3 mt-8">
                   <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 dark:bg-black/40 border border-gray-200 dark:border-white/10 text-sm font-semibold">
-                    <GraduationCap className="w-5 h-5 text-primary" /> ID: {student?.id}
+                    <GraduationCap className="w-5 h-5 text-primary" /> {t('dashboard.id_card')}: {student?.id}
                   </div>
                   <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 dark:bg-black/40 border border-gray-200 dark:border-white/10 text-sm font-semibold">
-                    <Layers className="w-5 h-5 text-blue-500" /> Level: {student?.level}
+                    <Layers className="w-5 h-5 text-blue-500" /> {t('dashboard.level')}: {student?.level}
                   </div>
                   <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 dark:bg-black/40 border border-gray-200 dark:border-white/10 text-sm font-semibold">
-                    <Users className="w-5 h-5 text-orange-500" /> Section: {student?.section || 'N/A'}
+                    <Users className="w-5 h-5 text-orange-500" /> {t('dashboard.section')}: {student?.section || t('common.not_assigned')}
                   </div>
                 </div>
               </div>
@@ -179,7 +176,7 @@ const StudentDashboard = () => {
             <div className="relative overflow-hidden rounded-[2rem] bg-white/70 dark:bg-white/5 backdrop-blur-2xl border border-gray-200 dark:border-white/10 p-6 sm:p-8 shadow-sm flex flex-col justify-center gap-6 group hover:border-primary/30 transition-all duration-500">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-500 dark:text-gray-400 text-xs font-bold uppercase tracking-widest mb-1">Enrolled Courses</p>
+                  <p className="text-gray-500 dark:text-gray-400 text-xs font-bold uppercase tracking-widest mb-1">{t('dashboard.enrolled_courses')}</p>
                   <h3 className="text-4xl font-black text-gray-900 dark:text-white">{grades.length}</h3>
                 </div>
                 <div className="w-14 h-14 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500">
@@ -189,7 +186,7 @@ const StudentDashboard = () => {
               <div className="h-px w-full bg-gray-200 dark:bg-white/10"></div>
               <div className="flex items-center justify-between cursor-pointer group/task" onClick={() => navigate('/student/personal-tasks')}>
                 <div>
-                  <p className="text-gray-500 dark:text-gray-400 text-xs font-bold uppercase tracking-widest mb-1">Pending Tasks</p>
+                  <p className="text-gray-500 dark:text-gray-400 text-xs font-bold uppercase tracking-widest mb-1">{t('dashboard.pending_tasks')}</p>
                   <h3 className="text-4xl font-black text-gray-900 dark:text-white group-hover/task:text-primary transition-colors">{totalPendingTasks}</h3>
                 </div>
                 <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover/task:scale-110 group-hover/task:-rotate-6 transition-all">
@@ -206,10 +203,10 @@ const StudentDashboard = () => {
             <div className="bg-white/70 dark:bg-[#111111]/80 backdrop-blur-2xl border border-gray-200 dark:border-white/10 rounded-[2rem] p-6 sm:p-8 shadow-sm flex flex-col h-[400px]">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-black flex items-center gap-2">
-                  <ListTodo className="w-6 h-6 text-primary" /> Action Items
+                  <ListTodo className="w-6 h-6 text-primary" /> {t('dashboard.action_items')}
                 </h2>
                 <button onClick={() => navigate('/student/personal-tasks')} className="text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-primary transition-colors flex items-center gap-1">
-                  View All <ChevronRight className="w-4 h-4" />
+                  {t('dashboard.view_all')} <ChevronRight className={`w-4 h-4 ${i18n.language === 'ar' ? 'rotate-180' : ''}`} />
                 </button>
               </div>
 
@@ -219,7 +216,7 @@ const StudentDashboard = () => {
                 ) : totalPendingTasks === 0 ? (
                   <div className="h-full flex flex-col items-center justify-center text-gray-400 text-center">
                     <CheckCircle2 className="w-12 h-12 mb-2 opacity-50" />
-                    <p className="font-semibold">You're all caught up!</p>
+                    <p className="font-semibold">{t('tasks.no_tasks')}</p>
                   </div>
                 ) : (
                   <>
@@ -228,10 +225,10 @@ const StudentDashboard = () => {
                         <button onClick={() => handleToggleOfficial(task.id, false)} className="text-gray-300 dark:text-gray-600 hover:text-primary transition-colors">
                           <Circle className="w-6 h-6" />
                         </button>
-                        <div className="flex-1 min-w-0">
+                        <div className="flex-1 min-w-0 text-start">
                           <div className="flex items-center gap-2 mb-1">
                             <span className="text-[9px] font-bold uppercase tracking-wider text-primary bg-primary/10 px-1.5 py-0.5 rounded">{task.course_name}</span>
-                            <span className="text-[9px] font-bold uppercase tracking-wider text-gray-400">Official</span>
+                            <span className="text-[9px] font-bold uppercase tracking-wider text-gray-400">{t('tasks.official_tasks')}</span>
                           </div>
                           <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{task.title}</p>
                         </div>
@@ -243,12 +240,12 @@ const StudentDashboard = () => {
                     {pendingPersonal.slice(0, 3).map(task => (
                       <div key={`pers-${task.id}`} className="group flex items-center gap-4 p-4 rounded-2xl border border-gray-100 dark:border-white/5 bg-white dark:bg-[#161616] hover:border-blue-500/30 transition-colors">
                         <div className="text-gray-300 dark:text-gray-600"><Circle className="w-6 h-6" /></div>
-                        <div className="flex-1 min-w-0">
-                          <span className="text-[9px] font-bold uppercase tracking-wider text-blue-500 bg-blue-500/10 px-1.5 py-0.5 rounded mb-1 inline-block">Personal</span>
+                        <div className="flex-1 min-w-0 text-start">
+                          <span className="text-[9px] font-bold uppercase tracking-wider text-blue-500 bg-blue-500/10 px-1.5 py-0.5 rounded mb-1 inline-block">{t('tasks.personal_tasks')}</span>
                           <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{task.title}</p>
                         </div>
                         <button onClick={() => navigate('/student/personal-tasks')} className="p-2 rounded-xl text-gray-400 hover:text-blue-500 transition-colors">
-                          <ChevronRight className="w-4 h-4" />
+                          <ChevronRight className={`w-4 h-4 ${i18n.language === 'ar' ? 'rotate-180' : ''}`} />
                         </button>
                       </div>
                     ))}
@@ -260,11 +257,11 @@ const StudentDashboard = () => {
             {/* Notifications Widget */}
             <div className="bg-white/70 dark:bg-[#111111]/80 backdrop-blur-2xl border border-gray-200 dark:border-white/10 rounded-[2rem] p-6 sm:p-8 shadow-sm flex flex-col h-[400px]">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-black flex items-center gap-2">
-                  <Bell className="w-6 h-6 text-orange-500" /> Inbox
+                <h2 className="text-xl font-black flex items-center gap-2 text-start">
+                  <Bell className="w-6 h-6 text-orange-500" /> {t('dashboard.inbox')}
                 </h2>
                 <button onClick={() => navigate('/student/notifications')} className="text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-orange-500 transition-colors flex items-center gap-1">
-                  View All <ChevronRight className="w-4 h-4" />
+                  {t('dashboard.view_all')} <ChevronRight className={`w-4 h-4 ${i18n.language === 'ar' ? 'rotate-180' : ''}`} />
                 </button>
               </div>
 
@@ -274,7 +271,7 @@ const StudentDashboard = () => {
                 ) : notifications.length === 0 ? (
                   <div className="h-full flex flex-col items-center justify-center text-gray-400 text-center">
                     <Bell className="w-12 h-12 mb-2 opacity-50" />
-                    <p className="font-semibold">No new notifications</p>
+                    <p className="font-semibold">{t('dashboard.no_notifications')}</p>
                   </div>
                 ) : (
                   notifications.map((notif) => {
@@ -282,8 +279,8 @@ const StudentDashboard = () => {
                     const isUnread = !notif.is_read;
                     return (
                       <div key={notif.id} className={`relative p-4 rounded-2xl border transition-all ${isUnread ? 'bg-white dark:bg-[#1a1a1a] border-gray-200 dark:border-white/10 shadow-sm' : 'bg-transparent border-transparent opacity-60 hover:opacity-100'}`}>
-                        {isUnread && <div className="absolute top-1/2 -left-1 w-2 h-2 rounded-full bg-primary -translate-y-1/2"></div>}
-                        <div className="flex gap-3">
+                        {isUnread && <div className="absolute top-1/2 -inset-inline-start-1 w-2 h-2 rounded-full bg-primary -translate-y-1/2"></div>}
+                        <div className="flex gap-3 text-start">
                           <div className={`w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center ${iconBg}`}>{emoji}</div>
                           <div className="flex-1 min-w-0">
                             <div className="flex justify-between items-start mb-1">
@@ -294,7 +291,7 @@ const StudentDashboard = () => {
                             <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">{renderContent(notif.content)}</p>
                             {isUnread && (
                               <button onClick={() => markAsRead(notif.id)} className="mt-2 text-[10px] font-bold uppercase tracking-wider text-primary hover:underline">
-                                Mark as Read
+                                {t('dashboard.mark_read')}
                               </button>
                             )}
                           </div>
@@ -311,8 +308,8 @@ const StudentDashboard = () => {
           {/* BOTTOM SECTION: My Courses */}
           <div className="pt-4">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-black flex items-center gap-2 text-gray-900 dark:text-white">
-                <LayoutDashboard className="w-7 h-7 text-primary" /> Active Courses
+              <h2 className="text-2xl font-black flex items-center gap-2 text-gray-900 dark:text-white text-start">
+                <LayoutDashboard className="w-7 h-7 text-primary" /> {t('dashboard.active_courses')}
               </h2>
             </div>
 
@@ -320,8 +317,8 @@ const StudentDashboard = () => {
               {grades.length === 0 ? (
                 <div className="col-span-full py-16 bg-white/50 dark:bg-white/5 backdrop-blur-xl border border-dashed border-gray-300 dark:border-white/10 rounded-[2rem] text-center">
                   <BookOpen className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-                  <p className="text-lg font-bold text-gray-900 dark:text-white">No enrolled courses found.</p>
-                  <p className="text-sm text-gray-500 mt-1">Contact administration to verify your enrollment.</p>
+                  <p className="text-lg font-bold text-gray-900 dark:text-white">{t('dashboard.no_courses')}</p>
+                  <p className="text-sm text-gray-500 mt-1">{t('dashboard.contact_admin')}</p>
                 </div>
               ) : (
                 grades.map((grade, idx) => {
@@ -345,18 +342,18 @@ const StudentDashboard = () => {
                       className="group relative bg-white/80 dark:bg-[#111111]/80 backdrop-blur-xl border border-gray-200 dark:border-white/10 rounded-[2rem] p-6 cursor-pointer hover:-translate-y-1 transition-all duration-300 hover:shadow-2xl overflow-hidden flex flex-col justify-between min-h-[220px]"
                     >
                       {/* Hover Glow */}
-                      <div className={`absolute -right-20 -top-20 w-40 h-40 ${c.bg} blur-[50px] rounded-full group-hover:scale-150 transition-transform duration-700`}></div>
+                      <div className={`absolute -inset-inline-end-20 -top-20 w-40 h-40 ${c.bg} blur-[50px] rounded-full group-hover:scale-150 transition-transform duration-700`}></div>
 
                       <div className="relative z-10 flex justify-between items-start mb-4">
                         <div className={`w-14 h-14 rounded-2xl ${c.bg} ${c.text} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
                           <BookOpen className="w-7 h-7" />
                         </div>
                         <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-white/5 flex items-center justify-center text-gray-400 group-hover:bg-white dark:group-hover:bg-white/10 transition-colors">
-                          <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                          <ChevronRight className={`w-5 h-5 group-hover:translate-x-1 transition-transform ${i18n.language === 'ar' ? 'rotate-180' : ''}`} />
                         </div>
                       </div>
 
-                      <div className="relative z-10">
+                      <div className="relative z-10 text-start">
                         <h3 className="text-xl font-black text-gray-900 dark:text-white mb-6 line-clamp-2 leading-tight">
                           {grade.course_name}
                         </h3>
@@ -374,7 +371,7 @@ const StudentDashboard = () => {
                         ) : (
                           <div className="pt-4 border-t border-gray-100 dark:border-white/5">
                             <span className="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1">
-                              <Clock className="w-4 h-4" /> No scores yet
+                              <Clock className="w-4 h-4" /> {t('dashboard.no_scores')}
                             </span>
                           </div>
                         )}
@@ -403,13 +400,13 @@ const StudentDashboard = () => {
 
             {/* Blue Header Bar */}
             <div className="bg-[#1874cd] py-4 text-center">
-              <h2 className="text-white text-[22px] font-bold tracking-widest uppercase m-0 leading-none">ID CARD</h2>
+              <h2 className="text-white text-[22px] font-bold tracking-widest uppercase m-0 leading-none">{t('dashboard.id_card')}</h2>
             </div>
 
             {/* Card Body */}
             <div className="p-6 flex items-start justify-between gap-5 relative">
 
-              {/* Profile Picture (Left) */}
+              {/* Profile Picture (Left/Right) */}
               <div className="w-[110px] h-[140px] shrink-0 bg-gray-100 rounded border border-gray-300 overflow-hidden flex items-center justify-center shadow-sm">
                 {student?.avatar_url ? (
                   <img src={student.avatar_url} alt={student.name} className="w-full h-full object-cover" />
@@ -419,7 +416,7 @@ const StudentDashboard = () => {
               </div>
 
               {/* Information Text (Center) */}
-              <div className="flex-1 flex flex-col pt-1">
+              <div className="flex-1 flex flex-col pt-1 text-start">
                 <div className="flex gap-2 items-center mb-1">
                   <span className="font-bold text-[13px] text-black">ID:</span>
                   <span className="text-[13px] font-bold text-black">{student?.id}</span>
@@ -430,17 +427,16 @@ const StudentDashboard = () => {
                 </div>
 
                 <div className="flex gap-2 items-center mb-1.5">
-                  <span className="text-[11px] text-gray-600 font-semibold w-16 shrink-0">Level:</span>
+                  <span className="text-[11px] text-gray-600 font-semibold w-16 shrink-0">{t('dashboard.level')}:</span>
                   <span className="text-[12px] font-bold text-gray-800">{student?.level}</span>
                 </div>
-
                 <div className="flex gap-2 items-start">
-                  <span className="text-[11px] text-gray-600 font-semibold w-16 shrink-0 pt-[2px]">Dept:</span>
-                  <span className="text-[12px] font-bold text-gray-800 leading-tight" dir="auto">{student?.department || 'Artificial Intelligence'}</span>
+                  <span className="text-[11px] text-gray-600 font-semibold w-16 shrink-0 pt-[2px]">{t('dashboard.dept')}:</span>
+                  <span className="text-[12px] font-bold text-gray-800 leading-tight" dir="auto">{student?.department || t('common.not_assigned')}</span>
                 </div>
               </div>
 
-              {/* Vertical Barcode (Right) */}
+              {/* Vertical Barcode (Right/Left) */}
               <div className="w-[30px] shrink-0 flex flex-col justify-between pt-1 pb-1 h-[130px] opacity-80">
                 {[3, 1, 2, 1, 4, 1, 2, 3, 1, 1, 3, 2, 1, 2, 3, 1, 4, 2, 1, 1, 3, 2, 1, 2, 3, 1, 1, 4, 2, 3, 1, 2, 1].map((h, i) => (
                   <div key={i} className="w-full bg-black" style={{ height: `${h}px` }}></div>
@@ -452,7 +448,7 @@ const StudentDashboard = () => {
           {/* Close Button - Outside the card */}
           <button
             onClick={() => setIsCardExpanded(false)}
-            className="absolute top-6 right-6 sm:top-10 sm:right-10 w-12 h-12 rounded-full bg-white/20 hover:bg-white/40 flex items-center justify-center text-white transition-colors z-[110]"
+            className={`absolute top-6 inset-inline-end-6 sm:top-10 sm:inset-inline-end-10 w-12 h-12 rounded-full bg-white/20 hover:bg-white/40 flex items-center justify-center text-white transition-colors z-[110]`}
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
           </button>
