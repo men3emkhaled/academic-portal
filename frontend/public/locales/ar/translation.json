@@ -759,32 +759,32 @@
       }
     },
     "timetable": {
-      "title": "الجدول الدراسي",
-      "description": "إدارة مواعيد المحاضرات والسكاشن",
-      "show_hidden": "إظهار المحاضرات المخفية",
-      "time_details": "تفاصيل الحصة",
-      "course_instructor": "المادة / المحاضر",
-      "type": "النوع",
-      "actions": "الإجراءات",
+      "title": "المصفوفة الزمنية",
+      "description": "هندسة وإدارة التدفق الزمني الأكاديمي",
+      "show_hidden": "كشف العقد المخفية",
+      "time_details": "الإشارة الزمنية",
+      "course_instructor": "الوحدة / المحاضر",
+      "type": "البروتوكول",
+      "actions": "العمليات",
       "section": "سيكشن",
-      "no_classes": "لا توجد محاضرات مجدولة ليوم {{day}}",
+      "no_classes": "لم يتم رصد إشارات جلسات ليوم {{day}}",
       "upload": {
-        "title": "رفع الجدول الدراسي",
+        "title": "حاقن الجدول الزمني",
         "click_to_upload": "رفع بيانات الجدول",
         "upload_button": "نشر الجدول",
-        "select_dept_hint": "اختر القسم لتفعيل خاصية الرفع",
+        "select_dept_hint": "اختر القسم لتمكين الرفع",
         "success_msg": "تم تخطيط السكاشن بنجاح: {{sections}}"
       },
       "visibility": {
         "title": "التحكم في الرؤية",
         "hide": "إخفاء",
         "show": "إظهار",
-        "hide_confirm": "إخفاء جميع المحاضرات ليوم {{day}}؟"
+        "hide_confirm": "إخفاء جميع إشارات الجلسات ليوم {{day}}؟"
       },
       "clear_sections": {
-        "title": "مسح بيانات السكاشن",
-        "sec_label": "مسح سيكشن {{num}}",
-        "select_dept_hint": "اختر القسم للوصول لأدوات المسح"
+        "title": "تطهير السكاشن",
+        "sec_label": "تطهير سيكشن {{num}}",
+        "select_dept_hint": "اختر القسم للوصول لعناصر التحكم في التطهير"
       },
       "days": {
         "Saturday": "السبت",
@@ -796,7 +796,7 @@
         "Friday": "الجمعة"
       },
       "stats": {
-        "temporal_sync": "مزامنة الجدول",
+        "temporal_sync": "مزامنة زمنية",
         "scheduled_events": "الفعاليات المجدولة"
       },
       "status": {
@@ -960,7 +960,7 @@
     },
     "records": {
       "title": "سجلات الطلاب",
-      "description": "إدارة المساقات والدرجات لطالب معين",
+      "description": "إدارة المواد والدرجات لطالب معين",
       "search_label": "البحث عن طالب",
       "search_placeholder": "اكتب الاسم أو الرقم الجامعي...",
       "select_label": "اختر الطالب",
@@ -969,26 +969,26 @@
       "level_label": "المستوى",
       "section_label": "الشعبة",
       "id_label": "الرقم الجامعي",
-      "enrollment_title": "المساقات المسجلة",
-      "add_course_btn": "إضافة مساق",
-      "course_name_col": "اسم المساق",
+      "enrollment_title": "المواد المسجلة",
+      "add_course_btn": "إضافة مادة",
+      "course_name_col": "اسم المادة",
       "semester_col": "الفصل الدراسي",
       "actions_col": "العمليات",
-      "no_courses": "لم يتم العثور على مساقات",
+      "no_courses": "لم يتم العثور على مواد",
       "semester_label": "الفصل {{count}}",
       "grades_title": "سجل الدرجات",
       "midterm_col": "أعمال السنة",
       "practical_col": "العملي",
       "oral_col": "الشفوي",
       "no_grades": "لم يتم العثور على درجات",
-      "enroll_modal_title": "تسجيل في مساق",
+      "enroll_modal_title": "تسجيل في مادة",
       "enroll_modal_subtitle": "تسجيل الطالب: {{name}}",
-      "choose_course_label": "اختر المساق",
-      "choose_course_placeholder": "-- اختر المساق --",
-      "add_btn": "إضافة المساق",
+      "choose_course_label": "اختر المادة",
+      "choose_course_placeholder": "-- اختر المادة --",
+      "add_btn": "إضافة المادة",
       "cancel_btn": "إلغاء",
       "edit_grade_title": "تعديل الدرجة",
-      "edit_grade_subtitle": "المساق: {{name}}",
+      "edit_grade_subtitle": "  المادة: {{name}}",
       "exam_type_label": "نوع التقييم",
       "score_label": "أدخل الدرجة",
       "status_label": "الحالة",
