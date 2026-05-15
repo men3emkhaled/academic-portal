@@ -30,6 +30,7 @@ const Sidebar = ({ onLogout }) => {
   const isDraggingRef = useRef(false);
   const touchStartXRef = useRef(0);
   const canDragRef = useRef(false);
+  const rectRef = useRef(null);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -141,7 +142,6 @@ const Sidebar = ({ onLogout }) => {
   // ============= Mobile Dock (Facebook Style) =============
 
   // Mobile Handlers
-  const rectRef = useRef(null);
 
   const handleTouchStart = (e) => {
     isDraggingRef.current = false;

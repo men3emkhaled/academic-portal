@@ -95,17 +95,12 @@ const StudentCourseHub = () => {
 
   const isAr = i18n.language === 'ar';
 
-  if (loading) {
-    return (
-      <div className="flex flex-col justify-center items-center h-screen bg-white dark:bg-[#0c0c14]">
-        <div className="w-12 h-12 border-2 border-gray-200 dark:border-white/10 border-t-[#2cfc7d] rounded-full animate-spin"></div>
-      </div>
-    );
-  }
-
-  if (!data) return null;
-
-  const { course, qrToken, announcements, progress = [], tasks, attendance = [] } = data;
+  const course = data?.course || {};
+  const qrToken = data?.qrToken || '';
+  const announcements = data?.announcements || [];
+  const progress = data?.progress || [];
+  const tasks = data?.tasks || [];
+  const attendance = data?.attendance || [];
   const attendedCount = attendance.filter(a => a.is_present).length;
 
   const tabs = [
@@ -128,13 +123,26 @@ const StudentCourseHub = () => {
       <Sidebar />
 
       <main className="md:ps-72 min-h-screen relative z-10 flex flex-col">
-        
+        {loading || !data ? (
+          <div className="flex flex-col justify-center items-center flex-1 min-h-[60vh]">
+            <div className="w-12 h-12 border-2 border-gray-200 dark:border-white/10 border-t-[#2cfc7d] rounded-full animate-spin"></div>
+          </div>
+        ) : (
+        <>
         {/* HERO SECTION - REPLICA OF DASHBOARD STYLE */}
         <section className="px-6 lg:px-10 pt-16 pb-12 max-w-[1500px] mx-auto w-full space-y-12">
           
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-10">
             <div className="space-y-4 max-w-3xl">
               
+              <button 
+                onClick={() => navigate('/student/dashboard')}
+                className="flex w-fit items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 hover:text-[#10b981] dark:hover:text-[#2cfc7d] transition-colors group mb-2"
+              >
+                <ArrowLeft className={`w-3.5 h-3.5 transition-transform ${isAr ? 'rotate-180 group-hover:translate-x-1' : 'group-hover:-translate-x-1'}`} />
+                {t('hub.back', { defaultValue: isAr ? 'العودة للرئيسية' : 'Back to Dashboard' })}
+              </button>
+
               <h1 className={`text-[clamp(2.5rem,6vw,5rem)] font-black leading-[0.95] tracking-tighter uppercase text-gray-900 dark:text-white ${isAr ? 'font-arabic' : ''}`}>
                 {course.name}
               </h1>
@@ -412,6 +420,8 @@ const StudentCourseHub = () => {
 
           </div>
         </section>
+        </>
+        )}
       </main>
 
       <style>{`
