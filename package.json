@@ -1,4 +1,8 @@
 {
+  "scripts": {
+    "start": "node backend/server.js",
+    "build": "echo 'No root build needed'"
+  },
   "dependencies": {
     "bcryptjs": "^3.0.3"
   }
