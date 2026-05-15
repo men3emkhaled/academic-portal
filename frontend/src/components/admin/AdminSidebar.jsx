@@ -9,11 +9,14 @@ const AdminSidebar = ({ activeTab, setActiveTab, admin, onLogout, availableTabs 
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
   const { theme, toggleTheme } = useTheme();
 
-  // Mobile-specific hooks
+  // Hooks MUST be at the top
   const [dragPosition, setDragPosition] = useState(null); // Percentage 0-100
   const dockRef = useRef(null);
   const indicatorRef = useRef(null);
   const isAnimatingRef = useRef(false);
+  const isDraggingRef = useRef(false);
+  const touchStartXRef = useRef(0);
+  const canDragRef = useRef(false);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 1024);
@@ -86,10 +89,6 @@ const AdminSidebar = ({ activeTab, setActiveTab, admin, onLogout, availableTabs 
       </div>
     );
   }
-
-  const isDraggingRef = useRef(false);
-  const touchStartXRef = useRef(0);
-  const canDragRef = useRef(false);
 
   // ============= Mobile Dock Logic =============
   const handleTouchStart = (e) => {
