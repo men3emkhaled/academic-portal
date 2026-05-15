@@ -66,7 +66,7 @@ const AdminDashboard = () => {
   const ALL_TABS = [
     { id: 'overview', label: t('admin.sidebar.tabs.overview'), icon: <LayoutDashboard className="w-4 h-4" />, reqPerm: 'admin' },
     { id: 'courses', label: t('admin.sidebar.tabs.courses'), icon: <BookOpen className="w-4 h-4" />, reqPerm: 'manage_courses' },
-    { id: 'grades', label: t('admin.sidebar.tabs.grades'), icon: <TrendingUp className="w-4 h-4" />, reqPerm: 'manage_grades' },
+    // { id: 'grades', label: t('admin.sidebar.tabs.grades'), icon: <TrendingUp className="w-4 h-4" />, reqPerm: 'manage_grades' },
     { id: 'resources', label: t('admin.sidebar.tabs.resources'), icon: <FileText className="w-4 h-4" />, reqPerm: 'manage_resources' },
     { id: 'roadmap', label: t('admin.sidebar.tabs.roadmap'), icon: <RoadmapIcon className="w-4 h-4" />, reqPerm: 'manage_roadmap' },
     { id: 'doctors', label: t('admin.sidebar.tabs.doctors'), icon: <UserCheck className="w-4 h-4" />, reqPerm: 'admin' },
@@ -80,7 +80,6 @@ const AdminDashboard = () => {
     { id: 'quizzes', label: t('admin.sidebar.tabs.quizzes'), icon: <Award className="w-4 h-4" />, reqPerm: 'manage_quizzes' },
     { id: 'reviews', label: t('admin.sidebar.tabs.reviews'), icon: <CheckCircle className="w-4 h-4" />, reqPerm: 'manage_quizzes' },
     { id: 'events', label: t('admin.sidebar.tabs.events'), icon: <Heart className="w-4 h-4" />, reqPerm: 'manage_events' },
-    { id: 'progress', label: t('admin.sidebar.tabs.progress'), icon: <CheckCircle className="w-4 h-4" />, reqPerm: 'manage_progress' },
     { id: 'tasks', label: t('admin.sidebar.tabs.tasks'), icon: <CheckSquare className="w-4 h-4" />, reqPerm: 'manage_courses' },
     { id: 'emails', label: t('admin.sidebar.tabs.emails'), icon: <Mail className="w-4 h-4" />, reqPerm: 'admin' },
     { id: 'logs', label: t('admin.sidebar.tabs.logs'), icon: <ScrollText className="w-4 h-4" />, reqPerm: 'admin' },

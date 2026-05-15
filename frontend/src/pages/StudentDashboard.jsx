@@ -130,25 +130,6 @@ const StudentDashboard = () => {
           {/* MAIN BENTO GRID */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pb-20">
             
-            {/* Summary Row */}
-            <div className="lg:col-span-12 bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-10 text-gray-900 dark:text-white flex flex-col md:flex-row justify-between gap-10 group transition-all duration-500 hover:shadow-2xl">
-              <div className="space-y-6 flex-1">
-                <p className={`text-[1.8rem] font-black leading-[1.1] tracking-tight ${isAr ? 'font-arabic' : ''}`}>
-                  {t('mavi.grades_desc')}
-                </p>
-              </div>
-              <div className="md:w-1/3 flex flex-col justify-between border-t md:border-t-0 md:border-s border-black/5 dark:border-white/5 pt-6 md:pt-0 md:ps-10">
-                 <div className="space-y-0">
-                    <span className="text-5xl font-black text-[#10b981] dark:text-[#2cfc7d]">{grades.length}</span>
-                    <p className="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 dark:text-white/30">{t('dashboard.enrolled_courses')}</p>
-                 </div>
-                 <div className="space-y-0 mt-6">
-                    <span className="text-2xl font-black text-gray-900 dark:text-white">{student?.section || 'N/A'}</span>
-                    <p className="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 dark:text-white/30">{t('dashboard.section')}</p>
-                 </div>
-              </div>
-            </div>
-
             {/* FULL WIDTH COURSES MATRIX - NO SCROLLING */}
             <div className="lg:col-span-12 space-y-8">
                <div className="flex items-center justify-between px-2">

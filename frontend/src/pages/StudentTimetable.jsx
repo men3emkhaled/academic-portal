@@ -265,8 +265,7 @@ const StudentTimetable = () => {
                           onClick={() => setSelectedDay(day.id)}
                           className={`p-6 rounded-[1.5rem] flex flex-col items-center gap-2 border transition-all duration-500 ${isActive ? 'bg-black dark:bg-white text-white dark:text-black border-transparent shadow-2xl scale-105' : 'bg-gray-50 dark:bg-white/5 border-transparent text-gray-400 hover:bg-gray-100'}`}
                         >
-                          <span className="text-[10px] font-black uppercase tracking-widest">{day.short}</span>
-                          <span className={`text-xl font-black ${isAr ? 'font-arabic' : ''}`}>{isAr ? day.arabic : day.id.slice(0, 3)}</span>
+                          <span className={`text-xl font-black ${isAr ? 'font-arabic' : ''}`}>{isAr ? day.arabic : day.name}</span>
                         </button>
                       );
                     })}
@@ -354,13 +353,29 @@ const StudentTimetable = () => {
                                    <h3 className={`text-xl font-black uppercase tracking-tighter truncate ${isAr ? 'font-arabic' : ''} ${isCompleted ? 'line-through opacity-40' : ''}`}>
                                      {entry.course_name}
                                    </h3>
-                                   {entry.exam_date && (
-                                     <span className="px-4 py-1 rounded-xl bg-[#10b981]/10 text-[#10b981] dark:text-[#2cfc7d] text-xs font-black uppercase tracking-widest whitespace-nowrap">
-                                       {new Date(entry.exam_date).toLocaleDateString(isAr ? 'ar-EG' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric' })}
-                                     </span>
-                                   )}
-                                 </div>
-                             </div>
+                                    {entry.exam_date && (
+                                      <span className="px-4 py-1 rounded-xl bg-[#10b981]/10 text-[#10b981] dark:text-[#2cfc7d] text-xs font-black uppercase tracking-widest whitespace-nowrap">
+                                        {new Date(entry.exam_date).toLocaleDateString(isAr ? 'ar-EG' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric' })}
+                                      </span>
+                                    )}
+                                  </div>
+                                  {entry.type === 'Lecture' && (
+                                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1">
+                                      {entry.instructor && (
+                                        <div className="flex items-center gap-1.5 text-gray-500 dark:text-slate-400">
+                                          <UserCheck size={14} className="opacity-70" />
+                                          <span className="text-[11px] font-black uppercase tracking-widest">{entry.instructor}</span>
+                                        </div>
+                                      )}
+                                      {entry.location && (
+                                        <div className="flex items-center gap-1.5 text-gray-500 dark:text-slate-400">
+                                          <MapPin size={14} className="opacity-70" />
+                                          <span className="text-[11px] font-black uppercase tracking-widest">{entry.location}</span>
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+                              </div>
                           </div>
 
                           <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${isCompleted ? 'bg-[#10b981] text-white' : 'bg-gray-50 dark:bg-white/5 text-gray-200 dark:text-white/5'}`}>
