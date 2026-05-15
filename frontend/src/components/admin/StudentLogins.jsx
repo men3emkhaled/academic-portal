@@ -140,9 +140,9 @@ const StudentLogins = () => {
                        </div>
                     </td>
                     <td className="px-10 py-6 text-inline-end">
-                       <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
-                          <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div>
-                          <span className="text-[9px] font-black text-emerald-600 uppercase tracking-widest">{t('admin.logs.table.details.secure')}</span>
+                       <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 border border-primary/20 rounded-lg">
+                          <div className="w-1.5 h-1.5 bg-primary rounded-full"></div>
+                          <span className="text-[9px] font-black text-primary uppercase tracking-widest">{t('admin.logs.table.details.secure')}</span>
                        </div>
                     </td>
                   </tr>

@@ -37,7 +37,6 @@ import {
 } from 'lucide-react';
 
 import AdminSidebar from '../components/admin/AdminSidebar';
-import AdminHeader from '../components/admin/AdminHeader';
 
 const AdminDashboard = () => {
   const { t, i18n } = useTranslation();
@@ -379,15 +378,105 @@ const AdminDashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-black transition-colors duration-500 font-sans relative overflow-hidden" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
       <AdminSidebar activeTab={activeTab} setActiveTab={handleTabChange} onLogout={logout} admin={decodedToken} availableTabs={availableTabs} />
+      
+      {/* Background Decor matching student dashboard */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute top-[-10%] inset-inline-end-[-5%] w-[50vw] h-[50vw] bg-[#8b5cf6]/5 blur-[120px] rounded-full"></div>
+        <div className="absolute bottom-[-10%] inset-inline-start-[-5%] w-[40vw] h-[40vw] bg-[#2cfc7d]/3 blur-[100px] rounded-full"></div>
+      </div>
 
-      <div className="lg:ps-[22rem] min-h-screen">
-        <AdminHeader admin={decodedToken} setActiveTab={handleTabChange} hasNotificationsAccess={userPermissions.includes('manage_notifications')} />
-        <main className="pt-24 pb-12 overflow-x-hidden">
+      <div className="lg:ps-[22rem] min-h-screen relative z-10">
+        <main className="pt-8 lg:pt-12 pb-12 overflow-x-hidden">
           <div
             key={activeTab}
             className={`flex-1 lg:ps-8 flex flex-col min-w-0 relative w-full ${direction === 0 ? 'animate-fadeIn' : (direction === 1 ? (i18n.language === 'ar' ? 'animate-slideInLeft' : 'animate-slideInRight') : (i18n.language === 'ar' ? 'animate-slideInRight' : 'animate-slideInLeft'))}`}
           >
-            {renderTabContent()}
+            {activeTab === 'overview' ? (
+              <div className="p-6 lg:p-10 space-y-16 lg:space-y-24 animate-in fade-in duration-700 max-w-[1500px] mx-auto w-full">
+                {/* Hero Section */}
+                <div className="space-y-4 max-w-2xl text-start">
+                  <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
+                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 dark:text-white/30">{t('admin.sidebar.tabs.overview')}</span>
+                  </div>
+                  <h1 className={`text-[clamp(2.5rem,6vw,5.5rem)] font-black leading-[0.95] tracking-tighter uppercase text-gray-900 dark:text-white ${i18n.language === 'ar' ? 'font-arabic' : ''}`}>
+                    {t('admin.overview.control_tower')}
+                  </h1>
+                </div>
+
+                {/* Bento Grid Stats */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {[
+                    { label: t('admin.stats.system_load'), value: '12%', icon: Activity, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+                    { label: t('admin.stats.active_users'), value: students.length + 42, icon: Users, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+                    { label: t('admin.stats.database'), value: t('admin.stats.syncing'), icon: Database, color: 'text-amber-500', bg: 'bg-amber-500/10' },
+                    { label: t('admin.stats.protocol'), value: 'v4.0.2', icon: Shield, color: 'text-rose-500', bg: 'bg-rose-500/10' },
+                  ].map((stat, i) => (
+                    <div
+                      key={i}
+                      className="group bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-8 space-y-8 hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all duration-700 shadow-sm"
+                    >
+                      <div className="flex justify-between items-start">
+                        <div className={`w-12 h-12 rounded-2xl ${stat.bg} flex items-center justify-center ${stat.color} group-hover:bg-white/20 transition-all duration-500`}>
+                          <stat.icon className="w-6 h-6" />
+                        </div>
+                        <div className="w-10 h-10 rounded-full border border-gray-100 dark:border-white/10 flex items-center justify-center group-hover:border-white/30 transition-all duration-500">
+                          <TrendingUp className="w-4 h-4 opacity-30" />
+                        </div>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40">{stat.label}</p>
+                        <p className="text-4xl font-black tracking-tighter">{stat.value}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Quick Access Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                  <div className="lg:col-span-8 bg-blue-600 rounded-[3rem] p-12 text-white flex flex-col md:flex-row items-center justify-between gap-10 group overflow-hidden relative shadow-2xl">
+                    <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent pointer-events-none" />
+                    <div className="space-y-4 relative z-10 text-center md:text-start">
+                      <h3 className="text-[3rem] lg:text-[4rem] font-black uppercase italic leading-none">{t('admin.sidebar.tabs.students')}</h3>
+                      <p className="text-blue-100/60 font-black uppercase tracking-widest text-xs">{t('admin.overview.central_node')}</p>
+                    </div>
+                    <div className="flex items-center gap-12 relative z-10">
+                      <span className="text-[6rem] lg:text-[8rem] font-black tracking-tighter leading-none">{students.length}</span>
+                      <button 
+                        onClick={() => handleTabChange('students')}
+                        className="w-20 h-20 bg-black text-white rounded-full flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-2xl"
+                      >
+                        <ChevronRight className={`w-8 h-8 ${i18n.language === 'ar' ? 'rotate-180' : ''}`} />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="lg:col-span-4 bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 rounded-[3rem] p-10 space-y-8 shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-xl font-black uppercase tracking-tighter">{t('quizzes.quick_stats')}</h4>
+                      <div className="w-8 h-8 rounded-full bg-gray-50 dark:bg-white/5 flex items-center justify-center">
+                        <Activity className="w-4 h-4 text-emerald-500" />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 gap-3">
+                      {[
+                        { label: t('admin.sidebar.tabs.courses'), value: courses.length, color: 'text-emerald-500', icon: BookOpen },
+                        { label: t('admin.sidebar.tabs.departments'), value: departments.length, color: 'text-amber-500', icon: LayoutDashboard },
+                        { label: t('admin.sidebar.tabs.notifications'), value: notifications.length, color: 'text-rose-500', icon: Bell },
+                      ].map((s, i) => (
+                        <div key={i} className="flex items-center justify-between p-4 rounded-2xl bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5">
+                           <div className="flex items-center gap-3">
+                              <s.icon className={`w-4 h-4 ${s.color}`} />
+                              <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">{s.label}</span>
+                           </div>
+                           <span className="text-lg font-black">{s.value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : renderTabContent()}
           </div>
         </main>
       </div>

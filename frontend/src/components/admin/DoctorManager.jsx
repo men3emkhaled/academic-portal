@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 
 const DoctorManager = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [doctors, setDoctors] = useState([]);
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -139,22 +139,20 @@ const DoctorManager = () => {
   );
 
   return (
-    <div className="space-y-8 lg:space-y-10 animate-in fade-in duration-700 pb-10">
-      {/* Header Bento Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 flex items-center gap-6 bg-white/50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 p-8 rounded-[2.5rem] shadow-sm">
-          <div className="w-16 h-16 bg-blue-500/10 dark:bg-blue-500/20 rounded-2xl flex items-center justify-center border border-blue-500/20 shadow-inner group transition-transform duration-500 hover:scale-110">
-            <GraduationCap className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+    <div className="space-y-16 lg:space-y-24 animate-in fade-in duration-700 pb-20 max-w-[1500px] mx-auto w-full">
+      {/* Hero Section */}
+      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-10 text-start">
+        <div className="space-y-4 max-w-2xl">
+          <div className="flex items-center gap-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-primary"></div>
+            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 dark:text-white/30">{t('admin.sidebar.tabs.doctors')}</span>
           </div>
-          <div>
-            <h2 className="text-2xl lg:text-3xl font-black text-gray-900 dark:text-white tracking-tight">
-              {t('admin.doctors.title')}
-            </h2>
-            <p className="text-gray-500 dark:text-slate-500 text-sm font-bold mt-1 uppercase tracking-widest">{t('admin.doctors.description')}</p>
-          </div>
+          <h1 className={`text-[clamp(2.5rem,6vw,5.5rem)] font-black leading-[0.95] tracking-tighter uppercase text-gray-900 dark:text-white ${i18n.language === 'ar' ? 'font-arabic' : ''}`}>
+            {t('admin.doctors.title')}
+          </h1>
         </div>
-        
-        <div className="bg-blue-600 text-white p-8 rounded-[2.5rem] shadow-lg shadow-blue-600/20 flex flex-col justify-between relative overflow-hidden group">
+
+        <div className="bg-primary text-white p-8 rounded-[2.5rem] shadow-lg shadow-primary/20 flex flex-col justify-between relative overflow-hidden group min-w-[280px]">
           <div className="absolute inset-inline-end-0 top-0 w-32 h-32 bg-white/10 hidden rounded-full translate-x-1/2 -translate-y-1/2 group-hover:scale-150 transition-transform duration-700"></div>
           <div className="flex justify-between items-start relative z-10">
             <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
@@ -162,38 +160,46 @@ const DoctorManager = () => {
             </div>
             <span className="text-[10px] font-black uppercase tracking-widest bg-black/10 px-3 py-1 rounded-full">{t('admin.doctors.faculty_grid')}</span>
           </div>
-          <div className="mt-4 relative z-10">
-            <p className="text-4xl font-black">{doctors.length}</p>
+          <div className="mt-4 relative z-10 text-start">
+            <p className="text-6xl font-black tracking-tighter">{doctors.length}</p>
             <p className="text-[10px] font-black uppercase tracking-widest opacity-60 mt-1">{t('admin.doctors.authorized_entities')}</p>
           </div>
         </div>
       </div>
 
       {/* Search & Actions Bar */}
-      <div className="flex flex-col lg:flex-row justify-between items-stretch gap-6">
-        <div className="relative flex-1 group">
-          <Search className="absolute inset-inline-start-6 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
-          <input 
-            type="text"
-            placeholder={t('common.search')}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-white dark:bg-white/[0.02] border border-gray-100 dark:border-white/10 rounded-[2rem] ps-16 pe-8 py-5 text-gray-900 dark:text-white font-black focus:ring-4 focus:ring-blue-500/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner uppercase tracking-widest text-[11px]"
-          />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 relative group">
+           <Search className="absolute inset-inline-start-8 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400 group-focus-within:text-primary transition-colors" />
+           <input 
+             type="text"
+             placeholder={t('common.search')}
+             value={searchTerm}
+             onChange={(e) => setSearchTerm(e.target.value)}
+             className="w-full bg-white dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 rounded-[2.5rem] ps-20 pe-10 py-8 text-gray-900 dark:text-white font-black text-xl tracking-tighter uppercase focus:ring-4 focus:ring-primary/10 outline-none transition-all shadow-sm"
+           />
         </div>
+        
         <button
           onClick={() => handleOpenModal('add')}
-          className="flex items-center justify-center gap-3 bg-blue-600 hover:bg-blue-700 text-white font-black py-4.5 px-10 rounded-[2rem] shadow-xl shadow-blue-600/20 hover:scale-[1.02] active:scale-95 transition-[color,background-color,border-color,transform,opacity] whitespace-nowrap group/add"
+          className="group bg-black dark:bg-white text-white dark:text-black rounded-[2.5rem] p-8 flex items-center justify-between gap-6 hover:scale-[1.02] active:scale-95 transition-all shadow-2xl relative overflow-hidden"
         >
-          <Plus className="w-5 h-5 group-hover/add:rotate-90 transition-transform duration-500" /> 
-          <span className="uppercase tracking-widest text-xs">{t('admin.doctors.add_instructor')}</span>
+          <div className="absolute inset-0 bg-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="flex items-center gap-6 relative z-10 text-start">
+            <div className="w-14 h-14 bg-white/10 dark:bg-black/10 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-90 transition-all duration-700">
+              <Plus className="w-7 h-7" />
+            </div>
+            <div>
+               <span className="block text-xl font-black uppercase tracking-tighter leading-none">{t('admin.doctors.add_instructor')}</span>
+               <span className="text-[9px] font-black uppercase tracking-[0.3em] opacity-40 italic">{t('admin.doctors.identity_registration')}</span>
+            </div>
+          </div>
+          <ChevronRight className={`w-6 h-6 opacity-20 group-hover:opacity-100 group-hover:translate-x-2 transition-all ${i18n.language === 'ar' ? 'rotate-180 group-hover:-translate-x-2' : ''}`} />
         </button>
       </div>
 
-      {/* Main Content: Table View */}
-      <div className="bg-white/50 dark:bg-white/[0.01] border border-gray-100 dark:border-white/5 rounded-[3rem] overflow-hidden shadow-sm relative group">
-        <div className="absolute -inset-inline-end-20 -bottom-20 w-96 h-96 bg-blue-500/5 rounded-full hidden pointer-events-none group-hover:scale-110 transition-transform duration-1000"></div>
-
+      {/* Main Content: Table Matrix */}
+      <div className="bg-white dark:bg-white/[0.01] border border-gray-100 dark:border-white/5 rounded-[3rem] overflow-hidden shadow-sm relative group">
         <div className="overflow-x-auto custom-scrollbar relative z-10">
           <table className="w-full text-start border-collapse">
             <thead>
@@ -206,77 +212,71 @@ const DoctorManager = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-white/[0.03]">
-              <>
               {loading ? (
                  <tr>
-                    <td colSpan="5" className="py-32 text-center">
-                        <Activity className="w-12 h-12 text-blue-500 animate-spin mx-auto" />
+                    <td colSpan="5" className="py-40 text-center">
+                        <Activity className="w-16 h-16 text-primary animate-spin mx-auto opacity-20" />
                         <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mt-6">{t('admin.doctors.scanning')}</p>
                     </td>
                  </tr>
               ) : filteredDoctors.length === 0 ? (
                 <tr>
-                    <td colSpan="5" className="text-center py-32">
-                        <div className="flex flex-col items-center gap-6 opacity-30 grayscale">
-                            <GraduationCap className="w-20 h-20 text-gray-400" />
+                    <td colSpan="5" className="text-center py-40">
+                        <div className="flex flex-col items-center gap-6 opacity-20 grayscale">
+                            <GraduationCap className="w-24 h-24 text-gray-400" />
                             <p className="text-gray-500 font-black uppercase tracking-[0.3em] text-xs">{t('admin.doctors.no_doctors')}</p>
                         </div>
                     </td>
                 </tr>
               ) : (
-                filteredDoctors.map((doctor, idx) => (
+                filteredDoctors.map((doctor) => (
                   <tr 
                     key={doctor.id}
-                    
-                    
-                    
-                    className="group/row hover:bg-white dark:hover:bg-white/[0.02] transition-colors"
+                    className="group/row hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all duration-700"
                   >
                     <td className="py-8 px-10">
-                      <div className="flex items-center gap-5">
-                        <div className="w-14 h-14 bg-blue-500/5 dark:bg-blue-500/10 rounded-2xl flex items-center justify-center border border-blue-500/10 text-blue-600 dark:text-blue-400 font-black text-xl shadow-inner group-hover/row:bg-blue-600 group-hover/row:text-white transition-[color,background-color,border-color,transform,opacity] duration-500">
+                      <div className="flex items-center gap-6 text-start">
+                        <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center font-black text-2xl group-hover/row:bg-white/20 group-hover/row:text-white transition-all duration-700">
                           {doctor.name?.charAt(0)}
                         </div>
                         <div className="min-w-0">
-                            <h4 className="text-gray-900 dark:text-white font-black tracking-tight text-lg group-hover/row:text-blue-600 transition-colors">{t('admin.doctors.instructor_prefix')} {doctor.name}</h4>
-                            <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mt-1 italic">{t('admin.doctors.identifier_protocol')}</p>
+                            <h4 className="font-black tracking-tighter text-2xl uppercase leading-none group-hover/row:text-white transition-colors">{doctor.name}</h4>
+                            <p className="text-[9px] font-black uppercase tracking-[0.3em] opacity-40 group-hover/row:opacity-60 transition-opacity mt-2">{t('admin.doctors.identifier_protocol')}</p>
                         </div>
                       </div>
                     </td>
                     <td className="py-8 px-10">
-                        <div className="flex items-center gap-3 text-gray-500 dark:text-slate-400 font-black text-xs tracking-wider">
-                            <Mail className="w-4 h-4 text-blue-500/40" />
+                        <div className="flex items-center gap-3 font-black text-[11px] tracking-widest opacity-60 group-hover/row:opacity-100 transition-opacity">
+                            <Mail className="w-4 h-4" />
                             {doctor.email}
                         </div>
                     </td>
                     <td className="py-8 px-10 text-center">
-                      <span className="px-4 py-1.5 rounded-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-500 dark:text-slate-400 text-[9px] font-black uppercase tracking-widest italic group-hover/row:border-blue-500/20 transition-[color,background-color,border-color,transform,opacity]">
-                        {doctor.department || t('admin.doctors.general_core')}
+                      <span className="px-4 py-2 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 text-[10px] font-black uppercase tracking-widest group-hover/row:bg-white/20 transition-colors">
+                        {doctor.department || 'CORE_FACULTY'}
                       </span>
                     </td>
                     <td className="py-8 px-10 text-center">
                       <button 
                         onClick={() => handleOpenModal('courses', doctor)}
-                        className="bg-emerald-500/5 hover:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/10 px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-[color,background-color,border-color,transform,opacity] hover:scale-[1.05] active:scale-95 flex items-center justify-center gap-3 mx-auto group/badge"
+                        className="bg-primary/10 text-primary border border-primary/20 px-6 py-3 rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.2em] transition-all hover:scale-[1.05] active:scale-95 group-hover/row:bg-white group-hover/row:text-black group-hover/row:border-white"
                       >
-                        <BookOpen className="w-4 h-4 group-hover/badge:rotate-12 transition-transform" /> 
                         {t('admin.doctors.courses_count', { count: doctor.courses_count })}
                       </button>
                     </td>
                     <td className="py-8 px-10">
-                      <div className="flex justify-inline-end gap-3 opacity-0 group-hover/row:opacity-100 transition-[color,background-color,border-color,transform,opacity] scale-90 group-hover/row:scale-100">
-                        <button onClick={() => handleOpenModal('edit', doctor)} className="w-11 h-11 flex items-center justify-center rounded-xl bg-amber-500/5 text-amber-500 border border-amber-500/10 hover:bg-amber-500 hover:text-white transition-[color,background-color,border-color,transform,opacity] shadow-sm">
-                          <Edit3 className="w-4.5 h-4.5" />
+                      <div className="flex justify-inline-end gap-3 opacity-0 group-hover/row:opacity-100 transition-all scale-90 group-hover/row:scale-100">
+                        <button onClick={() => handleOpenModal('edit', doctor)} className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white/10 border border-white/20 text-white dark:text-black transition-all">
+                          <Edit3 className="w-5 h-5" />
                         </button>
-                        <button onClick={() => handleDelete(doctor.id)} className="w-11 h-11 flex items-center justify-center rounded-xl bg-rose-500/5 text-rose-500 border border-rose-500/10 hover:bg-rose-600 hover:text-white transition-[color,background-color,border-color,transform,opacity] shadow-sm">
-                          <Trash2 className="w-4.5 h-4.5" />
+                        <button onClick={() => handleDelete(doctor.id)} className="w-12 h-12 flex items-center justify-center rounded-2xl bg-rose-500/20 border border-rose-500/20 text-rose-500 hover:bg-rose-500 hover:text-white transition-all">
+                          <Trash2 className="w-5 h-5" />
                         </button>
                       </div>
                     </td>
                   </tr>
                 ))
               )}
-              </>
             </tbody>
           </table>
         </div>
@@ -286,20 +286,17 @@ const DoctorManager = () => {
       <>
       {(modalType === 'add' || modalType === 'edit') && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
-          <div    onClick={handleCloseModal} className="absolute inset-0 bg-gray-950/40 dark:bg-black/80" />
+          <div onClick={handleCloseModal} className="absolute inset-0 bg-gray-950/40 dark:bg-black/80 backdrop-blur-sm" />
           <div 
-            
-            
-            
             className="bg-white dark:bg-[#080808] border border-gray-100 dark:border-white/5 rounded-[3.5rem] p-10 lg:p-12 w-full max-w-xl shadow-2xl relative overflow-hidden z-10" 
             onClick={e => e.stopPropagation()}
           >
             {/* Modal Background Glow */}
-            <div className="absolute top-0 inset-inline-end-0 w-80 h-80 bg-blue-500/10 hidden rounded-full pointer-events-none"></div>
+            <div className="absolute top-0 inset-inline-end-0 w-80 h-80 bg-primary/5 hidden rounded-full pointer-events-none"></div>
 
             <div className="flex items-center justify-between mb-12 pb-8 border-b border-gray-100 dark:border-white/5 relative z-10">
                 <div className="flex items-center gap-6">
-                  <div className="w-16 h-16 bg-blue-500/10 dark:bg-blue-500/20 rounded-2xl flex items-center justify-center border border-blue-500/20 shadow-inner text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform duration-500">
+                  <div className="w-16 h-16 bg-primary/10 dark:bg-primary/20 rounded-2xl flex items-center justify-center border border-primary/20 shadow-inner text-primary group-hover:scale-110 transition-transform duration-500">
                     <UserCircle className="w-8 h-8" />
                   </div>
                   <div>
@@ -318,13 +315,13 @@ const DoctorManager = () => {
               <div className="space-y-3">
                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('admin.doctors.full_name')} *</label>
                 <div className="relative group/name">
-                    <UserCircle className="absolute inset-inline-start-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/name:text-blue-500 transition-colors" />
+                    <UserCircle className="absolute inset-inline-start-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/name:text-primary transition-colors" />
                     <input
                         type="text"
                         required
                         value={formData.name}
                         onChange={e => setFormData({...formData, name: e.target.value})}
-                        className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl ps-14 pe-6 py-5 font-black focus:ring-4 focus:ring-blue-500/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner uppercase tracking-widest text-sm"
+                        className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl ps-14 pe-6 py-5 font-black focus:ring-4 focus:ring-primary/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner uppercase tracking-widest text-sm"
                         placeholder="John Doe"
                     />
                 </div>
@@ -332,13 +329,13 @@ const DoctorManager = () => {
               <div className="space-y-3">
                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('admin.doctors.email_label')} *</label>
                 <div className="relative group/email">
-                    <Mail className="absolute inset-inline-start-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/email:text-blue-500 transition-colors" />
+                    <Mail className="absolute inset-inline-start-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/email:text-primary transition-colors" />
                     <input
                         type="email"
                         required
                         value={formData.email}
                         onChange={e => setFormData({...formData, email: e.target.value})}
-                        className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl ps-14 pe-6 py-5 font-black focus:ring-4 focus:ring-blue-500/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner font-mono text-xs tracking-wider"
+                        className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl ps-14 pe-6 py-5 font-black focus:ring-4 focus:ring-primary/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner font-mono text-xs tracking-wider"
                         placeholder="doctor@academy.edu"
                     />
                 </div>
@@ -346,33 +343,33 @@ const DoctorManager = () => {
               <div className="space-y-3">
                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('admin.doctors.password')}</label>
                 <div className="relative group/pass">
-                    <Shield className="absolute inset-inline-start-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/pass:text-blue-500 transition-colors" />
+                    <Shield className="absolute inset-inline-start-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/pass:text-primary transition-colors" />
                     <input
                         type="password"
                         required={modalType === 'add'}
                         value={formData.password}
                         onChange={e => setFormData({...formData, password: e.target.value})}
                         placeholder={modalType === 'edit' ? t('admin.doctors.password_hint') : "••••••••"}
-                        className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl ps-14 pe-6 py-5 font-black focus:ring-4 focus:ring-blue-500/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner placeholder:text-[9px] placeholder:font-black uppercase placeholder:tracking-[0.2em]"
+                        className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl ps-14 pe-6 py-5 font-black focus:ring-4 focus:ring-primary/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner placeholder:text-[9px] placeholder:font-black uppercase placeholder:tracking-[0.2em]"
                     />
                 </div>
               </div>
               <div className="space-y-3">
                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('admin.doctors.department')}</label>
                 <div className="relative group/dept">
-                    <Building2 className="absolute inset-inline-start-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/dept:text-blue-500 transition-colors" />
+                    <Building2 className="absolute inset-inline-start-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/dept:text-primary transition-colors" />
                     <input
                         type="text"
                         value={formData.department}
                         onChange={e => setFormData({...formData, department: e.target.value})}
-                        className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl ps-14 pe-6 py-5 font-black focus:ring-4 focus:ring-blue-500/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner uppercase tracking-widest text-[11px]"
+                        className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl ps-14 pe-6 py-5 font-black focus:ring-4 focus:ring-primary/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner uppercase tracking-widest text-[11px]"
                         placeholder="e.g. Computer Science"
                     />
                 </div>
               </div>
               
               <div className="flex gap-6 pt-12 border-t border-gray-100 dark:border-white/5">
-                <button type="submit" className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-black py-5 rounded-[2.5rem] shadow-xl shadow-blue-600/20 transition-[color,background-color,border-color,transform,opacity] hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-3 group/save">
+                <button type="submit" className="flex-1 bg-primary hover:bg-primary text-white font-black py-5 rounded-[2.5rem] shadow-xl shadow-primary/20 transition-[color,background-color,border-color,transform,opacity] hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-3 group/save">
                     <CheckCircle className="w-6 h-6 group-hover/save:scale-110 transition-transform" />
                     <span className="uppercase tracking-widest text-xs">
                         {modalType === 'add' ? t('admin.doctors.create_instructor') : t('admin.doctors.save_changes')}
@@ -392,28 +389,25 @@ const DoctorManager = () => {
       <>
       {modalType === 'courses' && selectedDoctor && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
-          <div    onClick={handleCloseModal} className="absolute inset-0 bg-gray-950/40 dark:bg-black/80" />
+          <div onClick={handleCloseModal} className="absolute inset-0 bg-gray-950/40 dark:bg-black/80 backdrop-blur-sm" />
           <div 
-            
-            
-            
             className="bg-white dark:bg-[#080808] border border-gray-100 dark:border-white/5 rounded-[3.5rem] p-10 lg:p-12 w-full max-w-2xl shadow-2xl relative overflow-hidden z-10 max-h-[85vh] flex flex-col" 
             onClick={e => e.stopPropagation()}
           >
             {/* Modal Background Glow */}
-            <div className="absolute top-0 inset-inline-end-0 w-80 h-80 bg-emerald-500/10 hidden rounded-full pointer-events-none"></div>
+            <div className="absolute top-0 inset-inline-end-0 w-80 h-80 bg-primary/10 hidden rounded-full pointer-events-none"></div>
 
             <div className="flex items-center justify-between mb-10 pb-8 border-b border-gray-100 dark:border-white/5 shrink-0 relative z-10">
                 <div className="flex items-center gap-6">
-                  <div className="w-16 h-16 bg-emerald-500/10 dark:bg-emerald-500/20 rounded-[1.5rem] flex items-center justify-center border border-emerald-500/20 shadow-inner text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform duration-500">
+                  <div className="w-16 h-16 bg-primary/10 dark:bg-primary/20 rounded-[1.5rem] flex items-center justify-center border border-primary/20 shadow-inner text-primary group-hover:scale-110 transition-transform duration-500">
                     <Layers className="w-8 h-8" />
                   </div>
                   <div>
                     <h3 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight uppercase">{t('admin.doctors.assign_courses')}</h3>
-                    <p className="text-emerald-500 text-[10px] font-black uppercase tracking-widest mt-1 italic">{t('admin.doctors.instructor_prefix')} {selectedDoctor.name}</p>
+                    <p className="text-primary text-[10px] font-black uppercase tracking-widest mt-1 italic">{t('admin.doctors.instructor_prefix')} {selectedDoctor.name}</p>
                   </div>
                 </div>
-                <button onClick={handleCloseModal} className="w-12 h-12 flex items-center justify-center bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 text-gray-500 rounded-2xl hover:text-emerald-600 transition-[color,background-color,border-color,transform,opacity] shadow-sm">
+                <button onClick={handleCloseModal} className="w-12 h-12 flex items-center justify-center bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 text-gray-500 rounded-2xl hover:text-primary transition-[color,background-color,border-color,transform,opacity] shadow-sm">
                   <X className="w-6 h-6" />
                 </button>
             </div>
@@ -426,17 +420,17 @@ const DoctorManager = () => {
                   </div>
               ) : (
                 courses.map(course => (
-                  <div key={course.id} className="group flex items-center justify-between p-8 bg-gray-50 dark:bg-white/[0.01] border border-gray-100 dark:border-white/5 rounded-[2.5rem] hover:border-emerald-500/30 hover:bg-emerald-500/[0.02] transition-[color,background-color,border-color,transform,opacity] duration-500 hover:shadow-xl hover:shadow-emerald-500/5">
+                  <div key={course.id} className="group flex items-center justify-between p-8 bg-gray-50 dark:bg-white/[0.01] border border-gray-100 dark:border-white/5 rounded-[2.5rem] hover:border-primary/30 hover:bg-primary/[0.02] transition-[color,background-color,border-color,transform,opacity] duration-500 hover:shadow-xl hover:shadow-primary/5">
                     <div className="flex items-center gap-6 min-w-0">
                       <div className={`w-14 h-14 rounded-2xl flex items-center justify-center border transition-[color,background-color,border-color,transform,opacity] duration-700 shadow-inner group-hover:scale-110 ${
                           doctorCourses.includes(course.id) 
-                          ? 'bg-emerald-500 text-white border-emerald-500 shadow-emerald-500/20' 
+                          ? 'bg-primary text-white border-primary shadow-primary/20' 
                           : 'bg-white dark:bg-black/40 border-gray-100 dark:border-white/10 text-gray-400'
                       }`}>
                           <BookOpen className="w-6 h-6" />
                       </div>
                       <div className="min-w-0">
-                          <h4 className="font-black text-gray-900 dark:text-white tracking-tight uppercase text-lg group-hover:text-emerald-500 transition-colors truncate">{course.name}</h4>
+                          <h4 className="font-black text-gray-900 dark:text-white tracking-tight uppercase text-lg group-hover:text-primary transition-colors truncate">{course.name}</h4>
                           <div className="flex items-center gap-3 mt-1.5 text-[9px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-widest italic">
                               <span>{t('admin.doctors.semester')}: {course.semester}</span>
                               <div className="w-1 h-1 bg-gray-200 dark:bg-slate-800 rounded-full"></div>
@@ -449,7 +443,7 @@ const DoctorManager = () => {
                       className={`px-10 py-4.5 rounded-[1.5rem] font-black text-[10px] uppercase tracking-[0.2em] transition-[color,background-color,border-color,transform,opacity] hover:scale-[1.02] active:scale-95 shadow-xl shrink-0 ${
                         doctorCourses.includes(course.id)
                           ? 'bg-rose-500 text-white shadow-rose-500/20 border border-rose-600'
-                          : 'bg-emerald-500 text-white shadow-emerald-500/20 border border-emerald-600'
+                          : 'bg-primary text-white shadow-primary/20 border border-primary'
                       }`}
                     >
                       {doctorCourses.includes(course.id) ? t('admin.doctors.remove') : t('admin.doctors.assign')}
@@ -467,10 +461,10 @@ const DoctorManager = () => {
         .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { 
-          background: rgba(59, 130, 246, 0.1); 
+          background: rgba(46, 204, 113, 0.1); 
           border-radius: 10px;
         }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(59, 130, 246, 0.2); }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(46, 204, 113, 0.2); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>

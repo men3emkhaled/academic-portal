@@ -15,6 +15,12 @@ const Sidebar = ({ onLogout }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const isItemActive = (itemPath) => {
+    if (location.pathname === itemPath) return true;
+    if (itemPath === '/student/dashboard' && location.pathname.startsWith('/student/course/')) return true;
+    return false;
+  };
+
   // Mobile-specific hooks moved here to avoid "fewer hooks than expected" error
   const [dragPosition, setDragPosition] = useState(null); // Percentage 0-100
   const dockRef = React.useRef(null);
@@ -86,16 +92,17 @@ const Sidebar = ({ onLogout }) => {
           </div>
 
           <nav className="flex-1 px-4 py-8 space-y-2 overflow-y-auto hidden-scrollbar relative z-10">
-            {desktopItems.map((item) => (
+            {desktopItems.map((item) => {
+              const isActive = isItemActive(item.path);
+              return (
               <NavLink
                 key={item.id}
                 to={item.path}
-                className={({ isActive }) => `
+                className={`
                   relative group/item flex items-center gap-4 px-6 py-4 rounded-2xl transition-all duration-500
                   ${isActive ? 'text-gray-900 dark:text-white font-black' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-200'}
                 `}
               >
-                {({ isActive }) => (
                   <>
                     {isActive && (
                       <div className="absolute inset-0 bg-gray-100 dark:bg-white/5 rounded-2xl animate-in fade-in zoom-in-95 duration-500" />
@@ -108,9 +115,8 @@ const Sidebar = ({ onLogout }) => {
                       <div className="absolute start-0 w-1 h-6 bg-primary rounded-full shadow-[4px_0_15px_rgba(46,204,113,0.5)]" />
                     )}
                   </>
-                )}
               </NavLink>
-            ))}
+            )})}
           </nav>
 
           <div className="p-6 pt-0 relative z-10">
@@ -134,30 +140,47 @@ const Sidebar = ({ onLogout }) => {
 
   // ============= Mobile Dock (Facebook Style) =============
 
+  // Mobile Handlers
+  const rectRef = useRef(null);
+
   const handleTouchStart = (e) => {
     isDraggingRef.current = false;
     touchStartXRef.current = e.targetTouches[0].clientX;
 
     if (!dockRef.current) return;
-    const rect = dockRef.current.getBoundingClientRect();
+    
+    // Cache the rect on touchstart
+    rectRef.current = dockRef.current.getBoundingClientRect();
+    const rect = rectRef.current;
+    
     const relativeX = e.targetTouches[0].clientX - rect.left;
     let percent = (relativeX / rect.width) * 100;
     if (i18n.language === 'ar') percent = 100 - percent;
 
     const itemWidth = 100 / bottomBarItems.length;
     const touchedIndex = Math.max(0, Math.min(Math.floor(percent / itemWidth), bottomBarItems.length - 1));
-    const currentIndex = bottomBarItems.findIndex(item => location.pathname === item.path);
+    const currentIndex = bottomBarItems.findIndex(item => isItemActive(item.path));
 
     canDragRef.current = touchedIndex === currentIndex && bottomBarItems[touchedIndex].id !== 'menu';
   };
 
   const handleTouchMove = (e) => {
-    if (!canDragRef.current) return;
-    if (Math.abs(e.targetTouches[0].clientX - touchStartXRef.current) > 10) {
+    if (!canDragRef.current || !rectRef.current) return;
+    const clientX = e.targetTouches[0].clientX;
+    const diff = Math.abs(clientX - touchStartXRef.current);
+    
+    if (diff > 10) {
       isDraggingRef.current = true;
     }
+    
     if (isDraggingRef.current) {
-      updateDragPosition(e.targetTouches[0].clientX);
+      const rect = rectRef.current;
+      let percent = ((clientX - rect.left) / rect.width) * 100;
+      if (i18n.language === 'ar') percent = 100 - percent;
+      
+      const newPos = Math.max(0, Math.min(percent, 100));
+      // Optimization: Only update if movement is significant
+      setDragPosition(prev => Math.abs(prev - newPos) > 0.5 ? newPos : prev);
     }
   };
 
@@ -188,7 +211,7 @@ const Sidebar = ({ onLogout }) => {
     canDragRef.current = false;
   };
 
-  const currentIndex = bottomBarItems.findIndex(item => location.pathname === item.path);
+  const currentIndex = bottomBarItems.findIndex(item => isItemActive(item.path));
   const itemWidthPercent = 100 / bottomBarItems.length;
 
   // Animation Logic for the Indicator
@@ -271,12 +294,14 @@ const Sidebar = ({ onLogout }) => {
             
             <div className="px-6 pb-2 space-y-2 max-h-[45vh] overflow-y-auto hidden-scrollbar">
               <div className="grid grid-cols-1 gap-2">
-                {menuItems.map((item) => (
+                {menuItems.map((item) => {
+                  const isActive = isItemActive(item.path);
+                  return (
                   <NavLink
                     key={item.id}
                     to={item.path}
                     onClick={() => setIsOpen(false)}
-                    className={({ isActive }) => `
+                    className={`
                       group flex items-center justify-between px-6 py-5 rounded-[1.5rem] transition-all duration-500
                       ${isActive 
                         ? 'bg-gray-900 dark:bg-white text-white dark:text-black shadow-xl scale-[1.02]' 
@@ -291,7 +316,7 @@ const Sidebar = ({ onLogout }) => {
                     </div>
                     <ArrowRight className={`w-4 h-4 opacity-20 group-hover:opacity-100 transition-all ${i18n.language === 'ar' ? 'rotate-180' : ''}`} />
                   </NavLink>
-                ))}
+                )})}
               </div>
             </div>
 

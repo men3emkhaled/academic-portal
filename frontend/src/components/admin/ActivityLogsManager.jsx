@@ -12,7 +12,7 @@ import {
 const MODULE_COLORS = {
   'Auth': { bg: 'bg-yellow-500/10', text: 'text-yellow-600 dark:text-yellow-400', border: 'border-yellow-500/20' },
   'Students': { bg: 'bg-blue-500/10', text: 'text-blue-600 dark:text-blue-400', border: 'border-blue-500/20' },
-  'Courses': { bg: 'bg-emerald-500/10', text: 'text-emerald-600 dark:text-emerald-400', border: 'border-emerald-500/20' },
+  'Courses': { bg: 'bg-primary/10', text: 'text-primary dark:text-primary', border: 'border-primary/20' },
   'Grades': { bg: 'bg-purple-500/10', text: 'text-purple-600 dark:text-purple-400', border: 'border-purple-500/20' },
   'Timetable': { bg: 'bg-cyan-500/10', text: 'text-cyan-600 dark:text-cyan-400', border: 'border-cyan-500/20' },
   'Notifications': { bg: 'bg-red-500/10', text: 'text-red-600 dark:text-red-400', border: 'border-red-500/20' },
@@ -297,8 +297,8 @@ const ActivityLogsManager = () => {
                                 </div>
                                 <div className="space-y-4">
                                    <div>
-                                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1 flex items-center gap-2"><Activity className="w-3 h-3 text-emerald-500" /> {t('admin.logs.table.details.signal_status')}</p>
-                                      <p className={`text-sm font-black ${log.status_code < 400 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1 flex items-center gap-2"><Activity className="w-3 h-3 text-primary" /> {t('admin.logs.table.details.signal_status')}</p>
+                                      <p className={`text-sm font-black ${log.status_code < 400 ? 'text-primary' : 'text-rose-500'}`}>
                                         {log.status_code || '200 OK'} • {t('admin.logs.table.details.authorized')}
                                       </p>
                                    </div>
@@ -318,7 +318,7 @@ const ActivityLogsManager = () => {
                                       <div>
                                          <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">{t('admin.logs.table.details.payload_matrix')}</p>
                                          <div className="max-h-48 overflow-y-auto no-scrollbar bg-black dark:bg-black/40 rounded-xl p-4 border border-white/5">
-                                            <pre className="text-[10px] font-mono text-emerald-400 leading-relaxed whitespace-pre-wrap">
+                                            <pre className="text-[10px] font-mono text-primary leading-relaxed whitespace-pre-wrap">
                                                {JSON.stringify(log.details, null, 2)}
                                             </pre>
                                          </div>

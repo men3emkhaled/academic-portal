@@ -213,7 +213,7 @@ const DepartmentManager = () => {
                    <div className="flex items-center gap-2.5 text-[9px] font-black text-gray-400 dark:text-slate-600 uppercase tracking-widest">
                       <Database className="w-4 h-4 text-purple-500/40" /> ID: #{dept.id}
                    </div>
-                   <div className="flex items-center gap-2.5 text-[9px] font-black text-emerald-500 uppercase tracking-widest group-hover:animate-pulse">
+                   <div className="flex items-center gap-2.5 text-[9px] font-black text-primary uppercase tracking-widest group-hover:animate-pulse">
                       <Activity className="w-4 h-4" /> {t('admin.departments.active_status')}
                    </div>
                 </div>

@@ -220,7 +220,7 @@ const ProgressManager = ({ courses = [] }) => {
                   key={item.id}
                   className={`group relative flex items-center gap-6 p-6 rounded-[2rem] border transition-[color,background-color,border-color,transform,opacity] duration-500 ${
                     item.is_completed
-                      ? 'bg-emerald-500/5 dark:bg-emerald-500/5 border-emerald-500/20 hover:border-emerald-500/40 shadow-emerald-500/5'
+                      ? 'bg-primary/5 dark:bg-primary/5 border-primary/20 hover:border-primary/40 shadow-primary/5'
                       : 'bg-teal-500/5 dark:bg-teal-500/5 border-teal-500/20 hover:border-teal-500/40 shadow-teal-500/5'
                   }`}
                 >
@@ -228,7 +228,7 @@ const ProgressManager = ({ courses = [] }) => {
                     onClick={() => handleToggle(item.id)}
                     className={`w-12 h-12 rounded-xl flex items-center justify-center transition-[color,background-color,border-color,transform,opacity] ${
                         item.is_completed 
-                        ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30 rotate-[360deg]' 
+                        ? 'bg-primary text-white shadow-lg shadow-primary/30 rotate-[360deg]' 
                         : 'bg-white dark:bg-white/5 border border-teal-500/30 text-teal-400'
                     }`}
                   >
@@ -326,7 +326,7 @@ const ProgressManager = ({ courses = [] }) => {
                   {/* Progressive Bar */}
                   <div className="relative w-full h-3 bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden mb-10 shadow-inner">
                     <div
-                      className="absolute left-0 top-0 h-full bg-gradient-to-r from-teal-600 to-emerald-400 rounded-full transition-[color,background-color,border-color,transform,opacity] duration-1000 group-hover:shadow-[0_0_15px_rgba(20,184,166,0.5)]"
+                      className="absolute left-0 top-0 h-full bg-gradient-to-r from-teal-600 to-primary rounded-full transition-[color,background-color,border-color,transform,opacity] duration-1000 group-hover:shadow-[0_0_15px_rgba(20,184,166,0.5)]"
                       style={{ width: `${pct}%` }}
                     />
                   </div>
@@ -348,13 +348,13 @@ const ProgressManager = ({ courses = [] }) => {
                       {data.items.map((item, idx) => (
                         <div key={item.id} className="flex items-center justify-between group/item">
                           <div className="flex items-center gap-3">
-                             <div className={`w-2 h-2 rounded-full ${item.is_completed ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-teal-500/20'}`}></div>
+                             <div className={`w-2 h-2 rounded-full ${item.is_completed ? 'bg-primary shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-teal-500/20'}`}></div>
                              <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{idx + 1}.</span>
                              <span className={`text-sm font-bold transition-colors ${item.is_completed ? 'text-gray-900 dark:text-gray-300' : 'text-gray-400 dark:text-gray-600'}`}>
                                {item.title}
                              </span>
                           </div>
-                          {item.is_completed && <CheckCircle className="w-3.5 h-3.5 text-emerald-500" />}
+                          {item.is_completed && <CheckCircle className="w-3.5 h-3.5 text-primary" />}
                         </div>
                       ))}
                     </div>

@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 
 const CoursesManager = ({ departments }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -97,22 +97,20 @@ const CoursesManager = ({ departments }) => {
   };
 
   return (
-    <div className="space-y-8 lg:space-y-10 animate-in fade-in duration-700">
-      {/* Header Bento Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 flex items-center gap-6 bg-white/50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 p-8 rounded-[2.5rem] shadow-sm">
-          <div className="w-16 h-16 bg-emerald-500/10 dark:bg-emerald-500/20 rounded-2xl flex items-center justify-center border border-emerald-500/20 shadow-inner group transition-transform duration-500 hover:scale-110">
-            <BookOpen className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
+    <div className="space-y-16 lg:space-y-24 animate-in fade-in duration-700 pb-20 max-w-[1500px] mx-auto w-full">
+      {/* Hero Section */}
+      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-10">
+        <div className="space-y-4 max-w-2xl text-start">
+          <div className="flex items-center gap-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-primary"></div>
+            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 dark:text-white/30">{t('admin.sidebar.tabs.courses')}</span>
           </div>
-          <div>
-            <h2 className="text-2xl lg:text-3xl font-black text-gray-900 dark:text-white tracking-tight">
-              {t('admin.courses.title')}
-            </h2>
-            <p className="text-gray-500 dark:text-slate-500 text-sm font-bold mt-1 uppercase tracking-widest">{t('admin.courses.description')}</p>
-          </div>
+          <h1 className={`text-[clamp(2.5rem,6vw,5.5rem)] font-black leading-[0.95] tracking-tighter uppercase text-gray-900 dark:text-white ${i18n.language === 'ar' ? 'font-arabic' : ''}`}>
+            {t('admin.courses.title')}
+          </h1>
         </div>
-        
-        <div className="bg-emerald-500 text-white p-8 rounded-[2.5rem] shadow-lg shadow-emerald-500/20 flex flex-col justify-between relative overflow-hidden group">
+
+        <div className="bg-primary text-white p-8 rounded-[2.5rem] shadow-lg shadow-primary/20 flex flex-col justify-between relative overflow-hidden group min-w-[280px]">
           <div className="absolute inset-inline-end-0 top-0 w-32 h-32 bg-white/10 hidden rounded-full translate-x-1/2 -translate-y-1/2 group-hover:scale-150 transition-transform duration-700"></div>
           <div className="flex justify-between items-start relative z-10">
             <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
@@ -121,94 +119,106 @@ const CoursesManager = ({ departments }) => {
             <span className="text-[10px] font-black uppercase tracking-widest bg-black/10 px-3 py-1 rounded-full">{t('admin.courses.course_nodes')}</span>
           </div>
           <div className="mt-4 relative z-10">
-            <p className="text-4xl font-black">{courses.length}</p>
+            <p className="text-6xl font-black tracking-tighter">{courses.length}</p>
             <p className="text-[10px] font-black uppercase tracking-widest opacity-60 mt-1">{t('admin.courses.validated_modules')}</p>
           </div>
         </div>
       </div>
 
       {/* Actions Bar */}
-      <div className="flex justify-inline-end">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <button
           onClick={() => setShowForm(true)}
-          className="flex items-center justify-center gap-3 bg-gray-900 dark:bg-white text-white dark:text-black font-black py-4.5 px-10 rounded-2xl lg:rounded-[2rem] shadow-xl hover:scale-105 active:scale-95 transition-[color,background-color,border-color,transform,opacity] whitespace-nowrap group"
+          className="group bg-black dark:bg-white text-white dark:text-black rounded-[2.5rem] p-10 flex flex-col md:flex-row items-center justify-between gap-6 hover:scale-[1.02] active:scale-95 transition-all shadow-2xl relative overflow-hidden"
         >
-          <Plus className="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" /> 
-          <span className="uppercase tracking-widest text-xs">{t('admin.courses.add_course')}</span>
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="flex items-center gap-6 relative z-10">
+            <div className="w-16 h-16 bg-white/10 dark:bg-black/10 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-90 transition-all duration-700">
+              <Plus className="w-8 h-8" />
+            </div>
+            <div className="text-start">
+               <span className="block text-2xl font-black uppercase tracking-tighter">{t('admin.courses.add_course')}</span>
+               <span className="text-[10px] font-black uppercase tracking-[0.3em] opacity-40">{t('admin.courses.form_hint')}</span>
+            </div>
+          </div>
+          <ChevronRight className={`w-8 h-8 opacity-20 group-hover:opacity-100 group-hover:translate-x-2 transition-all ${i18n.language === 'ar' ? 'rotate-180 group-hover:-translate-x-2' : ''}`} />
         </button>
+
+        <div className="bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-10 flex items-center justify-between shadow-sm group overflow-hidden relative">
+           <div className="absolute inset-0 bg-primary opacity-0 group-hover:opacity-5 transition-opacity" />
+           <div className="space-y-2 relative z-10">
+              <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">{t('admin.courses.validated_modules')}</p>
+              <h4 className="text-4xl font-black tracking-tighter uppercase">{t('admin.stats.active_users')}</h4>
+           </div>
+           <div className="w-20 h-20 rounded-full border-4 border-primary/10 flex items-center justify-center relative z-10 group-hover:rotate-180 transition-transform duration-1000">
+              <Activity className="w-8 h-8 text-primary" />
+           </div>
+        </div>
       </div>
 
       {/* Course Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        <>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {courses.length === 0 ? (
-          <div 
-            
-            
-            className="col-span-full py-24 text-center border-2 border-gray-100 dark:border-white/5 border-dashed rounded-[3rem] bg-gray-50/30 dark:bg-white/[0.01]"
-          >
-            <BookOpen className="w-16 h-16 mx-auto mb-6 text-gray-200 dark:text-gray-800" />
-            <p className="text-gray-400 dark:text-slate-500 font-black uppercase tracking-[0.2em] text-sm">{t('admin.courses.no_courses')}</p>
-            <p className="text-emerald-500 text-[10px] font-black uppercase tracking-widest mt-2">{t('admin.courses.add_hint')}</p>
+          <div className="col-span-full py-40 text-center border-2 border-dashed border-gray-100 dark:border-white/10 rounded-[3rem] opacity-30 grayscale">
+            <BookOpen className="w-20 h-20 mx-auto mb-6 text-gray-400" />
+            <p className="text-gray-500 font-black uppercase tracking-[0.3em] text-xs">{t('admin.courses.no_courses')}</p>
           </div>
         ) : (
-          courses.map((course, idx) => (
+          courses.map((course) => (
             <div 
                 key={course.id}
-                
-                
-                
-                className="group relative bg-white dark:bg-white/[0.01] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-8 hover:shadow-2xl hover:shadow-emerald-500/10 hover:-translate-y-1 hover:border-emerald-500/20 transition-[color,background-color,border-color,transform,opacity] duration-500 overflow-hidden"
+                className="group relative bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-10 hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all duration-700 shadow-sm flex flex-col justify-between min-h-[400px] overflow-hidden"
             >
-                {/* Status Indicator */}
-                <div className="absolute top-0 inset-inline-start-0 w-1.5 h-full bg-emerald-500/20 group-hover:bg-emerald-500 transition-colors"></div>
+                {/* Background Decor */}
+                <div className="absolute top-[-10%] inset-inline-end-[-5%] w-32 h-32 bg-primary/10 blur-3xl rounded-full group-hover:bg-white/20 transition-all duration-700" />
                 
-                <div className="flex justify-between items-start mb-8 relative z-10">
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-gray-50 dark:bg-black/50 rounded-2xl flex items-center justify-center border border-gray-100 dark:border-white/10 text-gray-400 group-hover:text-emerald-500 group-hover:bg-emerald-500/10 transition-[color,background-color,border-color,transform,opacity] duration-500">
-                            <Layers className="w-6 h-6" />
+                <div className="space-y-8 relative z-10">
+                    <div className="flex justify-between items-start">
+                        <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center text-primary group-hover:bg-white/20 transition-all duration-500">
+                            <Tag className="w-7 h-7" />
                         </div>
-                        <span className="text-[10px] font-black text-gray-500 dark:text-slate-400 uppercase tracking-[0.2em] bg-gray-50 dark:bg-white/5 px-3 py-1.5 rounded-xl border border-gray-100 dark:border-white/10 group-hover:border-emerald-500/30 transition-colors">
+                        <div className="flex gap-2">
+                           <button onClick={(e) => { e.stopPropagation(); editCourse(course); }} className="w-10 h-10 rounded-xl border border-gray-100 dark:border-white/10 flex items-center justify-center hover:bg-primary hover:border-primary hover:text-white transition-all shadow-sm">
+                             <Edit3 className="w-4 h-4" />
+                           </button>
+                           <button onClick={(e) => { e.stopPropagation(); handleDelete(course.id, course.name); }} className="w-10 h-10 rounded-xl border border-gray-100 dark:border-white/10 flex items-center justify-center hover:bg-rose-500 hover:border-rose-500 hover:text-white transition-all shadow-sm">
+                             <Trash2 className="w-4 h-4" />
+                           </button>
+                        </div>
+                    </div>
+
+                    <div className="space-y-2">
+                        <span className="text-[10px] font-black uppercase tracking-[0.4em] opacity-40 group-hover:opacity-100 transition-opacity">
                             {course.code}
                         </span>
+                        <h3 className="text-2xl font-black tracking-tighter uppercase leading-[1.1] line-clamp-3">
+                            {course.name}
+                        </h3>
                     </div>
-                    <div className="flex gap-2.5">
-                        <button onClick={() => editCourse(course)} className="w-10 h-10 rounded-xl bg-blue-500/5 text-blue-500 border border-blue-500/10 hover:bg-blue-500 hover:text-white transition-[color,background-color,border-color,transform,opacity] shadow-sm flex items-center justify-center"><Edit3 className="w-4 h-4" /></button>
-                        <button onClick={() => handleDelete(course.id, course.name)} className="w-10 h-10 rounded-xl bg-rose-500/5 text-rose-500 border border-rose-500/10 hover:bg-rose-500 hover:text-white transition-[color,background-color,border-color,transform,opacity] shadow-sm flex items-center justify-center"><Trash2 className="w-4 h-4" /></button>
-                    </div>
-                </div>
 
-                <h3 className="text-xl font-black text-gray-900 dark:text-white tracking-tight leading-snug mb-6 group-hover:text-emerald-500 transition-colors line-clamp-2 min-h-[3.5rem]">{course.name}</h3>
-                
-                <div className="flex flex-wrap gap-2.5 mb-8">
-                    <span className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-blue-500/5 dark:bg-blue-500/10 border border-blue-500/10 text-blue-600 dark:text-blue-400 text-[10px] font-black uppercase tracking-widest">
-                      <Clock className="w-3.5 h-3.5" /> {t('admin.courses.semester')} {course.semester}
-                    </span>
-                    <span className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-black uppercase tracking-widest">
-                      <BookOpen className="w-3.5 h-3.5" /> {course.credits} {t('admin.courses.credits')}
-                    </span>
-                    {course.department_name && (
-                        <span className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gray-500/5 dark:bg-white/5 border border-gray-100 dark:border-white/10 text-gray-500 dark:text-slate-300 text-[10px] font-black uppercase tracking-widest truncate max-w-[150px]">
-                          <LayoutDashboard className="w-3.5 h-3.5" /> {course.department_name}
+                    <div className="flex flex-wrap gap-2 pt-4">
+                        <span className="px-4 py-2 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 text-[10px] font-black uppercase tracking-widest group-hover:bg-white/10 transition-colors">
+                           {t('admin.courses.semester')} {course.semester}
                         </span>
-                    )}
+                        <span className="px-4 py-2 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 text-[10px] font-black uppercase tracking-widest group-hover:bg-white/10 transition-colors">
+                           {course.credits} {t('admin.courses.credits')}
+                        </span>
+                    </div>
                 </div>
 
-                <div className="pt-6 border-t border-gray-100 dark:border-white/5 flex items-center justify-between relative z-10">
-                    <div className="flex items-center gap-2.5">
-                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
-                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{t('admin.courses.active_course')}</span>
+                <div className="pt-8 border-t border-gray-100 dark:border-white/5 flex items-center justify-between relative z-10 group-hover:border-white/20 transition-all">
+                    <div className="flex items-center gap-3">
+                        <div className="w-2 h-2 rounded-full bg-primary shadow-[0_0_12px_rgba(46,204,113,0.5)] group-hover:bg-white group-hover:shadow-[0_0_12px_rgba(255,255,255,0.5)] transition-all"></div>
+                        <span className="text-[10px] font-black uppercase tracking-[0.3em] opacity-40">{t('admin.courses.active_course')}</span>
                     </div>
-                    <ChevronRight className="w-5 h-5 text-gray-300 dark:text-gray-700 group-hover:translate-x-1 transition-transform rtl:rotate-180 rtl:group-hover:-translate-x-1" />
+                    <ChevronRight className={`w-5 h-5 opacity-20 group-hover:opacity-100 group-hover:translate-x-1 transition-all ${i18n.language === 'ar' ? 'rotate-180 group-hover:-translate-x-1' : ''}`} />
                 </div>
             </div>
           ))
         )}
-        </>
       </div>
 
       {/* Cinematic Modal */}
-      <>
       {showForm && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
           <div 
@@ -226,12 +236,12 @@ const CoursesManager = ({ departments }) => {
             onClick={e => e.stopPropagation()}
           >
              {/* Modal Background Glow */}
-             <div className="absolute top-0 inset-inline-end-0 w-80 h-80 bg-emerald-500/10 hidden rounded-full pointer-events-none"></div>
+             <div className="absolute top-0 inset-inline-end-0 w-80 h-80 bg-primary/10 hidden rounded-full pointer-events-none"></div>
 
              <div className="relative z-10">
                 <div className="flex items-center justify-between mb-10 pb-8 border-b border-gray-100 dark:border-white/5">
                     <div className="flex items-center gap-5">
-                      <div className="w-16 h-16 bg-emerald-500/10 dark:bg-emerald-500/20 rounded-2xl flex items-center justify-center border border-emerald-500/20 text-emerald-600 dark:text-emerald-400">
+                      <div className="w-16 h-16 bg-primary/10 dark:bg-primary/20 rounded-2xl flex items-center justify-center border border-primary/20 text-primary dark:text-primary">
                           {editingCourse ? <Edit3 className="w-7 h-7" /> : <Plus className="w-7 h-7" />}
                       </div>
                       <div>
@@ -250,18 +260,18 @@ const CoursesManager = ({ departments }) => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                         {/* Basic Info */}
                         <div className="space-y-6">
-                            <h5 className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.3em] mb-6 flex items-center gap-3">
+                            <h5 className="text-[10px] font-black text-primary uppercase tracking-[0.3em] mb-6 flex items-center gap-3">
                                 <Tag className="w-4 h-4" /> {t('admin.courses.basic_info')}
                             </h5>
                             
                             <div className="space-y-3">
                                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('admin.courses.course_name')} *</label>
-                                <input type="text" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl px-6 py-4.5 font-black focus:ring-4 focus:ring-emerald-500/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner" placeholder="e.g. Neural Networks 101" required />
+                                <input type="text" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl px-6 py-4.5 font-black focus:ring-4 focus:ring-primary/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner" placeholder="e.g. Neural Networks 101" required />
                             </div>
                             
                             <div className="space-y-3">
                                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('admin.courses.course_code')} *</label>
-                                <input type="text" value={formData.code} onChange={e => setFormData({ ...formData, code: e.target.value })} className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl px-6 py-4.5 font-black focus:ring-4 focus:ring-emerald-500/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner uppercase" placeholder="e.g. AI-402" required />
+                                <input type="text" value={formData.code} onChange={e => setFormData({ ...formData, code: e.target.value })} className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl px-6 py-4.5 font-black focus:ring-4 focus:ring-primary/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner uppercase" placeholder="e.g. AI-402" required />
                             </div>
                         </div>
 
@@ -301,11 +311,11 @@ const CoursesManager = ({ departments }) => {
                         <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 flex items-center gap-2">
                             <AlignLeft className="w-4 h-4" /> {t('admin.courses.description_label')}
                         </label>
-                        <textarea value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-[2rem] px-6 py-5 font-black focus:ring-4 focus:ring-emerald-500/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner resize-none min-h-[120px]" placeholder={t('admin.courses.description_placeholder')} />
+                        <textarea value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-[2rem] px-6 py-5 font-black focus:ring-4 focus:ring-primary/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner resize-none min-h-[120px]" placeholder={t('admin.courses.description_placeholder')} />
                     </div>
 
                     <div className="flex gap-6 pt-10 border-t border-gray-100 dark:border-white/5">
-                        <button type="submit" disabled={loading} className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-black py-5 rounded-[2.5rem] shadow-xl shadow-emerald-500/20 transition-[color,background-color,border-color,transform,opacity] hover:scale-[1.02] active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3">
+                        <button type="submit" disabled={loading} className="flex-1 bg-primary hover:bg-primary text-white font-black py-5 rounded-[2.5rem] shadow-xl shadow-primary/20 transition-[color,background-color,border-color,transform,opacity] hover:scale-[1.02] active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3">
                             <CheckCircle className="w-6 h-6" />
                             <span className="uppercase tracking-widest text-xs">
                                 {loading ? t('admin.courses.saving') : (editingCourse ? t('common.save') : t('admin.courses.add_course'))}
@@ -320,7 +330,6 @@ const CoursesManager = ({ departments }) => {
           </div>
         </div>
       )}
-      </>
     </div>
   );
 };

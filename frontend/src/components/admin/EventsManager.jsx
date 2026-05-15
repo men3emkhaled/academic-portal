@@ -245,7 +245,7 @@ const EventsManager = () => {
                 className="group relative bg-white dark:bg-white/[0.01] border border-gray-100 dark:border-white/5 rounded-[3rem] overflow-hidden transition-[color,background-color,border-color,transform,opacity] duration-500 hover:border-rose-500/30 hover:shadow-2xl hover:shadow-rose-500/10"
               >
                 {/* Visual Status Indicator */}
-                <div className={`absolute top-0 inset-inline-start-0 inset-inline-end-0 h-1.5 transition-[color,background-color,border-color,transform,opacity] duration-700 ${event.is_published ? 'bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.5)]' : 'bg-gray-300 dark:bg-slate-800'}`}></div>
+                <div className={`absolute top-0 inset-inline-start-0 inset-inline-end-0 h-1.5 transition-[color,background-color,border-color,transform,opacity] duration-700 ${event.is_published ? 'bg-primary shadow-[0_0_15px_rgba(46,204,113,0.5)]' : 'bg-gray-300 dark:bg-slate-800'}`}></div>
                 
                 <div className="p-10">
                   <div className="flex justify-between items-start mb-8 relative z-10">
@@ -256,7 +256,7 @@ const EventsManager = () => {
                       <span className="text-[10px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-widest">{t(`admin.events.categories.${event.category?.toLowerCase() || 'activity'}`)}</span>
                     </div>
                     <span className={`px-4 py-1.5 rounded-full text-[8px] font-black uppercase tracking-widest border transition-[color,background-color,border-color,transform,opacity] duration-500 ${
-                         event.is_published ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600' : 'bg-gray-100 dark:bg-white/5 border-gray-100 dark:border-white/10 text-gray-400'
+                         event.is_published ? 'bg-primary/10 border-primary/20 text-primary' : 'bg-gray-100 dark:bg-white/5 border-gray-100 dark:border-white/10 text-gray-400'
                     }`}>
                          {event.is_published ? t('admin.events.published') : t('admin.events.draft')}
                     </span>
@@ -417,11 +417,11 @@ const EventsManager = () => {
                            <div 
                                 onClick={() => setFormData({...formData, is_published: !formData.is_published})}
                                 className={`flex items-center gap-4 px-8 py-5 rounded-[1.5rem] border transition-[color,background-color,border-color,transform,opacity] duration-500 cursor-pointer shadow-inner ${
-                                    formData.is_published ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-gray-50 dark:bg-white/[0.01] border-gray-100 dark:border-white/5'
+                                    formData.is_published ? 'bg-primary/5 border-primary/20' : 'bg-gray-50 dark:bg-white/[0.01] border-gray-100 dark:border-white/5'
                                 }`}
                            >
                                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-[color,background-color,border-color,transform,opacity] duration-500 ${
-                                    formData.is_published ? 'bg-emerald-500 text-white' : 'bg-gray-200 dark:bg-white/10 text-gray-400'
+                                    formData.is_published ? 'bg-primary text-white' : 'bg-gray-200 dark:bg-white/10 text-gray-400'
                                 }`}>
                                     <Bell className="w-5 h-5" />
                                 </div>
@@ -431,7 +431,7 @@ const EventsManager = () => {
                                 </div>
                                 <div className="ms-auto">
                                     <div className={`w-12 h-6 rounded-full transition-[color,background-color,border-color,transform,opacity] duration-500 relative flex items-center px-1 ${
-                                        formData.is_published ? 'bg-emerald-500' : 'bg-gray-200 dark:bg-white/10'
+                                        formData.is_published ? 'bg-primary' : 'bg-gray-200 dark:bg-white/10'
                                     }`}>
                                         <div className={`w-4 h-4 bg-white rounded-full shadow-md transition-transform duration-500 ${
                                             formData.is_published ? 'translate-x-6' : 'translate-x-0'

@@ -324,7 +324,8 @@ const StudentTimetable = () => {
                       return (
                         <div 
                           key={idx}
-                          className={`group bg-white dark:bg-[#151520] border rounded-[2rem] p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 md:gap-10 transition-all duration-700 relative overflow-hidden ${isLive ? 'border-[#2cfc7d] shadow-[0_0_50px_rgba(44,252,125,0.1)]' : 'border-gray-100 dark:border-white/5 hover:-translate-y-1 hover:shadow-xl'}`}
+                          onClick={() => navigate(`/student/course/${entry.course_id}`)}
+                          className={`group bg-white dark:bg-[#151520] border rounded-[2rem] p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 md:gap-10 transition-all duration-700 relative overflow-hidden cursor-pointer ${isLive ? 'border-[#2cfc7d] shadow-[0_0_50px_rgba(44,252,125,0.1)]' : 'border-gray-100 dark:border-white/5 hover:-translate-y-1 hover:shadow-xl'}`}
                         >
                           {isLive && (
                             <div className="absolute top-0 inset-inline-end-0 bg-[#2cfc7d] text-black px-4 py-1 rounded-bl-[1rem] font-black text-[8px] uppercase tracking-[0.2em] animate-pulse">

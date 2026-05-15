@@ -1,10 +1,5 @@
 <available_skills>
   <skill>
-    <name>security-shield</name>
-    <description>Proactive code auditing and protection against credential leaks and vulnerabilities.</description>
-    <location>/home/men3emk1/Documents/academic-portal/academic-portal/.antigravity/skills/security-shield/SKILL.md</location>
-  </skill>
-  <skill>
     <name>performance-pro</name>
     <description>Deep optimization for execution speed, algorithmic efficiency, and memory usage.</description>
     <location>/home/men3emk1/Documents/academic-portal/academic-portal/.antigravity/skills/performance-pro/SKILL.md</location>
@@ -13,11 +8,6 @@
     <name>human-coder</name>
     <description>Professional human-like communication. Eliminates AI markers and excessive emojis.</description>
     <location>/home/men3emk1/Documents/academic-portal/academic-portal/.antigravity/skills/human-coder/SKILL.md</location>
-  </skill>
-  <skill>
-    <name>qa-expert</name>
-    <description>Expertise in automated testing, bug hunting, and quality assurance benchmarks.</description>
-    <location>/home/men3emk1/Documents/academic-portal/academic-portal/.antigravity/skills/qa-expert/SKILL.md</location>
   </skill>
   <skill>
     <name>api-tester</name>

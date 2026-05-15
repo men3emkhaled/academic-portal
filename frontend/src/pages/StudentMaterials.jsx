@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { useStudentAuth } from '../context/StudentAuthContext';
 import { useStudentData } from '../context/StudentDataContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../services/api';
 import toast from 'react-hot-toast';
 import Sidebar from '../components/Sidebar';
@@ -20,6 +20,7 @@ const StudentMaterials = () => {
   const { t, i18n } = useTranslation();
   const isAr = i18n.language === 'ar';
   const navigate = useNavigate();
+  const location = useLocation();
   
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [resources, setResources] = useState({ videos: [], pdfs: [], summaries: [], playlists: [], recordings: [] });
@@ -56,11 +57,20 @@ const StudentMaterials = () => {
 
   useEffect(() => {
     if (!loadingGrades && courses.length > 0 && !selectedCourse) {
-      setSelectedCourse(courses[0]);
-      fetchResources(courses[0].id);
-      fetchProgress(courses[0].id);
+      // Check if we came from timetable with a specific course
+      const courseNameFromState = location.state?.courseName;
+      let targetCourse = courses[0];
+      
+      if (courseNameFromState) {
+        const found = courses.find(c => c.name.toLowerCase() === courseNameFromState.toLowerCase());
+        if (found) targetCourse = found;
+      }
+
+      setSelectedCourse(targetCourse);
+      fetchResources(targetCourse.id);
+      fetchProgress(targetCourse.id);
     }
-  }, [loadingGrades, courses, selectedCourse]);
+  }, [loadingGrades, courses, selectedCourse, location.state]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
