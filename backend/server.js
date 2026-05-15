@@ -53,6 +53,7 @@ const allowedOrigins = [
   'http://localhost:3000',
   'https://znu-cs.online',
   'https://www.znu-cs.online',
+  /\.vercel\.app$/,
 ];
 
 if (process.env.FRONTEND_URL) {
