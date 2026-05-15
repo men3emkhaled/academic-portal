@@ -143,7 +143,7 @@ const StudentLogin = () => {
 
         {/* RIGHT PANEL: SECURE ACCESS */}
             <div
-               className={`flex-1 flex flex-col items-center justify-center p-8 lg:p-24 relative overflow-hidden transition-colors duration-500 ${isDarkMode ? 'bg-[#010101]' : 'bg-[#fafafa]'}`}
+               className={`flex-1 flex flex-col items-center justify-start pt-28 lg:justify-center p-8 lg:p-24 relative overflow-hidden transition-colors duration-500 ${isDarkMode ? 'bg-[#010101]' : 'bg-[#fafafa]'}`}
             >
                <motion.div 
                  initial={{ opacity: 0, y: 20 }}
