@@ -42,6 +42,11 @@
     color: var(--text-main);
     @apply font-sans antialiased transition-colors duration-300;
   }
+
+  /* ✅ Fix Arabic text fragmentation (letter-spacing breaks connections) */
+  [dir="rtl"] * {
+    letter-spacing: 0 !important;
+  }
 }
 
 @layer components {

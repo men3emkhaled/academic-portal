@@ -16,7 +16,60 @@
     "menu": "القائمة",
     "admin_panel": "لوحة الإدارة",
     "language": "اللغة",
-    "appearance": "الشكل"
+    "appearance": "المظهر"
+  },
+  "admin": {
+    "header": {
+      "search_placeholder": "ابحث عن مادة أو طالب...",
+      "admin_label": "المدير العام"
+    },
+    "sidebar": {
+      "tabs": {
+        "overview": "نظرة عامة",
+        "courses": "المواد الدراسية",
+        "grades": "نتائج الطلاب",
+        "resources": "المصادر التعليمية",
+        "roadmap": "الخطة الدراسية",
+        "doctors": "أعضاء هيئة التدريس",
+        "students": "قاعدة بيانات الطلاب",
+        "records": "سجلات القيد",
+        "timetable": "جدول المحاضرات",
+        "exams": "جدول الامتحانات",
+        "notifications": "الإشعارات",
+        "mobile_center": "تنبيهات الموبايل",
+        "departments": "الأقسام العلمية",
+        "quizzes": "بنك الاختبارات",
+        "reviews": "المراجعة اليدوية",
+        "events": "الفعاليات",
+        "progress": "تتبع الإنجاز",
+        "tasks": "التكليفات الرسمية",
+        "emails": "الحسابات المربوطة",
+        "logs": "سجل العمليات"
+      }
+    },
+    "stats": {
+      "system_load": "حمل النظام",
+      "active_users": "الأعضاء النشطين",
+      "database": "قاعدة البيانات",
+      "syncing": "جاري المزامنة...",
+      "protocol": "الإصدار"
+    },
+    "overview": {
+      "control_tower": "برج التحكم",
+      "central_node": "نقطة الإدارة المركزية",
+      "terminal_hint": "مؤشرات الأداء اللحظية"
+    },
+    "messages": {
+      "update_notif_failed": "فشل تحديث الإشعار",
+      "delete_notif_confirm": "هل أنت متأكد من حذف هذا الإشعار؟",
+      "delete_notif_failed": "فشل حذف الإشعار",
+      "reset_pass_confirm": "هل أنت متأكد من إعادة تعيين كلمة مرور هذا الطالب؟",
+      "reset_pass_failed": "فشل إعادة التعيين",
+      "delete_student_confirm": "هل أنت متأكد من حذف الطالب {{name}}؟",
+      "delete_student_failed": "فشل حذف الطالب",
+      "edit_requested": "تم طلب وضع التعديل",
+      "role_requested": "تم طلب إدارة الصلاحيات"
+    }
   },
   "dashboard": {
     "welcome_back": "أهلاً بيك تاني",

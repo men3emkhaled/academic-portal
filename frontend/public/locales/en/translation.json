@@ -18,6 +18,59 @@
     "language": "Language",
     "appearance": "Appearance"
   },
+  "admin": {
+    "header": {
+      "search_placeholder": "Search node or metadata...",
+      "admin_label": "Root Admin"
+    },
+    "sidebar": {
+      "tabs": {
+        "overview": "Overview",
+        "courses": "Courses",
+        "grades": "Grades",
+        "resources": "Resources",
+        "roadmap": "Roadmap",
+        "doctors": "Doctors",
+        "students": "Students",
+        "records": "Student Records",
+        "timetable": "Timetable",
+        "exams": "Exam Schedule",
+        "notifications": "Notifications",
+        "mobile_center": "Mobile Center",
+        "departments": "Departments",
+        "quizzes": "Quizzes",
+        "reviews": "Manual Reviews",
+        "events": "Events",
+        "progress": "Student Progress",
+        "tasks": "Official Tasks",
+        "emails": "Linked Emails",
+        "logs": "System Logs"
+      }
+    },
+    "stats": {
+      "system_load": "System Load",
+      "active_users": "Active Nodes",
+      "database": "Database",
+      "syncing": "Syncing...",
+      "protocol": "Protocol"
+    },
+    "overview": {
+      "control_tower": "Control Tower",
+      "central_node": "Central Management Node",
+      "terminal_hint": "Real-time performance metrics"
+    },
+    "messages": {
+      "update_notif_failed": "Failed to update notification",
+      "delete_notif_confirm": "Are you sure you want to delete this notification?",
+      "delete_notif_failed": "Failed to delete notification",
+      "reset_pass_confirm": "Are you sure you want to reset this student's password?",
+      "reset_pass_failed": "Failed to reset password",
+      "delete_student_confirm": "Are you sure you want to delete student {{name}}?",
+      "delete_student_failed": "Failed to delete student",
+      "edit_requested": "Edit mode requested",
+      "role_requested": "Role management requested"
+    }
+  },
   "dashboard": {
     "welcome_back": "Welcome Back",
     "greeting_morning": "Good Morning",
