@@ -59,6 +59,11 @@ const AdminDashboard = () => {
     }
   };
 
+  useEffect(() => {
+    document.documentElement.dir = i18n.language === 'ar' ? 'rtl' : 'ltr';
+    document.documentElement.lang = i18n.language;
+  }, [i18n.language]);
+
   const decodedToken = token ? parseJwt(token) : null;
   const isSuperAdmin = decodedToken?.role === 'admin';
   const userPermissions = decodedToken?.permissions || [];
