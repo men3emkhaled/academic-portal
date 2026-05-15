@@ -91,9 +91,9 @@ const MobileAlertCenter = ({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
         {/* Composition Panel */}
         <div className="space-y-8">
-          <div className="bg-white/80 dark:bg-[#111]/80 backdrop-blur-xl border border-gray-200 dark:border-white/10 rounded-[2.5rem] p-8 shadow-sm relative overflow-hidden group">
+          <div className="bg-white/80 dark:bg-[#111]/80 border border-gray-200 dark:border-white/10 rounded-[2.5rem] p-8 shadow-sm relative overflow-hidden group">
             {/* Background Glow */}
-            <div className="absolute -right-20 -top-20 w-64 h-64 bg-emerald-500/5 rounded-full blur-[60px] pointer-events-none"></div>
+            <div className="absolute -right-20 -top-20 w-64 h-64 bg-emerald-500/5 rounded-full hidden pointer-events-none"></div>
 
             <div className="relative z-10 space-y-8">
                 <div className="flex items-center gap-4">
@@ -111,7 +111,7 @@ const MobileAlertCenter = ({
                             placeholder={t('admin.mobile_center.placeholder_title')} 
                             value={alertForm.title} 
                             onChange={(e) => setAlertForm({ ...alertForm, title: e.target.value })} 
-                            className="w-full bg-gray-50/50 dark:bg-black/50 text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-4 font-black focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all shadow-inner" 
+                            className="w-full bg-gray-50/50 dark:bg-black/50 text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-4 font-black focus:ring-4 focus:ring-emerald-500/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner" 
                         />
                     </div>
                     <div className="space-y-2">
@@ -121,7 +121,7 @@ const MobileAlertCenter = ({
                             rows="4" 
                             value={alertForm.content} 
                             onChange={(e) => setAlertForm({ ...alertForm, content: e.target.value })} 
-                            className="w-full bg-gray-50/50 dark:bg-black/50 text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-4 font-black focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all shadow-inner resize-none min-h-[120px]" 
+                            className="w-full bg-gray-50/50 dark:bg-black/50 text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-4 font-black focus:ring-4 focus:ring-emerald-500/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner resize-none min-h-[120px]" 
                         />
                     </div>
                 </div>
@@ -133,7 +133,7 @@ const MobileAlertCenter = ({
                             <select 
                                 value={alertForm.department_id || ''} 
                                 onChange={(e) => setAlertForm({ ...alertForm, department_id: e.target.value })} 
-                                className="w-full bg-gray-50/50 dark:bg-black/50 text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-3.5 font-black focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all appearance-none uppercase tracking-widest text-[11px]"
+                                className="w-full bg-gray-50/50 dark:bg-black/50 text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-3.5 font-black focus:ring-4 focus:ring-indigo-500/10 outline-none transition-[color,background-color,border-color,transform,opacity] appearance-none uppercase tracking-widest text-[11px]"
                             >
                                 <option value="">{t('admin.mobile_center.placeholder_dept')}</option>
                                 {departments.map((dept) => (
@@ -145,7 +145,7 @@ const MobileAlertCenter = ({
                         <button 
                             onClick={() => handleSendPush('dept')} 
                             disabled={sending}
-                            className="w-full py-3.5 bg-indigo-600/10 hover:bg-indigo-600 text-indigo-600 hover:text-white border border-indigo-500/20 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-sm"
+                            className="w-full py-3.5 bg-indigo-600/10 hover:bg-indigo-600 text-indigo-600 hover:text-white border border-indigo-500/20 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-[color,background-color,border-color,transform,opacity] flex items-center justify-center gap-2 shadow-sm"
                         >
                             <Building2 className="w-4 h-4" /> {t('admin.mobile_center.send_to_dept')}
                         </button>
@@ -157,12 +157,12 @@ const MobileAlertCenter = ({
                             placeholder={t('admin.mobile_center.placeholder_student_id')} 
                             value={alertForm.studentId || ''} 
                             onChange={(e) => setAlertForm({ ...alertForm, studentId: e.target.value })} 
-                            className="w-full bg-gray-50/50 dark:bg-black/50 text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-3.5 font-black focus:ring-4 focus:ring-cyan-500/10 outline-none transition-all shadow-inner" 
+                            className="w-full bg-gray-50/50 dark:bg-black/50 text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-3.5 font-black focus:ring-4 focus:ring-cyan-500/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner" 
                         />
                         <button 
                             onClick={() => handleSendPush('student')} 
                             disabled={sending}
-                            className="w-full py-3.5 bg-cyan-600/10 hover:bg-cyan-600 text-cyan-600 hover:text-white border border-cyan-500/20 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-sm"
+                            className="w-full py-3.5 bg-cyan-600/10 hover:bg-cyan-600 text-cyan-600 hover:text-white border border-cyan-500/20 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-[color,background-color,border-color,transform,opacity] flex items-center justify-center gap-2 shadow-sm"
                         >
                             <User className="w-4 h-4" /> {t('admin.mobile_center.send_to_student')}
                         </button>
@@ -172,7 +172,7 @@ const MobileAlertCenter = ({
                 <button 
                     onClick={() => handleSendPush('all')} 
                     disabled={sending}
-                    className="w-full py-5 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm uppercase tracking-widest rounded-2xl shadow-xl shadow-emerald-500/20 hover:scale-[1.01] active:scale-95 transition-all flex items-center justify-center gap-3 relative overflow-hidden group"
+                    className="w-full py-5 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm uppercase tracking-widest rounded-2xl shadow-xl shadow-emerald-500/20 hover:scale-[1.01] active:scale-95 transition-[color,background-color,border-color,transform,opacity] flex items-center justify-center gap-3 relative overflow-hidden group"
                 >
                     {sending ? (
                         <div className="flex items-center gap-3">
@@ -190,7 +190,7 @@ const MobileAlertCenter = ({
             </div>
           </div>
 
-          <div className="p-8 bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/10 dark:border-emerald-500/20 rounded-[2.5rem] flex items-start gap-5 group transition-all duration-300 shadow-sm">
+          <div className="p-8 bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/10 dark:border-emerald-500/20 rounded-[2.5rem] flex items-start gap-5 group transition-[color,background-color,border-color,box-shadow,transform,opacity] duration-300 shadow-sm">
               <div className="w-12 h-12 bg-white dark:bg-black rounded-2xl flex items-center justify-center flex-shrink-0 border border-emerald-500/20 shadow-md group-hover:scale-110 transition-transform">
                   <AlertCircle className="w-6 h-6 text-emerald-600" />
               </div>
@@ -202,7 +202,7 @@ const MobileAlertCenter = ({
         </div>
 
         {/* History Log */}
-        <div className="bg-white/80 dark:bg-[#111]/80 backdrop-blur-xl border border-gray-200 dark:border-white/10 rounded-[2.5rem] flex flex-col h-[800px] shadow-sm relative overflow-hidden group">
+        <div className="bg-white/80 dark:bg-[#111]/80 border border-gray-200 dark:border-white/10 rounded-[2.5rem] flex flex-col h-[800px] shadow-sm relative overflow-hidden group">
             <div className="p-8 border-b border-gray-100 dark:border-white/10 bg-gray-50/50 dark:bg-white/[0.01] flex justify-between items-center relative z-10">
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-gray-100 dark:bg-white/5 rounded-xl flex items-center justify-center border border-gray-200 dark:border-white/10 shadow-inner">
@@ -217,7 +217,7 @@ const MobileAlertCenter = ({
 
             <div className="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar relative z-10">
                 {mobileHistory.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-32 opacity-30 grayscale group-hover:opacity-40 transition-all">
+                    <div className="flex flex-col items-center justify-center py-32 opacity-30 grayscale group-hover:opacity-40 transition-[color,background-color,border-color,transform,opacity]">
                         <div className="w-24 h-24 bg-gray-100 dark:bg-white/5 rounded-full flex items-center justify-center mb-6 shadow-inner">
                             <Bell className="w-12 h-12 text-gray-400" />
                         </div>
@@ -225,7 +225,7 @@ const MobileAlertCenter = ({
                     </div>
                 ) : (
                 mobileHistory.map((notif) => (
-                    <div key={notif.id} className="group/item relative bg-white dark:bg-black/40 border border-gray-100 dark:border-white/10 rounded-[2.5rem] p-8 hover:border-emerald-500/40 transition-all hover:shadow-2xl hover:shadow-emerald-500/10 hover:-translate-y-1 duration-500">
+                    <div key={notif.id} className="group/item relative bg-white dark:bg-black/40 border border-gray-100 dark:border-white/10 rounded-[2.5rem] p-8 hover:border-emerald-500/40 transition-[color,background-color,border-color,transform,opacity] hover:shadow-2xl hover:shadow-emerald-500/10 hover:-translate-y-1 duration-500">
                         <div className="flex justify-between items-start gap-4 relative z-10">
                             <div className="flex-1 min-w-0 space-y-4">
                                 <div className="flex items-center gap-4">
@@ -246,7 +246,7 @@ const MobileAlertCenter = ({
                             </div>
                             <button 
                                 onClick={() => handleDelete(notif.id)}
-                                className="w-10 h-10 flex items-center justify-center rounded-xl bg-rose-50 dark:bg-rose-500/10 text-rose-600 opacity-0 group-hover/item:opacity-100 transition-all hover:bg-rose-600 hover:text-white shadow-sm"
+                                className="w-10 h-10 flex items-center justify-center rounded-xl bg-rose-50 dark:bg-rose-500/10 text-rose-600 opacity-0 group-hover/item:opacity-100 transition-[color,background-color,border-color,transform,opacity] hover:bg-rose-600 hover:text-white shadow-sm"
                             >
                                 <Trash2 className="w-4.5 h-4.5" />
                             </button>

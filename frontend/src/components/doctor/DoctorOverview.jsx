@@ -89,7 +89,7 @@ const DoctorOverview = ({ stats, doctor, timetable, setActiveTab }) => {
               className="relative group overflow-hidden"
             >
               <div className={`absolute inset-0 bg-gradient-to-br ${stat.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`}></div>
-              <div className="bg-white/80 dark:bg-white/[0.03] backdrop-blur-xl border border-white dark:border-white/5 p-8 rounded-[2.5rem] relative z-10 shadow-2xl shadow-gray-200/50 dark:shadow-none transition-all duration-300">
+              <div className="bg-white/80 dark:bg-white/[0.03] backdrop-blur-sm border border-white dark:border-white/5 p-8 rounded-[2.5rem] relative z-10 shadow-2xl shadow-gray-200/50 dark:shadow-none transition-all duration-300">
                 <div className={`w-14 h-14 rounded-2xl bg-${stat.color}-500/10 dark:bg-${stat.color}-500/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500 border border-${stat.color}-500/20`}>
                   <Icon className={`w-7 h-7 text-${stat.color}-600 dark:text-${stat.color}-400 transition-colors`} />
                 </div>
@@ -156,7 +156,7 @@ const DoctorOverview = ({ stats, doctor, timetable, setActiveTab }) => {
                 Inquiries Center <ChevronRight className="w-4 h-4" />
               </button>
             </div>
-            <div className="bg-white/60 dark:bg-white/[0.03] backdrop-blur-xl border border-white dark:border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl shadow-gray-200/50 dark:shadow-none">
+            <div className="bg-white/60 dark:bg-white/[0.03] backdrop-blur-sm border border-white dark:border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl shadow-gray-200/50 dark:shadow-none">
               {loading ? (
                 <div className="flex flex-col items-center justify-center py-24 gap-4">
                   <div className="w-10 h-10 border-2 border-violet-500/20 border-t-violet-500 rounded-full animate-spin"></div>
@@ -232,7 +232,7 @@ const DoctorOverview = ({ stats, doctor, timetable, setActiveTab }) => {
                 </p>
               </div>
             </div>
-            <div className="bg-white/60 dark:bg-white/[0.03] backdrop-blur-xl border border-white dark:border-white/5 rounded-[3rem] p-8 space-y-10 relative overflow-hidden shadow-2xl shadow-gray-200/50 dark:shadow-none">
+            <div className="bg-white/60 dark:bg-white/[0.03] backdrop-blur-sm border border-white dark:border-white/5 rounded-[3rem] p-8 space-y-10 relative overflow-hidden shadow-2xl shadow-gray-200/50 dark:shadow-none">
               {/* Vertical line with gradient */}
               <div className="absolute left-[39px] top-12 bottom-12 w-[2px] bg-gradient-to-b from-violet-500/50 via-gray-100 dark:via-white/5 to-transparent"></div>
               

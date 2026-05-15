@@ -100,7 +100,7 @@ const ActivityLogsManager = () => {
           <div className="flex items-center gap-4">
               <button 
                 onClick={() => setShowFilters(!showFilters)}
-                className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border ${
+                className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-[color,background-color,border-color,transform,opacity] border ${
                   showFilters 
                     ? 'bg-amber-500 text-white border-amber-500 shadow-lg shadow-amber-500/20' 
                     : 'bg-white dark:bg-white/5 text-gray-500 border-gray-100 dark:border-white/10 hover:border-amber-500/30'
@@ -110,14 +110,14 @@ const ActivityLogsManager = () => {
               </button>
               <button 
                 onClick={() => { fetchLogs(); fetchStats(); }}
-                className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest text-gray-500 hover:border-amber-500/30 transition-all"
+                className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest text-gray-500 hover:border-amber-500/30 transition-[color,background-color,border-color,transform,opacity]"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} /> {t('admin.logs.sync')}
               </button>
           </div>
           <button 
             onClick={handleCleanup}
-            className="flex items-center gap-2 px-6 py-3 bg-rose-500/5 hover:bg-rose-500 text-rose-600 hover:text-white border border-rose-500/10 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all"
+            className="flex items-center gap-2 px-6 py-3 bg-rose-500/5 hover:bg-rose-500 text-rose-600 hover:text-white border border-rose-500/10 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-[color,background-color,border-color,transform,opacity]"
           >
             <Trash2 className="w-3.5 h-3.5" /> {t('admin.logs.purge')}
           </button>
@@ -132,7 +132,7 @@ const ActivityLogsManager = () => {
             { label: t('admin.logs.stats.weekly'), value: stats.week_actions, icon: <BarChart3 className="w-5 h-5" />, color: 'blue' },
             { label: t('admin.logs.stats.admins'), value: stats.unique_admins, icon: <Shield className="w-5 h-5" />, color: 'purple' },
           ].map((s, i) => (
-            <div key={i} className="group relative bg-white dark:bg-black/20 border border-gray-100 dark:border-white/5 rounded-[2rem] p-8 overflow-hidden hover:border-amber-500/30 transition-all duration-500 shadow-sm">
+            <div key={i} className="group relative bg-white dark:bg-black/20 border border-gray-100 dark:border-white/5 rounded-[2rem] p-8 overflow-hidden hover:border-amber-500/30 transition-[color,background-color,border-color,transform,opacity] duration-500 shadow-sm">
                 <div className={`absolute -inset-inline-end-4 -bottom-4 w-24 h-24 text-${s.color}-500/5 group-hover:scale-125 transition-transform duration-500`}>
                     {s.icon}
                 </div>
@@ -156,13 +156,13 @@ const ActivityLogsManager = () => {
                     <User className="absolute inset-inline-start-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <input type="text" placeholder="Search ID..." value={filters.admin_id}
                       onChange={e => setFilters({ ...filters, admin_id: e.target.value })}
-                      className="w-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl py-4 ps-14 pe-6 text-sm font-bold focus:ring-2 focus:ring-amber-500/50 outline-none transition-all" />
+                      className="w-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl py-4 ps-14 pe-6 text-sm font-bold focus:ring-2 focus:ring-amber-500/50 outline-none transition-[color,background-color,border-color,transform,opacity]" />
                  </div>
               </div>
               <div className="space-y-3">
                  <label className="text-[10px] font-black uppercase tracking-widest text-amber-600 ms-5">{t('admin.logs.filters.module')}</label>
                  <select value={filters.module} onChange={e => setFilters({ ...filters, module: e.target.value })}
-                   className="w-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl py-4 px-6 text-sm font-bold focus:ring-2 focus:ring-amber-500/50 outline-none appearance-none transition-all">
+                   className="w-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl py-4 px-6 text-sm font-bold focus:ring-2 focus:ring-amber-500/50 outline-none appearance-none transition-[color,background-color,border-color,transform,opacity]">
                    <option value="">{t('admin.logs.filters.all_modules')}</option>
                    {Object.keys(MODULE_COLORS).map(m => <option key={m} value={m}>{m}</option>)}
                  </select>
@@ -171,27 +171,27 @@ const ActivityLogsManager = () => {
                  <label className="text-[10px] font-black uppercase tracking-widest text-amber-600 ms-5">{t('admin.logs.filters.action')}</label>
                  <input type="text" placeholder={t('admin.logs.filters.placeholder_action')} value={filters.action}
                    onChange={e => setFilters({ ...filters, action: e.target.value })}
-                   className="w-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl py-4 px-6 text-sm font-bold focus:ring-2 focus:ring-amber-500/50 outline-none transition-all" />
+                   className="w-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl py-4 px-6 text-sm font-bold focus:ring-2 focus:ring-amber-500/50 outline-none transition-[color,background-color,border-color,transform,opacity]" />
               </div>
               <div className="space-y-3">
                  <label className="text-[10px] font-black uppercase tracking-widest text-amber-600 ms-5">{t('admin.logs.filters.date_from')}</label>
                  <input type="date" value={filters.date_from}
                    onChange={e => setFilters({ ...filters, date_from: e.target.value })}
-                   className="w-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl py-4 px-6 text-sm font-bold focus:ring-2 focus:ring-amber-500/50 outline-none transition-all" />
+                   className="w-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl py-4 px-6 text-sm font-bold focus:ring-2 focus:ring-amber-500/50 outline-none transition-[color,background-color,border-color,transform,opacity]" />
               </div>
               <div className="space-y-3">
                  <label className="text-[10px] font-black uppercase tracking-widest text-amber-600 ms-5">{t('admin.logs.filters.date_to')}</label>
                  <input type="date" value={filters.date_to}
                    onChange={e => setFilters({ ...filters, date_to: e.target.value })}
-                   className="w-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl py-4 px-6 text-sm font-bold focus:ring-2 focus:ring-amber-500/50 outline-none transition-all" />
+                   className="w-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl py-4 px-6 text-sm font-bold focus:ring-2 focus:ring-amber-500/50 outline-none transition-[color,background-color,border-color,transform,opacity]" />
               </div>
            </div>
            <div className="flex gap-4 pt-4">
-              <button onClick={() => fetchLogs(1)} className="px-10 py-4 bg-amber-500 text-white font-black rounded-2xl text-[10px] uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-amber-500/20">
+              <button onClick={() => fetchLogs(1)} className="px-10 py-4 bg-amber-500 text-white font-black rounded-2xl text-[10px] uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-[color,background-color,border-color,transform,opacity] shadow-xl shadow-amber-500/20">
                 {t('admin.logs.filters.execute')}
               </button>
               <button onClick={() => setFilters({ admin_id: '', module: '', action: '', date_from: '', date_to: '' })}
-                className="px-10 py-4 bg-white dark:bg-white/5 text-gray-500 font-black rounded-2xl text-[10px] uppercase tracking-widest border border-gray-100 dark:border-white/10 hover:border-amber-500/30 transition-all">
+                className="px-10 py-4 bg-white dark:bg-white/5 text-gray-500 font-black rounded-2xl text-[10px] uppercase tracking-widest border border-gray-100 dark:border-white/10 hover:border-amber-500/30 transition-[color,background-color,border-color,transform,opacity]">
                 {t('admin.logs.filters.reset')}
               </button>
            </div>
@@ -199,7 +199,7 @@ const ActivityLogsManager = () => {
       )}
 
       {/* Main Table View */}
-      <div className="bg-white/80 dark:bg-black/40 backdrop-blur-xl border border-gray-100 dark:border-white/10 rounded-[3rem] overflow-hidden shadow-2xl transition-all duration-500">
+      <div className="bg-white/80 dark:bg-black/40 border border-gray-100 dark:border-white/10 rounded-[3rem] overflow-hidden shadow-2xl transition-[color,background-color,border-color,transform,opacity] duration-500">
         <div className="px-10 py-8 border-b border-gray-50 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.01] flex justify-between items-center">
             <div className="flex items-center gap-4">
                 <div className="w-10 h-10 bg-amber-500/10 rounded-xl flex items-center justify-center border border-amber-500/20">
@@ -243,7 +243,7 @@ const ActivityLogsManager = () => {
                     <React.Fragment key={log.id}>
                       <tr 
                         onClick={() => setSelectedLog(isExpanded ? null : log)}
-                        className={`group cursor-pointer transition-all ${isExpanded ? 'bg-amber-500/5 dark:bg-amber-500/10' : 'hover:bg-gray-50 dark:hover:bg-white/[0.02]'}`}
+                        className={`group cursor-pointer transition-[color,background-color,border-color,transform,opacity] ${isExpanded ? 'bg-amber-500/5 dark:bg-amber-500/10' : 'hover:bg-gray-50 dark:hover:bg-white/[0.02]'}`}
                       >
                         <td className="px-10 py-6">
                            <span className={`text-[9px] font-black px-2.5 py-1 rounded-lg border ${METHOD_COLORS[log.method] || 'bg-gray-100 text-gray-500 border-gray-200'}`}>
@@ -276,7 +276,7 @@ const ActivityLogsManager = () => {
                            </div>
                         </td>
                         <td className="px-10 py-6 text-inline-end">
-                           <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${isExpanded ? 'bg-amber-500 text-white rotate-180' : 'bg-gray-100 dark:bg-white/5 text-gray-400 group-hover:text-amber-500'}`}>
+                           <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-[color,background-color,border-color,transform,opacity] ${isExpanded ? 'bg-amber-500 text-white rotate-180' : 'bg-gray-100 dark:bg-white/5 text-gray-400 group-hover:text-amber-500'}`}>
                               <ChevronRight className="w-4 h-4" />
                            </div>
                         </td>
@@ -343,7 +343,7 @@ const ActivityLogsManager = () => {
             <button 
               onClick={() => fetchLogs(pagination.page - 1)} 
               disabled={pagination.page <= 1}
-              className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-500 hover:border-amber-500/30 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-500 hover:border-amber-500/30 transition-[color,background-color,border-color,transform,opacity] disabled:opacity-30 disabled:cursor-not-allowed"
             >
               <ChevronLeft className="w-4 h-4" /> {t('common.previous')}
             </button>
@@ -355,7 +355,7 @@ const ActivityLogsManager = () => {
             <button 
               onClick={() => fetchLogs(pagination.page + 1)} 
               disabled={pagination.page >= pagination.totalPages}
-              className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-500 hover:border-amber-500/30 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-500 hover:border-amber-500/30 transition-[color,background-color,border-color,transform,opacity] disabled:opacity-30 disabled:cursor-not-allowed"
             >
               {t('common.next')} <ChevronRight className="w-4 h-4" />
             </button>

@@ -237,7 +237,7 @@ const DoctorSchedule = ({ timetable, onRefresh, courses }) => {
                       </div>
                       <div className="flex items-center gap-2 text-gray-400">
                         <GraduationCap className="w-3 h-3 text-emerald-500" />
-                        <span className="text-[10px] font-bold">Sec {entry.section}</span>
+                        <span className="text-[10px] font-bold">{t('doctor.timetable.section_label')} {entry.section}</span>
                       </div>
                     </div>
                   </motion.div>
@@ -256,7 +256,7 @@ const DoctorSchedule = ({ timetable, onRefresh, courses }) => {
       <AnimatePresence>
         {showModal && (
           <div className="fixed inset-0 z-[120] flex items-center justify-center p-6">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowModal(false)} className="absolute inset-0 bg-gray-900/60 backdrop-blur-xl" />
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowModal(false)} className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" />
             <motion.div initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }} className="relative w-full max-w-xl bg-white dark:bg-[#0A0A0A] border border-gray-100 dark:border-white/10 rounded-[3rem] shadow-2xl overflow-hidden p-10">
               <div className="flex items-center justify-between mb-10">
                 <div className="flex items-center gap-5">

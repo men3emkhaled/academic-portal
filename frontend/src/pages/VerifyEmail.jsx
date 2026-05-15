@@ -43,11 +43,11 @@ const VerifyEmail = () => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-dark text-gray-900 dark:text-white font-body p-4 relative overflow-hidden transition-colors duration-300">
       {/* Ambient Accents */}
-      <div className="absolute top-[10%] left-[20%] w-[30vw] h-[30vw] bg-primary/10 dark:bg-primary/5 blur-[130px] rounded-full pointer-events-none"></div>
-      <div className="absolute bottom-[10%] right-[10%] w-[40vw] h-[40vw] bg-primary/15 dark:bg-primary/10 blur-[150px] rounded-full pointer-events-none"></div>
+      <div className="absolute top-[10%] left-[20%] w-[30vw] h-[30vw] bg-primary/10 dark:bg-primary/5 hidden rounded-full pointer-events-none"></div>
+      <div className="absolute bottom-[10%] right-[10%] w-[40vw] h-[40vw] bg-primary/15 dark:bg-primary/10 hidden rounded-full pointer-events-none"></div>
 
       <div className="w-full max-w-md relative z-10">
-        <div className="bg-white/90 dark:bg-dark-card/80 backdrop-blur-2xl border border-gray-200 dark:border-white/10 rounded-[2rem] p-8 shadow-xl dark:shadow-2xl transition-colors duration-300">
+        <div className="bg-white/90 dark:bg-dark-card/80 backdrop-blur-sm border border-gray-200 dark:border-white/10 rounded-[2rem] p-8 shadow-xl dark:shadow-2xl transition-colors duration-300">
           <div className="flex flex-col items-center mb-8 text-center">
             <div className="relative flex items-center justify-center w-16 h-16 mb-6 rounded-2xl bg-gradient-to-br from-green-400 to-green-600 dark:from-green-500 dark:to-green-700 shadow-[0_0_30px_rgba(34,197,94,0.2)] dark:shadow-[0_0_30px_rgba(34,197,94,0.3)]">
               <div className="absolute inset-[3px] bg-white dark:bg-[#111111] rounded-[1rem] transition-colors duration-300"></div>

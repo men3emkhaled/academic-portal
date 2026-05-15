@@ -1,5 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Trophy, TrendingUp, ShieldCheck, Info, ExternalLink, GraduationCap, Layers, Users, ChevronRight, BookOpen, Bell, ListTodo, CheckCircle2, Circle, Clock, LayoutDashboard, CalendarDays } from 'lucide-react';
+import { 
+  Trophy, TrendingUp, ShieldCheck, Info, ExternalLink, 
+  GraduationCap, Layers, Users, ChevronRight, BookOpen, 
+  Bell, ListTodo, CheckCircle2, Circle, Clock, LayoutDashboard, 
+  CalendarDays, ArrowRight, Zap, Star, X, MousePointer2
+} from 'lucide-react';
 import { useStudentAuth } from '../context/StudentAuthContext';
 import { useStudentData } from '../context/StudentDataContext';
 import { useNavigate } from 'react-router-dom';
@@ -7,21 +12,8 @@ import Sidebar from '../components/Sidebar';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import studentApi from '../services/studentApi';
-
-const getNotificationStyle = (title, content) => {
-  const lowerTitle = title.toLowerCase();
-  const lowerContent = content.toLowerCase();
-  if (lowerTitle.includes('contest') || lowerContent.includes('contest')) {
-    return { emoji: <Trophy className="w-5 h-5 text-primary" />, category: 'Event', iconBg: 'bg-primary/10 dark:bg-primary/20', textColor: 'text-primary' };
-  }
-  if (lowerTitle.includes('grade') || lowerContent.includes('grade')) {
-    return { emoji: <TrendingUp className="w-5 h-5 text-blue-500" />, category: 'Grades', iconBg: 'bg-blue-500/10 dark:bg-blue-500/20', textColor: 'text-blue-500' };
-  }
-  if (lowerTitle.includes('security') || lowerContent.includes('login')) {
-    return { emoji: <ShieldCheck className="w-5 h-5 text-orange-500" />, category: 'Security', iconBg: 'bg-orange-500/10 dark:bg-orange-500/20', textColor: 'text-orange-500' };
-  }
-  return { emoji: <Info className="w-5 h-5 text-emerald-500" />, category: 'Info', iconBg: 'bg-emerald-500/10 dark:bg-emerald-500/20', textColor: 'text-emerald-500' };
-};
+import { useTheme } from '../context/ThemeContext';
+import { transliterateArabic } from '../utils/transliteration';
 
 const getGreeting = () => {
   const hour = new Date().getHours();
@@ -33,6 +25,7 @@ const getGreeting = () => {
 const StudentDashboard = () => {
   const { student, logout } = useStudentAuth();
   const { t, i18n } = useTranslation();
+  const { isDarkMode } = useTheme();
   const {
     gradesData, loadingGrades,
     notifications: allNotifications, loadingNotifications, markNotificationAsRead,
@@ -51,10 +44,7 @@ const StudentDashboard = () => {
   }, [t]);
 
   const notifications = useMemo(() => {
-    const threeDaysAgo = new Date();
-    threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
-    const recent = allNotifications.filter(notif => new Date(notif.created_at) >= threeDaysAgo);
-    return recent.slice(0, 4);
+    return allNotifications.slice(0, 3);
   }, [allNotifications]);
 
   const grades = gradesData.grades || [];
@@ -68,18 +58,6 @@ const StudentDashboard = () => {
   useEffect(() => {
     if (!student) navigate('/student/login');
   }, [student, navigate]);
-
-  const markAsRead = async (id) => await markNotificationAsRead(id);
-
-  const handleToggleOfficial = async (taskId, currentStatus) => {
-    try {
-      await studentApi.patch(`/official-tasks/${taskId}/toggle`, { is_completed: !currentStatus });
-      fetchOfficialTasks();
-      toast.success(!currentStatus ? t('tasks.mark_done') : t('tasks.mark_undone'));
-    } catch (error) {
-      toast.error(t('tasks.error_update'));
-    }
-  };
 
   const handleLogout = () => {
     logout();
@@ -97,368 +75,206 @@ const StudentDashboard = () => {
     return t('common.days_ago', { count: days });
   };
 
-  const renderContent = (text) => {
-    if (!text) return '';
-    const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
-    const parts = [];
-    let lastIndex = 0;
-    let match;
-    while ((match = linkRegex.exec(text)) !== null) {
-      if (match.index > lastIndex) {
-        parts.push(<span key={`text-${lastIndex}`}>{text.substring(lastIndex, match.index)}</span>);
-      }
-      parts.push(
-        <a key={`link-${match.index}`} href={match[2]} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary hover:underline font-semibold mx-1">
-          <ExternalLink className="w-3 h-3" /> {match[1]}
-        </a>
-      );
-      lastIndex = linkRegex.lastIndex;
-    }
-    if (lastIndex < text.length) parts.push(<span key={`text-${lastIndex}`}>{text.substring(lastIndex)}</span>);
-    return parts.length > 0 ? parts : text;
-  };
-
   if (loading) {
     return (
-      <div className="flex flex-col justify-center items-center h-screen bg-gray-50 dark:bg-[#0a0a0a]">
-        <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+      <div className="flex flex-col justify-center items-center h-screen bg-white dark:bg-[#0c0c14]">
+        <div className="w-12 h-12 border-2 border-gray-200 dark:border-white/10 border-t-[#2cfc7d] rounded-full animate-spin"></div>
       </div>
     );
   }
 
+  const isAr = i18n.language === 'ar';
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a0a] text-gray-900 dark:text-white font-sans transition-colors duration-500 overflow-hidden relative">
-      {/* Ambient Backgrounds */}
-      <div className="fixed inset-0 z-0 pointer-events-none opacity-50 dark:opacity-30">
-        <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-primary/10 blur-[150px] rounded-full"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40vw] h-[40vw] bg-blue-500/10 blur-[150px] rounded-full"></div>
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0c0c14] text-gray-900 dark:text-white font-sans transition-colors duration-500 overflow-x-hidden relative" dir={isAr ? 'rtl' : 'ltr'}>
+      
+      {/* Background Decor */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute top-[-10%] inset-inline-end-[-5%] w-[50vw] h-[50vw] bg-[#8b5cf6]/5 blur-[120px] rounded-full"></div>
+        <div className="absolute bottom-[-10%] inset-inline-start-[-5%] w-[40vw] h-[40vw] bg-[#2cfc7d]/3 blur-[100px] rounded-full"></div>
       </div>
 
       <Sidebar onLogout={handleLogout} />
 
-      <div className="md:ps-96 pb-24 md:pb-12 relative z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-
-          {/* HEADER / HERO SECTION */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Welcome Card (Spans 2 columns on large screens) */}
-            <div
-              onClick={() => setIsCardExpanded(true)}
-              className="lg:col-span-2 relative overflow-hidden rounded-[2rem] bg-white/70 dark:bg-white/5 backdrop-blur-2xl border border-gray-200 dark:border-white/10 p-6 sm:p-10 shadow-sm dark:shadow-[0_8px_30px_rgba(0,0,0,0.5)] group transition-all duration-500 cursor-pointer hover:shadow-xl hover:-translate-y-1"
-            >
-              <div className="absolute top-0 inset-inline-end-0 w-64 h-64 bg-primary/10 blur-[80px] rounded-full -translate-y-1/2 translate-x-1/3 group-hover:scale-110 transition-transform duration-700"></div>
-
-              <div className="relative z-10 h-full flex flex-col justify-between">
-                <div>
-                  <h1 className="text-4xl sm:text-5xl font-black text-gray-900 dark:text-white tracking-tight leading-tight mb-2">
-                    {student?.name}
-                  </h1>
-                  <p className="text-gray-500 dark:text-gray-400 text-base font-medium max-w-lg">
-                    {t('dashboard.welcome_msg')}
-                  </p>
-                </div>
-
-                <div className="flex flex-wrap gap-3 mt-8">
-                  <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 dark:bg-black/40 border border-gray-200 dark:border-white/10 text-sm font-semibold">
-                    <GraduationCap className="w-5 h-5 text-primary" /> {t('dashboard.id_card')}: {student?.id}
-                  </div>
-                  <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 dark:bg-black/40 border border-gray-200 dark:border-white/10 text-sm font-semibold">
-                    <Layers className="w-5 h-5 text-blue-500" /> {t('dashboard.level')}: {student?.level}
-                  </div>
-                  <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 dark:bg-black/40 border border-gray-200 dark:border-white/10 text-sm font-semibold">
-                    <Users className="w-5 h-5 text-orange-500" /> {t('dashboard.section')}: {student?.section || t('common.not_assigned')}
-                  </div>
-                </div>
+      <main className="md:ps-72 min-h-screen relative z-10 flex flex-col">
+        
+        {/* HERO SECTION */}
+        <section className="px-6 lg:px-10 pt-16 pb-12 max-w-[1500px] mx-auto w-full space-y-12">
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-10">
+            <div className="space-y-4 max-w-2xl text-start">
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#2cfc7d]"></div>
+                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 dark:text-white/30">{t('sidebar.dashboard')}</span>
               </div>
+              <h1 className={`text-[clamp(2.5rem,6vw,5.5rem)] font-black leading-[0.95] tracking-tighter uppercase text-gray-900 dark:text-white ${isAr ? 'font-arabic' : ''}`}>
+                {t('sidebar.dashboard')}
+              </h1>
             </div>
 
-            {/* Quick Stats Widget */}
-            <div className="relative overflow-hidden rounded-[2rem] bg-white/70 dark:bg-white/5 backdrop-blur-2xl border border-gray-200 dark:border-white/10 p-6 sm:p-8 shadow-sm flex flex-col justify-center gap-6 group hover:border-primary/30 transition-all duration-500">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-500 dark:text-gray-400 text-xs font-bold uppercase tracking-widest mb-1">{t('dashboard.enrolled_courses')}</p>
-                  <h3 className="text-4xl font-black text-gray-900 dark:text-white">{grades.length}</h3>
-                </div>
-                <div className="w-14 h-14 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500">
-                  <BookOpen className="w-7 h-7" />
-                </div>
-              </div>
-              <div className="h-px w-full bg-gray-200 dark:bg-white/10"></div>
-              <div className="flex items-center justify-between cursor-pointer group/task" onClick={() => navigate('/student/personal-tasks')}>
-                <div>
-                  <p className="text-gray-500 dark:text-gray-400 text-xs font-bold uppercase tracking-widest mb-1">{t('dashboard.pending_tasks')}</p>
-                  <h3 className="text-4xl font-black text-gray-900 dark:text-white group-hover/task:text-primary transition-colors">{totalPendingTasks}</h3>
-                </div>
-                <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover/task:scale-110 group-hover/task:-rotate-6 transition-all">
-                  <ListTodo className="w-7 h-7" />
-                </div>
+            <div className="relative group shrink-0">
+              <button 
+                onClick={() => setIsCardExpanded(true)}
+                className="w-36 h-36 rounded-full bg-[#8b5cf6] dark:bg-[#d4a3ff] text-white dark:text-black flex flex-col items-center justify-center gap-2 hover:scale-105 hover:rotate-6 transition-all duration-500 shadow-xl group"
+              >
+                <MousePointer2 className="w-5 h-5" />
+                <span className="text-[8px] font-black uppercase tracking-widest text-center px-4 leading-tight">
+                  {t('dashboard.id_card')}
+                </span>
+              </button>
+              <div className="absolute -top-1 -inset-inline-end-1 bg-[#10b981] dark:bg-[#2cfc7d] text-white dark:text-black px-4 py-1.5 rounded-2xl font-black text-lg shadow-lg rotate-12">
+                #{student?.level}
               </div>
             </div>
           </div>
 
-          {/* MIDDLE SECTION: Tasks & Notifications */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-            {/* Task Manager Widget */}
-            <div className="bg-white/70 dark:bg-[#111111]/80 backdrop-blur-2xl border border-gray-200 dark:border-white/10 rounded-[2rem] p-6 sm:p-8 shadow-sm flex flex-col h-[400px]">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-black flex items-center gap-2">
-                  <ListTodo className="w-6 h-6 text-primary" /> {t('dashboard.action_items')}
-                </h2>
-                <button onClick={() => navigate('/student/personal-tasks')} className="text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-primary transition-colors flex items-center gap-1">
-                  {t('dashboard.view_all')} <ChevronRight className={`w-4 h-4 ${i18n.language === 'ar' ? 'rotate-180' : ''}`} />
-                </button>
+          {/* MAIN BENTO GRID */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pb-20">
+            
+            {/* Summary Row */}
+            <div className="lg:col-span-12 bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-10 text-gray-900 dark:text-white flex flex-col md:flex-row justify-between gap-10 group transition-all duration-500 hover:shadow-2xl">
+              <div className="space-y-6 flex-1">
+                <p className={`text-[1.8rem] font-black leading-[1.1] tracking-tight ${isAr ? 'font-arabic' : ''}`}>
+                  {t('mavi.grades_desc')}
+                </p>
               </div>
+              <div className="md:w-1/3 flex flex-col justify-between border-t md:border-t-0 md:border-s border-black/5 dark:border-white/5 pt-6 md:pt-0 md:ps-10">
+                 <div className="space-y-0">
+                    <span className="text-5xl font-black text-[#10b981] dark:text-[#2cfc7d]">{grades.length}</span>
+                    <p className="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 dark:text-white/30">{t('dashboard.enrolled_courses')}</p>
+                 </div>
+                 <div className="space-y-0 mt-6">
+                    <span className="text-2xl font-black text-gray-900 dark:text-white">{student?.section || 'N/A'}</span>
+                    <p className="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 dark:text-white/30">{t('dashboard.section')}</p>
+                 </div>
+              </div>
+            </div>
 
-              <div className="flex-1 overflow-y-auto pr-2 space-y-3 custom-scrollbar">
-                {loadingTasks || loadingOfficialTasks ? (
-                  <div className="w-full h-full flex items-center justify-center"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div></div>
-                ) : totalPendingTasks === 0 ? (
-                  <div className="h-full flex flex-col items-center justify-center text-gray-400 text-center">
-                    <CheckCircle2 className="w-12 h-12 mb-2 opacity-50" />
-                    <p className="font-semibold">{t('tasks.no_tasks')}</p>
+            {/* FULL WIDTH COURSES MATRIX - NO SCROLLING */}
+            <div className="lg:col-span-12 space-y-8">
+               <div className="flex items-center justify-between px-2">
+                  <div className="flex flex-col">
+                    <h2 className={`text-[clamp(1.5rem,3vw,2.5rem)] font-black uppercase tracking-tight ${isAr ? 'font-arabic' : ''}`}>
+                      {t('dashboard.active_courses')}
+                    </h2>
                   </div>
-                ) : (
-                  <>
-                    {pendingOfficial.slice(0, 3).map(task => (
-                      <div key={`off-${task.id}`} className="group flex items-center gap-4 p-4 rounded-2xl border border-gray-100 dark:border-white/5 bg-white dark:bg-[#161616] hover:border-primary/30 transition-colors">
-                        <button onClick={() => handleToggleOfficial(task.id, false)} className="text-gray-300 dark:text-gray-600 hover:text-primary transition-colors">
-                          <Circle className="w-6 h-6" />
-                        </button>
-                        <div className="flex-1 min-w-0 text-start">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="text-[9px] font-bold uppercase tracking-wider text-primary bg-primary/10 px-1.5 py-0.5 rounded">{task.course_name}</span>
-                            <span className="text-[9px] font-bold uppercase tracking-wider text-gray-400">{t('tasks.official_tasks')}</span>
-                          </div>
-                          <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{task.title}</p>
-                        </div>
-                        <a href={task.drive_link} target="_blank" rel="noopener noreferrer" className="p-2 rounded-xl bg-gray-50 dark:bg-white/5 text-gray-400 hover:text-primary transition-colors">
-                          <ExternalLink className="w-4 h-4" />
-                        </a>
-                      </div>
-                    ))}
-                    {pendingPersonal.slice(0, 3).map(task => (
-                      <div key={`pers-${task.id}`} className="group flex items-center gap-4 p-4 rounded-2xl border border-gray-100 dark:border-white/5 bg-white dark:bg-[#161616] hover:border-blue-500/30 transition-colors">
-                        <div className="text-gray-300 dark:text-gray-600"><Circle className="w-6 h-6" /></div>
-                        <div className="flex-1 min-w-0 text-start">
-                          <span className="text-[9px] font-bold uppercase tracking-wider text-blue-500 bg-blue-500/10 px-1.5 py-0.5 rounded mb-1 inline-block">{t('tasks.personal_tasks')}</span>
-                          <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{task.title}</p>
-                        </div>
-                        <button onClick={() => navigate('/student/personal-tasks')} className="p-2 rounded-xl text-gray-400 hover:text-blue-500 transition-colors">
-                          <ChevronRight className={`w-4 h-4 ${i18n.language === 'ar' ? 'rotate-180' : ''}`} />
-                        </button>
-                      </div>
-                    ))}
-                  </>
-                )}
-              </div>
-            </div>
-
-            {/* Notifications Widget */}
-            <div className="bg-white/70 dark:bg-[#111111]/80 backdrop-blur-2xl border border-gray-200 dark:border-white/10 rounded-[2rem] p-6 sm:p-8 shadow-sm flex flex-col h-[400px]">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-black flex items-center gap-2 text-start">
-                  <Bell className="w-6 h-6 text-orange-500" /> {t('dashboard.inbox')}
-                </h2>
-                <button onClick={() => navigate('/student/notifications')} className="text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-orange-500 transition-colors flex items-center gap-1">
-                  {t('dashboard.view_all')} <ChevronRight className={`w-4 h-4 ${i18n.language === 'ar' ? 'rotate-180' : ''}`} />
-                </button>
-              </div>
-
-              <div className="flex-1 overflow-y-auto pr-2 space-y-3 custom-scrollbar">
-                {notifLoading ? (
-                  <div className="w-full h-full flex items-center justify-center"><div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div></div>
-                ) : notifications.length === 0 ? (
-                  <div className="h-full flex flex-col items-center justify-center text-gray-400 text-center">
-                    <Bell className="w-12 h-12 mb-2 opacity-50" />
-                    <p className="font-semibold">{t('dashboard.no_notifications')}</p>
+                  <div className="bg-[#10b981]/10 dark:bg-[#2cfc7d]/10 px-4 py-2 rounded-xl text-[#10b981] dark:text-[#2cfc7d] text-xs font-black">
+                     {grades.length}
                   </div>
-                ) : (
-                  notifications.map((notif) => {
-                    const { emoji, category, iconBg, textColor } = getNotificationStyle(notif.title, notif.content);
-                    const isUnread = !notif.is_read;
-                    return (
-                      <div key={notif.id} className={`relative p-4 rounded-2xl border transition-all ${isUnread ? 'bg-white dark:bg-[#1a1a1a] border-gray-200 dark:border-white/10 shadow-sm' : 'bg-transparent border-transparent opacity-60 hover:opacity-100'}`}>
-                        {isUnread && <div className="absolute top-1/2 -inset-inline-start-1 w-2 h-2 rounded-full bg-primary -translate-y-1/2"></div>}
-                        <div className="flex gap-3 text-start">
-                          <div className={`w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center ${iconBg}`}>{emoji}</div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex justify-between items-start mb-1">
-                              <p className={`text-xs font-bold uppercase tracking-wider ${textColor}`}>{category}</p>
-                              <span className="text-[10px] font-bold text-gray-400">{formatDate(notif.created_at)}</span>
-                            </div>
-                            <h4 className="font-bold text-sm text-gray-900 dark:text-white mb-1 truncate">{notif.title}</h4>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">{renderContent(notif.content)}</p>
-                            {isUnread && (
-                              <button onClick={() => markAsRead(notif.id)} className="mt-2 text-[10px] font-bold uppercase tracking-wider text-primary hover:underline">
-                                {t('dashboard.mark_read')}
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            </div>
+               </div>
 
-          </div>
-
-          {/* BOTTOM SECTION: My Courses */}
-          <div className="pt-4">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-black flex items-center gap-2 text-gray-900 dark:text-white text-start">
-                <LayoutDashboard className="w-7 h-7 text-primary" /> {t('dashboard.active_courses')}
-              </h2>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {grades.length === 0 ? (
-                <div className="col-span-full py-16 bg-white/50 dark:bg-white/5 backdrop-blur-xl border border-dashed border-gray-300 dark:border-white/10 rounded-[2rem] text-center">
-                  <BookOpen className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-                  <p className="text-lg font-bold text-gray-900 dark:text-white">{t('dashboard.no_courses')}</p>
-                  <p className="text-sm text-gray-500 mt-1">{t('dashboard.contact_admin')}</p>
-                </div>
-              ) : (
-                grades.map((grade, idx) => {
-                  const colors = [
-                    { from: 'from-emerald-400', to: 'to-teal-500', text: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-                    { from: 'from-blue-400', to: 'to-indigo-500', text: 'text-blue-500', bg: 'bg-blue-500/10' },
-                    { from: 'from-violet-400', to: 'to-purple-500', text: 'text-violet-500', bg: 'bg-violet-500/10' },
-                    { from: 'from-amber-400', to: 'to-orange-500', text: 'text-amber-500', bg: 'bg-amber-500/10' },
-                  ];
-                  const c = colors[idx % colors.length];
-
-                  const totalScore = (parseFloat(grade.midterm_score) || 0) + (parseFloat(grade.practical_score) || 0) + (parseFloat(grade.oral_score) || 0);
-                  const maxScore = parseFloat(grade.max_score) || 100;
-                  const percentage = Math.min(100, (totalScore / maxScore) * 100);
-                  const hasScores = grade.midterm_score != null || grade.practical_score != null || grade.oral_score != null;
-
-                  return (
-                    <div
+               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                  {grades.map((grade, idx) => (
+                    <div 
                       key={idx}
                       onClick={() => navigate(`/student/course/${grade.course_id}`)}
-                      className="group relative bg-white/80 dark:bg-[#111111]/80 backdrop-blur-xl border border-gray-200 dark:border-white/10 rounded-[2rem] p-6 cursor-pointer hover:-translate-y-1 transition-all duration-300 hover:shadow-2xl overflow-hidden flex flex-col justify-between min-h-[220px]"
+                      className="group bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-8 space-y-8 cursor-pointer hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all duration-700 hover:-translate-y-2 hover:shadow-2xl shadow-sm"
                     >
-                      {/* Hover Glow */}
-                      <div className={`absolute -inset-inline-end-20 -top-20 w-40 h-40 ${c.bg} blur-[50px] rounded-full group-hover:scale-150 transition-transform duration-700`}></div>
-
-                      <div className="relative z-10 flex justify-between items-start mb-4">
-                        <div className={`w-14 h-14 rounded-2xl ${c.bg} ${c.text} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
-                          <BookOpen className="w-7 h-7" />
-                        </div>
-                        <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-white/5 flex items-center justify-center text-gray-400 group-hover:bg-white dark:group-hover:bg-white/10 transition-colors">
-                          <ChevronRight className={`w-5 h-5 group-hover:translate-x-1 transition-transform ${i18n.language === 'ar' ? 'rotate-180' : ''}`} />
-                        </div>
+                      <div className="flex justify-between items-start">
+                         <div className="w-12 h-12 rounded-2xl bg-gray-50 dark:bg-[#2cfc7d]/10 flex items-center justify-center text-[#10b981] dark:text-[#2cfc7d] group-hover:bg-emerald-500 dark:group-hover:bg-black group-hover:text-white transition-all duration-500">
+                            <BookOpen className="w-6 h-6" />
+                         </div>
+                         <div className="w-10 h-10 rounded-full border border-gray-100 dark:border-white/10 flex items-center justify-center group-hover:border-white/30 transition-all duration-500">
+                            <ArrowRight className={`w-4 h-4 ${isAr ? 'rotate-180' : ''}`} />
+                         </div>
                       </div>
-
-                      <div className="relative z-10 text-start">
-                        <h3 className="text-xl font-black text-gray-900 dark:text-white mb-6 line-clamp-2 leading-tight">
+                      <div className="space-y-2">
+                        <h3 className={`text-2xl font-black leading-tight uppercase tracking-tighter ${isAr ? 'font-arabic' : ''}`}>
                           {grade.course_name}
                         </h3>
-
-                        {hasScores ? (
-                          <div className="space-y-2">
-                            <div className="flex justify-between items-end">
-                              <span className={`text-2xl font-black ${c.text}`}>{totalScore.toFixed(0)}<span className="text-sm text-gray-400">/{maxScore}</span></span>
-                              <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">{percentage.toFixed(0)}%</span>
-                            </div>
-                            <div className="h-1.5 w-full bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden">
-                              <div className={`h-full bg-gradient-to-r ${c.from} ${c.to} rounded-full transition-all duration-1000 ease-out`} style={{ width: `${percentage}%` }}></div>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="pt-4 border-t border-gray-100 dark:border-white/5">
-                            <span className="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1">
-                              <Clock className="w-4 h-4" /> {t('dashboard.no_scores')}
-                            </span>
-                          </div>
-                        )}
                       </div>
                     </div>
-                  );
-                })
-              )}
+                  ))}
+               </div>
             </div>
+
+            {/* Bottom Row: Pending Tasks Large */}
+            <div className="lg:col-span-12 bg-[#2cfc7d] rounded-[2.5rem] p-12 text-black flex flex-col md:flex-row items-center justify-between gap-10 group overflow-hidden relative shadow-2xl">
+               <div className="absolute inset-0 bg-gradient-to-r from-black/5 to-transparent pointer-events-none" />
+               <div className="space-y-4 relative z-10 text-center md:text-start">
+                 <h3 className="text-[3rem] lg:text-[4rem] font-black uppercase italic leading-none">{t('dashboard.pending_tasks')}</h3>
+               </div>
+               <div className="flex items-center gap-12 relative z-10">
+                 <span className="text-[6rem] lg:text-[8rem] font-black tracking-tighter leading-none">{totalPendingTasks}</span>
+                 <button 
+                  onClick={() => navigate('/student/personal-tasks')}
+                  className="w-20 h-20 bg-black text-white rounded-full flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-2xl"
+                 >
+                   <ChevronRight className={`w-8 h-8 ${isAr ? 'rotate-180' : ''}`} />
+                 </button>
+               </div>
+            </div>
+
           </div>
+        </section>
+      </main>
 
-        </div>
-      </div>
-
-      {/* ── Classic Standard ID Card Overlay ── */}
+      {/* ID MODAL */}
       {isCardExpanded && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 font-sans">
-          {/* Simple semi-transparent backdrop with strong blur */}
-          <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-xl transition-opacity duration-300"
-            onClick={() => setIsCardExpanded(false)}
-          />
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 dark:bg-black/95 backdrop-blur-md" onClick={() => setIsCardExpanded(false)} />
+          <div className="relative w-full max-w-[500px] bg-white dark:bg-[#0c0c14] border border-gray-200 dark:border-white/10 rounded-[3.5rem] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-500">
+            <div className="h-3 bg-gradient-to-r from-[#10b981] via-[#8b5cf6] to-[#10b981] dark:from-[#2cfc7d] dark:via-[#d4a3ff] dark:to-[#2cfc7d]"></div>
+            <div className="p-10 flex flex-col items-center text-center space-y-8">
+               <div className="w-full flex items-center justify-between opacity-50">
+                  <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400">ZNU-{student?.id}</span>
+                  <ShieldCheck className="w-4 h-4 text-[#10b981] dark:text-[#2cfc7d]" />
+               </div>
 
-          {/* Card Container - White, rounded corners, simple shadow */}
-          <div className="relative w-full max-w-[450px] bg-white rounded-xl overflow-hidden shadow-2xl z-10 text-gray-900 animate-scaleUp">
-
-            {/* Blue Header Bar */}
-            <div className="bg-[#1874cd] py-4 text-center">
-              <h2 className="text-white text-[22px] font-bold tracking-widest uppercase m-0 leading-none">{t('dashboard.id_card')}</h2>
-            </div>
-
-            {/* Card Body */}
-            <div className="p-6 flex items-start justify-between gap-5 relative">
-
-              {/* Profile Picture (Left/Right) */}
-              <div className="w-[110px] h-[140px] shrink-0 bg-gray-100 rounded border border-gray-300 overflow-hidden flex items-center justify-center shadow-sm">
+              <div className="w-32 h-32 rounded-full border-4 border-gray-100 dark:border-white/5 p-1 bg-gray-50 dark:bg-white/5 shadow-inner">
                 {student?.avatar_url ? (
-                  <img src={student.avatar_url} alt={student.name} className="w-full h-full object-cover" />
+                  <img src={student.avatar_url} alt={student.name} className="w-full h-full object-cover rounded-full" />
                 ) : (
-                  <span className="text-4xl font-black text-gray-400">{student?.name?.charAt(0)}</span>
+                  <div className="w-full h-full flex items-center justify-center text-4xl font-black text-gray-200 dark:text-white/5">{student?.name?.charAt(0)}</div>
                 )}
               </div>
 
-              {/* Information Text (Center) */}
-              <div className="flex-1 flex flex-col pt-1 text-start">
-                <div className="flex gap-2 items-center mb-1">
-                  <span className="font-bold text-[13px] text-black">ID:</span>
-                  <span className="text-[13px] font-bold text-black">{student?.id}</span>
-                </div>
-
-                <div className="text-[15px] font-semibold text-gray-800 mb-3 leading-tight" dir="auto">
-                  {student?.name}
-                </div>
-
-                <div className="flex gap-2 items-center mb-1.5">
-                  <span className="text-[11px] text-gray-600 font-semibold w-16 shrink-0">{t('dashboard.level')}:</span>
-                  <span className="text-[12px] font-bold text-gray-800">{student?.level}</span>
-                </div>
-                <div className="flex gap-2 items-start">
-                  <span className="text-[11px] text-gray-600 font-semibold w-16 shrink-0 pt-[2px]">{t('dashboard.dept')}:</span>
-                  <span className="text-[12px] font-bold text-gray-800 leading-tight" dir="auto">{student?.department || t('common.not_assigned')}</span>
-                </div>
+              <div className="space-y-1">
+                <h2 className={`text-4xl font-black uppercase text-gray-900 dark:text-white tracking-tighter ${isAr ? 'font-arabic' : ''}`}>
+                  {isAr ? student?.name : transliterateArabic(student?.name)}
+                </h2>
               </div>
 
-              {/* Vertical Barcode (Right/Left) */}
-              <div className="w-[30px] shrink-0 flex flex-col justify-between pt-1 pb-1 h-[130px] opacity-80">
-                {[3, 1, 2, 1, 4, 1, 2, 3, 1, 1, 3, 2, 1, 2, 3, 1, 4, 2, 1, 1, 3, 2, 1, 2, 3, 1, 1, 4, 2, 3, 1, 2, 1].map((h, i) => (
-                  <div key={i} className="w-full bg-black" style={{ height: `${h}px` }}></div>
-                ))}
+              <div className="grid grid-cols-2 gap-4 w-full">
+                 <div className="bg-gray-50 dark:bg-white/5 p-6 rounded-[2rem] border border-gray-100 dark:border-white/5">
+                    <span className="text-[8px] font-black uppercase tracking-widest text-gray-400 block mb-2">{t('settings.level')}</span>
+                    <span className="text-xs font-black uppercase text-gray-900 dark:text-white">
+                        {isAr ? (
+                           student?.level === 1 ? 'الفرقة الأولى' :
+                           student?.level === 2 ? 'الفرقة الثانية' :
+                           student?.level === 3 ? 'الفرقة الثالثة' :
+                           student?.level === 4 ? 'الفرقة الرابعة' : `الفرقة ${student?.level}`
+                        ) : (
+                           student?.level === 1 ? 'First Year' :
+                           student?.level === 2 ? 'Second Year' :
+                           student?.level === 3 ? 'Third Year' :
+                           student?.level === 4 ? 'Fourth Year' : `Year ${student?.level}`
+                        )}
+                    </span>
+                 </div>
+                 <div className="bg-gray-50 dark:bg-white/5 p-6 rounded-[2rem] border border-gray-100 dark:border-white/5">
+                    <span className="text-[8px] font-black uppercase tracking-widest text-gray-400 block mb-2">{t('settings.section')}</span>
+                    <span className="text-xs font-black uppercase text-gray-900 dark:text-white">{student?.section || '3'}</span>
+                 </div>
               </div>
+
+              <div className="bg-[#8b5cf6] dark:bg-[#d4a3ff] w-full p-6 rounded-[2.5rem] shadow-xl shadow-purple-500/10">
+                 <span className="text-[8px] font-black uppercase tracking-widest text-white/40 dark:text-black/40 block mb-1">{t('dashboard.dept')}</span>
+                 <span className="text-xl font-black uppercase text-white dark:text-black">{student?.department_name || 'Artificial Intelligence'}</span>
+              </div>
+
+              <button onClick={() => setIsCardExpanded(false)} className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+                {t('common.close')}
+              </button>
             </div>
           </div>
-
-          {/* Close Button - Outside the card */}
-          <button
-            onClick={() => setIsCardExpanded(false)}
-            className={`absolute top-6 inset-inline-end-6 sm:top-10 sm:inset-inline-end-10 w-12 h-12 rounded-full bg-white/20 hover:bg-white/40 flex items-center justify-center text-white transition-colors z-[110]`}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
-          </button>
         </div>
       )}
 
       <style>{`
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.3); border-radius: 4px; }
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
+        .font-arabic { font-family: 'Cairo', sans-serif !important; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
     </div>
   );

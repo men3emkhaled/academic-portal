@@ -56,7 +56,7 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout, unreadCount 
   if (!isMobile) {
     return (
       <div className="fixed inset-inline-start-14 top-10 bottom-10 w-72 z-50 transition-all duration-700">
-        <div className="h-full bg-white/70 dark:bg-[#080808]/70 backdrop-blur-3xl border border-white/20 dark:border-white/5 rounded-[3rem] shadow-[0_32px_64px_rgba(0,0,0,0.1)] dark:shadow-[0_32px_64px_rgba(0,0,0,0.4)] flex flex-col overflow-hidden relative group/sidebar">
+        <div className="h-full bg-white/70 dark:bg-[#080808]/70 backdrop-blur-sm border border-white/20 dark:border-white/5 rounded-[3rem] shadow-[0_32px_64px_rgba(0,0,0,0.1)] dark:shadow-[0_32px_64px_rgba(0,0,0,0.4)] flex flex-col overflow-hidden relative group/sidebar">
 
           <div className="p-8 pb-4 text-center">
             <div className="inline-flex items-center justify-center w-20 h-20 rounded-full overflow-hidden shadow-2xl bg-white dark:bg-white/5 border border-white/20 transition-transform duration-500 group-hover/sidebar:scale-110">
@@ -99,7 +99,7 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout, unreadCount 
                   </span>
                   <span className="relative z-10 text-[11px] font-black uppercase tracking-[0.2em]">{item.label}</span>
                   {isActive && (
-                    <div className="absolute inset-inline-start-0 w-1 h-6 bg-[#8b5cf6] rounded-full shadow-[4px_0_15px_rgba(139,92,246,0.5)]" />
+                    <div className="absolute start-0 w-1 h-6 bg-[#8b5cf6] rounded-full shadow-[4px_0_15px_rgba(139,92,246,0.5)]" />
                   )}
                 </button>
               );
@@ -141,31 +141,59 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout, unreadCount 
     );
   }
 
+  const isDraggingRef = useRef(false);
+  const touchStartXRef = useRef(0);
+  const canDragRef = useRef(false);
+
   // ============= Mobile Dock =============
   const handleTouchStart = (e) => {
-    updateDragPosition(e.targetTouches[0].clientX);
+    isDraggingRef.current = false;
+    touchStartXRef.current = e.targetTouches[0].clientX;
+    
+    if (!dockRef.current) return;
+    const rect = dockRef.current.getBoundingClientRect();
+    const relativeX = e.targetTouches[0].clientX - rect.left;
+    let percent = (relativeX / rect.width) * 100;
+    if (i18n.language === 'ar') percent = 100 - percent;
+    
+    const itemWidth = 100 / bottomBarItems.length;
+    const touchedIndex = Math.max(0, Math.min(Math.floor(percent / itemWidth), bottomBarItems.length - 1));
+    const currentIndex = bottomBarItems.findIndex(item => activeTab === item.id);
+    
+    canDragRef.current = touchedIndex === currentIndex;
   };
 
   const handleTouchMove = (e) => {
-    updateDragPosition(e.targetTouches[0].clientX);
+    if (!canDragRef.current) return;
+    if (Math.abs(e.targetTouches[0].clientX - touchStartXRef.current) > 10) {
+      isDraggingRef.current = true;
+    }
+    if (isDraggingRef.current) {
+      updateDragPosition(e.targetTouches[0].clientX);
+    }
   };
 
   const updateDragPosition = (clientX) => {
     if (!dockRef.current) return;
     const rect = dockRef.current.getBoundingClientRect();
     const relativeX = clientX - rect.left;
-    const percent = (relativeX / rect.width) * 100;
+    let percent = (relativeX / rect.width) * 100;
+    if (i18n.language === 'ar') {
+      percent = 100 - percent;
+    }
     setDragPosition(Math.max(0, Math.min(percent, 100)));
   };
 
   const handleTouchEnd = () => {
-    if (dragPosition !== null) {
+    if (dragPosition !== null && isDraggingRef.current && canDragRef.current) {
       const itemWidth = 100 / bottomBarItems.length;
       const index = Math.floor(dragPosition / itemWidth);
       const safeIndex = Math.max(0, Math.min(index, bottomBarItems.length - 1));
       setActiveTab(bottomBarItems[safeIndex].id);
     }
     setDragPosition(null);
+    isDraggingRef.current = false;
+    canDragRef.current = false;
   };
 
   const currentIndex = bottomBarItems.findIndex(item => activeTab === item.id);
@@ -177,37 +205,14 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout, unreadCount 
   let stretchOrigin = 'center';
 
   if (dragPosition !== null) {
-    // 1. Center of the finger
-    const fingerPercent = Math.max(0, Math.min(dragPosition, 100));
-
-    // 2. Center of the closest tab
-    const closestIndex = Math.floor(fingerPercent / itemWidthPercent);
-    const safeClosestIndex = Math.max(0, Math.min(closestIndex, bottomBarItems.length - 1));
-    const closestTabCenterPercent = (safeClosestIndex * itemWidthPercent) + (itemWidthPercent / 2);
-
-    // 3. Distance from closest tab
-    const distanceFromCenter = fingerPercent - closestTabCenterPercent;
-    const absDistance = Math.abs(distanceFromCenter);
-
-    // 4. Stretch factor (peaks exactly halfway between two tabs)
-    const stretchFactor = Math.min(absDistance / (itemWidthPercent / 2), 1);
-
-    // 5. Calculate width (base is full tab width, stretch adds up to ~80% more width)
-    const maxStretchPercent = itemWidthPercent * 1.8;
-    indicatorWidthPercent = itemWidthPercent + (maxStretchPercent - itemWidthPercent) * stretchFactor;
-
-    // 6. Set transform origin based on drag direction to anchor the stretch
-    if (distanceFromCenter > 0) {
-      stretchOrigin = 'left'; // Stretching to the right
-      translateX = closestTabCenterPercent;
-    } else {
-      stretchOrigin = 'right'; // Stretching to the left
-      translateX = closestTabCenterPercent;
-    }
-
-    // Smoothly shift translateX towards the finger to make the 'head' follow the finger
-    translateX = closestTabCenterPercent + (distanceFromCenter * 0.5);
-
+    // Smooth finger tracking without snapping to intermediate tabs
+    const minTranslateX = itemWidthPercent / 2;
+    const maxTranslateX = 100 - (itemWidthPercent / 2);
+    translateX = Math.max(minTranslateX, Math.min(dragPosition, maxTranslateX));
+    
+    // Maintain standard width during drag
+    indicatorWidthPercent = itemWidthPercent;
+    stretchOrigin = 'center';
   } else {
     // Resting state
     translateX = (currentIndex * itemWidthPercent) + (itemWidthPercent / 2);
@@ -219,19 +224,19 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout, unreadCount 
 
   return (
     <>
-      <div className="fixed inset-inline-start-0 inset-inline-end-0 bottom-4 z-50 flex items-center justify-center gap-3 px-4 pointer-events-none">
+      <div className="fixed start-0 end-0 bottom-4 z-50 flex items-center justify-center gap-3 px-4 pointer-events-none">
         {/* Main Capsule */}
         <div
           ref={dockRef}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
-          className="flex-1 flex items-center relative bg-[#1c1c1e] dark:bg-[#1c1c1e] backdrop-blur-3xl border border-white/[0.06] dark:border-white/[0.06] rounded-[2rem] py-3 shadow-[0_8px_32px_rgba(0,0,0,0.5)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.6)] pointer-events-auto touch-none select-none overflow-hidden [.light_&]:bg-white/80 [.light_&]:border-black/[0.06] [.light_&]:shadow-[0_8px_32px_rgba(0,0,0,0.12)]"
+          className="flex-1 flex items-center relative bg-[#1c1c1e] dark:bg-[#1c1c1e] backdrop-blur-sm border border-white/[0.06] dark:border-white/[0.06] rounded-[2rem] py-3 shadow-[0_8px_32px_rgba(0,0,0,0.5)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.6)] pointer-events-auto touch-none select-none overflow-hidden [.light_&]:bg-white/80 [.light_&]:border-black/[0.06] [.light_&]:shadow-[0_8px_32px_rgba(0,0,0,0.12)]"
         >
           {/* Animated Jelly Indicator */}
           <div
             ref={indicatorRef}
-            className={`absolute top-1/2 -translate-y-1/2 h-14 bg-white/[0.15] dark:bg-white/[0.15] rounded-[1.75rem] z-0 [.light_&]:bg-black/[0.07] ${dragPosition === null && !isAnimatingRef.current ? 'transition-all duration-[350ms] cubic-bezier(0.34,1.56,0.64,1)' : ''}`}
+            className={`absolute top-1/2 -translate-y-1/2 h-14 bg-white/[0.15] dark:bg-white/[0.15] rounded-[1.75rem] z-0 [.light_&]:bg-black/[0.07] ${dragPosition === null && !isAnimatingRef.current ? 'transition-all duration-[150ms] cubic-bezier(0.34,1.56,0.64,1)' : ''}`}
             style={{
               width: `${indicatorWidthPercent}%`,
               insetInlineStart: `${translateX}%`,
@@ -259,7 +264,7 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout, unreadCount 
                   const endPercent = (idx * itemWidthPercent) + (itemWidthPercent / 2);
 
                   let startTime = null;
-                  const duration = 400;
+                  const duration = 120;
 
                   // Direct DOM animation - bypasses React completely
                   const animateSlide = (timestamp) => {
@@ -271,16 +276,17 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout, unreadCount 
                     const eased = 1 - Math.pow(1 - progress, 3);
                     const fingerPercent = startPercent + (endPercent - startPercent) * eased;
 
-                    // Calculate jelly stretch (same logic as drag)
-                    const closestIdx = Math.floor(fingerPercent / itemWidthPercent);
-                    const safeIdx = Math.max(0, Math.min(closestIdx, bottomBarItems.length - 1));
-                    const tabCenter = (safeIdx * itemWidthPercent) + (itemWidthPercent / 2);
-                    const dist = fingerPercent - tabCenter;
-                    const absDist = Math.abs(dist);
-                    const stretch = Math.min(absDist / (itemWidthPercent / 2), 1);
-                    const maxW = itemWidthPercent * 1.8;
-                    const w = itemWidthPercent + (maxW - itemWidthPercent) * stretch;
-                    const pos = tabCenter + (dist * 0.5);
+                    // Smooth continuous stretch through the entire journey
+                    const journeyMidpoint = (startPercent + endPercent) / 2;
+                    const totalDist = Math.abs(endPercent - startPercent);
+                    const distFromMidpoint = Math.abs(fingerPercent - journeyMidpoint);
+                    
+                    // stretchFactor: 1 at midpoint, 0 at start/end
+                    const stretchFactor = totalDist > 0 ? Math.max(0, 1 - (distFromMidpoint / (totalDist / 2))) : 0;
+                    
+                    // Expand width slightly at the midpoint of the journey for a liquid effect
+                    const w = itemWidthPercent + (itemWidthPercent * 0.8 * stretchFactor);
+                    const pos = fingerPercent;
 
                     // Apply directly to DOM
                     el.style.transition = 'none';
@@ -288,11 +294,11 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout, unreadCount 
                     if (i18n.language === 'ar') {
                       el.style.insetInlineStart = `${pos}%`;
                       el.style.transform = `translate(50%, -50%)`;
-                      el.style.transformOrigin = dist > 0 ? 'right' : dist < 0 ? 'left' : 'center';
+                      el.style.transformOrigin = 'center';
                     } else {
                       el.style.insetInlineStart = `${pos}%`;
                       el.style.transform = `translate(-50%, -50%)`;
-                      el.style.transformOrigin = dist > 0 ? 'left' : dist < 0 ? 'right' : 'center';
+                      el.style.transformOrigin = 'center';
                     }
 
                     if (progress < 1) {
@@ -323,7 +329,7 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout, unreadCount 
         {/* Separate Menu Button */}
         <button
           onClick={() => setIsOpen(true)}
-          className="w-14 h-14 flex items-center justify-center bg-[#1c1c1e] dark:bg-[#1c1c1e] [.light_&]:bg-white/80 backdrop-blur-3xl border border-white/[0.06] dark:border-white/[0.06] [.light_&]:border-black/[0.06] rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.5)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.6)] [.light_&]:shadow-[0_8px_32px_rgba(0,0,0,0.12)] pointer-events-auto text-white/80 dark:text-white/80 [.light_&]:text-gray-700 transition-all active:scale-90 shrink-0"
+          className="w-14 h-14 flex items-center justify-center bg-[#1c1c1e] dark:bg-[#1c1c1e] [.light_&]:bg-white/80 backdrop-blur-sm border border-white/[0.06] dark:border-white/[0.06] [.light_&]:border-black/[0.06] rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.5)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.6)] [.light_&]:shadow-[0_8px_32px_rgba(0,0,0,0.12)] pointer-events-auto text-white/80 dark:text-white/80 [.light_&]:text-gray-700 transition-all active:scale-90 shrink-0"
         >
           <Menu className="w-5 h-5" />
         </button>
@@ -332,7 +338,7 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout, unreadCount 
       {isOpen && (
         <>
           <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[60]" onClick={() => setIsOpen(false)} />
-          <div className="fixed bottom-32 inset-inline-start-6 inset-inline-end-6 bg-white dark:bg-[#111] border border-gray-200 dark:border-white/10 rounded-[2.5rem] shadow-2xl z-[70] animate-slideUp overflow-hidden">
+          <div className="fixed bottom-32 start-6 end-6 bg-white dark:bg-[#111] border border-gray-200 dark:border-white/10 rounded-[2.5rem] shadow-2xl z-[70] animate-slideUp overflow-hidden">
             <div className="p-4 pt-6 text-center border-b border-gray-100 dark:border-white/5">
               <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-widest">Menu</h3>
             </div>
@@ -350,35 +356,30 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout, unreadCount 
                     <span className="font-bold text-[11px] uppercase tracking-wide text-center leading-tight">{item.label}</span>
                   </button>
                 ))}
-
-                {/* Theme & Language Toggles */}
-                <button
-                  onClick={() => { const newLang = i18n.language === 'ar' ? 'en' : 'ar'; i18n.changeLanguage(newLang); }}
-                  className="flex flex-col items-center justify-center gap-2 px-3 py-4 rounded-2xl transition-all text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 border border-gray-100 dark:border-white/5"
-                >
-                  <Languages className="w-5 h-5" />
-                  <span className="font-bold text-[11px] uppercase tracking-wide text-center leading-tight">
-                    {i18n.language === 'ar' ? 'English' : 'العربية'}
-                  </span>
-                </button>
-                <button
-                  onClick={toggleTheme}
-                  className="flex flex-col items-center justify-center gap-2 px-3 py-4 rounded-2xl transition-all text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 border border-gray-100 dark:border-white/5"
-                >
-                  {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-                  <span className="font-bold text-[11px] uppercase tracking-wide text-center leading-tight">
-                    {theme === 'dark' ? 'Light' : 'Dark'}
-                  </span>
-                </button>
-
-                {/* Logout */}
-                <button
-                  onClick={onLogout}
-                  className="flex flex-col items-center justify-center gap-2 px-3 py-4 rounded-2xl transition-all text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 border border-rose-100 dark:border-rose-500/20"
-                >
-                  <LogOut className="w-5 h-5" />
-                  <span className="font-bold text-[11px] uppercase tracking-wide text-center leading-tight">Logout</span>
-                </button>
+                  <div className="col-span-2 my-1 mx-2 h-px bg-gray-100 dark:bg-white/5" />
+                  <div className="col-span-2 flex justify-center gap-3 p-1">
+                  <button
+                    onClick={() => { const newLang = i18n.language === 'ar' ? 'en' : 'ar'; i18n.changeLanguage(newLang); }}
+                    className="w-14 h-14 flex items-center justify-center rounded-2xl bg-gray-50 dark:bg-white/5 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-white/5 hover:border-gray-300 dark:hover:border-white/10 transition-all active:scale-95"
+                    title={i18n.language === 'ar' ? 'English' : 'العربية'}
+                  >
+                    <Languages className="w-6 h-6" />
+                  </button>
+                  <button
+                    onClick={toggleTheme}
+                    className="w-14 h-14 flex items-center justify-center rounded-2xl bg-gray-50 dark:bg-white/5 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-white/5 hover:border-gray-300 dark:hover:border-white/10 transition-all active:scale-95"
+                    title={theme === 'dark' ? 'Light' : 'Dark'}
+                  >
+                    {theme === 'dark' ? <Sun className="w-6 h-6" /> : <Moon className="w-6 h-6" />}
+                  </button>
+                  <button
+                    onClick={onLogout}
+                    className="w-14 h-14 flex items-center justify-center rounded-2xl bg-rose-50 dark:bg-rose-500/10 text-rose-500 hover:bg-rose-100 dark:hover:bg-rose-500/20 hover:text-rose-600 border border-rose-100 dark:border-rose-500/20 hover:border-rose-200 dark:hover:border-rose-500/30 transition-all active:scale-95"
+                    title="Logout"
+                  >
+                    <LogOut className="w-6 h-6" />
+                  </button>
+                </div>
               </div>
             </div>
           </div>

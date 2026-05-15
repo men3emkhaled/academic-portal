@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { CheckSquare, Edit, Trash2, ExternalLink, BookOpen, Plus, Calendar } from 'lucide-react';
+import { 
+  CheckSquare, Edit, Trash2, ExternalLink, BookOpen, 
+  Plus, Calendar, ArrowLeft, CheckCircle2, Circle,
+  Layout, Zap, Activity, ShieldAlert, X, Loader2, ArrowRight
+} from 'lucide-react';
 import { useStudentAuth } from '../context/StudentAuthContext';
 import { useStudentData } from '../context/StudentDataContext';
 import { useNavigate } from 'react-router-dom';
@@ -13,9 +17,12 @@ const StudentPersonalTasks = () => {
   const { t, i18n } = useTranslation();
   const { tasks, setTasks, loadingTasks, fetchTasks, officialTasks, setOfficialTasks, fetchOfficialTasks, loadingOfficialTasks } = useStudentData();
   const navigate = useNavigate();
+  const isAr = i18n.language === 'ar';
+  
   const [showForm, setShowForm] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [formData, setFormData] = useState({ title: '', description: '' });
+  const [submitting, setSubmitting] = useState(false);
 
   const loading = loadingTasks || loadingOfficialTasks;
 
@@ -26,17 +33,14 @@ const StudentPersonalTasks = () => {
   };
 
   useEffect(() => {
-    if (!student) {
-      navigate('/student/login');
-    }
+    if (!student) navigate('/student/login');
   }, [student, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.title.trim()) {
-      toast.error(t('tasks.title_required'));
-      return;
-    }
+    if (!formData.title.trim()) return toast.error(t('tasks.title_required'));
+    
+    setSubmitting(true);
     try {
       if (editingTask) {
         await studentApi.put(`/student/personal-tasks/${editingTask.id}`, {
@@ -57,34 +61,28 @@ const StudentPersonalTasks = () => {
       fetchTasks();
     } catch (error) {
       toast.error(error.response?.data?.message || t('common.error_save'));
+    } finally {
+      setSubmitting(false);
     }
   };
 
   const handleToggle = async (taskId, currentStatus) => {
-    // Optimistic UI update
     setTasks(tasks.map(t => t.id === taskId ? { ...t, is_completed: !currentStatus } : t));
     try {
-      await studentApi.patch(`/student/personal-tasks/${taskId}/toggle`, {
-        is_completed: !currentStatus
-      });
+      await studentApi.patch(`/student/personal-tasks/${taskId}/toggle`, { is_completed: !currentStatus });
       toast.success(currentStatus ? t('tasks.marked_pending') : t('tasks.completed_toast'));
     } catch (error) {
-      // Revert on error
       fetchTasks();
       toast.error(t('common.error_save'));
     }
   };
 
   const handleToggleOfficial = async (taskId, currentStatus) => {
-    // Optimistic UI update
     setOfficialTasks(officialTasks.map(t => t.id === taskId ? { ...t, is_completed: !currentStatus } : t));
     try {
-      await studentApi.patch(`/official-tasks/${taskId}/toggle`, {
-        is_completed: !currentStatus
-      });
+      await studentApi.patch(`/official-tasks/${taskId}/toggle`, { is_completed: !currentStatus });
       toast.success(!currentStatus ? t('tasks.official_completed') : t('tasks.marked_pending'));
     } catch (error) {
-      // Revert on error
       fetchOfficialTasks();
       toast.error(t('common.error_save'));
     }
@@ -115,240 +113,218 @@ const StudentPersonalTasks = () => {
 
   if (loading) {
     return (
-      <div className="flex flex-col justify-center items-center h-screen bg-gray-50 dark:bg-[#0a0a0a] transition-colors duration-500 overflow-hidden relative">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 blur-[120px] rounded-full animate-pulse-slow"></div>
-        <div className="relative z-10 flex flex-col items-center">
-          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-          <p className="mt-4 text-gray-500 dark:text-gray-400 font-bold text-xs tracking-wide">{t('common.loading')}</p>
-        </div>
+      <div className="flex flex-col justify-center items-center h-screen bg-white dark:bg-[#0c0c14]">
+        <div className="w-12 h-12 border-2 border-gray-200 dark:border-white/10 border-t-[#2cfc7d] rounded-full animate-spin"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a0a] text-gray-900 dark:text-white font-sans transition-colors duration-500 relative overflow-hidden">
-      {/* Background Ambient Orbs */}
-      <div className="fixed top-0 left-0 w-full h-full pointer-events-none z-0 overflow-hidden">
-        <div className="absolute top-[20%] left-[-10%] w-[40%] h-[40%] bg-blue-500/5 dark:bg-blue-500/10 blur-[150px] rounded-full mix-blend-multiply dark:mix-blend-screen"></div>
-        <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-primary/5 dark:bg-primary/10 blur-[150px] rounded-full mix-blend-multiply dark:mix-blend-screen"></div>
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0c0c14] text-gray-900 dark:text-white font-sans transition-colors duration-500 overflow-x-hidden relative" dir={isAr ? 'rtl' : 'ltr'}>
+      
+      {/* Background Decor */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute top-[-10%] inset-inline-end-[-5%] w-[50vw] h-[50vw] bg-[#8b5cf6]/5 blur-[120px] rounded-full"></div>
+        <div className="absolute bottom-[-10%] inset-inline-start-[-5%] w-[40vw] h-[40vw] bg-[#2cfc7d]/3 blur-[100px] rounded-full"></div>
       </div>
 
-      <Sidebar activePage="tasks" onLogout={handleLogout} />
+      <Sidebar onLogout={handleLogout} />
 
-      <div className="md:ps-96 pb-24 md:pb-12 relative z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
-
-          {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-2">
-            <div className="flex items-center gap-4 text-start">
-              <div className="bg-primary/10 dark:bg-primary/20 p-3 rounded-2xl border border-primary/20 shadow-sm">
-                <CheckSquare className="w-8 h-8 text-primary" />
+      <main className="md:ps-72 min-h-screen relative z-10 flex flex-col">
+        
+        {/* HERO SECTION */}
+        <section className="px-6 lg:px-10 pt-16 pb-12 max-w-[1500px] mx-auto w-full space-y-12 text-start">
+          
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-10">
+            <div className="space-y-4 text-start">
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#2cfc7d]"></div>
+                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 dark:text-white/30">{t('sidebar.personal_tasks')}</span>
               </div>
-              <div>
-                <h1 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white tracking-tight">{t('tasks.title')}</h1>
-                <p className="text-gray-500 dark:text-gray-400 font-semibold mt-1">{t('tasks.desc')}</p>
-              </div>
+              <h1 className={`text-[clamp(2.5rem,6vw,5.5rem)] font-black leading-[0.95] tracking-tighter uppercase text-gray-900 dark:text-white ${isAr ? 'font-arabic' : ''}`}>
+                {t('mavi.command')}
+              </h1>
             </div>
 
-            <button
-              onClick={() => { setShowForm(true); setEditingTask(null); setFormData({ title: '', description: '' }); }}
-              className="group relative inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white dark:text-dark font-black px-6 py-4 rounded-2xl shadow-[0_4px_20px_rgba(46,204,113,0.3)] hover:shadow-[0_8px_30px_rgba(46,204,113,0.4)] transition-all hover:scale-105 active:scale-95"
-            >
-              <Plus className="w-5 h-5 transition-transform group-hover:rotate-90" /> {t('tasks.add_task')}
-            </button>
+            <div className="flex flex-col sm:flex-row items-center gap-4">
+               
+               <button 
+                onClick={() => { setShowForm(true); setEditingTask(null); setFormData({ title: '', description: '' }); }}
+                className="bg-gray-900 dark:bg-[#2cfc7d] text-white dark:text-black px-10 py-5 rounded-[2rem] font-black text-xs uppercase tracking-[0.4em] shadow-2xl hover:scale-[1.05] active:scale-95 transition-all flex items-center gap-3"
+               >
+                 <Plus className="w-5 h-5" />
+                 {t('tasks.add_task')}
+               </button>
+            </div>
           </div>
 
           {(tasks.length === 0 && officialTasks.length === 0) ? (
-            <div className="py-24 bg-white/50 dark:bg-white/5 backdrop-blur-xl rounded-[2.5rem] border-2 border-dashed border-gray-300 dark:border-white/10 text-center shadow-sm flex flex-col items-center justify-center max-w-3xl mx-auto mt-12">
-              <div className="w-24 h-24 rounded-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 flex items-center justify-center mb-6">
-                <CheckSquare className="w-12 h-12 text-gray-300 dark:text-gray-600" />
+            <div className="py-24 bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 rounded-[4rem] text-center shadow-xl flex flex-col items-center justify-center max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-8 duration-700">
+              <div className="w-32 h-32 rounded-[2.5rem] bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 flex items-center justify-center mb-8">
+                <Layout className="w-16 h-16 text-gray-200 dark:text-white/10" />
               </div>
-              <h4 className="font-black text-2xl text-gray-900 dark:text-white mb-2">{t('tasks.no_tasks')}</h4>
-              <p className="text-gray-500 dark:text-gray-400 font-medium">{t('tasks.no_tasks_desc')}</p>
+              <h4 className="font-black text-4xl text-gray-900 dark:text-white mb-4 uppercase tracking-tighter">{t('tasks.no_tasks')}</h4>
+              <p className="text-gray-400 dark:text-white/30 font-black uppercase tracking-widest text-xs">{t('tasks.no_tasks_desc')}</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 pb-24">
 
-              {/* Official Course Tasks Column */}
-              <div className="space-y-6">
-                <div className="flex items-center gap-3 mb-6 bg-white/80 dark:bg-[#111]/80 backdrop-blur-md border border-gray-200 dark:border-white/10 px-6 py-4 rounded-[1.5rem] shadow-sm text-start">
-                  <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
-                    <BookOpen className="w-5 h-5 text-blue-500" />
+              {/* OFFICIAL TASKS */}
+              <div className="space-y-8">
+                <div className="flex items-center gap-4 bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 p-8 rounded-[2.5rem] shadow-sm text-start relative overflow-hidden group">
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <div className="w-14 h-14 rounded-[1.2rem] bg-blue-500/10 flex items-center justify-center text-blue-500 border border-blue-500/10">
+                    <BookOpen className="w-7 h-7" />
                   </div>
                   <div>
-                    <h3 className="font-black text-lg text-gray-900 dark:text-white leading-tight">{t('tasks.official')}</h3>
-                    <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">{t('tasks.assigned', { count: officialTasks.length })}</p>
+                    <h3 className="font-black text-2xl text-gray-900 dark:text-white uppercase tracking-tighter leading-none">{t('tasks.official')}</h3>
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] mt-1 opacity-50 italic">{t('mavi.central_assignments')}</p>
                   </div>
                 </div>
 
                 {officialTasks.length === 0 ? (
-                  <div className="p-8 text-center text-gray-500 border border-dashed border-gray-300 dark:border-gray-700 rounded-3xl">{t('tasks.no_official')}</div>
+                  <div className="p-12 text-center text-gray-300 dark:text-white/10 italic font-black uppercase tracking-widest bg-white dark:bg-white/5 border border-dashed border-gray-200 dark:border-white/10 rounded-[2.5rem]">{t('tasks.no_official')}</div>
                 ) : (
                   <div className="space-y-4">
-                    {officialTasks.map((task) => {
-                      const isCompleted = task.is_completed;
-                      return (
-                        <div key={`official-${task.id}`} className={`group relative overflow-hidden bg-white/90 dark:bg-[#111]/90 backdrop-blur-xl border ${isCompleted ? 'border-blue-500/20 shadow-[0_8px_30px_rgba(59,130,246,0.1)]' : 'border-gray-200 dark:border-white/10 shadow-sm hover:shadow-md'} rounded-[2rem] p-6 flex items-start gap-5 transition-all duration-300 ${isCompleted ? 'opacity-80' : ''} text-start`}>
+                    {officialTasks.map((task) => (
+                      <div key={`official-${task.id}`} className={`group relative bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-8 flex items-start gap-8 transition-all duration-700 shadow-sm hover:shadow-2xl hover:-translate-y-1 ${task.is_completed ? 'opacity-40 grayscale' : ''} text-start`}>
+                        <button
+                          onClick={() => handleToggleOfficial(task.id, task.is_completed)}
+                          className={`relative z-10 shrink-0 w-12 h-12 rounded-[1.2rem] flex items-center justify-center transition-all duration-500 ${
+                            task.is_completed
+                              ? 'bg-blue-500 text-white shadow-xl shadow-blue-500/20 scale-90'
+                              : 'bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 text-gray-300 hover:scale-110'
+                          }`}
+                        >
+                          {task.is_completed ? <CheckCircle2 className="w-7 h-7 stroke-[3px]" /> : <Circle className="w-7 h-7" />}
+                        </button>
 
-                          {/* Success Glow */}
-                          <div className={`absolute inset-0 bg-gradient-to-r from-blue-500/5 to-transparent transition-opacity duration-500 pointer-events-none ${isCompleted ? 'opacity-100' : 'opacity-0'}`}></div>
-
-                          {/* Custom Checkbox */}
-                          <button
-                            onClick={() => handleToggleOfficial(task.id, isCompleted)}
-                            className={`relative z-10 shrink-0 w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 hover:scale-105 active:scale-95 ${
-                              isCompleted
-                                ? 'bg-blue-500 border-blue-500 text-white shadow-[0_0_15px_rgba(59,130,246,0.4)]'
-                                : 'bg-gray-50 dark:bg-dark border-gray-300 dark:border-gray-600 text-transparent hover:border-blue-500/50'
-                            }`}
-                          >
-                            <svg className={`w-5 h-5 transition-all duration-300 ${isCompleted ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                          </button>
-
-                          <div className="flex-1 relative z-10 min-w-0 pt-1">
-                            <div className="flex flex-wrap items-center gap-2 mb-2">
-                              <span className="bg-blue-500/10 text-blue-500 border border-blue-500/20 text-[10px] font-black px-2 py-0.5 rounded-lg uppercase tracking-widest">{task.course_name}</span>
-                              {task.deadline && (
-                                <span className="flex items-center gap-1 text-[10px] text-gray-500 font-bold uppercase tracking-widest"><Calendar className="w-3 h-3"/> {new Date(task.deadline).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'en-US')}</span>
-                              )}
-                            </div>
-                            <h4 className={`text-lg font-black transition-colors duration-300 ${isCompleted ? 'text-gray-400 line-through decoration-blue-500/40' : 'text-gray-900 dark:text-white'}`}>
-                              {task.title}
-                            </h4>
-                            {task.description && (
-                              <p className={`text-sm mt-1.5 transition-colors duration-300 ${isCompleted ? 'text-gray-400/70' : 'text-gray-600 dark:text-gray-400'}`}>
-                                {task.description}
-                              </p>
+                        <div className="flex-1 min-w-0 space-y-4">
+                          <div className="flex flex-wrap items-center gap-3">
+                            <span className="bg-blue-500/10 text-blue-500 border border-blue-500/10 text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest">{task.course_name}</span>
+                            {task.deadline && (
+                              <span className="flex items-center gap-2 text-[9px] text-gray-400 font-black uppercase tracking-widest"><Calendar className="w-3.5 h-3.5"/> {new Date(task.deadline).toLocaleDateString()}</span>
                             )}
                           </div>
-
-                          {task.drive_link && (
-                            <a href={task.drive_link} target="_blank" rel="noopener noreferrer" className="relative z-10 w-10 h-10 shrink-0 flex items-center justify-center bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-400 rounded-xl hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-all" title={t('materials.view_doc')}>
-                              <ExternalLink className="w-4 h-4" />
-                            </a>
-                          )}
+                          <h4 className={`text-xl font-black uppercase tracking-tight transition-all duration-700 ${task.is_completed ? 'line-through' : 'text-gray-900 dark:text-white'}`}>
+                            {task.title}
+                          </h4>
                         </div>
-                      );
-                    })}
+
+                        {task.drive_link && (
+                          <a href={task.drive_link} target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-full bg-gray-50 dark:bg-white/5 flex items-center justify-center text-gray-400 hover:bg-blue-500 hover:text-white transition-all shadow-sm">
+                            <ExternalLink className="w-5 h-5" />
+                          </a>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
 
-              {/* Personal Tasks Column */}
-              <div className="space-y-6">
-                <div className="flex items-center gap-3 mb-6 bg-white/80 dark:bg-[#111]/80 backdrop-blur-md border border-gray-200 dark:border-white/10 px-6 py-4 rounded-[1.5rem] shadow-sm text-start">
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
-                    <CheckSquare className="w-5 h-5 text-primary" />
+              {/* PERSONAL TASKS */}
+              <div className="space-y-8">
+                <div className="flex items-center gap-4 bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 p-8 rounded-[2.5rem] shadow-sm text-start relative overflow-hidden group">
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#10b981]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <div className="w-14 h-14 rounded-[1.2rem] bg-emerald-500/10 flex items-center justify-center text-emerald-500 border border-emerald-500/10">
+                    <Activity className="w-7 h-7" />
                   </div>
                   <div>
-                    <h3 className="font-black text-lg text-gray-900 dark:text-white leading-tight">{t('tasks.personal')}</h3>
-                    <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">{t('tasks.created', { count: tasks.length })}</p>
+                    <h3 className="font-black text-2xl text-gray-900 dark:text-white uppercase tracking-tighter leading-none">{t('tasks.personal')}</h3>
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] mt-1 opacity-50 italic">{t('mavi.user_space')}</p>
                   </div>
                 </div>
 
                 {tasks.length === 0 ? (
-                  <div className="p-8 text-center text-gray-500 border border-dashed border-gray-300 dark:border-gray-700 rounded-3xl">{t('tasks.no_personal')}</div>
+                  <div className="p-12 text-center text-gray-300 dark:text-white/10 italic font-black uppercase tracking-widest bg-white dark:bg-white/5 border border-dashed border-gray-200 dark:border-white/10 rounded-[2.5rem]">{t('tasks.no_personal')}</div>
                 ) : (
                   <div className="space-y-4">
-                    {tasks.map((task) => {
-                      const isCompleted = task.is_completed;
-                      return (
-                        <div key={`personal-${task.id}`} className={`group relative overflow-hidden bg-white/90 dark:bg-[#111]/90 backdrop-blur-xl border ${isCompleted ? 'border-primary/20 shadow-[0_8px_30px_rgba(46,204,113,0.1)]' : 'border-gray-200 dark:border-white/10 shadow-sm hover:shadow-md'} rounded-[2rem] p-6 flex items-start gap-5 transition-all duration-300 ${isCompleted ? 'opacity-80' : ''} text-start`}>
+                    {tasks.map((task) => (
+                      <div key={`personal-${task.id}`} className={`group relative bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-8 flex items-start gap-8 transition-all duration-700 shadow-sm hover:shadow-2xl hover:-translate-y-1 ${task.is_completed ? 'opacity-40 grayscale' : ''} text-start`}>
+                        <button
+                          onClick={() => handleToggle(task.id, task.is_completed)}
+                          className={`relative z-10 shrink-0 w-12 h-12 rounded-[1.2rem] flex items-center justify-center transition-all duration-500 ${
+                            task.is_completed
+                              ? 'bg-[#10b981] dark:bg-[#2cfc7d] text-white dark:text-black shadow-xl shadow-emerald-500/20 scale-90'
+                              : 'bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 text-gray-300 hover:scale-110'
+                          }`}
+                        >
+                          {task.is_completed ? <CheckCircle2 className="w-7 h-7 stroke-[3px]" /> : <Circle className="w-7 h-7" />}
+                        </button>
 
-                          {/* Success Glow */}
-                          <div className={`absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent transition-opacity duration-500 pointer-events-none ${isCompleted ? 'opacity-100' : 'opacity-0'}`}></div>
-
-                          {/* Custom Checkbox */}
-                          <button
-                            onClick={() => handleToggle(task.id, isCompleted)}
-                            className={`relative z-10 shrink-0 w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 hover:scale-105 active:scale-95 ${
-                              isCompleted
-                                ? 'bg-primary border-primary text-white shadow-[0_0_15px_rgba(46,204,113,0.4)]'
-                                : 'bg-gray-50 dark:bg-dark border-gray-300 dark:border-gray-600 text-transparent hover:border-primary/50'
-                            }`}
-                          >
-                            <svg className={`w-5 h-5 transition-all duration-300 ${isCompleted ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                          </button>
-
-                          <div className="flex-1 relative z-10 min-w-0 pt-1">
-                            <h4 className={`text-lg font-black transition-colors duration-300 ${isCompleted ? 'text-gray-400 line-through decoration-primary/40' : 'text-gray-900 dark:text-white'}`}>
-                              {task.title}
-                            </h4>
-                            {task.description && (
-                              <p className={`text-sm mt-1.5 transition-colors duration-300 ${isCompleted ? 'text-gray-400/70' : 'text-gray-600 dark:text-gray-400'}`}>
-                                {task.description}
-                              </p>
-                            )}
-                          </div>
-
-                          <div className="relative z-10 flex flex-col sm:flex-row gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button onClick={() => editTask(task)} className="w-10 h-10 flex items-center justify-center bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-400 rounded-xl hover:bg-amber-500 hover:text-white hover:border-amber-500 transition-all"><Edit className="w-4 h-4" /></button>
-                            <button onClick={() => handleDelete(task.id)} className="w-10 h-10 flex items-center justify-center bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-400 rounded-xl hover:bg-rose-500 hover:text-white hover:border-rose-500 transition-all"><Trash2 className="w-4 h-4" /></button>
-                          </div>
+                        <div className="flex-1 min-w-0 space-y-2">
+                          <h4 className={`text-xl font-black uppercase tracking-tight transition-all duration-700 ${task.is_completed ? 'line-through' : 'text-gray-900 dark:text-white'}`}>
+                            {task.title}
+                          </h4>
+                          {task.description && (
+                            <p className="text-sm text-gray-500 dark:text-white/30 font-medium leading-relaxed italic">"{task.description}"</p>
+                          )}
                         </div>
-                      );
-                    })}
+
+                        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity translate-y-2 group-hover:translate-y-0 duration-500">
+                          <button onClick={() => editTask(task)} className="w-12 h-12 rounded-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/5 text-gray-400 hover:bg-amber-500 hover:text-white transition-all shadow-sm flex items-center justify-center"><Edit className="w-5 h-5" /></button>
+                          <button onClick={() => handleDelete(task.id)} className="w-12 h-12 rounded-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/5 text-gray-400 hover:bg-rose-500 hover:text-white transition-all shadow-sm flex items-center justify-center"><Trash2 className="w-5 h-5" /></button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
-
             </div>
           )}
 
-          {/* Premium Glassmorphic Add/Edit Task Modal */}
+          {/* ADD/EDIT MODAL */}
           {showForm && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
-              {/* Blur Backdrop */}
-              <div className="absolute inset-0 bg-gray-900/40 dark:bg-black/60 backdrop-blur-xl animate-in fade-in duration-300" onClick={resetForm}></div>
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+              <div className="absolute inset-0 bg-gray-900/40 dark:bg-black/80 backdrop-blur-md animate-in fade-in duration-500" onClick={resetForm}></div>
 
-              {/* Modal Container */}
-              <div className="relative z-10 w-full max-w-lg bg-white/95 dark:bg-[#111]/95 backdrop-blur-2xl border border-white/20 dark:border-white/10 rounded-[2.5rem] shadow-[0_0_50px_rgba(0,0,0,0.2)] animate-in slide-in-from-bottom-8 duration-300 overflow-hidden">
-                {/* Decorative Top Glow */}
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-2 bg-primary blur-[20px]"></div>
-
-                <div className="p-8 sm:p-10">
-                  <div className="flex items-center gap-4 mb-8 text-start">
-                    <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20">
-                      {editingTask ? <Edit className="w-6 h-6 text-primary" /> : <Plus className="w-6 h-6 text-primary" />}
+              <div className="relative z-10 w-full max-w-2xl bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/10 rounded-[3.5rem] shadow-[0_40px_100px_rgba(0,0,0,0.5)] animate-in slide-in-from-bottom-12 duration-700 overflow-hidden">
+                <div className="p-12 space-y-12">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-6 text-start">
+                      <div className="w-16 h-16 rounded-[1.8rem] bg-[#10b981]/10 dark:bg-[#2cfc7d]/10 flex items-center justify-center border border-[#10b981]/10 dark:border-[#2cfc7d]/10">
+                        {editingTask ? <Edit className="w-8 h-8 text-[#10b981] dark:text-[#2cfc7d]" /> : <Plus className="w-8 h-8 text-[#10b981] dark:text-[#2cfc7d]" />}
+                      </div>
+                      <div>
+                        <h3 className="text-4xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none">
+                          {editingTask ? t('tasks.edit_task') : t('tasks.new_task')}
+                        </h3>
+                        <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 mt-2 opacity-50 italic">{t('mavi.system_override')}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="text-2xl font-black text-gray-900 dark:text-white">
-                        {editingTask ? t('tasks.edit_task') : t('tasks.new_task')}
-                      </h3>
-                      <p className="text-sm font-bold text-gray-500 dark:text-gray-400">{t('tasks.modal_desc')}</p>
-                    </div>
+                    <button onClick={resetForm} className="w-12 h-12 rounded-full bg-gray-50 dark:bg-white/5 flex items-center justify-center text-gray-400 hover:bg-rose-500 hover:text-white transition-all shadow-sm">
+                      <X className="w-6 h-6" />
+                    </button>
                   </div>
 
-                  <form onSubmit={handleSubmit} className="space-y-5">
-                    <div className="text-start">
-                      <label className="block text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 ms-1">{t('tasks.form_title')}</label>
+                  <form onSubmit={handleSubmit} className="space-y-8">
+                    <div className="text-start space-y-3">
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ms-6">{t('mavi.terminal_entry')}</label>
                       <input
                         type="text"
                         placeholder={t('tasks.placeholder_title')}
                         value={formData.title}
                         onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                        className="w-full bg-gray-50/50 dark:bg-black/50 text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-4 font-bold focus:ring-2 focus:ring-primary/50 focus:border-primary/50 outline-none placeholder:text-gray-400 dark:placeholder:text-gray-600 transition-all shadow-inner"
+                        className="w-full bg-gray-50 dark:bg-black/40 text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-[2.5rem] px-10 py-6 text-xl font-black focus:border-[#10b981] dark:focus:border-[#2cfc7d] outline-none transition-all shadow-inner uppercase tracking-tighter"
                         required
                         autoFocus
                       />
                     </div>
-                    <div className="text-start">
-                      <label className="block text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 ms-1">{t('tasks.form_desc')}</label>
+                    <div className="text-start space-y-3">
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ms-6">{t('mavi.metadata')}</label>
                       <textarea
                         placeholder={t('tasks.placeholder_desc')}
-                        rows="3"
+                        rows="4"
                         value={formData.description}
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                        className="w-full bg-gray-50/50 dark:bg-black/50 text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-4 font-medium focus:ring-2 focus:ring-primary/50 focus:border-primary/50 outline-none placeholder:text-gray-400 dark:placeholder:text-gray-600 transition-all shadow-inner resize-none custom-scrollbar"
+                        className="w-full bg-gray-50 dark:bg-black/40 text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-[3rem] px-10 py-8 text-lg font-bold focus:border-[#10b981] dark:focus:border-[#2cfc7d] outline-none transition-all shadow-inner resize-none custom-scrollbar"
                       />
                     </div>
 
-                    <div className="flex gap-4 pt-4 border-t border-gray-100 dark:border-white/10">
-                      <button type="button" onClick={resetForm} className="flex-1 py-4 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl hover:bg-gray-200 dark:hover:bg-white/10 transition-all text-gray-700 dark:text-gray-300 font-bold">
-                        {t('common.cancel')}
-                      </button>
-                      <button type="submit" className="flex-[2] bg-primary text-white dark:text-dark font-black py-4 rounded-2xl shadow-[0_4px_15px_rgba(46,204,113,0.3)] hover:shadow-[0_8px_25px_rgba(46,204,113,0.5)] transition-all hover:scale-[1.02] active:scale-95">
-                        {editingTask ? t('common.save') : t('tasks.create')}
+                    <div className="flex flex-col sm:flex-row gap-4 pt-6">
+                      <button type="submit" disabled={submitting} className="flex-[2] py-6 bg-gray-900 dark:bg-[#2cfc7d] text-white dark:text-black font-black text-xs uppercase tracking-[0.5em] rounded-[2.5rem] shadow-2xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3">
+                        {submitting ? <Loader2 className="w-6 h-6 animate-spin" /> : editingTask ? t('common.save') : t('tasks.create')}
+                        {!submitting && <ArrowRight className={`w-5 h-5 ${isAr ? 'rotate-180' : ''}`} />}
                       </button>
                     </div>
                   </form>
@@ -356,12 +332,16 @@ const StudentPersonalTasks = () => {
               </div>
             </div>
           )}
-        </div>
-      </div>
+        </section>
+      </main>
+
       <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
+        .font-arabic { font-family: 'Cairo', sans-serif !important; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.3); border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(44, 252, 125, 0.2); border-radius: 10px; }
       `}</style>
     </div>
   );

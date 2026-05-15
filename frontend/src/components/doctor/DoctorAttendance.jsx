@@ -355,7 +355,7 @@ const DoctorAttendance = ({ courses }) => {
                 className="space-y-8"
               >
                 {/* Control Panel */}
-                <div className="bg-white dark:bg-white/[0.03] backdrop-blur-xl border border-gray-100 dark:border-white/5 rounded-[3rem] p-10 shadow-2xl">
+                <div className="bg-white dark:bg-white/[0.03] backdrop-blur-sm border border-gray-100 dark:border-white/5 rounded-[3rem] p-10 shadow-2xl">
                   <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-10">
                     <div className="flex-1 space-y-6">
                       <div className="flex items-center gap-6">

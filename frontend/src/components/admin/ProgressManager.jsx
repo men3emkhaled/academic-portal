@@ -166,12 +166,12 @@ const ProgressManager = ({ courses = [] }) => {
           <select
             value={selectedCourseId}
             onChange={(e) => handleCourseSelect(e.target.value)}
-            className="w-full bg-white/50 dark:bg-white/[0.03] border border-gray-200 dark:border-white/10 rounded-[2rem] py-5 pl-16 pr-10 text-gray-900 dark:text-white font-black text-lg focus:outline-none focus:ring-2 focus:ring-teal-500/50 transition-all appearance-none"
+            className="w-full bg-white/50 dark:bg-white/[0.03] border border-gray-200 dark:border-white/10 rounded-[2rem] py-5 pl-16 pr-10 text-gray-900 dark:text-white font-black text-lg focus:outline-none focus:ring-2 focus:ring-teal-500/50 transition-[color,background-color,border-color,transform,opacity] appearance-none"
           >
             <option value="">{t('admin.progress.overview_analytics')}</option>
             {courses.map(c => (
               <option key={c.id} value={c.id}>
-                {c.name} (Semester {c.semester}){c.department_name ? ` • ${c.department_name}` : ''}
+                {c.name} ({t('records.semester_label', { count: c.semester })}){c.department_name ? ` • ${c.department_name}` : ''}
               </option>
             ))}
           </select>
@@ -189,14 +189,14 @@ const ProgressManager = ({ courses = [] }) => {
                  value={newItemTitle}
                  onChange={(e) => setNewItemTitle(e.target.value)}
                  placeholder={t('admin.progress.placeholder_part')}
-                 className="w-full bg-white/50 dark:bg-black border border-gray-200 dark:border-white/10 rounded-2xl py-4.5 px-8 text-gray-900 dark:text-white font-bold focus:ring-2 focus:ring-teal-500/50 outline-none transition-all shadow-inner"
+                 className="w-full bg-white/50 dark:bg-black border border-gray-200 dark:border-white/10 rounded-2xl py-4.5 px-8 text-gray-900 dark:text-white font-bold focus:ring-2 focus:ring-teal-500/50 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner"
                  required
                />
             </div>
             <button
               type="submit"
               disabled={adding || !newItemTitle.trim()}
-              className="flex items-center gap-3 bg-teal-600 hover:bg-teal-700 text-white font-black px-10 py-4.5 rounded-2xl shadow-xl shadow-teal-500/20 active:scale-95 transition-all disabled:opacity-50 whitespace-nowrap uppercase text-[10px] tracking-widest"
+              className="flex items-center gap-3 bg-teal-600 hover:bg-teal-700 text-white font-black px-10 py-4.5 rounded-2xl shadow-xl shadow-teal-500/20 active:scale-95 transition-[color,background-color,border-color,transform,opacity] disabled:opacity-50 whitespace-nowrap uppercase text-[10px] tracking-widest"
             >
               {adding ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
               {t('admin.progress.add_part')}
@@ -209,7 +209,7 @@ const ProgressManager = ({ courses = [] }) => {
                <p className="text-[10px] font-black uppercase tracking-widest">{t('admin.progress.hydrating')}</p>
             </div>
           ) : progressItems.length === 0 ? (
-            <div className="bg-white/50 dark:bg-white/[0.02] border-2 border-dashed border-gray-200 dark:border-white/10 rounded-[3rem] py-32 text-center flex flex-col items-center transition-all duration-500">
+            <div className="bg-white/50 dark:bg-white/[0.02] border-2 border-dashed border-gray-200 dark:border-white/10 rounded-[3rem] py-32 text-center flex flex-col items-center transition-[color,background-color,border-color,transform,opacity] duration-500">
                 <Sparkles className="w-12 h-12 text-teal-400 opacity-20 mb-6" />
                 <p className="text-sm font-black uppercase tracking-widest text-gray-500">{t('admin.progress.zero_items')}</p>
             </div>
@@ -218,7 +218,7 @@ const ProgressManager = ({ courses = [] }) => {
               {progressItems.map((item, index) => (
                 <div
                   key={item.id}
-                  className={`group relative flex items-center gap-6 p-6 rounded-[2rem] border backdrop-blur-xl transition-all duration-500 ${
+                  className={`group relative flex items-center gap-6 p-6 rounded-[2rem] border transition-[color,background-color,border-color,transform,opacity] duration-500 ${
                     item.is_completed
                       ? 'bg-emerald-500/5 dark:bg-emerald-500/5 border-emerald-500/20 hover:border-emerald-500/40 shadow-emerald-500/5'
                       : 'bg-teal-500/5 dark:bg-teal-500/5 border-teal-500/20 hover:border-teal-500/40 shadow-teal-500/5'
@@ -226,7 +226,7 @@ const ProgressManager = ({ courses = [] }) => {
                 >
                   <button
                     onClick={() => handleToggle(item.id)}
-                    className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${
+                    className={`w-12 h-12 rounded-xl flex items-center justify-center transition-[color,background-color,border-color,transform,opacity] ${
                         item.is_completed 
                         ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30 rotate-[360deg]' 
                         : 'bg-white dark:bg-white/5 border border-teal-500/30 text-teal-400'
@@ -253,23 +253,23 @@ const ProgressManager = ({ courses = [] }) => {
                     </div>
                   ) : (
                     <div className="flex-1">
-                        <span className={`text-base font-black transition-all ${item.is_completed ? 'text-gray-900 dark:text-white' : 'text-teal-700 dark:text-teal-300'}`}>
+                        <span className={`text-base font-black transition-[color,background-color,border-color,transform,opacity] ${item.is_completed ? 'text-gray-900 dark:text-white' : 'text-teal-700 dark:text-teal-300'}`}>
                           {item.title}
                         </span>
                         <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mt-1">{t('admin.students.status')}: {item.is_completed ? t('admin.progress.status_authenticated') : t('admin.progress.status_pending')}</p>
                     </div>
                   )}
 
-                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-4 group-hover:translate-x-0">
+                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-[color,background-color,border-color,box-shadow,transform,opacity] duration-300 translate-x-4 group-hover:translate-x-0">
                     <button
                       onClick={() => { setEditingId(item.id); setEditTitle(item.title); }}
-                      className="w-10 h-10 flex items-center justify-center bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 text-gray-400 hover:text-teal-600 rounded-xl transition-all shadow-sm"
+                      className="w-10 h-10 flex items-center justify-center bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 text-gray-400 hover:text-teal-600 rounded-xl transition-[color,background-color,border-color,transform,opacity] shadow-sm"
                     >
                       <Edit3 className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => handleDelete(item.id)}
-                      className="w-10 h-10 flex items-center justify-center bg-rose-500/10 text-rose-600 hover:bg-rose-600 hover:text-white rounded-xl transition-all shadow-sm"
+                      className="w-10 h-10 flex items-center justify-center bg-rose-500/10 text-rose-600 hover:bg-rose-600 hover:text-white rounded-xl transition-[color,background-color,border-color,transform,opacity] shadow-sm"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -285,7 +285,7 @@ const ProgressManager = ({ courses = [] }) => {
       {viewMode === 'overview' && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-in slide-in-from-bottom-4 duration-700">
           {Object.keys(groupedProgress).length === 0 ? (
-            <div className="col-span-full bg-white/50 dark:bg-white/[0.02] border-2 border-dashed border-gray-200 dark:border-white/10 rounded-[3rem] py-48 text-center flex flex-col items-center transition-all duration-500">
+            <div className="col-span-full bg-white/50 dark:bg-white/[0.02] border-2 border-dashed border-gray-200 dark:border-white/10 rounded-[3rem] py-48 text-center flex flex-col items-center transition-[color,background-color,border-color,transform,opacity] duration-500">
                 <LayoutGrid className="w-16 h-16 text-teal-400 opacity-20 mb-8" />
                 <h4 className="text-xl font-black uppercase tracking-widest text-gray-900 dark:text-white">{t('admin.progress.system_standby')}</h4>
                 <p className="text-sm font-bold mt-4 tracking-widest text-gray-500">{t('admin.progress.standby_hint')}</p>
@@ -298,7 +298,7 @@ const ProgressManager = ({ courses = [] }) => {
               const isExpanded = expandedCourse === courseName;
 
               return (
-                <div key={courseName} className="group relative bg-white/80 dark:bg-black/20 backdrop-blur-xl border border-gray-100 dark:border-white/10 rounded-[2.5rem] p-10 transition-all duration-500 hover:border-teal-500/40 hover:shadow-2xl hover:shadow-teal-500/5">
+                <div key={courseName} className="group relative bg-white/80 dark:bg-black/20 border border-gray-100 dark:border-white/10 rounded-[2.5rem] p-10 transition-[color,background-color,border-color,transform,opacity] duration-500 hover:border-teal-500/40 hover:shadow-2xl hover:shadow-teal-500/5">
                   <div className="flex items-center justify-between mb-10">
                     <div className="flex items-center gap-5">
                        <div className="w-14 h-14 bg-teal-500/10 rounded-2xl flex items-center justify-center border border-teal-500/20 text-teal-600 shadow-inner group-hover:scale-110 transition-transform">
@@ -307,7 +307,7 @@ const ProgressManager = ({ courses = [] }) => {
                        <div>
                           <h3 className="text-lg font-black text-gray-900 dark:text-white tracking-tight group-hover:text-teal-600 transition-colors">{courseName}</h3>
                           <div className="flex items-center gap-2 mt-1">
-                             <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Sem {data.semester}</span>
+                             <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{t('records.semester_label', { count: data.semester })}</span>
                              {data.department_name && (
                                 <>
                                    <div className="w-1 h-1 bg-gray-300 dark:bg-gray-700 rounded-full"></div>
@@ -326,7 +326,7 @@ const ProgressManager = ({ courses = [] }) => {
                   {/* Progressive Bar */}
                   <div className="relative w-full h-3 bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden mb-10 shadow-inner">
                     <div
-                      className="absolute left-0 top-0 h-full bg-gradient-to-r from-teal-600 to-emerald-400 rounded-full transition-all duration-1000 group-hover:shadow-[0_0_15px_rgba(20,184,166,0.5)]"
+                      className="absolute left-0 top-0 h-full bg-gradient-to-r from-teal-600 to-emerald-400 rounded-full transition-[color,background-color,border-color,transform,opacity] duration-1000 group-hover:shadow-[0_0_15px_rgba(20,184,166,0.5)]"
                       style={{ width: `${pct}%` }}
                     />
                   </div>
@@ -337,7 +337,7 @@ const ProgressManager = ({ courses = [] }) => {
                      </div>
                      <button
                        onClick={() => setExpandedCourse(isExpanded ? null : courseName)}
-                       className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all ${isExpanded ? 'bg-teal-600 text-white' : 'bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 text-gray-400 hover:text-teal-600'}`}
+                       className={`w-10 h-10 flex items-center justify-center rounded-xl transition-[color,background-color,border-color,transform,opacity] ${isExpanded ? 'bg-teal-600 text-white' : 'bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 text-gray-400 hover:text-teal-600'}`}
                      >
                        {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
                      </button>

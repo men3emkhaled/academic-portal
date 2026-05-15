@@ -13,7 +13,7 @@ const QuestionBank = ({ questions, setShowQuestionForm, editQuestion, handleDele
           </div>
           <button
               onClick={() => setShowQuestionForm(true)}
-              className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 shadow-md shadow-indigo-500/10"
+              className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-[color,background-color,border-color,transform,opacity] flex items-center gap-2 shadow-md shadow-indigo-500/10"
           >
               <Plus className="w-3.5 h-3.5" /> {t('admin.quizzes.questions.add_btn')}
           </button>
@@ -29,7 +29,7 @@ const QuestionBank = ({ questions, setShowQuestionForm, editQuestion, handleDele
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {questions.map((q, idx) => (
-            <div key={q.id} className="group relative bg-white/80 dark:bg-black/40 border border-gray-100 dark:border-white/10 rounded-[2.5rem] p-8 hover:border-indigo-500/40 transition-all duration-300 shadow-sm hover:shadow-xl">
+            <div key={q.id} className="group relative bg-white/80 dark:bg-black/40 border border-gray-100 dark:border-white/10 rounded-[2.5rem] p-8 hover:border-indigo-500/40 transition-[color,background-color,border-color,box-shadow,transform,opacity] duration-300 shadow-sm hover:shadow-xl">
                <div className="flex justify-between items-start mb-6">
                   <div className="flex items-center gap-3">
                       <span className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-xs font-black text-indigo-600 dark:text-indigo-400 shadow-inner">{idx + 1}</span>
@@ -39,17 +39,17 @@ const QuestionBank = ({ questions, setShowQuestionForm, editQuestion, handleDele
                       </div>
                   </div>
                   <div className="flex gap-2">
-                      <button onClick={() => editQuestion(q)} className="w-10 h-10 flex items-center justify-center rounded-xl bg-amber-50 dark:bg-amber-500/10 text-amber-600 hover:bg-amber-500 hover:text-white transition-all shadow-sm"><Edit3 className="w-4 h-4" /></button>
-                      <button onClick={() => handleDeleteQuestion(q)} className="w-10 h-10 flex items-center justify-center rounded-xl bg-rose-50 dark:bg-rose-500/10 text-rose-600 hover:bg-rose-600 hover:text-white transition-all shadow-sm"><Trash2 className="w-4 h-4" /></button>
+                      <button onClick={() => editQuestion(q)} className="w-10 h-10 flex items-center justify-center rounded-xl bg-amber-50 dark:bg-amber-500/10 text-amber-600 hover:bg-amber-500 hover:text-white transition-[color,background-color,border-color,transform,opacity] shadow-sm"><Edit3 className="w-4 h-4" /></button>
+                      <button onClick={() => handleDeleteQuestion(q)} className="w-10 h-10 flex items-center justify-center rounded-xl bg-rose-50 dark:bg-rose-500/10 text-rose-600 hover:bg-rose-600 hover:text-white transition-[color,background-color,border-color,transform,opacity] shadow-sm"><Trash2 className="w-4 h-4" /></button>
                   </div>
                </div>
 
                <h4 className="text-gray-900 dark:text-white font-black text-lg tracking-tight mb-8 leading-relaxed">{q.question_text}</h4>
                
                {q.image_url && (
-                  <div className="mb-8 rounded-3xl overflow-hidden border border-gray-100 dark:border-white/10 group-hover:border-indigo-500/20 transition-all shadow-sm relative">
+                  <div className="mb-8 rounded-3xl overflow-hidden border border-gray-100 dark:border-white/10 group-hover:border-indigo-500/20 transition-[color,background-color,border-color,transform,opacity] shadow-sm relative">
                       <img src={q.image_url} alt="Question visual" className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-700" />
-                      <div className="absolute top-4 right-4 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 flex items-center gap-2">
+                      <div className="absolute top-4 right-4 bg-black/40 px-3 py-1.5 rounded-xl border border-white/10 flex items-center gap-2">
                         <ImageIcon className="w-3.5 h-3.5 text-white" />
                         <span className="text-[10px] font-black text-white uppercase tracking-widest">{t('admin.quizzes.questions.image_matrix')}</span>
                       </div>
@@ -62,7 +62,7 @@ const QuestionBank = ({ questions, setShowQuestionForm, editQuestion, handleDele
                           const letter = String.fromCharCode(65 + i);
                           const isCorrect = q.correct_answer === letter;
                           return (
-                              <div key={i} className={`flex items-center gap-4 px-6 py-4 rounded-2xl border transition-all ${
+                              <div key={i} className={`flex items-center gap-4 px-6 py-4 rounded-2xl border transition-[color,background-color,border-color,transform,opacity] ${
                                   isCorrect 
                                   ? 'bg-emerald-500/5 border-emerald-500/30 text-emerald-800 dark:text-emerald-400 shadow-inner' 
                                   : 'bg-gray-50/50 dark:bg-black/20 border-gray-100 dark:border-white/5 text-gray-500 dark:text-gray-400'
@@ -80,7 +80,7 @@ const QuestionBank = ({ questions, setShowQuestionForm, editQuestion, handleDele
                       {['true', 'false'].map(val => {
                           const isCorrect = q.correct_answer === val;
                           return (
-                            <div key={val} className={`flex-1 flex items-center justify-center gap-3 py-4 rounded-2xl border font-black text-xs uppercase tracking-widest transition-all ${
+                            <div key={val} className={`flex-1 flex items-center justify-center gap-3 py-4 rounded-2xl border font-black text-xs uppercase tracking-widest transition-[color,background-color,border-color,transform,opacity] ${
                                 isCorrect 
                                 ? 'bg-emerald-500/5 border-emerald-500/30 text-emerald-800 dark:text-emerald-400 shadow-inner' 
                                 : 'bg-gray-50/50 dark:bg-black/20 border-gray-100 dark:border-white/5 text-gray-400'

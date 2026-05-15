@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { GraduationCap, Briefcase, Shield, Sun, Moon, Languages } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
-import { motion, AnimatePresence } from 'framer-motion';
+
 
 const portals = [
   {
@@ -37,7 +37,6 @@ const PortalSwitcher = () => {
   const location = useLocation();
   const { toggleTheme, isDarkMode } = useTheme();
   const { t, i18n } = useTranslation();
-  const [hoveredId, setHoveredId] = useState(null);
 
   const getActivePortal = () => {
     if (location.pathname.startsWith('/student')) return 'student';
@@ -55,10 +54,9 @@ const PortalSwitcher = () => {
 
   return (
     <div className="fixed top-8 inset-x-0 flex justify-center z-[200] pointer-events-none px-4">
-      <motion.div 
-        initial={{ y: -50, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        className={`pointer-events-auto flex items-center border rounded-full p-1.5 shadow-2xl transition-colors duration-700 ${isDarkMode ? 'bg-black/40 border-white/10 shadow-black/50' : 'bg-white/70 border-gray-100 shadow-gray-200/50 backdrop-blur-2xl'}`}
+      <div
+        className={`pointer-events-auto flex items-center border rounded-full p-1.5 shadow-2xl transition-[background-color,border-color] duration-300 ${isDarkMode ? 'bg-black/40 border-white/10 shadow-black/50' : 'bg-white/70 border-gray-100 shadow-gray-200/50 backdrop-blur-sm'}`}
+        style={{ animation: 'portalSwitcherIn 0.4s ease-out' }}
       >
         <button
           onClick={toggleLanguage}
@@ -74,35 +72,30 @@ const PortalSwitcher = () => {
           {portals.map((portal) => {
             const Icon = portal.icon;
             const isActive = portal.id === activeId;
-            
+
             return (
               <button
                 key={portal.id}
                 onClick={() => navigate(portal.path)}
-                onMouseEnter={() => setHoveredId(portal.id)}
-                onMouseLeave={() => setHoveredId(null)}
                 className={`
                   relative flex items-center gap-2 px-6 py-2.5 rounded-full text-[11px] font-black uppercase tracking-widest
                   transition-colors duration-500 z-10
-                  ${isActive 
-                    ? (isDarkMode ? 'text-white' : 'text-gray-900') 
+                  ${isActive
+                    ? (isDarkMode ? 'text-white' : 'text-gray-900')
                     : (isDarkMode ? 'text-white/30 hover:text-white/70' : 'text-gray-400 hover:text-gray-900')}
                 `}
               >
                 {isActive && (
-                  <motion.div
-                    layoutId="active-pill"
-                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                  <div
                     className={`absolute inset-0 rounded-full -z-10 border transition-colors ${isDarkMode ? 'bg-white/10 border-white/10' : 'bg-gray-100 border-gray-200'}`}
                     style={{ boxShadow: `0 0 25px ${portal.glowColor}` }}
                   >
-                     <motion.div 
-                        layoutId="active-dot"
-                        className={`absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full shadow-[0_0_10px_rgba(255,255,255,0.8)] ${isDarkMode ? 'bg-white' : 'bg-gray-800'}`}
-                     />
-                  </motion.div>
+                    <div
+                      className={`absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full shadow-[0_0_10px_rgba(255,255,255,0.8)] ${isDarkMode ? 'bg-white' : 'bg-gray-800'}`}
+                    />
+                  </div>
                 )}
-                
+
                 <Icon className={`w-4 h-4 transition-transform duration-500 ${isActive ? 'scale-110' : 'scale-100 opacity-50'}`} />
                 <span className="hidden sm:inline">{t(portal.label)}</span>
               </button>
@@ -118,7 +111,8 @@ const PortalSwitcher = () => {
         >
           {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
         </button>
-      </motion.div>
+        <style>{`@keyframes portalSwitcherIn { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+      </div>
     </div>
   );
 };

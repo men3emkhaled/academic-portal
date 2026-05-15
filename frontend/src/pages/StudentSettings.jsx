@@ -1,17 +1,27 @@
 import React, { useState, useRef } from 'react';
-import { Settings2, User, Fingerprint, Lock, Moon, Sun, LogOut, Mail, Send, Camera, Loader2, ShieldCheck, CheckCircle2, Languages } from 'lucide-react';
+import { 
+  Settings2, User, Fingerprint, Lock, 
+  Moon, Sun, LogOut, Mail, Send, 
+  Camera, Loader2, ShieldCheck, 
+  CheckCircle2, Languages, Zap, 
+  ArrowRight, Star, Layers,
+  Trash2, ShieldAlert
+} from 'lucide-react';
 import { useStudentAuth } from '../context/StudentAuthContext';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import Sidebar from '../components/Sidebar';
 import { useTheme } from '../context/ThemeContext';
-
 import { useTranslation } from 'react-i18next';
+import { transliterateArabic } from '../utils/transliteration';
 
 const StudentSettings = () => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { isDarkMode, toggleTheme } = useTheme();
+  
+  const isAr = i18n.language === 'ar';
+  
   const [emailInput, setEmailInput] = useState('');
   const [isLinking, setIsLinking] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
@@ -27,7 +37,7 @@ const StudentSettings = () => {
   const handleLogout = () => {
     logout();
     navigate('/student/login');
-    toast.success(t('sidebar.logout') + ' ' + t('auth.success'));
+    toast.success(`${t('sidebar.logout')} ${t('auth.success')}`);
   };
 
   const handleLinkEmail = async (e) => {
@@ -105,275 +115,261 @@ const StudentSettings = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a0a] text-gray-900 dark:text-white font-sans transition-colors duration-500 relative overflow-hidden">
-      {/* Background Ambient Orbs */}
-      <div className="fixed top-0 left-0 w-full h-full pointer-events-none z-0 overflow-hidden">
-        <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-primary/5 dark:bg-primary/10 blur-[150px] rounded-full mix-blend-multiply dark:mix-blend-screen"></div>
-        <div className="absolute bottom-[20%] right-[-10%] w-[40%] h-[40%] bg-blue-500/5 dark:bg-blue-500/10 blur-[150px] rounded-full mix-blend-multiply dark:mix-blend-screen"></div>
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0c0c14] text-gray-900 dark:text-white font-sans transition-colors duration-500 overflow-x-hidden relative" dir={isAr ? 'rtl' : 'ltr'}>
+      
+      {/* Background Decor */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute top-[-10%] inset-inline-end-[-5%] w-[50vw] h-[50vw] bg-[#8b5cf6]/5 blur-[120px] rounded-full"></div>
+        <div className="absolute bottom-[-10%] inset-inline-start-[-5%] w-[40vw] h-[40vw] bg-[#2cfc7d]/3 blur-[100px] rounded-full"></div>
       </div>
 
-      <Sidebar activePage="settings" onLogout={handleLogout} />
+      <Sidebar onLogout={handleLogout} />
 
-      <div className="md:ps-96 pb-24 md:pb-12 relative z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      <main className="md:ps-72 min-h-screen relative z-10 flex flex-col">
+        
+        {/* HERO SECTION */}
+        <section className="px-6 lg:px-10 pt-16 pb-12 max-w-[1500px] mx-auto w-full space-y-12 text-start">
           
-          {/* Header */}
-          <div className="flex items-center gap-4 mb-2 text-start">
-            <div className="bg-primary/10 dark:bg-primary/20 p-3 rounded-2xl border border-primary/20 shadow-sm">
-              <Settings2 className="w-8 h-8 text-primary" />
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-10">
+            <div className="space-y-4 text-start">
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#2cfc7d]"></div>
+                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 dark:text-white/30">{t('settings.title')}</span>
+              </div>
+              <h1 className={`text-[clamp(2.5rem,6vw,5.5rem)] font-black leading-[0.95] tracking-tighter uppercase text-gray-900 dark:text-white ${isAr ? 'font-arabic' : ''}`}>
+                {t('mavi.settings')}
+              </h1>
             </div>
-            <div>
-              <h1 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white tracking-tight">{t('settings.title')}</h1>
-              <p className="text-gray-500 dark:text-gray-400 font-semibold mt-1">{t('settings.desc')}</p>
-            </div>
+
           </div>
 
-          {/* Cinematic Hero Profile Card */}
-          <div className="relative rounded-[2.5rem] bg-white dark:bg-[#111] border border-gray-200 dark:border-white/10 overflow-hidden shadow-sm dark:shadow-2xl">
-            {/* Background Glow */}
-            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/10 dark:bg-primary/20 blur-[100px] rounded-full pointer-events-none"></div>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pb-20">
             
-            <div className="relative z-10 p-8 sm:p-12 flex flex-col md:flex-row items-center md:items-start gap-8">
-              {/* Avatar Upload Container */}
-              <div className="relative group shrink-0">
-                <div 
-                  className="w-32 h-32 sm:w-40 sm:h-40 rounded-[2rem] bg-gray-100 dark:bg-black/50 border border-gray-200 dark:border-white/20 flex items-center justify-center overflow-hidden shadow-xl cursor-pointer relative z-10 group-hover:border-primary/50 transition-all duration-300 group-hover:shadow-[0_0_40px_rgba(46,204,113,0.3)]"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  {student?.avatar_url ? (
-                    <img 
-                      src={student.avatar_url} 
-                      alt={student.name} 
-                      className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-110 ${isUploadingAvatar ? 'opacity-30 blur-sm' : 'opacity-100'}`} 
-                    />
-                  ) : (
-                    <User className={`w-16 h-16 text-gray-400 dark:text-gray-600 transition-transform duration-500 group-hover:scale-110 group-hover:text-primary ${isUploadingAvatar ? 'opacity-30' : 'opacity-100'}`} />
-                  )}
-                  
-                  {/* Hover Overlay */}
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-[2px]">
-                    <Camera className="w-8 h-8 text-white" />
+            {/* PROFILE HERO BENTO CARD */}
+            <div className="lg:col-span-12 bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 rounded-[3rem] p-10 md:p-16 flex flex-col md:flex-row items-center gap-12 group hover:shadow-2xl transition-all duration-700 text-start overflow-hidden relative">
+               <div className="absolute top-[-20%] inset-inline-end-[-10%] w-[40%] h-[150%] bg-[#2cfc7d]/5 blur-[80px] rounded-full pointer-events-none group-hover:scale-125 transition-transform duration-1000"></div>
+               
+               {/* Avatar Container */}
+               <div className="relative shrink-0 z-10">
+                  <div 
+                    className="w-48 h-48 rounded-[3.5rem] bg-gray-50 dark:bg-white/5 border-2 border-gray-100 dark:border-white/10 flex items-center justify-center overflow-hidden shadow-2xl cursor-pointer group/avatar hover:border-[#10b981] dark:hover:border-[#2cfc7d] transition-all duration-500"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                     {student?.avatar_url ? (
+                       <img src={student.avatar_url} alt={student.name} className={`w-full h-full object-cover group-hover/avatar:scale-110 transition-transform duration-700 ${isUploadingAvatar ? 'opacity-30 blur-sm' : ''}`} />
+                     ) : (
+                       <User className="w-20 h-20 text-gray-200 dark:text-white/10 group-hover/avatar:text-[#10b981] transition-colors" />
+                     )}
+                     
+                     <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity">
+                        <Camera className="w-10 h-10 text-white" />
+                     </div>
+
+                     {isUploadingAvatar && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+                           <Loader2 className="w-10 h-10 text-[#2cfc7d] animate-spin" />
+                        </div>
+                     )}
+                  </div>
+                  <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleAvatarChange} />
+               </div>
+
+               {/* Profile Info */}
+               <div className="flex-1 space-y-6 z-10 text-center md:text-start">
+                  <div className="space-y-2">
+                     <div className="flex items-center justify-center md:justify-start gap-3">
+                        <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#10b981] dark:text-[#2cfc7d]">{t('mavi.verification_uid')}</span>
+                        <div className="h-px w-10 bg-gray-100 dark:bg-white/10"></div>
+                        <span className="text-[10px] font-black uppercase text-gray-400 tracking-widest">ZNU-{student?.id}</span>
+                     </div>
+                     <h2 className={`text-4xl md:text-6xl font-black tracking-tighter uppercase text-gray-900 dark:text-white ${isAr ? 'font-arabic' : ''}`}>
+                        {isAr ? student?.name : transliterateArabic(student?.name)}
+                     </h2>
                   </div>
 
-                  {isUploadingAvatar && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                      <Loader2 className="w-10 h-10 text-primary animate-spin" />
-                    </div>
-                  )}
-                </div>
-                <input 
-                  type="file" 
-                  ref={fileInputRef} 
-                  className="hidden" 
-                  accept="image/*" 
-                  onChange={handleAvatarChange} 
-                />
-              </div>
-
-              {/* Profile Info */}
-              <div className="text-center flex-1 mt-2 md:text-start">
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-300 text-xs font-black uppercase tracking-widest mb-4">
-                  <Fingerprint className="w-3.5 h-3.5 text-primary" /> {t('settings.id')}: {student?.id}
-                </div>
-                <h2 className="text-3xl sm:text-5xl font-black text-gray-900 dark:text-white leading-tight mb-2">{student?.name}</h2>
-                <p className="text-gray-500 dark:text-gray-400 text-lg font-bold mb-6">{t('settings.student_records')}</p>
-                
-                <div className="flex flex-wrap justify-center gap-4 md:justify-start">
-                  <div className="bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-3 shadow-inner min-w-[100px]">
-                    <span className="block text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-1">{t('settings.level')}</span>
-                    <span className="text-gray-900 dark:text-white font-black">{student?.level}</span>
+                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
+                     <div className="bg-gray-50 dark:bg-white/5 px-6 py-3 rounded-2xl border border-gray-100 dark:border-white/5">
+                        <span className="text-[8px] font-black uppercase tracking-widest text-gray-400 block mb-1">{t('settings.level')}</span>
+                        <span className="text-sm font-black uppercase text-gray-900 dark:text-white">
+                           {isAr ? (
+                              student?.level === 1 ? 'الفرقة الأولى' :
+                              student?.level === 2 ? 'الفرقة الثانية' :
+                              student?.level === 3 ? 'الفرقة الثالثة' :
+                              student?.level === 4 ? 'الفرقة الرابعة' : `الفرقة ${student?.level}`
+                           ) : (
+                              student?.level === 1 ? 'First Year' :
+                              student?.level === 2 ? 'Second Year' :
+                              student?.level === 3 ? 'Third Year' :
+                              student?.level === 4 ? 'Fourth Year' : `Year ${student?.level}`
+                           )}
+                        </span>
+                     </div>
+                     <div className="bg-gray-50 dark:bg-white/5 px-6 py-3 rounded-2xl border border-gray-100 dark:border-white/5">
+                        <span className="text-[8px] font-black uppercase tracking-widest text-gray-400 block mb-1">{t('settings.section')}</span>
+                        <span className="text-sm font-black uppercase text-gray-900 dark:text-white">{student?.section || 'X-00'}</span>
+                     </div>
+                     <div className="bg-[#10b981] dark:bg-[#2cfc7d] px-6 py-3 rounded-2xl shadow-lg">
+                        <span className="text-[8px] font-black uppercase tracking-widest text-white/50 dark:text-black/50 block mb-1">{t('mavi.status')}</span>
+                        <span className="text-sm font-black uppercase text-white dark:text-black">{t('mavi.active')}</span>
+                     </div>
                   </div>
-                  <div className="bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-3 shadow-inner min-w-[100px]">
-                    <span className="block text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-1">{t('settings.section')}</span>
-                    <span className="text-gray-900 dark:text-white font-black">{student?.section || t('common.not_assigned')}</span>
-                  </div>
-                </div>
-              </div>
+               </div>
             </div>
-          </div>
 
-          {/* Bento Grid Control Center */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
-            {/* Left Column (Security) */}
-            <div className="lg:col-span-2 space-y-6">
-              <div className="bg-white/80 dark:bg-[#111]/80 backdrop-blur-xl rounded-[2.5rem] border border-gray-200 dark:border-white/10 p-8 shadow-sm">
-                <div className="flex items-center gap-3 mb-8 text-start">
-                  <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
-                    <ShieldCheck className="w-6 h-6 text-blue-500" />
+            {/* SECURITY BENTO CARD */}
+            <div className="lg:col-span-8 bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 rounded-[3rem] p-10 md:p-12 space-y-12 text-start group hover:shadow-2xl transition-all duration-700">
+               <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500">
+                     <ShieldCheck className="w-8 h-8" />
                   </div>
                   <div>
-                    <h3 className="text-2xl font-black text-gray-900 dark:text-white leading-tight">{t('settings.security')}</h3>
-                    <p className="text-sm font-bold text-gray-500 dark:text-gray-400">{t('settings.security_desc')}</p>
+                     <h3 className="text-2xl font-black uppercase tracking-tight">{t('settings.security')}</h3>
+                     <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400">{t('mavi.encrypted_protocol')}</p>
                   </div>
-                </div>
+               </div>
 
-                {/* Email Section */}
-                <div className="mb-10">
-                  <h4 className="text-sm font-black text-gray-900 dark:text-white flex items-center gap-2 mb-3">
-                    <Mail className="w-4 h-4 text-blue-500" /> {t('settings.recovery_email')}
-                  </h4>
-                  {student?.email ? (
-                    <div className="flex items-center gap-3 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-4 mb-4 shadow-sm text-start">
-                      <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
-                      <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{t('settings.linked')}: <span className="text-primary">{student.email}</span></p>
-                    </div>
-                  ) : (
-                    <p className="text-gray-500 dark:text-gray-400 text-sm mb-4 font-medium text-start">{t('settings.link_email_desc')}</p>
-                  )}
-
-                  <form onSubmit={handleLinkEmail} className="flex flex-col sm:flex-row gap-3">
-                    <input
-                      type="email"
-                      value={emailInput}
-                      onChange={(e) => setEmailInput(e.target.value)}
-                      placeholder={student?.email ? t('settings.update_email') : t('settings.enter_email')}
-                      className="flex-1 bg-gray-50/50 dark:bg-black/50 text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-4 font-bold focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 outline-none placeholder:text-gray-400 dark:placeholder:text-gray-600 transition-all shadow-inner text-start"
-                      required
-                    />
-                    <button
-                      type="submit"
-                      disabled={isLinking}
-                      className="bg-gray-100 hover:bg-blue-500 text-gray-600 hover:text-white dark:bg-white/5 dark:hover:bg-blue-500 dark:text-gray-300 dark:hover:text-white border border-gray-200 dark:border-white/10 font-black py-4 px-8 rounded-2xl transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-                    >
-                      {student?.email ? t('common.update') : t('settings.link')} <Send className="w-4 h-4 rtl:rotate-180" />
-                    </button>
+               {/* Email Form */}
+               <div className="space-y-6">
+                  <div className="flex items-center gap-3">
+                     <Mail className="w-4 h-4 text-gray-400" />
+                     <h4 className="text-xs font-black uppercase tracking-widest">{t('settings.recovery_email')}</h4>
+                  </div>
+                  <form onSubmit={handleLinkEmail} className="flex flex-col md:flex-row gap-4">
+                     <input 
+                        type="email"
+                        value={emailInput}
+                        onChange={(e) => setEmailInput(e.target.value)}
+                        placeholder={student?.email || t('settings.enter_email')}
+                        className="flex-1 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-[2rem] px-8 py-5 font-black text-xs uppercase tracking-widest focus:ring-2 focus:ring-[#10b981] outline-none"
+                     />
+                     <button 
+                        type="submit"
+                        disabled={isLinking}
+                        className="bg-black dark:bg-white text-white dark:text-black px-10 py-5 rounded-[2rem] font-black text-[10px] uppercase tracking-[0.3em] hover:scale-[1.02] active:scale-95 transition-all shadow-xl disabled:opacity-40"
+                     >
+                        {isLinking ? t('mavi.synching') : t('settings.link')}
+                     </button>
                   </form>
-                </div>
+               </div>
 
-                <div className="w-full h-px bg-gray-100 dark:bg-white/10 mb-8"></div>
+               <div className="h-px bg-black/5 dark:bg-white/5"></div>
 
-                {/* Password Section */}
-                <div>
-                  <h4 className="text-sm font-black text-gray-900 dark:text-white flex items-center gap-2 mb-4">
-                    <Lock className="w-4 h-4 text-amber-500" /> {t('settings.change_password')}
-                  </h4>
-                  <form onSubmit={handleChangePassword} className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="md:col-span-2">
-                        <input
-                          type="password"
-                          value={passwordData.oldPassword}
-                          onChange={(e) => setPasswordData({...passwordData, oldPassword: e.target.value})}
-                          placeholder={t('settings.current_password')}
-                          className="w-full bg-gray-50/50 dark:bg-black/50 text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-4 font-bold focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 outline-none placeholder:text-gray-400 dark:placeholder:text-gray-600 transition-all shadow-inner text-start"
-                          required
+               {/* Password Form */}
+               <div className="space-y-8">
+                  <div className="flex items-center gap-3">
+                     <Lock className="w-4 h-4 text-gray-400" />
+                     <h4 className="text-xs font-black uppercase tracking-widest">{t('settings.change_password')}</h4>
+                  </div>
+                  <form onSubmit={handleChangePassword} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                     <div className="md:col-span-2">
+                        <input 
+                           type="password"
+                           value={passwordData.oldPassword}
+                           onChange={(e) => setPasswordData({...passwordData, oldPassword: e.target.value})}
+                           placeholder={t('settings.current_password')}
+                           className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-[2rem] px-8 py-5 font-black text-xs uppercase tracking-widest focus:ring-2 focus:ring-amber-500 outline-none"
                         />
-                      </div>
-                      <div>
-                        <input
-                          type="password"
-                          value={passwordData.newPassword}
-                          onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
-                          placeholder={t('settings.new_password')}
-                          className="w-full bg-gray-50/50 dark:bg-black/50 text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-4 font-bold focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 outline-none placeholder:text-gray-400 dark:placeholder:text-gray-600 transition-all shadow-inner text-start"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <input
-                          type="password"
-                          value={passwordData.confirmPassword}
-                          onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
-                          placeholder={t('settings.confirm_password')}
-                          className="w-full bg-gray-50/50 dark:bg-black/50 text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-4 font-bold focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 outline-none placeholder:text-gray-400 dark:placeholder:text-gray-600 transition-all shadow-inner text-start"
-                          required
-                        />
-                      </div>
-                    </div>
-                    <button
-                      type="submit"
-                      disabled={isChangingPassword}
-                      className="w-full bg-gray-900 hover:bg-black text-white dark:bg-white dark:hover:bg-gray-200 dark:text-[#0a0a0a] font-black py-4 rounded-2xl shadow-md transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 mt-2"
-                    >
-                      {isChangingPassword ? t('common.updating') : t('settings.update_password')}
-                    </button>
+                     </div>
+                     <input 
+                        type="password"
+                        value={passwordData.newPassword}
+                        onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
+                        placeholder={t('settings.new_password')}
+                        className="bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-[2rem] px-8 py-5 font-black text-xs uppercase tracking-widest focus:ring-2 focus:ring-amber-500 outline-none"
+                     />
+                     <input 
+                        type="password"
+                        value={passwordData.confirmPassword}
+                        onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
+                        placeholder={t('settings.confirm_password')}
+                        className="bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-[2rem] px-8 py-5 font-black text-xs uppercase tracking-widest focus:ring-2 focus:ring-amber-500 outline-none"
+                     />
+                     <button 
+                        type="submit"
+                        disabled={isChangingPassword}
+                        className="md:col-span-2 bg-[#8b5cf6] text-white py-5 rounded-[2rem] font-black text-[10px] uppercase tracking-[0.3em] hover:shadow-[0_0_30px_rgba(139,92,246,0.3)] transition-all active:scale-[0.98] disabled:opacity-40"
+                     >
+                        {isChangingPassword ? t('mavi.encrypting') : t('settings.update_password')}
+                     </button>
                   </form>
-                </div>
-              </div>
+               </div>
             </div>
 
-            {/* Right Column */}
-            <div className="space-y-6">
-              
-               {/* Appearance */}
-              <div className="bg-white/80 dark:bg-[#111]/80 backdrop-blur-xl rounded-[2.5rem] border border-gray-200 dark:border-white/10 p-8 shadow-sm space-y-6 text-start">
-                <div>
-                  <h3 className="text-xl font-black text-gray-900 dark:text-white leading-tight">{t('settings.appearance')}</h3>
-                  <p className="text-sm font-bold text-gray-500 dark:text-gray-400">{t('settings.appearance_desc')}</p>
-                </div>
-                
-                {/* Theme Toggle */}
-                <div className="flex items-center justify-between bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-2xl p-4 shadow-inner">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${isDarkMode ? 'bg-indigo-500/20 text-indigo-400' : 'bg-amber-500/20 text-amber-500'}`}>
-                      {isDarkMode ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
-                    </div>
-                    <span className="font-bold text-gray-900 dark:text-white">{isDarkMode ? t('settings.dark') : t('settings.light')} {t('settings.mode')}</span>
+            {/* PREFERENCES BENTO CARD */}
+            <div className="lg:col-span-4 space-y-8">
+               
+               {/* Appearance Card */}
+               <div className="bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 rounded-[3rem] p-10 space-y-8 text-start group hover:shadow-2xl transition-all duration-700">
+                  <div className="space-y-1">
+                     <h3 className="text-xl font-black uppercase tracking-tight">{t('settings.appearance')}</h3>
+                     <p className="text-[8px] font-black uppercase tracking-[0.4em] text-gray-400">{t('mavi.interface_customization')}</p>
                   </div>
 
-                  <button
-                    onClick={toggleTheme}
-                    className={`relative w-14 h-8 rounded-full transition-colors duration-500 shadow-inner ${
-                      isDarkMode ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-700'
-                    }`}
-                  >
-                    <div className={`absolute top-1 w-6 h-6 rounded-full bg-white shadow-md transition-all duration-500 flex items-center justify-center ${
-                      isDarkMode ? 'start-7' : 'start-1'
-                    }`}>
-                      {isDarkMode && <div className="w-2 h-2 rounded-full bg-primary"></div>}
-                    </div>
-                  </button>
-                </div>
+                  <div className="space-y-4">
+                     {/* Theme Toggle */}
+                     <button 
+                        onClick={toggleTheme}
+                        className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 p-6 rounded-[2rem] flex items-center justify-between group/toggle"
+                     >
+                        <div className="flex items-center gap-4">
+                           <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${isDarkMode ? 'bg-indigo-500/10 text-indigo-400' : 'bg-amber-500/10 text-amber-500'}`}>
+                              {isDarkMode ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+                           </div>
+                           <span className="text-xs font-black uppercase tracking-widest">{isDarkMode ? t('settings.dark') : t('settings.light')}</span>
+                        </div>
+                        <div className={`w-10 h-6 rounded-full p-1 transition-colors ${isDarkMode ? 'bg-[#2cfc7d]' : 'bg-gray-200 dark:bg-white/10'}`}>
+                           <div className={`w-4 h-4 rounded-full bg-white transition-all ${isDarkMode ? (isAr ? '-translate-x-4' : 'translate-x-4') : 'translate-x-0'}`}></div>
+                        </div>
+                     </button>
 
-                {/* Language Toggle */}
-                <div className="flex items-center justify-between bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-2xl p-4 shadow-inner">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
-                      <Languages className="w-5 h-5 text-primary" />
-                    </div>
-                    <span className="font-bold text-gray-900 dark:text-white">{i18n.language === 'ar' ? 'العربية' : 'English'}</span>
+                     {/* Language Toggle */}
+                     <button 
+                        onClick={() => {
+                           const newLang = i18n.language === 'ar' ? 'en' : 'ar';
+                           i18n.changeLanguage(newLang);
+                           toast.success(t('settings.update_success'));
+                        }}
+                        className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 p-6 rounded-[2rem] flex items-center justify-between group/toggle"
+                     >
+                        <div className="flex items-center gap-4">
+                           <div className="w-12 h-12 rounded-2xl bg-[#10b981]/10 flex items-center justify-center text-[#10b981]">
+                              <Languages className="w-5 h-5" />
+                           </div>
+                           <span className="text-xs font-black uppercase tracking-widest">{isAr ? 'العربية' : 'English'}</span>
+                        </div>
+                        <Zap className="w-4 h-4 text-[#2cfc7d] opacity-0 group-hover/toggle:opacity-100 transition-opacity" />
+                     </button>
+                  </div>
+               </div>
+
+               {/* Logout / Danger Card */}
+               <div className="bg-rose-500 rounded-[3rem] p-10 space-y-8 text-white relative overflow-hidden group">
+                  <div className="absolute top-[-20%] inset-inline-end-[-20%] w-40 h-40 bg-white/10 blur-[40px] rounded-full group-hover:scale-150 transition-transform duration-1000"></div>
+                  
+                  <div className="space-y-2 relative z-10">
+                     <ShieldAlert className="w-10 h-10 mb-4" />
+                     <h3 className="text-2xl font-black uppercase italic leading-none">{t('settings.danger_zone')}</h3>
+                     <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-60">{t('mavi.system_override_actions')}</p>
                   </div>
 
-                  <button
-                    onClick={() => {
-                      const newLang = i18n.language === 'ar' ? 'en' : 'ar';
-                      i18n.changeLanguage(newLang);
-                      toast.success(t('settings.update_success'));
-                    }}
-                    className={`relative w-14 h-8 rounded-full transition-colors duration-500 shadow-inner ${
-                      i18n.language === 'ar' ? 'bg-primary' : 'bg-blue-500'
-                    }`}
+                  <button 
+                     onClick={handleLogout}
+                     className="w-full bg-white text-rose-500 py-5 rounded-[2rem] font-black text-[10px] uppercase tracking-[0.4em] flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-95 transition-all shadow-2xl relative z-10"
                   >
-                    <div className={`absolute top-1 w-6 h-6 rounded-full bg-white shadow-md transition-all duration-500 flex items-center justify-center ${
-                      i18n.language === 'ar' ? 'start-7' : 'start-1'
-                    }`}>
-                      <div className={`w-2 h-2 rounded-full ${i18n.language === 'ar' ? 'bg-primary' : 'bg-blue-500'}`}></div>
-                    </div>
+                     <LogOut className={`w-5 h-5 ${isAr ? 'rotate-180' : ''}`} /> {t('sidebar.logout')}
                   </button>
-                </div>
-              </div>
-
-              {/* Danger Zone */}
-              <div className="bg-red-50 dark:bg-rose-500/5 border border-red-200 dark:border-rose-500/20 rounded-[2.5rem] p-8 shadow-sm flex flex-col justify-between group hover:border-red-300 dark:hover:border-rose-500/40 transition-colors duration-300 text-start">
-                <div className="mb-8">
-                  <h3 className="text-xl font-black text-red-600 dark:text-rose-500 leading-tight">{t('settings.danger_zone')}</h3>
-                  <p className="text-sm font-bold text-red-400 dark:text-rose-500/70">{t('settings.danger_desc')}</p>
-                </div>
-                
-                <button
-                  onClick={handleLogout}
-                  className="w-full flex items-center justify-center gap-3 bg-red-100 hover:bg-red-200 text-red-600 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 dark:text-rose-500 border border-red-200 dark:border-rose-500/20 font-black py-4 rounded-2xl transition-all hover:scale-[1.02] active:scale-[0.98]"
-                >
-                  <LogOut className="w-5 h-5 rtl:rotate-180" /> {t('sidebar.logout')}
-                </button>
-              </div>
+               </div>
 
             </div>
+
           </div>
+        </section>
+      </main>
 
-        </div>
-      </div>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
+        .font-arabic { font-family: 'Cairo', sans-serif !important; }
+      `}</style>
     </div>
   );
 };

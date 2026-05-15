@@ -21,7 +21,7 @@ const DoctorHeader = ({
   }, []);
 
   return (
-    <header className="h-20 lg:h-24 bg-white/40 dark:bg-[#050505]/60 backdrop-blur-2xl border-b border-gray-200/50 dark:border-white/5 flex items-center justify-between px-6 lg:px-12 z-40 transition-colors duration-500">
+    <header className="h-20 lg:h-24 bg-white/40 dark:bg-[#050505]/60 backdrop-blur-sm border-b border-gray-200/50 dark:border-white/5 flex items-center justify-between px-6 lg:px-12 z-40 transition-colors duration-500">
       
       {/* Search Bar Container */}
       <div className="relative w-full max-w-[180px] sm:max-w-md group">
@@ -76,7 +76,7 @@ const DoctorHeader = ({
                   initial={{ opacity: 0, y: 15, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                  className="absolute top-16 right-0 w-80 lg:w-[400px] bg-white/90 dark:bg-[#0a0a0a]/90 backdrop-blur-3xl border border-gray-200 dark:border-white/10 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.1)] dark:shadow-2xl z-50 overflow-hidden"
+                  className="absolute top-16 right-0 w-80 lg:w-[400px] bg-white/90 dark:bg-[#0a0a0a]/90 backdrop-blur-sm border border-gray-200 dark:border-white/10 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.1)] dark:shadow-2xl z-50 overflow-hidden"
                 >
                   <div className="p-6 border-b border-gray-100 dark:border-white/5 flex items-center justify-between">
                     <h4 className="font-black text-gray-900 dark:text-white text-xs uppercase tracking-[0.2em]">Activity Feed</h4>

@@ -13,7 +13,7 @@ const QuestionForm = ({
 }) => {
   const { t } = useTranslation();
   return (
-    <div className="fixed inset-0 bg-gray-900/60 dark:bg-black/80 backdrop-blur-md flex items-center justify-center z-[60] p-4 animate-in fade-in duration-300" onClick={resetQuestionForm}>
+    <div className="fixed inset-0 bg-gray-900/60 dark:bg-black/80 flex items-center justify-center z-[60] p-4 animate-in fade-in duration-300" onClick={resetQuestionForm}>
       <div className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-white/10 rounded-[2.5rem] p-10 w-full max-w-4xl shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-300 max-h-[95vh] overflow-y-auto no-scrollbar" onClick={e => e.stopPropagation()}>
         
         <div className="relative z-10">
@@ -37,21 +37,21 @@ const QuestionForm = ({
             <form onSubmit={handleSaveQuestion} className="space-y-8">
                 <div className="space-y-2">
                     <label className="text-xs font-bold text-gray-700 dark:text-gray-300 ml-1 uppercase tracking-widest">{t('admin.quizzes.questions.form.question_text')} <span className="text-rose-500">*</span></label>
-                    <textarea placeholder={t('admin.quizzes.questions.form.question_placeholder')} value={questionForm.question_text} onChange={(e) => setQuestionForm({ ...questionForm, question_text: e.target.value })} className="w-full bg-gray-50/50 dark:bg-black/50 text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-5 font-semibold focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all shadow-inner resize-none" rows="4" required />
+                    <textarea placeholder={t('admin.quizzes.questions.form.question_placeholder')} value={questionForm.question_text} onChange={(e) => setQuestionForm({ ...questionForm, question_text: e.target.value })} className="w-full bg-gray-50/50 dark:bg-black/50 text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-5 font-semibold focus:ring-2 focus:ring-indigo-500/50 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner resize-none" rows="4" required />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-2">
                         <label className="text-xs font-bold text-gray-700 dark:text-gray-300 ml-1 uppercase tracking-widest">{t('admin.quizzes.questions.form.image_url')}</label>
                         <div className="relative">
-                            <input type="text" placeholder="https://..." value={questionForm.image_url} onChange={(e) => setQuestionForm({ ...questionForm, image_url: e.target.value })} className="w-full bg-gray-50/50 dark:bg-black/50 text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-4 font-semibold focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all pl-12 shadow-inner" />
+                            <input type="text" placeholder="https://..." value={questionForm.image_url} onChange={(e) => setQuestionForm({ ...questionForm, image_url: e.target.value })} className="w-full bg-gray-50/50 dark:bg-black/50 text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-4 font-semibold focus:ring-2 focus:ring-indigo-500/50 outline-none transition-[color,background-color,border-color,transform,opacity] pl-12 shadow-inner" />
                             <ImageIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                         </div>
                     </div>
                     <div className="space-y-2">
                         <label className="text-xs font-bold text-gray-700 dark:text-gray-300 ml-1 uppercase tracking-widest">{t('admin.quizzes.questions.form.question_type')}</label>
                         <div className="relative">
-                            <select value={questionForm.question_type} onChange={(e) => setQuestionForm({ ...questionForm, question_type: e.target.value })} className="w-full bg-gray-50/50 dark:bg-black/50 text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-4 font-semibold focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all appearance-none shadow-inner">
+                            <select value={questionForm.question_type} onChange={(e) => setQuestionForm({ ...questionForm, question_type: e.target.value })} className="w-full bg-gray-50/50 dark:bg-black/50 text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-4 font-semibold focus:ring-2 focus:ring-indigo-500/50 outline-none transition-[color,background-color,border-color,transform,opacity] appearance-none shadow-inner">
                                 <option value="mcq">{t('admin.quizzes.questions.form.types.mcq')}</option>
                                 <option value="true_false">{t('admin.quizzes.questions.form.types.true_false')}</option>
                                 <option value="written">{t('admin.quizzes.questions.form.types.written')}</option>
@@ -76,7 +76,7 @@ const QuestionForm = ({
                                             type="text"
                                             value={opt}
                                             onChange={(e) => handleOptionChange(idx, e.target.value)}
-                                            className="w-full bg-white dark:bg-black text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-4 font-semibold focus:border-indigo-500 outline-none transition-all pl-14 shadow-sm"
+                                            className="w-full bg-white dark:bg-black text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-4 font-semibold focus:border-indigo-500 outline-none transition-[color,background-color,border-color,transform,opacity] pl-14 shadow-sm"
                                             placeholder={t('admin.quizzes.questions.form.option_placeholder', { letter })}
                                             required
                                         />
@@ -93,7 +93,7 @@ const QuestionForm = ({
                                         key={letter}
                                         type="button"
                                         onClick={() => setQuestionForm({ ...questionForm, correct_answer: letter })}
-                                        className={`px-8 py-3.5 rounded-2xl text-xs font-black uppercase tracking-widest border transition-all ${
+                                        className={`px-8 py-3.5 rounded-2xl text-xs font-black uppercase tracking-widest border transition-[color,background-color,border-color,transform,opacity] ${
                                             questionForm.correct_answer === letter 
                                             ? 'bg-emerald-600 text-white border-emerald-500 shadow-lg shadow-emerald-500/20' 
                                             : 'bg-white dark:bg-black text-gray-400 border-gray-200 dark:border-white/10 hover:border-emerald-500/30'
@@ -112,7 +112,7 @@ const QuestionForm = ({
                         <button
                             type="button"
                             onClick={() => setQuestionForm({ ...questionForm, correct_answer: 'true' })}
-                            className={`py-5 rounded-2xl text-xs font-black uppercase tracking-widest border transition-all ${
+                            className={`py-5 rounded-2xl text-xs font-black uppercase tracking-widest border transition-[color,background-color,border-color,transform,opacity] ${
                                 questionForm.correct_answer === 'true' 
                                 ? 'bg-emerald-600 text-white border-emerald-500 shadow-lg shadow-emerald-500/20' 
                                 : 'bg-white dark:bg-black text-gray-400 border-gray-200 dark:border-white/10 hover:border-emerald-500/30'
@@ -123,7 +123,7 @@ const QuestionForm = ({
                         <button
                             type="button"
                             onClick={() => setQuestionForm({ ...questionForm, correct_answer: 'false' })}
-                            className={`py-5 rounded-2xl text-xs font-black uppercase tracking-widest border transition-all ${
+                            className={`py-5 rounded-2xl text-xs font-black uppercase tracking-widest border transition-[color,background-color,border-color,transform,opacity] ${
                                 questionForm.correct_answer === 'false' 
                                 ? 'bg-rose-600 text-white border-rose-500 shadow-lg shadow-rose-500/20' 
                                 : 'bg-white dark:bg-black text-gray-400 border-gray-200 dark:border-white/10 hover:border-rose-500/30'
@@ -137,19 +137,19 @@ const QuestionForm = ({
                  <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     <div className="space-y-2">
                         <label className="text-xs font-bold text-gray-700 dark:text-gray-300 ml-1 uppercase tracking-widest">{t('admin.quizzes.questions.form.points')}</label>
-                        <input type="number" value={questionForm.points} onChange={(e) => setQuestionForm({ ...questionForm, points: parseInt(e.target.value) || 1 })} className="w-full bg-gray-50/50 dark:bg-black/50 text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-4 font-black focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all shadow-inner" min="1" required />
+                        <input type="number" value={questionForm.points} onChange={(e) => setQuestionForm({ ...questionForm, points: parseInt(e.target.value) || 1 })} className="w-full bg-gray-50/50 dark:bg-black/50 text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-4 font-black focus:ring-2 focus:ring-indigo-500/50 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner" min="1" required />
                     </div>
                     <div className="md:col-span-2 space-y-2">
                         <label className="text-xs font-bold text-gray-700 dark:text-gray-300 ml-1 uppercase tracking-widest">{t('admin.quizzes.questions.form.explanation')}</label>
-                        <input type="text" placeholder={t('admin.quizzes.questions.form.explanation_placeholder')} value={questionForm.explanation} onChange={(e) => setQuestionForm({ ...questionForm, explanation: e.target.value })} className="w-full bg-gray-50/50 dark:bg-black/50 text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-4 font-semibold focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all shadow-inner" />
+                        <input type="text" placeholder={t('admin.quizzes.questions.form.explanation_placeholder')} value={questionForm.explanation} onChange={(e) => setQuestionForm({ ...questionForm, explanation: e.target.value })} className="w-full bg-gray-50/50 dark:bg-black/50 text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-4 font-semibold focus:ring-2 focus:ring-indigo-500/50 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner" />
                     </div>
                 </div>
 
                 <div className="flex gap-4 pt-6 border-t border-gray-100 dark:border-white/10">
-                    <button type="submit" disabled={loading} className="flex-1 py-5 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-sm uppercase tracking-widest rounded-2xl shadow-lg shadow-indigo-500/20 transition-all flex items-center justify-center gap-3">
+                    <button type="submit" disabled={loading} className="flex-1 py-5 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-sm uppercase tracking-widest rounded-2xl shadow-lg shadow-indigo-500/20 transition-[color,background-color,border-color,transform,opacity] flex items-center justify-center gap-3">
                         {loading ? <Activity className="w-6 h-6 animate-spin" /> : (editingQuestion ? t('admin.quizzes.questions.form.save_btn') : t('admin.quizzes.questions.form.add_btn'))}
                     </button>
-                    <button type="button" onClick={resetQuestionForm} className="px-12 py-5 bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-300 font-bold uppercase tracking-widest rounded-2xl transition-all">{t('admin.quizzes.questions.form.cancel_btn')}</button>
+                    <button type="button" onClick={resetQuestionForm} className="px-12 py-5 bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-300 font-bold uppercase tracking-widest rounded-2xl transition-[color,background-color,border-color,transform,opacity]">{t('admin.quizzes.questions.form.cancel_btn')}</button>
                 </div>
             </form>
         </div>

@@ -229,7 +229,7 @@ const DoctorCourses = ({ courses, onRefresh }) => {
                 className="bg-white/40 dark:bg-white/[0.02] border border-gray-200/50 dark:border-white/5 p-8 rounded-[3rem] hover:border-violet-500/30 transition-all group relative overflow-hidden backdrop-blur-sm"
               >
                 {/* Background Decor */}
-                <div className="absolute top-0 right-0 w-40 h-40 bg-violet-500/5 blur-[80px] rounded-full -translate-y-1/2 translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <div className="absolute top-0 right-0 w-40 h-40 bg-violet-500/5 hidden rounded-full -translate-y-1/2 translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 
                 <div className="flex items-start justify-between mb-8 relative z-10">
                   <div className="w-16 h-16 rounded-[1.75rem] bg-gray-100/50 dark:bg-white/5 flex items-center justify-center border border-gray-200/30 dark:border-white/5 group-hover:scale-110 group-hover:bg-violet-500/10 transition-all duration-500">
@@ -253,7 +253,7 @@ const DoctorCourses = ({ courses, onRefresh }) => {
                           animate={{ opacity: 1, y: 0, scale: 1 }}
                           exit={{ opacity: 0, y: 5, scale: 0.95 }}
                           onClick={(e) => e.stopPropagation()}
-                          className="absolute right-0 top-14 w-60 bg-white/95 dark:bg-[#0a0a0a]/95 backdrop-blur-2xl border border-gray-200 dark:border-white/10 rounded-[2rem] shadow-2xl z-[100] overflow-hidden"
+                          className="absolute right-0 top-14 w-60 bg-white/95 dark:bg-[#0a0a0a]/95 backdrop-blur-sm border border-gray-200 dark:border-white/10 rounded-[2rem] shadow-2xl z-[100] overflow-hidden"
                         >
                           <button 
                             onClick={() => {
@@ -339,7 +339,7 @@ const DoctorCourses = ({ courses, onRefresh }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-xl flex items-center justify-center z-[100] p-6"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] p-6"
           >
             <motion.div 
               initial={{ scale: 0.9, y: 20 }}

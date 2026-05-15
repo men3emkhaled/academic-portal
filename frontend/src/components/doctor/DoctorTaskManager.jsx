@@ -276,7 +276,7 @@ const DoctorTaskManager = ({ courses }) => {
                 <AnimatePresence>
                     {gradingStudent && (
                         <div className="fixed inset-0 z-[120] flex items-center justify-center p-6">
-                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setGradingStudent(null)} className="absolute inset-0 bg-gray-900/60 backdrop-blur-xl" />
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setGradingStudent(null)} className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" />
                             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="relative w-full max-w-md bg-white dark:bg-[#0A0A0A] border border-gray-100 dark:border-white/10 rounded-[3rem] shadow-2xl overflow-hidden p-10">
                                 <div className="flex items-center justify-between mb-10">
                                     <div>
@@ -458,7 +458,7 @@ const DoctorTaskManager = ({ courses }) => {
             <AnimatePresence>
                 {showFormModal && (
                     <div className="fixed inset-0 z-[120] flex items-center justify-center p-6">
-                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={resetForm} className="absolute inset-0 bg-gray-900/60 backdrop-blur-xl" />
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={resetForm} className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" />
                         <motion.div initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }} className="relative w-full max-w-2xl bg-white dark:bg-[#0A0A0A] border border-gray-100 dark:border-white/10 rounded-[3rem] shadow-2xl overflow-hidden">
                             <div className="p-10">
                                 <div className="flex items-center justify-between mb-10">

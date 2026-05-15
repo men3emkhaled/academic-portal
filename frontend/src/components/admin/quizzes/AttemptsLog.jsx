@@ -63,7 +63,7 @@ const AttemptsLog = ({ attempts, selectedQuiz }) => {
                             <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest">{t('admin.quizzes.attempts.raw_points')}</span>
                         </div>
                         <div className="w-24 h-2 bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden shadow-inner">
-                            <div className={`h-full rounded-full transition-all duration-1000 ${
+                            <div className={`h-full rounded-full transition-[color,background-color,border-color,transform,opacity] duration-1000 ${
                                 isPassed ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]' : 'bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.3)]'
                             }`} style={{ width: `${att.percentage || 0}%` }}></div>
                         </div>
@@ -76,7 +76,7 @@ const AttemptsLog = ({ attempts, selectedQuiz }) => {
                     </div>
                     </td>
                     <td className="py-6 px-10 text-right">
-                    <span className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all ${
+                    <span className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-[color,background-color,border-color,transform,opacity] ${
                         att.status === 'completed' ? 'bg-emerald-500/5 border-emerald-500/20 text-emerald-600' :
                         att.status === 'timed_out' ? 'bg-rose-500/5 border-rose-500/20 text-rose-600' :
                         'bg-amber-500/5 border-amber-500/20 text-amber-600'

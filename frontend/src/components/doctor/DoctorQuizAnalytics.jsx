@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { useDoctorAuth } from '../../context/DoctorAuthContext';
-import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import { PieChart, TrendingUp, Users, Award, Target, Zap, BarChart3 } from 'lucide-react';
 
 const DoctorQuizAnalytics = ({ courses }) => {
+  const { t } = useTranslation();
   const { doctorApi } = useDoctorAuth();
   const [selectedCourseId, setSelectedCourseId] = useState('');
   const [analytics, setAnalytics] = useState(null);
@@ -23,7 +22,7 @@ const DoctorQuizAnalytics = ({ courses }) => {
       const res = await doctorApi('get', `/doctor/analytics/${selectedCourseId}`);
       setAnalytics(res.data);
     } catch (err) {
-      toast.error('Failed to load analytics');
+      toast.error(t('doctor.quiz_analytics.load_failed'));
     } finally {
       setLoading(false);
     }
@@ -44,10 +43,10 @@ const DoctorQuizAnalytics = ({ courses }) => {
       {/* Header */}
       <div>
         <h2 className="text-xl md:text-2xl font-black text-gray-900 dark:text-white flex items-center gap-2">
-          <PieChart className="w-6 h-6 text-indigo-500" /> Quiz Analytics
+          <PieChart className="w-6 h-6 text-indigo-500" /> {t('doctor.quiz_analytics.title')}
         </h2>
         <p className="text-sm text-gray-500 dark:text-slate-500 mt-1">
-          Detailed performance analytics for your quizzes
+          {t('doctor.quiz_analytics.description')}
         </p>
       </div>
 
@@ -57,7 +56,7 @@ const DoctorQuizAnalytics = ({ courses }) => {
         onChange={(e) => setSelectedCourseId(e.target.value)}
         className="w-full sm:max-w-md bg-white dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/5 rounded-xl p-3.5 text-gray-900 dark:text-white font-medium focus:border-indigo-500/50 focus:outline-none transition-colors"
       >
-        <option value="">-- Select a Course --</option>
+        <option value="">{t('doctor.quiz_analytics.select_course')}</option>
         {courses.map(c => (
           <option key={c.id} value={c.id}>{c.name}</option>
         ))}
@@ -76,7 +75,7 @@ const DoctorQuizAnalytics = ({ courses }) => {
       ) : !selectedCourseId ? (
         <div className="bg-white dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/5 rounded-2xl p-16 text-center">
           <BarChart3 className="w-14 h-14 text-gray-300 dark:text-slate-600 mx-auto mb-3" />
-          <p className="text-gray-500 dark:text-slate-500 font-medium">Select a course to view quiz analytics</p>
+          <p className="text-gray-500 dark:text-slate-500 font-medium">{t('doctor.quiz_analytics.select_hint')}</p>
         </div>
       ) : !analytics ? null : (
         <>
@@ -89,7 +88,7 @@ const DoctorQuizAnalytics = ({ courses }) => {
                 </div>
               </div>
               <p className="text-2xl font-black text-gray-900 dark:text-white">{analytics.summary?.total_quizzes || 0}</p>
-              <p className="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider">Total Quizzes</p>
+              <p className="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider">{t('doctor.quiz_analytics.total_quizzes')}</p>
             </div>
 
             <div className="bg-white dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/5 rounded-2xl p-5">
@@ -99,7 +98,7 @@ const DoctorQuizAnalytics = ({ courses }) => {
                 </div>
               </div>
               <p className="text-2xl font-black text-gray-900 dark:text-white">{analytics.summary?.students_attempted || 0}</p>
-              <p className="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider">Students Attempted</p>
+              <p className="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider">{t('doctor.quiz_analytics.students_attempted')}</p>
             </div>
 
             <div className="bg-white dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/5 rounded-2xl p-5">
@@ -109,7 +108,7 @@ const DoctorQuizAnalytics = ({ courses }) => {
                 </div>
               </div>
               <p className="text-2xl font-black text-emerald-500">{analytics.summary?.overall_avg || '—'}%</p>
-              <p className="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider">Overall Average</p>
+              <p className="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider">{t('doctor.quiz_analytics.overall_avg')}</p>
             </div>
 
             <div className="bg-white dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/5 rounded-2xl p-5">
@@ -119,7 +118,7 @@ const DoctorQuizAnalytics = ({ courses }) => {
                 </div>
               </div>
               <p className="text-2xl font-black text-gray-900 dark:text-white">{analytics.summary?.published_quizzes || 0}</p>
-              <p className="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider">Published</p>
+              <p className="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider">{t('doctor.quiz_analytics.published')}</p>
             </div>
           </div>
 
@@ -127,7 +126,7 @@ const DoctorQuizAnalytics = ({ courses }) => {
           {analytics.distribution && analytics.distribution.length > 0 && (
             <div className="bg-white dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/5 rounded-2xl p-6">
               <h3 className="text-lg font-black text-gray-900 dark:text-white mb-5 flex items-center gap-2">
-                <Target className="w-5 h-5 text-indigo-500" /> Score Distribution
+                <Target className="w-5 h-5 text-indigo-500" /> {t('doctor.quiz_analytics.score_distribution')}
               </h3>
               <div className="space-y-3">
                 {allRanges.map(range => {
@@ -162,7 +161,7 @@ const DoctorQuizAnalytics = ({ courses }) => {
           {analytics.quizzes && analytics.quizzes.length > 0 && (
             <div className="space-y-3">
               <h3 className="text-lg font-black text-gray-900 dark:text-white flex items-center gap-2">
-                <Award className="w-5 h-5 text-indigo-500" /> Per-Quiz Performance
+                <Award className="w-5 h-5 text-indigo-500" /> {t('doctor.quiz_analytics.per_quiz')}
               </h3>
               {analytics.quizzes.map(q => {
                 const passRate = q.completed_attempts > 0
@@ -183,11 +182,11 @@ const DoctorQuizAnalytics = ({ courses }) => {
                               ? 'text-emerald-600 bg-emerald-50 dark:bg-emerald-500/10'
                               : 'text-gray-500 bg-gray-100 dark:bg-white/5'
                           }`}>
-                            {q.is_published ? 'Live' : 'Draft'}
+                            {q.is_published ? t('doctor.quiz_analytics.live') : t('doctor.quiz_analytics.draft')}
                           </span>
                         </div>
                         <p className="text-xs text-gray-400 dark:text-slate-500">
-                          ⏱ {q.time_limit_minutes}min · 🎯 Pass: {q.passing_score}%
+                          ⏱ {q.time_limit_minutes}{t('doctor.quiz_analytics.time_limit')} · 🎯 {t('doctor.quiz_analytics.pass_score')}: {q.passing_score}%
                         </p>
                       </div>
 
@@ -195,7 +194,7 @@ const DoctorQuizAnalytics = ({ courses }) => {
                       <div className="flex flex-wrap gap-4">
                         <div className="text-center">
                           <p className="text-lg font-black text-gray-900 dark:text-white">{q.completed_attempts || 0}</p>
-                          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Completed</p>
+                          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{t('doctor.quiz_analytics.completed')}</p>
                         </div>
                         <div className="text-center">
                           <p className={`text-lg font-black ${
@@ -203,17 +202,17 @@ const DoctorQuizAnalytics = ({ courses }) => {
                           }`}>
                             {q.avg_score !== null ? `${q.avg_score}%` : '—'}
                           </p>
-                          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Average</p>
+                          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{t('doctor.quiz_analytics.average')}</p>
                         </div>
                         <div className="text-center">
                           <p className="text-lg font-black text-blue-500">{q.max_score !== null ? `${Math.round(q.max_score)}%` : '—'}</p>
-                          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Highest</p>
+                          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{t('doctor.quiz_analytics.highest')}</p>
                         </div>
                         <div className="text-center">
                           <p className={`text-lg font-black ${passRate >= 70 ? 'text-emerald-500' : passRate >= 40 ? 'text-amber-500' : 'text-red-500'}`}>
                             {q.completed_attempts > 0 ? `${passRate}%` : '—'}
                           </p>
-                          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Pass Rate</p>
+                          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{t('doctor.quiz_analytics.pass_rate')}</p>
                         </div>
                       </div>
                     </div>
@@ -227,8 +226,8 @@ const DoctorQuizAnalytics = ({ courses }) => {
           {analytics.quizzes && analytics.quizzes.length === 0 && (
             <div className="bg-white dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/5 rounded-2xl p-16 text-center">
               <Award className="w-14 h-14 text-gray-300 dark:text-slate-600 mx-auto mb-3" />
-              <p className="text-gray-500 dark:text-slate-500 font-medium">No quizzes found for this course</p>
-              <p className="text-xs text-gray-400 dark:text-slate-600 mt-1">Create a quiz to start seeing analytics</p>
+              <p className="text-gray-500 dark:text-slate-500 font-medium">{t('doctor.quiz_analytics.no_quizzes')}</p>
+              <p className="text-xs text-gray-400 dark:text-slate-600 mt-1">{t('doctor.quiz_analytics.create_hint')}</p>
             </div>
           )}
         </>

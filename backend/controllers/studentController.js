@@ -135,6 +135,7 @@ const getAllStudents = async (req, res) => {
     const students = await Student.getAll();
     res.json(students);
   } catch (error) {
+    console.error('❌ Error in getAllStudents:', error);
     res.status(500).json({ message: error.message });
   }
 };

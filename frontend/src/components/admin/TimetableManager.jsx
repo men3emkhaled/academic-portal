@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
@@ -148,7 +147,7 @@ const TimetableManager = () => {
     <div className="space-y-8 lg:space-y-10 animate-in fade-in duration-700 pb-20">
       {/* Header Bento Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 flex items-center gap-6 bg-white/50 dark:bg-white/[0.02] backdrop-blur-md border border-gray-100 dark:border-white/5 p-8 rounded-[2.5rem] shadow-sm">
+        <div className="lg:col-span-2 flex items-center gap-6 bg-white/50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 p-8 rounded-[2.5rem] shadow-sm">
           <div className="w-16 h-16 bg-emerald-500/10 dark:bg-emerald-500/20 rounded-2xl flex items-center justify-center border border-emerald-500/20 shadow-inner group transition-transform duration-500 hover:scale-110">
             <Calendar className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
           </div>
@@ -161,9 +160,9 @@ const TimetableManager = () => {
         </div>
         
         <div className="bg-emerald-500 text-white p-8 rounded-[2.5rem] shadow-lg shadow-emerald-500/20 flex flex-col justify-between relative overflow-hidden group">
-          <div className="absolute inset-inline-end-0 top-0 w-32 h-32 bg-white/10 blur-[40px] rounded-full translate-x-1/2 -translate-y-1/2 group-hover:scale-150 transition-transform duration-700"></div>
+          <div className="absolute inset-inline-end-0 top-0 w-32 h-32 bg-white/10 hidden rounded-full translate-x-1/2 -translate-y-1/2 group-hover:scale-150 transition-transform duration-700"></div>
           <div className="flex justify-between items-start relative z-10">
-            <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
               <Clock className="w-5 h-5" />
             </div>
             <span className="text-[10px] font-black uppercase tracking-widest bg-black/10 px-3 py-1 rounded-full">Temporal Sync</span>
@@ -179,12 +178,12 @@ const TimetableManager = () => {
         {/* Main Content Area: Day Switcher + Class List */}
         <div className="flex-1 w-full space-y-8">
           {/* Day Switcher */}
-          <div className="bg-white/50 dark:bg-white/[0.01] backdrop-blur-xl border border-gray-100 dark:border-white/5 rounded-[2rem] p-2 shadow-inner flex flex-wrap gap-2">
+          <div className="bg-white/50 dark:bg-white/[0.01] border border-gray-100 dark:border-white/5 rounded-[2rem] p-2 shadow-inner flex flex-wrap gap-2">
             {DAYS.map(day => (
               <button
                 key={day}
                 onClick={() => setActiveDay(day)}
-                className={`flex-1 min-w-[110px] py-4 px-6 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 ${
+                className={`flex-1 min-w-[110px] py-4 px-6 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-[color,background-color,border-color,transform,opacity] duration-500 ${
                   activeDay === day
                     ? 'bg-emerald-600 text-white shadow-xl shadow-emerald-500/30 scale-[1.02]'
                     : 'text-gray-400 dark:text-slate-500 hover:bg-emerald-500/10 hover:text-emerald-600'
@@ -196,18 +195,18 @@ const TimetableManager = () => {
           </div>
 
           {/* Class List Table */}
-          <div className="bg-white/50 dark:bg-white/[0.01] backdrop-blur-xl border border-gray-100 dark:border-white/5 rounded-[3rem] overflow-hidden shadow-sm relative">
+          <div className="bg-white/50 dark:bg-white/[0.01] border border-gray-100 dark:border-white/5 rounded-[3rem] overflow-hidden shadow-sm relative">
             <div className="p-8 border-b border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.01] flex justify-between items-center relative z-10">
                 <div className="flex items-center gap-4">
                     <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_12px_rgba(16,185,129,0.5)]"></div>
                     <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight">{t(`admin.timetable.days.${activeDay}`)} {t('admin.timetable.title')}</h3>
                 </div>
-                <label className="flex items-center gap-3 px-5 py-2.5 rounded-2xl bg-white dark:bg-black/40 border border-gray-100 dark:border-white/10 text-[10px] font-black text-gray-400 dark:text-slate-400 uppercase tracking-widest cursor-pointer hover:border-emerald-500/30 transition-all">
+                <label className="flex items-center gap-3 px-5 py-2.5 rounded-2xl bg-white dark:bg-black/40 border border-gray-100 dark:border-white/10 text-[10px] font-black text-gray-400 dark:text-slate-400 uppercase tracking-widest cursor-pointer hover:border-emerald-500/30 transition-[color,background-color,border-color,transform,opacity]">
                   <input
                     type="checkbox"
                     checked={showHidden}
                     onChange={(e) => setShowHidden(e.target.checked)}
-                    className="w-4 h-4 rounded border-gray-300 dark:border-white/10 bg-gray-100 dark:bg-black text-emerald-600 focus:ring-emerald-500/30 cursor-pointer transition-all"
+                    className="w-4 h-4 rounded border-gray-300 dark:border-white/10 bg-gray-100 dark:bg-black text-emerald-600 focus:ring-emerald-500/30 cursor-pointer transition-[color,background-color,border-color,transform,opacity]"
                   />
                   {t('admin.timetable.show_hidden')}
                 </label>
@@ -224,23 +223,23 @@ const TimetableManager = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-                  <AnimatePresence mode="popLayout">
+                  <>
                   {filteredTimetables.length === 0 ? (
-                    <motion.tr initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                    <tr  >
                       <td colSpan="4" className="text-center py-32">
                         <div className="w-20 h-20 bg-gray-50 dark:bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
                             <Calendar className="w-10 h-10 text-gray-200 dark:text-gray-800" />
                         </div>
                         <p className="text-[11px] font-black text-gray-400 dark:text-slate-600 uppercase tracking-[0.3em]">{t('admin.timetable.no_classes', { day: t(`admin.timetable.days.${activeDay}`) })}</p>
                       </td>
-                    </motion.tr>
+                    </tr>
                   ) : (
                     filteredTimetables.map((entry, idx) => (
-                      <motion.tr
+                      <tr
                         key={entry.id}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: idx * 0.03 }}
+                        
+                        
+                        
                         className={`group hover:bg-gray-50/50 dark:hover:bg-white/[0.02] transition-colors ${entry.is_hidden ? 'opacity-40 grayscale-[0.5]' : ''}`}
                       >
                         <td className="py-6 px-8">
@@ -274,7 +273,7 @@ const TimetableManager = () => {
                         </td>
                         <td className="py-6 px-8">
                           <div className="flex flex-wrap gap-2">
-                            <span className={`px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest border shadow-inner transition-all ${
+                            <span className={`px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest border shadow-inner transition-[color,background-color,border-color,transform,opacity] ${
                                 entry.type === 'Lecture' ? 'bg-blue-500/5 border-blue-500/10 text-blue-600' :
                                 entry.type === 'Lab' ? 'bg-emerald-500/5 border-emerald-500/10 text-emerald-600' :
                                 'bg-purple-500/5 border-purple-500/10 text-purple-600'
@@ -289,10 +288,10 @@ const TimetableManager = () => {
                           </div>
                         </td>
                         <td className="py-6 px-8">
-                          <div className="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all scale-95 group-hover:scale-100">
+                          <div className="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-[color,background-color,border-color,transform,opacity] scale-95 group-hover:scale-100">
                             <button
                               onClick={() => toggleHideEntry(entry)}
-                              className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all shadow-sm ${entry.is_hidden
+                              className={`w-10 h-10 flex items-center justify-center rounded-xl transition-[color,background-color,border-color,transform,opacity] shadow-sm ${entry.is_hidden
                                   ? 'bg-rose-500 text-white shadow-rose-500/20'
                                   : 'bg-white dark:bg-white/10 text-gray-400 hover:text-emerald-500 hover:border-emerald-500/30'
                                 } border border-transparent`}
@@ -302,22 +301,22 @@ const TimetableManager = () => {
                             </button>
                             <button
                               onClick={() => handleEditEntry(entry)}
-                              className="w-10 h-10 flex items-center justify-center rounded-xl bg-blue-500/10 text-blue-500 border border-blue-500/10 hover:bg-blue-500 hover:text-white transition-all shadow-sm"
+                              className="w-10 h-10 flex items-center justify-center rounded-xl bg-blue-500/10 text-blue-500 border border-blue-500/10 hover:bg-blue-500 hover:text-white transition-[color,background-color,border-color,transform,opacity] shadow-sm"
                             >
                               <Edit3 className="w-5 h-5" />
                             </button>
                             <button
                               onClick={() => handleDeleteEntry(entry.id)}
-                              className="w-10 h-10 flex items-center justify-center rounded-xl bg-rose-500/10 text-rose-500 border border-rose-500/10 hover:bg-rose-500 hover:text-white transition-all shadow-sm"
+                              className="w-10 h-10 flex items-center justify-center rounded-xl bg-rose-500/10 text-rose-500 border border-rose-500/10 hover:bg-rose-500 hover:text-white transition-[color,background-color,border-color,transform,opacity] shadow-sm"
                             >
                               <Trash2 className="w-5 h-5" />
                             </button>
                           </div>
                         </td>
-                      </motion.tr>
+                      </tr>
                     ))
                   )}
-                  </AnimatePresence>
+                  </>
                 </tbody>
               </table>
             </div>
@@ -340,7 +339,7 @@ const TimetableManager = () => {
                         <select
                             value={selectedDepartmentId || ''}
                             onChange={(e) => setSelectedDepartmentId(e.target.value ? parseInt(e.target.value, 10) : '')}
-                            className="w-full bg-gray-50 dark:bg-black/50 border border-gray-100 dark:border-white/10 rounded-2xl px-6 py-4.5 font-black text-[11px] text-gray-900 dark:text-white focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all shadow-inner appearance-none uppercase tracking-widest"
+                            className="w-full bg-gray-50 dark:bg-black/50 border border-gray-100 dark:border-white/10 rounded-2xl px-6 py-4.5 font-black text-[11px] text-gray-900 dark:text-white focus:ring-4 focus:ring-emerald-500/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner appearance-none uppercase tracking-widest"
                         >
                             <option value="">All Faculty Nodes</option>
                             {departments.map(d => (
@@ -361,9 +360,9 @@ const TimetableManager = () => {
                     </div>
 
                     <form onSubmit={handleUploadTimetable} className="space-y-6">
-                        <label className="relative flex flex-col items-center justify-center gap-5 cursor-pointer bg-white/30 dark:bg-white/[0.01] border-2 border-gray-100 dark:border-white/5 border-dashed rounded-[2.5rem] p-10 hover:border-emerald-500/40 hover:bg-emerald-500/5 transition-all group/label shadow-inner overflow-hidden text-center">
+                        <label className="relative flex flex-col items-center justify-center gap-5 cursor-pointer bg-white/30 dark:bg-white/[0.01] border-2 border-gray-100 dark:border-white/5 border-dashed rounded-[2.5rem] p-10 hover:border-emerald-500/40 hover:bg-emerald-500/5 transition-[color,background-color,border-color,transform,opacity] group/label shadow-inner overflow-hidden text-center">
                             <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover/label:opacity-100 transition-opacity"></div>
-                            <FileSpreadsheet className="w-10 h-10 text-gray-300 group-hover/label:text-emerald-500 group-hover/label:scale-110 transition-all duration-500 relative z-10" />
+                            <FileSpreadsheet className="w-10 h-10 text-gray-300 group-hover/label:text-emerald-500 group-hover/label:scale-110 transition-[color,background-color,border-color,transform,opacity] duration-500 relative z-10" />
                             <span className="text-gray-500 dark:text-gray-400 font-black text-[10px] uppercase tracking-[0.2em] relative z-10">
                                 {timetableFile ? (
                                     <span className="text-emerald-600 dark:text-emerald-400">{timetableFile.name}</span>
@@ -375,7 +374,7 @@ const TimetableManager = () => {
                         <button
                             type="submit"
                             disabled={uploadingTimetable || !timetableFile || !selectedDepartmentId}
-                            className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-black py-5 rounded-[2.5rem] shadow-xl shadow-emerald-500/20 transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3 group"
+                            className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-black py-5 rounded-[2.5rem] shadow-xl shadow-emerald-500/20 transition-[color,background-color,border-color,transform,opacity] hover:scale-[1.02] active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3 group"
                         >
                             {uploadingTimetable ? <Activity className="w-6 h-6 animate-spin" /> : <><Upload className="w-5 h-5 group-hover:-translate-y-1 transition-transform" /> <span className="uppercase tracking-widest text-xs">{t('admin.timetable.upload.upload_button')}</span></>}
                         </button>
@@ -392,7 +391,7 @@ const TimetableManager = () => {
           </div>
 
           {/* Day Visibility Controls */}
-          <div className="bg-white/50 dark:bg-white/[0.01] backdrop-blur-xl border border-gray-100 dark:border-white/5 rounded-[3rem] p-10 shadow-sm relative overflow-hidden group">
+          <div className="bg-white/50 dark:bg-white/[0.01] border border-gray-100 dark:border-white/5 rounded-[3rem] p-10 shadow-sm relative overflow-hidden group">
             <div className="flex items-center gap-4 mb-10">
               <div className="w-12 h-12 bg-white dark:bg-white/5 rounded-2xl flex items-center justify-center border border-gray-100 dark:border-white/10 shadow-sm">
                 <Eye className="w-6 h-6 text-emerald-500" />
@@ -402,18 +401,18 @@ const TimetableManager = () => {
 
             <div className="space-y-4">
               {DAYS.map(day => (
-                <div key={day} className="flex items-center justify-between p-5 bg-white/50 dark:bg-black/20 border border-gray-100 dark:border-white/5 rounded-[1.5rem] group/day hover:border-emerald-500/20 transition-all">
+                <div key={day} className="flex items-center justify-between p-5 bg-white/50 dark:bg-black/20 border border-gray-100 dark:border-white/5 rounded-[1.5rem] group/day hover:border-emerald-500/20 transition-[color,background-color,border-color,transform,opacity]">
                   <span className="text-[10px] font-black text-gray-700 dark:text-gray-300 uppercase tracking-widest">{t(`admin.timetable.days.${day}`)}</span>
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleHideAllDay(day)}
-                      className="px-5 py-2.5 text-[9px] font-black bg-gray-100 dark:bg-black text-gray-500 hover:bg-rose-500 hover:text-white rounded-xl transition-all uppercase tracking-widest"
+                      className="px-5 py-2.5 text-[9px] font-black bg-gray-100 dark:bg-black text-gray-500 hover:bg-rose-500 hover:text-white rounded-xl transition-[color,background-color,border-color,transform,opacity] uppercase tracking-widest"
                     >
                       {t('admin.timetable.visibility.hide')}
                     </button>
                     <button
                       onClick={() => handleShowAllDay(day)}
-                      className="px-5 py-2.5 text-[9px] font-black bg-emerald-500 text-white hover:bg-emerald-600 rounded-xl shadow-lg shadow-emerald-500/20 transition-all uppercase tracking-widest"
+                      className="px-5 py-2.5 text-[9px] font-black bg-emerald-500 text-white hover:bg-emerald-600 rounded-xl shadow-lg shadow-emerald-500/20 transition-[color,background-color,border-color,transform,opacity] uppercase tracking-widest"
                     >
                       {t('admin.timetable.visibility.show')}
                     </button>
@@ -424,7 +423,7 @@ const TimetableManager = () => {
           </div>
 
           {/* Quick Actions (Delete Sections) */}
-          <div className="bg-white/50 dark:bg-white/[0.01] backdrop-blur-xl border border-gray-100 dark:border-white/5 rounded-[3rem] p-10 shadow-sm relative overflow-hidden group">
+          <div className="bg-white/50 dark:bg-white/[0.01] border border-gray-100 dark:border-white/5 rounded-[3rem] p-10 shadow-sm relative overflow-hidden group">
             <div className="flex items-center gap-4 mb-10">
               <div className="w-12 h-12 bg-rose-500/10 rounded-2xl flex items-center justify-center border border-rose-500/20 shadow-sm">
                 <Trash2 className="w-6 h-6 text-rose-500" />
@@ -437,7 +436,7 @@ const TimetableManager = () => {
                 <button
                   key={sec}
                   onClick={() => handleDeleteSection(sec, selectedDepartmentId)}
-                  className="py-4 text-[10px] font-black text-rose-500 bg-rose-500/5 border border-rose-500/10 rounded-2xl hover:bg-rose-500 hover:text-white transition-all uppercase tracking-widest shadow-sm"
+                  className="py-4 text-[10px] font-black text-rose-500 bg-rose-500/5 border border-rose-500/10 rounded-2xl hover:bg-rose-500 hover:text-white transition-[color,background-color,border-color,transform,opacity] uppercase tracking-widest shadow-sm"
                 >
                   {t('admin.timetable.clear_sections.sec_label', { num: sec })}
                 </button>

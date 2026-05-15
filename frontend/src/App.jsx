@@ -1,6 +1,8 @@
-import React, { useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
+
+// components
 import PortalSwitcher from './components/PortalSwitcher';
 import PullToRefresh from './components/PullToRefresh';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
@@ -49,8 +51,8 @@ const ProtectedStudentRoute = ({ children }) => {
   if (loading) {
     return (
       <div className="flex flex-col justify-center items-center h-screen bg-gray-50 dark:bg-dark transition-colors duration-500 overflow-hidden relative">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-emerald-500/5 dark:bg-emerald-500/10 blur-[120px] rounded-full animate-pulse-slow"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/5 dark:bg-blue-500/10 blur-[120px] rounded-full animate-pulse-slow"></div>
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-emerald-500/5 dark:bg-emerald-500/10 hidden rounded-full animate-pulse-slow"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/5 dark:bg-blue-500/10 hidden rounded-full animate-pulse-slow"></div>
 
         <div className="relative z-10 flex flex-col items-center">
           <div className="relative flex items-center justify-center w-20 h-20 mb-6">
@@ -67,7 +69,20 @@ const ProtectedStudentRoute = ({ children }) => {
     );
   }
 
-  return token ? children : null;
+  return token ? (
+    <div
+      className="w-full h-full min-h-screen"
+      style={{ animation: 'ultraLightFade 0.08s ease-out forwards' }}
+    >
+      <style>{`
+        @keyframes ultraLightFade {
+          from { opacity: 0.7; }
+          to { opacity: 1; }
+        }
+      `}</style>
+      {children}
+    </div>
+  ) : null;
 };
 
 // مكون إعادة توجيه الطالب المسجل دخوله
@@ -93,6 +108,41 @@ function AppContent() {
   const location = useLocation();
   const { isDarkMode } = useTheme();
 
+  const [direction, setDirection] = useState(0);
+  const prevPathRef = React.useRef(location.pathname);
+
+  // Define the logical order of tabs for Student
+  const STUDENT_TABS_ORDER = [
+    '/student/dashboard',
+    '/student/timetable',
+    '/student/course',
+    '/student/quizzes',
+    '/student/grades',
+    '/student/roadmap',
+    '/student/materials',
+    '/student/personal-tasks',
+    '/student/notifications',
+    '/student/settings'
+  ];
+
+  useEffect(() => {
+    // Only animate direction for student routes
+    if (location.pathname.startsWith('/student/') && prevPathRef.current.startsWith('/student/')) {
+      const getIndex = (path) => STUDENT_TABS_ORDER.findIndex(base => path.startsWith(base));
+      const oldIndex = getIndex(prevPathRef.current);
+      const newIndex = getIndex(location.pathname);
+
+      if (oldIndex !== -1 && newIndex !== -1 && oldIndex !== newIndex) {
+        setDirection(newIndex > oldIndex ? 1 : -1);
+      } else {
+        setDirection(0); // Default fade
+      }
+    } else {
+      setDirection(0);
+    }
+    prevPathRef.current = location.pathname;
+  }, [location.pathname]);
+
   useEffect(() => {
     document.documentElement.dir = i18n.language === 'ar' ? 'rtl' : 'ltr';
     document.documentElement.lang = i18n.language;
@@ -102,8 +152,8 @@ function AppContent() {
     return (
       <div className="flex flex-col justify-center items-center h-screen bg-gray-50 dark:bg-dark transition-colors duration-500 overflow-hidden relative">
         {/* Decorative Ambient Glows */}
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-emerald-500/5 dark:bg-emerald-500/10 blur-[120px] rounded-full animate-pulse-slow"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/5 dark:bg-blue-500/10 blur-[120px] rounded-full animate-pulse-slow"></div>
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-emerald-500/5 dark:bg-emerald-500/10 hidden rounded-full animate-pulse-slow"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/5 dark:bg-blue-500/10 hidden rounded-full animate-pulse-slow"></div>
 
         <div className="relative z-10 flex flex-col items-center">
           <div className="relative flex items-center justify-center w-24 h-24 mb-8">
@@ -129,10 +179,13 @@ function AppContent() {
   ].some((p) => location.pathname === p || location.pathname.startsWith(p)) && !(location.pathname.startsWith('/admin') && adminToken);
 
   return (
-    <div className={`min-h-screen transition-colors duration-500 ${isDarkMode ? 'bg-[#010101]' : 'bg-[#fafafa]'}`}>
+    <div className={`min-h-screen overflow-x-hidden transition-colors duration-500 ${isDarkMode ? 'bg-[#010101]' : 'bg-[#fafafa]'}`}>
       {showSwitcher && <PortalSwitcher />}
-      <AnimatePresence mode="wait">
-        <Routes location={location} key={location.pathname}>
+      <div
+        key={location.pathname}
+        className="min-h-screen w-full relative"
+      >
+        <Routes location={location}>
           <Route path="/" element={<Navigate to="/student/login" replace />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/login" element={<AdminLogin />} />
@@ -159,7 +212,7 @@ function AppContent() {
           {/* مسار وهمي لتفادي تحذيرات React Router عند تفعيل مدير كلمات المرور في iOS */}
           <Route path="/student/login-dummy" element={null} />
         </Routes>
-      </AnimatePresence>
+      </div>
     </div>
   );
 }

@@ -1,8 +1,8 @@
 <available_skills>
   <skill>
-    <name>frontend</name>
-    <description>Build stunning, high-performance web interfaces with premium design aesthetics and modern architecture.</description>
-    <location>/home/men3emk1/Documents/academic-portal/academic-portal/.antigravity/skills/frontend/SKILL.md</location>
+    <name>security-shield</name>
+    <description>Proactive code auditing and protection against credential leaks and vulnerabilities.</description>
+    <location>/home/men3emk1/Documents/academic-portal/academic-portal/.antigravity/skills/security-shield/SKILL.md</location>
   </skill>
   <skill>
     <name>performance-pro</name>
@@ -15,23 +15,33 @@
     <location>/home/men3emk1/Documents/academic-portal/academic-portal/.antigravity/skills/human-coder/SKILL.md</location>
   </skill>
   <skill>
+    <name>qa-expert</name>
+    <description>Expertise in automated testing, bug hunting, and quality assurance benchmarks.</description>
+    <location>/home/men3emk1/Documents/academic-portal/academic-portal/.antigravity/skills/qa-expert/SKILL.md</location>
+  </skill>
+  <skill>
+    <name>api-tester</name>
+    <description>Systematic REST and GraphQL API testing, edge case coverage, and contract validation.</description>
+    <location>/home/men3emk1/Documents/academic-portal/academic-portal/.antigravity/skills/api-tester/SKILL.md</location>
+  </skill>
+  <skill>
     <name>prompt-engineer</name>
     <description>Craft precise, effective prompts for LLMs to maximize output quality and consistency.</description>
     <location>/home/men3emk1/Documents/academic-portal/academic-portal/.antigravity/skills/prompt-engineer/SKILL.md</location>
   </skill>
   <skill>
-    <name>css-master</name>
-    <description>Deep CSS mastery: layouts, custom properties, cascade layers, and cutting-edge techniques.</description>
-    <location>/home/men3emk1/Documents/academic-portal/academic-portal/.antigravity/skills/css-master/SKILL.md</location>
+    <name>stability-architect</name>
+    <description>Ensure code integrity, prevent regressions, and maintain architectural consistency during modifications.</description>
+    <location>/home/men3emk1/Documents/academic-portal/academic-portal/.antigravity/skills/stability-architect/SKILL.md</location>
   </skill>
   <skill>
-    <name>animation-expert</name>
-    <description>Craft fluid micro-interactions, page transitions, and physics-based animations that delight users.</description>
-    <location>/home/men3emk1/Documents/academic-portal/academic-portal/.antigravity/skills/animation-expert/SKILL.md</location>
+    <name>accessibility-advocate</name>
+    <description>Ensure digital products are usable by everyone through WCAG 2.1 compliance and inclusive design.</description>
+    <location>/home/men3emk1/Documents/academic-portal/academic-portal/.antigravity/skills/accessibility-advocate/SKILL.md</location>
   </skill>
   <skill>
-    <name>creative-ui-pro</name>
-    <description>Create visually stunning, award-worthy interfaces using advanced CSS and modern design trends.</description>
-    <location>/home/men3emk1/Documents/academic-portal/academic-portal/.antigravity/skills/creative-ui-pro/SKILL.md</location>
+    <name>seo-engineer</name>
+    <description>Optimize technical SEO, metadata, and semantic structure for maximum search visibility.</description>
+    <location>/home/men3emk1/Documents/academic-portal/academic-portal/.antigravity/skills/seo-engineer/SKILL.md</location>
   </skill>
 </available_skills>

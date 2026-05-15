@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
@@ -42,7 +41,7 @@ const LinkedEmailsManager = () => {
     <div className="space-y-8 lg:space-y-10 animate-in fade-in duration-700 pb-10">
       {/* Header Bento Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 flex items-center gap-6 bg-white/50 dark:bg-white/[0.02] backdrop-blur-md border border-gray-100 dark:border-white/5 p-8 rounded-[2.5rem] shadow-sm">
+        <div className="lg:col-span-2 flex items-center gap-6 bg-white/50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 p-8 rounded-[2.5rem] shadow-sm">
           <div className="w-16 h-16 bg-indigo-500/10 dark:bg-indigo-500/20 rounded-2xl flex items-center justify-center border border-indigo-500/20 shadow-inner group transition-transform duration-500 hover:scale-110">
             <Mail className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
           </div>
@@ -55,9 +54,9 @@ const LinkedEmailsManager = () => {
         </div>
         
         <div className="bg-indigo-600 text-white p-8 rounded-[2.5rem] shadow-lg shadow-indigo-600/20 flex flex-col justify-between relative overflow-hidden group">
-          <div className="absolute inset-inline-end-0 top-0 w-32 h-32 bg-white/10 blur-[40px] rounded-full translate-x-1/2 -translate-y-1/2 group-hover:scale-150 transition-transform duration-700"></div>
+          <div className="absolute inset-inline-end-0 top-0 w-32 h-32 bg-white/10 hidden rounded-full translate-x-1/2 -translate-y-1/2 group-hover:scale-150 transition-transform duration-700"></div>
           <div className="flex justify-between items-start relative z-10">
-            <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
               <Shield className="w-5 h-5" />
             </div>
             <span className="text-[10px] font-black uppercase tracking-widest bg-black/10 px-3 py-1 rounded-full">Identity Hub</span>
@@ -78,62 +77,62 @@ const LinkedEmailsManager = () => {
             placeholder={t('admin.emails.search_placeholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-white dark:bg-white/[0.02] border border-gray-100 dark:border-white/10 rounded-[2rem] ps-16 pe-8 py-5 text-gray-900 dark:text-white font-black focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all shadow-inner uppercase tracking-widest text-[11px]"
+            className="w-full bg-white dark:bg-white/[0.02] border border-gray-100 dark:border-white/10 rounded-[2rem] ps-16 pe-8 py-5 text-gray-900 dark:text-white font-black focus:ring-4 focus:ring-indigo-500/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner uppercase tracking-widest text-[11px]"
           />
         </div>
         
         <button 
           onClick={fetchEmails}
           disabled={loading}
-          className="flex items-center justify-center gap-3 bg-white dark:bg-white/[0.05] border border-gray-100 dark:border-white/10 text-gray-900 dark:text-white font-black py-4.5 px-10 rounded-[2rem] shadow-sm hover:bg-gray-50 dark:hover:bg-white/[0.08] active:scale-95 transition-all whitespace-nowrap group"
+          className="flex items-center justify-center gap-3 bg-white dark:bg-white/[0.05] border border-gray-100 dark:border-white/10 text-gray-900 dark:text-white font-black py-4.5 px-10 rounded-[2rem] shadow-sm hover:bg-gray-50 dark:hover:bg-white/[0.08] active:scale-95 transition-[color,background-color,border-color,transform,opacity] whitespace-nowrap group"
         >
           <RefreshCw className={`w-5 h-5 group-hover:rotate-180 transition-transform duration-700 ${loading ? 'animate-spin text-indigo-500' : ''}`} /> 
           <span className="uppercase tracking-widest text-xs">{t('admin.emails.refresh_button')}</span>
         </button>
       </div>
 
-      <AnimatePresence mode="wait">
+      <>
       {loading ? (
-        <motion.div 
+        <div 
             key="loading"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            
+            
+            
             className="flex flex-col items-center justify-center py-48 opacity-50"
         >
            <Activity className="w-16 h-16 text-indigo-500 animate-spin mb-8" />
            <p className="text-[11px] font-black uppercase tracking-[0.3em] text-gray-500">{t('admin.emails.loading')}</p>
-        </motion.div>
+        </div>
       ) : filteredStudents.length === 0 ? (
-        <motion.div 
+        <div 
             key="empty"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-white/50 dark:bg-white/[0.01] border-2 border-dashed border-gray-100 dark:border-white/5 rounded-[3rem] py-48 text-center flex flex-col items-center group transition-all duration-500 shadow-sm"
+            
+            
+            className="bg-white/50 dark:bg-white/[0.01] border-2 border-dashed border-gray-100 dark:border-white/5 rounded-[3rem] py-48 text-center flex flex-col items-center group transition-[color,background-color,border-color,transform,opacity] duration-500 shadow-sm"
         >
             <div className="w-24 h-24 bg-indigo-500/5 dark:bg-indigo-500/10 rounded-full flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-500">
                 <AlertTriangle className="w-12 h-12 text-indigo-400/30" />
             </div>
             <h4 className="text-xl font-black uppercase tracking-[0.3em] text-gray-900 dark:text-white">{t('admin.emails.no_results')}</h4>
             <p className="text-[10px] font-black mt-4 uppercase tracking-widest text-gray-400">{t('admin.emails.no_results_hint')}</p>
-        </motion.div>
+        </div>
       ) : (
-        <motion.div 
+        <div 
             key="grid"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            
+            
             className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8"
         >
           {filteredStudents.map((student, idx) => (
-            <motion.div 
+            <div 
               key={student.id} 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.05 }}
-              className="group relative bg-white dark:bg-white/[0.01] backdrop-blur-xl border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-10 transition-all duration-500 hover:border-indigo-500/30 hover:shadow-2xl hover:shadow-indigo-500/10"
+              
+              
+              
+              className="group relative bg-white dark:bg-white/[0.01] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-10 transition-[color,background-color,border-color,transform,opacity] duration-500 hover:border-indigo-500/30 hover:shadow-2xl hover:shadow-indigo-500/10"
             >
                 <div className="flex items-center gap-5 mb-8 relative z-10">
-                  <div className="w-16 h-16 bg-indigo-500/5 dark:bg-indigo-500/10 rounded-2xl flex items-center justify-center border border-indigo-500/10 text-indigo-600 dark:text-indigo-400 shadow-inner group-hover:bg-indigo-600 group-hover:text-white transition-all duration-700">
+                  <div className="w-16 h-16 bg-indigo-500/5 dark:bg-indigo-500/10 rounded-2xl flex items-center justify-center border border-indigo-500/10 text-indigo-600 dark:text-indigo-400 shadow-inner group-hover:bg-indigo-600 group-hover:text-white transition-[color,background-color,border-color,transform,opacity] duration-700">
                     <User className="w-8 h-8" />
                   </div>
                   <div className="min-w-0">
@@ -147,7 +146,7 @@ const LinkedEmailsManager = () => {
                 </div>
 
                 <div className="space-y-4 relative z-10">
-                   <div className="flex items-center justify-between bg-gray-50/50 dark:bg-black/30 border border-gray-100 dark:border-white/5 px-6 py-4 rounded-2xl group-hover:border-indigo-500/20 transition-all shadow-inner">
+                   <div className="flex items-center justify-between bg-gray-50/50 dark:bg-black/30 border border-gray-100 dark:border-white/5 px-6 py-4 rounded-2xl group-hover:border-indigo-500/20 transition-[color,background-color,border-color,transform,opacity] shadow-inner">
                       <div className="flex items-center gap-3">
                         <Fingerprint className="w-4 h-4 text-gray-400 dark:text-slate-700" />
                         <span className="text-[9px] font-black text-gray-400 dark:text-slate-600 uppercase tracking-widest">{t('admin.emails.student_id')}</span>
@@ -155,7 +154,7 @@ const LinkedEmailsManager = () => {
                       <span className="text-xs font-black text-gray-900 dark:text-white tracking-[0.2em]">{student.id}</span>
                    </div>
                    
-                   <div className="flex items-center justify-between bg-emerald-500/5 dark:bg-emerald-500/[0.02] border border-emerald-500/10 dark:border-white/5 px-6 py-4 rounded-2xl group-hover:border-emerald-500/30 transition-all shadow-inner">
+                   <div className="flex items-center justify-between bg-emerald-500/5 dark:bg-emerald-500/[0.02] border border-emerald-500/10 dark:border-white/5 px-6 py-4 rounded-2xl group-hover:border-emerald-500/30 transition-[color,background-color,border-color,transform,opacity] shadow-inner">
                       <div className="flex items-center gap-3">
                         <Mail className="w-4 h-4 text-emerald-500" />
                         <span className="text-[9px] font-black text-emerald-500/60 uppercase tracking-widest">{t('admin.emails.email_label')}</span>
@@ -169,7 +168,7 @@ const LinkedEmailsManager = () => {
                         <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
                         <span className="text-[9px] font-black uppercase tracking-[0.3em] text-emerald-600 dark:text-emerald-400">{t('admin.emails.active_account')}</span>
                     </div>
-                    <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/10 flex items-center justify-center text-gray-300 dark:text-slate-800 group-hover:text-indigo-500 group-hover:border-indigo-500/30 group-hover:bg-white dark:group-hover:bg-white/5 transition-all shadow-sm">
+                    <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/10 flex items-center justify-center text-gray-300 dark:text-slate-800 group-hover:text-indigo-500 group-hover:border-indigo-500/30 group-hover:bg-white dark:group-hover:bg-white/5 transition-[color,background-color,border-color,transform,opacity] shadow-sm">
                         <ChevronRight className="w-5 h-5 transition-transform group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5" />
                     </div>
                 </div>
@@ -178,11 +177,11 @@ const LinkedEmailsManager = () => {
                 <div className="absolute inset-inline-end-10 bottom-10 opacity-0 group-hover:opacity-5 transition-opacity duration-1000 pointer-events-none">
                     <Fingerprint className="w-24 h-24 text-indigo-500" />
                 </div>
-            </motion.div>
+            </div>
           ))}
-        </motion.div>
+        </div>
       )}
-      </AnimatePresence>
+      </>
     </div>
   );
 };

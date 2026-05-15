@@ -252,7 +252,11 @@ const getMyGrades = async (req, res) => {
     let coursesPassed = 0;
     
     for (const grade of gradesList) {
-      const earned = (grade.midterm_score || 0) + (grade.practical_score || 0) + (grade.oral_score || 0);
+      const midterm = parseFloat(grade.midterm_score) || 0;
+      const practical = parseFloat(grade.practical_score) || 0;
+      const oral = parseFloat(grade.oral_score) || 0;
+      
+      const earned = midterm + practical + oral;
       totalPossible += grade.max_score;
       totalEarned += earned;
       

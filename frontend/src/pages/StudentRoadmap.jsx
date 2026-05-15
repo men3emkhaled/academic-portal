@@ -1,5 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Target, CheckCircle2, Circle, Trophy, ChevronDown, Map, Rocket } from 'lucide-react';
+import { 
+  Target, CheckCircle2, Circle, Trophy, 
+  ChevronDown, Map, Rocket, Zap,
+  TrendingUp, Layers, Info, ArrowRight,
+  Star, ClipboardList
+} from 'lucide-react';
 import { useStudentAuth } from '../context/StudentAuthContext';
 import { useStudentData } from '../context/StudentDataContext';
 import { useNavigate } from 'react-router-dom';
@@ -13,6 +18,8 @@ const StudentRoadmap = () => {
   const { student, logout } = useStudentAuth();
   const { roadmapTracks, loadingRoadmap } = useStudentData();
   const navigate = useNavigate();
+  
+  const isAr = i18n.language === 'ar';
   const tracks = roadmapTracks || [];
   
   const [selectedTrack, setSelectedTrack] = useState(null);
@@ -86,7 +93,6 @@ const StudentRoadmap = () => {
       toast.success(newStatus ? t('roadmap.task_done') : t('roadmap.task_undone'));
     } catch (error) {
       console.error('Error toggling task:', error);
-      // Revert on failure
       fetchTrackProgress(selectedTrack.id);
       toast.error(t('roadmap.update_error'));
     } finally {
@@ -103,212 +109,201 @@ const StudentRoadmap = () => {
   const handleLogout = () => {
     logout();
     navigate('/student/login');
-    toast.success(t('sidebar.logout') + ' ' + t('auth.success'));
+    toast.success(`${t('sidebar.logout')} ${t('auth.success')}`);
   };
 
   if ((loading || loadingRoadmap) && tracks.length === 0) {
     return (
-      <div className="flex flex-col justify-center items-center h-screen bg-gray-50 dark:bg-[#0a0a0a] transition-colors duration-500 overflow-hidden relative">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 blur-[120px] rounded-full animate-pulse-slow"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/10 blur-[120px] rounded-full animate-pulse-slow"></div>
-        <div className="relative z-10 flex flex-col items-center">
-          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-          <p className="mt-4 text-gray-500 dark:text-gray-400 font-bold text-xs tracking-wide">{t('common.loading')}</p>
-        </div>
+      <div className="flex flex-col justify-center items-center h-screen bg-white dark:bg-[#0c0c14]">
+        <div className="w-12 h-12 border-2 border-gray-200 dark:border-white/10 border-t-[#2cfc7d] rounded-full animate-spin"></div>
       </div>
     );
   }
 
-  // Circular Gauge Component
-  const CircularGauge = ({ percentage }) => {
-    const radius = 60;
-    const circumference = 2 * Math.PI * radius;
-    const strokeDashoffset = circumference - (percentage / 100) * circumference;
-    
-    return (
-      <div className="relative flex items-center justify-center">
-        <svg viewBox="0 0 160 160" className={`transform w-36 h-36 sm:w-40 sm:h-40 overflow-visible ${i18n.language === 'ar' ? 'rotate-90 scale-x-[-1]' : '-rotate-90'}`}>
-          <circle cx="80" cy="80" r={radius} stroke="currentColor" strokeWidth="12" fill="transparent" className="text-gray-200 dark:text-white/5" />
-          <circle cx="80" cy="80" r={radius} stroke="currentColor" strokeWidth="12" fill="transparent"
-            strokeDasharray={circumference} strokeDashoffset={strokeDashoffset}
-            strokeLinecap="round" className="text-primary transition-all duration-1000 ease-out" />
-        </svg>
-        <div className="absolute flex flex-col items-center justify-center">
-          <span className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white">{percentage}%</span>
-          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">{t('roadmap.done')}</span>
-        </div>
-      </div>
-    );
-  };
-
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a0a] text-gray-900 dark:text-white font-sans transition-colors duration-500 relative overflow-hidden">
-      {/* Background Ambient Orbs */}
-      <div className="fixed top-0 left-0 w-full h-full pointer-events-none z-0 overflow-hidden">
-        <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-primary/5 dark:bg-primary/10 blur-[150px] rounded-full mix-blend-multiply dark:mix-blend-screen"></div>
-        <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-blue-500/5 dark:bg-blue-500/10 blur-[150px] rounded-full mix-blend-multiply dark:mix-blend-screen"></div>
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0c0c14] text-gray-900 dark:text-white font-sans transition-colors duration-500 overflow-x-hidden relative" dir={isAr ? 'rtl' : 'ltr'}>
+      
+      {/* Background Decor */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute top-[-10%] inset-inline-end-[-5%] w-[50vw] h-[50vw] bg-[#8b5cf6]/5 blur-[120px] rounded-full"></div>
+        <div className="absolute bottom-[-10%] inset-inline-start-[-5%] w-[40vw] h-[40vw] bg-[#2cfc7d]/3 blur-[100px] rounded-full"></div>
       </div>
 
-      <Sidebar activePage="roadmap" onLogout={handleLogout} />
+      <Sidebar onLogout={handleLogout} />
 
-      <div className="md:ps-96 pb-24 md:pb-12 relative z-10">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+      <main className="md:ps-72 min-h-screen relative z-10 flex flex-col">
+        
+        {/* HERO SECTION */}
+        <section className="px-6 lg:px-10 pt-16 pb-12 max-w-[1500px] mx-auto w-full space-y-12 text-start">
           
-          {/* HERO SECTION */}
-          <div className="relative rounded-[2rem] sm:rounded-[2.5rem] bg-white dark:bg-[#111] p-6 sm:p-12 shadow-md dark:shadow-2xl border border-gray-200 dark:border-transparent transition-colors duration-500 flex flex-col lg:flex-row items-center justify-between gap-10 text-start">
-            {/* Background Container for Orbs to prevent spilling */}
-            <div className="absolute inset-0 overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] pointer-events-none">
-              <div className="absolute top-[-50%] right-[-10%] w-[60%] h-[150%] bg-primary/20 blur-[120px] rounded-full mix-blend-multiply dark:mix-blend-screen"></div>
-              <div className="absolute bottom-[-50%] left-[-10%] w-[50%] h-[150%] bg-blue-500/20 blur-[120px] rounded-full mix-blend-multiply dark:mix-blend-screen"></div>
-            </div>
-            
-            <div className="relative z-20 flex-1 w-full">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="bg-primary/10 dark:bg-primary/20 p-3 rounded-2xl border border-primary/20 dark:border-primary/30 shadow-[0_0_20px_rgba(46,204,113,0.15)] dark:shadow-[0_0_30px_rgba(46,204,113,0.3)]">
-                  <Map className="w-6 h-6 text-primary" />
-                </div>
-                <h1 className="text-xl font-bold text-gray-500 dark:text-gray-300 uppercase tracking-widest">{t('roadmap.title')}</h1>
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-10">
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#2cfc7d]"></div>
+                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 dark:text-white/30">{t('roadmap.title')}</span>
               </div>
-
-              {/* Custom Dropdown Selector */}
-              <div className="relative w-full max-w-lg" ref={dropdownRef}>
-                <button 
-                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="w-full flex items-center justify-between bg-gray-50 dark:bg-white/10 hover:bg-gray-100 dark:hover:bg-white/15 backdrop-blur-md border border-gray-200 dark:border-white/20 rounded-2xl py-5 px-6 transition-all duration-300 group text-start"
-                >
-                  <div>
-                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">{t('roadmap.active_track')}</p>
-                    <h2 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white group-hover:text-primary transition-colors">
-                      {selectedTrack ? selectedTrack.name : t('roadmap.select_track')}
-                    </h2>
-                  </div>
-                  <ChevronDown className={`w-6 h-6 text-gray-400 transition-transform duration-300 ${isDropdownOpen ? 'rotate-180 text-gray-900 dark:text-white' : ''}`} />
-                </button>
-
-                {isDropdownOpen && (
-                  <div className="absolute top-full left-0 w-full mt-4 bg-white/95 dark:bg-[#1a1a1a]/95 backdrop-blur-xl border border-gray-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-4 duration-200">
-                    <div className="max-h-[300px] overflow-y-auto custom-scrollbar p-2">
-                      {tracks.length === 0 ? (
-                        <p className="p-4 text-center text-gray-500">{t('roadmap.no_tracks')}</p>
-                      ) : (
-                        tracks.map(track => (
-                          <button
-                            key={track.id}
-                            onClick={() => handleTrackChange(track)}
-                            className={`w-full text-left px-4 py-3 rounded-xl transition-colors flex items-center gap-3 text-start ${selectedTrack?.id === track.id ? 'bg-primary/10 text-primary font-bold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5'}`}
-                          >
-                            <Target className={`w-5 h-5 ${selectedTrack?.id === track.id ? 'text-primary' : 'text-gray-400'}`} />
-                            {track.name} {track.is_primary && <span className="text-amber-500 text-xs font-bold uppercase ms-auto">{t('roadmap.primary')}</span>}
-                          </button>
-                        ))
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
+              <h1 className={`text-[clamp(2.5rem,6vw,5.5rem)] font-black leading-[0.95] tracking-tighter uppercase text-gray-900 dark:text-white ${isAr ? 'font-arabic' : ''}`}>
+                {t('mavi.success')} {t('mavi.roadmap')}
+              </h1>
             </div>
 
-            {/* Gauge Area */}
-            {progress && (
-              <div className="relative z-10 flex flex-col items-center bg-gray-50/50 dark:bg-white/5 p-6 rounded-3xl border border-gray-200/50 dark:border-white/10 backdrop-blur-md">
-                <CircularGauge percentage={progress.percentage || 0} />
-                <div className="mt-4 text-center">
-                  <p className="text-sm font-bold text-gray-500 dark:text-gray-400">
-                    <span className="text-gray-900 dark:text-white">{progress.completed_tasks}</span> {t('roadmap.of')} {progress.total_tasks} {t('roadmap.tasks')}
-                  </p>
-                </div>
-              </div>
-            )}
           </div>
 
-          {/* INTERACTIVE TIMELINE */}
-          {selectedTrack && (
-            <div className="relative pt-6">
-              <div className="flex items-center gap-3 mb-12 text-start">
-                <h3 className="text-2xl font-black text-gray-900 dark:text-white flex items-center gap-2">
-                  <Rocket className="w-6 h-6 text-primary" /> {t('roadmap.milestones')}
-                </h3>
-              </div>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pb-20">
+            
+            {/* Track Selector Bento Card */}
+            <div className="lg:col-span-8 bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 rounded-[3rem] p-12 flex flex-col justify-between gap-12 group hover:shadow-2xl transition-all duration-700">
+               <div className="space-y-6">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
+                     <h2 className={`text-4xl font-black leading-tight tracking-tight max-w-md ${isAr ? 'font-arabic' : ''}`}>
+                       {selectedTrack ? selectedTrack.name : t('roadmap.select_track')}
+                     </h2>
+                     <div className="relative" ref={dropdownRef}>
+                        <button 
+                           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                           className="bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 py-4 px-8 rounded-2xl flex items-center gap-4 text-xs font-black uppercase tracking-widest hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all"
+                        >
+                           {t('mavi.switch_track')}
+                           <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                        </button>
 
-              {tasks.length === 0 ? (
-                <div className="text-center py-20 bg-white/50 dark:bg-white/5 backdrop-blur-xl rounded-[2rem] border-2 border-dashed border-gray-300 dark:border-white/10 shadow-sm">
-                  <p className="text-gray-500 dark:text-gray-400 text-xl font-bold">{t('roadmap.no_tasks_desc')}</p>
-                </div>
-              ) : (
-                <div className="relative ps-6 sm:ps-12">
-                  {/* The Vertical Timeline Line */}
-                  <div className="absolute top-0 bottom-0 w-1 bg-gray-200 dark:bg-white/10 rounded-full start-[15px] sm:start-[31px]">
-                    {/* Animated Fill Line */}
-                    <div 
-                      className="absolute top-0 left-0 w-full bg-primary rounded-full transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(46,204,113,0.5)]"
-                      style={{ height: `${progress?.percentage || 0}%` }}
-                    />
+                        {isDropdownOpen && (
+                           <div className="absolute top-full inset-inline-end-0 mt-4 w-72 bg-white dark:bg-[#1a1a1a] border border-gray-100 dark:border-white/5 rounded-[2rem] shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-4 duration-300 p-2">
+                              {tracks.map(track => (
+                                 <button
+                                    key={track.id}
+                                    onClick={() => handleTrackChange(track)}
+                                    className={`w-full text-start px-6 py-4 rounded-xl transition-all flex items-center justify-between text-[10px] font-black uppercase tracking-widest ${selectedTrack?.id === track.id ? 'bg-[#10b981] text-white' : 'text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white'}`}
+                                 >
+                                    {track.name}
+                                    {selectedTrack?.id === track.id && <CheckCircle2 className="w-4 h-4" />}
+                                 </button>
+                              ))}
+                           </div>
+                        )}
+                     </div>
                   </div>
-
-                  <div className="space-y-10 relative">
-                    {tasks.map((task, idx) => {
-                      const isCompleted = task.is_completed;
-                      
-                      return (
-                        <div key={task.task_id} className="relative group">
-                          {/* Timeline Node Dot */}
-                          <div className="absolute top-1/2 -translate-y-1/2 w-8 h-8 rounded-full border-4 flex items-center justify-center transition-colors duration-500 z-10 -start-[35px] sm:-start-[51px]">
-                            {isCompleted && <CheckCircle2 className="w-4 h-4 text-white dark:text-dark" />}
-                          </div>
-
-                          {/* Task Card */}
-                          <div className={`relative overflow-hidden bg-white/80 dark:bg-[#111]/80 backdrop-blur-xl border ${isCompleted ? 'border-primary/30 shadow-[0_8px_30px_rgba(46,204,113,0.1)]' : 'border-gray-200 dark:border-white/10 shadow-sm'} rounded-[2rem] p-6 sm:p-8 flex items-center gap-6 transition-all duration-500 hover:-translate-y-1 hover:shadow-xl dark:hover:shadow-2xl text-start`}>
-                            
-                            {/* Success Glow */}
-                            <div className={`absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent transition-opacity duration-500 pointer-events-none ${isCompleted ? 'opacity-100' : 'opacity-0'}`}></div>
-
-                            {/* Custom Animated Checkbox */}
-                            <button
-                              onClick={() => toggleTask(task.task_id, isCompleted)}
-                              disabled={updating}
-                              className={`relative z-10 shrink-0 w-12 h-12 rounded-full flex items-center justify-center border-2 transition-all duration-300 hover:scale-105 active:scale-95 ${
-                                isCompleted 
-                                  ? 'bg-primary border-primary text-white shadow-[0_0_20px_rgba(46,204,113,0.4)]' 
-                                  : 'bg-transparent border-gray-300 dark:border-gray-600 text-transparent hover:border-primary/50'
-                              }`}
-                            >
-                              <CheckCircle2 className={`w-6 h-6 transition-all duration-300 ${isCompleted ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`} />
-                            </button>
-
-                            {/* Task Content */}
-                            <div className="flex-1 relative z-10 min-w-0">
-                              <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1 block">{t('roadmap.milestone')} {idx + 1}</span>
-                              <h4 className={`text-lg sm:text-xl font-black transition-colors duration-300 ${isCompleted ? 'text-gray-400 dark:text-gray-500 line-through decoration-primary/40' : 'text-gray-900 dark:text-white'}`}>
-                                {task.title}
-                              </h4>
-                              {task.description && (
-                                <p className={`text-sm mt-2 transition-colors duration-300 ${isCompleted ? 'text-gray-400/70 dark:text-gray-600' : 'text-gray-600 dark:text-gray-400'}`}>
-                                  {task.description}
-                                </p>
-                              )}
-                            </div>
-
-                            {/* Visual Trophy for completed tasks on Desktop */}
-                            <div className={`hidden sm:flex items-center justify-center w-12 h-12 rounded-full transition-all duration-500 absolute end-8 ${isCompleted ? 'bg-amber-500/10 text-amber-500 scale-100 opacity-100' : 'scale-50 opacity-0'}`}>
-                              <Trophy className="w-6 h-6" />
-                            </div>
-
-                          </div>
-                        </div>
-                      );
-                    })}
+               </div>
+               
+               <div className="grid grid-cols-2 md:grid-cols-4 gap-8 border-t border-black/5 dark:border-white/5 pt-10">
+                  <div className="space-y-1">
+                     <span className="text-3xl font-black text-[#10b981] dark:text-[#2cfc7d]">{progress?.completed_tasks || 0}</span>
+                     <p className="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 dark:text-white/30">{t('roadmap.done')}</p>
                   </div>
-                </div>
-              )}
+                  <div className="space-y-1">
+                     <span className="text-3xl font-black text-gray-900 dark:text-white">{progress?.total_tasks || 0}</span>
+                     <p className="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 dark:text-white/30">{t('roadmap.tasks')}</p>
+                  </div>
+                  <div className="space-y-1">
+                     <span className="text-3xl font-black text-[#8b5cf6]">{Math.max(0, (progress?.total_tasks || 0) - (progress?.completed_tasks || 0))}</span>
+                     <p className="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 dark:text-white/30">{t('mavi.remaining')}</p>
+                  </div>
+                  <div className="space-y-1">
+                     <span className="text-3xl font-black text-gray-900 dark:text-white">#{student?.level}</span>
+                     <p className="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 dark:text-white/30">{t('mavi.hierarchy')}</p>
+                  </div>
+               </div>
             </div>
-          )}
 
-        </div>
-      </div>
+            {/* Timeline Insight Card */}
+            <div className="lg:col-span-4 bg-[#8b5cf6] rounded-[3rem] p-12 text-white flex flex-col justify-between space-y-8 relative overflow-hidden group">
+               <div className="absolute top-[-10%] inset-inline-end-[-10%] w-40 h-40 bg-white/10 blur-[40px] rounded-full group-hover:scale-150 transition-transform duration-1000"></div>
+               <div className="space-y-4 relative z-10">
+                  <Map className="w-10 h-10 mb-4" />
+                  <h3 className="text-2xl font-black uppercase italic leading-none">{t('mavi.milestone_logic')}</h3>
+                  <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-60">{t('mavi.milestone_desc')}</p>
+               </div>
+               <div className="flex items-center justify-between relative z-10">
+                  <span className="text-[4rem] font-black tracking-tighter leading-none">{progress?.percentage}%</span>
+                  <button className="w-16 h-16 bg-white text-black rounded-full flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-2xl">
+                    <Rocket className={`w-6 h-6 ${isAr ? 'rotate-180' : ''}`} />
+                  </button>
+               </div>
+            </div>
+
+            {/* INTERACTIVE TIMELINE MATRIX */}
+            <div className="lg:col-span-12 space-y-12">
+               
+               <div className="flex items-center justify-between px-2">
+                  <div className="flex flex-col">
+                    <h2 className={`text-4xl font-black uppercase tracking-tight ${isAr ? 'font-arabic' : ''}`}>
+                      {isAr ? 'المهمات' : 'Tasks'}
+                    </h2>
+                  </div>
+                  <div className="bg-[#10b981]/10 dark:bg-[#2cfc7d]/10 px-6 py-2 rounded-2xl text-[#10b981] dark:text-[#2cfc7d] text-xs font-black uppercase tracking-widest">
+                     {tasks.length} {t('roadmap.tasks')}
+                  </div>
+               </div>
+
+               <div className="relative ps-10 md:ps-32">
+                  {/* The Vertical Core Line */}
+                  <div className="absolute top-0 bottom-0 start-4 md:start-12 w-[3px] bg-gray-100 dark:bg-white/5 rounded-full">
+                     <div 
+                        className="absolute top-0 start-0 w-full bg-[#10b981] dark:bg-[#2cfc7d] rounded-full transition-all duration-1000 shadow-[0_0_20px_rgba(46,204,113,0.5)]"
+                        style={{ height: `${progress?.percentage || 0}%` }}
+                     />
+                  </div>
+
+                  <div className="space-y-12 relative">
+                     {tasks.length === 0 ? (
+                       <div className="py-32 bg-white dark:bg-[#151520] border border-dashed border-gray-100 dark:border-white/10 rounded-[3rem] text-center opacity-40">
+                          <ClipboardList className="w-16 h-16 mx-auto mb-6 opacity-20" />
+                          <h3 className="text-xl font-black uppercase tracking-[0.4em]">{t('common.no_data')}</h3>
+                       </div>
+                     ) : (
+                       tasks.map((task, idx) => {
+                         const isCompleted = task.is_completed;
+                         
+                         return (
+                           <div key={task.task_id} className="relative group">
+                             {/* Node Indicator */}
+                             <div 
+                                className={`absolute top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 rounded-full border-4 flex items-center justify-center transition-all duration-500 z-10 start-[-25px] md:start-[-50px] ${isCompleted ? 'bg-[#10b981] border-[#10b981] text-white shadow-[0_0_30px_rgba(46,204,113,0.5)] scale-110 md:scale-125' : 'bg-white dark:bg-[#0c0c14] border-gray-100 dark:border-white/10 text-gray-200 dark:text-white/5'}`}
+                             >
+                                {isCompleted ? <CheckCircle2 className="w-5 h-5 md:w-6 md:h-6" /> : <div className="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-current" />}
+                             </div>
+
+                             <div 
+                               onClick={() => !updating && toggleTask(task.task_id, isCompleted)}
+                               className={`bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 rounded-[3rem] p-8 md:p-12 flex flex-col md:flex-row items-start md:items-center gap-10 hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all duration-700 hover:-translate-y-2 hover:shadow-2xl shadow-sm relative cursor-pointer group/card ${isCompleted ? 'opacity-60 grayscale-[0.5]' : ''}`}
+                             >
+                                <div className="flex-1 space-y-4">
+                                   <div className="flex items-center gap-3">
+                                      <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 dark:text-white/30 group-hover:text-white/50 dark:group-hover:text-black/30 transition-colors">{isAr ? 'مهمة' : 'Task'} {idx + 1}</span>
+                                      {isCompleted && (
+                                         <div className="bg-[#10b981]/10 px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest text-[#10b981]">{t('quizzes.completed')}</div>
+                                      )}
+                                   </div>
+                                    <h4 className={`text-2xl md:text-3xl font-black uppercase tracking-tight ${isAr ? 'font-arabic' : ''}`}>
+                                       {task.title}
+                                    </h4>
+                                    {task.description && (
+                                       <p className="text-gray-500 dark:text-white/60 group-hover:text-white/80 dark:group-hover:text-black/70 text-lg font-bold leading-relaxed max-w-2xl mt-4">
+                                          {task.description}
+                                       </p>
+                                    )}
+                                 </div>
+                                 {updating && (
+                                    <div className="absolute inset-0 bg-white/20 dark:bg-black/20 backdrop-blur-[2px] flex items-center justify-center rounded-[3rem] z-30">
+                                       <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                                    </div>
+                                 )}
+                              </div>
+                           </div>
+                         );
+                       })
+                     )}
+                  </div>
+               </div>
+            </div>
+
+          </div>
+        </section>
+      </main>
+
       <style>{`
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.3); border-radius: 4px; }
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
+        .font-arabic { font-family: 'Cairo', sans-serif !important; }
       `}</style>
     </div>
   );

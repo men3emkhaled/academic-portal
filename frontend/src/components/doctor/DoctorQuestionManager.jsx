@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useDoctorAuth } from '../../context/DoctorAuthContext';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../../services/supabase';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -10,6 +11,7 @@ import {
 } from 'lucide-react';
 
 const DoctorQuestionManager = ({ quiz, onBack }) => {
+    const { t } = useTranslation();
     const { doctorApi } = useDoctorAuth();
     const [questions, setQuestions] = useState([]);
     const [editingQuestion, setEditingQuestion] = useState(null);
@@ -34,13 +36,13 @@ const DoctorQuestionManager = ({ quiz, onBack }) => {
             const res = await doctorApi('get', `/doctor/quizzes/${quiz.id}/questions`);
             setQuestions(res.data);
         } catch (err) {
-            toast.error('Failed to load questions');
+            toast.error(t('doctor.questions.load_failed'));
         }
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!formData.question_text.trim()) return toast.error('Question text is required');
+        if (!formData.question_text.trim()) return toast.error(t('doctor.questions.text_required'));
 
         setLoading(true);
         try {
@@ -71,29 +73,29 @@ const DoctorQuestionManager = ({ quiz, onBack }) => {
             if (editingQuestion) {
                 if (!imageUrl) payload.image_url = editingQuestion.image_url;
                 await doctorApi('put', `/doctor/quizzes/${quiz.id}/questions/${editingQuestion.id}`, payload);
-                toast.success('Question updated');
+                toast.success(t('doctor.questions.update_success'));
             } else {
                 await doctorApi('post', `/doctor/quizzes/${quiz.id}/questions`, payload);
-                toast.success('Question added');
+                toast.success(t('doctor.questions.add_success'));
             }
 
             resetForm();
             fetchQuestions();
         } catch (err) {
-            toast.error(err.response?.data?.message || 'Failed to save question');
+            toast.error(err.response?.data?.message || t('doctor.questions.save_failed'));
         } finally {
             setLoading(false);
         }
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm('Delete this question?')) return;
+        if (!window.confirm(t('doctor.questions.delete_confirm'))) return;
         try {
             await doctorApi('delete', `/doctor/quizzes/${quiz.id}/questions/${id}`);
-            toast.success('Question deleted');
+            toast.success(t('doctor.questions.delete_success'));
             fetchQuestions();
         } catch (err) {
-            toast.error('Failed to delete question');
+            toast.error(t('doctor.questions.delete_failed'));
         }
     };
 
@@ -156,10 +158,10 @@ const DoctorQuestionManager = ({ quiz, onBack }) => {
                     <div>
                         <div className="flex items-center gap-3 mb-1">
                             <h2 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">{quiz.title}</h2>
-                            <span className="px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-[9px] font-black text-violet-500 uppercase tracking-widest">Questions</span>
+                            <span className="px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-[9px] font-black text-violet-500 uppercase tracking-widest">{t('doctor.questions.title_suffix')}</span>
                         </div>
                         <p className="text-sm text-gray-400 font-bold uppercase tracking-widest flex items-center gap-2">
-                            <Layout className="w-4 h-4" /> Edit Mode
+                            <Layout className="w-4 h-4" /> {t('doctor.questions.edit_mode')}
                         </p>
                     </div>
                 </div>
@@ -182,13 +184,13 @@ const DoctorQuestionManager = ({ quiz, onBack }) => {
                                 <div className="w-10 h-10 rounded-xl bg-violet-600 flex items-center justify-center shadow-lg shadow-violet-600/20">
                                     {editingQuestion ? <Edit3 className="w-5 h-5 text-white" /> : <Plus className="w-5 h-5 text-white" />}
                                 </div>
-                                {editingQuestion ? 'Edit Question' : 'Add Question'}
+                                {editingQuestion ? t('doctor.questions.edit_question') : t('doctor.questions.add_question')}
                             </h3>
 
                             <form onSubmit={handleSubmit} className="space-y-8">
                                 <div className="grid grid-cols-2 gap-6">
                                     <div className="space-y-3">
-                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Question Type</label>
+                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('doctor.questions.type_label')}</label>
                                         <select
                                             value={formData.question_type}
                                             onChange={(e) => setFormData({ ...formData, question_type: e.target.value })}
@@ -201,7 +203,7 @@ const DoctorQuestionManager = ({ quiz, onBack }) => {
                                     </div>
 
                                     <div className="space-y-3">
-                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Points</label>
+                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('doctor.questions.points_label')}</label>
                                         <div className="relative">
                                             <Target className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500" />
                                             <input
@@ -217,18 +219,18 @@ const DoctorQuestionManager = ({ quiz, onBack }) => {
                                 </div>
 
                                 <div className="space-y-3">
-                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Question Text</label>
+                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('doctor.questions.text_label')}</label>
                                     <textarea
                                         value={formData.question_text}
                                         onChange={(e) => setFormData({ ...formData, question_text: e.target.value })}
                                         className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/10 rounded-3xl py-5 px-6 text-sm font-semibold min-h-[120px] resize-none outline-none focus:ring-4 focus:ring-violet-500/10 dark:text-white"
-                                        placeholder="Enter your question here..."
+                                        placeholder={t('doctor.questions.text_placeholder')}
                                         required
                                     />
                                 </div>
 
                                 <div className="space-y-3">
-                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Image (Optional)</label>
+                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('doctor.questions.image_label')}</label>
                                     <div className="relative group">
                                         <div className={`flex flex-col items-center justify-center w-full min-h-[100px] border-2 border-dashed rounded-[2rem] transition-all cursor-pointer ${imageFile ? 'bg-emerald-500/5 border-emerald-500/30' : 'bg-gray-50 dark:bg-white/[0.02] border-gray-200 dark:border-white/10 hover:border-violet-500/30'}`}>
                                             <input
@@ -245,7 +247,7 @@ const DoctorQuestionManager = ({ quiz, onBack }) => {
                                             ) : (
                                                 <div className="flex flex-col items-center gap-2 text-gray-400">
                                                     <UploadCloud className="w-6 h-6 group-hover:text-violet-500 transition-colors" />
-                                                    <span className="text-[9px] font-black uppercase tracking-[0.2em]">Upload Image</span>
+                                                    <span className="text-[9px] font-black uppercase tracking-[0.2em]">{t('doctor.questions.upload_hint')}</span>
                                                 </div>
                                             )}
                                         </div>
@@ -254,7 +256,7 @@ const DoctorQuestionManager = ({ quiz, onBack }) => {
 
                                 {formData.question_type === 'multiple_choice' && (
                                     <div className="space-y-4 pt-4">
-                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Options</label>
+                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('doctor.questions.options_label')}</label>
                                         <div className="space-y-3">
                                             {formData.options.map((opt, i) => (
                                                 <div key={i} className={`flex items-center gap-4 p-3 rounded-2xl border transition-all ${formData.correct_answer === String(i) ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-white dark:bg-white/5 border-gray-100 dark:border-white/5'}`}>
@@ -269,7 +271,7 @@ const DoctorQuestionManager = ({ quiz, onBack }) => {
                                                         type="text"
                                                         value={opt}
                                                         onChange={(e) => handleOptionChange(i, e.target.value)}
-                                                        placeholder={`Option ${i + 1}`}
+                                                        placeholder={`${t('doctor.questions.option_placeholder')} ${i + 1}`}
                                                         className="flex-1 bg-transparent border-none outline-none text-sm font-bold placeholder-gray-300 dark:text-white"
                                                         required
                                                     />
@@ -302,7 +304,7 @@ const DoctorQuestionManager = ({ quiz, onBack }) => {
                                         disabled={loading}
                                         className="flex-1 bg-violet-600 hover:bg-violet-700 text-white font-black py-5 rounded-[1.5rem] shadow-xl shadow-violet-600/20 disabled:opacity-50 flex items-center justify-center gap-3 text-xs uppercase tracking-widest"
                                     >
-                                        {loading ? <div className="w-5 h-5 border-4 border-white/20 border-t-white rounded-full animate-spin"></div> : <><Save className="w-4 h-4" /> Save Question</>}
+                                        {loading ? <div className="w-5 h-5 border-4 border-white/20 border-t-white rounded-full animate-spin"></div> : <><Save className="w-4 h-4" /> {t('doctor.questions.save_btn')}</>}
                                     </motion.button>
                                     {editingQuestion && (
                                         <button
@@ -310,7 +312,7 @@ const DoctorQuestionManager = ({ quiz, onBack }) => {
                                             onClick={resetForm}
                                             className="px-8 bg-gray-100 dark:bg-white/5 hover:bg-rose-500/10 hover:text-rose-500 text-gray-400 font-black py-5 rounded-[1.5rem] transition-all text-xs uppercase tracking-widest"
                                         >
-                                            Cancel
+                                            {t('common.cancel')}
                                         </button>
                                     )}
                                 </div>
@@ -327,11 +329,11 @@ const DoctorQuestionManager = ({ quiz, onBack }) => {
                                 <div className="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/20">
                                     <ListChecks className="w-5 h-5 text-white" />
                                 </div>
-                                Questions List <span className="text-gray-300 font-bold">/ {questions.length} Items</span>
+                                {t('doctor.questions.list_title')} <span className="text-gray-300 font-bold">/ {questions.length} {t('doctor.questions.items_suffix')}</span>
                             </h3>
                             <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5">
                                 <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Auto-save active</span>
+                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{t('doctor.questions.auto_save')}</span>
                             </div>
                         </div>
 
@@ -344,7 +346,7 @@ const DoctorQuestionManager = ({ quiz, onBack }) => {
                             {questions.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center h-full opacity-30 py-32">
                                     <Microscope className="w-24 h-24 mb-6 text-gray-400" />
-                                    <p className="text-xl font-black uppercase tracking-widest">No Questions Found</p>
+                                    <p className="text-xl font-black uppercase tracking-widest">{t('doctor.questions.no_found')}</p>
                                 </div>
                             ) : (
                                 questions.map((q, idx) => (
@@ -364,7 +366,7 @@ const DoctorQuestionManager = ({ quiz, onBack }) => {
                                                             {q.question_type.replace('_', ' ')}
                                                         </span>
                                                         <span className="text-[9px] font-black uppercase tracking-[0.2em] text-emerald-500 bg-emerald-500/5 px-3 py-1.5 rounded-xl border border-emerald-500/10">
-                                                            {q.points} Points
+                                                            {q.points} {t('doctor.questions.points_suffix')}
                                                         </span>
                                                     </div>
                                                     <h4 className="text-xl font-bold text-gray-900 dark:text-white leading-relaxed mb-6">
@@ -393,7 +395,7 @@ const DoctorQuestionManager = ({ quiz, onBack }) => {
                                                     {q.question_type === 'true_false' && (
                                                         <div className="mt-4">
                                                             <span className="inline-flex items-center gap-3 bg-emerald-500 text-white font-black text-[10px] px-5 py-2.5 rounded-2xl shadow-lg shadow-emerald-500/20 uppercase tracking-widest">
-                                                                <CheckCircle2 className="w-4 h-4" /> Correct Answer: {q.correct_answer}
+                                                                <CheckCircle2 className="w-4 h-4" /> {t('doctor.questions.correct_answer')}: {q.correct_answer}
                                                             </span>
                                                         </div>
                                                     )}

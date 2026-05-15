@@ -1,12 +1,7 @@
 node_modules
-npm-debug.log*
+npm-debug.log
 .env
-.env.*
-uploads/*
-!uploads/.gitkeep
-scratch/
-test_*.js
-*.sql
 .git
 .gitignore
-README.md
+*.md
+

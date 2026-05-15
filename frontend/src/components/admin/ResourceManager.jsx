@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../services/api';
 import { supabase } from '../../services/supabase'; 
 import toast from 'react-hot-toast';
@@ -9,7 +8,7 @@ import {
   FileText, Mic, Link as LinkIcon, PlayCircle, 
   Layers, Download, ExternalLink, Activity,
   ChevronRight, BookOpen, Clock, FileType, 
-  ShieldCheck, ArrowRight, Zap, Sparkles, Box, Search, X, CheckCircle2
+  ShieldCheck, ArrowRight, Zap, Sparkles, Box, Search, X, CheckCircle2, Database
 } from 'lucide-react';
 
 const convertToEmbedUrl = (url) => {
@@ -179,7 +178,7 @@ const ResourceManager = () => {
     <div className="space-y-8 lg:space-y-10 animate-in fade-in duration-700 pb-10">
       {/* Header Bento Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 flex items-center gap-6 bg-white/50 dark:bg-white/[0.02] backdrop-blur-md border border-gray-100 dark:border-white/5 p-8 rounded-[2.5rem] shadow-sm">
+        <div className="lg:col-span-2 flex items-center gap-6 bg-white/50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 p-8 rounded-[2.5rem] shadow-sm">
           <div className="w-16 h-16 bg-sky-500/10 dark:bg-sky-500/20 rounded-2xl flex items-center justify-center border border-sky-500/20 shadow-inner group transition-transform duration-500 hover:scale-110">
             <FolderOpen className="w-8 h-8 text-sky-600 dark:text-sky-400" />
           </div>
@@ -192,9 +191,9 @@ const ResourceManager = () => {
         </div>
         
         <div className="bg-sky-600 text-white p-8 rounded-[2.5rem] shadow-lg shadow-sky-600/20 flex flex-col justify-between relative overflow-hidden group">
-          <div className="absolute inset-inline-end-0 top-0 w-32 h-32 bg-white/10 blur-[40px] rounded-full translate-x-1/2 -translate-y-1/2 group-hover:scale-150 transition-transform duration-700"></div>
+          <div className="absolute inset-inline-end-0 top-0 w-32 h-32 bg-white/10 hidden rounded-full translate-x-1/2 -translate-y-1/2 group-hover:scale-150 transition-transform duration-700"></div>
           <div className="flex justify-between items-start relative z-10">
-            <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
               <Database className="w-5 h-5" />
             </div>
             <span className="text-[10px] font-black uppercase tracking-widest bg-black/10 px-3 py-1 rounded-full">{t('admin.resources.archive_active')}</span>
@@ -210,8 +209,8 @@ const ResourceManager = () => {
         {/* Left Column: Management & Selection */}
         <div className="xl:col-span-5 space-y-8">
             {/* Course Selector */}
-            <div className="bg-white/50 dark:bg-white/[0.01] backdrop-blur-xl border border-gray-100 dark:border-white/5 rounded-[3rem] p-8 lg:p-10 shadow-sm relative overflow-hidden group">
-                <div className="absolute -inset-inline-end-20 -top-20 w-64 h-64 bg-sky-500/5 blur-[80px] rounded-full pointer-events-none group-hover:scale-110 transition-transform duration-1000"></div>
+            <div className="bg-white/50 dark:bg-white/[0.01] border border-gray-100 dark:border-white/5 rounded-[3rem] p-8 lg:p-10 shadow-sm relative overflow-hidden group">
+                <div className="absolute -inset-inline-end-20 -top-20 w-64 h-64 bg-sky-500/5 hidden rounded-full pointer-events-none group-hover:scale-110 transition-transform duration-1000"></div>
 
                 <div className="relative z-10">
                     <div className="flex items-center gap-4 mb-8">
@@ -230,7 +229,7 @@ const ResourceManager = () => {
                             <select
                                 value={selectedCourseName}
                                 onChange={(e) => setSelectedCourseName(e.target.value)}
-                                className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-[1.5rem] ps-14 pe-8 py-5 font-black focus:ring-4 focus:ring-sky-500/10 outline-none transition-all shadow-inner appearance-none uppercase tracking-widest text-xs"
+                                className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-[1.5rem] ps-14 pe-8 py-5 font-black focus:ring-4 focus:ring-sky-500/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner appearance-none uppercase tracking-widest text-xs"
                             >
                                 <option value="">-- {t('admin.resources.select_course')} --</option>
                                 {uniqueCourses.map(c => (
@@ -240,7 +239,7 @@ const ResourceManager = () => {
                             <ChevronRight className="absolute inset-inline-end-6 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 rotate-90 pointer-events-none" />
                         </div>
                         
-                        <div className="flex items-start gap-4 bg-sky-500/5 dark:bg-sky-500/[0.02] p-6 rounded-[2rem] border border-sky-500/10 dark:border-white/5 group/info transition-all duration-500">
+                        <div className="flex items-start gap-4 bg-sky-500/5 dark:bg-sky-500/[0.02] p-6 rounded-[2rem] border border-sky-500/10 dark:border-white/5 group/info transition-[color,background-color,border-color,transform,opacity] duration-500">
                             <ShieldCheck className="w-6 h-6 text-sky-500 shrink-0 mt-0.5 group-hover:scale-110 transition-transform" />
                             <p className="text-[11px] text-sky-800 dark:text-sky-400/80 font-bold leading-relaxed uppercase tracking-widest italic">
                                 {t('admin.resources.global_propagation')}
@@ -251,15 +250,9 @@ const ResourceManager = () => {
             </div>
 
             {/* Add/Edit Form */}
-            <AnimatePresence mode="wait">
             {selectedCourseName && (
-                <motion.div 
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 20 }}
-                    className="bg-white/50 dark:bg-white/[0.01] backdrop-blur-xl border border-gray-100 dark:border-white/5 rounded-[3rem] p-8 lg:p-10 shadow-sm relative overflow-hidden group"
-                >
-                    <div className="absolute -inset-inline-start-20 -bottom-20 w-64 h-64 bg-emerald-500/5 blur-[80px] rounded-full pointer-events-none group-hover:scale-110 transition-transform duration-1000"></div>
+                <div className="bg-white/50 dark:bg-white/[0.01] border border-gray-100 dark:border-white/5 rounded-[3rem] p-8 lg:p-10 shadow-sm relative overflow-hidden group">
+                    <div className="absolute -inset-inline-start-20 -bottom-20 w-64 h-64 bg-emerald-500/5 hidden rounded-full pointer-events-none group-hover:scale-110 transition-transform duration-1000"></div>
 
                     <div className="relative z-10">
                         <div className="flex items-center gap-4 mb-10 pb-6 border-b border-gray-100 dark:border-white/5">
@@ -286,7 +279,7 @@ const ResourceManager = () => {
                                                 setFormData({ ...formData, type: e.target.value });
                                                 setRecordingFile(null);
                                             }}
-                                            className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl ps-14 pe-8 py-5 font-black focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all shadow-inner appearance-none uppercase tracking-widest text-xs"
+                                            className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl ps-14 pe-8 py-5 font-black focus:ring-4 focus:ring-emerald-500/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner appearance-none uppercase tracking-widest text-xs"
                                         >
                                             <option value="video">{t('admin.resources.types.video')}</option>
                                             <option value="pdf">{t('admin.resources.types.pdf')}</option>
@@ -306,7 +299,7 @@ const ResourceManager = () => {
                                             placeholder={t('admin.resources.placeholder_title')}
                                             value={formData.title}
                                             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                            className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl ps-14 pe-6 py-5 font-black focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all shadow-inner uppercase tracking-widest text-xs"
+                                            className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl ps-14 pe-6 py-5 font-black focus:ring-4 focus:ring-emerald-500/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner uppercase tracking-widest text-xs"
                                             required
                                         />
                                     </div>
@@ -316,8 +309,8 @@ const ResourceManager = () => {
                             {formData.type === 'recording' ? (
                                 <div className="space-y-3">
                                     <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('admin.resources.modals.upload_file')}</label>
-                                    <label className={`relative flex flex-col items-center justify-center gap-6 cursor-pointer bg-gray-50 dark:bg-white/[0.01] border-2 border-gray-100 dark:border-white/5 border-dashed rounded-[2.5rem] p-10 hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-all group/upload ${loading ? 'opacity-50 pointer-events-none' : ''} shadow-inner`}>
-                                        <div className="w-16 h-16 bg-white dark:bg-white/5 rounded-[1.5rem] flex items-center justify-center shadow-sm group-hover/upload:scale-110 group-hover/upload:bg-emerald-500/10 transition-all border border-gray-100 dark:border-white/5">
+                                    <label className={`relative flex flex-col items-center justify-center gap-6 cursor-pointer bg-gray-50 dark:bg-white/[0.01] border-2 border-gray-100 dark:border-white/5 border-dashed rounded-[2.5rem] p-10 hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-[color,background-color,border-color,transform,opacity] group/upload ${loading ? 'opacity-50 pointer-events-none' : ''} shadow-inner`}>
+                                        <div className="w-16 h-16 bg-white dark:bg-white/5 rounded-[1.5rem] flex items-center justify-center shadow-sm group-hover/upload:scale-110 group-hover/upload:bg-emerald-500/10 transition-[color,background-color,border-color,transform,opacity] border border-gray-100 dark:border-white/5">
                                             <Mic className="w-8 h-8 text-gray-400 group-hover/upload:text-emerald-500 transition-colors" />
                                         </div>
                                         <div className="text-center">
@@ -339,7 +332,7 @@ const ResourceManager = () => {
                                             placeholder={formData.type === 'video' ? 'https://youtube.com/...' : 'https://example.com/file.pdf'}
                                             value={formData.url}
                                             onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-                                            className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl ps-14 pe-6 py-5 font-black focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all shadow-inner text-xs font-mono tracking-wider"
+                                            className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl ps-14 pe-6 py-5 font-black focus:ring-4 focus:ring-emerald-500/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner text-xs font-mono tracking-wider"
                                             required
                                         />
                                     </div>
@@ -347,24 +340,23 @@ const ResourceManager = () => {
                             )}
 
                             <div className="flex gap-6 pt-10 border-t border-gray-100 dark:border-white/5">
-                                <button type="submit" disabled={loading} className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-black py-5 rounded-[2.5rem] shadow-xl shadow-emerald-500/20 transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3">
+                                <button type="submit" disabled={loading} className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-black py-5 rounded-[2.5rem] shadow-xl shadow-emerald-500/20 transition-[color,background-color,border-color,transform,opacity] hover:scale-[1.02] active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3">
                                     {loading ? <Activity className="w-6 h-6 animate-spin" /> : <><CheckCircle2 className="w-6 h-6" /> <span className="uppercase tracking-widest text-xs">{editingResource ? t('common.save') : t('common.save')}</span></>}
                                 </button>
                                 {editingResource && (
-                                    <button type="button" onClick={resetForm} className="px-14 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 font-black py-5 rounded-[2.5rem] transition-all uppercase tracking-widest text-xs">{t('common.cancel')}</button>
+                                    <button type="button" onClick={resetForm} className="px-14 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 font-black py-5 rounded-[2.5rem] transition-[color,background-color,border-color,transform,opacity] uppercase tracking-widest text-xs">{t('common.cancel')}</button>
                                 )}
                             </div>
                         </form>
                     </div>
-                </motion.div>
+                </div>
             )}
-            </AnimatePresence>
         </div>
 
         {/* Right Column: Resource Listing */}
         <div className="xl:col-span-7">
-            <div className="bg-white/50 dark:bg-white/[0.01] backdrop-blur-xl border border-gray-100 dark:border-white/5 rounded-[3rem] flex flex-col h-full shadow-sm relative overflow-hidden group">
-                <div className="absolute -inset-inline-start-20 -bottom-20 w-96 h-96 bg-sky-500/5 rounded-full blur-[100px] pointer-events-none group-hover:scale-110 transition-transform duration-1000"></div>
+            <div className="bg-white/50 dark:bg-white/[0.01] border border-gray-100 dark:border-white/5 rounded-[3rem] flex flex-col h-full shadow-sm relative overflow-hidden group">
+                <div className="absolute -inset-inline-start-20 -bottom-20 w-96 h-96 bg-sky-500/5 rounded-full hidden pointer-events-none group-hover:scale-110 transition-transform duration-1000"></div>
 
                 <div className="p-8 lg:p-10 border-b border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.01] flex flex-wrap justify-between items-center gap-6 relative z-10">
                     <div className="flex items-center gap-5">
@@ -380,41 +372,28 @@ const ResourceManager = () => {
                 </div>
 
                 <div className="p-8 lg:p-10 space-y-6 flex-1 overflow-y-auto no-scrollbar relative z-10">
-                    <AnimatePresence mode="popLayout">
                     {!selectedCourseName ? (
-                        <motion.div 
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            className="flex flex-col items-center justify-center h-full py-48 text-center"
-                        >
+                        <div className="flex flex-col items-center justify-center h-full py-48 text-center">
                             <BookOpen className="w-20 h-20 text-gray-200 dark:text-gray-800 mb-8 animate-pulse" />
                             <h4 className="text-xl font-black uppercase tracking-[0.3em] text-gray-400 dark:text-slate-600">{t('admin.resources.course_hint')}</h4>
                             <p className="text-[10px] font-black uppercase tracking-widest text-gray-300 dark:text-slate-700 mt-4">{t('admin.resources.awaiting_auth')}</p>
-                        </motion.div>
+                        </div>
                     ) : resources.length === 0 ? (
-                        <motion.div 
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            className="flex flex-col items-center justify-center h-full py-48 text-center bg-white/30 dark:bg-white/[0.01] border-2 border-dashed border-gray-100 dark:border-white/5 rounded-[3rem]"
-                        >
+                        <div className="flex flex-col items-center justify-center h-full py-48 text-center bg-white/30 dark:bg-white/[0.01] border-2 border-dashed border-gray-100 dark:border-white/5 rounded-[3rem]">
                             <Sparkles className="w-16 h-16 text-gray-200 dark:text-gray-800 mb-8" />
                             <h4 className="text-xl font-black uppercase tracking-[0.3em] text-gray-400 dark:text-slate-600">{t('admin.resources.no_resources')}</h4>
                             <p className="text-[10px] font-black uppercase tracking-widest text-gray-300 dark:text-slate-700 mt-4">{t('admin.resources.registry_void')}</p>
-                        </motion.div>
+                        </div>
                     ) : (
                         <div className="grid grid-cols-1 gap-6">
-                            {resources.map((r, idx) => (
-                                <motion.div 
+                            {resources.map((r) => (
+                                <div 
                                     key={r.id} 
-                                    layout
-                                    initial={{ opacity: 0, x: 20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: idx * 0.05 }}
-                                    className="group/item relative bg-white dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-8 hover:border-sky-500/30 hover:shadow-2xl hover:shadow-sky-500/10 transition-all duration-500"
+                                    className="group/item relative bg-white dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-8 hover:border-sky-500/30 hover:shadow-2xl hover:shadow-sky-500/10 transition-[color,background-color,border-color,transform,opacity] duration-500"
                                 >
                                      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 relative z-10">
                                         <div className="flex items-center gap-6 min-w-0">
-                                            <div className="w-16 h-16 rounded-[1.5rem] bg-gray-50 dark:bg-black/40 border border-gray-100 dark:border-white/5 flex items-center justify-center shadow-inner group-hover/item:scale-110 group-hover/item:border-sky-500/30 transition-all duration-700 shrink-0">
+                                            <div className="w-16 h-16 rounded-[1.5rem] bg-gray-50 dark:bg-black/40 border border-gray-100 dark:border-white/5 flex items-center justify-center shadow-inner group-hover/item:scale-110 group-hover/item:border-sky-500/30 transition-[color,background-color,border-color,transform,opacity] duration-700 shrink-0">
                                                 {getTypeIcon(r.type)}
                                             </div>
                                             <div className="min-w-0">
@@ -436,10 +415,10 @@ const ResourceManager = () => {
                                         </div>
 
                                         <div className="flex gap-3 shrink-0 self-end md:self-auto">
-                                            <button onClick={() => startEdit(r)} className="w-11 h-11 flex items-center justify-center rounded-xl bg-blue-500/5 text-blue-500 border border-blue-500/10 hover:bg-blue-500 hover:text-white transition-all shadow-sm">
+                                            <button onClick={() => startEdit(r)} className="w-11 h-11 flex items-center justify-center rounded-xl bg-blue-500/5 text-blue-500 border border-blue-500/10 hover:bg-blue-500 hover:text-white transition-[color,background-color,border-color,transform,opacity] shadow-sm">
                                                 <Edit3 className="w-4.5 h-4.5" />
                                             </button>
-                                            <button onClick={() => handleDelete(r.id)} className="w-11 h-11 flex items-center justify-center rounded-xl bg-rose-500/5 text-rose-500 border border-rose-500/10 hover:bg-rose-500 hover:text-white transition-all shadow-sm">
+                                            <button onClick={() => handleDelete(r.id)} className="w-11 h-11 flex items-center justify-center rounded-xl bg-rose-500/5 text-rose-500 border border-rose-500/10 hover:bg-rose-500 hover:text-white transition-[color,background-color,border-color,transform,opacity] shadow-sm">
                                                 <Trash2 className="w-4.5 h-4.5" />
                                             </button>
                                         </div>
@@ -448,11 +427,10 @@ const ResourceManager = () => {
                                      <div className="absolute inset-inline-end-10 bottom-8 opacity-0 group-hover/item:opacity-5 transition-opacity duration-1000 pointer-events-none">
                                         <FileType className="w-24 h-24 text-sky-500" />
                                      </div>
-                                </motion.div>
+                                </div>
                             ))}
                         </div>
                     )}
-                    </AnimatePresence>
                 </div>
             </div>
         </div>

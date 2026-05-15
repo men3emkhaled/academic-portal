@@ -1,5 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { UserCheck, MapPin, ClipboardList, Coffee, CheckCircle2, Calendar } from 'lucide-react';
+import { 
+  UserCheck, MapPin, ClipboardList, Coffee, 
+  CheckCircle2, Calendar, Clock, Layout, 
+  ChevronRight, ArrowRight, Zap, Info, 
+  AlertCircle, LayoutDashboard, CalendarDays
+} from 'lucide-react';
 import { useStudentAuth } from '../context/StudentAuthContext';
 import { useStudentData } from '../context/StudentDataContext';
 import { useNavigate } from 'react-router-dom';
@@ -26,6 +31,8 @@ const StudentTimetable = () => {
     { id: 'Friday', name: t('days.friday'), short: t('days.fri'), arabic: 'الجمعة' },
     { id: 'Saturday', name: t('days.saturday'), short: t('days.sat'), arabic: 'السبت' },
   ];
+
+  const isAr = i18n.language === 'ar';
 
   const getStartOfWeek = (date) => {
     const d = new Date(date);
@@ -69,9 +76,7 @@ const StudentTimetable = () => {
     if (viewMode === 'my-section') {
       return myTimetable || [];
     } else {
-      if (!student?.department_id) {
-        return [];
-      }
+      if (!student?.department_id) return [];
       const data = departmentTimetable || [];
       const uniqueMap = new Map();
       for (const entry of data) {
@@ -93,15 +98,13 @@ const StudentTimetable = () => {
   }, [myTimetable, departmentTimetable, viewMode, student]);
 
   useEffect(() => {
-    if (!student) {
-      navigate('/student/login');
-    }
+    if (!student) navigate('/student/login');
   }, [student, navigate]);
 
   const handleLogout = () => {
     logout();
     navigate('/student/login');
-    toast.success(t('sidebar.logout') + ' ' + t('auth.success'));
+    toast.success(`${t('sidebar.logout')} ${t('auth.success')}`);
   };
 
   const formatTime = (time) => {
@@ -113,289 +116,272 @@ const StudentTimetable = () => {
     return `${hour12}:${minutes} ${ampm}`;
   };
 
-  const getTimetableForDay = (day) => {
-    return timetable.filter(item => item.day_of_week === day);
+  const getTimetableForDay = (dayId) => {
+    if (scheduleType === 'lectures') {
+      return timetable.filter(item => item.day_of_week === dayId);
+    } else {
+      return (exams || []).sort((a, b) => new Date(a.exam_date) - new Date(b.exam_date)).map(exam => ({
+        ...exam,
+        type: exam.exam_type || 'Exam',
+        instructor: exam.instructor || 'Department',
+        location: exam.location || t('mavi.matrix_node')
+      }));
+    }
   };
-
-  if (loading) {
-    return (
-      <div className="flex flex-col justify-center items-center h-screen bg-gray-50 dark:bg-[#050505] transition-colors duration-500 overflow-hidden relative">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-emerald-500/5 dark:bg-emerald-500/10 blur-[120px] rounded-full animate-pulse-slow"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/5 dark:bg-blue-500/10 blur-[120px] rounded-full animate-pulse-slow"></div>
-
-        <div className="relative z-10 flex flex-col items-center">
-          <div className="relative flex items-center justify-center w-20 h-20 mb-6">
-            <div className="absolute inset-0 border-4 border-emerald-500/20 dark:border-emerald-500/10 rounded-full"></div>
-            <div className="absolute inset-0 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-            <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center animate-pulse">
-              <span className="text-xl font-black text-emerald-500">Z</span>
-            </div>
-          </div>
-          <p className="text-gray-900 dark:text-white font-black text-[10px] uppercase tracking-[0.4em] mb-1 animate-pulse">ZNU PORTAL</p>
-          <p className="text-gray-500 dark:text-gray-400 font-bold text-xs tracking-wide">{t('common.loading')}</p>
-        </div>
-      </div>
-    );
-  }
 
   const currentDayEntries = getTimetableForDay(selectedDay);
   const hasEntries = currentDayEntries.length > 0;
   const currentDayObj = days.find(d => d.id === selectedDay);
-  const currentDayName = currentDayObj?.name || selectedDay;
+  const currentDayName = scheduleType === 'lectures' 
+    ? (isAr ? currentDayObj?.arabic : currentDayObj?.name)
+    : t('timetable.exams');
 
-  const weekNumber = currentWeekStart
-    ? Math.ceil(
-      (new Date(currentWeekStart) - new Date(new Date().getFullYear(), 0, 1)) /
-      (7 * 24 * 60 * 60 * 1000)
-    )
-    : 0;
+  if (loading) {
+    return (
+      <div className="flex flex-col justify-center items-center h-screen bg-white dark:bg-[#0c0c14]">
+        <div className="w-12 h-12 border-2 border-gray-200 dark:border-white/10 border-t-[#2cfc7d] rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-dark text-gray-900 dark:text-white font-body transition-colors duration-300">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0c0c14] text-gray-900 dark:text-white font-sans transition-colors duration-500 overflow-x-hidden relative" dir={isAr ? 'rtl' : 'ltr'}>
+      
+      {/* Background Decor */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute top-[-10%] inset-inline-end-[-5%] w-[50vw] h-[50vw] bg-[#8b5cf6]/5 blur-[120px] rounded-full"></div>
+        <div className="absolute bottom-[-10%] inset-inline-start-[-5%] w-[40vw] h-[40vw] bg-[#2cfc7d]/3 blur-[100px] rounded-full"></div>
+      </div>
+
       <Sidebar onLogout={handleLogout} />
 
-      <div className="md:ps-96 pb-24 md:pb-8">
-        <div className="max-w-2xl mx-auto px-6 py-8">
-          {/* Header with toggle buttons */}
-          <div className="mb-8 text-start">
-            <div className="flex items-baseline justify-between mb-6 flex-wrap gap-2">
-              <h2 className="font-headline font-extrabold text-5xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-gray-900 to-gray-500 dark:from-white dark:to-gray-400">
+      <main className="md:ps-72 min-h-screen relative z-10 flex flex-col">
+        
+        {/* HERO SECTION */}
+        <section className="px-6 lg:px-10 pt-16 pb-12 max-w-[1500px] mx-auto w-full space-y-12">
+          
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-10">
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#2cfc7d]"></div>
+                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 dark:text-white/30">{t('sidebar.timetable')}</span>
+              </div>
+              <h1 className={`text-[clamp(2.5rem,6vw,5.5rem)] font-black leading-[0.95] tracking-tighter uppercase text-gray-900 dark:text-white ${isAr ? 'font-arabic' : ''}`}>
                 {currentDayName}
-              </h2>
-              <div className="flex bg-white dark:bg-dark-glass p-1.5 rounded-full border border-gray-200 dark:border-white/10 shadow-sm dark:shadow-inner overflow-hidden">
-                <button
-                  onClick={() => setViewMode('my-section')}
-                  className={`px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest transition-all duration-300 ${viewMode === 'my-section'
-                    ? 'bg-primary text-white dark:text-dark shadow-md'
-                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-5'
-                    }`}
-                >
-                  {t('timetable.my_section')} ({student?.section || '?'})
-                </button>
-                <button
-                  onClick={() => setViewMode('all-sections')}
-                  disabled={!student?.department_id}
-                  className={`px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest transition-all duration-300 ${viewMode === 'all-sections'
-                    ? 'bg-primary text-white dark:text-dark shadow-md'
-                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-5'
-                    } ${!student?.department_id ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  title={!student?.department_id ? t('timetable.no_dept') : t('timetable.all_sections_desc')}
-                >
-                  {t('timetable.all_sections')}
-                </button>
-              </div>
+              </h1>
             </div>
-            <span className="font-label text-xs font-bold uppercase tracking-[0.2em] text-primary/90 dark:text-primary/70">
-              {t('timetable.week')} {weekNumber}
-            </span>
+
+            <div className="flex bg-white dark:bg-white/5 p-2 rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-xl">
+              <button
+                onClick={() => setScheduleType('lectures')}
+                className={`px-8 py-4 rounded-[1.8rem] text-[11px] font-black uppercase tracking-widest transition-all ${scheduleType === 'lectures' ? 'bg-[#10b981] dark:bg-[#2cfc7d] text-white dark:text-black shadow-lg' : 'text-gray-400'}`}
+              >
+                {t('timetable.lectures')}
+              </button>
+              <button
+                onClick={() => setScheduleType('exams')}
+                className={`px-8 py-4 rounded-[1.8rem] text-[11px] font-black uppercase tracking-widest transition-all ${scheduleType === 'exams' ? 'bg-[#10b981] dark:bg-[#2cfc7d] text-white dark:text-black shadow-lg' : 'text-gray-400'}`}
+              >
+                {t('timetable.exams')}
+              </button>
+            </div>
           </div>
 
-          {/* Main Toggle (Lectures vs Exams) */}
-          <div className="flex bg-white dark:bg-dark-glass p-1.5 rounded-full border border-gray-200 dark:border-white/10 shadow-sm dark:shadow-inner overflow-hidden mb-8">
-            <button
-              onClick={() => setScheduleType('lectures')}
-              className={`flex-1 py-3 rounded-full text-xs font-bold uppercase tracking-widest transition-all duration-300 ${scheduleType === 'lectures' ? 'bg-primary text-white dark:text-dark shadow-md' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
-            >
-              {t('timetable.lectures')}
-            </button>
-            <button
-              onClick={() => setScheduleType('exams')}
-              className={`flex-1 py-3 rounded-full text-xs font-bold uppercase tracking-widest transition-all duration-300 ${scheduleType === 'exams' ? 'bg-primary text-white dark:text-dark shadow-md' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
-            >
-              {t('timetable.exams')}
-            </button>
-          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pb-20">
+            
+            {/* MOBILE ONLY: Horizontal Day Picker & Section Toggle */}
+            <div className="lg:hidden space-y-6">
+               <div className="flex bg-white dark:bg-white/5 p-2 rounded-[2rem] border border-gray-100 dark:border-white/5 shadow-xl">
+                  <button
+                    onClick={() => setViewMode('my-section')}
+                    className={`flex-1 py-3 rounded-[1.5rem] text-[9px] font-black uppercase tracking-widest transition-all ${viewMode === 'my-section' ? 'bg-[#10b981] dark:bg-[#2cfc7d] text-white dark:text-black shadow-lg' : 'text-gray-400'}`}
+                  >
+                    {t('timetable.my_section')}
+                  </button>
+                  <button
+                    onClick={() => setViewMode('all-sections')}
+                    className={`flex-1 py-3 rounded-[1.5rem] text-[9px] font-black uppercase tracking-widest transition-all ${viewMode === 'all-sections' ? 'bg-[#10b981] dark:bg-[#2cfc7d] text-white dark:text-black shadow-lg' : 'text-gray-400'}`}
+                  >
+                    {t('timetable.all_sections')}
+                  </button>
+               </div>
 
-          {scheduleType === 'lectures' ? (
-            <>
-              {/* Days Selector */}
-              <div className="flex justify-between items-center bg-white dark:bg-dark-card border border-gray-200 dark:border-white/10 shadow-sm dark:shadow-inner p-2 rounded-[2rem] overflow-x-auto no-scrollbar gap-2 mb-12">
-                {days.map((day) => {
-                  const isActive = selectedDay === day.id;
-                  return (
-                    <button
-                      key={day.id}
-                      onClick={() => setSelectedDay(day.id)}
-                      className={`flex-1 min-w-[4rem] flex flex-col items-center py-4 rounded-2xl transition-all duration-300 ${isActive ? 'bg-primary text-white dark:text-dark shadow-[0_4px_15px_rgba(46,204,113,0.3)] dark:shadow-[0_0_20px_rgba(142,255,113,0.4)] scale-105' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white'}`}
-                    >
-                      <span className="text-[9px] font-black uppercase tracking-widest mb-1">
-                        {day.short}
-                      </span>
-                      <span className="text-lg font-black font-headline">
-                        {new Date(currentWeekStart).getDate() + days.findIndex(d => d.id === day.id)}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Schedule List */}
-              <div className="space-y-8">
-                {!hasEntries ? (
-                  <div className="text-center py-16 bg-white/50 dark:bg-dark-glass/50 backdrop-blur-md rounded-[2rem] border border-dashed border-gray-300 dark:border-white/10 shadow-sm dark:shadow-inner">
-                    <div className="flex justify-center mb-6"><Coffee className="w-16 h-16 text-primary/40" /></div>
-                    <p className="text-gray-500 dark:text-gray-400 text-lg">{t('timetable.holiday')}</p>
-                    <p className="text-gray-400 dark:text-gray-500 text-sm mt-2">{t('timetable.holiday_desc')}</p>
-                  </div>
-                ) : (
-                  currentDayEntries.map((entry, idx) => {
-                    const completed = isLectureCompleted(entry);
-                    const isNow = isLectureNow(entry);
-                    const isToday = selectedDay === ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][new Date().getDay()];
-
-                    const startFormatted = formatTime(entry.start_time);
-                    const endFormatted = formatTime(entry.end_time);
-
-                    let bgColor = '';
-                    let statusBadge = null;
-
-
-                    if (isNow && isToday) {
-                      bgColor = 'bg-primary/10 border border-primary/50 shadow-[0_4px_20px_rgba(46,204,113,0.1)] dark:shadow-[0_0_40px_rgba(142,255,113,0.15)] ring-1 ring-primary/20 scale-[1.02]';
-                      statusBadge = (
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/20 text-primary border border-primary/50 text-[10px] uppercase tracking-widest font-black shadow-[0_0_15px_rgba(46,204,113,0.3)] dark:shadow-[0_0_15px_rgba(142,255,113,0.3)] animate-pulse">
-                          <span className="w-2 h-2 rounded-full bg-primary"></span> {t('timetable.live')}
-                        </span>
-                      );
-                    } else if (completed && isToday) {
-                      bgColor = 'bg-gray-100/50 dark:bg-dark-glass/40 border border-gray-200 dark:border-white/5 opacity-60 grayscale-[0.5] hover:opacity-100 transition-opacity';
-                      statusBadge = (
-                        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-gray-200 dark:bg-white/5 text-gray-500 border border-gray-300 dark:border-white/10 text-[10px] uppercase tracking-widest font-black">
-                          ✓ {t('timetable.finished')}
-                        </span>
-                      );
-                    } else {
-                      bgColor = 'bg-white dark:bg-dark-card border border-gray-200 dark:border-white/10 shadow-sm dark:shadow-xl group hover:border-primary/40 hover:-translate-y-1 hover:shadow-md dark:hover:shadow-2xl transition-all duration-500';
-                      statusBadge = null;
-                    }
-
+               <div className={`flex items-center gap-3 overflow-x-auto no-scrollbar pb-2 transition-all duration-500 ${scheduleType === 'exams' ? 'opacity-40 pointer-events-none' : ''}`}>
+                  {days.map(day => {
+                    const isActive = selectedDay === day.id;
                     return (
-                      <div key={idx} className="relative">
-                        <div
-                          className={`relative overflow-hidden ${bgColor} p-6 sm:p-8 rounded-[2rem] backdrop-blur-md transition-all text-start`}
+                      <button
+                        key={day.id}
+                        onClick={() => setSelectedDay(day.id)}
+                        className={`flex-shrink-0 px-6 py-4 rounded-[1.8rem] flex flex-col items-center gap-1 border transition-all duration-300 ${isActive ? 'bg-black dark:bg-white text-white dark:text-black border-transparent shadow-xl scale-105' : 'bg-white dark:bg-white/5 border-gray-100 dark:border-white/5 text-gray-400'}`}
+                      >
+                        <span className="text-[8px] font-black uppercase tracking-widest opacity-40">{day.short}</span>
+                        <span className={`text-sm font-black ${isAr ? 'font-arabic' : ''}`}>{isAr ? day.arabic : day.id.slice(0, 3)}</span>
+                      </button>
+                    );
+                  })}
+               </div>
+            </div>
+
+            {/* LEFT COLUMN: Controls & Day Selector (Desktop Only) */}
+            <div className={`hidden lg:block lg:col-span-4 space-y-8 transition-all duration-500 ${scheduleType === 'exams' ? 'opacity-40 pointer-events-none' : ''}`}>
+              
+              {/* Context Selector */}
+              <div className="bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-10 space-y-8">
+                 <div className="flex items-center justify-between">
+                    <h2 className="text-[9px] font-black uppercase tracking-[0.5em] text-gray-400 dark:text-white/30">{t('common.filter')}</h2>
+                    <Zap className="w-4 h-4 text-[#8b5cf6]" />
+                 </div>
+                 <div className="space-y-4">
+                    <button
+                      onClick={() => setViewMode('my-section')}
+                      className={`w-full flex items-center justify-between p-6 rounded-[1.5rem] border transition-all ${viewMode === 'my-section' ? 'bg-[#10b981]/5 border-[#10b981]/20 text-[#10b981] dark:text-[#2cfc7d]' : 'bg-gray-50 dark:bg-white/5 border-transparent text-gray-400'}`}
+                    >
+                      <span className="text-xs font-black uppercase tracking-widest">{t('timetable.my_section')} ({student?.section})</span>
+                      {viewMode === 'my-section' && <CheckCircle2 className="w-4 h-4" />}
+                    </button>
+                    <button
+                      onClick={() => setViewMode('all-sections')}
+                      className={`w-full flex items-center justify-between p-6 rounded-[1.5rem] border transition-all ${viewMode === 'all-sections' ? 'bg-[#10b981]/5 border-[#10b981]/20 text-[#10b981] dark:text-[#2cfc7d]' : 'bg-gray-50 dark:bg-white/5 border-transparent text-gray-400'}`}
+                    >
+                      <span className="text-xs font-black uppercase tracking-widest">{t('timetable.all_sections')}</span>
+                      {viewMode === 'all-sections' && <CheckCircle2 className="w-4 h-4" />}
+                    </button>
+                 </div>
+              </div>
+
+              {/* Day Selector Matrix */}
+              <div className="bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-10 space-y-8">
+                 <div className="flex items-center justify-between">
+                    <h2 className="text-[9px] font-black uppercase tracking-[0.5em] text-gray-400 dark:text-white/30">{t('common.navigation')}</h2>
+                    <CalendarDays className="w-4 h-4 text-[#2cfc7d]" />
+                 </div>
+                 <div className="grid grid-cols-2 gap-4">
+                    {days.map(day => {
+                      const isActive = selectedDay === day.id;
+                      return (
+                        <button
+                          key={day.id}
+                          onClick={() => setSelectedDay(day.id)}
+                          className={`p-6 rounded-[1.5rem] flex flex-col items-center gap-2 border transition-all duration-500 ${isActive ? 'bg-black dark:bg-white text-white dark:text-black border-transparent shadow-2xl scale-105' : 'bg-gray-50 dark:bg-white/5 border-transparent text-gray-400 hover:bg-gray-100'}`}
                         >
-                          <div className="flex justify-between items-start mb-5">
-                            <div className="space-y-2">
-                              <span
-                                className={`inline-block px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest mb-2 ${entry.type === 'Lecture' ? 'bg-blue-100 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20' : 'bg-purple-100 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-500/20'}`}
-                              >
-                                {entry.type === 'Lecture' ? t('timetable.type_lecture') : (entry.type === 'Lab' ? t('timetable.type_lab') : (entry.type === 'Section' ? t('timetable.type_section') : entry.type))}
-                              </span>
-                              <h3 className="text-2xl font-headline font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-gray-900 to-gray-500 dark:from-white dark:to-gray-400 leading-tight tracking-tight">
-                                {entry.course_name}
-                              </h3>
-                              {/* عرض السكاشن المجمعة في وضع "كل السكاشن" */}
-                              {viewMode === 'all-sections' && entry.sections_text && (
-                                <div className="text-xs text-gray-700 dark:text-white/80 bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/20 inline-block px-3 py-1 mt-2 rounded-full font-bold">
-                                  {t('timetable.section')}: {entry.sections_text}
-                                </div>
-                              )}
+                          <span className="text-[10px] font-black uppercase tracking-widest">{day.short}</span>
+                          <span className={`text-xl font-black ${isAr ? 'font-arabic' : ''}`}>{isAr ? day.arabic : day.id.slice(0, 3)}</span>
+                        </button>
+                      );
+                    })}
+                 </div>
+              </div>
+            </div>
+
+            {/* RIGHT COLUMN: Schedule Visualization */}
+            <div className="lg:col-span-8 space-y-8">
+               <div className="flex items-center justify-between px-2">
+                  <div className="flex flex-col">
+                    <h2 className={`text-3xl font-black uppercase tracking-tight ${isAr ? 'font-arabic' : ''}`}>
+                      {scheduleType === 'lectures' ? t('timetable.lectures') : t('timetable.exams')}
+                    </h2>
+                    <span className="text-[9px] font-black uppercase tracking-[0.5em] text-gray-400 dark:text-white/20">{t('mavi.temporal_sequence')}</span>
+                  </div>
+                  <div className="bg-[#10b981]/10 dark:bg-[#2cfc7d]/10 px-6 py-2 rounded-2xl text-[#10b981] dark:text-[#2cfc7d] text-xs font-black uppercase tracking-widest">
+                     {currentDayEntries.length} {isAr ? 'محاضرة' : 'Lecture'}
+                  </div>
+               </div>
+
+               <div className="space-y-6">
+                  {!hasEntries ? (
+                    <div className="bg-white dark:bg-[#151520] border border-dashed border-gray-200 dark:border-white/10 rounded-[3rem] p-24 text-center">
+                       <div className="w-24 h-24 rounded-full bg-gray-50 dark:bg-white/5 flex items-center justify-center mx-auto mb-8">
+                          <Coffee className="w-10 h-10 text-gray-200 dark:text-white/10" />
+                       </div>
+                       <h3 className="text-2xl font-black uppercase tracking-tighter opacity-20">{scheduleType === 'lectures' ? t('timetable.holiday') : t('timetable.no_exams')}</h3>
+                       <p className="text-[10px] font-black uppercase tracking-[0.4em] opacity-10 mt-2">{scheduleType === 'lectures' ? t('timetable.holiday_desc') : t('timetable.no_exams_desc')}</p>
+                    </div>
+                  ) : (
+                    currentDayEntries.map((entry, idx) => {
+                      const now = new Date();
+                      const todayName = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][now.getDay()];
+                      
+                      let isLive = false;
+                      let isCompleted = false;
+
+                      if (scheduleType === 'lectures') {
+                        const isToday = selectedDay === todayName;
+                        isLive = isLectureNow(entry) && isToday;
+                        isCompleted = isLectureCompleted(entry) && isToday;
+                      } else if (entry.exam_date) {
+                        const examDate = new Date(entry.exam_date);
+                        const entryDateOnly = new Date(examDate.getFullYear(), examDate.getMonth(), examDate.getDate());
+                        const todayDateOnly = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                        
+                        if (entryDateOnly < todayDateOnly) {
+                          isCompleted = true;
+                        } else if (entryDateOnly.getTime() === todayDateOnly.getTime()) {
+                          isLive = isLectureNow(entry);
+                          isCompleted = isLectureCompleted(entry);
+                        }
+                      }
+
+                      return (
+                        <div 
+                          key={idx}
+                          className={`group bg-white dark:bg-[#151520] border rounded-[2rem] p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 md:gap-10 transition-all duration-700 relative overflow-hidden ${isLive ? 'border-[#2cfc7d] shadow-[0_0_50px_rgba(44,252,125,0.1)]' : 'border-gray-100 dark:border-white/5 hover:-translate-y-1 hover:shadow-xl'}`}
+                        >
+                          {isLive && (
+                            <div className="absolute top-0 inset-inline-end-0 bg-[#2cfc7d] text-black px-4 py-1 rounded-bl-[1rem] font-black text-[8px] uppercase tracking-[0.2em] animate-pulse">
+                               {t('mavi.live_now')}
                             </div>
-                            <div className="text-end">
-                              {statusBadge ? (
-                                statusBadge
-                              ) : (
-                                <>
-                                  <p className="font-headline font-black text-3xl text-gray-900 dark:text-white tracking-tighter">
-                                    {startFormatted.split(' ')[0]}
-                                  </p>
-                                  <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 mt-1 uppercase tracking-widest opacity-80 dark:opacity-60">
-                                    {startFormatted.split(' ')[1]}
-                                  </p>
-                                </>
-                              )}
-                              {entry.is_quiz && (
-                                <div className="mt-2">
-                                  <span className="inline-block px-2 py-0.5 rounded-full bg-yellow-100 dark:bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 text-[10px] font-bold uppercase tracking-wider">
-                                    <span className={`flex items-center gap-1 ${i18n.language === 'ar' ? 'flex-row-reverse' : ''}`}><ClipboardList className="w-3 h-3" /> {t('timetable.quiz')}</span>
-                                  </span>
+                          )}
+
+                          <div className="flex items-center gap-6 flex-1">
+                             <div className={`w-16 h-16 rounded-[1.5rem] flex flex-col items-center justify-center border transition-all duration-500 ${isLive ? 'bg-[#2cfc7d] text-black border-transparent shadow-xl' : 'bg-gray-50 dark:bg-white/5 border-gray-100 dark:border-white/5 text-gray-400 group-hover:bg-black dark:group-hover:bg-white group-hover:text-white dark:group-hover:text-black'}`}>
+                                <Clock className="w-5 h-5 mb-0.5" />
+                                <span className="text-[9px] font-black">{entry.start_time?.substring(0, 5)}</span>
+                             </div>
+
+                             <div className="space-y-1 min-w-0">
+                                <div className="flex items-center gap-2">
+                                   <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest ${entry.type === 'Lecture' ? 'bg-blue-500/10 text-blue-500' : 'bg-[#8b5cf6]/10 text-[#8b5cf6]'}`}>
+                                      {entry.type}
+                                   </span>
+                                   {viewMode === 'all-sections' && (
+                                     <span className="px-2 py-0.5 rounded-full bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-white/40 text-[8px] font-black uppercase tracking-widest">
+                                        SEC: {entry.sections_text}
+                                     </span>
+                                   )}
                                 </div>
-                              )}
-                            </div>
+                                 <div className="flex items-center gap-2">
+                                   <h3 className={`text-xl font-black uppercase tracking-tighter truncate ${isAr ? 'font-arabic' : ''} ${isCompleted ? 'line-through opacity-40' : ''}`}>
+                                     {entry.course_name}
+                                   </h3>
+                                   {entry.exam_date && (
+                                     <span className="px-4 py-1 rounded-xl bg-[#10b981]/10 text-[#10b981] dark:text-[#2cfc7d] text-xs font-black uppercase tracking-widest whitespace-nowrap">
+                                       {new Date(entry.exam_date).toLocaleDateString(isAr ? 'ar-EG' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric' })}
+                                     </span>
+                                   )}
+                                 </div>
+                             </div>
                           </div>
 
-                          <div className="flex flex-wrap gap-5 items-center mt-4 pt-4 border-t border-gray-100 dark:border-white/5">
-                            {entry.instructor && (
-                              <div className={`flex items-center gap-2 ${i18n.language === 'ar' ? 'flex-row-reverse' : ''}`}>
-                                <span className="text-sm font-semibold text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                                  <UserCheck className="w-4 h-4 text-primary" /> {entry.instructor}
-                                </span>
-                              </div>
-                            )}
-                            {entry.location && (
-                              <div className={`flex items-center gap-2 ${i18n.language === 'ar' ? 'flex-row-reverse' : ''}`}>
-                                <span className="text-sm font-semibold text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                                  <MapPin className="w-4 h-4 text-secondary" /> {entry.location}
-                                </span>
-                              </div>
-                            )}
+                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${isCompleted ? 'bg-[#10b981] text-white' : 'bg-gray-50 dark:bg-white/5 text-gray-200 dark:text-white/5'}`}>
+                             {isCompleted ? <CheckCircle2 className="w-6 h-6" /> : <ArrowRight className={`w-6 h-6 ${isAr ? 'rotate-180' : ''}`} />}
                           </div>
                         </div>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            </>
-          ) : (
-            <div className="space-y-8">
-              {!exams || exams.length === 0 ? (
-                <div className="text-center py-16 bg-white/50 dark:bg-dark-glass/50 backdrop-blur-md rounded-[2rem] border border-dashed border-gray-300 dark:border-white/10 shadow-sm dark:shadow-inner">
-                  <div className="flex justify-center mb-6"><ClipboardList className="w-16 h-16 text-primary/40" /></div>
-                  <p className="text-gray-500 dark:text-gray-400 text-lg">{t('timetable.no_exams')}</p>
-                  <p className="text-gray-400 dark:text-gray-500 text-sm mt-2">{t('timetable.no_exams_desc')}</p>
-                </div>
-              ) : (
-                exams.map((exam, idx) => {
-                  const isPractical = exam.exam_type === 'Practical';
-                  return (
-                    <div key={idx} className="relative">
-                      <div className={`relative overflow-hidden bg-white dark:bg-dark-card border border-gray-200 dark:border-white/10 shadow-sm dark:shadow-xl group hover:border-primary/40 hover:-translate-y-1 hover:shadow-md dark:hover:shadow-2xl transition-all duration-500 p-6 sm:p-8 rounded-[2rem] backdrop-blur-md text-start`}>
-                        <div className={`flex justify-between items-start mb-5 ${i18n.language === 'ar' ? 'flex-row-reverse' : ''}`}>
-                          <div className="space-y-2">
-                            <span className={`inline-block px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest mb-2 ${isPractical ? 'bg-orange-100 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-500/20' : 'bg-red-100 dark:bg-red-500/10 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500/20'}`}>
-                              {isPractical ? t('timetable.type_practical') : t('timetable.type_final')}
-                            </span>
-                            <h3 className="text-xl sm:text-2xl font-extrabold font-headline leading-tight pr-4 text-gray-900 dark:text-white">
-                              {exam.course_name}
-                            </h3>
-                          </div>
-                        </div>
-                        <div className="flex flex-col sm:flex-row gap-4 mt-8 pt-6 border-t border-gray-100 dark:border-white/10">
-                          <div className="flex items-center gap-3 w-full sm:w-auto">
-                            <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-white/5 flex items-center justify-center flex-shrink-0">
-                              <Calendar className="w-4 h-4 text-primary" />
-                            </div>
-                            <div className="text-start">
-                              <p className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest">{t('timetable.exam_day')}</p>
-                              <p className="text-sm font-bold text-gray-700 dark:text-gray-200">
-                                {new Date(exam.exam_date).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'en-GB', { weekday: 'long' })}<br />
-                                <span className="text-xs text-gray-500 dark:text-gray-400">{new Date(exam.exam_date).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'en-GB')}</span>
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-3 w-full sm:w-auto sm:ms-4">
-                            <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-white/5 flex items-center justify-center flex-shrink-0">
-                              <Coffee className="w-4 h-4 text-primary" />
-                            </div>
-                            <div className="text-start">
-                              <p className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest">{t('timetable.exam_time')}</p>
-                              <p className="text-sm font-bold text-gray-700 dark:text-gray-200">{formatTime(exam.start_time)} - {formatTime(exam.end_time)}</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })
-              )}
+                      );
+                    })
+                  )}
+               </div>
             </div>
-          )}
-        </div>
-      </div>
+
+          </div>
+        </section>
+      </main>
+
       <style>{`
-        .font-headline { font-family: 'Manrope', 'Inter', sans-serif; }
-        .bg-dark-glass { background: rgba(17, 17, 17, 0.7); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
+        .font-arabic { font-family: 'Cairo', sans-serif !important; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
     </div>
   );

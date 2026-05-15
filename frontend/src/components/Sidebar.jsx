@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { flushSync } from 'react-dom';
-import { Home, Calendar, Library, BarChart3, FileText, Map, Bell, CheckSquare, Settings, LogOut, Menu, X, ShieldCheck, Sun, Moon, LayoutDashboard, BookOpen, TrendingUp, Languages } from 'lucide-react';
+import { Home, Calendar, Library, BarChart3, FileText, Map, Bell, CheckSquare, Settings, LogOut, Menu, X, ShieldCheck, Sun, Moon, LayoutDashboard, BookOpen, TrendingUp, Languages, ArrowRight } from 'lucide-react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useStudentAuth } from '../context/StudentAuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -20,6 +20,10 @@ const Sidebar = ({ onLogout }) => {
   const dockRef = React.useRef(null);
   const indicatorRef = React.useRef(null);
   const isAnimatingRef = React.useRef(false);
+  const dragPositionRef = useRef(null);
+  const isDraggingRef = useRef(false);
+  const touchStartXRef = useRef(0);
+  const canDragRef = useRef(false);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -28,16 +32,17 @@ const Sidebar = ({ onLogout }) => {
   }, []);
 
   const bottomBarItems = [
-    { id: 'dashboard', label: t('sidebar.dashboard'), icon: <LayoutDashboard className="w-5 h-5" />, path: '/student/dashboard' },
+    { id: 'dashboard', label: t('sidebar.dashboard'), icon: <Home className="w-5 h-5" />, path: '/student/dashboard' },
     { id: 'timetable', label: t('sidebar.timetable'), icon: <Calendar className="w-5 h-5" />, path: '/student/timetable' },
     { id: 'materials', label: t('sidebar.materials'), icon: <BookOpen className="w-5 h-5" />, path: '/student/materials' },
-    { id: 'grades', label: t('sidebar.courses_grades'), icon: <TrendingUp className="w-5 h-5" />, path: '/student/grades' },
+    { id: 'notifications', label: t('sidebar.notifications'), icon: <Bell className="w-5 h-5" />, path: '/student/notifications' },
+    { id: 'menu', label: t('sidebar.menu'), icon: <Menu className="w-5 h-5" />, path: '#menu' },
   ];
 
   const menuItems = [
+    { id: 'grades', label: t('sidebar.courses_grades'), icon: <TrendingUp className="w-5 h-5" />, path: '/student/grades' },
     { id: 'quizzes', label: t('sidebar.quizzes'), icon: <FileText className="w-5 h-5" />, path: '/student/quizzes' },
     { id: 'roadmap', label: t('sidebar.roadmap'), icon: <Map className="w-5 h-5" />, path: '/student/roadmap' },
-    { id: 'notifications', label: t('sidebar.notifications'), icon: <Bell className="w-5 h-5" />, path: '/student/notifications' },
     { id: 'personal-tasks', label: t('sidebar.personal_tasks'), icon: <CheckSquare className="w-5 h-5" />, path: '/student/personal-tasks' },
     { id: 'settings', label: t('sidebar.settings'), icon: <Settings className="w-5 h-5" />, path: '/student/settings' },
   ];
@@ -59,19 +64,29 @@ const Sidebar = ({ onLogout }) => {
 
   // ============= Sidebar Desktop =============
   if (!isMobile) {
+    // Desktop items list should include everything
+    const desktopItems = [
+      { id: 'dashboard', label: t('sidebar.dashboard'), icon: <LayoutDashboard className="w-5 h-5" />, path: '/student/dashboard' },
+      { id: 'timetable', label: t('sidebar.timetable'), icon: <Calendar className="w-5 h-5" />, path: '/student/timetable' },
+      { id: 'materials', label: t('sidebar.materials'), icon: <BookOpen className="w-5 h-5" />, path: '/student/materials' },
+      { id: 'grades', label: t('sidebar.courses_grades'), icon: <TrendingUp className="w-5 h-5" />, path: '/student/grades' },
+      { id: 'notifications', label: t('sidebar.notifications'), icon: <Bell className="w-5 h-5" />, path: '/student/notifications' },
+      ...menuItems.filter(i => i.id !== 'grades')
+    ];
+
     return (
       <div className="fixed z-50 transition-all duration-700 w-72" style={{ insetInlineStart: '1.5rem', top: '1rem', bottom: '1rem' }}>
-        <div className="h-full bg-white/70 dark:bg-[#080808]/70 backdrop-blur-3xl border border-white/20 dark:border-white/5 rounded-[3rem] shadow-[0_32px_64px_rgba(0,0,0,0.1)] dark:shadow-[0_32px_64px_rgba(0,0,0,0.4)] flex flex-col overflow-hidden relative group/sidebar">
+        <div className="h-full bg-white dark:bg-[#080808] border border-gray-100 dark:border-white/10 rounded-[3rem] shadow-[0_32px_64px_rgba(0,0,0,0.05)] dark:shadow-[0_32px_64px_rgba(0,0,0,0.4)] flex flex-col overflow-hidden relative group/sidebar">
 
           <div className="p-8 pb-4 text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full overflow-hidden shadow-2xl bg-white dark:bg-white/5 border border-white/20 transition-transform duration-500 group-hover/sidebar:scale-110">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full overflow-hidden shadow-2xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 transition-transform duration-500 group-hover/sidebar:scale-110">
               <img src="/logo.png" alt="ZNU Logo" className="w-full h-full object-contain" />
             </div>
             <h1 className="text-sm font-black uppercase tracking-[0.4em] text-gray-900 dark:text-white opacity-40 mt-4">Portal</h1>
           </div>
 
           <nav className="flex-1 px-4 py-8 space-y-2 overflow-y-auto hidden-scrollbar relative z-10">
-            {[...bottomBarItems, ...menuItems].map((item) => (
+            {desktopItems.map((item) => (
               <NavLink
                 key={item.id}
                 to={item.path}
@@ -88,9 +103,9 @@ const Sidebar = ({ onLogout }) => {
                     <span className={`relative z-10 transition-all duration-500 ${isActive ? 'scale-110 text-primary' : 'group-hover/item:scale-110'}`}>
                       {item.icon}
                     </span>
-                    <span className="relative z-10 text-[11px] font-black uppercase tracking-[0.2em]">{item.label}</span>
+                    <span className={`relative z-10 text-[11px] font-black uppercase tracking-[0.2em] ${i18n.language === 'ar' ? 'font-arabic' : ''}`}>{item.label}</span>
                     {isActive && (
-                      <div className="absolute inset-inline-start-0 w-1 h-6 bg-primary rounded-full shadow-[4px_0_15px_rgba(46,204,113,0.5)]" />
+                      <div className="absolute start-0 w-1 h-6 bg-primary rounded-full shadow-[4px_0_15px_rgba(46,204,113,0.5)]" />
                     )}
                   </>
                 )}
@@ -116,76 +131,78 @@ const Sidebar = ({ onLogout }) => {
     );
   }
 
-  // ============= Mobile Dock (Dynamic Island Style) =============
+
+  // ============= Mobile Dock (Facebook Style) =============
 
   const handleTouchStart = (e) => {
-    updateDragPosition(e.targetTouches[0].clientX);
+    isDraggingRef.current = false;
+    touchStartXRef.current = e.targetTouches[0].clientX;
+
+    if (!dockRef.current) return;
+    const rect = dockRef.current.getBoundingClientRect();
+    const relativeX = e.targetTouches[0].clientX - rect.left;
+    let percent = (relativeX / rect.width) * 100;
+    if (i18n.language === 'ar') percent = 100 - percent;
+
+    const itemWidth = 100 / bottomBarItems.length;
+    const touchedIndex = Math.max(0, Math.min(Math.floor(percent / itemWidth), bottomBarItems.length - 1));
+    const currentIndex = bottomBarItems.findIndex(item => location.pathname === item.path);
+
+    canDragRef.current = touchedIndex === currentIndex && bottomBarItems[touchedIndex].id !== 'menu';
   };
 
   const handleTouchMove = (e) => {
-    updateDragPosition(e.targetTouches[0].clientX);
+    if (!canDragRef.current) return;
+    if (Math.abs(e.targetTouches[0].clientX - touchStartXRef.current) > 10) {
+      isDraggingRef.current = true;
+    }
+    if (isDraggingRef.current) {
+      updateDragPosition(e.targetTouches[0].clientX);
+    }
   };
 
   const updateDragPosition = (clientX) => {
     if (!dockRef.current) return;
     const rect = dockRef.current.getBoundingClientRect();
     const relativeX = clientX - rect.left;
-    const percent = (relativeX / rect.width) * 100;
+    let percent = (relativeX / rect.width) * 100;
+    if (i18n.language === 'ar') {
+      percent = 100 - percent;
+    }
     setDragPosition(Math.max(0, Math.min(percent, 100)));
   };
 
   const handleTouchEnd = () => {
-    if (dragPosition !== null) {
+    if (dragPosition !== null && isDraggingRef.current && canDragRef.current) {
       const itemWidth = 100 / bottomBarItems.length;
       const index = Math.floor(dragPosition / itemWidth);
       const safeIndex = Math.max(0, Math.min(index, bottomBarItems.length - 1));
-      navigate(bottomBarItems[safeIndex].path);
+      if (bottomBarItems[safeIndex].id === 'menu') {
+        setIsOpen(true);
+      } else {
+        navigate(bottomBarItems[safeIndex].path);
+      }
     }
     setDragPosition(null);
+    isDraggingRef.current = false;
+    canDragRef.current = false;
   };
 
   const currentIndex = bottomBarItems.findIndex(item => location.pathname === item.path);
   const itemWidthPercent = 100 / bottomBarItems.length;
 
-  // Animation Logic for the Indicator (Jelly / Liquid effect)
+  // Animation Logic for the Indicator
   let translateX = 0;
   let indicatorWidthPercent = itemWidthPercent;
   let stretchOrigin = 'center';
 
   if (dragPosition !== null) {
-    // 1. Center of the finger
-    const fingerPercent = Math.max(0, Math.min(dragPosition, 100));
-
-    // 2. Center of the closest tab
-    const closestIndex = Math.floor(fingerPercent / itemWidthPercent);
-    const safeClosestIndex = Math.max(0, Math.min(closestIndex, bottomBarItems.length - 1));
-    const closestTabCenterPercent = (safeClosestIndex * itemWidthPercent) + (itemWidthPercent / 2);
-
-    // 3. Distance from closest tab
-    const distanceFromCenter = fingerPercent - closestTabCenterPercent;
-    const absDistance = Math.abs(distanceFromCenter);
-
-    // 4. Stretch factor (peaks exactly halfway between two tabs)
-    const stretchFactor = Math.min(absDistance / (itemWidthPercent / 2), 1);
-
-    // 5. Calculate width (base is full tab width, stretch adds up to ~80% more width)
-    const maxStretchPercent = itemWidthPercent * 1.8;
-    indicatorWidthPercent = itemWidthPercent + (maxStretchPercent - itemWidthPercent) * stretchFactor;
-
-    // 6. Set transform origin based on drag direction to anchor the stretch
-    if (distanceFromCenter > 0) {
-      stretchOrigin = 'left'; // Stretching to the right
-      translateX = closestTabCenterPercent;
-    } else {
-      stretchOrigin = 'right'; // Stretching to the left
-      translateX = closestTabCenterPercent;
-    }
-
-    // Smoothly shift translateX towards the finger to make the 'head' follow the finger
-    translateX = closestTabCenterPercent + (distanceFromCenter * 0.5);
-
+    const minTranslateX = itemWidthPercent / 2;
+    const maxTranslateX = 100 - (itemWidthPercent / 2);
+    translateX = Math.max(minTranslateX, Math.min(dragPosition, maxTranslateX));
+    indicatorWidthPercent = itemWidthPercent;
+    stretchOrigin = 'center';
   } else {
-    // Resting state
     translateX = (currentIndex * itemWidthPercent) + (itemWidthPercent / 2);
   }
 
@@ -195,153 +212,117 @@ const Sidebar = ({ onLogout }) => {
 
   return (
     <>
-      <div className="fixed inset-inline-start-0 inset-inline-end-0 bottom-4 z-50 flex items-center justify-center gap-3 px-4 pointer-events-none">
-        {/* Main Capsule */}
+      <div className="fixed start-0 end-0 bottom-0 z-50 flex items-center justify-center p-0 pointer-events-none">
+        {/* Dock Bar */}
         <div
           ref={dockRef}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
-          className="flex-1 flex items-center relative bg-[#1c1c1e] dark:bg-[#1c1c1e] backdrop-blur-3xl border border-white/[0.06] dark:border-white/[0.06] rounded-[2rem] py-3 shadow-[0_8px_32px_rgba(0,0,0,0.5)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.6)] pointer-events-auto touch-none select-none overflow-hidden [.light_&]:bg-white/80 [.light_&]:border-black/[0.06] [.light_&]:shadow-[0_8px_32px_rgba(0,0,0,0.12)]"
+          className="flex items-center w-full bg-white/95 dark:bg-[#0c0c0c]/95 backdrop-blur-xl border-t border-gray-100 dark:border-white/[0.05] pb-[calc(1.2rem+env(safe-area-inset-bottom))] pt-3 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] pointer-events-auto touch-none select-none overflow-hidden relative"
         >
-          {/* Animated Jelly Indicator */}
+          {/* Active Indicator Line (Facebook Style) */}
           <div
-            ref={indicatorRef}
-            className={`absolute top-1/2 -translate-y-1/2 h-14 bg-white/[0.15] dark:bg-white/[0.15] rounded-[1.75rem] z-0 [.light_&]:bg-black/[0.07] ${dragPosition === null && !isAnimatingRef.current ? 'transition-all duration-[350ms] cubic-bezier(0.34,1.56,0.64,1)' : ''}`}
+            className={`absolute top-0 h-0.5 bg-primary transition-all duration-300 rounded-full`}
             style={{
-              width: `${indicatorWidthPercent}%`,
-              insetInlineStart: `${translateX}%`,
-              transform: `translate(${i18n.language === 'ar' ? '50%' : '-50%'}, -50%)`,
-              transformOrigin: stretchOrigin,
-              transition: dragPosition !== null ? 'none' : undefined,
+              width: `${itemWidthPercent * 0.5}%`,
+              insetInlineStart: `${(currentIndex * itemWidthPercent) + (itemWidthPercent * 0.25)}%`,
+              display: currentIndex === -1 ? 'none' : 'block'
             }}
           />
 
           {bottomBarItems.map((item, idx) => {
-            const isHighlighted = activeIndex === idx;
+            const isActive = currentIndex === idx;
+            const isMenu = item.id === 'menu';
 
             return (
               <div
                 key={item.id}
                 onClick={() => {
-                  if (idx === currentIndex || isAnimatingRef.current) return;
-
-                  const el = indicatorRef.current;
-                  if (!el) return;
-
-                  isAnimatingRef.current = true;
-
-                  const startPercent = (currentIndex * itemWidthPercent) + (itemWidthPercent / 2);
-                  const endPercent = (idx * itemWidthPercent) + (itemWidthPercent / 2);
-
-                  let startTime = null;
-                  const duration = 400;
-
-                  // Direct DOM animation - bypasses React completely
-                  const animateSlide = (timestamp) => {
-                    if (!startTime) startTime = timestamp;
-                    const elapsed = timestamp - startTime;
-                    const progress = Math.min(elapsed / duration, 1);
-
-                    // Easing (cubic out)
-                    const eased = 1 - Math.pow(1 - progress, 3);
-                    const fingerPercent = startPercent + (endPercent - startPercent) * eased;
-
-                    // Calculate jelly stretch (same logic as drag)
-                    const closestIdx = Math.floor(fingerPercent / itemWidthPercent);
-                    const safeIdx = Math.max(0, Math.min(closestIdx, bottomBarItems.length - 1));
-                    const tabCenter = (safeIdx * itemWidthPercent) + (itemWidthPercent / 2);
-                    const dist = fingerPercent - tabCenter;
-                    const absDist = Math.abs(dist);
-                    const stretch = Math.min(absDist / (itemWidthPercent / 2), 1);
-                    const maxW = itemWidthPercent * 1.8;
-                    const w = itemWidthPercent + (maxW - itemWidthPercent) * stretch;
-                    const pos = tabCenter + (dist * 0.5);
-
-                    // Apply directly to DOM
-                    el.style.transition = 'none';
-                    el.style.width = `${w}%`;
-                    if (i18n.language === 'ar') {
-                      el.style.insetInlineStart = `${pos}%`;
-                      el.style.transform = `translate(50%, -50%)`;
-                      el.style.transformOrigin = dist > 0 ? 'right' : dist < 0 ? 'left' : 'center';
-                    } else {
-                      el.style.insetInlineStart = `${pos}%`;
-                      el.style.transform = `translate(-50%, -50%)`;
-                      el.style.transformOrigin = dist > 0 ? 'left' : dist < 0 ? 'right' : 'center';
-                    }
-
-                    if (progress < 1) {
-                      requestAnimationFrame(animateSlide);
-                    } else {
-                      // Animation done - navigate and reset
-                      el.style.transition = '';
-                      isAnimatingRef.current = false;
-                      navigate(item.path);
-                    }
-                  };
-
-                  requestAnimationFrame(animateSlide);
+                  if (isMenu) {
+                    setIsOpen(true);
+                    return;
+                  }
+                  if (isActive) return;
+                  navigate(item.path);
                 }}
-                className="relative flex-1 flex flex-col items-center gap-1.5 cursor-pointer z-10"
+                className={`relative flex-1 flex flex-col items-center gap-0.5 cursor-pointer z-10 transition-all active:scale-90 ${isActive ? 'text-primary' : 'text-gray-400 dark:text-white/60'}`}
               >
-                <div className={`flex items-center justify-center transition-colors duration-300 ${isHighlighted ? 'text-white dark:text-white [.light_&]:text-gray-900' : 'text-white/60 dark:text-white/60 [.light_&]:text-gray-500'}`}>
-                  {React.cloneElement(item.icon, { className: 'w-[22px] h-[22px]' })}
+                <div className={`flex items-center justify-center transition-all duration-300 ${isActive ? 'scale-110' : 'opacity-60 dark:opacity-100'}`}>
+                  {React.cloneElement(item.icon, { className: 'w-[18px] h-[18px]' })}
                 </div>
-                <span className={`text-[10px] font-semibold transition-colors duration-300 leading-none ${isHighlighted ? 'text-white dark:text-white [.light_&]:text-gray-900' : 'text-white/40 dark:text-white/40 [.light_&]:text-gray-400'}`}>
+                <span className={`text-[8px] font-black uppercase tracking-widest transition-all ${i18n.language === 'ar' ? 'font-arabic' : ''} ${isActive ? 'opacity-100' : 'opacity-40 dark:opacity-80'}`}>
                   {item.label}
                 </span>
               </div>
             );
           })}
         </div>
-
-        {/* Separate Menu Button */}
-        <button
-          onClick={() => setIsOpen(true)}
-          className="w-14 h-14 flex items-center justify-center bg-[#1c1c1e] dark:bg-[#1c1c1e] [.light_&]:bg-white/80 backdrop-blur-3xl border border-white/[0.06] dark:border-white/[0.06] [.light_&]:border-black/[0.06] rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.5)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.6)] [.light_&]:shadow-[0_8px_32px_rgba(0,0,0,0.12)] pointer-events-auto text-white/80 dark:text-white/80 [.light_&]:text-gray-700 transition-all active:scale-90 shrink-0"
-        >
-          <Menu className="w-5 h-5" />
-        </button>
       </div>
 
       {isOpen && (
         <>
-          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[60]" onClick={() => setIsOpen(false)} />
-          <div className="fixed bottom-32 inset-inline-start-6 inset-inline-end-6 bg-white dark:bg-[#111] border border-gray-200 dark:border-white/10 rounded-[2.5rem] shadow-2xl z-[70] animate-slideUp overflow-hidden">
-            <div className="p-4 pt-6 text-center border-b border-gray-100 dark:border-white/5">
-              <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-widest">{t('sidebar.menu')}</h3>
+          <div className="fixed inset-0 bg-black/20 dark:bg-black/60 backdrop-blur-md z-[60]" onClick={() => setIsOpen(false)} />
+          <div className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] start-6 end-6 bg-white dark:bg-[#0c0c14] border border-gray-100 dark:border-white/10 rounded-[3rem] shadow-[0_40px_100px_rgba(0,0,0,0.3)] z-[70] animate-slideUp overflow-hidden">
+            <div className="p-8 pt-10 text-center relative overflow-hidden">
+              <div className="absolute top-0 inset-inline-start-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+              <h4 className={`text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter ${i18n.language === 'ar' ? 'font-arabic' : ''}`}>{t('sidebar.menu')}</h4>
             </div>
-            <div className="p-3 max-h-[50vh] overflow-y-auto hidden-scrollbar">
-              <div className="grid grid-cols-1 gap-1">
+            
+            <div className="px-6 pb-2 space-y-2 max-h-[45vh] overflow-y-auto hidden-scrollbar">
+              <div className="grid grid-cols-1 gap-2">
                 {menuItems.map((item) => (
                   <NavLink
                     key={item.id}
                     to={item.path}
                     onClick={() => setIsOpen(false)}
                     className={({ isActive }) => `
-                      flex items-center gap-4 px-5 py-4 rounded-2xl transition-all
-                      ${isActive ? 'bg-primary/10 text-primary font-bold' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5'}
+                      group flex items-center justify-between px-6 py-5 rounded-[1.5rem] transition-all duration-500
+                      ${isActive 
+                        ? 'bg-gray-900 dark:bg-white text-white dark:text-black shadow-xl scale-[1.02]' 
+                        : 'bg-gray-50 dark:bg-white/5 text-gray-500 dark:text-white/30 hover:bg-gray-100 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white'}
                     `}
                   >
-                    {item.icon}
-                    <span className="font-bold text-sm">{item.label}</span>
+                    <div className="flex items-center gap-4">
+                       <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${i18n.language === 'ar' ? 'order-last' : ''}`}>
+                          {item.icon}
+                       </div>
+                       <span className={`text-[11px] font-black uppercase tracking-widest ${i18n.language === 'ar' ? 'font-arabic' : ''}`}>{item.label}</span>
+                    </div>
+                    <ArrowRight className={`w-4 h-4 opacity-20 group-hover:opacity-100 transition-all ${i18n.language === 'ar' ? 'rotate-180' : ''}`} />
                   </NavLink>
                 ))}
               </div>
-              <div className="my-3 mx-2 h-px bg-gray-100 dark:bg-white/5" />
-              <div className="flex gap-2 p-1">
-                <button onClick={toggleLanguage} className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl bg-gray-50 dark:bg-white/5 text-gray-600 dark:text-gray-400 font-bold border border-gray-200 dark:border-white/5">
-                  <Languages className="w-5 h-5" />
-                  <span>{i18n.language === 'ar' ? 'English' : 'العربية'}</span>
+            </div>
+
+            <div className="p-6 pt-4 border-t border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02]">
+              <div className="grid grid-cols-3 gap-4">
+                <button
+                  onClick={toggleLanguage}
+                  className="flex flex-col items-center gap-3 p-4 rounded-[2rem] bg-white dark:bg-white/5 border border-gray-100 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-white/10 transition-all active:scale-95 group shadow-sm"
+                >
+                  <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-black/40 flex items-center justify-center text-gray-400 group-hover:text-primary shadow-inner transition-colors">
+                     <Languages className="w-5 h-5" />
+                  </div>
+                  <span className="text-[7px] font-black uppercase tracking-widest text-gray-400">{i18n.language === 'ar' ? 'English' : 'العربية'}</span>
                 </button>
-                <button onClick={toggleTheme} className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl bg-gray-50 dark:bg-white/5 text-gray-600 dark:text-gray-400 font-bold border border-gray-200 dark:border-white/5">
-                  {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-                  <span>{theme === 'dark' ? t('sidebar.light') : t('sidebar.dark')}</span>
+                <button
+                  onClick={toggleTheme}
+                  className="flex flex-col items-center gap-3 p-4 rounded-[2rem] bg-white dark:bg-white/5 border border-gray-100 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-white/10 transition-all active:scale-95 group shadow-sm"
+                >
+                  <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-black/40 flex items-center justify-center text-gray-400 group-hover:text-primary shadow-inner transition-colors">
+                     {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                  </div>
+                  <span className="text-[7px] font-black uppercase tracking-widest text-gray-400">{theme === 'dark' ? t('sidebar.light') : t('sidebar.dark')}</span>
                 </button>
-                <button onClick={handleLogout} className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl bg-rose-50 dark:bg-rose-500/10 text-rose-500 font-bold border border-rose-100 dark:border-rose-500/20">
-                  <LogOut className="w-5 h-5" />
-                  <span>{t('sidebar.logout')}</span>
+                <button
+                  onClick={handleLogout}
+                  className="flex flex-col items-center gap-3 p-4 rounded-[2rem] bg-rose-500/5 dark:bg-rose-500/10 border border-rose-500/10 hover:bg-rose-500/10 transition-all active:scale-95 group shadow-sm"
+                >
+                  <div className="w-10 h-10 rounded-full bg-white dark:bg-rose-500/20 flex items-center justify-center text-rose-500 shadow-inner transition-colors">
+                     <LogOut className="w-5 h-5" />
+                  </div>
+                  <span className="text-[7px] font-black uppercase tracking-widest text-rose-500">{t('sidebar.logout')}</span>
                 </button>
               </div>
             </div>
@@ -350,6 +331,8 @@ const Sidebar = ({ onLogout }) => {
       )}
 
       <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
+        .font-arabic { font-family: 'Cairo', sans-serif !important; }
         @keyframes slideUp {
           from { opacity: 0; transform: translateY(20px); }
           to { opacity: 1; transform: translateY(0); }

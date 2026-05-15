@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStudentAuth } from '../context/StudentAuthContext';
 import toast from 'react-hot-toast';
@@ -6,22 +6,22 @@ import { useGoogleLogin } from '@react-oauth/google';
 import { useMsal } from "@azure/msal-react";
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
-import { motion, useMotionValue, useSpring, useTransform, AnimatePresence } from 'framer-motion';
-import { Fingerprint, Lock, Eye, EyeOff, ArrowRight, Sparkles, Globe, Zap, Stars } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Mail, Lock, ArrowRight, GraduationCap, BookOpen, Clock, Database } from 'lucide-react';
 
 const StudentLogin = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  
+
   const { login, googleLogin, microsoftLogin, token, loading: authLoading } = useStudentAuth();
   const { isDarkMode } = useTheme();
   const { t, i18n } = useTranslation();
+  const isAr = i18n.language === 'ar';
   const navigate = useNavigate();
   const { instance } = useMsal();
 
-  // --- SSO HANDLERS ---
   const triggerGoogleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       setLoading(true);
@@ -36,6 +36,20 @@ const StudentLogin = () => {
     },
     onError: () => toast.error(t('auth.login_failed'))
   });
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    if (!username || !password) return toast.error(t('auth.fill_fields'));
+    setLoading(true);
+    const result = await login(username, password);
+    setLoading(false);
+    if (result.success) {
+      toast.success(t('auth.signed_in'));
+      navigate('/student/dashboard');
+    } else {
+      toast.error(result.message || t('auth.login_failed'));
+    }
+  };
 
   const handleMicrosoftLogin = async () => {
     try {
@@ -54,180 +68,170 @@ const StudentLogin = () => {
       }
     } catch (error) {
       setLoading(false);
-      console.error(error);
       if (error.name !== 'BrowserAuthError') {
         toast.error(t('auth.login_failed'));
       }
     }
   };
 
-  // 3D Tilt Values
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-  const springX = useSpring(mouseX, { stiffness: 100, damping: 20 });
-  const springY = useSpring(mouseY, { stiffness: 100, damping: 20 });
-  const rotateX = useTransform(springY, [-0.5, 0.5], ["8deg", "-8deg"]);
-  const rotateY = useTransform(springX, [-0.5, 0.5], ["-8deg", "8deg"]);
-
-  const handleMouseMove = (e) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    mouseX.set((e.clientX - rect.left) / rect.width - 0.5);
-    mouseY.set((e.clientY - rect.top) / rect.height - 0.5);
-  };
-
   useEffect(() => {
     if (!authLoading && token) navigate('/student/dashboard', { replace: true });
   }, [token, authLoading, navigate]);
 
-  const particles = Array.from({ length: 20 });
-
   return (
-    <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className={`min-h-screen w-full flex overflow-hidden font-sans transition-colors duration-700 relative ${isDarkMode ? 'bg-[#010101] text-white' : 'bg-[#fafafa] text-gray-900'}`}
-    >
-      {/* Background Living Layer */}
+    <div className={`min-h-screen w-full flex overflow-hidden font-sans relative ${isDarkMode ? 'bg-[#0c0c14] text-white' : 'bg-gray-50 text-gray-900'}`} dir={isAr ? 'rtl' : 'ltr'}>
+      
+      {/* MAVI BACKGROUND ARCHITECTURE */}
+      {/* Background -- single combined gradient layer */}
       <div className="absolute inset-0 z-0 pointer-events-none">
-        <motion.div 
-          layoutId="bg-glow-1"
-          animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
-          transition={{ duration: 10, repeat: Infinity }}
-          className={`absolute top-[-10%] right-[-5%] w-[60vw] h-[60vw] blur-[150px] rounded-full ${isDarkMode ? 'bg-emerald-500/10' : 'bg-emerald-500/5'}`}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: isDarkMode
+              ? 'radial-gradient(ellipse at top right, rgba(16,185,129,0.06), transparent 50%), radial-gradient(ellipse at bottom left, rgba(20,184,166,0.06), transparent 50%)'
+              : 'radial-gradient(ellipse at top right, rgba(16,185,129,0.05), transparent 50%), radial-gradient(ellipse at bottom left, rgba(16,185,129,0.05), transparent 50%)',
+          }}
         />
-        <motion.div 
-          layoutId="bg-glow-2"
-          className={`absolute bottom-[-10%] left-[-5%] w-[50vw] h-[50vw] blur-[150px] rounded-full ${isDarkMode ? 'bg-blue-600/5' : 'bg-blue-600/[0.03]'}`}
-        />
-        {particles.map((_, i) => (
-          <motion.div
-            key={i}
-            initial={{ x: Math.random() * 100 + "%", y: Math.random() * 100 + "%" }}
-            animate={{ y: ["-10%", "110%"], opacity: [0, 0.5, 0] }}
-            transition={{ duration: Math.random() * 10 + 10, repeat: Infinity, ease: "linear", delay: Math.random() * 10 }}
-            className={`absolute w-1 h-1 rounded-full ${isDarkMode ? 'bg-white/10' : 'bg-black/5'}`}
-          />
-        ))}
-        <div className={`absolute inset-0 ${isDarkMode ? 'bg-[radial-gradient(circle_at_center,#ffffff02_1px,transparent_1px)]' : 'bg-[radial-gradient(circle_at_center,#00000003_1px,transparent_1px)]'} bg-[size:4rem_4rem]`}></div>
       </div>
 
       <div className="w-full flex relative z-10">
-        
-        {/* LEFT PANEL: CENTERED BRANDING */}
-        <motion.div 
-          layoutId="hero-panel"
-          className={`hidden lg:flex w-[50%] flex-col justify-center items-center text-center p-24 border-e transition-colors ${isDarkMode ? 'border-white/5 bg-black/20' : 'border-gray-100 bg-white/40'} backdrop-blur-3xl`}
-        >
-           <motion.div 
-             style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
-             onMouseMove={handleMouseMove}
-             onMouseLeave={() => { mouseX.set(0); mouseY.set(0); }}
-             className="flex flex-col items-center space-y-16"
-           >
-              {/* MAGNIFIED LOGO - NO BACKGROUND */}
-              <motion.div layoutId="logo-container" className="relative w-max">
-                 <div className={`absolute -inset-20 blur-[100px] rounded-full ${isDarkMode ? 'bg-emerald-500/20' : 'bg-emerald-500/10'}`}></div>
-                 <motion.div 
-                   whileHover={{ scale: 1.05 }}
-                   className="relative w-56 h-56 flex items-center justify-center p-0"
-                 >
-                    <img src="/logo.png" className="w-full h-full object-contain drop-shadow-[0_0_30px_rgba(255,255,255,0.3)]" alt="ZNU" />
-                 </motion.div>
-              </motion.div>
 
+        {/* LEFT PANEL: CINEMATIC BRANDING */}
+        <div className={`hidden lg:flex w-[55%] flex-col justify-center items-center p-20 text-center relative overflow-hidden border-e transition-colors duration-500 ${isDarkMode ? 'border-white/5 bg-black' : 'border-gray-100 bg-white'}`}>
+          
+          {/* Logo Section */}
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="relative z-10"
+          >
+             <div className="w-64 h-64 flex items-center justify-center mb-0">
+                <img src="/logo.png" className="w-full h-full object-contain" alt="Logo" />
+             </div>
+          </motion.div>
+
+          {/* Core Branding */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.1, ease: "easeOut" }}
+            className="relative z-10 space-y-10"
+          >
+            <div className="space-y-4">
+               <h1 className={`text-[clamp(4rem,8vw,8rem)] font-black uppercase text-gray-900 dark:text-white ${isAr ? 'font-arabic leading-[1.2] tracking-normal' : 'leading-[0.9] tracking-tighter'}`}>
+                 {t('auth.student_portal').split(' ')[0]} <br />
+                 <span className="text-[#10b981] dark:text-[#2cfc7d]">{t('auth.student_portal').split(' ')[1]}.</span>
+               </h1>
+            </div>
+            
+            <p className={`text-2xl font-medium max-w-lg leading-relaxed mx-auto ${isDarkMode ? 'text-white/30' : 'text-gray-400'}`}>
+              {t('mavi.login_desc')}
+            </p>
+
+            <div className="flex justify-center gap-8 pt-6">
+              {[GraduationCap, BookOpen, Clock].map((Icon, i) => (
+                <div key={i} className="flex flex-col items-center gap-3 group">
+                  <div className={`w-16 h-16 rounded-2xl border flex items-center justify-center transition-all duration-500 group-hover:-translate-y-2 ${isDarkMode ? 'bg-white/[0.02] border-white/5' : 'bg-white border-gray-100 shadow-sm'}`}>
+                    <Icon className="w-7 h-7 text-[#10b981] opacity-40 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+
+        {/* RIGHT PANEL: SECURE ACCESS */}
+            <div
+               className={`flex-1 flex flex-col items-center justify-center p-8 lg:p-24 relative overflow-hidden transition-colors duration-500 ${isDarkMode ? 'bg-[#010101]' : 'bg-[#fafafa]'}`}
+            >
+               <motion.div 
+                 initial={{ opacity: 0, y: 20 }}
+                 animate={{ opacity: 1, y: 0 }}
+                 transition={{ duration: 0.4, ease: "easeOut" }}
+                 className="w-full max-w-md relative z-10 text-center flex flex-col"
+               >
+                  {/* Elegant Brand Icon for Mobile */}
+                  <div className="lg:hidden mb-10 flex flex-col items-center">
+                     <img src="/logo.png" className="w-20 h-20 object-contain mb-4" alt="Logo" />
+                     <div className="h-px w-12 bg-emerald-500/30"></div>
+                  </div>
+
+                  <div className="text-start mb-12">
+                     <h2 className="text-5xl lg:text-6xl font-black uppercase tracking-tighter text-gray-900 dark:text-white leading-none">{t('auth.sign_in')}</h2>
+                     <p className="mt-4 text-sm font-bold text-gray-400 uppercase tracking-widest">{t('auth.student_portal')}</p>
+                  </div>
+
+            <form onSubmit={handleLogin} className="space-y-10">
+              
               <div className="space-y-6">
-                 <motion.h1 
-                   layoutId="portal-title" 
-                   initial={{ y: 20, opacity: 0 }}
-                   animate={{ y: 0, opacity: 1 }}
-                   className="text-8xl font-black tracking-tighter leading-none"
-                 >
-                    {t('auth.student_portal').split(' ')[0]} <br />
-                    <span className="text-emerald-500">{t('auth.student_portal').split(' ')[1]}.</span>
-                 </motion.h1>
-                 <motion.p layoutId="portal-desc" className={`text-2xl font-medium max-w-sm transition-colors ${isDarkMode ? 'text-white/30' : 'text-gray-400'}`}>
-                    {t('auth.next_gen_node')}.
-                 </motion.p>
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 ms-6">{t('auth.student_id')}</label>
+                  <div className={`group relative flex items-center rounded-[2.5rem] border transition-all duration-500 focus-within:ring-8 focus-within:ring-emerald-500/5 ${isDarkMode ? 'bg-black/40 border-white/5 focus-within:border-emerald-500' : 'bg-gray-50 border-gray-100 focus-within:border-emerald-500 shadow-inner'}`}>
+                    <Mail className={`ms-8 w-6 h-6 transition-colors ${isDarkMode ? 'text-white/10 group-focus-within:text-emerald-500' : 'text-gray-300 group-focus-within:text-emerald-500'}`} />
+                    <input
+                      type="text"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      placeholder={t('auth.enter_id')}
+                      className="w-full bg-transparent py-7 px-8 text-xl font-bold outline-none placeholder:opacity-20 uppercase tracking-tight"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 ms-6">{t('auth.access_key')}</label>
+                  <div className={`group relative flex items-center rounded-[2.5rem] border transition-all duration-500 focus-within:ring-8 focus-within:ring-emerald-500/5 ${isDarkMode ? 'bg-black/40 border-white/5 focus-within:border-emerald-500' : 'bg-gray-50 border-gray-100 focus-within:border-emerald-500 shadow-inner'}`}>
+                    <Lock className={`ms-8 w-6 h-6 transition-colors ${isDarkMode ? 'text-white/10 group-focus-within:text-emerald-500' : 'text-gray-300 group-focus-within:text-emerald-500'}`} />
+                    <input
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="w-full bg-transparent py-7 px-8 text-xl font-bold outline-none tracking-widest placeholder:tracking-normal placeholder:opacity-20"
+                    />
+                  </div>
+                </div>
               </div>
 
-              <div className="flex gap-4">
-                 {[Globe, Zap, Stars].map((Icon, i) => (
-                    <motion.div 
-                      key={i} 
-                      whileHover={{ y: -8, backgroundColor: isDarkMode ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.02)" }}
-                      className={`w-16 h-16 rounded-2xl border flex items-center justify-center transition-all ${isDarkMode ? 'bg-white/[0.02] border-white/5 text-emerald-500/40' : 'bg-white/60 border-gray-100 text-emerald-600/60'}`}
-                    >
-                       <Icon className="w-7 h-7" />
-                    </motion.div>
-                 ))}
-              </div>
-           </motion.div>
-        </motion.div>
-
-        {/* RIGHT PANEL: SECURE AUTH */}
-        <motion.div 
-          layoutId="form-panel"
-          className={`flex-1 flex flex-col items-center justify-center p-8 lg:p-24 backdrop-blur-md ${isDarkMode ? 'bg-[#010101]/50' : 'bg-white/40'}`}
-        >
-           <div className="w-full max-w-sm space-y-12">
-              <div className="space-y-3">
-                 <h2 className="text-5xl font-black uppercase tracking-tighter">{t('auth.sign_in')}</h2>
-                 <p className={`text-[11px] font-black uppercase tracking-[0.6em] ${isDarkMode ? 'text-white/20' : 'text-gray-300'}`}>{t('auth.institutional_access')}</p>
-              </div>
-
-              <form onSubmit={(e) => { e.preventDefault(); login(username, password); }} className="space-y-8">
-                 <div className="space-y-4">
-                    <label className={`text-[10px] font-black uppercase tracking-widest ml-1 ${isDarkMode ? 'text-white/30' : 'text-gray-400'}`}>{t('auth.student_id')}</label>
-                    <div className={`relative flex items-center border rounded-[2rem] transition-all focus-within:ring-4 focus-within:ring-emerald-500/10 ${isDarkMode ? 'bg-white/[0.02] border-white/10 focus-within:border-emerald-500/50' : 'bg-gray-50 border-gray-100 focus-within:border-emerald-500/50'}`}>
-                       <Fingerprint className={`ms-7 w-6 h-6 transition-colors ${isDarkMode ? 'text-white/20' : 'text-gray-300'}`} />
-                       <input 
-                         type="text"
-                         value={username}
-                         onChange={(e) => setUsername(e.target.value)}
-                         placeholder={t('auth.enter_id')}
-                         className="w-full bg-transparent py-6 px-8 text-xl font-bold outline-none placeholder:opacity-20"
-                       />
+              <motion.button
+                  whileHover={{ scale: 1.02, y: -4 }}
+                  whileTap={{ scale: 0.98 }}
+                  disabled={loading}
+                  className={`w-full font-black py-7 rounded-[2.5rem] flex items-center justify-center gap-4 text-xs uppercase tracking-[0.6em] shadow-[0_20px_50px_rgba(0,0,0,0.3)] relative overflow-hidden group ${isDarkMode ? 'bg-white text-black' : 'bg-gray-900 text-white'} ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#2cfc7d]/0 via-[#2cfc7d]/20 to-[#2cfc7d]/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                  {loading ? (
+                    <div className="flex items-center gap-3">
+                      <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                      <span>{t('auth.processing')}</span>
                     </div>
-                 </div>
+                  ) : <>{t('auth.authenticate')} <ArrowRight className={`w-6 h-6 ${isAr ? 'rotate-180' : ''}`} /></>}
+                </motion.button>
 
-                 <div className="space-y-4">
-                    <label className={`text-[10px] font-black uppercase tracking-widest ml-1 ${isDarkMode ? 'text-white/30' : 'text-gray-400'}`}>{t('auth.access_key')}</label>
-                    <div className={`relative flex items-center border rounded-[2rem] transition-all focus-within:ring-4 focus-within:ring-blue-500/10 ${isDarkMode ? 'bg-white/[0.02] border-white/10 focus-within:border-blue-500/50' : 'bg-gray-50 border-gray-100 focus-within:border-blue-500/50'}`}>
-                       <Lock className={`ms-7 w-6 h-6 transition-colors ${isDarkMode ? 'text-white/20' : 'text-gray-300'}`} />
-                       <input 
-                         type={showPassword ? 'text' : 'password'}
-                         value={password}
-                         onChange={(e) => setPassword(e.target.value)}
-                         placeholder="••••••••"
-                         className="w-full bg-transparent py-6 px-8 text-xl font-bold outline-none tracking-widest placeholder:tracking-normal placeholder:opacity-20"
-                       />
-                    </div>
-                 </div>
-
-                 <motion.button 
-                   whileHover={{ scale: 1.02, y: -2 }}
-                   whileTap={{ scale: 0.98 }}
-                   disabled={loading}
-                   className={`w-full font-black py-6 rounded-[2.5rem] flex items-center justify-center gap-4 text-xs uppercase tracking-[0.5em] shadow-2xl transition-all relative overflow-hidden group ${isDarkMode ? 'bg-white text-black' : 'bg-gray-900 text-white'} ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                 >
-                    <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/0 via-emerald-500/20 to-emerald-500/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                    {loading ? t('auth.processing') : <>{t('auth.authenticate')} <ArrowRight className="w-5 h-5" /></>}
-                 </motion.button>
-
-                 <div className="grid grid-cols-2 gap-5 pt-4">
-                    <button onClick={() => triggerGoogleLogin()} type="button" className={`flex items-center justify-center gap-4 py-5 border rounded-[2rem] text-[10px] font-black uppercase tracking-widest transition-all ${isDarkMode ? 'bg-white/[0.02] border-white/5 hover:bg-white/[0.05]' : 'bg-white border-gray-100 hover:bg-gray-50'}`}>
-                       <img src="https://www.google.com/favicon.ico" className="w-4 h-4 grayscale" alt="G" /> {t('auth.google_sign_in')}
-                    </button>
-                    <button onClick={handleMicrosoftLogin} type="button" className={`flex items-center justify-center gap-4 py-5 border rounded-[2rem] text-[10px] font-black uppercase tracking-widest transition-all ${isDarkMode ? 'bg-white/[0.02] border-white/5 hover:bg-white/[0.05]' : 'bg-white border-gray-100 hover:bg-gray-50'}`}>
-                       <img src="https://www.microsoft.com/favicon.ico" className="w-4 h-4 grayscale" alt="M" /> {t('auth.microsoft_sign_in')}
-                    </button>
-                 </div>
+                <div className="grid grid-cols-2 gap-5 pt-2">
+                  <button onClick={() => triggerGoogleLogin()} type="button" className={`flex items-center justify-center gap-4 py-6 border rounded-[2rem] text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${isDarkMode ? 'bg-white/[0.02] border-white/5 hover:bg-white/[0.05] hover:border-[#10b981]' : 'bg-white border-gray-100 hover:bg-gray-50 hover:border-[#10b981]'}`}>
+                    <img src="https://www.google.com/favicon.ico" className="w-4 h-4 grayscale group-hover:grayscale-0 transition-all" alt="G" /> {t('auth.google_sign_in')}
+                  </button>
+                  <button onClick={handleMicrosoftLogin} type="button" className={`flex items-center justify-center gap-4 py-6 border rounded-[2rem] text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${isDarkMode ? 'bg-white/[0.02] border-white/5 hover:bg-white/[0.05] hover:border-blue-500' : 'bg-white border-gray-100 hover:bg-gray-50 hover:border-blue-500'}`}>
+                    <img src="https://www.microsoft.com/favicon.ico" className="w-4 h-4 grayscale group-hover:grayscale-0 transition-all" alt="M" /> {t('auth.microsoft_sign_in')}
+                  </button>
+                </div>
               </form>
-           </div>
-        </motion.div>
-      </div>
-    </motion.div>
+            </motion.div>
+          </div>
+
+          {/* Floating Aesthetic Nodes */}
+          <div className="absolute bottom-10 left-10 w-24 h-24 opacity-5 pointer-events-none">
+             <Database className="w-full h-full text-[#2cfc7d]" />
+          </div>
+        </div>
+
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
+        .font-arabic { font-family: 'Cairo', sans-serif !important; }
+      `}</style>
+    </div>
   );
 };
 

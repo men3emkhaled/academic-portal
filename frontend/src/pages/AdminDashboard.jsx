@@ -1,5 +1,4 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import toast from 'react-hot-toast';
@@ -93,7 +92,16 @@ const AdminDashboard = () => {
     return firstAvailable ? firstAvailable.id : 'overview';
   };
 
-  const [activeTab, setActiveTab] = useState(initialTab());
+  const [activeTab, setActiveTabState] = useState(initialTab());
+  const [direction, setDirection] = useState(0);
+
+  const handleTabChange = (newTab) => {
+    if (newTab === activeTab) return;
+    const oldIndex = ALL_TABS.findIndex(t => t.id === activeTab);
+    const newIndex = ALL_TABS.findIndex(t => t.id === newTab);
+    setDirection(newIndex > oldIndex ? 1 : -1);
+    setActiveTabState(newTab);
+  };
   const [students, setStudents] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [courses, setCourses] = useState([]);
@@ -201,12 +209,10 @@ const AdminDashboard = () => {
   };
 
   const handleEditStudentInfo = (student) => {
-    // Placeholder for edit student info modal/logic
     toast.info(t('admin.messages.edit_requested'));
   };
 
   const handleManageRole = (student) => {
-    // Placeholder for role management logic
     toast.info(t('admin.messages.role_requested'));
   };
 
@@ -283,8 +289,8 @@ const AdminDashboard = () => {
       case 'emails': return <Suspense fallback={<div className="p-10 text-gray-400">{t('common.loading')}</div>}><LinkedEmailsManager /></Suspense>;
       case 'logs': return <Suspense fallback={<div className="p-10 text-gray-400">{t('common.loading')}</div>}><LogsDashboard /></Suspense>;
       case 'exams': return <Suspense fallback={<div className="p-10 text-gray-400">{t('common.loading')}</div>}><ExamScheduleManager /></Suspense>;
-       default: return (
-        <div className="p-6 lg:p-10 space-y-8 lg:space-y-12 relative z-10">
+      default: return (
+        <div className="p-6 lg:p-10 space-y-8 lg:space-y-12 relative z-10 animate-in fade-in duration-500">
           {/* Bento Grid Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-8">
             {[
@@ -307,13 +313,13 @@ const AdminDashboard = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10">
-            <div className="bg-white dark:bg-[#080808] backdrop-blur-md border border-gray-100 dark:border-white/5 rounded-[3rem] lg:rounded-[3.5rem] p-8 lg:p-12 shadow-sm relative overflow-hidden group">
-              <div className="absolute top-0 inset-inline-end-0 w-64 h-64 bg-emerald-500/5 blur-[100px] rounded-full translate-x-1/2 -translate-y-1/2 group-hover:scale-110 transition-transform duration-1000" />
+            <div className="bg-white dark:bg-[#080808] border border-gray-100 dark:border-white/5 rounded-[3rem] lg:rounded-[3.5rem] p-8 lg:p-12 shadow-sm relative overflow-hidden group">
+              <div className="absolute top-0 inset-inline-end-0 w-64 h-64 bg-emerald-500/5 hidden rounded-full translate-x-1/2 -translate-y-1/2 group-hover:scale-110 transition-transform duration-1000" />
               <h4 className="text-2xl font-black mb-2 uppercase tracking-tight relative z-10">{t('admin.overview.control_tower')}</h4>
               <p className="text-sm text-gray-400 font-bold uppercase tracking-widest mb-10 relative z-10">{t('admin.overview.central_node')}</p>
               <div className="space-y-3 relative z-10">
                 {ALL_TABS.slice(1, 5).map(tab => (
-                  <button key={tab.id} onClick={() => setActiveTab(tab.id)} className="w-full flex items-center justify-between p-5 lg:p-6 rounded-[2rem] bg-gray-50/50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 hover:border-emerald-500/30 transition-[border-color,background-color] duration-200 group/item">
+                  <button key={tab.id} onClick={() => handleTabChange(tab.id)} className="w-full flex items-center justify-between p-5 lg:p-6 rounded-[2rem] bg-gray-50/50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 hover:border-emerald-500/30 transition-[border-color,background-color] duration-200 group/item">
                     <div className="flex items-center gap-4">
                       <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-white dark:bg-white/5 flex items-center justify-center text-gray-400 group-hover/item:text-emerald-500 transition-colors duration-200 shadow-sm">
                         {tab.icon}
@@ -326,9 +332,9 @@ const AdminDashboard = () => {
               </div>
             </div>
 
-            <div className="bg-white dark:bg-[#080808] backdrop-blur-md border border-gray-100 dark:border-white/5 rounded-[3rem] lg:rounded-[3.5rem] p-8 lg:p-12 shadow-sm relative overflow-hidden group">
-              <div className="absolute top-0 inset-inline-end-0 w-64 h-64 bg-blue-500/5 blur-[100px] rounded-full translate-x-1/2 -translate-y-1/2 group-hover:scale-110 transition-transform duration-700 will-change-transform" />
-              
+            <div className="bg-white dark:bg-[#080808] border border-gray-100 dark:border-white/5 rounded-[3rem] lg:rounded-[3.5rem] p-8 lg:p-12 shadow-sm relative overflow-hidden group">
+              <div className="absolute top-0 inset-inline-end-0 w-64 h-64 bg-blue-500/5 hidden rounded-full translate-x-1/2 -translate-y-1/2 group-hover:scale-110 transition-transform duration-700 will-change-transform" />
+
               <div className="flex items-center gap-4 mb-8 relative z-10">
                 <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500 transition-transform duration-200 group-hover:scale-105 will-change-transform">
                   <TrendingUp className="w-6 h-6" />
@@ -368,23 +374,17 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-black transition-colors duration-500 font-sans relative overflow-hidden" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
-      <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} onLogout={logout} admin={decodedToken} availableTabs={availableTabs} />
+      <AdminSidebar activeTab={activeTab} setActiveTab={handleTabChange} onLogout={logout} admin={decodedToken} availableTabs={availableTabs} />
 
       <div className="lg:ps-[22rem] min-h-screen">
-        <AdminHeader admin={decodedToken} setActiveTab={setActiveTab} hasNotificationsAccess={userPermissions.includes('manage_notifications')} />
-        <main className="pt-24 pb-12">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeTab}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}
-              className="flex-1 lg:ps-8 flex flex-col min-w-0 overflow-hidden relative"
-            >
-              {renderTabContent()}
-            </motion.div>
-          </AnimatePresence>
+        <AdminHeader admin={decodedToken} setActiveTab={handleTabChange} hasNotificationsAccess={userPermissions.includes('manage_notifications')} />
+        <main className="pt-24 pb-12 overflow-x-hidden">
+          <div
+            key={activeTab}
+            className={`flex-1 lg:ps-8 flex flex-col min-w-0 relative w-full ${direction === 0 ? 'animate-fadeIn' : (direction === 1 ? (i18n.language === 'ar' ? 'animate-slideInLeft' : 'animate-slideInRight') : (i18n.language === 'ar' ? 'animate-slideInRight' : 'animate-slideInLeft'))}`}
+          >
+            {renderTabContent()}
+          </div>
         </main>
       </div>
     </div>

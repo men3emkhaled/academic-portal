@@ -36,7 +36,7 @@ const LogsDashboard = () => {
         <div className="flex p-1.5 bg-white/50 dark:bg-white/[0.03] border border-gray-200 dark:border-white/10 rounded-2xl shadow-sm">
             <button
               onClick={() => setActiveTab('admin')}
-              className={`flex items-center gap-3 px-8 py-3.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${
+              className={`flex items-center gap-3 px-8 py-3.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-[color,background-color,border-color,transform,opacity] ${
                 activeTab === 'admin'
                   ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/20'
                   : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
@@ -47,7 +47,7 @@ const LogsDashboard = () => {
             </button>
             <button
               onClick={() => setActiveTab('student')}
-              className={`flex items-center gap-3 px-8 py-3.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${
+              className={`flex items-center gap-3 px-8 py-3.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-[color,background-color,border-color,transform,opacity] ${
                 activeTab === 'student'
                   ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
                   : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'

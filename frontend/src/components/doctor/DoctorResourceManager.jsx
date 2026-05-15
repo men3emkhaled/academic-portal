@@ -305,7 +305,7 @@ const DoctorResourceManager = ({ courses }) => {
                                         whileHover={{ y: -5 }}
                                         className="bg-white/40 dark:bg-white/[0.02] border border-gray-200/50 dark:border-white/5 p-8 rounded-[2.5rem] hover:border-violet-500/30 transition-all group relative overflow-hidden backdrop-blur-sm"
                                     >
-                                        <div className={`absolute top-0 end-0 w-32 h-32 bg-${config.color.split('-')[1]}-500/5 blur-[60px] rounded-full translate-x-1/3 -translate-y-1/3`}></div>
+                                        <div className={`absolute top-0 end-0 w-32 h-32 bg-${config.color.split('-')[1]}-500/5 hidden rounded-full translate-x-1/3 -translate-y-1/3`}></div>
                                         
                                         <div className="flex items-start justify-between gap-6 mb-8 relative z-10">
                                             <div className="min-w-0">
@@ -369,7 +369,7 @@ const DoctorResourceManager = ({ courses }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/70 backdrop-blur-xl"
+            className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/70 backdrop-blur-sm"
           >
               <motion.div 
                 initial={{ scale: 0.9, y: 20 }}

@@ -12,14 +12,14 @@ export const ThemeProvider = ({ children }) => {
         return savedTheme;
       }
       // If no saved theme, maybe default to dark since the app was built dark-first
-      return 'dark'; 
+      return 'dark';
     }
     return 'dark';
   });
 
   useEffect(() => {
     const root = window.document.documentElement;
-    
+
     // Remove both classes to ensure clean slate
     root.classList.remove('light', 'dark');
 

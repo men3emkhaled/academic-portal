@@ -210,7 +210,7 @@ const DoctorGradesView = ({ courses }) => {
       {/* Main Register Table */}
       <motion.div 
         layout
-        className="bg-white dark:bg-[#080808]/40 backdrop-blur-xl border border-gray-200 dark:border-white/5 rounded-[3.5rem] overflow-hidden shadow-2xl"
+        className="bg-white dark:bg-[#080808]/40 backdrop-blur-sm border border-gray-200 dark:border-white/5 rounded-[3.5rem] overflow-hidden shadow-2xl"
       >
         <div className="p-10 lg:p-14 border-b border-gray-100 dark:border-white/5 flex flex-col xl:flex-row xl:items-center justify-between gap-10">
             <div className="space-y-2">

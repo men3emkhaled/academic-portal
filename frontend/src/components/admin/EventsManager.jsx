@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
@@ -130,7 +129,7 @@ const EventsManager = () => {
     <div className="space-y-8 lg:space-y-10 animate-in fade-in duration-700 pb-10">
       {/* Header Bento Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 flex items-center gap-6 bg-white/50 dark:bg-white/[0.02] backdrop-blur-md border border-gray-100 dark:border-white/5 p-8 rounded-[2.5rem] shadow-sm">
+        <div className="lg:col-span-2 flex items-center gap-6 bg-white/50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 p-8 rounded-[2.5rem] shadow-sm">
           <div className="w-16 h-16 bg-rose-500/10 dark:bg-rose-500/20 rounded-2xl flex items-center justify-center border border-rose-500/20 shadow-inner group transition-transform duration-500 hover:scale-110">
             <Calendar className="w-8 h-8 text-rose-600 dark:text-rose-400" />
           </div>
@@ -143,9 +142,9 @@ const EventsManager = () => {
         </div>
         
         <div className="bg-rose-600 text-white p-8 rounded-[2.5rem] shadow-lg shadow-rose-600/20 flex flex-col justify-between relative overflow-hidden group">
-          <div className="absolute inset-inline-end-0 top-0 w-32 h-32 bg-white/10 blur-[40px] rounded-full translate-x-1/2 -translate-y-1/2 group-hover:scale-150 transition-transform duration-700"></div>
+          <div className="absolute inset-inline-end-0 top-0 w-32 h-32 bg-white/10 hidden rounded-full translate-x-1/2 -translate-y-1/2 group-hover:scale-150 transition-transform duration-700"></div>
           <div className="flex justify-between items-start relative z-10">
-            <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
               <Zap className="w-5 h-5" />
             </div>
             <span className="text-[10px] font-black uppercase tracking-widest bg-black/10 px-3 py-1 rounded-full">{t('admin.events.stream_status')}</span>
@@ -158,7 +157,7 @@ const EventsManager = () => {
       </div>
 
       {/* Controls: Search, Filter, Add */}
-      <div className="bg-white/50 dark:bg-white/[0.01] backdrop-blur-xl border border-gray-100 dark:border-white/5 rounded-[3rem] p-8 shadow-sm space-y-8">
+      <div className="bg-white/50 dark:bg-white/[0.01] border border-gray-100 dark:border-white/5 rounded-[3rem] p-8 shadow-sm space-y-8">
         <div className="flex flex-col lg:flex-row justify-between items-stretch gap-6">
             <div className="relative flex-1 group">
                 <Search className="absolute inset-inline-start-6 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-rose-500 transition-colors" />
@@ -167,13 +166,13 @@ const EventsManager = () => {
                     placeholder={t('admin.events.search_placeholder')}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/10 rounded-[2rem] ps-16 pe-8 py-5 text-gray-900 dark:text-white font-black focus:ring-4 focus:ring-rose-500/10 outline-none transition-all shadow-inner uppercase tracking-widest text-[11px]"
+                    className="w-full bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/10 rounded-[2rem] ps-16 pe-8 py-5 text-gray-900 dark:text-white font-black focus:ring-4 focus:ring-rose-500/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner uppercase tracking-widest text-[11px]"
                 />
             </div>
             
             <button 
                 onClick={() => openModal()}
-                className="flex items-center justify-center gap-3 bg-rose-600 hover:bg-rose-700 text-white font-black py-4.5 px-10 rounded-[2rem] shadow-xl shadow-rose-600/20 hover:scale-[1.02] active:scale-95 transition-all whitespace-nowrap group/add"
+                className="flex items-center justify-center gap-3 bg-rose-600 hover:bg-rose-700 text-white font-black py-4.5 px-10 rounded-[2rem] shadow-xl shadow-rose-600/20 hover:scale-[1.02] active:scale-95 transition-[color,background-color,border-color,transform,opacity] whitespace-nowrap group/add"
             >
                 <Plus className="w-5 h-5 group-hover/add:rotate-180 transition-transform duration-500" /> 
                 <span className="uppercase tracking-widest text-xs">{t('admin.events.add_button')}</span>
@@ -190,7 +189,7 @@ const EventsManager = () => {
                 <button
                     key={cat}
                     onClick={() => setActiveCategory(cat)}
-                    className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap border transition-all duration-500 shrink-0 ${
+                    className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap border transition-[color,background-color,border-color,transform,opacity] duration-500 shrink-0 ${
                     activeCategory === cat 
                     ? 'bg-rose-600 text-white border-rose-500 shadow-xl shadow-rose-500/20' 
                     : 'bg-white/50 dark:bg-white/[0.02] text-gray-500 border-gray-100 dark:border-white/5 hover:border-rose-500/30 hover:text-rose-600'
@@ -203,50 +202,50 @@ const EventsManager = () => {
       </div>
 
       {/* Events Grid Layout */}
-      <AnimatePresence mode="wait">
+      <>
       {loading ? (
-        <motion.div 
+        <div 
             key="loading"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            
+            
+            
             className="flex flex-col items-center justify-center py-48 opacity-50"
         >
            <Activity className="w-16 h-16 text-rose-500 animate-spin mb-8" />
            <p className="text-[11px] font-black uppercase tracking-[0.3em] text-gray-500">{t('admin.events.scanning')}</p>
-        </motion.div>
+        </div>
       ) : filteredEvents.length === 0 ? (
-        <motion.div 
+        <div 
             key="empty"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-white/50 dark:bg-white/[0.01] border-2 border-dashed border-gray-100 dark:border-white/5 rounded-[3rem] py-48 text-center flex flex-col items-center group transition-all duration-500 shadow-sm"
+            
+            
+            className="bg-white/50 dark:bg-white/[0.01] border-2 border-dashed border-gray-100 dark:border-white/5 rounded-[3rem] py-48 text-center flex flex-col items-center group transition-[color,background-color,border-color,transform,opacity] duration-500 shadow-sm"
         >
             <div className="w-24 h-24 bg-rose-500/5 dark:bg-rose-500/10 rounded-full flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-500">
                 <Sparkles className="w-12 h-12 text-rose-400/30" />
             </div>
             <h4 className="text-xl font-black uppercase tracking-[0.3em] text-gray-900 dark:text-white">{t('admin.events.no_events')}</h4>
             <p className="text-[10px] font-black mt-4 uppercase tracking-widest text-gray-400">{t('admin.events.no_events_hint')}</p>
-        </motion.div>
+        </div>
       ) : (
-        <motion.div 
+        <div 
             key="grid"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            
+            
             className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8"
         >
           {filteredEvents.map((event, idx) => {
             const dateInfo = formatDate(event.event_date);
             return (
-              <motion.div 
+              <div 
                 key={event.id} 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.05 }}
-                className="group relative bg-white dark:bg-white/[0.01] backdrop-blur-xl border border-gray-100 dark:border-white/5 rounded-[3rem] overflow-hidden transition-all duration-500 hover:border-rose-500/30 hover:shadow-2xl hover:shadow-rose-500/10"
+                
+                
+                
+                className="group relative bg-white dark:bg-white/[0.01] border border-gray-100 dark:border-white/5 rounded-[3rem] overflow-hidden transition-[color,background-color,border-color,transform,opacity] duration-500 hover:border-rose-500/30 hover:shadow-2xl hover:shadow-rose-500/10"
               >
                 {/* Visual Status Indicator */}
-                <div className={`absolute top-0 inset-inline-start-0 inset-inline-end-0 h-1.5 transition-all duration-700 ${event.is_published ? 'bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.5)]' : 'bg-gray-300 dark:bg-slate-800'}`}></div>
+                <div className={`absolute top-0 inset-inline-start-0 inset-inline-end-0 h-1.5 transition-[color,background-color,border-color,transform,opacity] duration-700 ${event.is_published ? 'bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.5)]' : 'bg-gray-300 dark:bg-slate-800'}`}></div>
                 
                 <div className="p-10">
                   <div className="flex justify-between items-start mb-8 relative z-10">
@@ -256,7 +255,7 @@ const EventsManager = () => {
                       </div>
                       <span className="text-[10px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-widest">{t(`admin.events.categories.${event.category?.toLowerCase() || 'activity'}`)}</span>
                     </div>
-                    <span className={`px-4 py-1.5 rounded-full text-[8px] font-black uppercase tracking-widest border transition-all duration-500 ${
+                    <span className={`px-4 py-1.5 rounded-full text-[8px] font-black uppercase tracking-widest border transition-[color,background-color,border-color,transform,opacity] duration-500 ${
                          event.is_published ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600' : 'bg-gray-100 dark:bg-white/5 border-gray-100 dark:border-white/10 text-gray-400'
                     }`}>
                          {event.is_published ? t('admin.events.published') : t('admin.events.draft')}
@@ -266,7 +265,7 @@ const EventsManager = () => {
                   <h3 className="text-2xl font-black text-gray-900 dark:text-white leading-tight mb-8 group-hover:text-rose-600 transition-colors min-h-[4rem] line-clamp-2 uppercase tracking-tight relative z-10">{event.title}</h3>
 
                   <div className="space-y-4 mb-8 relative z-10">
-                    <div className="flex items-center gap-5 p-5 rounded-[1.5rem] bg-gray-50 dark:bg-white/[0.01] border border-gray-100 dark:border-white/5 group/info hover:bg-white dark:hover:bg-white/5 transition-all duration-500 shadow-inner">
+                    <div className="flex items-center gap-5 p-5 rounded-[1.5rem] bg-gray-50 dark:bg-white/[0.01] border border-gray-100 dark:border-white/5 group/info hover:bg-white dark:hover:bg-white/5 transition-[color,background-color,border-color,transform,opacity] duration-500 shadow-inner">
                        <div className="w-14 h-14 rounded-2xl bg-white dark:bg-black border border-gray-100 dark:border-white/5 flex flex-col items-center justify-center text-rose-600 dark:text-rose-400 shadow-sm group-hover/info:scale-110 transition-transform duration-700">
                           <span className="text-[10px] font-black uppercase">{dateInfo.month}</span>
                           <span className="text-2xl font-black mt-0.5">{dateInfo.day}</span>
@@ -277,7 +276,7 @@ const EventsManager = () => {
                        </div>
                     </div>
 
-                    <div className="flex items-center gap-5 p-5 rounded-[1.5rem] bg-gray-50 dark:bg-white/[0.01] border border-gray-100 dark:border-white/5 group/info hover:bg-white dark:hover:bg-white/5 transition-all duration-500 shadow-inner">
+                    <div className="flex items-center gap-5 p-5 rounded-[1.5rem] bg-gray-50 dark:bg-white/[0.01] border border-gray-100 dark:border-white/5 group/info hover:bg-white dark:hover:bg-white/5 transition-[color,background-color,border-color,transform,opacity] duration-500 shadow-inner">
                        <div className="w-14 h-14 rounded-2xl bg-white dark:bg-black border border-gray-100 dark:border-white/5 flex items-center justify-center text-indigo-500 shadow-sm group-hover/info:scale-110 transition-transform duration-700">
                           <MapPin className="w-6 h-6" />
                        </div>
@@ -295,13 +294,13 @@ const EventsManager = () => {
                   <div className="flex items-center justify-end gap-3 pt-8 border-t border-gray-100 dark:border-white/5 relative z-10">
                     <button 
                       onClick={() => openModal(event)}
-                      className="flex-1 py-4.5 bg-gray-50 dark:bg-white/5 hover:bg-rose-600 hover:text-white dark:text-gray-400 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 group/edit"
+                      className="flex-1 py-4.5 bg-gray-50 dark:bg-white/5 hover:bg-rose-600 hover:text-white dark:text-gray-400 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-[color,background-color,border-color,transform,opacity] flex items-center justify-center gap-2 group/edit"
                     >
                       <Edit3 className="w-4 h-4 group-hover/edit:rotate-12 transition-transform" /> {t('common.edit')}
                     </button>
                     <button 
                       onClick={() => handleDelete(event.id)}
-                      className="w-14 h-14 bg-rose-500/5 text-rose-500 border border-rose-500/10 hover:bg-rose-600 hover:text-white rounded-2xl transition-all flex items-center justify-center shadow-inner"
+                      className="w-14 h-14 bg-rose-500/5 text-rose-500 border border-rose-500/10 hover:bg-rose-600 hover:text-white rounded-2xl transition-[color,background-color,border-color,transform,opacity] flex items-center justify-center shadow-inner"
                     >
                       <Trash2 className="w-5 h-5" />
                     </button>
@@ -312,27 +311,27 @@ const EventsManager = () => {
                     <Zap className="w-24 h-24 text-rose-500" />
                   </div>
                 </div>
-              </motion.div>
+              </div>
             );
           })}
-        </motion.div>
+        </div>
       )}
-      </AnimatePresence>
+      </>
 
       {/* Event Form Modal */}
-      <AnimatePresence>
+      <>
       {showModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
-           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={closeModal} className="absolute inset-0 bg-gray-950/40 dark:bg-black/80 backdrop-blur-md" />
-           <motion.div 
-             initial={{ opacity: 0, scale: 0.9, y: 20 }} 
-             animate={{ opacity: 1, scale: 1, y: 0 }} 
-             exit={{ opacity: 0, scale: 0.9, y: 20 }} 
+           <div    onClick={closeModal} className="absolute inset-0 bg-gray-950/40 dark:bg-black/80" />
+           <div 
+              
+              
+              
              className="bg-white dark:bg-[#080808] border border-gray-100 dark:border-white/5 shadow-2xl rounded-[3.5rem] w-full max-w-3xl overflow-hidden relative z-10"
              onClick={e => e.stopPropagation()}
            >
               {/* Modal Background Glow */}
-              <div className="absolute top-0 inset-inline-end-0 w-80 h-80 bg-rose-500/10 blur-[100px] rounded-full pointer-events-none"></div>
+              <div className="absolute top-0 inset-inline-end-0 w-80 h-80 bg-rose-500/10 hidden rounded-full pointer-events-none"></div>
 
               {/* Modal Header */}
               <div className="p-10 lg:p-12 border-b border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.01] flex justify-between items-center relative z-10">
@@ -345,7 +344,7 @@ const EventsManager = () => {
                         <p className="text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-widest mt-1">{t('admin.events.registry_sync')}</p>
                     </div>
                  </div>
-                 <button onClick={closeModal} className="w-12 h-12 flex items-center justify-center bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 text-gray-500 rounded-2xl hover:text-rose-600 transition-all shadow-sm">
+                 <button onClick={closeModal} className="w-12 h-12 flex items-center justify-center bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 text-gray-500 rounded-2xl hover:text-rose-600 transition-[color,background-color,border-color,transform,opacity] shadow-sm">
                     <X className="w-6 h-6" />
                  </button>
               </div>
@@ -362,7 +361,7 @@ const EventsManager = () => {
                             required
                             value={formData.title}
                             onChange={(e) => setFormData({...formData, title: e.target.value})}
-                            className="w-full bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/10 rounded-[1.5rem] py-5 ps-16 pe-8 text-gray-900 dark:text-white text-lg font-black focus:ring-4 focus:ring-rose-500/10 outline-none transition-all shadow-inner uppercase tracking-widest"
+                            className="w-full bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/10 rounded-[1.5rem] py-5 ps-16 pe-8 text-gray-900 dark:text-white text-lg font-black focus:ring-4 focus:ring-rose-500/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner uppercase tracking-widest"
                             placeholder={t('admin.events.modals.placeholder_title')}
                           />
                        </div>
@@ -378,7 +377,7 @@ const EventsManager = () => {
                                required
                                value={formData.event_date}
                                onChange={(e) => setFormData({...formData, event_date: e.target.value})}
-                               className="w-full bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/10 rounded-[1.5rem] py-5 ps-14 pe-6 text-gray-900 dark:text-white font-black focus:ring-4 focus:ring-rose-500/10 outline-none transition-all shadow-inner uppercase text-[11px]"
+                               className="w-full bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/10 rounded-[1.5rem] py-5 ps-14 pe-6 text-gray-900 dark:text-white font-black focus:ring-4 focus:ring-rose-500/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner uppercase text-[11px]"
                              />
                           </div>
                        </div>
@@ -390,7 +389,7 @@ const EventsManager = () => {
                                type="text"
                                value={formData.location}
                                onChange={(e) => setFormData({...formData, location: e.target.value})}
-                               className="w-full bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/10 rounded-[1.5rem] py-5 ps-14 pe-6 text-gray-900 dark:text-white font-black focus:ring-4 focus:ring-rose-500/10 outline-none transition-all shadow-inner uppercase tracking-widest text-[11px]"
+                               className="w-full bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/10 rounded-[1.5rem] py-5 ps-14 pe-6 text-gray-900 dark:text-white font-black focus:ring-4 focus:ring-rose-500/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner uppercase tracking-widest text-[11px]"
                                placeholder={t('admin.events.modals.placeholder_location')}
                              />
                           </div>
@@ -405,7 +404,7 @@ const EventsManager = () => {
                              <select 
                                value={formData.category}
                                onChange={(e) => setFormData({...formData, category: e.target.value})}
-                               className="w-full bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/10 rounded-[1.5rem] py-5 ps-14 pe-8 text-gray-900 dark:text-white font-black focus:ring-4 focus:ring-rose-500/10 outline-none transition-all shadow-inner appearance-none uppercase tracking-widest text-[11px]"
+                               className="w-full bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/10 rounded-[1.5rem] py-5 ps-14 pe-8 text-gray-900 dark:text-white font-black focus:ring-4 focus:ring-rose-500/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner appearance-none uppercase tracking-widest text-[11px]"
                              >
                                {categories.filter(c => c !== 'All').map(cat => (
                                  <option key={cat} value={cat}>{t(`admin.events.categories.${cat.toLowerCase()}`)}</option>
@@ -417,11 +416,11 @@ const EventsManager = () => {
                        <div className="flex flex-col justify-end">
                            <div 
                                 onClick={() => setFormData({...formData, is_published: !formData.is_published})}
-                                className={`flex items-center gap-4 px-8 py-5 rounded-[1.5rem] border transition-all duration-500 cursor-pointer shadow-inner ${
+                                className={`flex items-center gap-4 px-8 py-5 rounded-[1.5rem] border transition-[color,background-color,border-color,transform,opacity] duration-500 cursor-pointer shadow-inner ${
                                     formData.is_published ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-gray-50 dark:bg-white/[0.01] border-gray-100 dark:border-white/5'
                                 }`}
                            >
-                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-500 ${
+                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-[color,background-color,border-color,transform,opacity] duration-500 ${
                                     formData.is_published ? 'bg-emerald-500 text-white' : 'bg-gray-200 dark:bg-white/10 text-gray-400'
                                 }`}>
                                     <Bell className="w-5 h-5" />
@@ -431,7 +430,7 @@ const EventsManager = () => {
                                     <span className="text-[8px] font-black uppercase tracking-[0.2em] text-gray-400 mt-0.5 italic">{t('admin.events.propagation_protocol')}</span>
                                 </div>
                                 <div className="ms-auto">
-                                    <div className={`w-12 h-6 rounded-full transition-all duration-500 relative flex items-center px-1 ${
+                                    <div className={`w-12 h-6 rounded-full transition-[color,background-color,border-color,transform,opacity] duration-500 relative flex items-center px-1 ${
                                         formData.is_published ? 'bg-emerald-500' : 'bg-gray-200 dark:bg-white/10'
                                     }`}>
                                         <div className={`w-4 h-4 bg-white rounded-full shadow-md transition-transform duration-500 ${
@@ -451,7 +450,7 @@ const EventsManager = () => {
                             rows="4"
                             value={formData.description}
                             onChange={(e) => setFormData({...formData, description: e.target.value})}
-                            className="w-full bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/10 rounded-[2.5rem] ps-16 pe-8 py-6 text-gray-900 dark:text-white font-bold focus:ring-4 focus:ring-rose-500/10 outline-none transition-all shadow-inner resize-none min-h-[140px]"
+                            className="w-full bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/10 rounded-[2.5rem] ps-16 pe-8 py-6 text-gray-900 dark:text-white font-bold focus:ring-4 focus:ring-rose-500/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner resize-none min-h-[140px]"
                             placeholder={t('admin.events.modals.placeholder_desc')}
                           ></textarea>
                        </div>
@@ -461,20 +460,20 @@ const EventsManager = () => {
 
               {/* Modal Footer */}
               <div className="p-10 lg:p-12 border-t border-gray-100 dark:border-white/5 flex justify-end gap-6 bg-gray-50/50 dark:bg-white/[0.01] relative z-10">
-                 <button onClick={closeModal} className="px-10 py-5 rounded-[2rem] font-black text-gray-500 hover:text-gray-900 dark:text-slate-400 dark:hover:text-white transition-all uppercase text-[10px] tracking-widest">{t('common.cancel')}</button>
+                 <button onClick={closeModal} className="px-10 py-5 rounded-[2rem] font-black text-gray-500 hover:text-gray-900 dark:text-slate-400 dark:hover:text-white transition-[color,background-color,border-color,transform,opacity] uppercase text-[10px] tracking-widest">{t('common.cancel')}</button>
                  <button 
                    type="submit" 
                    form="event-form"
-                   className="flex items-center gap-3 bg-rose-600 hover:bg-rose-700 text-white px-14 py-5 rounded-[2.5rem] font-black transition-all shadow-xl shadow-rose-600/20 active:scale-95 uppercase text-[10px] tracking-widest"
+                   className="flex items-center gap-3 bg-rose-600 hover:bg-rose-700 text-white px-14 py-5 rounded-[2.5rem] font-black transition-[color,background-color,border-color,transform,opacity] shadow-xl shadow-rose-600/20 active:scale-95 uppercase text-[10px] tracking-widest"
                  >
                    <Save className="w-5 h-5" />
                    {editingEvent ? t('common.save') : t('common.save')}
                  </button>
               </div>
-           </motion.div>
+           </div>
         </div>
       )}
-      </AnimatePresence>
+      </>
     </div>
   );
 };

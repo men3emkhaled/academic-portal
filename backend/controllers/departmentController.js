@@ -5,6 +5,7 @@ const getAllDepartments = async (req, res) => {
     const departments = await Department.getAll();
     res.json(departments);
   } catch (error) {
+    console.error('❌ Error in getAllDepartments:', error);
     res.status(500).json({ message: error.message });
   }
 };

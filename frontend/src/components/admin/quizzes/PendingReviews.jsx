@@ -122,7 +122,7 @@ const PendingReviews = ({ quizId = null }) => {
            <p className="text-xs font-black uppercase tracking-widest text-gray-500">{t('admin.quizzes.reviews.scanning')}</p>
         </div>
       ) : filteredAttempts.length === 0 ? (
-        <div className="bg-white/80 dark:bg-black/20 border-2 border-dashed border-gray-200 dark:border-white/10 rounded-[3rem] py-48 text-center flex flex-col items-center group transition-all duration-500">
+        <div className="bg-white/80 dark:bg-black/20 border-2 border-dashed border-gray-200 dark:border-white/10 rounded-[3rem] py-48 text-center flex flex-col items-center group transition-[color,background-color,border-color,transform,opacity] duration-500">
             <div className="w-24 h-24 bg-emerald-500/5 dark:bg-emerald-500/10 rounded-full flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-500">
                 <CheckCircle2 className="w-12 h-12 text-emerald-400 opacity-50" />
             </div>
@@ -142,7 +142,7 @@ const PendingReviews = ({ quizId = null }) => {
               <div
                 key={attempt.attempt_id}
                 onClick={() => handleSelectAttempt(attempt)}
-                className={`group relative p-6 rounded-[2.5rem] border transition-all duration-500 cursor-pointer ${
+                className={`group relative p-6 rounded-[2.5rem] border transition-[color,background-color,border-color,transform,opacity] duration-500 cursor-pointer ${
                   selectedAttempt?.attempt_id === attempt.attempt_id
                     ? 'bg-emerald-600 text-white border-emerald-500 shadow-xl'
                     : 'bg-white/80 dark:bg-[#111]/80 border-gray-100 dark:border-white/10 hover:border-emerald-500/30 hover:bg-emerald-500/5'
@@ -162,13 +162,13 @@ const PendingReviews = ({ quizId = null }) => {
                       <p className={`text-[10px] font-black tracking-widest uppercase mt-0.5 ${selectedAttempt?.attempt_id === attempt.attempt_id ? 'text-white/60' : 'text-gray-400'}`}>ID: {attempt.student_id}</p>
                     </div>
                   </div>
-                  <span className={`flex-shrink-0 w-8 h-8 rounded-xl flex items-center justify-center text-[10px] font-black border transition-all ${
+                  <span className={`flex-shrink-0 w-8 h-8 rounded-xl flex items-center justify-center text-[10px] font-black border transition-[color,background-color,border-color,transform,opacity] ${
                       selectedAttempt?.attempt_id === attempt.attempt_id ? 'bg-white/20 border-white/20 text-white' : 'bg-amber-500/10 border-amber-500/20 text-amber-600'
                   }`}>
                     {attempt.pending_count}
                   </span>
                 </div>
-                <div className={`p-4 rounded-2xl border transition-all mb-4 ${
+                <div className={`p-4 rounded-2xl border transition-[color,background-color,border-color,transform,opacity] mb-4 ${
                     selectedAttempt?.attempt_id === attempt.attempt_id ? 'bg-black/10 border-white/10' : 'bg-gray-50 dark:bg-black/40 border-gray-100 dark:border-white/5'
                 }`}>
                     <p className={`text-[9px] font-black uppercase tracking-[0.15em] truncate ${selectedAttempt?.attempt_id === attempt.attempt_id ? 'text-white' : 'text-emerald-600 dark:text-emerald-400'}`}>{attempt.quiz_title}</p>
@@ -183,7 +183,7 @@ const PendingReviews = ({ quizId = null }) => {
 
           <div className="xl:col-span-3">
             {!selectedAttempt ? (
-              <div className="bg-white/80 dark:bg-[#111]/80 backdrop-blur-xl border-2 border-dashed border-gray-200 dark:border-white/10 rounded-[3rem] py-56 text-center flex flex-col items-center group transition-all duration-500 shadow-sm">
+              <div className="bg-white/80 dark:bg-[#111]/80 border-2 border-dashed border-gray-200 dark:border-white/10 rounded-[3rem] py-56 text-center flex flex-col items-center group transition-[color,background-color,border-color,transform,opacity] duration-500 shadow-sm">
                   <div className="w-24 h-24 bg-emerald-500/5 dark:bg-emerald-500/10 rounded-full flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-500">
                     <ClipboardList className="w-12 h-12 text-emerald-400 opacity-50" />
                   </div>
@@ -191,12 +191,12 @@ const PendingReviews = ({ quizId = null }) => {
                   <p className="text-sm font-bold mt-4 tracking-widest text-gray-500 max-w-xs">{t('admin.quizzes.reviews.workspace_idle_desc')}</p>
               </div>
             ) : detailsLoading ? (
-               <div className="bg-white/80 dark:bg-[#111]/80 backdrop-blur-xl border border-gray-200 dark:border-white/10 rounded-[3rem] py-60 flex flex-col items-center justify-center shadow-sm">
+               <div className="bg-white/80 dark:bg-[#111]/80 border border-gray-200 dark:border-white/10 rounded-[3rem] py-60 flex flex-col items-center justify-center shadow-sm">
                   <Activity className="w-12 h-12 text-emerald-600 animate-spin mb-6" />
                   <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">{t('admin.quizzes.reviews.hydrating')}</p>
                </div>
             ) : (
-              <div className="bg-white/80 dark:bg-[#111]/80 backdrop-blur-xl border border-gray-200 dark:border-white/10 rounded-[3rem] overflow-hidden shadow-sm animate-in fade-in slide-in-from-right-6 duration-500">
+              <div className="bg-white/80 dark:bg-[#111]/80 border border-gray-200 dark:border-white/10 rounded-[3rem] overflow-hidden shadow-sm animate-in fade-in slide-in-from-right-6 duration-500">
                 <div className="p-10 border-b border-gray-100 dark:border-white/10 bg-gray-50/30 dark:bg-white/[0.01]">
                   <div className="flex items-center gap-8">
                         <div className="w-20 h-20 rounded-[2rem] bg-emerald-500/10 border-2 border-emerald-500/20 flex items-center justify-center overflow-hidden shadow-inner">
@@ -232,7 +232,7 @@ const PendingReviews = ({ quizId = null }) => {
                     </div>
                   ) : (
                     reviewAnswers.map((ans, idx) => (
-                      <div key={ans.answer_id} className="group relative bg-white/50 dark:bg-black/20 border border-gray-100 dark:border-white/10 rounded-[3rem] p-10 hover:border-emerald-500/40 transition-all duration-500 shadow-sm hover:shadow-xl">
+                      <div key={ans.answer_id} className="group relative bg-white/50 dark:bg-black/20 border border-gray-100 dark:border-white/10 rounded-[3rem] p-10 hover:border-emerald-500/40 transition-[color,background-color,border-color,transform,opacity] duration-500 shadow-sm hover:shadow-xl">
                            <div className="flex items-center gap-5 mb-10 pb-6 border-b border-gray-100 dark:border-white/10">
                                 <span className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-xs font-black text-emerald-600 shadow-inner">{idx + 1}</span>
                                 <div className="flex-1">
@@ -275,7 +275,7 @@ const PendingReviews = ({ quizId = null }) => {
                                             />
                                             <button 
                                                 onClick={() => window.open(`${process.env.REACT_APP_API_URL || ''}${ans.written_answer_url}`, '_blank')}
-                                                className="absolute inset-0 bg-indigo-600/20 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-all"
+                                                className="absolute inset-0 bg-indigo-600/20 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-[color,background-color,border-color,transform,opacity]"
                                             >
                                                 <div className="bg-white text-indigo-600 px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl flex items-center gap-2">
                                                     <ExternalLink className="w-4 h-4" /> {t('admin.quizzes.reviews.view_image_btn')}
@@ -308,13 +308,13 @@ const PendingReviews = ({ quizId = null }) => {
                                         placeholder={t('admin.quizzes.reviews.score_placeholder', { max: ans.points })}
                                         value={grading[ans.answer_id] ?? ''}
                                         onChange={(e) => handleGradeChange(ans.answer_id, e.target.value)}
-                                        className="w-40 bg-white dark:bg-black border border-gray-200 dark:border-white/10 rounded-2xl px-6 py-4.5 text-gray-900 dark:text-white text-lg font-black focus:ring-2 focus:ring-emerald-500/50 outline-none transition-all shadow-inner"
+                                        className="w-40 bg-white dark:bg-black border border-gray-200 dark:border-white/10 rounded-2xl px-6 py-4.5 text-gray-900 dark:text-white text-lg font-black focus:ring-2 focus:ring-emerald-500/50 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner"
                                       />
                                       <Award className="absolute right-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300 pointer-events-none" />
                                   </div>
                                   <button
                                     onClick={() => handleSubmitGrade(ans.answer_id, ans.points)}
-                                    className="px-10 py-4.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-lg shadow-emerald-500/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-3"
+                                    className="px-10 py-4.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-lg shadow-emerald-500/20 hover:scale-105 active:scale-95 transition-[color,background-color,border-color,transform,opacity] flex items-center gap-3"
                                   >
                                     <CheckCircle className="w-5 h-5" /> {t('admin.quizzes.reviews.submit_grade_btn')}
                                   </button>

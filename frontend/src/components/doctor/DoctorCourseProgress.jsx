@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { useDoctorAuth } from '../../context/DoctorAuthContext';
-import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import { ListChecks, Plus, Edit3, Trash2, CheckCircle2, Circle, GripVertical } from 'lucide-react';
 
 const DoctorCourseProgress = ({ courses }) => {
+  const { t } = useTranslation();
   const { doctorApi } = useDoctorAuth();
   const [selectedCourseId, setSelectedCourseId] = useState('');
   const [progressItems, setProgressItems] = useState([]);
@@ -29,7 +28,7 @@ const DoctorCourseProgress = ({ courses }) => {
       const res = await doctorApi('get', `/doctor/course-progress/${selectedCourseId}`);
       setProgressItems(res.data);
     } catch (err) {
-      toast.error('Failed to load course progress');
+      toast.error(t('doctor.progress.load_failed'));
     } finally {
       setLoading(false);
     }
@@ -37,25 +36,25 @@ const DoctorCourseProgress = ({ courses }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.title.trim()) return toast.error('Title is required');
+    if (!formData.title.trim()) return toast.error(t('doctor.progress.title_required'));
 
     setIsSaving(true);
     try {
       if (editingItem) {
         await doctorApi('put', `/doctor/course-progress/${editingItem.id}`, formData);
-        toast.success('Item updated');
+        toast.success(t('doctor.progress.item_updated'));
       } else {
         await doctorApi('post', '/doctor/course-progress', {
           ...formData,
           courseId: selectedCourseId,
           order_index: progressItems.length
         });
-        toast.success('Item added');
+        toast.success(t('doctor.progress.item_added'));
       }
       resetForm();
       fetchProgress();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to save item');
+      toast.error(err.response?.data?.message || t('doctor.progress.save_failed'));
     } finally {
       setIsSaving(false);
     }
@@ -71,19 +70,19 @@ const DoctorCourseProgress = ({ courses }) => {
         item.id === id ? { ...item, is_completed: !currentStatus } : item
       ));
     } catch (err) {
-      toast.error('Failed to update status');
+      toast.error(t('doctor.progress.update_failed'));
       fetchProgress(); // Revert on failure
     }
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Delete this item from syllabus?')) return;
+    if (!window.confirm(t('doctor.progress.delete_confirm'))) return;
     try {
       await doctorApi('delete', `/doctor/course-progress/${id}`);
-      toast.success('Item deleted');
+      toast.success(t('doctor.progress.item_deleted'));
       fetchProgress();
     } catch (err) {
-      toast.error('Failed to delete item');
+      toast.error(t('doctor.progress.delete_failed'));
     }
   };
 
@@ -110,10 +109,10 @@ const DoctorCourseProgress = ({ courses }) => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-xl md:text-2xl font-black text-gray-900 dark:text-white flex items-center gap-2">
-            <ListChecks className="w-6 h-6 text-teal-500" /> Syllabus Progress
+            <ListChecks className="w-6 h-6 text-teal-500" /> {t('doctor.progress.title')}
           </h2>
           <p className="text-sm text-gray-500 dark:text-slate-500 mt-1">
-            Manage course chapters and track completion status
+            {t('doctor.progress.description')}
           </p>
         </div>
       </div>
@@ -125,7 +124,7 @@ const DoctorCourseProgress = ({ courses }) => {
           onChange={(e) => setSelectedCourseId(e.target.value)}
           className="flex-1 bg-white dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/5 rounded-xl p-3.5 text-gray-900 dark:text-white font-medium focus:border-teal-500/50 focus:outline-none transition-colors"
         >
-          <option value="">-- Select a Course --</option>
+          <option value="">{t('doctor.progress.select_course')}</option>
           {courses.map(c => (
             <option key={c.id} value={c.id}>{c.name}</option>
           ))}
@@ -135,7 +134,7 @@ const DoctorCourseProgress = ({ courses }) => {
             onClick={() => setShowForm(true)}
             className="flex items-center justify-center gap-2 bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-5 rounded-xl transition-all hover:shadow-lg hover:shadow-teal-500/20 active:scale-95 text-sm"
           >
-            <Plus className="w-4 h-4" /> Add Topic
+            <Plus className="w-4 h-4" /> {t('doctor.progress.add_topic')}
           </button>
         )}
       </div>
@@ -144,7 +143,7 @@ const DoctorCourseProgress = ({ courses }) => {
       {selectedCourseId && progressItems.length > 0 && !loading && (
         <div className="bg-white dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/5 p-5 rounded-2xl">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-bold text-gray-700 dark:text-slate-300">Overall Completion</span>
+            <span className="text-sm font-bold text-gray-700 dark:text-slate-300">{t('doctor.progress.overall_completion')}</span>
             <span className="text-sm font-black text-teal-500">{progressPct}%</span>
           </div>
           <div className="w-full bg-gray-100 dark:bg-white/5 rounded-full h-3 overflow-hidden">
@@ -154,7 +153,7 @@ const DoctorCourseProgress = ({ courses }) => {
             ></div>
           </div>
           <p className="text-xs font-medium text-gray-500 mt-3 text-center">
-            {completedCount} of {progressItems.length} topics completed
+            {t('doctor.progress.topics_completed', { completed: completedCount, total: progressItems.length })}
           </p>
         </div>
       )}
@@ -164,11 +163,11 @@ const DoctorCourseProgress = ({ courses }) => {
         <div className="bg-white dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/5 p-6 rounded-2xl animate-fadeIn">
           <h3 className="text-lg font-black mb-5 flex items-center gap-2 text-gray-900 dark:text-white">
             {editingItem ? <Edit3 className="text-teal-500 w-5 h-5" /> : <Plus className="text-teal-500 w-5 h-5" />}
-            {editingItem ? 'Edit Topic' : 'Add New Topic'}
+            {editingItem ? t('doctor.progress.edit_topic') : t('doctor.progress.add_new_topic')}
           </h3>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-bold text-gray-500 dark:text-slate-500 mb-2 uppercase tracking-wider">Topic Title *</label>
+              <label className="block text-xs font-bold text-gray-500 dark:text-slate-500 mb-2 uppercase tracking-wider">{t('doctor.progress.topic_title')} *</label>
               <input
                 type="text"
                 required
@@ -186,14 +185,14 @@ const DoctorCourseProgress = ({ courses }) => {
                 disabled={isSaving}
                 className="flex-1 bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 rounded-xl transition-all disabled:opacity-50 hover:shadow-lg hover:shadow-teal-500/20 active:scale-[0.98]"
               >
-                {isSaving ? 'Saving...' : (editingItem ? 'Update Topic' : 'Add Topic')}
+                {isSaving ? t('doctor.progress.saving') : (editingItem ? t('doctor.progress.update_topic') : t('doctor.progress.add_topic'))}
               </button>
               <button
                 type="button"
                 onClick={resetForm}
                 className="px-6 py-3 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 font-bold rounded-xl transition-colors"
               >
-                Cancel
+                {t('common.cancel')}
               </button>
             </div>
           </form>
@@ -204,7 +203,7 @@ const DoctorCourseProgress = ({ courses }) => {
       {!selectedCourseId ? (
         <div className="bg-white dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/5 rounded-2xl p-12 text-center">
           <ListChecks className="w-12 h-12 text-gray-300 dark:text-slate-600 mx-auto mb-3" />
-          <p className="text-gray-500 dark:text-slate-500 font-medium">Select a course to view syllabus</p>
+          <p className="text-gray-500 dark:text-slate-500 font-medium">{t('doctor.progress.select_hint')}</p>
         </div>
       ) : loading ? (
         <div className="space-y-3">
@@ -217,8 +216,8 @@ const DoctorCourseProgress = ({ courses }) => {
       ) : progressItems.length === 0 ? (
         <div className="bg-white dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/5 rounded-2xl p-12 text-center">
           <ListChecks className="w-12 h-12 text-gray-300 dark:text-slate-600 mx-auto mb-3" />
-          <p className="text-gray-500 dark:text-slate-500 font-medium">No topics added to syllabus yet</p>
-          <p className="text-xs text-gray-400 dark:text-slate-600 mt-1">Click "Add Topic" to build your course timeline</p>
+          <p className="text-gray-500 dark:text-slate-500 font-medium">{t('doctor.progress.no_topics')}</p>
+          <p className="text-xs text-gray-400 dark:text-slate-600 mt-1">{t('doctor.progress.no_topics_hint')}</p>
         </div>
       ) : (
         <div className="space-y-3">

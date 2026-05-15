@@ -56,14 +56,14 @@ const StudentLogins = () => {
           </div>
           <button 
             onClick={() => fetchLogs()} 
-            className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest text-gray-500 hover:border-blue-500/30 transition-all"
+            className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest text-gray-500 hover:border-blue-500/30 transition-[color,background-color,border-color,transform,opacity]"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} /> {t('admin.logs.sync_access')}
           </button>
       </div>
 
       {/* Main Table View */}
-      <div className="bg-white/80 dark:bg-black/40 backdrop-blur-xl border border-gray-100 dark:border-white/10 rounded-[3rem] overflow-hidden shadow-2xl transition-all duration-500">
+      <div className="bg-white/80 dark:bg-black/40 border border-gray-100 dark:border-white/10 rounded-[3rem] overflow-hidden shadow-2xl transition-[color,background-color,border-color,transform,opacity] duration-500">
         <div className="px-10 py-8 border-b border-gray-50 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.01] flex justify-between items-center">
             <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
               {t('admin.logs.access_points', { count: logs.length, total: pagination.total })}
@@ -98,10 +98,10 @@ const StudentLogins = () => {
               </thead>
               <tbody className="divide-y divide-gray-50 dark:divide-white/5">
                 {logs.map(log => (
-                  <tr key={log.id} className="group hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-all">
+                  <tr key={log.id} className="group hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-[color,background-color,border-color,transform,opacity]">
                     <td className="px-10 py-6">
                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center overflow-hidden shadow-inner group-hover:bg-blue-600 group-hover:text-white transition-all duration-500">
+                          <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center overflow-hidden shadow-inner group-hover:bg-blue-600 group-hover:text-white transition-[color,background-color,border-color,transform,opacity] duration-500">
                              {log.avatar_url ? (
                                <img src={log.avatar_url} alt={log.student_name} className="w-full h-full object-cover" />
                              ) : (
@@ -158,7 +158,7 @@ const StudentLogins = () => {
             <button 
               onClick={() => fetchLogs(pagination.page - 1)} 
               disabled={pagination.page <= 1}
-              className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-500 hover:border-blue-500/30 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-500 hover:border-blue-500/30 transition-[color,background-color,border-color,transform,opacity] disabled:opacity-30 disabled:cursor-not-allowed"
             >
               <ChevronLeft className="w-4 h-4" /> {t('common.previous')}
             </button>
@@ -170,7 +170,7 @@ const StudentLogins = () => {
             <button 
               onClick={() => fetchLogs(pagination.page + 1)} 
               disabled={pagination.page >= pagination.totalPages}
-              className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-500 hover:border-blue-500/30 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-500 hover:border-blue-500/30 transition-[color,background-color,border-color,transform,opacity] disabled:opacity-30 disabled:cursor-not-allowed"
             >
               {t('common.next')} <ChevronRight className="w-4 h-4" />
             </button>

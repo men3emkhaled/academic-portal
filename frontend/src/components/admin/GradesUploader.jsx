@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
@@ -81,7 +80,7 @@ const GradesUploader = ({ courses = [], departments = [] }) => {
     
     setUploadingGrades(true);
     try {
-      const res = await api.delete(`/grades/admin/clear-course-grades?courseId=${selectedCourseId}&examType=${selectedExamType}`);
+      await api.delete(`/grades/admin/clear-course-grades?courseId=${selectedCourseId}&examType=${selectedExamType}`);
       toast.success(t('common.success'));
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to delete grades');
@@ -104,7 +103,7 @@ const GradesUploader = ({ courses = [], departments = [] }) => {
     <div className="space-y-8 lg:space-y-10 animate-in fade-in duration-700">
       {/* Header Bento Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 flex items-center gap-6 bg-white/50 dark:bg-white/[0.02] backdrop-blur-md border border-gray-100 dark:border-white/5 p-8 rounded-[2.5rem] shadow-sm">
+        <div className="lg:col-span-2 flex items-center gap-6 bg-white/50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 p-8 rounded-[2.5rem] shadow-sm">
           <div className="w-16 h-16 bg-orange-500/10 dark:bg-orange-500/20 rounded-2xl flex items-center justify-center border border-orange-500/20 shadow-inner group transition-transform duration-500 hover:scale-110">
             <BarChart3 className="w-8 h-8 text-orange-600 dark:text-orange-400" />
           </div>
@@ -117,9 +116,9 @@ const GradesUploader = ({ courses = [], departments = [] }) => {
         </div>
         
         <div className="bg-orange-500 text-white p-8 rounded-[2.5rem] shadow-lg shadow-orange-500/20 flex flex-col justify-between relative overflow-hidden group">
-          <div className="absolute inset-inline-end-0 top-0 w-32 h-32 bg-white/10 blur-[40px] rounded-full translate-x-1/2 -translate-y-1/2 group-hover:scale-150 transition-transform duration-700"></div>
+          <div className="absolute inset-inline-end-0 top-0 w-32 h-32 bg-white/10 hidden rounded-full translate-x-1/2 -translate-y-1/2 group-hover:scale-150 transition-transform duration-700"></div>
           <div className="flex justify-between items-start relative z-10">
-            <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
               <Database className="w-5 h-5" />
             </div>
             <span className="text-[10px] font-black uppercase tracking-widest bg-black/10 px-3 py-1 rounded-full">Grading Node</span>
@@ -135,8 +134,8 @@ const GradesUploader = ({ courses = [], departments = [] }) => {
         
         {/* Left Column: Settings & File Upload */}
         <div className="xl:col-span-2 space-y-8">
-            <div className="bg-white/50 dark:bg-white/[0.01] backdrop-blur-xl border border-gray-100 dark:border-white/5 rounded-[3rem] p-8 lg:p-12 shadow-sm relative overflow-hidden group">
-                <div className="absolute -inset-inline-start-20 -top-20 w-80 h-80 bg-orange-500/5 rounded-full blur-[80px] pointer-events-none group-hover:scale-110 transition-transform duration-1000"></div>
+            <div className="bg-white/50 dark:bg-white/[0.01] border border-gray-100 dark:border-white/5 rounded-[3rem] p-8 lg:p-12 shadow-sm relative overflow-hidden group">
+                <div className="absolute -inset-inline-start-20 -top-20 w-80 h-80 bg-orange-500/5 rounded-full hidden pointer-events-none group-hover:scale-110 transition-transform duration-1000"></div>
 
                 <div className="relative z-10 space-y-10">
                     <div className="flex items-center gap-4 mb-2">
@@ -160,7 +159,7 @@ const GradesUploader = ({ courses = [], departments = [] }) => {
                                             setSelectedDepartmentId(e.target.value);
                                             setSelectedCourseId('');
                                         }}
-                                        className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl px-6 py-4.5 font-black focus:ring-4 focus:ring-orange-500/10 outline-none transition-all shadow-inner appearance-none uppercase tracking-widest text-[11px]"
+                                        className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl px-6 py-4.5 font-black focus:ring-4 focus:ring-orange-500/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner appearance-none uppercase tracking-widest text-[11px]"
                                         disabled={uploadingGrades}
                                     >
                                         <option value="">{t('admin.grades.settings.dept_placeholder')}</option>
@@ -180,7 +179,7 @@ const GradesUploader = ({ courses = [], departments = [] }) => {
                                     <select
                                         value={selectedCourseId}
                                         onChange={(e) => setSelectedCourseId(e.target.value)}
-                                        className={`w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl px-6 py-4.5 font-black focus:ring-4 focus:ring-orange-500/10 outline-none transition-all shadow-inner appearance-none uppercase tracking-widest text-[11px] ${!selectedDepartmentId ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                        className={`w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl px-6 py-4.5 font-black focus:ring-4 focus:ring-orange-500/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner appearance-none uppercase tracking-widest text-[11px] ${!selectedDepartmentId ? 'opacity-50 cursor-not-allowed' : ''}`}
                                         disabled={uploadingGrades || !selectedDepartmentId}
                                     >
                                         <option value="">{t('admin.grades.settings.course_placeholder')}</option>
@@ -203,7 +202,7 @@ const GradesUploader = ({ courses = [], departments = [] }) => {
                                     <select
                                         value={selectedExamType}
                                         onChange={(e) => setSelectedExamType(e.target.value)}
-                                        className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl px-6 py-4.5 font-black focus:ring-4 focus:ring-orange-500/10 outline-none transition-all shadow-inner appearance-none uppercase tracking-widest text-[11px]"
+                                        className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl px-6 py-4.5 font-black focus:ring-4 focus:ring-orange-500/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner appearance-none uppercase tracking-widest text-[11px]"
                                         disabled={uploadingGrades}
                                     >
                                         <option value="midterm">{t('admin.grades.exam_types.midterm')}</option>
@@ -229,9 +228,9 @@ const GradesUploader = ({ courses = [], departments = [] }) => {
                     <form onSubmit={handleUploadGrades} className="space-y-8 border-t border-gray-100 dark:border-white/5 pt-10">
                         <div className="flex flex-col lg:flex-row gap-8 items-stretch">
                             {/* File Upload Area */}
-                            <label className={`relative flex-1 flex flex-col items-center justify-center gap-5 cursor-pointer bg-white/30 dark:bg-white/[0.01] border-2 border-gray-100 dark:border-white/5 border-dashed rounded-[2.5rem] p-10 hover:border-orange-500/40 hover:bg-orange-500/5 transition-all group/label shadow-inner overflow-hidden text-center ${uploadingGrades ? 'opacity-50 pointer-events-none' : ''}`}>
+                            <label className={`relative flex-1 flex flex-col items-center justify-center gap-5 cursor-pointer bg-white/30 dark:bg-white/[0.01] border-2 border-gray-100 dark:border-white/5 border-dashed rounded-[2.5rem] p-10 hover:border-orange-500/40 hover:bg-orange-500/5 transition-[color,background-color,border-color,transform,opacity] group/label shadow-inner overflow-hidden text-center ${uploadingGrades ? 'opacity-50 pointer-events-none' : ''}`}>
                                 <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent opacity-0 group-hover/label:opacity-100 transition-opacity"></div>
-                                <div className="w-16 h-16 bg-gray-50 dark:bg-white/5 rounded-full flex items-center justify-center group-hover/label:bg-orange-500/10 group-hover/label:scale-110 transition-all duration-500 shadow-inner relative z-10">
+                                <div className="w-16 h-16 bg-gray-50 dark:bg-white/5 rounded-full flex items-center justify-center group-hover/label:bg-orange-500/10 group-hover/label:scale-110 transition-[color,background-color,border-color,transform,opacity] duration-500 shadow-inner relative z-10">
                                     <UploadCloud className="w-8 h-8 text-gray-300 dark:text-slate-700 group-hover/label:text-orange-500 transition-colors" />
                                 </div>
                                 
@@ -250,7 +249,7 @@ const GradesUploader = ({ courses = [], departments = [] }) => {
                                 <button
                                     type="submit"
                                     disabled={uploadingGrades || !selectedCourseId || !gradesFile}
-                                    className="w-full bg-orange-500 hover:bg-orange-600 text-white font-black py-5 rounded-[2.5rem] shadow-xl shadow-orange-500/20 transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3 group h-[70px]"
+                                    className="w-full bg-orange-500 hover:bg-orange-600 text-white font-black py-5 rounded-[2.5rem] shadow-xl shadow-orange-500/20 transition-[color,background-color,border-color,transform,opacity] hover:scale-[1.02] active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3 group h-[70px]"
                                 >
                                     {uploadingGrades ? <Activity className="w-6 h-6 animate-spin" /> : <><CheckCircle className="w-6 h-6 group-hover:scale-110 transition-transform" /> <span className="uppercase tracking-widest text-xs">{t('admin.grades.upload.upload_button')}</span></>}
                                 </button>
@@ -259,7 +258,7 @@ const GradesUploader = ({ courses = [], departments = [] }) => {
                                     type="button"
                                     onClick={handleClearGrades}
                                     disabled={uploadingGrades || !selectedCourseId}
-                                    className="w-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 border border-rose-500/20 font-black py-5 rounded-[2.5rem] transition-all disabled:opacity-50 h-[70px] flex items-center justify-center gap-3 uppercase tracking-widest text-[10px]"
+                                    className="w-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 border border-rose-500/20 font-black py-5 rounded-[2.5rem] transition-[color,background-color,border-color,transform,opacity] disabled:opacity-50 h-[70px] flex items-center justify-center gap-3 uppercase tracking-widest text-[10px]"
                                 >
                                     <Trash2 className="w-5 h-5" /> {t('admin.grades.upload.delete_button')}
                                 </button>
@@ -272,35 +271,22 @@ const GradesUploader = ({ courses = [], departments = [] }) => {
 
         {/* Right Column: Status Panel */}
         <div className="xl:col-span-1">
-            <div className="bg-white/50 dark:bg-white/[0.01] backdrop-blur-xl border border-gray-100 dark:border-white/5 rounded-[3rem] p-10 lg:p-12 h-full flex flex-col justify-center items-center relative overflow-hidden text-center shadow-sm min-h-[400px]">
+            <div className="bg-white/50 dark:bg-white/[0.01] border border-gray-100 dark:border-white/5 rounded-[3rem] p-10 lg:p-12 h-full flex flex-col justify-center items-center relative overflow-hidden text-center shadow-sm min-h-[400px]">
                  {/* Cinematic Glow */}
                  <div className="absolute top-0 inset-inline-start-0 w-full h-1.5 bg-gradient-to-r from-transparent via-orange-500 to-transparent opacity-50"></div>
-                 <div className="absolute -inset-inline-end-40 -bottom-40 w-80 h-80 bg-orange-500/[0.03] rounded-full blur-[100px] pointer-events-none"></div>
                  
-                 <AnimatePresence mode="wait">
                  {!uploadingGrades && step === 0 ? (
-                     <motion.div 
-                        key="idle"
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        className="space-y-8"
-                     >
-                        <div className="w-24 h-24 bg-gray-50 dark:bg-white/5 rounded-full flex items-center justify-center mx-auto shadow-inner border border-gray-100 dark:border-white/5 group hover:border-orange-500/30 transition-all duration-700">
+                     <div className="space-y-8">
+                        <div className="w-24 h-24 bg-gray-50 dark:bg-white/5 rounded-full flex items-center justify-center mx-auto shadow-inner border border-gray-100 dark:border-white/5 group hover:border-orange-500/30 transition-[color,background-color,border-color,transform,opacity] duration-700">
                             <FileText className="w-10 h-10 text-gray-200 dark:text-slate-700 group-hover:text-orange-500 transition-colors" />
                         </div>
                         <div>
                             <h4 className="text-[11px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-[0.3em] mb-4">Relay Status</h4>
                             <p className="text-xs font-bold text-gray-400 dark:text-slate-600 leading-relaxed max-w-[220px] mx-auto uppercase tracking-widest">{t('admin.grades.status.ready')}</p>
                         </div>
-                     </motion.div>
+                     </div>
                  ) : (
-                     <motion.div 
-                        key="processing"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="w-full space-y-10"
-                     >
+                     <div className="w-full space-y-10">
                         <div className="relative flex justify-center">
                             {/* Spinning Ring */}
                             <div className="w-32 h-32 rounded-full border-[2px] border-gray-100 dark:border-white/5 border-t-orange-500 animate-spin"></div>
@@ -320,27 +306,20 @@ const GradesUploader = ({ courses = [], departments = [] }) => {
                             
                             {/* Premium Progress Bar */}
                             <div className="w-full bg-gray-50 dark:bg-black/40 rounded-full h-3 overflow-hidden border border-gray-100 dark:border-white/5 shadow-inner p-0.5">
-                                <motion.div 
-                                    className={`h-full rounded-full ${step === 4 ? 'bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.4)]' : 'bg-orange-500 shadow-[0_0_20px_rgba(249,115,22,0.4)]'}`} 
-                                    initial={{ width: 0 }}
-                                    animate={{ width: `${(step / 4) * 100}%` }}
-                                    transition={{ type: "spring", stiffness: 50, damping: 20 }}
+                                <div 
+                                    className={`h-full rounded-full transition-all duration-500 ${step === 4 ? 'bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.4)]' : 'bg-orange-500 shadow-[0_0_20px_rgba(249,115,22,0.4)]'}`} 
+                                    style={{ width: `${(step / 4) * 100}%` }}
                                 />
                             </div>
                         </div>
 
                         {step === 4 && (
-                            <motion.p 
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.4em] animate-bounce"
-                            >
+                            <p className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.4em] animate-bounce">
                                 {t('admin.grades.status.save_success')}
-                            </motion.p>
+                            </p>
                         )}
-                     </motion.div>
+                     </div>
                  )}
-                 </AnimatePresence>
             </div>
         </div>
       </div>

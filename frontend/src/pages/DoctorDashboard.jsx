@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDoctorAuth } from '../context/DoctorAuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // Components
 import DoctorSidebar from '../components/doctor/DoctorSidebar';
@@ -28,7 +29,20 @@ const DoctorDashboard = () => {
   const { isDarkMode, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTabState] = useState('overview');
+  const [direction, setDirection] = useState(0);
+
+  const DOCTOR_TABS_ORDER = ['overview', 'courses', 'materials', 'quizzes', 'tasks', 'inquiries', 'grades', 'analytics', 'attendance', 'syllabus', 'announcements', 'settings', 'notifications', 'schedule'];
+
+  const handleTabChange = (newTab) => {
+    if (newTab === activeTab) return;
+    const oldIndex = DOCTOR_TABS_ORDER.indexOf(activeTab);
+    const newIndex = DOCTOR_TABS_ORDER.indexOf(newTab);
+    if (oldIndex !== -1 && newIndex !== -1) {
+      setDirection(newIndex > oldIndex ? 1 : -1);
+    }
+    setActiveTabState(newTab);
+  };
   const [stats, setStats] = useState({ courses: 0, students: 0, quizzes: 0, resources: 0 });
   const [myCourses, setMyCourses] = useState([]);
   const [timetable, setTimetable] = useState([]);
@@ -130,7 +144,7 @@ const DoctorDashboard = () => {
       {/* Sidebar / Bottom Bar */}
       <DoctorSidebar
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        setActiveTab={handleTabChange}
         doctor={doctor}
         onLogout={handleLogout}
         unreadCount={unreadCount}
@@ -139,8 +153,8 @@ const DoctorDashboard = () => {
       {/* Main Content Area */}
       <div className="flex-1 lg:ps-96 flex flex-col min-w-0 overflow-hidden relative transition-all duration-300">
         {/* Background Glows */}
-        <div className="absolute top-[-20%] right-[-10%] w-[50%] h-[50%] bg-doctor-primary/10 blur-[150px] rounded-full pointer-events-none"></div>
-        <div className="absolute bottom-[-10%] left-[-5%] w-[40%] h-[40%] bg-doctor-primary/5 blur-[120px] rounded-full pointer-events-none"></div>
+        <div className="absolute top-[-20%] right-[-10%] w-[50%] h-[50%] bg-doctor-primary/10 hidden rounded-full pointer-events-none"></div>
+        <div className="absolute bottom-[-10%] left-[-5%] w-[40%] h-[40%] bg-doctor-primary/5 hidden rounded-full pointer-events-none"></div>
 
         <DoctorHeader
           doctor={doctor}
@@ -150,17 +164,20 @@ const DoctorDashboard = () => {
           unreadCount={unreadCount}
           onMarkRead={markNotificationAsRead}
           onMarkAllRead={markAllNotificationsAsRead}
-          setActiveTab={setActiveTab}
+          setActiveTab={handleTabChange}
         />
 
-        <main className="flex-1 overflow-y-auto p-6 lg:p-10 pb-32 lg:pb-10 hidden-scrollbar relative z-10">
-          <div className="max-w-[1400px] mx-auto">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden p-6 lg:p-10 pb-32 lg:pb-10 hidden-scrollbar relative z-10">
+          <div
+            key={activeTab}
+            className={`max-w-[1400px] mx-auto min-h-full w-full ${direction === 0 ? 'animate-fadeIn' : (direction === 1 ? (i18n.language === 'ar' ? 'animate-slideInLeft' : 'animate-slideInRight') : (i18n.language === 'ar' ? 'animate-slideInRight' : 'animate-slideInLeft'))}`}
+          >
             {activeTab === 'overview' && (
               <DoctorOverview
                 stats={stats}
                 doctor={doctor}
                 timetable={timetable}
-                setActiveTab={setActiveTab}
+                setActiveTab={handleTabChange}
               />
             )}
 

@@ -244,7 +244,7 @@ const DoctorInquiries = () => {
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: -20 }}
-                            className="bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-white/10 rounded-[3rem] overflow-hidden shadow-2xl flex flex-col h-full backdrop-blur-xl"
+                            className="bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-white/10 rounded-[3rem] overflow-hidden shadow-2xl flex flex-col h-full backdrop-blur-sm"
                           >
                               {/* Detail Header */}
                               <div className="p-10 border-b border-gray-100 dark:border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-6">

@@ -1,42 +1,30 @@
-# ============================================
-# 🏗️ Stage 1: Build the React app
-# ============================================
-FROM node:18-alpine AS builder
-
+# Stage 1: Build
+FROM node:18-alpine as build
 WORKDIR /app
 
-# Copy dependency files first
-COPY package*.json ./
-
-# Install all dependencies (including devDependencies for build)
-RUN npm ci && npm cache clean --force
-
-# Copy source code
-COPY . .
-
-# Accept API URL as a build argument
+# Accept API URL as build argument
 ARG VITE_API_URL
 ENV VITE_API_URL=$VITE_API_URL
 
-# Build the production bundle
+COPY package*.json ./
+RUN npm install
+COPY . .
 RUN npm run build
 
-# ============================================
-# 🚀 Stage 2: Serve with Nginx
-# ============================================
-FROM nginx:alpine AS production
+# Stage 2: Serve with Nginx
+FROM nginx:alpine
+COPY --from=build /app/dist /usr/share/nginx/html
 
-# Copy custom nginx config
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# SPA-friendly Nginx configuration
+RUN echo 'server { \
+    listen 80; \
+    location / { \
+        root /usr/share/nginx/html; \
+        index index.html; \
+        try_files $uri $uri/ /index.html; \
+    } \
+}' > /etc/nginx/conf.d/default.conf
 
-# Copy built assets from builder
-COPY --from=builder /app/dist /usr/share/nginx/html
-
-# Expose port
 EXPOSE 80
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:80/ || exit 1
-
 CMD ["nginx", "-g", "daemon off;"]
+
