@@ -152,7 +152,7 @@ const StudentRoadmap = () => {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pb-20">
             
             {/* Track Selector Bento Card */}
-            <div className="lg:col-span-8 bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 rounded-[3rem] p-12 flex flex-col justify-between gap-12 group hover:shadow-2xl transition-all duration-700">
+            <div className="lg:col-span-8 bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[3rem] p-12 flex flex-col justify-between gap-12 group hover:shadow-2xl transition-all duration-700">
                <div className="space-y-6">
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
                      <h2 className={`text-4xl font-black leading-tight tracking-tight max-w-md ${isAr ? 'font-arabic' : ''}`}>
@@ -246,7 +246,7 @@ const StudentRoadmap = () => {
 
                   <div className="space-y-12 relative">
                      {tasks.length === 0 ? (
-                       <div className="py-32 bg-white dark:bg-[#151520] border border-dashed border-gray-100 dark:border-white/10 rounded-[3rem] text-center opacity-40">
+                       <div className="py-32 bg-white dark:bg-[#0d0d14] border border-dashed border-gray-100 dark:border-white/10 rounded-[3rem] text-center opacity-40">
                           <ClipboardList className="w-16 h-16 mx-auto mb-6 opacity-20" />
                           <h3 className="text-xl font-black uppercase tracking-[0.4em]">{t('common.no_data')}</h3>
                        </div>
@@ -265,7 +265,7 @@ const StudentRoadmap = () => {
 
                              <div 
                                onClick={() => !updating && toggleTask(task.task_id, isCompleted)}
-                               className={`bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 rounded-[3rem] p-8 md:p-12 flex flex-col md:flex-row items-start md:items-center gap-10 hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all duration-700 hover:-translate-y-2 hover:shadow-2xl shadow-sm relative cursor-pointer group/card ${isCompleted ? 'opacity-60 grayscale-[0.5]' : ''}`}
+                               className={`bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[3rem] p-8 md:p-12 flex flex-col md:flex-row items-start md:items-center gap-10 hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all duration-700 hover:-translate-y-2 hover:shadow-2xl shadow-sm relative cursor-pointer group/card ${isCompleted ? 'opacity-60 grayscale-[0.5]' : ''}`}
                              >
                                 <div className="flex-1 space-y-4">
                                    <div className="flex items-center gap-3">

@@ -129,7 +129,7 @@ const DoctorSchedule = ({ timetable, onRefresh, courses }) => {
   return (
     <div className="max-w-[1600px] mx-auto pb-20 space-y-10 px-4">
       {/* Header Bento */}
-      <div className="bg-white dark:bg-[#080808] border border-gray-100 dark:border-white/5 rounded-[3.5rem] p-10 shadow-sm">
+      <div className="bg-white dark:bg-[#0c0c0e] border border-gray-100 dark:border-white/5 rounded-[3.5rem] p-10 shadow-sm">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-12">
           <div className="flex items-center gap-8">
             <div className="w-20 h-20 rounded-3xl bg-violet-600 flex items-center justify-center shadow-2xl shadow-violet-600/30">
@@ -191,7 +191,7 @@ const DoctorSchedule = ({ timetable, onRefresh, courses }) => {
       <div className="grid grid-cols-1 xl:grid-cols-7 gap-6">
         {DAYS.map((day) => (
           <div key={day} className="space-y-6">
-            <div className="bg-white dark:bg-[#080808] border border-gray-100 dark:border-white/5 py-4 px-6 rounded-2xl shadow-sm">
+            <div className="bg-white dark:bg-[#0c0c0e] border border-gray-100 dark:border-white/5 py-4 px-6 rounded-2xl shadow-sm">
               <h3 className="text-gray-900 dark:text-white font-black text-center uppercase tracking-[0.2em] text-[10px]">
                 {t(`admin.timetable.days.${day}`).slice(0, 3)}
               </h3>
@@ -208,7 +208,7 @@ const DoctorSchedule = ({ timetable, onRefresh, courses }) => {
                   <motion.div
                     variants={itemVariants}
                     key={entry.id}
-                    className="group bg-white dark:bg-[#080808] border border-gray-100 dark:border-white/5 p-6 rounded-[2rem] hover:border-violet-500/30 transition-all hover:bg-gray-50 dark:hover:bg-white/[0.01] hover:shadow-2xl hover:shadow-violet-500/5 relative overflow-hidden"
+                    className="group bg-white dark:bg-[#0c0c0e] border border-gray-100 dark:border-white/5 p-6 rounded-[2rem] hover:border-violet-500/30 transition-all hover:bg-gray-50 dark:hover:bg-white/[0.01] hover:shadow-2xl hover:shadow-violet-500/5 relative overflow-hidden"
                   >
                     <div className={`absolute inset-y-0 start-0 w-1.5 ${entry.type === 'Lecture' ? 'bg-violet-600' : 'bg-emerald-500'}`}></div>
 

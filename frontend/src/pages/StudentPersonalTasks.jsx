@@ -159,7 +159,7 @@ const StudentPersonalTasks = () => {
           </div>
 
           {(tasks.length === 0 && officialTasks.length === 0) ? (
-            <div className="py-24 bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 rounded-[4rem] text-center shadow-xl flex flex-col items-center justify-center max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-8 duration-700">
+            <div className="py-24 bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[4rem] text-center shadow-xl flex flex-col items-center justify-center max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-8 duration-700">
               <div className="w-32 h-32 rounded-[2.5rem] bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 flex items-center justify-center mb-8">
                 <Layout className="w-16 h-16 text-gray-200 dark:text-white/10" />
               </div>
@@ -171,7 +171,7 @@ const StudentPersonalTasks = () => {
 
               {/* OFFICIAL TASKS */}
               <div className="space-y-8">
-                <div className="flex items-center gap-4 bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 p-8 rounded-[2.5rem] shadow-sm text-start relative overflow-hidden group">
+                <div className="flex items-center gap-4 bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 p-8 rounded-[2.5rem] shadow-sm text-start relative overflow-hidden group">
                   <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                   <div className="w-14 h-14 rounded-[1.2rem] bg-blue-500/10 flex items-center justify-center text-blue-500 border border-blue-500/10">
                     <BookOpen className="w-7 h-7" />
@@ -187,7 +187,7 @@ const StudentPersonalTasks = () => {
                 ) : (
                   <div className="space-y-4">
                     {officialTasks.map((task) => (
-                      <div key={`official-${task.id}`} className={`group relative bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-8 flex items-start gap-8 transition-all duration-700 shadow-sm hover:shadow-2xl hover:-translate-y-1 ${task.is_completed ? 'opacity-40 grayscale' : ''} text-start`}>
+                      <div key={`official-${task.id}`} className={`group relative bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-8 flex items-start gap-8 transition-all duration-700 shadow-sm hover:shadow-2xl hover:-translate-y-1 ${task.is_completed ? 'opacity-40 grayscale' : ''} text-start`}>
                         <button
                           onClick={() => handleToggleOfficial(task.id, task.is_completed)}
                           className={`relative z-10 shrink-0 w-12 h-12 rounded-[1.2rem] flex items-center justify-center transition-all duration-500 ${
@@ -224,7 +224,7 @@ const StudentPersonalTasks = () => {
 
               {/* PERSONAL TASKS */}
               <div className="space-y-8">
-                <div className="flex items-center gap-4 bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 p-8 rounded-[2.5rem] shadow-sm text-start relative overflow-hidden group">
+                <div className="flex items-center gap-4 bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 p-8 rounded-[2.5rem] shadow-sm text-start relative overflow-hidden group">
                   <div className="absolute inset-0 bg-gradient-to-r from-[#10b981]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                   <div className="w-14 h-14 rounded-[1.2rem] bg-emerald-500/10 flex items-center justify-center text-emerald-500 border border-emerald-500/10">
                     <Activity className="w-7 h-7" />
@@ -240,7 +240,7 @@ const StudentPersonalTasks = () => {
                 ) : (
                   <div className="space-y-4">
                     {tasks.map((task) => (
-                      <div key={`personal-${task.id}`} className={`group relative bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-8 flex items-start gap-8 transition-all duration-700 shadow-sm hover:shadow-2xl hover:-translate-y-1 ${task.is_completed ? 'opacity-40 grayscale' : ''} text-start`}>
+                      <div key={`personal-${task.id}`} className={`group relative bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-8 flex items-start gap-8 transition-all duration-700 shadow-sm hover:shadow-2xl hover:-translate-y-1 ${task.is_completed ? 'opacity-40 grayscale' : ''} text-start`}>
                         <button
                           onClick={() => handleToggle(task.id, task.is_completed)}
                           className={`relative z-10 shrink-0 w-12 h-12 rounded-[1.2rem] flex items-center justify-center transition-all duration-500 ${
@@ -278,7 +278,7 @@ const StudentPersonalTasks = () => {
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
               <div className="absolute inset-0 bg-gray-900/40 dark:bg-black/80 backdrop-blur-md animate-in fade-in duration-500" onClick={resetForm}></div>
 
-              <div className="relative z-10 w-full max-w-2xl bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/10 rounded-[3.5rem] shadow-[0_40px_100px_rgba(0,0,0,0.5)] animate-in slide-in-from-bottom-12 duration-700 overflow-hidden">
+              <div className="relative z-10 w-full max-w-2xl bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/10 rounded-[3.5rem] shadow-[0_40px_100px_rgba(0,0,0,0.5)] animate-in slide-in-from-bottom-12 duration-700 overflow-hidden">
                 <div className="p-12 space-y-12">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-6 text-start">

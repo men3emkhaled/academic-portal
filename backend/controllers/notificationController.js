@@ -151,7 +151,7 @@ const sendToDepartment = async (req, res) => {
     }
     const safeTitle = xss(title);
     const safeContent = xss(content);
-    const notifications = await Notification.sendToDepartment(department_id, safeTitle, safeContent, isMobileOnly);
+    const notification = await Notification.sendToDepartment(department_id, safeTitle, safeContent, isMobileOnly);
 
     // Send Push if requested
     if (sendPush || isMobileOnly) {
@@ -165,7 +165,7 @@ const sendToDepartment = async (req, res) => {
       }
     }
 
-    res.status(201).json({ message: `Sent to ${notifications.length} nodes`, count: notifications.length });
+    res.status(201).json({ message: `Sent to ${notification.affected_count} nodes`, count: notification.affected_count });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

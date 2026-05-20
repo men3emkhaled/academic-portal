@@ -174,7 +174,7 @@ const DoctorQuestionManager = ({ quiz, onBack }) => {
                         <motion.div 
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            className="bg-white dark:bg-[#080808] border border-gray-100 dark:border-white/5 p-8 rounded-[3rem] shadow-2xl relative overflow-hidden"
+                            className="bg-white dark:bg-[#0c0c0e] border border-gray-100 dark:border-white/5 p-8 rounded-[3rem] shadow-2xl relative overflow-hidden"
                         >
                             <div className="absolute top-0 right-0 p-8 opacity-5">
                                 <Zap className="w-24 h-24 text-violet-500" />
@@ -323,7 +323,7 @@ const DoctorQuestionManager = ({ quiz, onBack }) => {
 
                 {/* List Column */}
                 <div className="xl:col-span-8">
-                    <div className="bg-white dark:bg-[#080808] border border-gray-100 dark:border-white/5 rounded-[3.5rem] p-10 min-h-[900px] flex flex-col shadow-sm">
+                    <div className="bg-white dark:bg-[#0c0c0e] border border-gray-100 dark:border-white/5 rounded-[3.5rem] p-10 min-h-[900px] flex flex-col shadow-sm">
                         <div className="flex items-center justify-between mb-12">
                             <h3 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter flex items-center gap-4">
                                 <div className="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/20">

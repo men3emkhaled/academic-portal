@@ -103,7 +103,7 @@ const DoctorSettings = () => {
   return (
     <div className="max-w-[1400px] mx-auto pb-20 space-y-10 px-4">
       {/* Header Hub */}
-      <div className="bg-white dark:bg-[#080808] border border-gray-100 dark:border-white/5 rounded-[3.5rem] p-10 shadow-sm">
+      <div className="bg-white dark:bg-[#0c0c0e] border border-gray-100 dark:border-white/5 rounded-[3.5rem] p-10 shadow-sm">
           <div className="flex items-center gap-8">
               <div className="w-20 h-20 rounded-3xl bg-violet-600 flex items-center justify-center shadow-2xl shadow-violet-600/30">
                   <SettingsIcon className="w-10 h-10 text-white" />
@@ -153,7 +153,7 @@ const DoctorSettings = () => {
                 key={activeSection}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-white dark:bg-[#080808] border border-gray-100 dark:border-white/5 rounded-[4rem] p-12 shadow-sm relative overflow-hidden min-h-[700px]"
+                className="bg-white dark:bg-[#0c0c0e] border border-gray-100 dark:border-white/5 rounded-[4rem] p-12 shadow-sm relative overflow-hidden min-h-[700px]"
             >
                 {/* Profile Section */}
                 {activeSection === 'profile' && (
@@ -179,7 +179,7 @@ const DoctorSettings = () => {
                                     whileHover={{ scale: 1.1 }}
                                     whileTap={{ scale: 0.9 }}
                                     onClick={() => fileInputRef.current.click()}
-                                    className="absolute bottom-2 end-2 w-12 h-12 bg-violet-600 text-white rounded-2xl flex items-center justify-center shadow-2xl border-4 border-white dark:border-[#080808]"
+                                    className="absolute bottom-2 end-2 w-12 h-12 bg-violet-600 text-white rounded-2xl flex items-center justify-center shadow-2xl border-4 border-white dark:border-[#0c0c0e]"
                                 >
                                     <Camera className="w-5 h-5" />
                                 </motion.button>

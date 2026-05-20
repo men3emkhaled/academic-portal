@@ -56,7 +56,7 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout, unreadCount 
   if (!isMobile) {
     return (
       <div className="fixed inset-inline-start-14 top-10 bottom-10 w-72 z-50 transition-all duration-700">
-        <div className="h-full bg-white/70 dark:bg-[#080808]/70 backdrop-blur-sm border border-white/20 dark:border-white/5 rounded-[3rem] shadow-[0_32px_64px_rgba(0,0,0,0.1)] dark:shadow-[0_32px_64px_rgba(0,0,0,0.4)] flex flex-col overflow-hidden relative group/sidebar">
+        <div className="h-full bg-white/70 dark:bg-[#0c0c0e]/70 backdrop-blur-sm border border-white/20 dark:border-white/5 rounded-[3rem] shadow-[0_32px_64px_rgba(0,0,0,0.1)] dark:shadow-[0_32px_64px_rgba(0,0,0,0.4)] flex flex-col overflow-hidden relative group/sidebar">
 
           <div className="p-8 pb-4 text-center">
             <div className="inline-flex items-center justify-center w-20 h-20 rounded-full overflow-hidden shadow-2xl bg-white dark:bg-white/5 border border-white/20 transition-transform duration-500 group-hover/sidebar:scale-110">

@@ -171,7 +171,7 @@ const ProgressManager = ({ courses = [] }) => {
             <option value="">{t('admin.progress.overview_analytics')}</option>
             {courses.map(c => (
               <option key={c.id} value={c.id}>
-                {c.name} ({t('records.semester_label', { count: c.semester })}){c.department_name ? ` • ${c.department_name}` : ''}
+                {c.name} ({t('admin.records.semester_label', { count: c.semester })}){c.department_name ? ` • ${c.department_name}` : ''}
               </option>
             ))}
           </select>
@@ -307,7 +307,7 @@ const ProgressManager = ({ courses = [] }) => {
                        <div>
                           <h3 className="text-lg font-black text-gray-900 dark:text-white tracking-tight group-hover:text-teal-600 transition-colors">{courseName}</h3>
                           <div className="flex items-center gap-2 mt-1">
-                             <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{t('records.semester_label', { count: data.semester })}</span>
+                             <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{t('admin.records.semester_label', { count: data.semester })}</span>
                              {data.department_name && (
                                 <>
                                    <div className="w-1 h-1 bg-gray-300 dark:bg-gray-700 rounded-full"></div>

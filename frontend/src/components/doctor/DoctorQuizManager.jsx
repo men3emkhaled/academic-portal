@@ -115,7 +115,7 @@ const DoctorQuizManager = () => {
             {!selectedQuiz ? (
                 <div className="space-y-12">
                     {/* Header Section */}
-                    <div className="bg-white dark:bg-[#080808] border border-gray-100 dark:border-white/5 rounded-[3.5rem] p-10 shadow-sm">
+                    <div className="bg-white dark:bg-[#0c0c0e] border border-gray-100 dark:border-white/5 rounded-[3.5rem] p-10 shadow-sm">
                         <div className="flex items-center gap-8 mb-12">
                             <div className="w-20 h-20 rounded-3xl bg-violet-600 flex items-center justify-center shadow-2xl shadow-violet-600/30">
                                 <BarChart3 className="w-10 h-10 text-white" />
@@ -151,7 +151,7 @@ const DoctorQuizManager = () => {
                     </div>
 
                     {/* Quiz Grid */}
-                    <div className="bg-white dark:bg-[#080808] border border-gray-100 dark:border-white/5 rounded-[3.5rem] p-10 shadow-sm">
+                    <div className="bg-white dark:bg-[#0c0c0e] border border-gray-100 dark:border-white/5 rounded-[3.5rem] p-10 shadow-sm">
                         <div className="flex items-center justify-between mb-12">
                             <h3 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter flex items-center gap-4">
                                 <div className="w-10 h-10 rounded-xl bg-violet-600 flex items-center justify-center shadow-lg shadow-violet-600/20">

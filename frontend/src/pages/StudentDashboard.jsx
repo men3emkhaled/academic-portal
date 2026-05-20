@@ -148,7 +148,7 @@ const StudentDashboard = () => {
                     <div 
                       key={idx}
                       onClick={() => navigate(`/student/course/${grade.course_id}`)}
-                      className="group bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-8 space-y-8 cursor-pointer hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all duration-700 hover:-translate-y-2 hover:shadow-2xl shadow-sm"
+                      className="group bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-8 space-y-8 cursor-pointer hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all duration-700 hover:-translate-y-2 hover:shadow-2xl shadow-sm"
                     >
                       <div className="flex justify-between items-start">
                          <div className="w-12 h-12 rounded-2xl bg-gray-50 dark:bg-[#2cfc7d]/10 flex items-center justify-center text-[#10b981] dark:text-[#2cfc7d] group-hover:bg-emerald-500 dark:group-hover:bg-black group-hover:text-white transition-all duration-500">

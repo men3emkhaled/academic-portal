@@ -251,7 +251,7 @@ const DoctorAnalytics = ({ courses }) => {
               {/* Main Visualization Area */}
               <motion.div 
                 layout
-                className="bg-white dark:bg-[#080808]/40 backdrop-blur-sm border border-gray-200 dark:border-white/5 rounded-[3rem] overflow-hidden shadow-2xl"
+                className="bg-white dark:bg-[#0c0c0e]/40 backdrop-blur-sm border border-gray-200 dark:border-white/5 rounded-[3rem] overflow-hidden shadow-2xl"
               >
                 <AnimatePresence mode="wait">
                   {activeView === 'overview' && (

@@ -225,7 +225,7 @@ const StudentMaterials = () => {
           <div className="relative z-20" ref={dropdownRef}>
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="w-full flex flex-col md:flex-row items-center justify-between bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 rounded-[3rem] p-8 md:p-12 transition-all duration-500 group shadow-lg hover:shadow-2xl"
+              className="w-full flex flex-col md:flex-row items-center justify-between bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[3rem] p-8 md:p-12 transition-all duration-500 group shadow-lg hover:shadow-2xl"
             >
               <div className="text-center md:text-start space-y-2">
                 <div className="flex items-center justify-center md:justify-start gap-3">
@@ -246,7 +246,7 @@ const StudentMaterials = () => {
             </button>
 
             {isDropdownOpen && (
-              <div className="absolute top-full left-0 w-full mt-6 bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/10 rounded-[3rem] shadow-[0_30px_100px_rgba(0,0,0,0.3)] overflow-hidden z-50 animate-in fade-in slide-in-from-top-6 duration-500">
+              <div className="absolute top-full left-0 w-full mt-6 bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/10 rounded-[3rem] shadow-[0_30px_100px_rgba(0,0,0,0.3)] overflow-hidden z-50 animate-in fade-in slide-in-from-top-6 duration-500">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2 p-4 max-h-[500px] overflow-y-auto no-scrollbar">
                   {courses.map(course => (
                     <button
@@ -300,7 +300,7 @@ const StudentMaterials = () => {
                 {/* 🎯 PROGRESS TAB */}
                 {activeTab === 'progress' && (
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                    <div className="lg:col-span-5 bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 rounded-[3rem] p-12 flex flex-col items-center justify-center shadow-sm relative overflow-hidden group">
+                    <div className="lg:col-span-5 bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[3rem] p-12 flex flex-col items-center justify-center shadow-sm relative overflow-hidden group">
                       <div className="absolute top-[-10%] inset-inline-end-[-10%] w-[50%] h-[50%] bg-[#2cfc7d]/5 blur-[80px] rounded-full pointer-events-none group-hover:scale-125 transition-transform duration-1000"></div>
                       
                       <CircularProgress percentage={progressData.stats.percentage} />
@@ -316,7 +316,7 @@ const StudentMaterials = () => {
                       </div>
                     </div>
 
-                    <div className="lg:col-span-7 bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 rounded-[3rem] p-12 shadow-sm text-start">
+                    <div className="lg:col-span-7 bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[3rem] p-12 shadow-sm text-start">
                       <div className="flex items-center justify-between mb-10">
                         <div className="space-y-1">
                            <h3 className="text-2xl font-black uppercase tracking-tight leading-none">{t('materials.roadmap')}</h3>
@@ -360,7 +360,7 @@ const StudentMaterials = () => {
                       </div>
                     ) : (
                       resources[activeTab].map(item => (
-                        <div key={item.id} className="group relative bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 rounded-[3rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-700 hover:-translate-y-4">
+                        <div key={item.id} className="group relative bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[3rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-700 hover:-translate-y-4">
                           {activeTab === 'videos' ? (
                             <div className="aspect-video relative overflow-hidden bg-black group-hover:scale-105 transition-transform duration-700">
                               <iframe src={getEmbedUrl(item.url)} title={item.title} className="w-full h-full border-none" allowFullScreen />
@@ -407,7 +407,7 @@ const StudentMaterials = () => {
                       </div>
                     ) : (
                       resources[activeTab].map(doc => (
-                        <a key={doc.id} href={doc.url} target="_blank" rel="noopener noreferrer" className="group bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 rounded-[3.5rem] p-12 flex flex-col justify-between min-h-[350px] hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all duration-700 hover:-translate-y-4 hover:shadow-[0_40px_100px_rgba(0,0,0,0.4)] shadow-sm relative overflow-hidden">
+                        <a key={doc.id} href={doc.url} target="_blank" rel="noopener noreferrer" className="group bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[3.5rem] p-12 flex flex-col justify-between min-h-[350px] hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all duration-700 hover:-translate-y-4 hover:shadow-[0_40px_100px_rgba(0,0,0,0.4)] shadow-sm relative overflow-hidden">
                            <div className="absolute top-[-20%] inset-inline-end-[-20%] w-40 h-40 bg-[#2cfc7d]/5 blur-[40px] rounded-full group-hover:bg-white/10 transition-colors duration-700"></div>
                            
                            <div className="space-y-10 relative z-10">

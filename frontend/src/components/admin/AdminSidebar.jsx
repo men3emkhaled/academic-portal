@@ -96,7 +96,7 @@ const AdminSidebar = ({ activeTab, setActiveTab, admin, onLogout, availableTabs 
       {/* Desktop Version - Floating Sidebar Style */}
       {!isMobile && (
         <div className="fixed z-50 transition-all duration-700 w-72" style={{ insetInlineStart: '1.5rem', top: '1rem', bottom: '1rem' }}>
-          <div className="h-full bg-white dark:bg-[#080808] border border-gray-100 dark:border-white/10 rounded-[3rem] shadow-[0_32px_64px_rgba(0,0,0,0.05)] dark:shadow-[0_32px_64px_rgba(0,0,0,0.4)] flex flex-col overflow-hidden relative group/sidebar">
+          <div className="h-full bg-white dark:bg-[#0c0c0e] border border-gray-100 dark:border-white/10 rounded-[3rem] shadow-[0_32px_64px_rgba(0,0,0,0.05)] dark:shadow-[0_32px_64px_rgba(0,0,0,0.4)] flex flex-col overflow-hidden relative group/sidebar">
             
             <div className="p-8 pb-4 text-center">
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full overflow-hidden shadow-2xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 transition-transform duration-500 group-hover/sidebar:scale-110">
@@ -120,14 +120,14 @@ const AdminSidebar = ({ activeTab, setActiveTab, admin, onLogout, availableTabs 
                     {isActive && (
                       <div className="absolute inset-0 bg-gray-100 dark:bg-white/5 rounded-2xl animate-in fade-in zoom-in-95 duration-500" />
                     )}
-                    <span className={`relative z-10 transition-all duration-500 ${isActive ? 'scale-110 text-primary' : 'group-hover/item:scale-110'}`}>
+                    <span className={`relative z-10 transition-all duration-500 ${isActive ? 'scale-110 text-[#8b5cf6]' : 'group-hover/item:scale-110'}`}>
                       {item.icon}
                     </span>
                     <span className={`relative z-10 text-[10px] font-black uppercase tracking-[0.2em] ${i18n.language === 'ar' ? 'font-arabic' : ''}`}>
                       {t(`admin.sidebar.tabs.${item.id}`)}
                     </span>
                     {isActive && (
-                      <div className="absolute start-0 w-1 h-6 bg-primary rounded-full shadow-[4px_0_15px_rgba(46,204,113,0.5)]" />
+                      <div className="absolute start-0 w-1 h-6 bg-[#8b5cf6] rounded-full shadow-[4px_0_15px_rgba(139,92,246,0.5)]" />
                     )}
                   </button>
                 );
@@ -136,10 +136,10 @@ const AdminSidebar = ({ activeTab, setActiveTab, admin, onLogout, availableTabs 
 
             <div className="p-6 pt-0 relative z-10">
               <div className="bg-gray-50/50 dark:bg-white/[0.02] rounded-[2rem] p-2 flex gap-1 border border-gray-100 dark:border-white/5">
-                <button onClick={() => i18n.changeLanguage(i18n.language === 'ar' ? 'en' : 'ar')} className="flex-1 h-12 flex items-center justify-center rounded-xl hover:bg-white dark:hover:bg-white/5 transition-all text-gray-400 hover:text-primary">
+                <button onClick={() => i18n.changeLanguage(i18n.language === 'ar' ? 'en' : 'ar')} className="flex-1 h-12 flex items-center justify-center rounded-xl hover:bg-white dark:hover:bg-white/5 transition-all text-gray-400 hover:text-[#8b5cf6]">
                   <Languages className="w-5 h-5" />
                 </button>
-                <button onClick={toggleTheme} className="flex-1 h-12 flex items-center justify-center rounded-xl hover:bg-white dark:hover:bg-white/5 transition-all text-gray-400 hover:text-primary">
+                <button onClick={toggleTheme} className="flex-1 h-12 flex items-center justify-center rounded-xl hover:bg-white dark:hover:bg-white/5 transition-all text-gray-400 hover:text-[#8b5cf6]">
                   {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
                 </button>
                 <button onClick={onLogout} className="flex-1 h-12 flex items-center justify-center rounded-xl hover:bg-rose-500/10 transition-all text-gray-400 hover:text-rose-500">
@@ -164,7 +164,7 @@ const AdminSidebar = ({ activeTab, setActiveTab, admin, onLogout, availableTabs 
             >
               {/* Active Indicator Line */}
               <div
-                className="absolute top-0 h-0.5 bg-primary transition-all duration-300 rounded-full"
+                className="absolute top-0 h-0.5 bg-[#8b5cf6] transition-all duration-300 rounded-full"
                 style={{
                   width: `${itemWidthPercent * 0.5}%`,
                   insetInlineStart: `${(currentIndex * itemWidthPercent) + (itemWidthPercent * 0.25)}%`,
@@ -178,7 +178,7 @@ const AdminSidebar = ({ activeTab, setActiveTab, admin, onLogout, availableTabs 
                   <div
                     key={item.id}
                     onClick={() => setActiveTab(item.id)}
-                    className={`relative flex-1 flex flex-col items-center gap-0.5 cursor-pointer z-10 transition-all active:scale-90 ${isActive ? 'text-primary' : 'text-gray-400 dark:text-white/60'}`}
+                    className={`relative flex-1 flex flex-col items-center gap-0.5 cursor-pointer z-10 transition-all active:scale-90 ${isActive ? 'text-[#8b5cf6]' : 'text-gray-400 dark:text-white/60'}`}
                   >
                     <div className={`flex items-center justify-center transition-all duration-300 ${isActive ? 'scale-110' : 'opacity-60 dark:opacity-100'}`}>
                       {React.cloneElement(item.icon, { className: 'w-[18px] h-[18px]' })}
@@ -211,7 +211,7 @@ const AdminSidebar = ({ activeTab, setActiveTab, admin, onLogout, availableTabs 
               <div className="fixed inset-0 bg-black/20 dark:bg-black/60 backdrop-blur-md z-[60]" onClick={() => setIsOpen(false)} />
               <div className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] start-6 end-6 bg-white dark:bg-[#0c0c14] border border-gray-100 dark:border-white/10 rounded-[3rem] shadow-[0_40px_100px_rgba(0,0,0,0.3)] z-[70] animate-slideUp overflow-hidden">
                 <div className="p-8 pt-10 text-center relative overflow-hidden">
-                  <div className="absolute top-0 inset-inline-start-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+                  <div className="absolute top-0 inset-inline-start-0 w-full h-1 bg-gradient-to-r from-transparent via-[#8b5cf6]/40 to-transparent" />
                   <h4 className={`text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter ${i18n.language === 'ar' ? 'font-arabic' : ''}`}>{t('sidebar.menu')}</h4>
                 </div>
                 
@@ -243,13 +243,13 @@ const AdminSidebar = ({ activeTab, setActiveTab, admin, onLogout, availableTabs 
                 <div className="p-6 pt-4 border-t border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02]">
                   <div className="grid grid-cols-3 gap-4">
                     <button onClick={() => i18n.changeLanguage(i18n.language === 'ar' ? 'en' : 'ar')} className="flex flex-col items-center gap-3 p-4 rounded-[2rem] bg-white dark:bg-white/5 border border-gray-100 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-white/10 transition-all active:scale-95 group shadow-sm">
-                      <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-black/40 flex items-center justify-center text-gray-400 group-hover:text-primary shadow-inner transition-colors">
+                      <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-black/40 flex items-center justify-center text-gray-400 group-hover:text-[#8b5cf6] shadow-inner transition-colors">
                          <Languages className="w-5 h-5" />
                       </div>
                       <span className="text-[7px] font-black uppercase tracking-widest text-gray-400">{i18n.language === 'ar' ? 'English' : 'العربية'}</span>
                     </button>
                     <button onClick={toggleTheme} className="flex flex-col items-center gap-3 p-4 rounded-[2rem] bg-white dark:bg-white/5 border border-gray-100 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-white/10 transition-all active:scale-95 group shadow-sm">
-                      <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-black/40 flex items-center justify-center text-gray-400 group-hover:text-primary shadow-inner transition-colors">
+                      <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-black/40 flex items-center justify-center text-gray-400 group-hover:text-[#8b5cf6] shadow-inner transition-colors">
                          {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
                       </div>
                       <span className="text-[7px] font-black uppercase tracking-widest text-gray-400">{theme === 'dark' ? t('sidebar.light') : t('sidebar.dark')}</span>

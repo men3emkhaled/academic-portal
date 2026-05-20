@@ -178,7 +178,7 @@ const DoctorTaskManager = ({ courses }) => {
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-6 bg-white dark:bg-[#080808] p-6 rounded-[2rem] border border-gray-100 dark:border-white/5 shadow-sm">
+                    <div className="flex items-center gap-6 bg-white dark:bg-[#0c0c0e] p-6 rounded-[2rem] border border-gray-100 dark:border-white/5 shadow-sm">
                         <div className="text-right border-r border-gray-100 dark:border-white/10 pr-6">
                             <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Total</p>
                             <p className="text-2xl font-black text-gray-900 dark:text-white">{submissions.length}</p>
@@ -191,7 +191,7 @@ const DoctorTaskManager = ({ courses }) => {
                 </div>
 
                 {/* Submissions Table/List */}
-                <div className="bg-white dark:bg-[#080808] border border-gray-100 dark:border-white/5 rounded-[3.5rem] p-10 min-h-[600px] shadow-sm overflow-hidden">
+                <div className="bg-white dark:bg-[#0c0c0e] border border-gray-100 dark:border-white/5 rounded-[3.5rem] p-10 min-h-[600px] shadow-sm overflow-hidden">
                     {submissionsLoading ? (
                         <div className="flex flex-col items-center justify-center py-40 gap-6">
                             <div className="w-16 h-16 border-4 border-violet-600/20 border-t-violet-600 rounded-full animate-spin"></div>
@@ -330,7 +330,7 @@ const DoctorTaskManager = ({ courses }) => {
     return (
         <div className="max-w-[1600px] mx-auto pb-20 space-y-10 px-4">
             {/* Header Hub */}
-            <div className="bg-white dark:bg-[#080808] border border-gray-100 dark:border-white/5 rounded-[3.5rem] p-10 shadow-sm">
+            <div className="bg-white dark:bg-[#0c0c0e] border border-gray-100 dark:border-white/5 rounded-[3.5rem] p-10 shadow-sm">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-12">
                     <div className="flex items-center gap-8">
                         <div className="w-20 h-20 rounded-3xl bg-violet-600 flex items-center justify-center shadow-2xl shadow-violet-600/30">
@@ -383,7 +383,7 @@ const DoctorTaskManager = ({ courses }) => {
                 className="grid grid-cols-1 lg:grid-cols-2 gap-8"
             >
                 {tasks.length === 0 ? (
-                    <div className="lg:col-span-2 bg-white dark:bg-[#080808] border border-gray-100 dark:border-white/5 rounded-[3.5rem] p-20 text-center opacity-30">
+                    <div className="lg:col-span-2 bg-white dark:bg-[#0c0c0e] border border-gray-100 dark:border-white/5 rounded-[3.5rem] p-20 text-center opacity-30">
                         <Microscope className="w-20 h-20 mx-auto mb-6" />
                         <p className="text-xl font-black uppercase tracking-widest">No Active Tasks</p>
                     </div>
@@ -394,7 +394,7 @@ const DoctorTaskManager = ({ courses }) => {
                             <motion.div
                                 variants={itemVariants}
                                 key={task.id}
-                                className="group bg-white dark:bg-[#080808] border border-gray-100 dark:border-white/5 rounded-[3rem] p-10 hover:border-violet-500/30 transition-all hover:bg-gray-50 dark:hover:bg-white/[0.01] hover:shadow-2xl hover:shadow-violet-500/5 relative overflow-hidden"
+                                className="group bg-white dark:bg-[#0c0c0e] border border-gray-100 dark:border-white/5 rounded-[3rem] p-10 hover:border-violet-500/30 transition-all hover:bg-gray-50 dark:hover:bg-white/[0.01] hover:shadow-2xl hover:shadow-violet-500/5 relative overflow-hidden"
                             >
                                 <div className="flex justify-between items-start mb-8">
                                     <div className="flex flex-wrap gap-2">

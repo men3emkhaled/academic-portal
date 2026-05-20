@@ -9,36 +9,36 @@ import {
 } from 'lucide-react';
 
 const LogsDashboard = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [activeTab, setActiveTab] = useState('admin');
 
   return (
-    <div className="animate-in fade-in duration-700 pb-10">
+    <div className="animate-in fade-in duration-700 pb-10 text-start">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-12">
         <div className="flex items-center gap-5">
-          <div className="w-16 h-16 bg-amber-500/10 dark:bg-amber-500/20 rounded-3xl flex items-center justify-center border border-amber-500/20 shadow-inner group">
-            <History className="w-8 h-8 text-amber-600 dark:text-amber-400 group-hover:rotate-12 transition-transform" />
+          <div className="w-16 h-16 bg-[#8b5cf6]/10 dark:bg-[#8b5cf6]/20 rounded-3xl flex items-center justify-center border border-[#8b5cf6]/20 shadow-inner group">
+            <History className="w-8 h-8 text-[#8b5cf6] group-hover:rotate-12 transition-transform" />
           </div>
           <div>
-            <h2 className="text-4xl font-black text-gray-900 dark:text-white tracking-tighter">
+            <h2 className={`text-4xl font-black text-gray-900 dark:text-white tracking-tighter ${i18n.language === 'ar' ? 'font-arabic' : ''}`}>
               {t('admin.logs.title')}
             </h2>
             <div className="flex items-center gap-3 mt-1.5">
-                <span className="text-gray-500 dark:text-gray-400 text-xs font-black uppercase tracking-[0.2em]">{t('admin.logs.audit_trail')}</span>
+                <span className="text-gray-500 dark:text-slate-400 text-xs font-black uppercase tracking-[0.2em]">{t('admin.logs.audit_trail')}</span>
                 <div className="w-1 h-1 bg-gray-300 dark:bg-gray-700 rounded-full"></div>
-                <span className="text-amber-600 dark:text-amber-400 text-[10px] font-black uppercase tracking-widest">{t('admin.logs.real_time')}</span>
+                <span className="text-[#8b5cf6] text-[10px] font-black uppercase tracking-widest">{t('admin.logs.real_time')}</span>
             </div>
           </div>
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex p-1.5 bg-white/50 dark:bg-white/[0.03] border border-gray-200 dark:border-white/10 rounded-2xl shadow-sm">
+        <div className="flex p-1.5 bg-white/50 dark:bg-[#0d0d14] border border-gray-200 dark:border-white/10 rounded-2xl shadow-sm">
             <button
               onClick={() => setActiveTab('admin')}
               className={`flex items-center gap-3 px-8 py-3.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-[color,background-color,border-color,transform,opacity] ${
                 activeTab === 'admin'
-                  ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/20'
+                  ? 'bg-[#8b5cf6] text-white shadow-lg shadow-purple-500/20'
                   : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
               }`}
             >
@@ -49,7 +49,7 @@ const LogsDashboard = () => {
               onClick={() => setActiveTab('student')}
               className={`flex items-center gap-3 px-8 py-3.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-[color,background-color,border-color,transform,opacity] ${
                 activeTab === 'student'
-                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
+                  ? 'bg-[#2cfc7d] text-black shadow-lg shadow-green-500/20'
                   : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
               }`}
             >
@@ -61,7 +61,7 @@ const LogsDashboard = () => {
 
       {/* Main Content Area */}
       <div className="animate-in slide-in-from-bottom-4 duration-700">
-        <div className="bg-white/40 dark:bg-white/[0.01] border border-gray-100 dark:border-white/5 rounded-[3rem] overflow-hidden">
+        <div className="bg-white/40 dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[3rem] overflow-hidden">
             {activeTab === 'admin' ? <ActivityLogsManager /> : <StudentLogins />}
         </div>
       </div>

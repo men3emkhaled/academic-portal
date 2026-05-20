@@ -146,7 +146,7 @@ const StudentSettings = () => {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pb-20">
             
             {/* PROFILE HERO BENTO CARD */}
-            <div className="lg:col-span-12 bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 rounded-[3rem] p-10 md:p-16 flex flex-col md:flex-row items-center gap-12 group hover:shadow-2xl transition-all duration-700 text-start overflow-hidden relative">
+            <div className="lg:col-span-12 bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[3rem] p-10 md:p-16 flex flex-col md:flex-row items-center gap-12 group hover:shadow-2xl transition-all duration-700 text-start overflow-hidden relative">
                <div className="absolute top-[-20%] inset-inline-end-[-10%] w-[40%] h-[150%] bg-[#2cfc7d]/5 blur-[80px] rounded-full pointer-events-none group-hover:scale-125 transition-transform duration-1000"></div>
                
                {/* Avatar Container */}
@@ -217,7 +217,7 @@ const StudentSettings = () => {
             </div>
 
             {/* SECURITY BENTO CARD */}
-            <div className="lg:col-span-8 bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 rounded-[3rem] p-10 md:p-12 space-y-12 text-start group hover:shadow-2xl transition-all duration-700">
+            <div className="lg:col-span-8 bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[3rem] p-10 md:p-12 space-y-12 text-start group hover:shadow-2xl transition-all duration-700">
                <div className="flex items-center gap-4">
                   <div className="w-14 h-14 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500">
                      <ShieldCheck className="w-8 h-8" />
@@ -299,7 +299,7 @@ const StudentSettings = () => {
             <div className="lg:col-span-4 space-y-8">
                
                {/* Appearance Card */}
-               <div className="bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 rounded-[3rem] p-10 space-y-8 text-start group hover:shadow-2xl transition-all duration-700">
+               <div className="bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[3rem] p-10 space-y-8 text-start group hover:shadow-2xl transition-all duration-700">
                   <div className="space-y-1">
                      <h3 className="text-xl font-black uppercase tracking-tight">{t('settings.appearance')}</h3>
                      <p className="text-[8px] font-black uppercase tracking-[0.4em] text-gray-400">{t('mavi.interface_customization')}</p>

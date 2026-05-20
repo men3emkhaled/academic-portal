@@ -1,12 +1,15 @@
 const rateLimit = require('express-rate-limit');
 const { ipKeyGenerator } = require('express-rate-limit'); // ✅ استيراد الدالة المساعدة لـ IPv6
 
+const isDev = process.env.NODE_ENV === 'development';
+
 // ============= إعدادات عامة =============
 const standardLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 دقيقة
     max: 1000, // الحد الأقصى: 1000 طلب لكل IP (لضمان عمل لوحة التحكم بسلاسة)
     standardHeaders: true,
     legacyHeaders: false,
+    skip: () => isDev,
     message: {
         status: 429,
         message: 'Too many requests from this IP, please try again after 15 minutes.'
@@ -21,6 +24,7 @@ const studentLoginLimiter = rateLimit({
     skipSuccessfulRequests: true,
     standardHeaders: true,
     legacyHeaders: false,
+    skip: () => isDev,
     message: {
         status: 429,
         message: 'Too many failed login attempts. Please try again after 15 minutes.'
@@ -44,6 +48,7 @@ const adminLoginLimiter = rateLimit({
     skipSuccessfulRequests: true,
     standardHeaders: true,
     legacyHeaders: false,
+    skip: () => isDev,
     message: {
         status: 429,
         message: 'Too many failed admin login attempts. Your IP has been temporarily blocked.'
@@ -60,6 +65,7 @@ const uploadLimiter = rateLimit({
     max: 20,
     standardHeaders: true,
     legacyHeaders: false,
+    skip: () => isDev,
     message: {
         status: 429,
         message: 'Upload limit reached. Please try again later.'
@@ -77,6 +83,7 @@ const studentCreationLimiter = rateLimit({
     max: 5,
     standardHeaders: true,
     legacyHeaders: false,
+    skip: () => isDev,
     message: {
         status: 429,
         message: 'Student creation limit reached. Please try again after an hour.'

@@ -107,7 +107,7 @@ const StudentGrades = () => {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pb-20">
             
             {/* Stats Summary Row */}
-            <div className="lg:col-span-8 bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 rounded-[3rem] p-12 flex flex-col md:flex-row justify-between gap-12 group hover:shadow-2xl transition-all duration-700">
+            <div className="lg:col-span-8 bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[3rem] p-12 flex flex-col md:flex-row justify-between gap-12 group hover:shadow-2xl transition-all duration-700">
                <div className="space-y-6 flex-1">
                   <p className={`text-3xl font-black leading-tight tracking-tight ${isAr ? 'font-arabic' : ''}`}>
                     {t('mavi.grades_desc')}
@@ -171,7 +171,7 @@ const StudentGrades = () => {
                     return (
                       <div 
                         key={idx}
-                        className="group bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 rounded-[3rem] p-10 space-y-10 hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all duration-700 hover:-translate-y-2 hover:shadow-2xl shadow-sm relative overflow-hidden"
+                        className="group bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[3rem] p-10 space-y-10 hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all duration-700 hover:-translate-y-2 hover:shadow-2xl shadow-sm relative overflow-hidden"
                       >
                         <div className="flex justify-between items-start">
                            <div className="w-14 h-14 rounded-2xl bg-gray-50 dark:bg-[#2cfc7d]/10 flex items-center justify-center text-[#10b981] dark:text-[#2cfc7d] group-hover:bg-emerald-500 dark:group-hover:bg-black group-hover:text-white transition-all duration-500 shadow-inner">

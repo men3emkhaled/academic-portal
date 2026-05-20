@@ -1,12 +1,15 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { 
   UserCheck, MapPin, ClipboardList, Coffee, 
   CheckCircle2, Calendar, Clock, Layout, 
   ChevronRight, ArrowRight, Zap, Info, 
-  AlertCircle, LayoutDashboard, CalendarDays
+  AlertCircle, LayoutDashboard, CalendarDays,
+  QrCode, X, ScanLine, RefreshCw
 } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import { useStudentAuth } from '../context/StudentAuthContext';
 import { useStudentData } from '../context/StudentDataContext';
+import studentApi from '../services/studentApi';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import Sidebar from '../components/Sidebar';
@@ -15,12 +18,14 @@ import { useTranslation } from 'react-i18next';
 const StudentTimetable = () => {
   const { t, i18n } = useTranslation();
   const { student, logout } = useStudentAuth();
-  const { timetable: myTimetable, departmentTimetable, exams, loadingTimetable, loadingExams } = useStudentData();
+  const { timetable: myTimetable, departmentTimetable, exams, loadingTimetable, loadingExams, gradesData } = useStudentData();
   const navigate = useNavigate();
   const [selectedDay, setSelectedDay] = useState('');
   const [currentWeekStart, setCurrentWeekStart] = useState(null);
   const [viewMode, setViewMode] = useState('my-section'); // 'my-section' or 'all-sections'
   const [scheduleType, setScheduleType] = useState('lectures'); // 'lectures' or 'exams'
+  const [qrModal, setQrModal] = useState(null); // { courseName, token } | null
+  const [qrLoading, setQrLoading] = useState(false);
 
   const days = [
     { id: 'Sunday', name: t('days.sunday'), short: t('days.sun'), arabic: 'الأحد' },
@@ -106,6 +111,35 @@ const StudentTimetable = () => {
     navigate('/student/login');
     toast.success(`${t('sidebar.logout')} ${t('auth.success')}`);
   };
+
+  const handleLectureClick = useCallback(async (entry) => {
+    let courseId = entry.course_id;
+    if (!courseId && gradesData?.grades) {
+      const matched = gradesData.grades.find(g => 
+        g.course_name?.trim().toLowerCase() === entry.course_name?.trim().toLowerCase()
+      );
+      if (matched) {
+        courseId = matched.course_id;
+      }
+    }
+
+    if (!courseId) {
+      toast.error(isAr ? 'عذراً، لم يتم العثور على رمز هذه المادة في حسابك' : 'Course ID not found for this lecture');
+      return;
+    }
+
+    setQrLoading(true);
+    setQrModal({ courseName: entry.course_name, courseId: courseId, token: null });
+    try {
+      const res = await studentApi.get(`/student/attendance/token/${courseId}`);
+      setQrModal({ courseName: entry.course_name, courseId: courseId, token: res.data.token });
+    } catch (err) {
+      toast.error(isAr ? 'تعذر تحميل رمز QR' : 'Failed to load QR code');
+      setQrModal(null);
+    } finally {
+      setQrLoading(false);
+    }
+  }, [gradesData, isAr]);
 
   const formatTime = (time) => {
     if (!time) return '—';
@@ -227,7 +261,7 @@ const StudentTimetable = () => {
             <div className={`hidden lg:block lg:col-span-4 space-y-8 transition-all duration-500 ${scheduleType === 'exams' ? 'opacity-40 pointer-events-none' : ''}`}>
               
               {/* Context Selector */}
-              <div className="bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-10 space-y-8">
+              <div className="bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-10 space-y-8">
                  <div className="flex items-center justify-between">
                     <h2 className="text-[9px] font-black uppercase tracking-[0.5em] text-gray-400 dark:text-white/30">{t('common.filter')}</h2>
                     <Zap className="w-4 h-4 text-[#8b5cf6]" />
@@ -251,7 +285,7 @@ const StudentTimetable = () => {
               </div>
 
               {/* Day Selector Matrix */}
-              <div className="bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-10 space-y-8">
+              <div className="bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-10 space-y-8">
                  <div className="flex items-center justify-between">
                     <h2 className="text-[9px] font-black uppercase tracking-[0.5em] text-gray-400 dark:text-white/30">{t('common.navigation')}</h2>
                     <CalendarDays className="w-4 h-4 text-[#2cfc7d]" />
@@ -289,7 +323,7 @@ const StudentTimetable = () => {
 
                <div className="space-y-6">
                   {!hasEntries ? (
-                    <div className="bg-white dark:bg-[#151520] border border-dashed border-gray-200 dark:border-white/10 rounded-[3rem] p-24 text-center">
+                    <div className="bg-white dark:bg-[#0d0d14] border border-dashed border-gray-200 dark:border-white/10 rounded-[3rem] p-24 text-center">
                        <div className="w-24 h-24 rounded-full bg-gray-50 dark:bg-white/5 flex items-center justify-center mx-auto mb-8">
                           <Coffee className="w-10 h-10 text-gray-200 dark:text-white/10" />
                        </div>
@@ -321,11 +355,21 @@ const StudentTimetable = () => {
                         }
                       }
 
+                      const borderLeftClass = 
+                        entry.type === 'Lecture' ? 'border-s-[5px] border-s-blue-500' :
+                        entry.type === 'Lab' ? 'border-s-[5px] border-s-purple-500' :
+                        entry.type === 'Section' ? 'border-s-[5px] border-s-emerald-500' : 'border-s-[5px] border-s-[#8b5cf6]';
+
+                      const typeBadgeColor = 
+                        entry.type === 'Lecture' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' :
+                        entry.type === 'Lab' ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20' :
+                        entry.type === 'Section' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-[#8b5cf6]/10 text-[#8b5cf6] border border-[#8b5cf6]/20';
+
                       return (
                         <div 
                           key={idx}
-                          onClick={() => navigate(`/student/course/${entry.course_id}`)}
-                          className={`group bg-white dark:bg-[#151520] border rounded-[2rem] p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 md:gap-10 transition-all duration-700 relative overflow-hidden cursor-pointer ${isLive ? 'border-[#2cfc7d] shadow-[0_0_50px_rgba(44,252,125,0.1)]' : 'border-gray-100 dark:border-white/5 hover:-translate-y-1 hover:shadow-xl'}`}
+                          onClick={() => scheduleType === 'lectures' ? handleLectureClick(entry) : navigate(`/student/course/${entry.course_id}`)}
+                          className={`group bg-white/80 dark:bg-[#0c0c14]/80 backdrop-blur-md border rounded-[2rem] p-5 md:p-6 flex items-center justify-between gap-4 transition-all duration-500 relative overflow-hidden cursor-pointer ${borderLeftClass} ${isLive ? 'border-[#2cfc7d] shadow-[0_0_50px_rgba(44,252,125,0.08)]' : 'border-gray-100 dark:border-white/[0.03] hover:-translate-y-1 hover:border-purple-500/20 hover:shadow-2xl hover:shadow-purple-500/[0.04]'}`}
                         >
                           {isLive && (
                             <div className="absolute top-0 inset-inline-end-0 bg-[#2cfc7d] text-black px-4 py-1 rounded-bl-[1rem] font-black text-[8px] uppercase tracking-[0.2em] animate-pulse">
@@ -333,25 +377,25 @@ const StudentTimetable = () => {
                             </div>
                           )}
 
-                          <div className="flex items-center gap-6 flex-1">
-                             <div className={`w-16 h-16 rounded-[1.5rem] flex flex-col items-center justify-center border transition-all duration-500 ${isLive ? 'bg-[#2cfc7d] text-black border-transparent shadow-xl' : 'bg-gray-50 dark:bg-white/5 border-gray-100 dark:border-white/5 text-gray-400 group-hover:bg-black dark:group-hover:bg-white group-hover:text-white dark:group-hover:text-black'}`}>
-                                <Clock className="w-5 h-5 mb-0.5" />
-                                <span className="text-[9px] font-black">{entry.start_time?.substring(0, 5)}</span>
+                          <div className="flex items-center gap-4 md:gap-6 flex-1 min-w-0">
+                             <div className={`w-14 h-14 md:w-16 md:h-16 rounded-[1.25rem] md:rounded-[1.5rem] flex flex-col items-center justify-center border transition-all duration-500 shrink-0 ${isLive ? 'bg-[#2cfc7d] text-black border-transparent shadow-xl' : 'bg-gray-50 dark:bg-white/[0.03] border-gray-100 dark:border-white/5 text-gray-400 dark:text-purple-300/80 group-hover:bg-black dark:group-hover:bg-white group-hover:text-white dark:group-hover:text-black group-hover:border-transparent'}`}>
+                                <Clock className="w-4 h-4 md:w-5 md:h-5 mb-0.5" />
+                                <span className="text-[8px] md:text-[9px] font-black tracking-wider">{entry.start_time?.substring(0, 5)}</span>
                              </div>
 
-                             <div className="space-y-1 min-w-0">
+                             <div className="space-y-1.5 min-w-0 flex-1">
                                 <div className="flex items-center gap-2">
-                                   <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest ${entry.type === 'Lecture' ? 'bg-blue-500/10 text-blue-500' : 'bg-[#8b5cf6]/10 text-[#8b5cf6]'}`}>
+                                   <span className={`px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest ${typeBadgeColor}`}>
                                       {entry.type}
                                    </span>
                                    {viewMode === 'all-sections' && (
-                                     <span className="px-2 py-0.5 rounded-full bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-white/40 text-[8px] font-black uppercase tracking-widest">
+                                     <span className="px-2 py-0.5 rounded-full bg-gray-100/80 dark:bg-white/[0.04] text-gray-500 dark:text-white/40 text-[8px] font-black uppercase tracking-widest border border-gray-200/20 dark:border-white/[0.02]">
                                         SEC: {entry.sections_text}
                                      </span>
                                    )}
                                 </div>
                                  <div className="flex items-center gap-2">
-                                   <h3 className={`text-xl font-black uppercase tracking-tighter truncate ${isAr ? 'font-arabic' : ''} ${isCompleted ? 'line-through opacity-40' : ''}`}>
+                                   <h3 className={`text-base md:text-xl font-black uppercase tracking-tighter truncate text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors ${isAr ? 'font-arabic' : ''} ${isCompleted ? 'line-through opacity-40' : ''}`}>
                                      {entry.course_name}
                                    </h3>
                                     {entry.exam_date && (
@@ -360,18 +404,18 @@ const StudentTimetable = () => {
                                       </span>
                                     )}
                                   </div>
-                                  {entry.type === 'Lecture' && (
+                                  {(entry.instructor || entry.location) && (
                                     <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1">
                                       {entry.instructor && (
                                         <div className="flex items-center gap-1.5 text-gray-500 dark:text-slate-400">
-                                          <UserCheck size={14} className="opacity-70" />
-                                          <span className="text-[11px] font-black uppercase tracking-widest">{entry.instructor}</span>
+                                          <UserCheck size={12} className="text-[#a855f7]/70" />
+                                          <span className="text-[9px] font-black uppercase tracking-widest truncate max-w-[120px] md:max-w-none text-gray-400 dark:text-gray-400/80">{entry.instructor}</span>
                                         </div>
                                       )}
                                       {entry.location && (
                                         <div className="flex items-center gap-1.5 text-gray-500 dark:text-slate-400">
-                                          <MapPin size={14} className="opacity-70" />
-                                          <span className="text-[11px] font-black uppercase tracking-widest">{entry.location}</span>
+                                          <MapPin size={12} className="text-[#2cfc7d]/70" />
+                                          <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-400/80">{entry.location}</span>
                                         </div>
                                       )}
                                     </div>
@@ -379,8 +423,8 @@ const StudentTimetable = () => {
                               </div>
                           </div>
 
-                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${isCompleted ? 'bg-[#10b981] text-white' : 'bg-gray-50 dark:bg-white/5 text-gray-200 dark:text-white/5'}`}>
-                             {isCompleted ? <CheckCircle2 className="w-6 h-6" /> : <ArrowRight className={`w-6 h-6 ${isAr ? 'rotate-180' : ''}`} />}
+                          <div className={`w-10 h-10 md:w-12 md:h-12 rounded-[1rem] md:rounded-xl flex items-center justify-center transition-all duration-300 border shrink-0 ${isCompleted ? 'bg-[#10b981] border-[#10b981] text-white shadow-lg shadow-emerald-500/10' : scheduleType === 'lectures' ? 'bg-[#8b5cf6]/10 hover:bg-[#8b5cf6] text-[#8b5cf6] hover:text-white border-[#8b5cf6]/20 hover:border-transparent shadow-md hover:shadow-purple-500/30' : 'bg-gray-50 dark:bg-white/5 border-gray-100 dark:border-white/5 text-gray-200 dark:text-white/5'}`}>
+                             {isCompleted ? <CheckCircle2 className="w-5 h-5" /> : scheduleType === 'lectures' ? <QrCode className="w-4 h-4 md:w-5 md:h-5" /> : <ArrowRight className={`w-5 h-5 ${isAr ? 'rotate-180' : ''}`} />}
                           </div>
                         </div>
                       );
@@ -392,6 +436,82 @@ const StudentTimetable = () => {
           </div>
         </section>
       </main>
+
+      {/* QR Attendance Modal */}
+      {qrModal && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-6" dir={isAr ? 'rtl' : 'ltr'}>
+          <div
+            onClick={() => setQrModal(null)}
+            className="absolute inset-0 bg-black/70 backdrop-blur-md"
+          />
+          <div className="relative z-10 bg-white dark:bg-[#0c0c0e] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-8 sm:p-10 w-full max-w-sm shadow-2xl animate-in zoom-in-95 duration-200 text-center">
+            {/* Glow */}
+            <div className="absolute top-0 inset-inline-end-0 w-64 h-64 bg-[#8b5cf6]/10 blur-[80px] rounded-full pointer-events-none" />
+
+            {/* Close */}
+            <button
+              onClick={() => setQrModal(null)}
+              className="absolute top-5 right-5 rtl:left-5 rtl:right-auto z-50 w-10 h-10 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer"
+            >
+              <X className="w-4 h-4 pointer-events-none" />
+            </button>
+
+            {/* Header */}
+            <div className="flex flex-col items-center gap-3 mb-8 relative z-10">
+              <div className="w-14 h-14 rounded-2xl bg-[#8b5cf6]/10 border border-[#8b5cf6]/20 flex items-center justify-center">
+                <QrCode className="w-7 h-7 text-[#8b5cf6]" />
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-gray-900 dark:text-white tracking-tight uppercase">
+                  {qrModal.courseName}
+                </h3>
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mt-1">
+                  {isAr ? 'رمز الحضور' : 'ATTENDANCE QR'}
+                </p>
+              </div>
+            </div>
+
+            {/* QR or Loader */}
+            <div className="relative z-10 flex items-center justify-center">
+              {qrLoading || !qrModal.token ? (
+                <div className="w-[220px] h-[220px] flex flex-col items-center justify-center gap-4 bg-gray-50 dark:bg-white/[0.02] rounded-[2rem] border border-gray-100 dark:border-white/5">
+                  <ScanLine className="w-10 h-10 text-[#8b5cf6] animate-pulse" />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+                    {isAr ? 'جارٍ التحميل...' : 'Loading...'}
+                  </span>
+                </div>
+              ) : (
+                <div className="p-4 bg-white rounded-[1.5rem] shadow-xl border border-gray-100 dark:border-white/10">
+                  <QRCodeSVG
+                    value={qrModal.token}
+                    size={200}
+                    bgColor="#ffffff"
+                    fgColor="#1a1a2e"
+                    level="H"
+                    includeMargin={false}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Hint */}
+            {qrModal.token && (
+              <div className="mt-8 relative z-10">
+                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+                  {isAr ? 'اعرض الرمز للدكتور لتسجيل حضورك' : 'Show this QR to your instructor'}
+                </p>
+                <button
+                  onClick={() => handleLectureClick({ course_id: qrModal.courseId, course_name: qrModal.courseName })}
+                  className="mt-4 flex items-center gap-2 mx-auto text-[#8b5cf6] text-[10px] font-black uppercase tracking-widest hover:opacity-70 transition-opacity"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  {isAr ? 'تحديث' : 'Refresh'}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');

@@ -12,7 +12,7 @@ import {
 const MODULE_COLORS = {
   'Auth': { bg: 'bg-yellow-500/10', text: 'text-yellow-600 dark:text-yellow-400', border: 'border-yellow-500/20' },
   'Students': { bg: 'bg-blue-500/10', text: 'text-blue-600 dark:text-blue-400', border: 'border-blue-500/20' },
-  'Courses': { bg: 'bg-primary/10', text: 'text-primary dark:text-primary', border: 'border-primary/20' },
+  'Courses': { bg: 'bg-[#8b5cf6]/10', text: 'text-[#8b5cf6] dark:text-[#8b5cf6]', border: 'border-[#8b5cf6]/20' },
   'Grades': { bg: 'bg-purple-500/10', text: 'text-purple-600 dark:text-purple-400', border: 'border-purple-500/20' },
   'Timetable': { bg: 'bg-cyan-500/10', text: 'text-cyan-600 dark:text-cyan-400', border: 'border-cyan-500/20' },
   'Notifications': { bg: 'bg-red-500/10', text: 'text-red-600 dark:text-red-400', border: 'border-red-500/20' },
@@ -94,7 +94,7 @@ const ActivityLogsManager = () => {
   };
 
   return (
-    <div className="p-8 space-y-12">
+    <div className="p-8 space-y-12 text-start">
       {/* Action Bar */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div className="flex items-center gap-4">
@@ -102,15 +102,15 @@ const ActivityLogsManager = () => {
                 onClick={() => setShowFilters(!showFilters)}
                 className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-[color,background-color,border-color,transform,opacity] border ${
                   showFilters 
-                    ? 'bg-amber-500 text-white border-amber-500 shadow-lg shadow-amber-500/20' 
-                    : 'bg-white dark:bg-white/5 text-gray-500 border-gray-100 dark:border-white/10 hover:border-amber-500/30'
+                    ? 'bg-[#8b5cf6] text-white border-[#8b5cf6] shadow-lg shadow-purple-500/20' 
+                    : 'bg-white dark:bg-white/5 text-gray-500 border-gray-100 dark:border-white/10 hover:border-[#8b5cf6]/30'
                 }`}
               >
                 <Filter className="w-3.5 h-3.5" /> {t('admin.logs.filters.title')}
               </button>
               <button 
                 onClick={() => { fetchLogs(); fetchStats(); }}
-                className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest text-gray-500 hover:border-amber-500/30 transition-[color,background-color,border-color,transform,opacity]"
+                className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest text-gray-500 hover:border-[#8b5cf6]/30 transition-[color,background-color,border-color,transform,opacity]"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} /> {t('admin.logs.sync')}
               </button>
@@ -127,19 +127,19 @@ const ActivityLogsManager = () => {
       {stats && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {[
-            { label: t('admin.logs.stats.total'), value: stats.total_actions, icon: <Database className="w-5 h-5" />, color: 'emerald' },
-            { label: t('admin.logs.stats.today'), value: stats.today_actions, icon: <Clock className="w-5 h-5" />, color: 'amber' },
-            { label: t('admin.logs.stats.weekly'), value: stats.week_actions, icon: <BarChart3 className="w-5 h-5" />, color: 'blue' },
-            { label: t('admin.logs.stats.admins'), value: stats.unique_admins, icon: <Shield className="w-5 h-5" />, color: 'purple' },
+            { label: t('admin.logs.stats.total'), value: stats.total_actions, icon: <Database className="w-5 h-5" />, bg: 'bg-emerald-500/10 dark:bg-emerald-500/20', text: 'text-emerald-600 dark:text-emerald-400', border: 'border-emerald-500/20', glow: 'text-emerald-500/5' },
+            { label: t('admin.logs.stats.today'), value: stats.today_actions, icon: <Clock className="w-5 h-5" />, bg: 'bg-[#8b5cf6]/10 dark:bg-[#8b5cf6]/20', text: 'text-[#8b5cf6] dark:text-[#8b5cf6]', border: 'border-[#8b5cf6]/20', glow: 'text-[#8b5cf6]/5' },
+            { label: t('admin.logs.stats.weekly'), value: stats.week_actions, icon: <BarChart3 className="w-5 h-5" />, bg: 'bg-blue-500/10 dark:bg-blue-500/20', text: 'text-blue-600 dark:text-blue-400', border: 'border-blue-500/20', glow: 'text-blue-500/5' },
+            { label: t('admin.logs.stats.admins'), value: stats.unique_admins, icon: <Shield className="w-5 h-5" />, bg: 'bg-purple-500/10 dark:bg-purple-500/20', text: 'text-purple-600 dark:text-purple-400', border: 'border-purple-500/20', glow: 'text-purple-500/5' },
           ].map((s, i) => (
-            <div key={i} className="group relative bg-white dark:bg-black/20 border border-gray-100 dark:border-white/5 rounded-[2rem] p-8 overflow-hidden hover:border-amber-500/30 transition-[color,background-color,border-color,transform,opacity] duration-500 shadow-sm">
-                <div className={`absolute -inset-inline-end-4 -bottom-4 w-24 h-24 text-${s.color}-500/5 group-hover:scale-125 transition-transform duration-500`}>
+            <div key={i} className="group relative bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[2rem] p-8 overflow-hidden hover:border-[#8b5cf6]/30 transition-[color,background-color,border-color,transform,opacity] duration-500 shadow-sm">
+                <div className={`absolute -inset-inline-end-4 -bottom-4 w-24 h-24 ${s.glow} group-hover:scale-125 transition-transform duration-500`}>
                     {s.icon}
                 </div>
-                <div className={`w-10 h-10 bg-${s.color}-500/10 rounded-xl flex items-center justify-center text-${s.color}-600 dark:text-${s.color}-400 mb-6 border border-${s.color}-500/20`}>
+                <div className={`w-10 h-10 ${s.bg} rounded-xl flex items-center justify-center ${s.text} mb-6 border ${s.border}`}>
                     {s.icon}
                 </div>
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-2">{s.label}</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 dark:text-slate-400 mb-2">{s.label}</p>
                 <p className="text-3xl font-black text-gray-900 dark:text-white tracking-tighter">{s.value || 0}</p>
             </div>
           ))}
@@ -148,50 +148,50 @@ const ActivityLogsManager = () => {
 
       {/* Filters Interface */}
       {showFilters && (
-        <div className="bg-white/50 dark:bg-black/40 border border-gray-100 dark:border-white/10 rounded-[2.5rem] p-10 space-y-8 animate-in slide-in-from-top-4 duration-500">
+        <div className="bg-white/50 dark:bg-[#0d0d14] border border-gray-100 dark:border-white/10 rounded-[2.5rem] p-10 space-y-8 animate-in slide-in-from-top-4 duration-500">
            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
               <div className="space-y-3">
-                 <label className="text-[10px] font-black uppercase tracking-widest text-amber-600 ms-5">{t('admin.logs.filters.admin')}</label>
+                 <label className="text-[10px] font-black uppercase tracking-widest text-[#8b5cf6] ms-5">{t('admin.logs.filters.admin')}</label>
                  <div className="relative">
                     <User className="absolute inset-inline-start-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <input type="text" placeholder="Search ID..." value={filters.admin_id}
                       onChange={e => setFilters({ ...filters, admin_id: e.target.value })}
-                      className="w-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl py-4 ps-14 pe-6 text-sm font-bold focus:ring-2 focus:ring-amber-500/50 outline-none transition-[color,background-color,border-color,transform,opacity]" />
+                      className="w-full bg-white dark:bg-black/40 border border-gray-100 dark:border-white/10 rounded-2xl py-4 ps-14 pe-6 text-sm font-bold focus:ring-2 focus:ring-[#8b5cf6]/50 outline-none transition-[color,background-color,border-color,transform,opacity]" />
                  </div>
               </div>
               <div className="space-y-3">
-                 <label className="text-[10px] font-black uppercase tracking-widest text-amber-600 ms-5">{t('admin.logs.filters.module')}</label>
+                 <label className="text-[10px] font-black uppercase tracking-widest text-[#8b5cf6] ms-5">{t('admin.logs.filters.module')}</label>
                  <select value={filters.module} onChange={e => setFilters({ ...filters, module: e.target.value })}
-                   className="w-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl py-4 px-6 text-sm font-bold focus:ring-2 focus:ring-amber-500/50 outline-none appearance-none transition-[color,background-color,border-color,transform,opacity]">
-                   <option value="">{t('admin.logs.filters.all_modules')}</option>
-                   {Object.keys(MODULE_COLORS).map(m => <option key={m} value={m}>{m}</option>)}
+                   className="w-full bg-white dark:bg-black/40 border border-gray-100 dark:border-white/10 rounded-2xl py-4 px-6 text-sm font-bold focus:ring-2 focus:ring-[#8b5cf6]/50 outline-none appearance-none transition-[color,background-color,border-color,transform,opacity]">
+                   <option value="" className="bg-white dark:bg-[#0d0d14] dark:text-white">{t('admin.logs.filters.all_modules')}</option>
+                   {Object.keys(MODULE_COLORS).map(m => <option key={m} value={m} className="bg-white dark:bg-[#0d0d14] dark:text-white">{m}</option>)}
                  </select>
               </div>
               <div className="space-y-3">
-                 <label className="text-[10px] font-black uppercase tracking-widest text-amber-600 ms-5">{t('admin.logs.filters.action')}</label>
+                 <label className="text-[10px] font-black uppercase tracking-widest text-[#8b5cf6] ms-5">{t('admin.logs.filters.action')}</label>
                  <input type="text" placeholder={t('admin.logs.filters.placeholder_action')} value={filters.action}
                    onChange={e => setFilters({ ...filters, action: e.target.value })}
-                   className="w-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl py-4 px-6 text-sm font-bold focus:ring-2 focus:ring-amber-500/50 outline-none transition-[color,background-color,border-color,transform,opacity]" />
+                   className="w-full bg-white dark:bg-black/40 border border-gray-100 dark:border-white/10 rounded-2xl py-4 px-6 text-sm font-bold focus:ring-2 focus:ring-[#8b5cf6]/50 outline-none transition-[color,background-color,border-color,transform,opacity]" />
               </div>
               <div className="space-y-3">
-                 <label className="text-[10px] font-black uppercase tracking-widest text-amber-600 ms-5">{t('admin.logs.filters.date_from')}</label>
+                 <label className="text-[10px] font-black uppercase tracking-widest text-[#8b5cf6] ms-5">{t('admin.logs.filters.date_from')}</label>
                  <input type="date" value={filters.date_from}
                    onChange={e => setFilters({ ...filters, date_from: e.target.value })}
-                   className="w-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl py-4 px-6 text-sm font-bold focus:ring-2 focus:ring-amber-500/50 outline-none transition-[color,background-color,border-color,transform,opacity]" />
+                   className="w-full bg-white dark:bg-black/40 border border-gray-100 dark:border-white/10 rounded-2xl py-4 px-6 text-sm font-bold focus:ring-2 focus:ring-[#8b5cf6]/50 outline-none transition-[color,background-color,border-color,transform,opacity]" />
               </div>
               <div className="space-y-3">
-                 <label className="text-[10px] font-black uppercase tracking-widest text-amber-600 ms-5">{t('admin.logs.filters.date_to')}</label>
+                 <label className="text-[10px] font-black uppercase tracking-widest text-[#8b5cf6] ms-5">{t('admin.logs.filters.date_to')}</label>
                  <input type="date" value={filters.date_to}
                    onChange={e => setFilters({ ...filters, date_to: e.target.value })}
-                   className="w-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl py-4 px-6 text-sm font-bold focus:ring-2 focus:ring-amber-500/50 outline-none transition-[color,background-color,border-color,transform,opacity]" />
+                   className="w-full bg-white dark:bg-black/40 border border-gray-100 dark:border-white/10 rounded-2xl py-4 px-6 text-sm font-bold focus:ring-2 focus:ring-[#8b5cf6]/50 outline-none transition-[color,background-color,border-color,transform,opacity]" />
               </div>
            </div>
            <div className="flex gap-4 pt-4">
-              <button onClick={() => fetchLogs(1)} className="px-10 py-4 bg-amber-500 text-white font-black rounded-2xl text-[10px] uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-[color,background-color,border-color,transform,opacity] shadow-xl shadow-amber-500/20">
+              <button onClick={() => fetchLogs(1)} className="px-10 py-4 bg-[#8b5cf6] text-white font-black rounded-2xl text-[10px] uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-[color,background-color,border-color,transform,opacity] shadow-xl shadow-purple-500/20">
                 {t('admin.logs.filters.execute')}
               </button>
               <button onClick={() => setFilters({ admin_id: '', module: '', action: '', date_from: '', date_to: '' })}
-                className="px-10 py-4 bg-white dark:bg-white/5 text-gray-500 font-black rounded-2xl text-[10px] uppercase tracking-widest border border-gray-100 dark:border-white/10 hover:border-amber-500/30 transition-[color,background-color,border-color,transform,opacity]">
+                className="px-10 py-4 bg-white dark:bg-white/5 text-gray-500 font-black rounded-2xl text-[10px] uppercase tracking-widest border border-gray-100 dark:border-white/10 hover:border-[#8b5cf6]/30 transition-[color,background-color,border-color,transform,opacity]">
                 {t('admin.logs.filters.reset')}
               </button>
            </div>
@@ -199,11 +199,11 @@ const ActivityLogsManager = () => {
       )}
 
       {/* Main Table View */}
-      <div className="bg-white/80 dark:bg-black/40 border border-gray-100 dark:border-white/10 rounded-[3rem] overflow-hidden shadow-2xl transition-[color,background-color,border-color,transform,opacity] duration-500">
+      <div className="bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/10 rounded-[3rem] overflow-hidden shadow-2xl transition-[color,background-color,border-color,transform,opacity] duration-500">
         <div className="px-10 py-8 border-b border-gray-50 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.01] flex justify-between items-center">
             <div className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-amber-500/10 rounded-xl flex items-center justify-center border border-amber-500/20">
-                    <Terminal className="w-5 h-5 text-amber-600" />
+                <div className="w-10 h-10 bg-[#8b5cf6]/10 rounded-xl flex items-center justify-center border border-[#8b5cf6]/20">
+                    <Terminal className="w-5 h-5 text-[#8b5cf6]" />
                 </div>
                 <h3 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">{t('admin.logs.registry')}</h3>
             </div>
@@ -214,7 +214,7 @@ const ActivityLogsManager = () => {
 
         {loading ? (
           <div className="flex flex-col items-center justify-center py-32 opacity-50">
-             <div className="w-12 h-12 border-4 border-amber-500/20 border-t-amber-500 rounded-full animate-spin mb-6"></div>
+             <div className="w-12 h-12 border-4 border-[#8b5cf6]/20 border-t-[#8b5cf6] rounded-full animate-spin mb-6"></div>
              <p className="text-[10px] font-black uppercase tracking-widest">{t('admin.tasks.loading')}</p>
           </div>
         ) : logs.length === 0 ? (
@@ -243,7 +243,7 @@ const ActivityLogsManager = () => {
                     <React.Fragment key={log.id}>
                       <tr 
                         onClick={() => setSelectedLog(isExpanded ? null : log)}
-                        className={`group cursor-pointer transition-[color,background-color,border-color,transform,opacity] ${isExpanded ? 'bg-amber-500/5 dark:bg-amber-500/10' : 'hover:bg-gray-50 dark:hover:bg-white/[0.02]'}`}
+                        className={`group cursor-pointer transition-[color,background-color,border-color,transform,opacity] ${isExpanded ? 'bg-[#8b5cf6]/5 dark:bg-[#8b5cf6]/10' : 'hover:bg-gray-50 dark:hover:bg-white/[0.02]'}`}
                       >
                         <td className="px-10 py-6">
                            <span className={`text-[9px] font-black px-2.5 py-1 rounded-lg border ${METHOD_COLORS[log.method] || 'bg-gray-100 text-gray-500 border-gray-200'}`}>
@@ -260,12 +260,12 @@ const ActivityLogsManager = () => {
                         </td>
                         <td className="px-6 py-6">
                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center border border-gray-200 dark:border-white/10 group-hover:border-amber-500/30 transition-colors">
-                                 <User className="w-4 h-4 text-gray-400 group-hover:text-amber-500 transition-colors" />
+                              <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center border border-gray-200 dark:border-white/10 group-hover:border-[#8b5cf6]/30 transition-colors">
+                                 <User className="w-4 h-4 text-gray-400 group-hover:text-[#8b5cf6] transition-colors" />
                               </div>
                               <div>
                                  <p className="text-xs font-black text-gray-700 dark:text-gray-300">{log.admin_name}</p>
-                                 <p className="text-[8px] font-black text-amber-600 uppercase tracking-widest">{log.admin_role}</p>
+                                 <p className="text-[8px] font-black text-[#8b5cf6] uppercase tracking-widest">{log.admin_role}</p>
                               </div>
                            </div>
                         </td>
@@ -276,41 +276,41 @@ const ActivityLogsManager = () => {
                            </div>
                         </td>
                         <td className="px-10 py-6 text-inline-end">
-                           <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-[color,background-color,border-color,transform,opacity] ${isExpanded ? 'bg-amber-500 text-white rotate-180' : 'bg-gray-100 dark:bg-white/5 text-gray-400 group-hover:text-amber-500'}`}>
+                           <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-[color,background-color,border-color,transform,opacity] ${isExpanded ? 'bg-[#8b5cf6] text-white rotate-180' : 'bg-gray-100 dark:bg-white/5 text-gray-400 group-hover:text-[#8b5cf6]'}`}>
                               <ChevronRight className="w-4 h-4" />
                            </div>
                         </td>
                       </tr>
                       {isExpanded && (
                         <tr>
-                          <td colSpan="6" className="px-10 pb-10 pt-4 bg-amber-500/5 dark:bg-amber-500/10">
-                             <div className="grid grid-cols-1 md:grid-cols-4 gap-8 bg-white dark:bg-black/60 border border-amber-500/20 rounded-[2rem] p-8 animate-in zoom-in-95 duration-300">
+                          <td colSpan="6" className="px-10 pb-10 pt-4 bg-[#8b5cf6]/5 dark:bg-[#8b5cf6]/10">
+                             <div className="grid grid-cols-1 md:grid-cols-4 gap-8 bg-white dark:bg-black/60 border border-[#8b5cf6]/20 rounded-[2rem] p-8 animate-in zoom-in-95 duration-300">
                                 <div className="space-y-4">
                                    <div>
-                                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1 flex items-center gap-2"><Fingerprint className="w-3 h-3 text-amber-500" /> {t('admin.logs.table.details.admin_id')}</p>
+                                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1 flex items-center gap-2"><Fingerprint className="w-3 h-3 text-[#8b5cf6]" /> {t('admin.logs.table.details.admin_id')}</p>
                                       <p className="text-sm font-black text-gray-900 dark:text-white">#{log.admin_id}</p>
                                    </div>
                                    <div>
-                                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1 flex items-center gap-2"><Globe className="w-3 h-3 text-amber-500" /> {t('admin.logs.table.details.source_address')}</p>
+                                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1 flex items-center gap-2"><Globe className="w-3 h-3 text-[#8b5cf6]" /> {t('admin.logs.table.details.source_address')}</p>
                                       <p className="text-sm font-black text-gray-900 dark:text-white">{log.ip_address || 'Internal'}</p>
                                    </div>
                                 </div>
                                 <div className="space-y-4">
                                    <div>
-                                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1 flex items-center gap-2"><Activity className="w-3 h-3 text-primary" /> {t('admin.logs.table.details.signal_status')}</p>
-                                      <p className={`text-sm font-black ${log.status_code < 400 ? 'text-primary' : 'text-rose-500'}`}>
+                                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1 flex items-center gap-2"><Activity className="w-3 h-3 text-[#8b5cf6]" /> {t('admin.logs.table.details.signal_status')}</p>
+                                      <p className={`text-sm font-black ${log.status_code < 400 ? 'text-green-500' : 'text-rose-500'}`}>
                                         {log.status_code || '200 OK'} • {t('admin.logs.table.details.authorized')}
                                       </p>
                                    </div>
                                    <div>
-                                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1 flex items-center gap-2"><Calendar className="w-3 h-3 text-amber-500" /> {t('admin.logs.table.details.full_timestamp')}</p>
+                                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1 flex items-center gap-2"><Calendar className="w-3 h-3 text-[#8b5cf6]" /> {t('admin.logs.table.details.full_timestamp')}</p>
                                       <p className="text-sm font-black text-gray-900 dark:text-white">{formatDate(log.created_at)}</p>
                                    </div>
                                 </div>
                                 <div className="md:col-span-2 space-y-4">
                                    <div>
-                                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1 flex items-center gap-2"><ArrowUpRight className="w-3 h-3 text-amber-500" /> {t('admin.logs.table.details.resource_mapping')}</p>
-                                      <code className="text-[10px] font-mono font-black text-amber-600 bg-amber-500/5 dark:bg-amber-500/10 px-3 py-1.5 rounded-lg border border-amber-500/10 block break-all">
+                                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1 flex items-center gap-2"><ArrowUpRight className="w-3 h-3 text-[#8b5cf6]" /> {t('admin.logs.table.details.resource_mapping')}</p>
+                                      <code className="text-[10px] font-mono font-black text-[#8b5cf6] bg-[#8b5cf6]/5 dark:bg-[#8b5cf6]/10 px-3 py-1.5 rounded-lg border border-[#8b5cf6]/10 block break-all">
                                         {log.endpoint}
                                       </code>
                                    </div>
@@ -318,7 +318,7 @@ const ActivityLogsManager = () => {
                                       <div>
                                          <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">{t('admin.logs.table.details.payload_matrix')}</p>
                                          <div className="max-h-48 overflow-y-auto no-scrollbar bg-black dark:bg-black/40 rounded-xl p-4 border border-white/5">
-                                            <pre className="text-[10px] font-mono text-primary leading-relaxed whitespace-pre-wrap">
+                                            <pre className="text-[10px] font-mono text-[#8b5cf6] leading-relaxed whitespace-pre-wrap">
                                                {JSON.stringify(log.details, null, 2)}
                                             </pre>
                                          </div>
@@ -343,19 +343,19 @@ const ActivityLogsManager = () => {
             <button 
               onClick={() => fetchLogs(pagination.page - 1)} 
               disabled={pagination.page <= 1}
-              className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-500 hover:border-amber-500/30 transition-[color,background-color,border-color,transform,opacity] disabled:opacity-30 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-500 hover:border-[#8b5cf6]/30 transition-[color,background-color,border-color,transform,opacity] disabled:opacity-30 disabled:cursor-not-allowed"
             >
               <ChevronLeft className="w-4 h-4" /> {t('common.previous')}
             </button>
             <div className="flex items-center gap-4">
-               <div className="px-4 py-2 bg-amber-500/10 border border-amber-500/20 rounded-xl">
-                  <span className="text-xs font-black text-amber-600">{t('admin.logs.registry')} {pagination.page} / {pagination.totalPages}</span>
+               <div className="px-4 py-2 bg-[#8b5cf6]/10 border border-[#8b5cf6]/20 rounded-xl">
+                  <span className="text-xs font-black text-[#8b5cf6]">{t('admin.logs.registry')} {pagination.page} / {pagination.totalPages}</span>
                </div>
             </div>
             <button 
               onClick={() => fetchLogs(pagination.page + 1)} 
               disabled={pagination.page >= pagination.totalPages}
-              className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-500 hover:border-amber-500/30 transition-[color,background-color,border-color,transform,opacity] disabled:opacity-30 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-500 hover:border-[#8b5cf6]/30 transition-[color,background-color,border-color,transform,opacity] disabled:opacity-30 disabled:cursor-not-allowed"
             >
               {t('common.next')} <ChevronRight className="w-4 h-4" />
             </button>

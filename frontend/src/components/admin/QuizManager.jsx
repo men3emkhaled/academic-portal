@@ -257,7 +257,7 @@ const QuizManager = ({ courses }) => {
       <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-10 text-start">
         <div className="space-y-4 max-w-2xl">
           <div className="flex items-center gap-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-primary"></div>
+            <div className="w-1.5 h-1.5 rounded-full bg-[#2cfc7d]"></div>
             <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 dark:text-white/30">{t('admin.sidebar.tabs.quizzes')}</span>
           </div>
           <h1 className="text-[clamp(2.5rem,6vw,5.5rem)] font-black leading-[0.95] tracking-tighter uppercase text-gray-900 dark:text-white">
@@ -265,8 +265,8 @@ const QuizManager = ({ courses }) => {
           </h1>
         </div>
 
-        <div className="flex gap-4">
-           <div className="bg-primary text-white p-8 rounded-[2.5rem] shadow-lg shadow-primary/20 flex flex-col justify-between relative overflow-hidden group min-w-[240px]">
+        <div className="flex gap-4 flex-wrap">
+           <div className="bg-gradient-to-br from-[#8b5cf6] to-[#6d28d9] text-white p-8 rounded-[2.5rem] shadow-lg shadow-purple-600/20 flex flex-col justify-between relative overflow-hidden group min-w-[240px]">
               <div className="absolute inset-inline-end-0 top-0 w-24 h-24 bg-white/10 hidden rounded-full translate-x-1/2 -translate-y-1/2 group-hover:scale-150 transition-transform duration-700"></div>
               <div className="flex justify-between items-start relative z-10">
                 <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
@@ -284,12 +284,12 @@ const QuizManager = ({ courses }) => {
              onClick={() => setShowQuizForm(true)}
              className="group bg-black dark:bg-white text-white dark:text-black rounded-[2.5rem] p-8 flex flex-col justify-between items-start gap-10 hover:scale-[1.02] active:scale-95 transition-all shadow-2xl relative overflow-hidden min-w-[200px]"
            >
-             <div className="absolute inset-0 bg-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+             <div className="absolute inset-0 bg-[#8b5cf6] opacity-0 group-hover:opacity-10 transition-opacity" />
              <div className="w-14 h-14 bg-white/10 dark:bg-black/10 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-90 transition-all duration-700 relative z-10">
                 <Plus className="w-8 h-8" />
              </div>
              <div className="relative z-10 text-start">
-                <span className="block text-xl font-black uppercase tracking-tighter leading-none">{t('admin.quizzes.add_btn')}</span>
+                <span className="block text-xl font-black uppercase tracking-tighter leading-none text-white dark:text-black">{t('admin.quizzes.add_btn')}</span>
                 <span className="text-[9px] font-black uppercase tracking-[0.3em] opacity-40 italic mt-2 block">{t('admin.quizzes.identity_registration')}</span>
              </div>
            </button>
@@ -304,11 +304,11 @@ const QuizManager = ({ courses }) => {
             className={`w-full text-start p-8 rounded-[2.5rem] border transition-all duration-500 flex items-center justify-between group ${
                 !selectedQuiz
                 ? 'bg-black dark:bg-white text-white dark:text-black border-black shadow-2xl'
-                : 'bg-white dark:bg-white/[0.02] text-gray-500 border-gray-100 dark:border-white/5 hover:border-primary/30 shadow-sm'
+                : 'bg-white dark:bg-white/[0.02] text-gray-500 border-gray-100 dark:border-white/5 hover:border-[#8b5cf6]/30 shadow-sm'
             }`}
           >
             <div className="flex items-center gap-5">
-               <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${!selectedQuiz ? 'bg-white/10 dark:bg-black/10' : 'bg-gray-50 dark:bg-black/40 text-gray-400 group-hover:text-primary'}`}>
+               <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${!selectedQuiz ? 'bg-white/10 dark:bg-black/10' : 'bg-gray-50 dark:bg-black/40 text-gray-400 group-hover:text-[#8b5cf6]'}`}>
                   <LayoutDashboard className="w-6 h-6" />
                </div>
                <span className="font-black text-sm uppercase tracking-widest">{t('admin.quizzes.all_quizzes_tab')}</span>
@@ -333,8 +333,8 @@ const QuizManager = ({ courses }) => {
                 key={quiz.id}
                 className={`group relative p-8 rounded-[3rem] border transition-all duration-700 cursor-pointer text-start ${
                   selectedQuiz?.id === quiz.id
-                    ? 'bg-primary text-white border-primary shadow-2xl shadow-primary/20'
-                    : 'bg-white dark:bg-white/[0.02] border-gray-100 dark:border-white/5 hover:border-primary/40 hover:bg-primary/[0.02] shadow-sm'
+                    ? 'bg-[#8b5cf6] text-white border-[#8b5cf6] shadow-2xl shadow-purple-500/20'
+                    : 'bg-white dark:bg-[#0d0d14] border-gray-100 dark:border-white/5 hover:border-[#8b5cf6]/40 hover:bg-[#8b5cf6]/[0.02] shadow-sm'
                 }`}
                 onClick={() => { setSelectedQuiz(quiz); setActiveSubTab('questions'); }}
               >
@@ -347,7 +347,7 @@ const QuizManager = ({ courses }) => {
                     <p className={`text-[10px] font-black uppercase tracking-[0.2em] mb-6 truncate ${selectedQuiz?.id === quiz.id ? 'text-white/60' : 'text-gray-400'}`}>{quiz.course_name}</p>
                     
                     <div className="flex flex-wrap gap-2">
-                        <span className={`inline-flex items-center gap-2 text-[9px] font-black uppercase tracking-widest px-4 py-2 rounded-xl border transition-colors ${selectedQuiz?.id === quiz.id ? 'bg-white/10 border-white/20 text-white' : 'bg-primary/5 border-primary/10 text-primary'}`}>
+                        <span className={`inline-flex items-center gap-2 text-[9px] font-black uppercase tracking-widest px-4 py-2 rounded-xl border transition-colors ${selectedQuiz?.id === quiz.id ? 'bg-white/10 border-white/20 text-white' : 'bg-[#8b5cf6]/5 border-[#8b5cf6]/10 text-[#8b5cf6]'}`}>
                             <Clock className="w-3 h-3" /> {quiz.time_limit_minutes}m
                         </span>
                         <span className={`inline-flex items-center gap-2 text-[9px] font-black uppercase tracking-widest px-4 py-2 rounded-xl border transition-colors ${selectedQuiz?.id === quiz.id ? 'bg-white/10 border-white/20 text-white' : 'bg-emerald-500/5 border-emerald-500/10 text-emerald-500'}`}>
@@ -387,9 +387,9 @@ const QuizManager = ({ courses }) => {
         </div>
 
         {/* Right Content: Workspace */}
-        <div className="xl:col-span-8">
+        <div className="xl:col-span-8 text-start">
           {selectedQuiz ? (
-            <div className="bg-white dark:bg-white/[0.01] border border-gray-100 dark:border-white/5 rounded-[3.5rem] overflow-hidden shadow-sm animate-in fade-in slide-in-from-right-8 duration-700 h-full flex flex-col">
+            <div className="bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[3.5rem] overflow-hidden shadow-sm animate-in fade-in slide-in-from-right-8 duration-700 h-full flex flex-col">
               {/* Workspace Header */}
               <div className="p-12 border-b border-gray-100 dark:border-white/5 bg-gray-50/30 dark:bg-white/[0.01]">
                 <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-10 text-start">
@@ -406,15 +406,15 @@ const QuizManager = ({ courses }) => {
                         </div>
                         <div className="flex flex-wrap gap-8">
                              <div className="flex items-center gap-3 text-xs font-black text-gray-400 dark:text-white/40 uppercase tracking-widest italic">
-                                <LayoutDashboard className="w-5 h-5 text-primary" /> {selectedQuiz.course_name}
+                                <LayoutDashboard className="w-5 h-5 text-[#8b5cf6]" /> {selectedQuiz.course_name}
                              </div>
                              <div className="flex items-center gap-3 text-xs font-black text-gray-400 dark:text-white/40 uppercase tracking-widest italic">
-                                <RotateCcw className="w-5 h-5 text-primary" /> {t('admin.quizzes.attempts_label', { count: selectedQuiz.max_attempts || 1 })}
+                                <RotateCcw className="w-5 h-5 text-[#8b5cf6]" /> {t('admin.quizzes.attempts_label', { count: selectedQuiz.max_attempts || 1 })}
                              </div>
                              {selectedQuiz.is_official && (
                                <div className="flex items-center gap-3 text-xs font-black text-rose-600 dark:text-rose-500 uppercase tracking-widest italic">
                                   <Shield className="w-5 h-5" /> {t('admin.quizzes.official_mode')}
-                               </div>
+                                </div>
                              )}
                         </div>
                     </div>
@@ -433,10 +433,10 @@ const QuizManager = ({ courses }) => {
                         className={`group flex items-center gap-4 px-10 py-5 rounded-[2rem] text-[10px] font-black uppercase tracking-[0.2em] transition-all relative overflow-hidden ${
                             activeSubTab === tab.id 
                             ? 'bg-black dark:bg-white text-white dark:text-black shadow-2xl scale-[1.02]' 
-                            : 'bg-white dark:bg-white/[0.05] text-gray-500 border border-gray-100 dark:border-white/5 hover:border-primary/30'
+                            : 'bg-white dark:bg-[#0d0d14] text-gray-500 border border-gray-100 dark:border-white/5 hover:border-[#8b5cf6]/30'
                         }`}
                       >
-                          <div className={`transition-colors ${activeSubTab === tab.id ? 'text-white dark:text-black' : 'text-gray-400 group-hover:text-primary'}`}>
+                          <div className={`transition-colors ${activeSubTab === tab.id ? 'text-white dark:text-black' : 'text-gray-400 group-hover:text-[#8b5cf6]'}`}>
                              <tab.icon className="w-5 h-5" />
                           </div>
                           {tab.label}
@@ -466,10 +466,10 @@ const QuizManager = ({ courses }) => {
               </div>
             </div>
           ) : (
-            <div className="bg-white dark:bg-white/[0.01] border-2 border-dashed border-gray-100 dark:border-white/5 rounded-[4rem] py-60 text-center flex flex-col items-center group transition-all duration-700 h-full justify-center shadow-inner">
-                <div className="w-32 h-32 bg-primary/5 dark:bg-primary/10 rounded-full flex items-center justify-center mb-10 group-hover:scale-110 transition-transform duration-700 relative">
-                    <div className="absolute inset-0 bg-primary blur-2xl opacity-0 group-hover:opacity-10 transition-opacity"></div>
-                    <ClipboardList className="w-16 h-16 text-primary opacity-40 relative z-10" />
+            <div className="bg-white dark:bg-[#0d0d14] border-2 border-dashed border-gray-100 dark:border-white/5 rounded-[4rem] py-60 text-center flex flex-col items-center group transition-all duration-700 h-full justify-center shadow-inner">
+                <div className="w-32 h-32 bg-[#8b5cf6]/5 dark:bg-[#8b5cf6]/10 rounded-full flex items-center justify-center mb-10 group-hover:scale-110 transition-transform duration-700 relative">
+                    <div className="absolute inset-0 bg-[#8b5cf6] blur-2xl opacity-0 group-hover:opacity-10 transition-opacity"></div>
+                    <ClipboardList className="w-16 h-16 text-[#8b5cf6] opacity-40 relative z-10" />
                 </div>
                 <h4 className="text-3xl font-black uppercase tracking-tight text-gray-900 dark:text-white leading-none mb-6">{t('admin.quizzes.workspace_idle_title')}</h4>
                 <p className="text-xs font-black mt-2 tracking-[0.3em] text-gray-400 uppercase max-w-sm italic opacity-40">{t('admin.quizzes.workspace_idle_desc')}</p>

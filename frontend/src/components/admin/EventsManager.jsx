@@ -126,22 +126,28 @@ const EventsManager = () => {
   };
 
   return (
-    <div className="space-y-8 lg:space-y-10 animate-in fade-in duration-700 pb-10">
+    <div className="space-y-6 sm:space-y-8 lg:space-y-10 animate-in fade-in duration-700 pb-10 px-4 sm:px-0 relative z-10">
+      {/* Background Decor */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute top-[-10%] inset-inline-end-[-5%] w-[50vw] h-[50vw] bg-rose-500/5 blur-[120px] rounded-full"></div>
+        <div className="absolute bottom-[-10%] inset-inline-start-[-5%] w-[40vw] h-[40vw] bg-[#8b5cf6]/3 blur-[100px] rounded-full"></div>
+      </div>
+
       {/* Header Bento Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 flex items-center gap-6 bg-white/50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 p-8 rounded-[2.5rem] shadow-sm">
-          <div className="w-16 h-16 bg-rose-500/10 dark:bg-rose-500/20 rounded-2xl flex items-center justify-center border border-rose-500/20 shadow-inner group transition-transform duration-500 hover:scale-110">
-            <Calendar className="w-8 h-8 text-rose-600 dark:text-rose-400" />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 relative z-10">
+        <div className="lg:col-span-2 flex items-center gap-4 sm:gap-6 bg-white/50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 p-5 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] shadow-sm">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-rose-500/10 dark:bg-rose-500/20 rounded-xl sm:rounded-2xl flex items-center justify-center border border-rose-500/20 shadow-inner shrink-0 group transition-transform duration-500 hover:scale-110">
+            <Calendar className="w-6 h-6 sm:w-8 sm:h-8 text-rose-600 dark:text-rose-400" />
           </div>
           <div>
-            <h2 className="text-2xl lg:text-3xl font-black text-gray-900 dark:text-white tracking-tight">
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-gray-900 dark:text-white tracking-tight">
               {t('admin.events.title')}
             </h2>
-            <p className="text-gray-500 dark:text-slate-500 text-sm font-bold mt-1 uppercase tracking-widest">{t('admin.events.description')}</p>
+            <p className="text-gray-500 dark:text-slate-500 text-[10px] sm:text-sm font-bold mt-1 uppercase tracking-widest">{t('admin.events.description')}</p>
           </div>
         </div>
         
-        <div className="bg-rose-600 text-white p-8 rounded-[2.5rem] shadow-lg shadow-rose-600/20 flex flex-col justify-between relative overflow-hidden group">
+        <div className="bg-gradient-to-br from-rose-600 to-rose-800 text-white p-6 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] shadow-lg shadow-rose-600/20 flex flex-col justify-between relative overflow-hidden group">
           <div className="absolute inset-inline-end-0 top-0 w-32 h-32 bg-white/10 hidden rounded-full translate-x-1/2 -translate-y-1/2 group-hover:scale-150 transition-transform duration-700"></div>
           <div className="flex justify-between items-start relative z-10">
             <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
@@ -150,46 +156,46 @@ const EventsManager = () => {
             <span className="text-[10px] font-black uppercase tracking-widest bg-black/10 px-3 py-1 rounded-full">{t('admin.events.stream_status')}</span>
           </div>
           <div className="mt-4 relative z-10">
-            <p className="text-4xl font-black">{events.length}</p>
+            <p className="text-4xl sm:text-5xl font-black tracking-tighter">{events.length}</p>
             <p className="text-[10px] font-black uppercase tracking-widest opacity-60 mt-1">{t('admin.events.total_count', { count: events.length })}</p>
           </div>
         </div>
       </div>
 
       {/* Controls: Search, Filter, Add */}
-      <div className="bg-white/50 dark:bg-white/[0.01] border border-gray-100 dark:border-white/5 rounded-[3rem] p-8 shadow-sm space-y-8">
-        <div className="flex flex-col lg:flex-row justify-between items-stretch gap-6">
+      <div className="bg-white/50 dark:bg-white/[0.01] border border-gray-100 dark:border-white/5 rounded-[2rem] sm:rounded-[3rem] p-5 sm:p-8 shadow-sm space-y-5 sm:space-y-8 relative z-20">
+        <div className="flex flex-col sm:flex-row justify-between items-stretch gap-4">
             <div className="relative flex-1 group">
-                <Search className="absolute inset-inline-start-6 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-rose-500 transition-colors" />
+                <Search className="absolute inset-inline-start-5 sm:inset-inline-start-6 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-focus-within:text-rose-500 transition-colors" />
                 <input 
                     type="text"
                     placeholder={t('admin.events.search_placeholder')}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/10 rounded-[2rem] ps-16 pe-8 py-5 text-gray-900 dark:text-white font-black focus:ring-4 focus:ring-rose-500/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner uppercase tracking-widest text-[11px]"
+                    className="w-full bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/10 rounded-[1.5rem] sm:rounded-[2rem] ps-12 sm:ps-16 pe-6 sm:pe-8 py-4 sm:py-5 text-gray-900 dark:text-white font-black focus:ring-4 focus:ring-rose-500/10 outline-none transition-all shadow-inner uppercase tracking-widest text-[11px]"
                 />
             </div>
             
             <button 
                 onClick={() => openModal()}
-                className="flex items-center justify-center gap-3 bg-rose-600 hover:bg-rose-700 text-white font-black py-4.5 px-10 rounded-[2rem] shadow-xl shadow-rose-600/20 hover:scale-[1.02] active:scale-95 transition-[color,background-color,border-color,transform,opacity] whitespace-nowrap group/add"
+                className="flex items-center justify-center gap-3 bg-rose-600 hover:bg-rose-700 text-white font-black py-4 sm:py-4.5 px-8 sm:px-10 rounded-[1.5rem] sm:rounded-[2rem] shadow-xl shadow-rose-600/20 hover:scale-[1.02] active:scale-95 transition-all whitespace-nowrap group/add"
             >
                 <Plus className="w-5 h-5 group-hover/add:rotate-180 transition-transform duration-500" /> 
                 <span className="uppercase tracking-widest text-xs">{t('admin.events.add_button')}</span>
             </button>
         </div>
 
-        {/* Categories Chips */}
-        <div className="flex items-center gap-3 overflow-x-auto no-scrollbar pb-2">
-            <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-100 dark:border-white/10 shrink-0">
-                <Filter className="w-3.5 h-3.5 text-gray-400" />
-                <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">{t('admin.events.protocol')}</span>
+        {/* Categories Chips - Scrollable */}
+        <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto no-scrollbar pb-1 -mx-5 px-5 sm:mx-0 sm:px-0">
+            <div className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-100 dark:border-white/10 shrink-0">
+                <Filter className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-gray-400" />
+                <span className="text-[8px] sm:text-[9px] font-black text-gray-400 uppercase tracking-widest">{t('admin.events.protocol')}</span>
             </div>
             {categories.map(cat => (
                 <button
                     key={cat}
                     onClick={() => setActiveCategory(cat)}
-                    className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap border transition-[color,background-color,border-color,transform,opacity] duration-500 shrink-0 ${
+                    className={`px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest whitespace-nowrap border transition-all duration-500 shrink-0 ${
                     activeCategory === cat 
                     ? 'bg-rose-600 text-white border-rose-500 shadow-xl shadow-rose-500/20' 
                     : 'bg-white/50 dark:bg-white/[0.02] text-gray-500 border-gray-100 dark:border-white/5 hover:border-rose-500/30 hover:text-rose-600'
@@ -327,7 +333,7 @@ const EventsManager = () => {
               
               
               
-             className="bg-white dark:bg-[#080808] border border-gray-100 dark:border-white/5 shadow-2xl rounded-[3.5rem] w-full max-w-3xl overflow-hidden relative z-10"
+             className="bg-white dark:bg-[#0c0c0e] border border-gray-100 dark:border-white/5 shadow-2xl rounded-[3.5rem] w-full max-w-3xl overflow-hidden relative z-10"
              onClick={e => e.stopPropagation()}
            >
               {/* Modal Background Glow */}

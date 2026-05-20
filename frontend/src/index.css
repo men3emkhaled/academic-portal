@@ -65,7 +65,7 @@
   }
 
   .admin-card {
-    @apply bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 rounded-[3rem] p-10 transition-all duration-500 hover:shadow-[0_32px_64px_rgba(0,0,0,0.1)] dark:hover:shadow-[0_32px_64px_rgba(0,0,0,0.4)];
+    @apply bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-6 sm:p-10 transition-all duration-500 hover:shadow-[0_32px_64px_rgba(0,0,0,0.1)] dark:hover:shadow-[0_32px_64px_rgba(0,0,0,0.4)];
   }
 
   .max-dashboard {
@@ -78,19 +78,19 @@
   }
 
   .admin-input {
-    @apply w-full bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/5 rounded-2xl px-6 py-3.5 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-600 focus:border-emerald-500/50 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 transition-all font-medium;
+    @apply w-full bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/10 rounded-2xl px-5 py-4 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-600 focus:border-[#8b5cf6]/50 focus:outline-none focus:ring-4 focus:ring-[#8b5cf6]/10 transition-all font-black text-xs sm:text-sm shadow-inner;
   }
 
   .admin-input-sm {
-    @apply bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/5 rounded-xl px-4 py-2 text-gray-900 dark:text-white text-sm placeholder-gray-400 dark:placeholder-slate-600 focus:border-emerald-500/50 focus:outline-none transition-all;
+    @apply bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/5 rounded-xl px-4 py-2 text-gray-900 dark:text-white text-sm placeholder-gray-400 dark:placeholder-slate-600 focus:border-[#8b5cf6]/50 focus:outline-none transition-all;
   }
 
   .admin-btn-primary {
-    @apply bg-emerald-500 text-white dark:text-black font-black py-3 px-8 rounded-2xl shadow-lg shadow-emerald-500/20 transition-all hover:scale-[1.03] hover:bg-emerald-600 dark:hover:bg-emerald-400 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed;
+    @apply bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-black py-4 sm:py-5 px-8 sm:px-12 rounded-[2rem] sm:rounded-[2.5rem] shadow-xl shadow-purple-500/20 transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed uppercase tracking-widest text-xs sm:text-sm flex items-center justify-center gap-3;
   }
 
   .admin-btn-secondary {
-    @apply bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-slate-300 border border-gray-200 dark:border-white/10 py-3 px-8 rounded-2xl font-bold transition-all hover:bg-gray-200 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white active:scale-95;
+    @apply bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-slate-300 border border-gray-200 dark:border-white/10 py-4 sm:py-5 px-8 sm:px-12 rounded-[2rem] sm:rounded-[2.5rem] font-black transition-all hover:bg-gray-200 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white active:scale-95 uppercase tracking-widest text-xs sm:text-sm flex items-center justify-center gap-3;
   }
 
   .admin-btn-ghost {
@@ -98,11 +98,11 @@
   }
 
   .admin-modal-backdrop {
-    @apply fixed inset-0 bg-gray-900/40 dark:bg-black/60 flex items-center justify-center z-50 p-4;
+    @apply fixed inset-0 bg-gray-950/40 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center z-[100] p-4 overflow-y-auto;
   }
 
   .admin-modal-panel {
-    @apply bg-white dark:bg-[#111111] border border-gray-200 dark:border-white/10 rounded-[2.5rem] p-10 w-full max-w-3xl shadow-2xl relative overflow-hidden animate-fadeInUp;
+    @apply bg-white dark:bg-[#080808] border border-gray-100 dark:border-white/5 rounded-[2.5rem] sm:rounded-[3rem] p-6 sm:p-12 w-full max-w-3xl shadow-2xl relative overflow-hidden animate-fadeInUp my-8;
   }
 
   .admin-table {

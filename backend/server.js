@@ -225,6 +225,7 @@ app.listen(PORT, async () => {
   await AdminLog.ensureTable();
   await StudentLog.initializeTable();
   await OfficialTask.initializeTable();
+  await require('./models/Notification').initializeTable();
 
   console.log(`📡 API available at http://localhost:${PORT}/api`);
   console.log(`✅ Health check: http://localhost:${PORT}/api/health`);

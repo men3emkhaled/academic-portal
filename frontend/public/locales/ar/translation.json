@@ -579,15 +579,52 @@
       "student_tab": "سجلات الطلاب",
       "admin_tab": "سجلات الإدارة",
       "sync": "مزامنة السجلات",
-      "filters": {
-        "title": "تصفية السجلات"
-      },
       "purge": "مسح السجلات",
+      "registry": "سجل العمليات الإدارية",
+      "scan_results": "تم العثور على {{count}} سجل من إجمالي {{total}}",
+      "sync_access": "مزامنة سجل الولوج",
+      "access_registry": "سجل ولوج الطلاب",
+      "access_points": "تم العثور على {{count}} سجل من إجمالي {{total}}",
+      "registry_void": "سجل الولوج فارغ حالياً",
+      "filters": {
+        "title": "تصفية السجلات",
+        "admin": "بحث بـ UID المسؤول",
+        "module": "الوحدة الأكاديمية",
+        "all_modules": "جميع الوحدات الأكاديمية",
+        "action": "تفاصيل العملية",
+        "placeholder_action": "مثلاً: إضافة طالب، تحديث درجة...",
+        "date_from": "التاريخ من",
+        "date_to": "التاريخ إلى",
+        "execute": "تطبيق التصفية",
+        "reset": "إعادة تعيين"
+      },
       "stats": {
         "today": "عمليات اليوم",
         "total": "إجمالي الأحداث",
         "admins": "إجراءات الإدارة",
         "weekly": "حجم الأسبوع"
+      },
+      "table": {
+        "method": "البروتوكول",
+        "module": "الوحدة",
+        "operation": "العملية",
+        "admin": "المسؤول",
+        "temporal": "التوقيت",
+        "identity": "الهوية",
+        "auth": "المصادقة",
+        "node": "عنوان الشبكة",
+        "status": "الحالة",
+        "details": {
+          "admin_id": "معرف المسؤول",
+          "source_address": "عنوان المصدر IP",
+          "signal_status": "حالة الإشارة",
+          "ipv4_endpoint": "عنوان بروتوكول الإنترنت IP",
+          "secure": "اتصال آمن",
+          "authorized": "عملية مصرحة",
+          "full_timestamp": "التوقيت الكامل",
+          "resource_mapping": "مسار المورد الأكاديمي",
+          "payload_matrix": "مصفوفة البيانات المرسلة"
+        }
       }
     },
     "notifications": {
@@ -621,7 +658,57 @@
         "no_history": "لم يتم تسجيل أي عمليات بث",
         "to": "إلى:",
         "date": "التوقيت:",
-        "delete_confirm": "هل أنت متأكد من حذف سجل الإشعار هذا؟"
+        "delete_confirm": "هل أنت متأكد من حذف سجل الإشعار هذا؟",
+        "messages_count": "إجمالي حزم البث: {{count}}",
+        "doctor_prefix": "بواسطة عضو هيئة التدريس: Dr. ",
+        "student_prefix": "بواسطة الطالب: ",
+        "global": "بث عام للنظام",
+        "read": "تم القراءة",
+        "unread": "غير مقروء"
+      },
+      "modals": {
+        "insert_link": "إدراج رابط تشعبي",
+        "link_text": "نص الرابط المعروض",
+        "link_placeholder": "مثال: اضغط هنا",
+        "url": "رابط الوجهة (URL)",
+        "insert_link_btn": "إدراج الرابط",
+        "insert_image": "إدراج صورة توضيحية",
+        "alt_text": "الوصف البديل للصورة",
+        "img_placeholder": "مثال: شعار المادة الأكاديمية",
+        "image_url": "رابط الصورة المباشر",
+        "insert_image_btn": "إدراج الصورة",
+        "edit_notification": "تعديل معلمات البث",
+        "update_relay_params": "تحديث الخصائص والمعلمات للإشعار النشط",
+        "mark_as_read": "تحديد الإشعار كمقروء"
+      }
+    },
+    "progress": {
+      "title": "تتبع الإنجاز الأكاديمي",
+      "audit_trail": "مراقبة الإنجاز",
+      "signals_tracked": "إشارات الطلاب الممتدة ({{count}})",
+      "total_parts": "إجمالي الأجزاء المتبعة ({{count}})",
+      "select_node": "اختر المادة التعليمية",
+      "overview_analytics": "نظرة عامة على تقدم الطلاب",
+      "efficiency": "معدل الإنجاز",
+      "active_signals": "الطلاب النشطين ({{completed}} من {{total}})",
+      "add_part": "إضافة جزء جديد",
+      "placeholder_part": "عنوان الجزء الدراسي الجديد...",
+      "zero_items": "لم يتم إدراج أي أجزاء دراسية لهذه المادة",
+      "hydrating": "جاري تحميل البيانات...",
+      "system_standby": "النظام في وضع الاستعداد",
+      "standby_hint": "الرجاء اختيار مادة من القائمة أعلاه لبدء المتابعة وتعديل المسار",
+      "status_authenticated": "مكتمل",
+      "status_pending": "قيد الإنجاز",
+      "messages": {
+        "load_failed": "فشل تحميل هيكل التقدم الدراسي",
+        "added": "تم إضافة الجزء الدراسي بنجاح",
+        "add_failed": "فشل إضافة الجزء الدراسي",
+        "update_failed": "فشل تحديث حالة الإنجاز",
+        "delete_confirm": "هل أنت متأكد من حذف هذا الجزء الدراسي؟",
+        "deleted": "تم حذف الجزء الدراسي بنجاح",
+        "delete_failed": "فشل حذف الجزء الدراسي",
+        "updated": "تم تعديل الجزء الدراسي بنجاح",
+        "save_failed": "فشل حفظ التعديلات"
       }
     },
     "mobile_center": {
@@ -635,7 +722,24 @@
       "send_to_dept": "إرسال للقسم",
       "placeholder_dept": "اختر القسم",
       "send_to_student": "إرسال لطالب",
-      "placeholder_student_id": "أدخل كود الطالب..."
+      "placeholder_student_id": "أدخل كود الطالب...",
+      "sending": "جاري البث...",
+      "send_all": "بث للجميع",
+      "note_title": "تنبيه هام",
+      "note_content": "سيتم تعميم هذا الإشعار فوريًا على أجهزة الهواتف للطلاب",
+      "history_title": "سجل البث المحمول",
+      "sent_count": "إجمالي حزم البث: {{count}}",
+      "no_history": "لا توجد عمليات بث مسجلة",
+      "delete_confirm": "هل أنت متأكد من حذف سجل البث المحمول هذا؟",
+      "messages": {
+        "req_fields": "يرجى ملء جميع الحقول المطلوبة",
+        "req_dept": "يرجى اختيار القسم المستهدف",
+        "req_student": "يرجى إدخال كود الطالب المستهدف",
+        "success_sent": "تم بث الإشعار بنجاح",
+        "error_sent": "فشل إرسال البث",
+        "success_deleted": "تم حذف سجل البث بنجاح",
+        "error_deleted": "فشل حذف سجل البث"
+      }
     }
   },
   "dashboard": {

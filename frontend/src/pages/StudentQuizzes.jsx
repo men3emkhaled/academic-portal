@@ -152,7 +152,7 @@ const StudentQuizzes = () => {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pb-20">
             
             {/* Stats Summary Bento Card */}
-            <div className="lg:col-span-8 bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 rounded-[3rem] p-12 flex flex-col md:flex-row justify-between gap-12 group hover:shadow-2xl transition-all duration-700">
+            <div className="lg:col-span-8 bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[3rem] p-12 flex flex-col md:flex-row justify-between gap-12 group hover:shadow-2xl transition-all duration-700">
                <div className="space-y-6 flex-1 text-start">
                   <span className="text-[9px] font-black uppercase tracking-[0.5em] text-gray-400 dark:text-white/30">{t('mavi.analytics_node')}</span>
                   <p className={`text-3xl font-black leading-tight tracking-tight ${isAr ? 'font-arabic' : ''}`}>
@@ -213,14 +213,14 @@ const StudentQuizzes = () => {
                         placeholder={t('quizzes.search_placeholder')}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 rounded-2xl py-4 ps-16 pe-6 font-black text-xs uppercase tracking-widest focus:ring-2 focus:ring-[#10b981]/20 outline-none transition-all shadow-sm text-start"
+                        className="w-full bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-2xl py-4 ps-16 pe-6 font-black text-xs uppercase tracking-widest focus:ring-2 focus:ring-[#10b981]/20 outline-none transition-all shadow-sm text-start"
                      />
                   </div>
                </div>
 
                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
                   {(activeTab === 'available' ? filteredQuizzes : filteredCompleted).length === 0 ? (
-                    <div className="col-span-full py-32 bg-white dark:bg-[#151520] border border-dashed border-gray-100 dark:border-white/10 rounded-[3rem] text-center opacity-40">
+                    <div className="col-span-full py-32 bg-white dark:bg-[#0d0d14] border border-dashed border-gray-100 dark:border-white/10 rounded-[3rem] text-center opacity-40">
                        <ClipboardList className="w-16 h-16 mx-auto mb-6 opacity-20" />
                        <h3 className="text-xl font-black uppercase tracking-[0.4em]">{t('common.no_data')}</h3>
                     </div>
@@ -232,7 +232,7 @@ const StudentQuizzes = () => {
                       return (
                         <div 
                           key={idx}
-                          className="group bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 rounded-[3rem] p-10 space-y-10 hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all duration-700 hover:-translate-y-2 hover:shadow-2xl shadow-sm relative overflow-hidden"
+                          className="group bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[3rem] p-10 space-y-10 hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all duration-700 hover:-translate-y-2 hover:shadow-2xl shadow-sm relative overflow-hidden"
                         >
                           <div className="flex justify-between items-start">
                              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-500 shadow-inner ${isCompleted ? 'bg-[#10b981] text-white' : 'bg-gray-50 dark:bg-[#2cfc7d]/10 text-[#10b981] dark:text-[#2cfc7d] group-hover:bg-emerald-500 dark:group-hover:bg-black group-hover:text-white'}`}>

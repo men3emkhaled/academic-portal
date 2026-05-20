@@ -142,56 +142,64 @@ const TimetableManager = () => {
   };
 
   return (
-    <div className="space-y-12 animate-in fade-in duration-700 pb-10 text-start">
+    <div className="space-y-8 sm:space-y-12 animate-in fade-in duration-700 pb-10 text-start px-4 sm:px-0 relative z-10">
+      {/* Background Decor */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute top-[-10%] inset-inline-end-[-5%] w-[50vw] h-[50vw] bg-[#8b5cf6]/5 blur-[120px] rounded-full"></div>
+        <div className="absolute bottom-[-10%] inset-inline-start-[-5%] w-[40vw] h-[40vw] bg-[#2cfc7d]/3 blur-[100px] rounded-full"></div>
+      </div>
+
       {/* Header Bento Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 flex items-center gap-8 bg-white dark:bg-white/[0.01] border border-gray-100 dark:border-white/5 p-10 rounded-[3rem] shadow-sm relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 blur-3xl rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-1000"></div>
-          <div className="w-20 h-20 bg-primary/10 dark:bg-primary/20 rounded-[1.75rem] flex items-center justify-center border border-primary/20 shadow-inner group-hover:scale-110 transition-transform duration-500 relative z-10">
-            <Calendar className="w-10 h-10 text-primary" />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8 relative z-10">
+        <div className="lg:col-span-2 flex items-center gap-5 sm:gap-8 bg-white dark:bg-white/[0.01] border border-gray-100 dark:border-white/5 p-6 sm:p-10 rounded-[2.5rem] sm:rounded-[3rem] shadow-sm relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-[#8b5cf6]/5 blur-3xl rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-1000"></div>
+          <div className="w-14 h-14 sm:w-20 sm:h-20 bg-[#8b5cf6]/10 dark:bg-[#8b5cf6]/20 rounded-[1.5rem] sm:rounded-[1.75rem] flex items-center justify-center border border-[#8b5cf6]/20 shadow-inner group-hover:scale-110 transition-transform duration-500 relative z-10">
+            <Calendar className="w-7 h-7 sm:w-10 sm:h-10 text-[#8b5cf6]" />
           </div>
           <div className="relative z-10">
-            <h2 className={`text-3xl lg:text-4xl font-black text-gray-900 dark:text-white tracking-tighter uppercase leading-none ${i18n.language === 'ar' ? 'font-arabic' : ''}`}>
+            <h2 className={`text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900 dark:text-white tracking-tighter uppercase leading-none ${i18n.language === 'ar' ? 'font-arabic' : ''}`}>
               {t('admin.timetable.title')}
             </h2>
-            <p className="text-gray-400 text-[11px] font-black mt-3 uppercase tracking-widest italic opacity-60">{t('admin.timetable.description')}</p>
+            <p className="text-gray-400 text-[10px] sm:text-[11px] font-black mt-2 sm:mt-3 uppercase tracking-widest opacity-60">{t('admin.timetable.description')}</p>
           </div>
         </div>
         
-        <div className="bg-primary text-white p-10 rounded-[3rem] shadow-2xl shadow-primary/20 flex flex-col justify-between relative overflow-hidden group">
+        <div className="bg-gradient-to-br from-[#8b5cf6] to-[#6d28d9] text-white p-6 sm:p-10 rounded-[2.5rem] sm:rounded-[3rem] shadow-2xl shadow-[#8b5cf6]/20 flex flex-col justify-between relative overflow-hidden group">
           <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
           <div className="flex justify-between items-start relative z-10">
-            <div className="w-12 h-12 rounded-[1.25rem] bg-white/20 flex items-center justify-center backdrop-blur-md border border-white/20">
-              <Clock className="w-6 h-6" />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-[1.25rem] bg-white/20 flex items-center justify-center backdrop-blur-md border border-white/20">
+              <Clock className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] bg-black/10 px-4 py-1.5 rounded-full backdrop-blur-md">{t('admin.timetable.stats.temporal_sync')}</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] bg-black/10 px-3 sm:px-4 py-1.5 rounded-full backdrop-blur-md">{t('admin.timetable.stats.temporal_sync')}</span>
           </div>
-          <div className="mt-8 relative z-10">
-            <p className="text-5xl font-black tracking-tighter leading-none">{allTimetables.length}</p>
-            <p className="text-[11px] font-black uppercase tracking-[0.3em] opacity-60 mt-3">{t('admin.timetable.stats.scheduled_events')}</p>
+          <div className="mt-6 sm:mt-8 relative z-10">
+            <p className="text-4xl sm:text-5xl font-black tracking-tighter leading-none">{allTimetables.length}</p>
+            <p className="text-[10px] sm:text-[11px] font-black uppercase tracking-[0.3em] opacity-60 mt-2 sm:mt-3">{t('admin.timetable.stats.scheduled_events')}</p>
           </div>
         </div>
       </div>
 
-      <div className="flex flex-col xl:flex-row gap-10 items-start">
+      <div className="flex flex-col xl:flex-row gap-6 sm:gap-10 items-start relative z-10">
+
         {/* Main Content Area: Day Switcher + Class List */}
         <div className="flex-1 w-full space-y-10">
-          {/* Day Switcher */}
-          <div className="bg-white dark:bg-white/[0.01] border border-gray-100 dark:border-white/5 rounded-[3rem] p-3 shadow-inner flex flex-wrap gap-2">
+          {/* Day Switcher - Swipeable on mobile */}
+          <div className="bg-white dark:bg-white/[0.01] border border-gray-100 dark:border-white/5 rounded-[2.5rem] sm:rounded-[3rem] p-2 sm:p-3 shadow-inner flex overflow-x-auto gap-2 scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-3">
             {DAYS.map(day => (
               <button
                 key={day}
                 onClick={() => setActiveDay(day)}
-                className={`flex-1 min-w-[120px] py-5 px-4 rounded-[2rem] text-[10px] font-black uppercase tracking-[0.3em] transition-all duration-500 ${
+                className={`shrink-0 py-3 sm:py-5 px-4 sm:px-4 rounded-[1.5rem] sm:rounded-[2rem] text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] transition-all duration-500 ${
                   activeDay === day
-                    ? 'bg-primary text-white shadow-xl scale-[1.02]'
-                    : 'text-gray-400 dark:text-slate-500 hover:bg-primary/10 hover:text-primary'
+                    ? 'bg-[#8b5cf6] text-white shadow-xl scale-[1.02]'
+                    : 'text-gray-400 dark:text-slate-500 hover:bg-[#8b5cf6]/10 hover:text-[#8b5cf6]'
                 }`}
               >
                 {t(`admin.timetable.days.${day}`)}
               </button>
             ))}
           </div>
+
 
           {/* Class Matrix */}
           <div className="space-y-8">

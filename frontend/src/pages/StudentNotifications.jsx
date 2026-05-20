@@ -194,7 +194,7 @@ const StudentNotifications = () => {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pb-20">
             
             {/* Header Bento Card */}
-            <div className="lg:col-span-12 bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 rounded-[3rem] p-12 flex flex-col md:flex-row justify-between gap-12 group hover:shadow-2xl transition-all duration-700 text-start">
+            <div className="lg:col-span-12 bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[3rem] p-12 flex flex-col md:flex-row justify-between gap-12 group hover:shadow-2xl transition-all duration-700 text-start">
                <div className="space-y-6 flex-1 text-start">
                   <p className={`text-3xl font-black leading-tight tracking-tight ${isAr ? 'font-arabic' : ''}`}>
                     {t('mavi.notifications_desc')}
@@ -216,7 +216,7 @@ const StudentNotifications = () => {
             <div className="lg:col-span-12 space-y-8">
                <div className="columns-1 md:columns-2 xl:columns-3 gap-8 space-y-8">
                   {notifications.length === 0 ? (
-                    <div className="col-span-full py-32 bg-white dark:bg-[#151520] border border-dashed border-gray-100 dark:border-white/10 rounded-[3rem] text-center opacity-40">
+                    <div className="col-span-full py-32 bg-white dark:bg-[#0d0d14] border border-dashed border-gray-100 dark:border-white/10 rounded-[3rem] text-center opacity-40">
                        <Bell className="w-16 h-16 mx-auto mb-6 opacity-20" />
                        <h3 className="text-xl font-black uppercase tracking-[0.4em]">{t('notifications.no_alerts')}</h3>
                     </div>
@@ -229,7 +229,7 @@ const StudentNotifications = () => {
                         <div 
                           key={notification.id}
                           onClick={() => isUnread && markAsRead(notification.id)}
-                          className={`break-inside-avoid group bg-white dark:bg-[#151520] border rounded-[3rem] p-10 space-y-8 transition-all duration-700 hover:-translate-y-2 hover:shadow-2xl shadow-sm relative overflow-hidden text-start cursor-pointer ${isUnread ? `border-[#10b981]/20 dark:border-[#2cfc7d]/20 ${glow}` : 'border-gray-100 dark:border-white/5 opacity-60'}`}
+                          className={`break-inside-avoid group bg-white dark:bg-[#0d0d14] border rounded-[3rem] p-10 space-y-8 transition-all duration-700 hover:-translate-y-2 hover:shadow-2xl shadow-sm relative overflow-hidden text-start cursor-pointer ${isUnread ? `border-[#10b981]/20 dark:border-[#2cfc7d]/20 ${glow}` : 'border-gray-100 dark:border-white/5 opacity-60'}`}
                         >
                            <div className="flex justify-between items-start">
                               <div 

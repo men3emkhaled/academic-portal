@@ -70,7 +70,7 @@ const AdminDashboard = () => {
   const ALL_TABS = [
     { id: 'overview', label: t('admin.sidebar.tabs.overview'), icon: <LayoutDashboard className="w-4 h-4" />, reqPerm: 'admin' },
     { id: 'courses', label: t('admin.sidebar.tabs.courses'), icon: <BookOpen className="w-4 h-4" />, reqPerm: 'manage_courses' },
-    // { id: 'grades', label: t('admin.sidebar.tabs.grades'), icon: <TrendingUp className="w-4 h-4" />, reqPerm: 'manage_grades' },
+    { id: 'grades', label: t('admin.sidebar.tabs.grades'), icon: <TrendingUp className="w-4 h-4" />, reqPerm: 'manage_grades' },
     { id: 'resources', label: t('admin.sidebar.tabs.resources'), icon: <FileText className="w-4 h-4" />, reqPerm: 'manage_resources' },
     { id: 'roadmap', label: t('admin.sidebar.tabs.roadmap'), icon: <RoadmapIcon className="w-4 h-4" />, reqPerm: 'manage_roadmap' },
     { id: 'doctors', label: t('admin.sidebar.tabs.doctors'), icon: <UserCheck className="w-4 h-4" />, reqPerm: 'admin' },
@@ -84,6 +84,7 @@ const AdminDashboard = () => {
     { id: 'quizzes', label: t('admin.sidebar.tabs.quizzes'), icon: <Award className="w-4 h-4" />, reqPerm: 'manage_quizzes' },
     { id: 'reviews', label: t('admin.sidebar.tabs.reviews'), icon: <CheckCircle className="w-4 h-4" />, reqPerm: 'manage_quizzes' },
     { id: 'events', label: t('admin.sidebar.tabs.events'), icon: <Heart className="w-4 h-4" />, reqPerm: 'manage_events' },
+    { id: 'progress', label: t('admin.sidebar.tabs.progress'), icon: <Activity className="w-4 h-4" />, reqPerm: 'admin' },
     { id: 'tasks', label: t('admin.sidebar.tabs.tasks'), icon: <CheckSquare className="w-4 h-4" />, reqPerm: 'manage_courses' },
     { id: 'emails', label: t('admin.sidebar.tabs.emails'), icon: <Mail className="w-4 h-4" />, reqPerm: 'admin' },
     { id: 'logs', label: t('admin.sidebar.tabs.logs'), icon: <ScrollText className="w-4 h-4" />, reqPerm: 'admin' },
@@ -211,12 +212,26 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleEditStudentInfo = (student) => {
-    toast.info(t('admin.messages.edit_requested'));
+  const handleEditStudentInfo = async (id, studentData) => {
+    try {
+      await api.put(`/admin/students/${id}`, studentData);
+      toast.success(t('common.success'));
+      fetchStudents();
+    } catch (error) {
+      toast.error(error.response?.data?.message || t('admin.messages.operation_failed'));
+      throw error;
+    }
   };
 
-  const handleManageRole = (student) => {
-    toast.info(t('admin.messages.role_requested'));
+  const handleManageRole = async (id, role, permissions = []) => {
+    try {
+      await api.put(`/admin/students/${id}/role`, { role, permissions });
+      toast.success(t('common.success'));
+      fetchStudents();
+    } catch (error) {
+      toast.error(error.response?.data?.message || t('admin.messages.operation_failed'));
+      throw error;
+    }
   };
 
   const handleAddStudent = async (studentData) => {
@@ -376,9 +391,9 @@ const AdminDashboard = () => {
   const availableTabs = ALL_TABS.filter(tab => isSuperAdmin || (tab.reqPerm !== 'admin' && userPermissions.includes(tab.reqPerm)));
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-black transition-colors duration-500 font-sans relative overflow-hidden" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0c0c14] transition-colors duration-500 font-sans relative overflow-hidden" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
       <AdminSidebar activeTab={activeTab} setActiveTab={handleTabChange} onLogout={logout} admin={decodedToken} availableTabs={availableTabs} />
-      
+
       {/* Background Decor matching student dashboard */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         <div className="absolute top-[-10%] inset-inline-end-[-5%] w-[50vw] h-[50vw] bg-[#8b5cf6]/5 blur-[120px] rounded-full"></div>
@@ -396,7 +411,7 @@ const AdminDashboard = () => {
                 {/* Hero Section */}
                 <div className="space-y-4 max-w-2xl text-start">
                   <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#2cfc7d]"></div>
                     <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 dark:text-white/30">{t('admin.sidebar.tabs.overview')}</span>
                   </div>
                   <h1 className={`text-[clamp(2.5rem,6vw,5.5rem)] font-black leading-[0.95] tracking-tighter uppercase text-gray-900 dark:text-white ${i18n.language === 'ar' ? 'font-arabic' : ''}`}>
@@ -407,14 +422,14 @@ const AdminDashboard = () => {
                 {/* Bento Grid Stats */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                   {[
-                    { label: t('admin.stats.system_load'), value: '12%', icon: Activity, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-                    { label: t('admin.stats.active_users'), value: students.length + 42, icon: Users, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+                    { label: t('admin.stats.system_load'), value: '12%', icon: Activity, color: 'text-violet-500', bg: 'bg-violet-500/10' },
+                    { label: t('admin.stats.active_users'), value: students.length + 42, icon: Users, color: 'text-[#2cfc7d]', bg: 'bg-[#2cfc7d]/10' },
                     { label: t('admin.stats.database'), value: t('admin.stats.syncing'), icon: Database, color: 'text-amber-500', bg: 'bg-amber-500/10' },
                     { label: t('admin.stats.protocol'), value: 'v4.0.2', icon: Shield, color: 'text-rose-500', bg: 'bg-rose-500/10' },
                   ].map((stat, i) => (
                     <div
                       key={i}
-                      className="group bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-8 space-y-8 hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all duration-700 shadow-sm"
+                      className="group bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-8 space-y-8 hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all duration-700 shadow-sm"
                     >
                       <div className="flex justify-between items-start">
                         <div className={`w-12 h-12 rounded-2xl ${stat.bg} flex items-center justify-center ${stat.color} group-hover:bg-white/20 transition-all duration-500`}>
@@ -424,7 +439,7 @@ const AdminDashboard = () => {
                           <TrendingUp className="w-4 h-4 opacity-30" />
                         </div>
                       </div>
-                      <div className="space-y-1">
+                      <div className="space-y-1 text-start">
                         <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40">{stat.label}</p>
                         <p className="text-4xl font-black tracking-tighter">{stat.value}</p>
                       </div>
@@ -434,28 +449,28 @@ const AdminDashboard = () => {
 
                 {/* Quick Access Grid */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                  <div className="lg:col-span-8 bg-blue-600 rounded-[3rem] p-12 text-white flex flex-col md:flex-row items-center justify-between gap-10 group overflow-hidden relative shadow-2xl">
+                  <div className="lg:col-span-8 bg-gradient-to-br from-[#8b5cf6] to-[#6d28d9] rounded-[3rem] p-12 text-white flex flex-col md:flex-row items-center justify-between gap-10 group overflow-hidden relative shadow-2xl">
                     <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent pointer-events-none" />
                     <div className="space-y-4 relative z-10 text-center md:text-start">
                       <h3 className="text-[3rem] lg:text-[4rem] font-black uppercase italic leading-none">{t('admin.sidebar.tabs.students')}</h3>
-                      <p className="text-blue-100/60 font-black uppercase tracking-widest text-xs">{t('admin.overview.central_node')}</p>
+                      <p className="text-violet-100/60 font-black uppercase tracking-widest text-xs">{t('admin.overview.central_node')}</p>
                     </div>
                     <div className="flex items-center gap-12 relative z-10">
                       <span className="text-[6rem] lg:text-[8rem] font-black tracking-tighter leading-none">{students.length}</span>
-                      <button 
+                      <button
                         onClick={() => handleTabChange('students')}
-                        className="w-20 h-20 bg-black text-white rounded-full flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-2xl"
+                        className="w-20 h-20 bg-white text-black hover:bg-black hover:text-white rounded-full flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-2xl"
                       >
                         <ChevronRight className={`w-8 h-8 ${i18n.language === 'ar' ? 'rotate-180' : ''}`} />
                       </button>
                     </div>
                   </div>
 
-                  <div className="lg:col-span-4 bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 rounded-[3rem] p-10 space-y-8 shadow-sm">
+                  <div className="lg:col-span-4 bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[3rem] p-10 space-y-8 shadow-sm">
                     <div className="flex items-center justify-between">
                       <h4 className="text-xl font-black uppercase tracking-tighter">{t('quizzes.quick_stats')}</h4>
                       <div className="w-8 h-8 rounded-full bg-gray-50 dark:bg-white/5 flex items-center justify-center">
-                        <Activity className="w-4 h-4 text-emerald-500" />
+                        <Activity className="w-4 h-4 text-[#2cfc7d]" />
                       </div>
                     </div>
                     <div className="grid grid-cols-1 gap-3">
@@ -465,11 +480,11 @@ const AdminDashboard = () => {
                         { label: t('admin.sidebar.tabs.notifications'), value: notifications.length, color: 'text-rose-500', icon: Bell },
                       ].map((s, i) => (
                         <div key={i} className="flex items-center justify-between p-4 rounded-2xl bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5">
-                           <div className="flex items-center gap-3">
-                              <s.icon className={`w-4 h-4 ${s.color}`} />
-                              <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">{s.label}</span>
-                           </div>
-                           <span className="text-lg font-black">{s.value}</span>
+                          <div className="flex items-center gap-3">
+                            <s.icon className={`w-4 h-4 ${s.color}`} />
+                            <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">{s.label}</span>
+                          </div>
+                          <span className="text-lg font-black">{s.value}</span>
                         </div>
                       ))}
                     </div>

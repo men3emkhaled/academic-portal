@@ -170,22 +170,28 @@ const RoadmapManager = () => {
   };
 
   return (
-    <div className="space-y-8 lg:space-y-10 animate-in fade-in duration-700 pb-10">
+    <div className="space-y-8 sm:space-y-12 lg:space-y-16 animate-in fade-in duration-700 pb-10 text-start px-4 sm:px-0 relative z-10">
+      {/* Background Decor */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute top-[-10%] inset-inline-end-[-5%] w-[50vw] h-[50vw] bg-[#8b5cf6]/5 blur-[120px] rounded-full"></div>
+        <div className="absolute bottom-[-10%] inset-inline-start-[-5%] w-[40vw] h-[40vw] bg-[#2cfc7d]/3 blur-[100px] rounded-full"></div>
+      </div>
+
       {/* Header Bento Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 flex items-center gap-6 bg-white/50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 p-8 rounded-[2.5rem] shadow-sm">
-          <div className="w-16 h-16 bg-indigo-500/10 dark:bg-indigo-500/20 rounded-2xl flex items-center justify-center border border-indigo-500/20 shadow-inner group transition-transform duration-500 hover:scale-110">
-            <Map className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 relative z-10">
+        <div className="lg:col-span-2 flex items-center gap-4 sm:gap-6 bg-white/50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 p-6 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] shadow-sm">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-[#8b5cf6]/10 dark:bg-[#8b5cf6]/20 rounded-xl sm:rounded-2xl flex items-center justify-center border border-[#8b5cf6]/20 shadow-inner group transition-transform duration-500 hover:scale-110">
+            <Map className="w-6 h-6 sm:w-8 sm:h-8 text-[#8b5cf6]" />
           </div>
           <div>
-            <h2 className="text-2xl lg:text-3xl font-black text-gray-900 dark:text-white tracking-tight">
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-gray-900 dark:text-white tracking-tight">
               {t('admin.roadmap.title')}
             </h2>
-            <p className="text-gray-500 dark:text-slate-500 text-sm font-bold mt-1 uppercase tracking-widest">{t('admin.roadmap.description')}</p>
+            <p className="text-gray-500 dark:text-slate-500 text-[10px] sm:text-sm font-bold mt-1 uppercase tracking-widest">{t('admin.roadmap.description')}</p>
           </div>
         </div>
         
-        <div className="bg-indigo-600 text-white p-8 rounded-[2.5rem] shadow-lg shadow-indigo-600/20 flex flex-col justify-between relative overflow-hidden group">
+        <div className="bg-gradient-to-br from-[#8b5cf6] to-[#6d28d9] text-white p-6 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] shadow-lg shadow-purple-600/20 flex flex-col justify-between relative overflow-hidden group">
           <div className="absolute inset-inline-end-0 top-0 w-32 h-32 bg-white/10 hidden rounded-full translate-x-1/2 -translate-y-1/2 group-hover:scale-150 transition-transform duration-700"></div>
           <div className="flex justify-between items-start relative z-10">
             <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
@@ -194,26 +200,26 @@ const RoadmapManager = () => {
             <span className="text-[10px] font-black uppercase tracking-widest bg-black/10 px-3 py-1 rounded-full">{t('admin.roadmap.roadmap_node')}</span>
           </div>
           <div className="mt-4 relative z-10">
-            <p className="text-4xl font-black">{tracks.length}</p>
+            <p className="text-4xl sm:text-5xl font-black tracking-tighter">{tracks.length}</p>
             <p className="text-[10px] font-black uppercase tracking-widest opacity-60 mt-1">{t('admin.roadmap.active_tracks')}</p>
           </div>
         </div>
       </div>
 
       {/* Main Grid Layout */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-10">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 sm:gap-10 relative z-10">
         
         {/* Left Column: Tracks Sidebar */}
-        <div className="xl:col-span-4 space-y-8">
-            <div className="bg-white/50 dark:bg-white/[0.01] border border-gray-100 dark:border-white/5 rounded-[3rem] p-8 shadow-sm relative overflow-hidden flex flex-col h-full">
-                <div className="flex justify-between items-center mb-8 relative z-10">
+        <div className="xl:col-span-4 space-y-6 sm:space-y-8">
+            <div className="bg-white/50 dark:bg-white/[0.01] border border-gray-100 dark:border-white/5 rounded-[2.5rem] sm:rounded-[3rem] p-6 sm:p-8 shadow-sm relative overflow-hidden flex flex-col h-full">
+                <div className="flex justify-between items-center mb-6 sm:mb-8 relative z-10">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-indigo-500/10 dark:bg-indigo-500/20 rounded-xl flex items-center justify-center border border-indigo-500/20 text-indigo-600 dark:text-indigo-400">
+                        <div className="w-10 h-10 bg-[#8b5cf6]/10 dark:bg-[#8b5cf6]/20 rounded-xl flex items-center justify-center border border-[#8b5cf6]/20 text-[#8b5cf6]">
                             <Box className="w-5 h-5" />
                         </div>
                         <h3 className="text-lg font-black text-gray-900 dark:text-white tracking-tight uppercase">{t('admin.roadmap.available_tracks')}</h3>
                     </div>
-                    <button onClick={() => setShowTrackForm(true)} className="w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-[color,background-color,border-color,transform,opacity]">
+                    <button onClick={() => setShowTrackForm(true)} className="w-10 h-10 bg-[#8b5cf6] text-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-all">
                         <Plus className="w-5 h-5" />
                     </button>
                 </div>
@@ -221,7 +227,7 @@ const RoadmapManager = () => {
                 <div className="space-y-4 overflow-y-auto no-scrollbar relative z-10 flex-1 pr-2">
                     {loading && tracks.length === 0 ? (
                         <div className="flex items-center justify-center py-20 opacity-50">
-                            <Activity className="w-10 h-10 text-indigo-500 animate-spin" />
+                            <Activity className="w-10 h-10 text-[#8b5cf6] animate-spin" />
                         </div>
                     ) : tracks.length === 0 ? (
                         <div className="text-center py-20 bg-gray-50/50 dark:bg-white/[0.02] border border-dashed border-gray-100 dark:border-white/10 rounded-[2rem]">
@@ -233,14 +239,11 @@ const RoadmapManager = () => {
                         {tracks.map((track) => (
                             <div
                                 key={track.id}
-                               
-                                
-                                
                                 onClick={() => selectTrack(track)}
-                                className={`group/track relative p-6 rounded-[2rem] border transition-[color,background-color,border-color,box-shadow,transform,opacity] duration-300 cursor-pointer overflow-hidden ${
+                                className={`group/track relative p-5 sm:p-6 rounded-[2rem] border transition-all duration-300 cursor-pointer overflow-hidden ${
                                     selectedTrack?.id === track.id
-                                        ? 'bg-indigo-600 text-white border-indigo-600 shadow-xl shadow-indigo-600/20'
-                                        : 'bg-white dark:bg-white/[0.02] border-gray-100 dark:border-white/10 hover:border-indigo-500/30 hover:bg-gray-50/50 dark:hover:bg-white/[0.04]'
+                                        ? 'bg-[#8b5cf6] text-white border-[#8b5cf6] shadow-xl shadow-[#8b5cf6]/20'
+                                        : 'bg-white dark:bg-white/[0.02] border-gray-100 dark:border-white/10 hover:border-[#8b5cf6]/30 hover:bg-gray-50/50 dark:hover:bg-white/[0.04]'
                                 }`}
                             >
                                 <div className="flex justify-between items-start mb-4 relative z-10">
@@ -248,9 +251,9 @@ const RoadmapManager = () => {
                                         <h4 className={`font-black tracking-tight truncate text-sm uppercase ${selectedTrack?.id === track.id ? 'text-white' : 'text-gray-900 dark:text-white'}`}>{track.name}</h4>
                                         {track.is_primary && <Star className={`w-3.5 h-3.5 shrink-0 ${selectedTrack?.id === track.id ? 'text-white fill-white' : 'text-amber-500 fill-amber-500'}`} />}
                                     </div>
-                                    <div className={`flex gap-1.5 transition-[color,background-color,border-color,transform,opacity] opacity-0 group-hover/track:opacity-100`}>
-                                        <button onClick={(e) => { e.stopPropagation(); editTrack(track); }} className={`w-8 h-8 flex items-center justify-center rounded-lg transition-[color,background-color,border-color,transform,opacity] ${selectedTrack?.id === track.id ? 'bg-white/20 text-white hover:bg-white/30' : 'bg-blue-500/10 text-blue-500 border border-blue-500/10 hover:bg-blue-500 hover:text-white shadow-sm'}`}><Edit3 className="w-3.5 h-3.5" /></button>
-                                        <button onClick={(e) => { e.stopPropagation(); handleDeleteTrack(track); }} className={`w-8 h-8 flex items-center justify-center rounded-lg transition-[color,background-color,border-color,transform,opacity] ${selectedTrack?.id === track.id ? 'bg-white/20 text-white hover:bg-white/30' : 'bg-rose-500/10 text-rose-500 border border-rose-500/10 hover:bg-rose-500 hover:text-white shadow-sm'}`}><Trash2 className="w-3.5 h-3.5" /></button>
+                                    <div className={`flex gap-1.5 transition-all opacity-0 group-hover/track:opacity-100`}>
+                                        <button onClick={(e) => { e.stopPropagation(); editTrack(track); }} className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all ${selectedTrack?.id === track.id ? 'bg-white/20 text-white hover:bg-white/30' : 'bg-blue-500/10 text-blue-500 border border-blue-500/10 hover:bg-blue-500 hover:text-white shadow-sm'}`}><Edit3 className="w-3.5 h-3.5" /></button>
+                                        <button onClick={(e) => { e.stopPropagation(); handleDeleteTrack(track); }} className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all ${selectedTrack?.id === track.id ? 'bg-white/20 text-white hover:bg-white/30' : 'bg-rose-500/10 text-rose-500 border border-rose-500/10 hover:bg-rose-500 hover:text-white shadow-sm'}`}><Trash2 className="w-3.5 h-3.5" /></button>
                                     </div>
                                 </div>
                                 <p className={`text-[10px] font-bold leading-relaxed line-clamp-2 uppercase tracking-widest ${selectedTrack?.id === track.id ? 'text-indigo-100' : 'text-gray-400 dark:text-slate-500'}`}>{track.description || t('admin.roadmap.no_desc')}</p>
@@ -263,24 +266,22 @@ const RoadmapManager = () => {
         </div>
 
         {/* Right Column: Tasks Management */}
-        <div className="xl:col-span-8 space-y-8">
+        <div className="xl:col-span-8 space-y-6 sm:space-y-8">
             {selectedTrack ? (
                 <div 
-                    
-                    
-                    className="bg-white/50 dark:bg-white/[0.01] border border-gray-100 dark:border-white/5 rounded-[3rem] p-10 lg:p-12 shadow-sm relative overflow-hidden group"
+                    className="bg-white/50 dark:bg-white/[0.01] border border-gray-100 dark:border-white/5 rounded-[2.5rem] sm:rounded-[3rem] p-6 sm:p-10 lg:p-12 shadow-sm relative overflow-hidden group"
                 >
-                    <div className="absolute -inset-inline-start-20 -top-20 w-96 h-96 bg-indigo-500/5 rounded-full hidden pointer-events-none group-hover:scale-110 transition-transform duration-1000"></div>
+                    <div className="absolute -inset-inline-start-20 -top-20 w-96 h-96 bg-[#8b5cf6]/5 rounded-full hidden pointer-events-none group-hover:scale-110 transition-transform duration-1000"></div>
 
                     <div className="relative z-10">
-                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-12">
-                            <div className="flex items-center gap-5">
-                                <div className="w-14 h-14 bg-white dark:bg-white/5 rounded-2xl flex items-center justify-center border border-gray-100 dark:border-white/10 shadow-sm relative">
-                                    <ListOrdered className="w-7 h-7 text-indigo-500" />
-                                    <div className="absolute -top-1 -inset-inline-end-1 w-5 h-5 bg-indigo-600 rounded-full flex items-center justify-center text-[10px] font-black text-white border-2 border-white dark:border-[#080808]">{tasks.length}</div>
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 sm:gap-8 mb-8 sm:mb-12">
+                            <div className="flex items-center gap-4 sm:gap-5">
+                                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-white dark:bg-white/5 rounded-2xl flex items-center justify-center border border-gray-100 dark:border-white/10 shadow-sm relative">
+                                    <ListOrdered className="w-6 h-6 sm:w-7 sm:h-7 text-[#8b5cf6]" />
+                                    <div className="absolute -top-1 -inset-inline-end-1 w-5 h-5 bg-[#8b5cf6] rounded-full flex items-center justify-center text-[10px] font-black text-white border-2 border-white dark:border-[#0c0c0e]">{tasks.length}</div>
                                 </div>
                                 <div>
-                                    <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight uppercase">
+                                    <h3 className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white tracking-tight uppercase">
                                         {t('admin.roadmap.tasks_for', { name: selectedTrack.name })}
                                     </h3>
                                     <p className="text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-widest mt-1">{t('admin.roadmap.sequence_alignment')}</p>
@@ -288,7 +289,7 @@ const RoadmapManager = () => {
                             </div>
                             <button 
                                 onClick={() => setShowTaskForm(true)} 
-                                className="flex items-center justify-center gap-3 bg-indigo-600 hover:bg-indigo-700 text-white font-black py-4 px-8 rounded-2xl lg:rounded-[2rem] shadow-xl shadow-indigo-600/20 hover:scale-105 active:scale-95 transition-[color,background-color,border-color,transform,opacity] whitespace-nowrap group/add"
+                                className="flex items-center justify-center gap-3 bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-black py-4 px-8 rounded-2xl lg:rounded-[2rem] shadow-xl shadow-[#8b5cf6]/20 hover:scale-102 active:scale-95 transition-all whitespace-nowrap group/add w-full md:w-auto"
                             >
                                 <Plus className="w-5 h-5 group-hover/add:rotate-180 transition-transform duration-500" /> 
                                 <span className="uppercase tracking-widest text-xs">{t('admin.roadmap.add_task')}</span>
@@ -299,42 +300,36 @@ const RoadmapManager = () => {
                             <>
                             {tasks.length === 0 ? (
                                 <div 
-                                    
-                                    
-                                    className="text-center py-32 bg-white/30 dark:bg-white/[0.01] border-2 border-dashed border-gray-100 dark:border-white/5 rounded-[2.5rem]"
+                                    className="text-center py-20 sm:py-32 bg-white/30 dark:bg-white/[0.01] border-2 border-dashed border-gray-100 dark:border-white/5 rounded-[2.5rem]"
                                 >
-                                    <Target className="w-14 h-14 text-gray-200 dark:text-gray-800 mx-auto mb-6" />
+                                    <Target className="w-12 h-12 sm:w-14 sm:h-14 text-gray-200 dark:text-gray-800 mx-auto mb-4 sm:mb-6 animate-pulse" />
                                     <p className="text-[11px] font-black text-gray-400 dark:text-slate-600 uppercase tracking-[0.3em]">{t('admin.roadmap.no_tasks')}</p>
                                 </div>
                             ) : (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                                     {tasks.map((task, index) => (
                                         <div 
                                             key={task.id} 
-                                           
-                                            
-                                            
-                                            
-                                            className="group/task relative bg-white dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-8 hover:border-indigo-500/30 hover:shadow-2xl hover:shadow-indigo-500/10 transition-[color,background-color,border-color,transform,opacity] duration-500"
+                                            className="group/task relative bg-white dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-6 sm:p-8 hover:border-[#8b5cf6]/30 hover:shadow-2xl hover:shadow-[#8b5cf6]/10 transition-all duration-500"
                                         >
-                                            <div className="flex justify-between items-start gap-5 relative z-10">
+                                            <div className="flex justify-between items-start gap-4 relative z-10">
                                                 <div className="flex-1 min-w-0">
-                                                    <div className="flex items-center gap-4 mb-4">
-                                                        <div className="shrink-0 w-10 h-10 rounded-[1.2rem] bg-gray-50 dark:bg-black/40 border border-gray-100 dark:border-white/5 flex items-center justify-center text-[11px] font-black text-indigo-600 dark:text-indigo-400 shadow-inner group-hover/task:bg-indigo-600 group-hover/task:text-white transition-[color,background-color,border-color,transform,opacity] duration-500">
+                                                    <div className="flex items-center gap-3 sm:gap-4 mb-4">
+                                                        <div className="shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-[1.2rem] bg-gray-50 dark:bg-black/40 border border-gray-100 dark:border-white/5 flex items-center justify-center text-[11px] font-black text-[#8b5cf6] shadow-inner group-hover/task:bg-[#8b5cf6] group-hover/task:text-white transition-all duration-500">
                                                             {task.order_index}
                                                         </div>
-                                                        <h4 className="font-black text-gray-900 dark:text-white tracking-tight truncate text-lg group-hover/task:text-indigo-600 dark:group-hover/task:text-indigo-400 transition-colors uppercase">{task.title}</h4>
+                                                        <h4 className="font-black text-gray-900 dark:text-white tracking-tight truncate text-base sm:text-lg group-hover/task:text-[#8b5cf6] transition-colors uppercase">{task.title}</h4>
                                                     </div>
-                                                    {task.description && <p className="text-xs font-bold text-gray-400 dark:text-slate-500 leading-relaxed line-clamp-2 ml-14 italic">{task.description}</p>}
+                                                    {task.description && <p className="text-xs font-bold text-gray-400 dark:text-slate-500 leading-relaxed line-clamp-2 ml-12 sm:ml-14 italic">{task.description}</p>}
                                                 </div>
-                                                <div className="flex gap-2.5 shrink-0 opacity-0 group-hover/task:opacity-100 transition-[color,background-color,border-color,transform,opacity] scale-90 group-hover/task:scale-100">
-                                                    <button onClick={() => editTask(task)} className="w-10 h-10 flex items-center justify-center rounded-xl bg-blue-500/5 text-blue-500 border border-blue-500/10 hover:bg-blue-500 hover:text-white transition-[color,background-color,border-color,transform,opacity] shadow-sm"><Edit3 className="w-4.5 h-4.5" /></button>
-                                                    <button onClick={() => handleDeleteTask(task)} className="w-10 h-10 flex items-center justify-center rounded-xl bg-rose-500/5 text-rose-500 border border-rose-500/10 hover:bg-rose-500 hover:text-white transition-[color,background-color,border-color,transform,opacity] shadow-sm"><Trash2 className="w-4.5 h-4.5" /></button>
+                                                <div className="flex gap-2.5 shrink-0 opacity-0 group-hover/task:opacity-100 transition-all scale-90 group-hover/task:scale-100">
+                                                    <button onClick={() => editTask(task)} className="w-10 h-10 flex items-center justify-center rounded-xl bg-blue-500/5 text-blue-500 border border-blue-500/10 hover:bg-blue-500 hover:text-white transition-all shadow-sm"><Edit3 className="w-4.5 h-4.5" /></button>
+                                                    <button onClick={() => handleDeleteTask(task)} className="w-10 h-10 flex items-center justify-center rounded-xl bg-rose-500/5 text-rose-500 border border-rose-500/10 hover:bg-rose-500 hover:text-white transition-all shadow-sm"><Trash2 className="w-4.5 h-4.5" /></button>
                                                 </div>
                                             </div>
                                             
-                                            <div className="absolute inset-inline-end-10 top-1/2 -translate-y-1/2 opacity-0 group-hover/task:opacity-20 transition-[color,background-color,border-color,transform,opacity] duration-700 pointer-events-none">
-                                                <ArrowRight className="w-12 h-12 text-indigo-500" />
+                                            <div className="absolute inset-inline-end-10 top-1/2 -translate-y-1/2 opacity-0 group-hover/task:opacity-20 transition-all duration-700 pointer-events-none">
+                                                <ArrowRight className="w-12 h-12 text-[#8b5cf6]" />
                                             </div>
                                         </div>
                                     ))}
@@ -345,9 +340,9 @@ const RoadmapManager = () => {
                     </div>
                 </div>
             ) : (
-                <div className="h-full flex flex-col items-center justify-center bg-white/50 dark:bg-white/[0.01] border border-gray-100 dark:border-white/5 rounded-[3rem] p-20 text-center opacity-60">
-                    <Map className="w-20 h-20 text-gray-200 dark:text-gray-800 mb-8 animate-pulse" />
-                    <h4 className="text-xl font-black uppercase tracking-[0.3em] text-gray-400 dark:text-slate-600">{t('admin.roadmap.select_path_hint')}</h4>
+                <div className="h-full flex flex-col items-center justify-center bg-white/50 dark:bg-white/[0.01] border border-gray-100 dark:border-white/5 rounded-[2.5rem] sm:rounded-[3rem] p-12 sm:p-20 text-center opacity-60">
+                    <Map className="w-16 h-16 sm:w-20 sm:h-20 text-gray-200 dark:text-gray-800 mb-6 sm:mb-8 animate-pulse" />
+                    <h4 className="text-lg sm:text-xl font-black uppercase tracking-[0.3em] text-gray-400 dark:text-slate-600">{t('admin.roadmap.select_path_hint')}</h4>
                     <p className="text-[10px] font-black uppercase tracking-widest text-gray-300 dark:text-slate-700 mt-4">{t('admin.roadmap.awaiting_auth')}</p>
                 </div>
             )}
@@ -359,7 +354,7 @@ const RoadmapManager = () => {
       {showTrackForm && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
           <div    onClick={resetTrackForm} className="absolute inset-0 bg-gray-950/40 dark:bg-black/80" />
-          <div    className="bg-white dark:bg-[#080808] border border-gray-100 dark:border-white/5 rounded-[3.5rem] p-8 lg:p-12 w-full max-w-2xl shadow-2xl relative overflow-hidden z-10" onClick={e => e.stopPropagation()}>
+          <div    className="bg-white dark:bg-[#0c0c0e] border border-gray-100 dark:border-white/5 rounded-[3.5rem] p-8 lg:p-12 w-full max-w-2xl shadow-2xl relative overflow-hidden z-10" onClick={e => e.stopPropagation()}>
              {/* Modal Background Glow */}
              <div className="absolute top-0 inset-inline-end-0 w-80 h-80 bg-indigo-500/10 hidden rounded-full pointer-events-none"></div>
 
@@ -422,7 +417,7 @@ const RoadmapManager = () => {
       {showTaskForm && selectedTrack && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
           <div    onClick={resetTaskForm} className="absolute inset-0 bg-gray-950/40 dark:bg-black/80" />
-          <div    className="bg-white dark:bg-[#080808] border border-gray-100 dark:border-white/5 rounded-[3.5rem] p-8 lg:p-12 w-full max-w-2xl shadow-2xl relative overflow-hidden z-10" onClick={e => e.stopPropagation()}>
+          <div    className="bg-white dark:bg-[#0c0c0e] border border-gray-100 dark:border-white/5 rounded-[3.5rem] p-8 lg:p-12 w-full max-w-2xl shadow-2xl relative overflow-hidden z-10" onClick={e => e.stopPropagation()}>
              {/* Modal Background Glow */}
              <div className="absolute top-0 inset-inline-end-0 w-80 h-80 bg-primary/10 hidden rounded-full pointer-events-none"></div>
 

@@ -159,7 +159,7 @@ const StudentCourseHub = () => {
               </div>
             </div>
 
-            <div className="hidden lg:flex flex-col items-center gap-4 bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 p-8 rounded-[3rem] shadow-xl group">
+            <div className="hidden lg:flex flex-col items-center gap-4 bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 p-8 rounded-[3rem] shadow-xl group">
                <div className="bg-white p-3 rounded-2xl shadow-inner border border-gray-100">
                  <QRCodeSVG value={qrToken} size={120} level="H" fgColor="#0c0c14" bgColor="#FFFFFF" />
                </div>
@@ -175,7 +175,7 @@ const StudentCourseHub = () => {
                { label: t('hub.attendance.title'), value: attendedCount, color: 'text-purple-500', bg: 'bg-purple-500/10', icon: Users },
                { label: t('hub.tabs.news'), value: announcements.length, color: 'text-amber-500', bg: 'bg-amber-500/10', icon: Megaphone }
              ].map((stat, i) => (
-               <div key={i} className="bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 p-8 rounded-[2.5rem] shadow-sm hover:shadow-xl transition-all">
+               <div key={i} className="bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 p-8 rounded-[2.5rem] shadow-sm hover:shadow-xl transition-all">
                   <div className={`w-10 h-10 rounded-xl ${stat.bg} ${stat.color} flex items-center justify-center mb-4`}>
                     <stat.icon className="w-5 h-5" />
                   </div>
@@ -213,7 +213,7 @@ const StudentCourseHub = () => {
              
              {/* CONTENT AREA */}
              <div className="lg:col-span-8">
-                <div className="bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 rounded-[3rem] p-10 min-h-[500px]">
+                <div className="bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[3rem] p-10 min-h-[500px]">
                    
                    {activeTab === 'announcements' && (
                      <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -395,7 +395,7 @@ const StudentCourseHub = () => {
              <div className="lg:col-span-4 space-y-8">
                 
                 {/* QR PASS CARD */}
-                <div className="bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 rounded-[3rem] p-10 flex flex-col items-center text-center shadow-xl relative overflow-hidden group">
+                <div className="bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[3rem] p-10 flex flex-col items-center text-center shadow-xl relative overflow-hidden group">
                    <div className="absolute top-0 inset-inline-end-0 w-32 h-32 bg-[#2cfc7d]/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl group-hover:scale-150 transition-transform duration-1000" />
                    
                    <div className="w-16 h-16 rounded-2xl bg-gray-50 dark:bg-white/5 flex items-center justify-center text-gray-400 mb-8 border border-gray-100 dark:border-white/5">

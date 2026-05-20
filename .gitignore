@@ -47,3 +47,9 @@ client\ id.json
 # Test Scripts
 test_*.js
 backend/scratch/
+# Agent Assistant Skills & Context
+.antigravity/
+.gemini/
+CLAUDE.md
+GEMINI.md
+.github/copilot-instructions.md
