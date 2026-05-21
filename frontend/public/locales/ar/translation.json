@@ -1179,7 +1179,7 @@
     "n_a": "غير متاح"
   },
   "mavi": {
-    "archive": "أرشيف",
+    "archive": "ماتريال",
     "protocol": "المحتوى",
     "library_access": "الوصول للمكتبة",
     "central_storage": "المخزن المركزي",
@@ -1205,7 +1205,7 @@
     "sync_active": "الربط شغال",
     "login_desc": "ادخل على مساحتك الأكاديمية. أمان عالي، ذكاء، وسرعة في الأداء.",
     "verified_node": "حساب طالب موثق",
-    "command": "مركز",
+    "command": "مهماتي",
     "center": "المهام",
     "task_latency": "سرعة الإنجاز",
     "active_pipeline": "المهام الشغالة",
@@ -1241,7 +1241,7 @@
     "encrypting": "جاري التشفير...",
     "interface_customization": "تخصيص الواجهة",
     "system_override_actions": "إجراءات تخطي النظام",
-    "system": "تنبيهات",
+    "system": "الاشعارات",
     "alerts": "النظام",
     "intelligence_feed": "موجز البيانات",
     "notifications_desc": "ابق على اطلاع دائم بآخر المستجدات الأكاديمية والفعاليات والنتائج.",
