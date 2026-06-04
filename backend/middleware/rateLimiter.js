@@ -6,10 +6,9 @@ const isDev = process.env.NODE_ENV === 'development';
 // ============= إعدادات عامة =============
 const standardLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 دقيقة
-    max: 1000, // الحد الأقصى: 1000 طلب لكل IP (لضمان عمل لوحة التحكم بسلاسة)
+    max: isDev ? 5000 : 1000, // حد أعلى في التطوير، لكن لا يزال مفعّل
     standardHeaders: true,
     legacyHeaders: false,
-    skip: () => isDev,
     message: {
         status: 429,
         message: 'Too many requests from this IP, please try again after 15 minutes.'
@@ -20,11 +19,10 @@ const standardLimiter = rateLimit({
 // تم إصلاح مشكلة IPv6 باستخدام ipKeyGenerator
 const studentLoginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 دقيقة
-    max: 10, // 5 محاولات فاشلة
+    max: isDev ? 50 : 10, // حد أعلى في التطوير
     skipSuccessfulRequests: true,
     standardHeaders: true,
     legacyHeaders: false,
-    skip: () => isDev,
     message: {
         status: 429,
         message: 'Too many failed login attempts. Please try again after 15 minutes.'
@@ -44,11 +42,10 @@ const studentLoginLimiter = rateLimit({
 // ============= تسجيل دخول الأدمن =============
 const adminLoginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 3,
+    max: isDev ? 20 : 3,
     skipSuccessfulRequests: true,
     standardHeaders: true,
     legacyHeaders: false,
-    skip: () => isDev,
     message: {
         status: 429,
         message: 'Too many failed admin login attempts. Your IP has been temporarily blocked.'
@@ -65,7 +62,6 @@ const uploadLimiter = rateLimit({
     max: 20,
     standardHeaders: true,
     legacyHeaders: false,
-    skip: () => isDev,
     message: {
         status: 429,
         message: 'Upload limit reached. Please try again later.'
@@ -83,7 +79,6 @@ const studentCreationLimiter = rateLimit({
     max: 5,
     standardHeaders: true,
     legacyHeaders: false,
-    skip: () => isDev,
     message: {
         status: 429,
         message: 'Student creation limit reached. Please try again after an hour.'

@@ -1,11 +1,11 @@
 const db = require('../config/database');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const SALT_ROUNDS = 10;
 
 class Student {
   static async findById(id) {
     const result = await db.query(
-      `SELECT s.id, s.name, s.email, s.level, s.section, s.department_id, s.password_hash, s.role, s.permissions, s.avatar_url,
+      `SELECT s.id, s.name, s.email, s.level, s.section, s.department_id, s.role, s.permissions, s.avatar_url,
               d.name as department_name, d.code as department_code
        FROM students s
        LEFT JOIN departments d ON s.department_id = d.id
@@ -15,9 +15,18 @@ class Student {
     return result.rows[0];
   }
 
+  // ✅ Security: Only use this for password verification / reset flows
+  static async findByIdWithHash(id) {
+    const result = await db.query(
+      'SELECT id, name, email, department_id, password_hash FROM students WHERE id = $1',
+      [id]
+    );
+    return result.rows[0];
+  }
+
   static async findByUsername(username) {
     const result = await db.query(
-      'SELECT * FROM students WHERE id = $1',
+      'SELECT id, name, email, level, section, department_id, password_hash, role, permissions, avatar_url FROM students WHERE id = $1',
       [username]
     );
     return result.rows[0];
@@ -61,7 +70,7 @@ class Student {
 
   static async getAll() {
     const result = await db.query(`
-      SELECT s.id, s.name, s.email, s.level, s.section, s.department_id, s.password_hash, s.role, s.permissions, s.avatar_url,
+      SELECT s.id, s.name, s.email, s.level, s.section, s.department_id, s.role, s.permissions, s.avatar_url,
              d.name as department_name, d.code as department_code
       FROM students s
       LEFT JOIN departments d ON s.department_id = d.id

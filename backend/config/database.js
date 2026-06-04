@@ -5,10 +5,15 @@ let poolConfig;
 
 if (process.env.DATABASE_URL) {
     // Production (Neon / Supabase / etc.)
+    // ✅ Security: Default to validating SSL certs. Set DB_SSL_REJECT_UNAUTHORIZED=false only if your provider requires it.
+    const rejectUnauthorized = process.env.DB_SSL_REJECT_UNAUTHORIZED !== 'false';
     poolConfig = {
         connectionString: process.env.DATABASE_URL,
-        ssl: { rejectUnauthorized: false },
+        ssl: { rejectUnauthorized },
     };
+    if (!rejectUnauthorized) {
+        console.warn('⚠️ SSL certificate validation is DISABLED. Set DB_SSL_REJECT_UNAUTHORIZED=true for production.');
+    }
 } else {
     // Local development
     poolConfig = {

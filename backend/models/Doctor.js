@@ -42,7 +42,8 @@ class Doctor {
     }
 
     static async findByEmail(email) {
-        const result = await db.query('SELECT * FROM doctors WHERE email = $1', [email]);
+        // ✅ Security: Include password only because this is used exclusively for login verification
+        const result = await db.query('SELECT id, name, email, department, password FROM doctors WHERE email = $1', [email]);
         return result.rows[0];
     }
 

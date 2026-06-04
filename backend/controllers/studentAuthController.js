@@ -12,8 +12,7 @@ const studentLogin = async (req, res) => {
   try {
     const { username, password } = req.body;
     
-    console.log('📥 POST /api/student/login - Request received');
-    console.log('📥 Body:', { username, password: '***' });
+    console.log('📥 POST /api/student/login');
     
     if (!username || !password) {
       return res.status(400).json({ message: 'Username and password are required' });
@@ -22,15 +21,13 @@ const studentLogin = async (req, res) => {
     const student = await Student.findByUsername(username);
     
     if (!student) {
-      console.log('❌ Student not found:', username);
-      return res.status(401).json({ message: 'Invalid Student ID' });
+      return res.status(401).json({ message: 'Invalid credentials' });
     }
     
     const isValid = await Student.verifyPassword(student, password);
     
     if (!isValid) {
-      console.log('❌ Invalid password for:', username);
-      return res.status(401).json({ message: 'Invalid Password' });
+      return res.status(401).json({ message: 'Invalid credentials' });
     }
     
     const token = jwt.sign(
@@ -40,10 +37,10 @@ const studentLogin = async (req, res) => {
         permissions: student.permissions || [] 
       },
       process.env.JWT_SECRET,
-      { expiresIn: '7d' }
+      { expiresIn: '24h' }
     );
     
-    console.log('✅ Login successful:', username);
+
     
     StudentLog.logLogin(student.id, student.name, 'Standard', req.ip || req.connection?.remoteAddress);
 
@@ -63,21 +60,20 @@ const studentLogin = async (req, res) => {
     });
   } catch (error) {
     console.error('❌ Login error:', error);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
 const getCurrentStudent = async (req, res) => {
   try {
-    console.log('📥 GET /api/student/me - User ID:', req.user?.id);
+    console.log('📥 GET /api/student/me');
     
     const student = await Student.findById(req.user.id);
     if (!student) {
-      console.log('❌ Student not found:', req.user.id);
       return res.status(404).json({ message: 'Student not found' });
     }
     
-    console.log('✅ Student found:', student.id, student.name);
+
     
     // Log daily active session (auto-login)
     StudentLog.logDailyVisit(student.id, student.name, req.ip || req.connection?.remoteAddress);
@@ -95,7 +91,7 @@ const getCurrentStudent = async (req, res) => {
     });
   } catch (error) {
     console.error('❌ Error in getCurrentStudent:', error);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -124,15 +120,15 @@ const changePassword = async (req, res) => {
       return res.status(401).json({ message: 'Current password is incorrect' });
     }
     
-    if (newPass.length < 4) {
-      return res.status(400).json({ message: 'Password must be at least 4 characters' });
+    if (newPass.length < 8) {
+      return res.status(400).json({ message: 'Password must be at least 8 characters' });
     }
     
     await Student.updatePassword(studentId, newPass);
     
     res.json({ message: 'Password updated successfully' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -171,14 +167,14 @@ const linkEmail = async (req, res) => {
       res.status(500).json({ message: 'Failed to send verification email' });
     }
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
 const verifyEmail = async (req, res) => {
   try {
-    const { token, studentId } = req.body;
-    if (!token || !studentId) return res.status(400).json({ message: 'Token and Student ID are required' });
+    const { token } = req.body;
+    if (!token) return res.status(400).json({ message: 'Verification token is required' });
     
     let decoded;
     try {
@@ -187,10 +183,8 @@ const verifyEmail = async (req, res) => {
       return res.status(400).json({ message: 'Verification link is invalid or has expired' });
     }
     
-    // Check if the entered student ID matches the one who requested
-    if (decoded.id !== studentId) {
-      return res.status(400).json({ message: 'Student ID does not match. Verification failed.' });
-    }
+    // Student ID is extracted from the verified token — not from user input
+    const studentId = decoded.id;
     
     // Check email isn't taken by someone else in the meantime
     const existing = await db.query('SELECT id FROM students WHERE email = $1 AND id != $2', [decoded.email, studentId]);
@@ -200,7 +194,7 @@ const verifyEmail = async (req, res) => {
     await Student.updateEmail(studentId, decoded.email);
     res.json({ message: 'Email verified and linked successfully!' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -209,7 +203,7 @@ const forgotPassword = async (req, res) => {
     const { studentId, method } = req.body;
     if (!studentId) return res.status(400).json({ message: 'Student ID is required' });
     
-    const student = await Student.findById(studentId);
+    const student = await Student.findByIdWithHash(studentId);
     if (!student) return res.status(404).json({ message: 'Student not found' });
     
     let targetEmail;
@@ -241,7 +235,7 @@ const forgotPassword = async (req, res) => {
       res.status(500).json({ message: 'Failed to send email. Please try again later.' });
     }
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -256,7 +250,7 @@ const resetPassword = async (req, res) => {
     const studentId = parts[0];
     const jwtToken = token.substring(studentId.length + 1);
     
-    const student = await Student.findById(studentId);
+    const student = await Student.findByIdWithHash(studentId);
     if (!student) return res.status(400).json({ message: 'Invalid token or student' });
     
     const secret = process.env.JWT_SECRET + student.password_hash;
@@ -269,7 +263,7 @@ const resetPassword = async (req, res) => {
     await Student.updatePassword(student.id, newPassword);
     res.json({ message: 'Password has been reset successfully' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 

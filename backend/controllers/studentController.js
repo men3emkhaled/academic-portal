@@ -124,7 +124,8 @@ const uploadStudentsExcel = async (req, res) => {
     await client.query('ROLLBACK');
     if (filePath && fs.existsSync(filePath)) fs.unlinkSync(filePath);
     console.error('Upload students error:', error);
-    res.status(500).json({ message: error.message });
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
   } finally {
     client.release();
   }
@@ -136,7 +137,8 @@ const getAllStudents = async (req, res) => {
     res.json(students);
   } catch (error) {
     console.error('❌ Error in getAllStudents:', error);
-    res.status(500).json({ message: error.message });
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -161,7 +163,8 @@ const updateStudentSection = async (req, res) => {
 
     res.json(student);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -183,7 +186,8 @@ const updateStudentDepartment = async (req, res) => {
 
     res.json(student);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -202,7 +206,8 @@ const resetStudentPassword = async (req, res) => {
     // ✅ لا نُعيد كلمة المرور في الرد لأسباب أمنية
     res.json({ message: 'Password reset successfully' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -231,7 +236,8 @@ const updateFcmToken = async (req, res) => {
     res.json({ message: 'FCM token updated successfully', student: result.rows[0] });
   } catch (error) {
     console.error('Update FCM Token error:', error);
-    res.status(500).json({ message: error.message });
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -251,7 +257,8 @@ const updateStudentRole = async (req, res) => {
 
     res.json({ message: 'Role and permissions updated successfully', student });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -271,13 +278,15 @@ const generateAttendanceToken = async (req, res) => {
 
     const token = jwt.sign(
       { student_id: studentId, course_id: courseId, type: 'attendance' },
-      process.env.JWT_SECRET || 'fallback_secret'
+      process.env.JWT_SECRET,
+      { expiresIn: '5m' }
     );
 
     res.json({ token });
   } catch (error) {
     console.error('QR Generate Error:', error);
-    res.status(500).json({ message: error.message });
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -300,7 +309,8 @@ const getCourseHubData = async (req, res) => {
 
     const token = jwt.sign(
       { student_id: studentId, course_id: courseId, type: 'attendance' },
-      process.env.JWT_SECRET || 'fallback_secret'
+      process.env.JWT_SECRET,
+      { expiresIn: '5m' }
     );
 
     const announcementsRes = await db.query(
@@ -346,7 +356,8 @@ const getCourseHubData = async (req, res) => {
       attendance: attendanceRes.rows
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -389,7 +400,8 @@ const uploadAvatar = async (req, res) => {
     });
   } catch (error) {
     console.error('Upload avatar error:', error);
-    res.status(500).json({ message: error.message });
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 

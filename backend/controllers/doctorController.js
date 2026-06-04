@@ -29,7 +29,7 @@ const login = async (req, res) => {
         const token = jwt.sign(
             { id: doctor.id, role: 'doctor', name: doctor.name },
             process.env.JWT_SECRET,
-            { expiresIn: '7d' }
+            { expiresIn: '24h' }
         );
 
         res.json({
@@ -1025,7 +1025,7 @@ const scanAttendance = async (req, res) => {
 
         let decoded;
         try {
-            decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret');
+            decoded = jwt.verify(token, process.env.JWT_SECRET);
         } catch (e) {
             return res.status(400).json({ message: 'Invalid or expired QR Code' });
         }

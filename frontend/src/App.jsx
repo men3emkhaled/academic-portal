@@ -25,6 +25,11 @@ import StudentSettings from './pages/StudentSettings';
 import StudentPersonalTasks from './pages/StudentPersonalTasks';
 import ResetPassword from './pages/ResetPassword';
 import VerifyEmail from './pages/VerifyEmail';
+import LandingPage from './pages/LandingPage';
+import ProgramsPage from './pages/ProgramsPage';
+import AboutPage from './pages/AboutPage';
+import ContactPage from './pages/ContactPage';
+import ProgramDetailsPage from './pages/ProgramDetailsPage';
 
 // ✅ استيراد صفحات الاختبارات
 import StudentQuizzes from './pages/StudentQuizzes';
@@ -187,6 +192,10 @@ function AppContent() {
       >
         <Routes location={location}>
           <Route path="/" element={<Navigate to="/student/login" replace />} />
+          <Route path="/programs" element={<ProgramsPage />} />
+          <Route path="/programs/:id" element={<ProgramDetailsPage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/contact" element={<ContactPage />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/doctor/login" element={<DoctorLogin />} />

@@ -5,6 +5,15 @@ const path = require('path');
 require('dotenv').config();
 const fs = require('fs');
 
+// ✅ Security: Crash on missing critical secrets at startup
+const REQUIRED_SECRETS = ['JWT_SECRET', 'DATABASE_URL'];
+for (const secret of REQUIRED_SECRETS) {
+  if (!process.env[secret]) {
+    console.error(`❌ FATAL: Missing required environment variable: ${secret}`);
+    process.exit(1);
+  }
+}
+
 const courseRoutes = require('./routes/courseRoutes');
 const gradeRoutes = require('./routes/gradeRoutes');
 const adminRoutes = require('./routes/adminRoutes');
@@ -44,7 +53,8 @@ const {
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// الثقة بالبروكسي (ضروري لمنصات الاستضافة مثل Vercel)
+// الثقة بالبروكسي — يجب أن يساوي عدد البروكسيات الفعلية أمام السيرفر
+// Railway = 1, Cloudflare + Railway = 2. القيمة الخاطئة تعطل Rate Limiting!
 app.set('trust proxy', 1);
 
 // CORS configuration
@@ -53,7 +63,6 @@ const allowedOrigins = [
   'http://localhost:3000',
   'https://znu-cs.online',
   'https://www.znu-cs.online',
-  /\.vercel\.app$/,
 ];
 
 if (process.env.FRONTEND_URL) {
@@ -61,7 +70,9 @@ if (process.env.FRONTEND_URL) {
 }
 
 const isOriginAllowed = (origin) => {
-  if (!origin) return true;
+  // ✅ Security: Don't allow requests with no origin in production
+  // (Server-to-server calls like curl have no origin header)
+  if (!origin) return process.env.NODE_ENV !== 'production';
   return allowedOrigins.some(allowed => {
     if (allowed instanceof RegExp) return allowed.test(origin);
     return allowed === origin;
@@ -83,7 +94,23 @@ const corsOptions = {
   optionsSuccessStatus: 200,
 };
 
-app.use(helmet());
+// ✅ Security: Explicit helmet configuration with hardened headers
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://accounts.google.com", "https://apis.google.com"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      imgSrc: ["'self'", "data:", "blob:", "https:"],
+      connectSrc: ["'self'", "https://graph.microsoft.com", "https://www.googleapis.com", "https://*.supabase.co"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      frameSrc: ["'self'", "https://accounts.google.com"],
+    },
+  },
+  hsts: { maxAge: 31536000, includeSubDomains: true, preload: true },
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+  crossOriginEmbedderPolicy: false, // Required for Google OAuth iframes
+}));
 app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
@@ -99,8 +126,20 @@ if (!fs.existsSync('uploads')) {
   fs.mkdirSync('uploads');
 }
 
-// ✅ أهم سطر: يسمح للمتصفح بالوصول للملفات داخل مجلد uploads
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// ✅ Security: حماية ملفات uploads بتوكن — لازم يكون المستخدم مسجل دخول
+const jwt = require('jsonwebtoken');
+app.use('/uploads', (req, res, next) => {
+  const token = req.query.token || req.headers.authorization?.replace('Bearer ', '');
+  if (!token) {
+    return res.status(401).json({ message: 'Authentication required to access files' });
+  }
+  try {
+    jwt.verify(token, process.env.JWT_SECRET);
+    next();
+  } catch {
+    return res.status(401).json({ message: 'Invalid or expired token' });
+  }
+}, express.static(path.join(__dirname, 'uploads')));
 
 app.use((req, res, next) => {
   console.log(`📥 ${req.method} ${req.originalUrl}`);

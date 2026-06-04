@@ -6,8 +6,8 @@ const { studentAuth } = require('../middleware/studentAuth');
 const { upload, handleMulterError } = require('../middleware/upload');
 const { uploadLimiter } = require('../middleware/rateLimiter');
 
-// ============= Public Routes =============
-router.get('/section/:section', timetableController.getTimetableBySection);
+// ============= Student Routes =============
+router.get('/section/:section', studentAuth, timetableController.getTimetableBySection);
 
 // ============= Student Routes =============
 // ✅ جدول الطالب الشخصي: يعتمد على department_id + section من بيانات الطالب المسجل

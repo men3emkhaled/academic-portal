@@ -348,15 +348,38 @@ const ProgressManager = ({ courses = [] }) => {
                       {data.items.map((item, idx) => (
                         <div key={item.id} className="flex items-center justify-between group/item">
                           <div className="flex items-center gap-3">
-                             <div className={`w-2 h-2 rounded-full ${item.is_completed ? 'bg-primary shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-teal-500/20'}`}></div>
+                             <button
+                               onClick={() => handleToggle(item.id)}
+                               className={`w-6 h-6 rounded-lg flex items-center justify-center transition-all duration-300 hover:scale-110 ${item.is_completed ? 'bg-primary text-white shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-white dark:bg-white/5 border border-teal-500/30 text-teal-400 hover:border-teal-500'}`}
+                               title={item.is_completed ? t('admin.progress.status_authenticated') : t('admin.progress.status_pending')}
+                             >
+                               {item.is_completed ? <CheckCircle className="w-3.5 h-3.5" /> : <Circle className="w-3.5 h-3.5" />}
+                             </button>
                              <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{idx + 1}.</span>
                              <span className={`text-sm font-bold transition-colors ${item.is_completed ? 'text-gray-900 dark:text-gray-300' : 'text-gray-400 dark:text-gray-600'}`}>
                                {item.title}
                              </span>
                           </div>
-                          {item.is_completed && <CheckCircle className="w-3.5 h-3.5 text-primary" />}
+                          <div className="flex items-center gap-2 opacity-0 group-hover/item:opacity-100 transition-opacity">
+                            <button
+                              onClick={() => handleDelete(item.id)}
+                              className="w-7 h-7 flex items-center justify-center text-gray-300 hover:text-rose-500 rounded-lg transition-colors"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
                         </div>
                       ))}
+                      {/* Quick jump to manage mode */}
+                      <button
+                        onClick={() => {
+                          const course = courses.find(c => c.name === courseName);
+                          if (course) handleCourseSelect(String(course.id));
+                        }}
+                        className="mt-4 w-full py-3 rounded-xl border border-dashed border-teal-500/20 text-[10px] font-black text-teal-500 uppercase tracking-widest hover:bg-teal-500/5 transition-colors"
+                      >
+                        {t('admin.progress.add_part')} +
+                      </button>
                     </div>
                   )}
                 </div>
