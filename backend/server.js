@@ -63,6 +63,8 @@ const allowedOrigins = [
   'http://localhost:3000',
   'https://znu-cs.online',
   'https://www.znu-cs.online',
+  /^https:\/\/academic-portal-.*\.vercel\.app$/,
+  /^https:\/\/academic-portal-.*-projects\.vercel\.app$/,
 ];
 
 if (process.env.FRONTEND_URL) {
