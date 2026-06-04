@@ -10,7 +10,7 @@ import {
 import { useStudentAuth } from '../context/StudentAuthContext';
 import { useStudentData } from '../context/StudentDataContext';
 import { useNavigate, useLocation } from 'react-router-dom';
-import api from '../services/api';
+import studentApi from '../services/studentApi';
 import toast from 'react-hot-toast';
 import Sidebar from '../components/Sidebar';
 
@@ -85,7 +85,7 @@ const StudentMaterials = () => {
   const fetchResources = async (courseId) => {
     setLoading(true);
     try {
-      const response = await api.get(`/resources/course/${courseId}`);
+      const response = await studentApi.get(`/resources/course/${courseId}`);
       const organized = { videos: [], pdfs: [], summaries: [], playlists: [], recordings: [] };
       response.data.forEach(resource => {
         if (resource.type === 'video') organized.videos.push(resource);
@@ -106,7 +106,7 @@ const StudentMaterials = () => {
   const fetchProgress = async (courseId) => {
     setLoadingProgress(true);
     try {
-      const response = await api.get(`/progress/course/${courseId}`);
+      const response = await studentApi.get(`/progress/course/${courseId}`);
       setProgressData(response.data);
     } catch (error) {
       console.error('Error fetching progress:', error);
