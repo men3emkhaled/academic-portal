@@ -11,7 +11,7 @@ services:
     environment:
       POSTGRES_DB: ${DB_NAME:-academic_portal}
       POSTGRES_USER: ${DB_USER:-postgres}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:?Database password is required}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres_password_placeholder}
     ports:
       - "${DB_PORT:-5432}:5432"
     volumes:
@@ -61,8 +61,8 @@ services:
       DB_PORT: 5432
       DB_NAME: ${DB_NAME:-academic_portal}
       DB_USER: ${DB_USER:-postgres}
-      DB_PASSWORD: ${DB_PASSWORD:?Database password is required}
-      JWT_SECRET: ${JWT_SECRET:?JWT secret is required}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres_password_placeholder}
+      JWT_SECRET: ${JWT_SECRET:-jwt_secret_placeholder}
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD:-redis_pass}
