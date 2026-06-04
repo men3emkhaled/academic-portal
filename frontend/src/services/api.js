@@ -7,6 +7,11 @@ if (apiUrl && !apiUrl.startsWith('/') && !apiUrl.startsWith('http://') && !apiUr
   apiUrl = 'https://' + apiUrl;
 }
 
+// تأكيد وجود /api في نهاية الرابط
+if (apiUrl.startsWith('http') && !apiUrl.includes('/api')) {
+  apiUrl = apiUrl.replace(/\/$/, '') + '/api';
+}
+
 // نقوم بإنشاء instance من axios مع تحديد رابط السيرفر
 const api = axios.create({
   baseURL: apiUrl,
@@ -18,6 +23,17 @@ const api = axios.create({
 // إضافة الـ Token للطلبات إذا كان المستخدم مسجلاً للدخول (Admin)
 api.interceptors.request.use(
   (config) => {
+    // حل مشكلة المسارات النسبية في Axios وتجاوز /api
+    if (config.url && config.url.startsWith('/')) {
+      if (config.url.startsWith('/api/')) {
+        config.url = config.url.substring(5);
+      } else if (config.url === '/api') {
+        config.url = '';
+      } else {
+        config.url = config.url.substring(1);
+      }
+    }
+
     // Only attach adminToken if no Authorization header is already provided
     const hasAuth = config.headers && (
       config.headers.Authorization || 

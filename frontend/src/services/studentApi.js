@@ -7,6 +7,11 @@ if (API_BASE_URL && !API_BASE_URL.startsWith('/') && !API_BASE_URL.startsWith('h
   API_BASE_URL = 'https://' + API_BASE_URL;
 }
 
+// تأكيد وجود /api في نهاية الرابط
+if (API_BASE_URL.startsWith('http') && !API_BASE_URL.includes('/api')) {
+  API_BASE_URL = API_BASE_URL.replace(/\/$/, '') + '/api';
+}
+
 const studentApi = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -18,6 +23,17 @@ const studentApi = axios.create({
 // إضافة التوكن تلقائياً لكل الطلبات
 studentApi.interceptors.request.use(
   (config) => {
+    // حل مشكلة المسارات النسبية في Axios وتجاوز /api
+    if (config.url && config.url.startsWith('/')) {
+      if (config.url.startsWith('/api/')) {
+        config.url = config.url.substring(5);
+      } else if (config.url === '/api') {
+        config.url = '';
+      } else {
+        config.url = config.url.substring(1);
+      }
+    }
+
     const token = safeGetItem('studentToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
