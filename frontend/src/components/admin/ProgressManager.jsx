@@ -6,7 +6,7 @@ import {
   CheckCircle, Circle, Plus, Trash2, Edit3, X, 
   ChevronDown, ChevronUp, ListChecks, Sparkles,
   Activity, BookOpen, Clock, Save, Search, Filter,
-  LayoutGrid, List as ListIcon, MoreVertical
+  LayoutGrid, List as ListIcon, MoreVertical, RefreshCw
 } from 'lucide-react';
 
 const ProgressManager = ({ courses = [] }) => {
@@ -36,6 +36,7 @@ const ProgressManager = ({ courses = [] }) => {
   };
 
   const fetchCourseProgress = async (courseId) => {
+    if (!courseId) return;
     setLoading(true);
     try {
       const res = await api.get(`/progress/admin/course/${courseId}`);
@@ -83,7 +84,9 @@ const ProgressManager = ({ courses = [] }) => {
   const handleToggle = async (id) => {
     try {
       await api.patch(`/progress/admin/${id}/toggle`);
-      fetchCourseProgress(selectedCourseId);
+      if (selectedCourseId) {
+        fetchCourseProgress(selectedCourseId);
+      }
       fetchAllProgress();
     } catch (error) {
       toast.error(t('admin.progress.messages.update_failed'));
@@ -95,7 +98,9 @@ const ProgressManager = ({ courses = [] }) => {
     try {
       await api.delete(`/progress/admin/${id}`);
       toast.success(t('admin.progress.messages.deleted'));
-      fetchCourseProgress(selectedCourseId);
+      if (selectedCourseId) {
+        fetchCourseProgress(selectedCourseId);
+      }
       fetchAllProgress();
     } catch (error) {
       toast.error(t('admin.progress.messages.delete_failed'));
@@ -109,7 +114,9 @@ const ProgressManager = ({ courses = [] }) => {
       toast.success(t('admin.progress.messages.updated'));
       setEditingId(null);
       setEditTitle('');
-      fetchCourseProgress(selectedCourseId);
+      if (selectedCourseId) {
+        fetchCourseProgress(selectedCourseId);
+      }
       fetchAllProgress();
     } catch (error) {
       toast.error(t('admin.progress.messages.save_failed'));

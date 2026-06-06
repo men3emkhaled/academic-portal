@@ -1,3 +1,6 @@
+import React, { useState, useEffect } from 'react';
+import { useDoctorAuth } from '../../context/DoctorAuthContext';
+import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { ListChecks, Plus, Edit3, Trash2, CheckCircle2, Circle, GripVertical } from 'lucide-react';
 
