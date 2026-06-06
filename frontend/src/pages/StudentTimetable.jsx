@@ -28,13 +28,13 @@ const StudentTimetable = () => {
   const [qrLoading, setQrLoading] = useState(false);
 
   const days = [
-    { id: 'Sunday', name: t('days.sunday'), short: t('days.sun'), arabic: 'الأحد' },
-    { id: 'Monday', name: t('days.monday'), short: t('days.mon'), arabic: 'الإثنين' },
-    { id: 'Tuesday', name: t('days.tuesday'), short: t('days.tue'), arabic: 'الثلاثاء' },
-    { id: 'Wednesday', name: t('days.wednesday'), short: t('days.wed'), arabic: 'الأربعاء' },
-    { id: 'Thursday', name: t('days.thursday'), short: t('days.thu'), arabic: 'الخميس' },
-    { id: 'Friday', name: t('days.friday'), short: t('days.fri'), arabic: 'الجمعة' },
-    { id: 'Saturday', name: t('days.saturday'), short: t('days.sat'), arabic: 'السبت' },
+    { id: 'Sunday', name: t('days.sunday'), arabic: 'الأحد' },
+    { id: 'Monday', name: t('days.monday'), arabic: 'الإثنين' },
+    { id: 'Tuesday', name: t('days.tuesday'), arabic: 'الثلاثاء' },
+    { id: 'Wednesday', name: t('days.wednesday'), arabic: 'الأربعاء' },
+    { id: 'Thursday', name: t('days.thursday'), arabic: 'الخميس' },
+    { id: 'Friday', name: t('days.friday'), arabic: 'الجمعة' },
+    { id: 'Saturday', name: t('days.saturday'), arabic: 'السبت' },
   ];
 
   const isAr = i18n.language === 'ar';
@@ -249,7 +249,6 @@ const StudentTimetable = () => {
                         onClick={() => setSelectedDay(day.id)}
                         className={`flex-shrink-0 px-6 py-4 rounded-[1.8rem] flex flex-col items-center gap-1 border transition-all duration-300 ${isActive ? 'bg-black dark:bg-white text-white dark:text-black border-transparent shadow-xl scale-105' : 'bg-white dark:bg-white/5 border-gray-100 dark:border-white/5 text-gray-400'}`}
                       >
-                        <span className="text-[8px] font-black uppercase tracking-widest opacity-40">{day.short}</span>
                         <span className={`text-sm font-black ${isAr ? 'font-arabic' : ''}`}>{isAr ? day.arabic : day.id.slice(0, 3)}</span>
                       </button>
                     );
@@ -314,7 +313,6 @@ const StudentTimetable = () => {
                     <h2 className={`text-3xl font-black uppercase tracking-tight ${isAr ? 'font-arabic' : ''}`}>
                       {scheduleType === 'lectures' ? t('timetable.lectures') : t('timetable.exams')}
                     </h2>
-                    <span className="text-[9px] font-black uppercase tracking-[0.5em] text-gray-400 dark:text-white/20">{t('mavi.temporal_sequence')}</span>
                   </div>
                   <div className="bg-[#10b981]/10 dark:bg-[#2cfc7d]/10 px-6 py-2 rounded-2xl text-[#10b981] dark:text-[#2cfc7d] text-xs font-black uppercase tracking-widest">
                      {currentDayEntries.length} {isAr ? 'محاضرة' : 'Lecture'}
