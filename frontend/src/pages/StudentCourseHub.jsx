@@ -11,8 +11,10 @@ import {
   ArrowLeft, Calendar, User, ExternalLink, Users,
   Loader2, Clock, BookOpen, X, Check, XCircle,
   Lock, Zap, Award, MessageSquare, AlertCircle, Send,
-  HelpCircle, ShieldAlert, ArrowRight, MousePointer2, ShieldCheck
+  HelpCircle, ShieldAlert, ArrowRight, MousePointer2, ShieldCheck,
+  ChevronDown
 } from 'lucide-react';
+import { useStudentData } from '../context/StudentDataContext';
 
 const StudentCourseHub = () => {
   const { t, i18n } = useTranslation();
@@ -24,6 +26,9 @@ const StudentCourseHub = () => {
   const [activeTab, setActiveTab] = useState('announcements');
   const [showQr, setShowQr] = useState(false);
   const [submissionUrls, setSubmissionUrls] = useState({});
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const { gradesData } = useStudentData();
+  const courses = gradesData?.grades || [];
   
   // Inquiry Form State
   const [inquiryType, setInquiryType] = useState('question');
@@ -145,9 +150,57 @@ const StudentCourseHub = () => {
                 {t('hub.back', { defaultValue: isAr ? 'العودة للرئيسية' : 'Back to Dashboard' })}
               </button>
 
-              <h1 className={`text-[clamp(2.5rem,6vw,5rem)] font-black leading-[0.95] tracking-tighter uppercase text-gray-900 dark:text-white ${isAr ? 'font-arabic' : ''}`}>
-                {course.name}
-              </h1>
+              <div className="relative inline-block text-start z-30">
+                <button
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className={`group flex items-center gap-3 text-[clamp(2.5rem,6vw,5rem)] font-black leading-[0.95] tracking-tighter uppercase text-gray-900 dark:text-white ${isAr ? 'font-arabic' : ''} text-start hover:text-[#10b981] dark:hover:text-[#2cfc7d] transition-colors focus:outline-none`}
+                >
+                  <span className="border-b-2 border-transparent group-hover:border-[#10b981] dark:group-hover:border-[#2cfc7d] transition-all">
+                    {course.name}
+                  </span>
+                  <ChevronDown className={`w-8 h-8 text-gray-400 group-hover:text-[#10b981] dark:group-hover:text-[#2cfc7d] transition-all duration-300 shrink-0 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
+                
+                {isDropdownOpen && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setIsDropdownOpen(false)} />
+                    <div className="absolute z-50 mt-4 w-80 max-h-96 overflow-y-auto bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/10 rounded-[2.5rem] shadow-2xl p-4 animate-in fade-in slide-in-from-top-4 duration-300 backdrop-blur-xl">
+                      <div className="px-4 py-2 border-b border-gray-100 dark:border-white/5 mb-3">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+                          {isAr ? 'اختر مادة أخرى' : 'Switch Course'}
+                        </span>
+                      </div>
+                      <div className="space-y-1">
+                        {courses.map((c) => {
+                          const isActive = String(c.course_id) === String(courseId);
+                          return (
+                            <button
+                              key={c.course_id}
+                              onClick={() => {
+                                setIsDropdownOpen(false);
+                                navigate(`/student/course/${c.course_id}`);
+                              }}
+                              className={`w-full text-start flex items-center justify-between p-4 rounded-2xl transition-all ${
+                                isActive
+                                  ? 'bg-[#10b981]/10 dark:bg-[#2cfc7d]/10 border border-[#10b981]/20 dark:border-[#2cfc7d]/20 text-[#10b981] dark:text-[#2cfc7d]'
+                                  : 'hover:bg-gray-50 dark:hover:bg-white/5 border border-transparent text-gray-700 dark:text-white/80'
+                              }`}
+                            >
+                              <div className="flex items-center gap-3 min-w-0">
+                                <BookOpen className="w-4 h-4 shrink-0 text-gray-400" />
+                                <span className="font-bold text-sm truncate uppercase">{c.course_name}</span>
+                              </div>
+                              {isActive && (
+                                <div className="w-2 h-2 rounded-full bg-[#10b981] dark:bg-[#2cfc7d]" />
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
               
               <div className="flex flex-wrap items-center gap-4 pt-2">
                 <div className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-full text-xs font-black uppercase tracking-widest">

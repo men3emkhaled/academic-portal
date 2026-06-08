@@ -135,30 +135,70 @@ const MaterialHubTab = ({ courseId }) => {
 
   // ── Upvote ──────────────────────────────────────────────────────────────
   const handleToggleUpvote = async (postId) => {
+    let originalPost = null;
+    
+    // Optimistic Update
+    setPosts(prev => prev.map(p => {
+      if (p.id !== postId) return p;
+      originalPost = { ...p };
+      const nextHasUpvoted = !p.has_upvoted;
+      const delta = nextHasUpvoted ? 1 : -1;
+      return {
+        ...p,
+        has_upvoted: nextHasUpvoted,
+        upvotes_count: Math.max(0, (p.upvotes_count || 0) + delta)
+      };
+    }));
+
     try {
       const res = await studentApi.post(`/material-hub/${postId}/upvote`);
+      // Sync exact state from response
       setPosts(prev => prev.map(p => {
         if (p.id !== postId) return p;
-        const delta = res.data.upvoted ? 1 : -1;
-        return { ...p, has_upvoted: res.data.upvoted, upvotes_count: (p.upvotes_count || 0) + delta };
+        return {
+          ...p,
+          has_upvoted: res.data.upvoted,
+        };
       }));
     } catch (err) {
+      // Revert on failure
+      if (originalPost) {
+        setPosts(prev => prev.map(p => p.id === postId ? originalPost : p));
+      }
       toast.error(isAr ? 'تعذّر التصويت' : 'Could not upvote');
     }
   };
 
   // ── Bookmark ─────────────────────────────────────────────────────────────
   const handleToggleBookmark = async (postId) => {
+    let originalPost = null;
+    let nextBookmarked = false;
+
+    // Optimistic Update
+    setPosts(prev => prev.map(p => {
+      if (p.id !== postId) return p;
+      originalPost = { ...p };
+      nextBookmarked = !p.has_bookmarked;
+      return { ...p, has_bookmarked: nextBookmarked };
+    }));
+
+    const toastId = `bookmark-${postId}`;
+    toast.success(nextBookmarked
+      ? (isAr ? '✦ تمت الإضافة للمفضلة' : '✦ Added to saved')
+      : (isAr ? 'تمت الإزالة من المفضلة' : 'Removed from saved'), {
+        id: toastId
+      });
+
     try {
-      const res = await studentApi.post(`/material-hub/${postId}/bookmark`);
-      setPosts(prev => prev.map(p =>
-        p.id !== postId ? p : { ...p, has_bookmarked: res.data.bookmarked }
-      ));
-      toast.success(res.data.bookmarked
-        ? (isAr ? '✦ تمت الإضافة للمفضلة' : '✦ Added to saved')
-        : (isAr ? 'تمت الإزالة من المفضلة' : 'Removed from saved'));
+      await studentApi.post(`/material-hub/${postId}/bookmark`);
     } catch (err) {
-      toast.error(isAr ? 'تعذّر حفظ المنشور' : 'Could not bookmark');
+      // Revert on failure
+      if (originalPost) {
+        setPosts(prev => prev.map(p => p.id === postId ? originalPost : p));
+      }
+      toast.error(isAr ? 'تعذّر حفظ المنشور' : 'Could not bookmark', {
+        id: toastId
+      });
     }
   };
 
