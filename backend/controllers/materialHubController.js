@@ -22,14 +22,28 @@ const getPosts = async (req, res) => {
           p.*, 
           s.name as student_name, 
           s.avatar_url as student_avatar_url, 
-          rev.name as reviewer_name
+          rev.name as reviewer_name,
+          COALESCE(u.upvotes_count, 0)::INTEGER as upvotes_count,
+          COALESCE(c.comments_count, 0)::INTEGER as comments_count,
+          EXISTS(SELECT 1 FROM material_hub_upvotes WHERE post_id = p.id AND student_id = $2) as has_upvoted,
+          EXISTS(SELECT 1 FROM material_hub_bookmarks WHERE post_id = p.id AND student_id = $2) as has_bookmarked
         FROM material_hub_posts p
         LEFT JOIN students s ON p.student_id = s.id
         LEFT JOIN students rev ON p.reviewed_by = rev.id
+        LEFT JOIN (
+          SELECT post_id, COUNT(*) as upvotes_count 
+          FROM material_hub_upvotes 
+          GROUP BY post_id
+        ) u ON p.id = u.post_id
+        LEFT JOIN (
+          SELECT post_id, COUNT(*) as comments_count 
+          FROM material_hub_comments 
+          GROUP BY post_id
+        ) c ON p.id = c.post_id
         WHERE p.course_id = $1
         ORDER BY p.created_at DESC
       `;
-      queryParams = [courseId];
+      queryParams = [courseId, studentId];
     } else {
       // Normal students only see approved posts OR their own posts
       queryText = `
@@ -37,10 +51,24 @@ const getPosts = async (req, res) => {
           p.*, 
           s.name as student_name, 
           s.avatar_url as student_avatar_url, 
-          rev.name as reviewer_name
+          rev.name as reviewer_name,
+          COALESCE(u.upvotes_count, 0)::INTEGER as upvotes_count,
+          COALESCE(c.comments_count, 0)::INTEGER as comments_count,
+          EXISTS(SELECT 1 FROM material_hub_upvotes WHERE post_id = p.id AND student_id = $2) as has_upvoted,
+          EXISTS(SELECT 1 FROM material_hub_bookmarks WHERE post_id = p.id AND student_id = $2) as has_bookmarked
         FROM material_hub_posts p
         LEFT JOIN students s ON p.student_id = s.id
         LEFT JOIN students rev ON p.reviewed_by = rev.id
+        LEFT JOIN (
+          SELECT post_id, COUNT(*) as upvotes_count 
+          FROM material_hub_upvotes 
+          GROUP BY post_id
+        ) u ON p.id = u.post_id
+        LEFT JOIN (
+          SELECT post_id, COUNT(*) as comments_count 
+          FROM material_hub_comments 
+          GROUP BY post_id
+        ) c ON p.id = c.post_id
         WHERE p.course_id = $1 AND (p.status = 'approved' OR p.student_id = $2)
         ORDER BY p.created_at DESC
       `;
@@ -213,9 +241,172 @@ const deletePost = async (req, res) => {
   }
 };
 
+// Toggle upvote on a post
+const toggleUpvote = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const studentId = req.user.id;
+
+    // Check if post exists
+    const checkPost = await db.query('SELECT id FROM material_hub_posts WHERE id = $1', [id]);
+    if (checkPost.rows.length === 0) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
+
+    // Check if already upvoted
+    const checkUpvote = await db.query(
+      'SELECT id FROM material_hub_upvotes WHERE post_id = $1 AND student_id = $2',
+      [id, studentId]
+    );
+
+    if (checkUpvote.rows.length > 0) {
+      // Remove upvote
+      await db.query('DELETE FROM material_hub_upvotes WHERE post_id = $1 AND student_id = $2', [id, studentId]);
+      res.json({ upvoted: false });
+    } else {
+      // Add upvote
+      await db.query('INSERT INTO material_hub_upvotes (post_id, student_id) VALUES ($1, $2)', [id, studentId]);
+      res.json({ upvoted: true });
+    }
+  } catch (error) {
+    console.error('Error toggling upvote:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+// Toggle bookmark on a post
+const toggleBookmark = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const studentId = req.user.id;
+
+    // Check if post exists
+    const checkPost = await db.query('SELECT id FROM material_hub_posts WHERE id = $1', [id]);
+    if (checkPost.rows.length === 0) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
+
+    // Check if already bookmarked
+    const checkBookmark = await db.query(
+      'SELECT id FROM material_hub_bookmarks WHERE post_id = $1 AND student_id = $2',
+      [id, studentId]
+    );
+
+    if (checkBookmark.rows.length > 0) {
+      // Remove bookmark
+      await db.query('DELETE FROM material_hub_bookmarks WHERE post_id = $1 AND student_id = $2', [id, studentId]);
+      res.json({ bookmarked: false });
+    } else {
+      // Add bookmark
+      await db.query('INSERT INTO material_hub_bookmarks (post_id, student_id) VALUES ($1, $2)', [id, studentId]);
+      res.json({ bookmarked: true });
+    }
+  } catch (error) {
+    console.error('Error toggling bookmark:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+// Get comments for a post
+const getComments = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const queryText = `
+      SELECT 
+        c.*, 
+        s.name as student_name, 
+        s.avatar_url as student_avatar_url
+      FROM material_hub_comments c
+      LEFT JOIN students s ON c.student_id = s.id
+      WHERE c.post_id = $1
+      ORDER BY c.created_at ASC
+    `;
+    const result = await db.query(queryText, [id]);
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching comments:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+// Add comment to a post
+const addComment = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { content } = req.body;
+    const studentId = req.user.id;
+
+    if (!content || !content.trim()) {
+      return res.status(400).json({ message: 'Comment content is required' });
+    }
+
+    // Check if post exists
+    const checkPost = await db.query('SELECT id FROM material_hub_posts WHERE id = $1', [id]);
+    if (checkPost.rows.length === 0) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
+
+    const insertQuery = `
+      INSERT INTO material_hub_comments (post_id, student_id, content)
+      VALUES ($1, $2, $3)
+      RETURNING *
+    `;
+    const commentResult = await db.query(insertQuery, [id, studentId, content.trim()]);
+    
+    // Return with student info
+    const fullCommentQuery = `
+      SELECT 
+        c.*, 
+        s.name as student_name, 
+        s.avatar_url as student_avatar_url
+      FROM material_hub_comments c
+      LEFT JOIN students s ON c.student_id = s.id
+      WHERE c.id = $1
+    `;
+    const result = await db.query(fullCommentQuery, [commentResult.rows[0].id]);
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    console.error('Error adding comment:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+// Delete comment
+const deleteComment = async (req, res) => {
+  try {
+    const { commentId } = req.params;
+    const userId = req.user.id;
+
+    const commentQuery = await db.query('SELECT * FROM material_hub_comments WHERE id = $1', [commentId]);
+    if (commentQuery.rows.length === 0) {
+      return res.status(404).json({ message: 'Comment not found' });
+    }
+
+    const comment = commentQuery.rows[0];
+    const isReviewer = req.user.role === 'admin' || (req.user.permissions || []).includes('manage_resources');
+    const isOwner = comment.student_id === userId;
+
+    if (!isReviewer && !isOwner) {
+      return res.status(403).json({ message: 'Access denied. You can only delete your own comments.' });
+    }
+
+    await db.query('DELETE FROM material_hub_comments WHERE id = $1', [commentId]);
+    res.json({ message: 'Comment deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting comment:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
 module.exports = {
   getPosts,
   createPost,
   reviewPost,
-  deletePost
+  deletePost,
+  toggleUpvote,
+  toggleBookmark,
+  getComments,
+  addComment,
+  deleteComment
 };

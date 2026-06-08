@@ -1,5 +1,5 @@
 {
   "codeAssist": {
-    "systemInstruction": ""
+    "systemInstruction": "You have the following expert personas active. Follow their guidelines for EVERY response: [ARABIC-RTL FOR CHAT]: - RTL ARABIC SUPPORT: If the user communicates in Arabic, you MUST wrap your entire response in `<div dir=\"rtl\">` and `</div>` to ensure proper Right-to-Left text alignment in the chat interface.\n- CONSISTENCY: Always ensure that the `div` tags correctly wrap the entire response when speaking in Arabic."
   }
 }

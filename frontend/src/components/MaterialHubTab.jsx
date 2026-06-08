@@ -6,7 +6,8 @@ import toast from 'react-hot-toast';
 import { 
   BookOpen, FileText, Upload, Trash2, Check, X,
   Search, Paperclip, MessageSquare, AlertCircle, FileCode,
-  Download, Clock, CheckCircle2, ShieldAlert, ArrowDown, ExternalLink, Image
+  Download, Clock, CheckCircle2, ShieldAlert, ArrowDown, ExternalLink, Image,
+  ThumbsUp, Bookmark, Send
 } from 'lucide-react';
 
 const MaterialHubTab = ({ courseId }) => {
@@ -17,7 +18,7 @@ const MaterialHubTab = ({ courseId }) => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterType, setFilterType] = useState('all'); // all, lecture, exam
+  const [filterType, setFilterType] = useState('all'); // all, lecture, exam, bookmarks
 
   // Upload Form State
   const [caption, setCaption] = useState('');
@@ -121,9 +122,7 @@ const MaterialHubTab = ({ courseId }) => {
   };
 
   const handleDeletePost = async (id) => {
-    if (!window.confirm(isAr ? 'هل أنت متأكد من رغبتك في حذف هذا المنشور؟' : 'Are you sure you want to delete this post?')) {
-      return;
-    }
+    if (!window.confirm(isAr ? 'هل أنت متأكد من رغبتك في حذف هذا المنشور؟' : 'Are you sure you want to delete this post?')) return;
     try {
       await studentApi.delete(`/material-hub/${id}`);
       toast.success(isAr ? 'تم حذف المنشور بنجاح' : 'Post deleted successfully');
@@ -131,6 +130,89 @@ const MaterialHubTab = ({ courseId }) => {
     } catch (err) {
       console.error('Error deleting post:', err);
       toast.error(isAr ? 'فشل حذف المنشور' : 'Failed to delete post');
+    }
+  };
+
+  // ── Upvote ──────────────────────────────────────────────────────────────
+  const handleToggleUpvote = async (postId) => {
+    try {
+      const res = await studentApi.post(`/material-hub/${postId}/upvote`);
+      setPosts(prev => prev.map(p => {
+        if (p.id !== postId) return p;
+        const delta = res.data.upvoted ? 1 : -1;
+        return { ...p, has_upvoted: res.data.upvoted, upvotes_count: (p.upvotes_count || 0) + delta };
+      }));
+    } catch (err) {
+      toast.error(isAr ? 'تعذّر التصويت' : 'Could not upvote');
+    }
+  };
+
+  // ── Bookmark ─────────────────────────────────────────────────────────────
+  const handleToggleBookmark = async (postId) => {
+    try {
+      const res = await studentApi.post(`/material-hub/${postId}/bookmark`);
+      setPosts(prev => prev.map(p =>
+        p.id !== postId ? p : { ...p, has_bookmarked: res.data.bookmarked }
+      ));
+      toast.success(res.data.bookmarked
+        ? (isAr ? '✦ تمت الإضافة للمفضلة' : '✦ Added to saved')
+        : (isAr ? 'تمت الإزالة من المفضلة' : 'Removed from saved'));
+    } catch (err) {
+      toast.error(isAr ? 'تعذّر حفظ المنشور' : 'Could not bookmark');
+    }
+  };
+
+  // ── Comments ──────────────────────────────────────────────────────────────
+  const [openCommentsId, setOpenCommentsId] = useState(null);
+  const [commentsMap, setCommentsMap] = useState({});
+  const [commentsLoading, setCommentsLoading] = useState(false);
+  const [commentText, setCommentText] = useState('');
+  const [submittingComment, setSubmittingComment] = useState(false);
+
+  const handleToggleComments = async (postId) => {
+    if (openCommentsId === postId) { setOpenCommentsId(null); return; }
+    setOpenCommentsId(postId);
+    if (commentsMap[postId]) return;
+    setCommentsLoading(true);
+    try {
+      const res = await studentApi.get(`/material-hub/${postId}/comments`);
+      setCommentsMap(prev => ({ ...prev, [postId]: res.data }));
+    } catch (err) {
+      toast.error(isAr ? 'فشل تحميل التعليقات' : 'Failed to load comments');
+    } finally {
+      setCommentsLoading(false);
+    }
+  };
+
+  const handleAddComment = async (postId) => {
+    if (!commentText.trim()) return;
+    setSubmittingComment(true);
+    try {
+      const res = await studentApi.post(`/material-hub/${postId}/comments`, { content: commentText });
+      setCommentsMap(prev => ({ ...prev, [postId]: [...(prev[postId] || []), res.data] }));
+      setPosts(prev => prev.map(p =>
+        p.id !== postId ? p : { ...p, comments_count: (p.comments_count || 0) + 1 }
+      ));
+      setCommentText('');
+    } catch (err) {
+      toast.error(isAr ? 'فشل إضافة التعليق' : 'Failed to add comment');
+    } finally {
+      setSubmittingComment(false);
+    }
+  };
+
+  const handleDeleteComment = async (postId, commentId) => {
+    try {
+      await studentApi.delete(`/material-hub/comments/${commentId}`);
+      setCommentsMap(prev => ({
+        ...prev,
+        [postId]: (prev[postId] || []).filter(c => c.id !== commentId)
+      }));
+      setPosts(prev => prev.map(p =>
+        p.id !== postId ? p : { ...p, comments_count: Math.max(0, (p.comments_count || 1) - 1) }
+      ));
+    } catch (err) {
+      toast.error(isAr ? 'فشل حذف التعليق' : 'Failed to delete comment');
     }
   };
 
@@ -157,8 +239,13 @@ const MaterialHubTab = ({ courseId }) => {
 
   // Filter & Search posts
   const filteredPosts = posts.filter(post => {
-    const matchesType = filterType === 'all' || post.type === filterType;
-    const matchesSearch = 
+    let matchesType = true;
+    if (filterType === 'bookmarks') {
+      matchesType = post.has_bookmarked === true;
+    } else if (filterType !== 'all') {
+      matchesType = post.type === filterType;
+    }
+    const matchesSearch =
       (post.caption && post.caption.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (post.file_name && post.file_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (post.student_name && post.student_name.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -170,18 +257,13 @@ const MaterialHubTab = ({ courseId }) => {
       
       {/* 🚀 Top Action Card: Upload Form */}
       <div className="bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-8 sm:p-10 space-y-6">
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col items-center justify-center text-center gap-3 w-full">
           <div className="w-12 h-12 bg-[#2cfc7d]/10 text-[#2cfc7d] rounded-2xl flex items-center justify-center border border-[#2cfc7d]/10">
             <Upload className="w-6 h-6" />
           </div>
-          <div>
-            <h3 className="text-xl font-black tracking-tight text-gray-900 dark:text-white uppercase leading-none">
-              {isAr ? 'مشاركة مادة دراسية' : 'Share Course Material'}
-            </h3>
-            <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mt-1 block leading-none">
-              {isAr ? 'ارفع محاضرة أو امتحان وساعد زمايلك' : 'Upload lectures or exams to support your peers'}
-            </p>
-          </div>
+          <h3 className="text-xl font-black tracking-tight text-gray-900 dark:text-white uppercase">
+            {isAr ? 'مشاركة مادة دراسية' : 'Share Course Material'}
+          </h3>
         </div>
 
         <form onSubmit={handleCreatePost} className="space-y-6">
@@ -276,7 +358,8 @@ const MaterialHubTab = ({ courseId }) => {
           {[
             { id: 'all', label: isAr ? 'الكل' : 'All' },
             { id: 'lecture', label: isAr ? 'المحاضرات' : 'Lectures' },
-            { id: 'exam', label: isAr ? 'الامتحانات' : 'Exams' }
+            { id: 'exam', label: isAr ? 'الامتحانات' : 'Exams' },
+            { id: 'bookmarks', label: isAr ? '🔖 المحفوظات' : '🔖 Saved' }
           ].map(btn => (
             <button
               key={btn.id}
@@ -313,7 +396,7 @@ const MaterialHubTab = ({ courseId }) => {
       ) : filteredPosts.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-gray-300 dark:text-white/10 italic font-black uppercase tracking-widest text-center">
           <BookOpen className="w-14 h-14 mb-4 opacity-25" />
-          {isAr ? 'مفيش مواد دراسية مرفوعة هنا بعد' : 'No materials uploaded here yet'}
+          {filterType === 'bookmarks' ? (isAr ? 'مفيش مواد محفوظة لحد دلوقتي' : 'No saved materials yet') : (isAr ? 'مفيش مواد دراسية مرفوعة هنا بعد' : 'No materials uploaded here yet')}
         </div>
       ) : (
         <div className="space-y-6">
@@ -445,6 +528,126 @@ const MaterialHubTab = ({ courseId }) => {
                     )}
                   </div>
                 </div>
+
+                {/* ── Action Bar: Upvote · Bookmark · Comments ── */}
+                <div className="flex items-center gap-5 pt-2 ps-0 sm:ps-16">
+                  {/* Upvote */}
+                  <button
+                    onClick={() => handleToggleUpvote(post.id)}
+                    className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all hover:scale-105 active:scale-95 ${
+                      post.has_upvoted
+                        ? 'text-[#2cfc7d]'
+                        : 'text-gray-400 hover:text-[#2cfc7d]'
+                    }`}
+                  >
+                    <ThumbsUp className={`w-4 h-4 ${post.has_upvoted ? 'fill-[#2cfc7d] stroke-[#2cfc7d]' : ''}`} />
+                    <span>{post.upvotes_count > 0 ? post.upvotes_count : (isAr ? 'مفيد' : 'Helpful')}</span>
+                  </button>
+
+                  {/* Comments toggle */}
+                  <button
+                    onClick={() => handleToggleComments(post.id)}
+                    className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all hover:scale-105 active:scale-95 ${
+                      openCommentsId === post.id
+                        ? 'text-blue-400'
+                        : 'text-gray-400 hover:text-blue-400'
+                    }`}
+                  >
+                    <MessageSquare className="w-4 h-4" />
+                    <span>{post.comments_count > 0 ? post.comments_count : (isAr ? 'تعليق' : 'Comment')}</span>
+                  </button>
+
+                  {/* Bookmark */}
+                  <button
+                    onClick={() => handleToggleBookmark(post.id)}
+                    className={`ms-auto flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest transition-all hover:scale-105 active:scale-95 ${
+                      post.has_bookmarked
+                        ? 'text-amber-400'
+                        : 'text-gray-400 hover:text-amber-400'
+                    }`}
+                    title={post.has_bookmarked ? (isAr ? 'إزالة من المحفوظات' : 'Remove from saved') : (isAr ? 'حفظ في المفضلة' : 'Save')}
+                  >
+                    <Bookmark className={`w-4 h-4 ${post.has_bookmarked ? 'fill-amber-400 stroke-amber-400' : ''}`} />
+                  </button>
+                </div>
+
+                {/* ── Comments Section ── */}
+                {openCommentsId === post.id && (
+                  <div className="ms-0 sm:ms-16 space-y-3 animate-in slide-in-from-top-2 duration-300">
+                    <div className="h-px bg-gray-100 dark:bg-white/5" />
+
+                    {/* Comments list */}
+                    {commentsLoading && !commentsMap[post.id] ? (
+                      <div className="flex justify-center py-4">
+                        <div className="w-5 h-5 border-2 border-gray-200 dark:border-white/10 border-t-[#2cfc7d] rounded-full animate-spin" />
+                      </div>
+                    ) : (
+                      <div className="space-y-2 max-h-60 overflow-y-auto">
+                        {(commentsMap[post.id] || []).length === 0 ? (
+                          <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest text-center py-3">
+                            {isAr ? 'لا توجد تعليقات بعد — كن أول من يعلّق!' : 'No comments yet — be the first!'}
+                          </p>
+                        ) : (
+                          (commentsMap[post.id] || []).map(comment => (
+                            <div key={comment.id} className="flex items-start gap-3 group/comment">
+                              <div className="w-7 h-7 bg-gray-100 dark:bg-white/5 rounded-xl flex items-center justify-center border border-gray-100 dark:border-white/5 overflow-hidden shrink-0">
+                                {comment.student_avatar_url ? (
+                                  <img src={comment.student_avatar_url} alt="" className="w-full h-full object-cover" />
+                                ) : (
+                                  <span className="text-[9px] font-black text-[#2cfc7d] uppercase">
+                                    {comment.student_name?.substring(0, 2) || 'ST'}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex-1 bg-gray-50 dark:bg-white/[0.03] rounded-2xl px-4 py-2.5 border border-gray-100 dark:border-white/5">
+                                <div className="flex items-center justify-between mb-1">
+                                  <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">{comment.student_name || 'Student'}</span>
+                                  {(comment.student_id === student?.id || isReviewer) && (
+                                    <button
+                                      onClick={() => handleDeleteComment(post.id, comment.id)}
+                                      className="opacity-0 group-hover/comment:opacity-100 text-gray-300 hover:text-rose-400 transition-all"
+                                    >
+                                      <X className="w-3 h-3" />
+                                    </button>
+                                  )}
+                                </div>
+                                <p className="text-sm text-gray-700 dark:text-white/80 font-medium leading-snug">{comment.content}</p>
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    )}
+
+                    {/* Comment input */}
+                    <div className="flex items-center gap-3 pt-1">
+                      <div className="w-7 h-7 bg-gray-100 dark:bg-white/5 rounded-xl flex items-center justify-center border border-gray-100 dark:border-white/5 shrink-0">
+                        <span className="text-[9px] font-black text-[#2cfc7d] uppercase">
+                          {student?.name?.substring(0, 2) || 'ST'}
+                        </span>
+                      </div>
+                      <div className="flex-1 flex items-center gap-2 bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/5 rounded-2xl px-4 py-2">
+                        <input
+                          type="text"
+                          placeholder={isAr ? 'اكتب تعليقك...' : 'Write a comment...'}
+                          value={commentText}
+                          onChange={e => setCommentText(e.target.value)}
+                          onKeyDown={e => e.key === 'Enter' && handleAddComment(post.id)}
+                          className="flex-1 bg-transparent text-sm font-medium text-gray-700 dark:text-white/80 outline-none placeholder:text-gray-300 dark:placeholder:text-white/20"
+                        />
+                        <button
+                          onClick={() => handleAddComment(post.id)}
+                          disabled={submittingComment || !commentText.trim()}
+                          className="text-[#2cfc7d] hover:scale-110 active:scale-90 transition-all disabled:opacity-30 shrink-0"
+                        >
+                          {submittingComment
+                            ? <div className="w-4 h-4 border-2 border-[#2cfc7d] border-t-transparent rounded-full animate-spin" />
+                            : <Send className="w-4 h-4" />}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Rejection Details Info Box */}
                 {isRejected && post.reject_reason && (
