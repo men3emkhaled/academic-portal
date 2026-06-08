@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Sidebar from '../components/Sidebar';
+import MaterialHubTab from '../components/MaterialHubTab';
 import studentApi from '../services/studentApi';
 import { QRCodeSVG } from 'qrcode.react';
 import toast from 'react-hot-toast';
@@ -108,6 +109,7 @@ const StudentCourseHub = () => {
     { id: 'progress', label: t('hub.tabs.progress'), icon: ListChecks },
     { id: 'tasks', label: t('hub.tabs.tasks'), icon: CheckCircle2, count: tasks.length },
     { id: 'attendance', label: t('hub.tabs.presence'), icon: Users },
+    { id: 'materials', label: t('hub.tabs.materials', { defaultValue: 'Material Hub' }), icon: BookOpen },
     { id: 'inquiries', label: t('hub.tabs.support'), icon: MessageSquare, count: inquiries.length }
   ];
 
@@ -387,6 +389,10 @@ const StudentCourseHub = () => {
                            ))}
                         </div>
                      </div>
+                   )}
+
+                   {activeTab === 'materials' && (
+                     <MaterialHubTab courseId={courseId} />
                    )}
                 </div>
              </div>

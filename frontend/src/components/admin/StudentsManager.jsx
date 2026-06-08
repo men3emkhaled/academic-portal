@@ -19,6 +19,7 @@ const AVAILABLE_PERMISSIONS = [
   { key: 'manage_notifications', label_ar: 'الإشعارات وتنبيهات الجوال الذكية', label_en: 'System & Push Notifications' },
   { key: 'manage_quizzes', label_ar: 'إعداد الاختبارات وتصحيح الإجابات', label_en: 'Quizzes & Quiz Reviews' },
   { key: 'manage_events', label_ar: 'الفعاليات الجامعية والأنشطة الطلابية', label_en: 'Events & Student Activities' },
+  { key: 'manage_material_hub', label_ar: 'ناشر موثوق — رفع مواد بدون مراجعة', label_en: 'Trusted Publisher — Post Without Review' },
 ];
 
 const StudentsManager = ({

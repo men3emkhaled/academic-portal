@@ -190,6 +190,10 @@ app.use('/api/official-tasks', officialTaskRoutes);
 // ✅ مسارات لوحة تحكم الدكاترة
 app.use('/api/doctor', doctorRoutes);
 
+// ✅ مسارات Material Hub لرفع المواد وتصديقها
+const materialHubRoutes = require('./routes/materialHubRoutes');
+app.use('/api/material-hub', materialHubRoutes);
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.status(200).json({

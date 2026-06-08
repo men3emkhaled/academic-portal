@@ -1,0 +1,221 @@
+const db = require('../config/database');
+const supabase = require('../config/supabase');
+const path = require('path');
+
+// Get all posts for a course
+const getPosts = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const studentId = req.user.id;
+    
+    // Check if user has permission to review (is admin or has manage_resources permission)
+    const perms = req.user.permissions || [];
+    const isReviewer = req.user.role === 'admin' || perms.includes('manage_resources');
+    
+    let queryText;
+    let queryParams;
+
+    if (isReviewer) {
+      // Reviewers can see all posts (pending, approved, rejected)
+      queryText = `
+        SELECT 
+          p.*, 
+          s.name as student_name, 
+          s.avatar_url as student_avatar_url, 
+          rev.name as reviewer_name
+        FROM material_hub_posts p
+        LEFT JOIN students s ON p.student_id = s.id
+        LEFT JOIN students rev ON p.reviewed_by = rev.id
+        WHERE p.course_id = $1
+        ORDER BY p.created_at DESC
+      `;
+      queryParams = [courseId];
+    } else {
+      // Normal students only see approved posts OR their own posts
+      queryText = `
+        SELECT 
+          p.*, 
+          s.name as student_name, 
+          s.avatar_url as student_avatar_url, 
+          rev.name as reviewer_name
+        FROM material_hub_posts p
+        LEFT JOIN students s ON p.student_id = s.id
+        LEFT JOIN students rev ON p.reviewed_by = rev.id
+        WHERE p.course_id = $1 AND (p.status = 'approved' OR p.student_id = $2)
+        ORDER BY p.created_at DESC
+      `;
+      queryParams = [courseId, studentId];
+    }
+
+    const result = await db.query(queryText, queryParams);
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching material hub posts:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+// Create a new post
+const createPost = async (req, res) => {
+  try {
+    const { courseId, type, caption } = req.body;
+    const studentId = req.user.id;
+
+    if (!courseId || !type) {
+      return res.status(400).json({ message: 'Course ID and type are required' });
+    }
+
+    if (!['lecture', 'exam'].includes(type)) {
+      return res.status(400).json({ message: 'Type must be "lecture" or "exam"' });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ message: 'A file upload is required' });
+    }
+
+    const file = req.file;
+    const fileExt = path.extname(file.originalname);
+    const cleanFileName = path.basename(file.originalname, fileExt).replace(/[^a-zA-Z0-9]/g, '_');
+    const fileName = `material_${studentId}_${Date.now()}_${cleanFileName}${fileExt}`;
+    const filePath = `materials/${fileName}`;
+
+    // Upload to Supabase Storage
+    const { data, error: uploadError } = await supabase.storage
+      .from('material-hub')
+      .upload(filePath, file.buffer, {
+        contentType: file.mimetype,
+        upsert: true
+      });
+
+    if (uploadError) {
+      console.error('Supabase upload error:', uploadError);
+      return res.status(500).json({ message: 'Failed to upload file to storage bucket "material-hub". Ensure bucket exists and has public access.' });
+    }
+
+    // Get public URL
+    const { data: { publicUrl } } = supabase.storage
+      .from('material-hub')
+      .getPublicUrl(filePath);
+
+    // If poster is admin, has manage_resources (reviewer), or manage_material_hub (trusted publisher), approve instantly
+    const perms = req.user.permissions || [];
+    const isTrustedPublisher = req.user.role === 'admin' || perms.includes('manage_resources') || perms.includes('manage_material_hub');
+    const initialStatus = isTrustedPublisher ? 'approved' : 'pending';
+
+    const insertQuery = `
+      INSERT INTO material_hub_posts (
+        course_id, student_id, type, caption, file_url, file_name, file_size, status
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      RETURNING *
+    `;
+
+    const result = await db.query(insertQuery, [
+      courseId,
+      studentId,
+      type,
+      caption || '',
+      publicUrl,
+      file.originalname,
+      file.size,
+      initialStatus
+    ]);
+
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    console.error('Error creating material hub post:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+// Review a post (Approve or Reject)
+const reviewPost = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status, rejectReason } = req.body;
+    const reviewerId = req.user.id;
+
+    const isReviewer = req.user.role === 'admin' || (req.user.permissions || []).includes('manage_resources');
+    if (!isReviewer) {
+      return res.status(403).json({ message: 'Access denied. You do not have permission to moderate materials.' });
+    }
+
+    if (!['approved', 'rejected'].includes(status)) {
+      return res.status(400).json({ message: 'Invalid status. Must be "approved" or "rejected"' });
+    }
+
+    const checkQuery = await db.query('SELECT id FROM material_hub_posts WHERE id = $1', [id]);
+    if (checkQuery.rows.length === 0) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
+
+    const updateQuery = `
+      UPDATE material_hub_posts 
+      SET 
+        status = $1, 
+        reject_reason = $2, 
+        reviewed_by = $3, 
+        reviewed_at = CURRENT_TIMESTAMP
+      WHERE id = $4
+      RETURNING *
+    `;
+
+    const result = await db.query(updateQuery, [
+      status,
+      status === 'rejected' ? (rejectReason || '') : null,
+      reviewerId,
+      id
+    ]);
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Error reviewing material hub post:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+// Delete a post
+const deletePost = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    const postQuery = await db.query('SELECT * FROM material_hub_posts WHERE id = $1', [id]);
+    if (postQuery.rows.length === 0) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
+
+    const post = postQuery.rows[0];
+    const isReviewer = req.user.role === 'admin' || (req.user.permissions || []).includes('manage_resources');
+    const isOwner = post.student_id === userId;
+
+    if (!isReviewer && !isOwner) {
+      return res.status(403).json({ message: 'Access denied. You can only delete your own posts.' });
+    }
+
+    // Delete record from DB
+    await db.query('DELETE FROM material_hub_posts WHERE id = $1', [id]);
+
+    // Optional: Delete from Supabase storage (handled gracefully)
+    try {
+      const urlParts = post.file_url.split('/material-hub/');
+      if (urlParts.length > 1) {
+        const filePath = urlParts[1];
+        await supabase.storage.from('material-hub').remove([filePath]);
+      }
+    } catch (storageErr) {
+      console.warn('Could not delete file from Supabase storage:', storageErr.message);
+    }
+
+    res.json({ message: 'Post deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting material hub post:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+module.exports = {
+  getPosts,
+  createPost,
+  reviewPost,
+  deletePost
+};

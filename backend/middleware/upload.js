@@ -92,11 +92,25 @@ const uploadAvatar = multer({
     }
 });
 
+const uploadMaterial = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 50 * 1024 * 1024 }, // 50MB max file size
+    fileFilter: (req, file, cb) => {
+        const allowedExts = ['.pdf', '.doc', '.docx', '.ppt', '.pptx', '.xls', '.xlsx', '.txt', '.zip', '.rar', '.png', '.jpg', '.jpeg', '.webp'];
+        const ext = path.extname(file.originalname).toLowerCase();
+        if (allowedExts.includes(ext)) {
+            cb(null, true);
+        } else {
+            cb(new Error('Invalid file type. Allowed: PDF, Office documents, TXT, Zips/Rars, and Images'), false);
+        }
+    }
+});
+
 // ---------- معالج الأخطاء الموحد ----------
 const handleMulterError = (err, req, res, next) => {
     if (err instanceof multer.MulterError) {
         if (err.code === 'LIMIT_FILE_SIZE') {
-            return res.status(400).json({ message: 'File too large. Max size is 10MB for Excel, 5MB for images.' });
+            return res.status(400).json({ message: 'File too large. Max size is 50MB for materials.' });
         }
         return res.status(400).json({ message: err.message });
     }
@@ -111,5 +125,6 @@ module.exports = {
     upload, 
     uploadWrittenAnswer, 
     uploadAvatar,
+    uploadMaterial,
     handleMulterError 
 };
