@@ -399,7 +399,7 @@ const MaterialHubTab = ({ courseId }) => {
             { id: 'all', label: isAr ? 'الكل' : 'All' },
             { id: 'lecture', label: isAr ? 'المحاضرات' : 'Lectures' },
             { id: 'exam', label: isAr ? 'الامتحانات' : 'Exams' },
-            { id: 'bookmarks', label: isAr ? '🔖 المحفوظات' : '🔖 Saved' }
+            { id: 'bookmarks', label: isAr ? 'المحفوظات' : 'Saved' }
           ].map(btn => (
             <button
               key={btn.id}
