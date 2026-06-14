@@ -37,16 +37,22 @@ const StudentsManager = ({
   onAddStudent
 }) => {
   const { t, i18n } = useTranslation();
+  const isAr = i18n.language === 'ar';
   const [uploading, setUploading] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isFilterActive, setIsFilterActive] = useState(false);
+  const [selectedDept, setSelectedDept] = useState('all');
+  const [selectedLevel, setSelectedLevel] = useState('all');
+  const [selectedSection, setSelectedSection] = useState('all');
   const [newStudent, setNewStudent] = useState({
     id: '',
     name: '',
     password: '',
     level: '1',
     section: '',
-    department_id: ''
+    department_id: '',
+    batch: '2025'
   });
   const [adding, setAdding] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -56,7 +62,8 @@ const StudentsManager = ({
     name: '',
     level: '1',
     section: '',
-    department_id: ''
+    department_id: '',
+    batch: '2025'
   });
   const [editRole, setEditRole] = useState({
     role: 'student',
@@ -70,7 +77,8 @@ const StudentsManager = ({
       name: student.name || '',
       level: student.level?.toString() || '1',
       section: student.section?.toString() || '',
-      department_id: student.department_id || ''
+      department_id: student.department_id || '',
+      batch: student.batch?.toString() || '2025'
     });
     setShowEditModal(true);
   };
@@ -96,7 +104,8 @@ const StudentsManager = ({
         name: editStudent.name,
         level: parseInt(editStudent.level),
         section: editStudent.section ? parseInt(editStudent.section) : null,
-        department_id: editStudent.department_id || null
+        department_id: editStudent.department_id || null,
+        batch: parseInt(editStudent.batch) || 2025
       });
       setShowEditModal(false);
     } catch (error) {
@@ -166,7 +175,10 @@ const StudentsManager = ({
     }
     setAdding(true);
     try {
-      await onAddStudent(newStudent);
+      await onAddStudent({
+        ...newStudent,
+        batch: parseInt(newStudent.batch) || 2025
+      });
       toast.success(t('common.success'));
       setShowAddModal(false);
       setNewStudent({
@@ -175,7 +187,8 @@ const StudentsManager = ({
         password: '',
         level: '1',
         section: '',
-        department_id: ''
+        department_id: '',
+        batch: '2025'
       });
       fetchStudents();
     } catch (error) {
@@ -185,10 +198,35 @@ const StudentsManager = ({
     }
   };
 
-  const filteredStudents = students.filter(s => 
-    (s.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    s.id?.toString().includes(searchTerm))
-  );
+  const uniqueLevels = [...new Set(students.map(s => s.level).filter(Boolean))].sort((a, b) => a - b);
+  const uniqueSections = [...new Set(students.map(s => s.section).filter(Boolean))].sort((a, b) => {
+    const na = parseInt(a, 10);
+    const nb = parseInt(b, 10);
+    if (isNaN(na) || isNaN(nb)) return a.toString().localeCompare(b.toString());
+    return na - nb;
+  });
+
+  const hasActiveFilter = isFilterActive || searchTerm.trim() !== '';
+
+  const filteredStudents = hasActiveFilter 
+    ? students.filter(s => {
+        // Search term check
+        const matchesSearch = !searchTerm.trim() || 
+                             s.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                             s.id?.toString().includes(searchTerm);
+        
+        // Department check
+        const matchesDept = selectedDept === 'all' || s.department_id?.toString() === selectedDept.toString();
+        
+        // Level check
+        const matchesLevel = selectedLevel === 'all' || s.level?.toString() === selectedLevel.toString();
+        
+        // Section check
+        const matchesSection = selectedSection === 'all' || s.section?.toString() === selectedSection.toString();
+        
+        return matchesSearch && matchesDept && matchesLevel && matchesSection;
+      })
+    : [];
 
   return (
     <div className="space-y-8 sm:space-y-16 lg:space-y-24 animate-in fade-in duration-700 pb-20 max-w-[1500px] mx-auto w-full px-4 sm:px-0 text-start relative z-10">
@@ -307,104 +345,230 @@ const StudentsManager = ({
 
       {/* Student Matrix Table */}
       <div className="space-y-8">
-        <div className="flex items-center justify-between px-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-4">
             <div className="flex items-center gap-4">
                 <h2 className="text-3xl font-black uppercase tracking-tighter">{t('admin.students.saved_students')}</h2>
-                <div className="bg-[#2cfc7d]/10 px-4 py-2 rounded-xl text-[#2cfc7d] text-xs font-black">
-                   {filteredStudents.length}
-                </div>
+                {hasActiveFilter && (
+                  <div className="bg-[#2cfc7d]/10 px-4 py-2 rounded-xl text-[#2cfc7d] text-xs font-black animate-pulse">
+                     {filteredStudents.length}
+                  </div>
+                )}
             </div>
         </div>
 
-        <div className="bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[3rem] overflow-hidden shadow-sm">
-          <div className="overflow-x-auto custom-scrollbar">
-            <table className="w-full text-start border-collapse">
-              <thead>
-                <tr className="bg-gray-50/50 dark:bg-white/[0.01]">
-                  <th className="py-8 px-10 text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-[0.3em] text-start">{t('admin.students.name_id')}</th>
-                  <th className="py-8 px-10 text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-[0.3em] text-start">{t('admin.students.level_section')}</th>
-                  <th className="py-8 px-10 text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-[0.3em] text-start">{t('admin.students.status')}</th>
-                  <th className="py-8 px-10 text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-[0.3em] text-inline-end">{t('admin.students.actions')}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100 dark:divide-white/[0.03]">
-                {filteredStudents.length === 0 ? (
-                  <tr>
-                      <td colSpan="4" className="text-center py-40">
-                          <div className="flex flex-col items-center gap-6 opacity-30 grayscale">
-                              <Users className="w-20 h-20 text-gray-400" />
-                              <p className="text-gray-500 font-black uppercase tracking-[0.3em] text-xs">{t('admin.students.no_students')}</p>
-                          </div>
-                      </td>
+        {/* Filter Toolbar */}
+        <div className="flex flex-wrap items-center gap-4 bg-white dark:bg-[#0d0d14] p-6 rounded-[2rem] border border-gray-100 dark:border-white/5 shadow-sm">
+          {/* Department Select */}
+          <div className="flex-1 min-w-[200px] space-y-1 text-start">
+            <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ms-2">
+              {isAr ? 'القسم الدراسي' : 'Department'}
+            </label>
+            <div className="relative">
+              <select
+                value={selectedDept}
+                onChange={(e) => {
+                  setSelectedDept(e.target.value);
+                  setIsFilterActive(true);
+                }}
+                className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-xl px-4 py-3 text-xs font-black focus:ring-2 focus:ring-[#8b5cf6]/20 outline-none appearance-none cursor-pointer"
+              >
+                <option value="all">{isAr ? 'كل الأقسام' : 'All Departments'}</option>
+                {departments.map(d => (
+                  <option key={d.id} value={d.id}>{isAr ? d.name_ar : d.name}</option>
+                ))}
+              </select>
+              <ChevronRight className="absolute inset-inline-end-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 rotate-90 w-4 h-4" />
+            </div>
+          </div>
+
+          {/* Level Select */}
+          <div className="w-full sm:w-[150px] space-y-1 text-start">
+            <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ms-2">
+              {isAr ? 'المستوى' : 'Level'}
+            </label>
+            <div className="relative">
+              <select
+                value={selectedLevel}
+                onChange={(e) => {
+                  setSelectedLevel(e.target.value);
+                  setIsFilterActive(true);
+                }}
+                className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-xl px-4 py-3 text-xs font-black focus:ring-2 focus:ring-[#8b5cf6]/20 outline-none appearance-none cursor-pointer"
+              >
+                <option value="all">{isAr ? 'كل المستويات' : 'All Levels'}</option>
+                {uniqueLevels.map(lvl => (
+                  <option key={lvl} value={lvl}>{isAr ? `المستوى ${lvl}` : `Level ${lvl}`}</option>
+                ))}
+              </select>
+              <ChevronRight className="absolute inset-inline-end-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 rotate-90 w-4 h-4" />
+            </div>
+          </div>
+
+          {/* Section Select */}
+          <div className="w-full sm:w-[150px] space-y-1 text-start">
+            <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ms-2">
+              {isAr ? 'الشعبة' : 'Section'}
+            </label>
+            <div className="relative">
+              <select
+                value={selectedSection}
+                onChange={(e) => {
+                  setSelectedSection(e.target.value);
+                  setIsFilterActive(true);
+                }}
+                className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-xl px-4 py-3 text-xs font-black focus:ring-2 focus:ring-[#8b5cf6]/20 outline-none appearance-none cursor-pointer"
+              >
+                <option value="all">{isAr ? 'كل الشعب' : 'All Sections'}</option>
+                {uniqueSections.map(sec => (
+                  <option key={sec} value={sec}>{isAr ? `شعبة ${sec}` : `Section ${sec}`}</option>
+                ))}
+              </select>
+              <ChevronRight className="absolute inset-inline-end-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 rotate-90 w-4 h-4" />
+            </div>
+          </div>
+
+          {/* Clear/Reset Button */}
+          {hasActiveFilter && (
+            <button
+              onClick={() => {
+                setSelectedDept('all');
+                setSelectedLevel('all');
+                setSelectedSection('all');
+                setIsFilterActive(false);
+                setSearchTerm('');
+              }}
+              className="px-6 py-3 rounded-xl bg-rose-500/5 hover:bg-rose-500/10 text-rose-500 text-xs font-black uppercase tracking-widest border border-rose-500/10 transition-all flex items-center justify-center gap-2"
+            >
+              <X className="w-4 h-4" />
+              {isAr ? 'إعادة تعيين' : 'Reset'}
+            </button>
+          )}
+        </div>
+
+        {!hasActiveFilter ? (
+          <div className="bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[3rem] p-16 sm:p-24 text-center shadow-sm flex flex-col items-center justify-center relative overflow-hidden group">
+            <div className="absolute inset-0 bg-gradient-to-br from-[#8b5cf6]/2 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-700 pointer-events-none" />
+            <div className="w-20 h-20 bg-gray-50 dark:bg-white/5 rounded-[2rem] flex items-center justify-center text-gray-400 border border-gray-100 dark:border-white/5 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-sm relative z-10">
+              <Users className="w-10 h-10" />
+            </div>
+            <h3 className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white tracking-tighter uppercase mt-6 relative z-10">
+              {isAr ? 'حدد فلتر لعرض الطلاب' : 'Select filters to display students'}
+            </h3>
+            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mt-2 max-w-sm leading-relaxed relative z-10">
+              {isAr 
+                ? 'الرجاء اختيار قسم معين، شعبة، مستوى دراسي، أو البحث باسم الطالب لعرض النتائج وتجنب بطء التحميل.' 
+                : 'Please choose a department, section, level or type student name to load records. This optimizes portal speed.'}
+            </p>
+            <button
+              onClick={() => {
+                setSelectedDept('all');
+                setSelectedLevel('all');
+                setSelectedSection('all');
+                setIsFilterActive(true);
+              }}
+              className="mt-8 px-8 py-4 bg-black dark:bg-white text-white dark:text-black rounded-2xl text-[10px] font-black uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-md relative z-10"
+            >
+              {isAr ? 'عرض جميع الطلاب' : 'Show All Students'}
+            </button>
+          </div>
+        ) : (
+          <div className="bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[3rem] overflow-hidden shadow-sm">
+            <div className="overflow-x-auto custom-scrollbar">
+              <table className="w-full text-start border-collapse">
+                <thead>
+                  <tr className="bg-gray-50/50 dark:bg-white/[0.01]">
+                    <th className="py-8 px-10 text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-[0.3em] text-start">{t('admin.students.name_id')}</th>
+                    <th className="py-8 px-10 text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-[0.3em] text-start">{t('admin.students.level_section')}</th>
+                    <th className="py-8 px-10 text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-[0.3em] text-start">{t('admin.students.status')}</th>
+                    <th className="py-8 px-10 text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-[0.3em] text-inline-end">{t('admin.students.actions')}</th>
                   </tr>
-                ) : (
-                  filteredStudents.map((s) => (
-                    <tr key={s.id} className="group hover:bg-gray-50/30 dark:hover:bg-white/[0.01] transition-all">
-                      <td className="py-8 px-10 text-start">
-                        <div className="flex items-center gap-6">
-                          <div className="w-16 h-16 bg-white dark:bg-black rounded-2xl flex items-center justify-center border border-gray-100 dark:border-white/10 shadow-inner group-hover:scale-110 group-hover:rotate-3 transition-all duration-700 overflow-hidden relative">
-                            {s.avatar_url ? (
-                              <img src={s.avatar_url} alt={s.name} className="w-full h-full object-cover" />
+                </thead>
+                <tbody className="divide-y divide-gray-100 dark:divide-white/[0.03]">
+                  {filteredStudents.length === 0 ? (
+                    <tr>
+                        <td colSpan="4" className="text-center py-40">
+                            <div className="flex flex-col items-center gap-6 opacity-30 grayscale">
+                                <Users className="w-20 h-20 text-gray-400" />
+                                <p className="text-gray-500 font-black uppercase tracking-[0.3em] text-xs">{t('admin.students.no_students')}</p>
+                            </div>
+                        </td>
+                    </tr>
+                  ) : (
+                    filteredStudents.map((s) => (
+                      <tr key={s.id} className="group hover:bg-gray-50/30 dark:hover:bg-white/[0.01] transition-all">
+                        <td className="py-8 px-10 text-start">
+                          <div className="flex items-center gap-6">
+                            <div className="w-16 h-16 bg-white dark:bg-black rounded-2xl flex items-center justify-center border border-gray-100 dark:border-white/10 shadow-inner group-hover:scale-110 group-hover:rotate-3 transition-all duration-700 overflow-hidden relative">
+                              {s.avatar_url ? (
+                                <img src={s.avatar_url} alt={s.name} className="w-full h-full object-cover" />
+                              ) : (
+                                <div className="w-full h-full bg-[#8b5cf6]/10 dark:bg-white/5 flex items-center justify-center">
+                                  <User className="w-8 h-8 text-[#8b5cf6] dark:text-gray-400" />
+                                </div>
+                              )}
+                            </div>
+                            <div className="space-y-1 text-start">
+                              <h4 className="text-base font-black text-gray-900 dark:text-white leading-snug group-hover:text-[#8b5cf6] transition-colors">
+                                 {s.name}
+                              </h4>
+                              <span className="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
+                                 {s.id}
+                              </span>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-8 px-10 text-start">
+                          <div className="flex flex-wrap gap-2">
+                            <span className="px-4 py-2 rounded-xl bg-blue-500/5 border border-blue-500/10 text-blue-600 dark:text-blue-400 text-[10px] font-black uppercase tracking-widest">
+                              {t('admin.students.level')} {s.level}
+                            </span>
+                            <span className="px-4 py-2 rounded-xl bg-purple-500/5 border border-purple-500/10 text-purple-600 dark:text-purple-400 text-[10px] font-black uppercase tracking-widest">
+                              {t('admin.students.section')} {s.section || '—'}
+                            </span>
+                            <span className="px-4 py-2 rounded-xl bg-indigo-500/5 border border-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-black uppercase tracking-widest">
+                              {isAr ? 'العام الدراسي' : 'Academic Year'} {s.batch || 2025}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="py-8 px-10 text-start">
+                          <div className="flex items-center gap-3">
+                            {s.role && s.role !== 'student' ? (
+                              <span className="px-4 py-2 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-600 dark:text-[#d4a3ff] text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 animate-pulse">
+                                <ShieldCheck className="w-3.5 h-3.5" />
+                                {s.role}
+                              </span>
                             ) : (
-                              <div className="w-full h-full bg-[#8b5cf6]/10 dark:bg-white/5 flex items-center justify-center">
-                                <User className="w-8 h-8 text-[#8b5cf6] dark:text-gray-400" />
-                              </div>
+                              <>
+                                <div className="w-2 h-2 rounded-full bg-[#2cfc7d] shadow-[0_0_12px_rgba(44,252,125,0.5)]"></div>
+                                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 italic opacity-60">{t('admin.students.protected')}</span>
+                              </>
                             )}
                           </div>
-                          <div className="text-start">
-                            <p className="text-gray-900 dark:text-white font-black tracking-tight text-xl group-hover:text-[#2cfc7d] transition-colors leading-tight">{s.name}</p>
-                            <p className="text-[10px] text-gray-400 font-black uppercase tracking-[0.4em] mt-1.5">{s.id}</p>
+                        </td>
+                        <td className="py-8 px-10 text-inline-end">
+                          <div className="flex items-center justify-inline-end gap-3 opacity-0 group-hover:opacity-100 transition-all scale-90 group-hover:scale-100">
+                            <button onClick={() => handleEditClick(s)} className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 text-gray-400 hover:text-amber-500 transition-all shadow-sm" title={t('admin.students.edit_details')}>
+                                <Edit3 className="w-5 h-5" />
+                            </button>
+                            <button onClick={() => handleRoleClick(s)} className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 text-gray-400 hover:text-purple-500 transition-all shadow-sm" title={t('admin.students.change_role')}>
+                                <Shield className="w-5 h-5" />
+                            </button>
+                            <button onClick={() => handleResetPassword(s.id)} className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 text-gray-400 hover:text-blue-500 transition-all shadow-sm" title={t('admin.students.reset_password')}>
+                                <Key className="w-5 h-5" />
+                            </button>
+                            <button onClick={() => handleDeleteStudent(s.id, s.name)} className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 text-gray-400 hover:text-rose-500 transition-all shadow-sm" title={t('admin.students.delete')}>
+                                <Trash2 className="w-5 h-5" />
+                            </button>
                           </div>
-                        </div>
-                      </td>
-                      <td className="py-8 px-10 text-start">
-                        <div className="flex flex-wrap gap-2">
-                          <span className="px-4 py-2 rounded-xl bg-blue-500/5 border border-blue-500/10 text-blue-600 dark:text-blue-400 text-[10px] font-black uppercase tracking-widest">
-                            {t('admin.students.level')} {s.level}
-                          </span>
-                          <span className="px-4 py-2 rounded-xl bg-purple-500/5 border border-purple-500/10 text-purple-600 dark:text-purple-400 text-[10px] font-black uppercase tracking-widest">
-                            {t('admin.students.section')} {s.section || '—'}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="py-8 px-10 text-start">
-                        <div className="flex items-center gap-3">
-                          {s.role && s.role !== 'student' ? (
-                            <span className="px-4 py-2 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-600 dark:text-[#d4a3ff] text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 animate-pulse">
-                              <ShieldCheck className="w-3.5 h-3.5" />
-                              {s.role}
-                            </span>
-                          ) : (
-                            <>
-                              <div className="w-2 h-2 rounded-full bg-[#2cfc7d] shadow-[0_0_12px_rgba(44,252,125,0.5)]"></div>
-                              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 italic opacity-60">{t('admin.students.protected')}</span>
-                            </>
-                          )}
-                        </div>
-                      </td>
-                      <td className="py-8 px-10 text-inline-end">
-                        <div className="flex items-center justify-inline-end gap-3 opacity-0 group-hover:opacity-100 transition-all scale-90 group-hover:scale-100">
-                          <button onClick={() => handleEditClick(s)} className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 text-gray-400 hover:text-amber-500 transition-all shadow-sm" title={t('admin.students.edit_details')}>
-                              <Edit3 className="w-5 h-5" />
-                          </button>
-                          <button onClick={() => handleRoleClick(s)} className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 text-gray-400 hover:text-purple-500 transition-all shadow-sm" title={t('admin.students.change_role')}>
-                              <Shield className="w-5 h-5" />
-                          </button>
-                          <button onClick={() => handleResetPassword(s.id)} className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 text-gray-400 hover:text-blue-500 transition-all shadow-sm" title={t('admin.students.reset_password')}>
-                              <Key className="w-5 h-5" />
-                          </button>
-                          <button onClick={() => handleDeleteStudent(s.id, s.name)} className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 text-gray-400 hover:text-rose-500 transition-all shadow-sm" title={t('admin.students.delete')}>
-                              <Trash2 className="w-5 h-5" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+        )}
       </div>      {/* Premium Add Student Modal */}
       {showAddModal && createPortal(
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 lg:p-10">
@@ -453,7 +617,7 @@ const StudentsManager = ({
                     <p className="text-[11px] lg:text-xs text-[#8b5cf6] dark:text-[#d4a3ff] font-black uppercase tracking-widest opacity-60 ml-1">{t('admin.students.password_hint')}</p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-3 gap-6">
                     <div className="space-y-3">
                         <label className="text-xs lg:text-sm font-black text-gray-400 uppercase tracking-widest ml-1">{t('admin.students.level')}</label>
                         <input type="number" value={newStudent.level} onChange={(e) => setNewStudent({ ...newStudent, level: e.target.value })} className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl px-6 py-4.5 text-base lg:text-lg font-black focus:ring-4 focus:ring-[#8b5cf6]/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner" min="1" max="4" />
@@ -461,6 +625,10 @@ const StudentsManager = ({
                     <div className="space-y-3">
                         <label className="text-xs lg:text-sm font-black text-gray-400 uppercase tracking-widest ml-1">{t('admin.students.section')}</label>
                         <input type="text" value={newStudent.section} onChange={(e) => setNewStudent({ ...newStudent, section: e.target.value })} className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl px-6 py-4.5 text-base lg:text-lg font-black focus:ring-4 focus:ring-[#8b5cf6]/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner placeholder-gray-400/50" placeholder="e.g. 1" />
+                    </div>
+                    <div className="space-y-3">
+                        <label className="text-xs lg:text-sm font-black text-gray-400 uppercase tracking-widest ml-1">{isAr ? 'سنة الالتحاق' : 'Academic Year'}</label>
+                        <input type="number" value={newStudent.batch} onChange={(e) => setNewStudent({ ...newStudent, batch: e.target.value })} className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl px-6 py-4.5 text-base lg:text-lg font-black focus:ring-4 focus:ring-[#8b5cf6]/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner placeholder-gray-400/50" placeholder="e.g. 2025" />
                     </div>
                 </div>
 
@@ -533,7 +701,7 @@ const StudentsManager = ({
                     <input type="text" value={editStudent.name} onChange={(e) => setEditStudent({ ...editStudent, name: e.target.value })} className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl px-6 py-4.5 text-base lg:text-lg font-black focus:ring-4 focus:ring-amber-500/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner placeholder-gray-400/50" required placeholder={t('admin.students.full_name')} />
                 </div>
 
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-3 gap-6">
                     <div className="space-y-3">
                         <label className="text-xs lg:text-sm font-black text-gray-400 uppercase tracking-widest ml-1">{t('admin.students.level')}</label>
                         <input type="number" value={editStudent.level} onChange={(e) => setEditStudent({ ...editStudent, level: e.target.value })} className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl px-6 py-4.5 text-base lg:text-lg font-black focus:ring-4 focus:ring-amber-500/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner" min="1" max="4" />
@@ -541,6 +709,10 @@ const StudentsManager = ({
                     <div className="space-y-3">
                         <label className="text-xs lg:text-sm font-black text-gray-400 uppercase tracking-widest ml-1">{t('admin.students.section')}</label>
                         <input type="text" value={editStudent.section} onChange={(e) => setEditStudent({ ...editStudent, section: e.target.value })} className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl px-6 py-4.5 text-base lg:text-lg font-black focus:ring-4 focus:ring-amber-500/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner placeholder-gray-400/50" placeholder="e.g. 1" />
+                    </div>
+                    <div className="space-y-3">
+                        <label className="text-xs lg:text-sm font-black text-gray-400 uppercase tracking-widest ml-1">{isAr ? 'سنة الالتحاق' : 'Academic Year'}</label>
+                        <input type="number" value={editStudent.batch} onChange={(e) => setEditStudent({ ...editStudent, batch: e.target.value })} className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl px-6 py-4.5 text-base lg:text-lg font-black focus:ring-4 focus:ring-amber-500/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner placeholder-gray-400/50" placeholder="e.g. 2025" />
                     </div>
                 </div>
 

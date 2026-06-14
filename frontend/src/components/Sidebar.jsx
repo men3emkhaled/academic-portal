@@ -7,7 +7,6 @@ import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
 
 const Sidebar = ({ onLogout }) => {
-  const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const { student, logout } = useStudentAuth();
   const { theme, toggleTheme } = useTheme();
@@ -41,13 +40,13 @@ const Sidebar = ({ onLogout }) => {
   const bottomBarItems = [
     { id: 'dashboard', label: t('sidebar.dashboard'), icon: <Home className="w-5 h-5" />, path: '/student/dashboard' },
     { id: 'timetable', label: t('sidebar.timetable'), icon: <Calendar className="w-5 h-5" />, path: '/student/timetable' },
-    { id: 'materials', label: t('sidebar.materials'), icon: <BookOpen className="w-5 h-5" />, path: '/student/materials' },
+    { id: 'materials', label: t('sidebar.materials'), icon: <Library className="w-5 h-5" />, path: '/student/materials' },
     { id: 'notifications', label: t('sidebar.notifications'), icon: <Bell className="w-5 h-5" />, path: '/student/notifications' },
-    { id: 'menu', label: t('sidebar.menu'), icon: <Menu className="w-5 h-5" />, path: '#menu' },
+    { id: 'menu', label: t('sidebar.menu'), icon: <Menu className="w-5 h-5" />, path: '/student/menu' },
   ];
 
   const menuItems = [
-    // { id: 'grades', label: t('sidebar.courses_grades'), icon: <TrendingUp className="w-5 h-5" />, path: '/student/grades' },
+    { id: 'course-registration', label: t('sidebar.course_registration'), icon: <BookOpen className="w-5 h-5" />, path: '/student/registration' },
     { id: 'quizzes', label: t('sidebar.quizzes'), icon: <FileText className="w-5 h-5" />, path: '/student/quizzes' },
     { id: 'roadmap', label: t('sidebar.roadmap'), icon: <Map className="w-5 h-5" />, path: '/student/roadmap' },
     { id: 'personal-tasks', label: t('sidebar.personal_tasks'), icon: <CheckSquare className="w-5 h-5" />, path: '/student/personal-tasks' },
@@ -75,8 +74,8 @@ const Sidebar = ({ onLogout }) => {
     const desktopItems = [
       { id: 'dashboard', label: t('sidebar.dashboard'), icon: <LayoutDashboard className="w-5 h-5" />, path: '/student/dashboard' },
       { id: 'timetable', label: t('sidebar.timetable'), icon: <Calendar className="w-5 h-5" />, path: '/student/timetable' },
-      { id: 'materials', label: t('sidebar.materials'), icon: <BookOpen className="w-5 h-5" />, path: '/student/materials' },
-      // { id: 'grades', label: t('sidebar.courses_grades'), icon: <TrendingUp className="w-5 h-5" />, path: '/student/grades' },
+      { id: 'materials', label: t('sidebar.materials'), icon: <Library className="w-5 h-5" />, path: '/student/materials' },
+      { id: 'grades', label: t('sidebar.courses_grades'), icon: <TrendingUp className="w-5 h-5" />, path: '/student/grades' },
       { id: 'notifications', label: t('sidebar.notifications'), icon: <Bell className="w-5 h-5" />, path: '/student/notifications' },
       ...menuItems
     ];
@@ -161,7 +160,7 @@ const Sidebar = ({ onLogout }) => {
     const touchedIndex = Math.max(0, Math.min(Math.floor(percent / itemWidth), bottomBarItems.length - 1));
     const currentIndex = bottomBarItems.findIndex(item => isItemActive(item.path));
 
-    canDragRef.current = touchedIndex === currentIndex && bottomBarItems[touchedIndex].id !== 'menu';
+    canDragRef.current = touchedIndex === currentIndex;
   };
 
   const handleTouchMove = (e) => {
@@ -200,11 +199,7 @@ const Sidebar = ({ onLogout }) => {
       const itemWidth = 100 / bottomBarItems.length;
       const index = Math.floor(dragPosition / itemWidth);
       const safeIndex = Math.max(0, Math.min(index, bottomBarItems.length - 1));
-      if (bottomBarItems[safeIndex].id === 'menu') {
-        setIsOpen(true);
-      } else {
-        navigate(bottomBarItems[safeIndex].path);
-      }
+      navigate(bottomBarItems[safeIndex].path);
     }
     setDragPosition(null);
     isDraggingRef.current = false;
@@ -256,16 +251,11 @@ const Sidebar = ({ onLogout }) => {
 
           {bottomBarItems.map((item, idx) => {
             const isActive = currentIndex === idx;
-            const isMenu = item.id === 'menu';
 
             return (
               <div
                 key={item.id}
                 onClick={() => {
-                  if (isMenu) {
-                    setIsOpen(true);
-                    return;
-                  }
                   if (isActive) return;
                   navigate(item.path);
                 }}
@@ -283,86 +273,9 @@ const Sidebar = ({ onLogout }) => {
         </div>
       </div>
 
-      {isOpen && (
-        <>
-          <div className="fixed inset-0 bg-black/20 dark:bg-black/60 backdrop-blur-md z-[60]" onClick={() => setIsOpen(false)} />
-          <div className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] start-6 end-6 bg-white dark:bg-[#0c0c14] border border-gray-100 dark:border-white/10 rounded-[3rem] shadow-[0_40px_100px_rgba(0,0,0,0.3)] z-[70] animate-slideUp overflow-hidden">
-            <div className="p-8 pt-10 text-center relative overflow-hidden">
-              <div className="absolute top-0 inset-inline-start-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
-              <h4 className={`text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter ${i18n.language === 'ar' ? 'font-arabic' : ''}`}>{t('sidebar.menu')}</h4>
-            </div>
-            
-            <div className="px-6 pb-2 space-y-2 max-h-[45vh] overflow-y-auto hidden-scrollbar">
-              <div className="grid grid-cols-1 gap-2">
-                {menuItems.map((item) => {
-                  const isActive = isItemActive(item.path);
-                  return (
-                  <NavLink
-                    key={item.id}
-                    to={item.path}
-                    onClick={() => setIsOpen(false)}
-                    className={`
-                      group flex items-center justify-between px-6 py-5 rounded-[1.5rem] transition-all duration-500
-                      ${isActive 
-                        ? 'bg-gray-900 dark:bg-white text-white dark:text-black shadow-xl scale-[1.02]' 
-                        : 'bg-gray-50 dark:bg-white/5 text-gray-500 dark:text-white/30 hover:bg-gray-100 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white'}
-                    `}
-                  >
-                    <div className="flex items-center gap-4">
-                       <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${i18n.language === 'ar' ? 'order-last' : ''}`}>
-                          {item.icon}
-                       </div>
-                       <span className={`text-[11px] font-black uppercase tracking-widest ${i18n.language === 'ar' ? 'font-arabic' : ''}`}>{item.label}</span>
-                    </div>
-                    <ArrowRight className={`w-4 h-4 opacity-20 group-hover:opacity-100 transition-all ${i18n.language === 'ar' ? 'rotate-180' : ''}`} />
-                  </NavLink>
-                )})}
-              </div>
-            </div>
-
-            <div className="p-6 pt-4 border-t border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02]">
-              <div className="grid grid-cols-3 gap-4">
-                <button
-                  onClick={toggleLanguage}
-                  className="flex flex-col items-center gap-3 p-4 rounded-[2rem] bg-white dark:bg-white/5 border border-gray-100 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-white/10 transition-all active:scale-95 group shadow-sm"
-                >
-                  <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-black/40 flex items-center justify-center text-gray-400 group-hover:text-primary shadow-inner transition-colors">
-                     <Languages className="w-5 h-5" />
-                  </div>
-                  <span className="text-[7px] font-black uppercase tracking-widest text-gray-400">{i18n.language === 'ar' ? 'English' : 'العربية'}</span>
-                </button>
-                <button
-                  onClick={toggleTheme}
-                  className="flex flex-col items-center gap-3 p-4 rounded-[2rem] bg-white dark:bg-white/5 border border-gray-100 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-white/10 transition-all active:scale-95 group shadow-sm"
-                >
-                  <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-black/40 flex items-center justify-center text-gray-400 group-hover:text-primary shadow-inner transition-colors">
-                     {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-                  </div>
-                  <span className="text-[7px] font-black uppercase tracking-widest text-gray-400">{theme === 'dark' ? t('sidebar.light') : t('sidebar.dark')}</span>
-                </button>
-                <button
-                  onClick={handleLogout}
-                  className="flex flex-col items-center gap-3 p-4 rounded-[2rem] bg-rose-500/5 dark:bg-rose-500/10 border border-rose-500/10 hover:bg-rose-500/10 transition-all active:scale-95 group shadow-sm"
-                >
-                  <div className="w-10 h-10 rounded-full bg-white dark:bg-rose-500/20 flex items-center justify-center text-rose-500 shadow-inner transition-colors">
-                     <LogOut className="w-5 h-5" />
-                  </div>
-                  <span className="text-[7px] font-black uppercase tracking-widest text-rose-500">{t('sidebar.logout')}</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
-
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
         .font-arabic { font-family: 'Cairo', sans-serif !important; }
-        @keyframes slideUp {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-slideUp { animation: slideUp 0.3s ease-out forwards; }
         .hidden-scrollbar::-webkit-scrollbar { display: none; }
         .hidden-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>

@@ -16,7 +16,26 @@
     "menu": "القائمة",
     "admin_panel": "لوحة الإدارة",
     "language": "اللغة",
-    "appearance": "المظهر"
+    "appearance": "المظهر",
+    "course_registration": "تسجيل المواد"
+  },
+  "course_registration": {
+    "title": "تسجيل المواد الدراسية",
+    "available_courses": "المواد المتاحة",
+    "enrolled_courses": "المواد المسجلة",
+    "semester1": "الترم الأول",
+    "semester2": "الترم الثاني",
+    "search_courses": "ابحث عن المقررات بالاسم أو الكود...",
+    "register": "تسجيل المادة",
+    "register_selected": "تسجيل المواد المحددة",
+    "drop": "إلغاء تسجيل",
+    "confirm_drop": "هل أنت متأكد من إلغاء تسجيل هذه المادة؟ سيتم حذف جميع درجاتك المسجلة بها نهائياً.",
+    "no_available_courses": "لا توجد مواد متاحة للتسجيل حالياً.",
+    "no_enrolled_courses": "لم تقم بتسجيل أي مواد بعد.",
+    "credit_hours": "الساعات المعتمدة",
+    "total_credits": "إجمالي الساعات المسجلة",
+    "register_success": "تم تسجيل المواد بنجاح!",
+    "drop_success": "تم إلغاء تسجيل المادة بنجاح."
   },
   "admin": {
     "header": {
@@ -544,7 +563,7 @@
       "title": "جدول الامتحانات",
       "description": "إدارة مواعيد الامتحانات واللجان",
       "proctor_node": "عقدة المراقبة",
-      "active_batches": "دفعات نشطة",
+      "active_batches": "أعوام أكاديمية نشطة",
       "add_button": "نشر امتحان",
       "course_dept": "المادة والقسم",
       "type": "نوع الامتحان",

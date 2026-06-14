@@ -10,6 +10,8 @@ const Map<String, Map<String, String>> translations = {
   'notifications': {'en': 'Notifications', 'ar': 'الإشعارات'},
   'my_tasks': {'en': 'My Tasks', 'ar': 'مهامي'},
   'settings': {'en': 'Settings', 'ar': 'الإعدادات'},
+  'course_registration': {'en': 'Course Registration', 'ar': 'تسجيل المواد'},
+
 
   // ── Login ──
   'student_portal': {'en': 'Student Portal', 'ar': 'بوابة الطالب'},
@@ -35,6 +37,9 @@ const Map<String, Map<String, String>> translations = {
 
   // ── Dashboard ──
   'student_profile': {'en': 'STUDENT PROFILE', 'ar': 'ملف الطالب'},
+  'secure_profile_title': {'en': 'SECURE STUDENT PROFILE', 'ar': 'ملف الطالب المؤمن'},
+  'secure_profile_subtitle': {'en': 'Swipe to unlock your student details', 'ar': 'اسحب لفك قفل البيانات وعرضها'},
+  'swipe_unlock_profile': {'en': 'Swipe to unlock profile', 'ar': 'اسحب لفك قفل الملف'},
   'id_label': {'en': 'ID', 'ar': 'الرقم'},
   'level_label': {'en': 'Level', 'ar': 'المستوى'},
   'section_label': {'en': 'Section', 'ar': 'الشعبة'},

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'dart:ui';
 import 'package:url_launcher/url_launcher.dart';
 import '../theme.dart';
@@ -251,3 +251,9 @@ class RenderContent extends StatelessWidget {
     );
   }
 }
+
+class TabSwitchNotification extends Notification {
+  final int index;
+  TabSwitchNotification(this.index);
+}
+

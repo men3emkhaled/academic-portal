@@ -16,7 +16,26 @@
     "menu": "Menu",
     "admin_panel": "Admin Panel",
     "language": "Language",
-    "appearance": "Appearance"
+    "appearance": "Appearance",
+    "course_registration": "Course Registration"
+  },
+  "course_registration": {
+    "title": "Course Registration",
+    "available_courses": "Available Courses",
+    "enrolled_courses": "Enrolled Courses",
+    "semester1": "Semester 1",
+    "semester2": "Semester 2",
+    "search_courses": "Search courses by name or code...",
+    "register": "Register",
+    "register_selected": "Register Selected",
+    "drop": "Drop",
+    "confirm_drop": "Are you sure you want to drop this course? All your recorded grades for it will be permanently deleted.",
+    "no_available_courses": "No available courses to register.",
+    "no_enrolled_courses": "You haven't registered any courses yet.",
+    "credit_hours": "Credit Hours",
+    "total_credits": "Total Credit Hours",
+    "register_success": "Courses registered successfully!",
+    "drop_success": "Course dropped successfully."
   },
   "admin": {
     "header": {
@@ -544,7 +563,7 @@
       "title": "Exam Schedule",
       "description": "Manage examination timetables and logistics",
       "proctor_node": "Proctor Node",
-      "active_batches": "Active Batches",
+      "active_batches": "Active Academic Years",
       "add_button": "Deploy Exam",
       "course_dept": "Module & Department",
       "type": "Exam Type",

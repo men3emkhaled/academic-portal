@@ -1,6 +1,9 @@
+
 import 'dart:convert';
+import 'dart:async' as async_lib;
+import 'dart:math' as math_lib;
 import 'package:flutter/material.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -123,6 +126,17 @@ class _MaterialsTabState extends State<MaterialsTab> {
      }
   }
 
+  void _showMediaPlayer(dynamic item) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (ctx) => MediaPlayerModal(
+        item: Map<String, dynamic>.from(item),
+        courseName: _selectedCourseObject?['course_name'] ?? 'Course',
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final dp = context.watch<DataProvider>();
@@ -150,30 +164,6 @@ class _MaterialsTabState extends State<MaterialsTab> {
            children: [
              const Padding(padding: EdgeInsets.fromLTRB(24, 24, 24, 16), child: GradientText('Course Materials')),
              
-             if (courses.isNotEmpty)
-               Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: GlassContainer(
-                     backgroundColor: colors.card,
-                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                     child: DropdownButtonHideUnderline(
-                        child: DropdownButton<dynamic>(
-                           value: courses.any((c) => c['course_id'] == _selectedCourseId) ? _selectedCourseId : null,
-                           isExpanded: true,
-                           icon: Icon(LucideIcons.graduationCap, color: AppTheme.primaryBlue),
-                           dropdownColor: colors.card,
-                           items: courses.map((c) => DropdownMenuItem<dynamic>(value: c['course_id'], child: Text('${c['course_name']} (Sem ${c['semester']})', style: TextStyle(color: colors.textPrimary)))).toList(),
-                           onChanged: (v) { 
-                              if (v != null) {
-                                  final course = courses.firstWhere((c) => c['course_id'] == v, orElse: () => null);
-                                  if (course != null) _loadData(course);
-                              } 
-                           }
-                        )
-                     )
-                  )
-               ),
-             
              if (_selectedCourseId == null)
                Expanded(
                   child: Center(
@@ -184,42 +174,146 @@ class _MaterialsTabState extends State<MaterialsTab> {
                   )
                )
              else ...[
-               const SizedBox(height: 8),
-               Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Stack(
-                     clipBehavior: Clip.none,
-                     children: [
-                        Positioned(right: -30, top: -30, child: Container(width: 100, height: 100, decoration: BoxDecoration(color: AppTheme.primaryBlue.withValues(alpha: 0.2), shape: BoxShape.circle))),
-                        GlassContainer(
-                           backgroundColor: colors.surfaceLight,
-                           margin: EdgeInsets.zero,
-                           child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                 Row(
-                                    children: [
-                                       Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: AppTheme.primaryBlue.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)), child: Icon(LucideIcons.laptop, color: AppTheme.primaryBlue)),
+                const SizedBox(height: 8),
+                Padding(
+                   padding: const EdgeInsets.symmetric(horizontal: 24),
+                   child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                         Positioned(
+                           right: -20, 
+                           top: -20, 
+                           child: Container(
+                             width: 80, 
+                             height: 80, 
+                             decoration: BoxDecoration(
+                               color: AppTheme.primaryBlue.withValues(alpha: 0.15), 
+                               shape: BoxShape.circle,
+                             ),
+                           ),
+                         ),
+                         Theme(
+                           data: Theme.of(context).copyWith(
+                             cardColor: colors.card,
+                           ),
+                           child: PopupMenuButton<dynamic>(
+                             tooltip: 'Switch Course',
+                             offset: const Offset(0, 80),
+                             onSelected: (v) { 
+                                final course = courses.firstWhere((c) => c['course_id'] == v, orElse: () => null);
+                                if (course != null) _loadData(course);
+                             },
+                             itemBuilder: (ctx) {
+                               return courses.map((c) {
+                                 return PopupMenuItem<dynamic>(
+                                   value: c['course_id'],
+                                   child: Row(
+                                     children: [
+                                       Icon(
+                                         c['course_id'] == _selectedCourseId 
+                                             ? LucideIcons.checkCircle2 
+                                             : LucideIcons.circle,
+                                         size: 16,
+                                         color: c['course_id'] == _selectedCourseId 
+                                             ? AppTheme.primaryBlue 
+                                             : colors.textHint,
+                                       ),
                                        const SizedBox(width: 12),
-                                       Expanded(child: Text(_selectedCourseObject?['course_name'] ?? '', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18, color: colors.textPrimary)))
-                                    ],
-                                 ),
-                                 const SizedBox(height: 12),
-                                 Row(
-                                    children: [
-                                       Container(width: 8, height: 8, decoration: BoxDecoration(color: AppTheme.primaryBlue, shape: BoxShape.circle, boxShadow: [BoxShadow(color: AppTheme.primaryBlue.withValues(alpha: 0.5), blurRadius: 6)])),
-                                       const SizedBox(width: 8),
-                                       const Text('ONGOING', style: TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: AppTheme.primaryBlue, letterSpacing: 1.5))
-                                    ],
-                                 )
-                              ],
-                           )
-                        )
-                     ],
-                  ),
-               ),
+                                       Expanded(
+                                         child: Text(
+                                           '${c['course_name']} (Sem ${c['semester']})',
+                                           style: TextStyle(
+                                             fontWeight: c['course_id'] == _selectedCourseId 
+                                                 ? FontWeight.bold 
+                                                 : FontWeight.normal,
+                                             color: colors.textPrimary,
+                                           ),
+                                         ),
+                                       ),
+                                     ],
+                                   ),
+                                 );
+                               }).toList();
+                             },
+                             child: GlassContainer(
+                                backgroundColor: colors.surfaceLight,
+                                margin: EdgeInsets.zero,
+                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                                child: Row(
+                                   children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(12), 
+                                        decoration: BoxDecoration(
+                                          color: AppTheme.primaryBlue.withValues(alpha: 0.1), 
+                                          borderRadius: BorderRadius.circular(16),
+                                        ), 
+                                        child: Icon(LucideIcons.laptop, color: AppTheme.primaryBlue, size: 24),
+                                      ),
+                                      const SizedBox(width: 16),
+                                      Expanded(
+                                        child: Column(
+                                           crossAxisAlignment: CrossAxisAlignment.start,
+                                           children: [
+                                              Row(
+                                                 children: [
+                                                    Container(
+                                                      width: 6, 
+                                                      height: 6, 
+                                                      decoration: BoxDecoration(
+                                                        color: AppTheme.primaryBlue, 
+                                                        shape: BoxShape.circle, 
+                                                        boxShadow: [
+                                                          BoxShadow(
+                                                            color: AppTheme.primaryBlue.withValues(alpha: 0.5), 
+                                                            blurRadius: 4,
+                                                          )
+                                                        ],
+                                                      ),
+                                                    ),
+                                                    const SizedBox(width: 6),
+                                                    const Text(
+                                                      'ONGOING', 
+                                                      style: TextStyle(
+                                                        fontSize: 8, 
+                                                        fontWeight: FontWeight.w900, 
+                                                        color: AppTheme.primaryBlue, 
+                                                        letterSpacing: 1.2,
+                                                      ),
+                                                    ),
+                                                 ],
+                                              ),
+                                              const SizedBox(height: 6),
+                                              Text(
+                                                _selectedCourseObject?['course_name'] ?? '', 
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.w900, 
+                                                  fontSize: 18, 
+                                                  color: colors.textPrimary,
+                                                ),
+                                              ),
+                                           ],
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Container(
+                                        padding: const EdgeInsets.all(8), 
+                                        decoration: BoxDecoration(
+                                          color: colors.card, 
+                                          borderRadius: BorderRadius.circular(12),
+                                          border: Border.all(color: colors.borderSubtle),
+                                        ), 
+                                        child: Icon(LucideIcons.chevronsUpDown, size: 16, color: colors.textSecondary),
+                                      ),
+                                   ],
+                                ),
+                             ),
+                           ),
+                         ),
+                      ],
+                   ),
+                ),
+                const SizedBox(height: 16),
                
-               const SizedBox(height: 16),
                SizedBox(
                   height: 48,
                   child: ListView.builder(
@@ -269,7 +363,13 @@ class _MaterialsTabState extends State<MaterialsTab> {
                            if (r['type'] == 'playlist') fileIcon = LucideIcons.library;
                            
                            return GestureDetector(
-                              onTap: () => _open(r['url']),
+                              onTap: () {
+                                if (r['type'] == 'video' || r['type'] == 'recording') {
+                                  _showMediaPlayer(r);
+                                } else {
+                                  _open(r['url']);
+                                }
+                              },
                               child: GlassContainer(
                                  backgroundColor: colors.card,
                                  padding: const EdgeInsets.all(16),
@@ -331,53 +431,96 @@ class _MaterialsTabState extends State<MaterialsTab> {
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
       children: [
-        // Progress Stats Card
+        // Progress Stats Card (Premium Circular Bento-style)
         GlassContainer(
           backgroundColor: colors.card,
           padding: const EdgeInsets.all(20),
-          child: Column(
+          child: Row(
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              // Circular progress
+              Stack(
+                alignment: Alignment.center,
                 children: [
-                  Row(
-                    children: [
-                      Icon(LucideIcons.listChecks, size: 18, color: AppTheme.primaryBlue),
-                      const SizedBox(width: 8),
-                      Text('Course Progress', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 14, color: colors.textPrimary)),
-                    ],
-                  ),
-                  Text('$percentage%', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 20, color: AppTheme.primaryBlue)),
-                ],
-              ),
-              const SizedBox(height: 12),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(6),
-                child: LinearProgressIndicator(
-                  value: percentage / 100,
-                  backgroundColor: colors.surfaceLight,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    percentage == 100 ? const Color(0xFF4ade80) : AppTheme.primaryBlue,
-                  ),
-                  minHeight: 10,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  RichText(
-                    text: TextSpan(
-                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: colors.textSecondary),
-                      children: [
-                        TextSpan(text: '$completed', style: TextStyle(color: AppTheme.primaryBlue, fontWeight: FontWeight.w900)),
-                        TextSpan(text: ' / $total completed'),
-                      ],
+                  SizedBox(
+                    width: 76,
+                    height: 76,
+                    child: CircularProgressIndicator(
+                      value: percentage / 100,
+                      backgroundColor: colors.surfaceLight,
+                      color: percentage == 100 ? const Color(0xFF4ADE80) : AppTheme.primaryBlue,
+                      strokeWidth: 8,
+                      strokeCap: StrokeCap.round,
                     ),
                   ),
-                  if (pending > 0)
-                    Text('$pending pending', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFFFBBF24))),
+                  Text(
+                    '$percentage%',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w900,
+                      fontSize: 14,
+                      color: colors.textPrimary,
+                    ),
+                  ),
                 ],
+              ),
+              const SizedBox(width: 20),
+              // Text stats
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Course Progress'.toUpperCase(),
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: colors.textHint,
+                        letterSpacing: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      percentage == 100 ? 'Syllabus Completed' : 'Ongoing Study',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w900,
+                        color: colors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        RichText(
+                          text: TextSpan(
+                            style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: colors.textSecondary),
+                            children: [
+                              TextSpan(text: '$completed', style: TextStyle(color: AppTheme.primaryBlue, fontWeight: FontWeight.w900)),
+                              TextSpan(text: ' / $total completed'),
+                            ],
+                          ),
+                        ),
+                        if (pending > 0) ...[
+                          const SizedBox(width: 12),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFBBF24).withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              '$pending PENDING',
+                              style: const TextStyle(
+                                fontSize: 8,
+                                fontWeight: FontWeight.w900,
+                                color: Color(0xFFFBBF24),
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -443,6 +586,436 @@ class _MaterialsTabState extends State<MaterialsTab> {
           );
         }),
       ],
+    );
+  }
+}
+
+class MediaPlayerModal extends StatefulWidget {
+  final Map<String, dynamic> item;
+  final String courseName;
+
+  const MediaPlayerModal({
+    super.key,
+    required this.item,
+    required this.courseName,
+  });
+
+  @override
+  State<MediaPlayerModal> createState() => _MediaPlayerModalState();
+}
+
+class _MediaPlayerModalState extends State<MediaPlayerModal> {
+  bool _isPlaying = false;
+  double _progress = 0.0; // 0.0 to 1.0
+  double _playbackSpeed = 1.0;
+  late Duration _currentPosition;
+  late Duration _totalDuration;
+  async_lib.Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentPosition = Duration.zero;
+    _totalDuration = widget.item['type'] == 'video'
+        ? const Duration(minutes: 54, seconds: 20)
+        : const Duration(minutes: 18, seconds: 45);
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void _togglePlay() {
+    setState(() {
+      _isPlaying = !_isPlaying;
+    });
+
+    if (_isPlaying) {
+      _timer = async_lib.Timer.periodic(const Duration(seconds: 1), (timer) {
+        if (!mounted) return;
+        setState(() {
+          final increment = 1 * _playbackSpeed;
+          final currentSec = _currentPosition.inSeconds + increment.toInt();
+          if (currentSec >= _totalDuration.inSeconds) {
+            _currentPosition = _totalDuration;
+            _progress = 1.0;
+            _isPlaying = false;
+            _timer?.cancel();
+          } else {
+            _currentPosition = Duration(seconds: currentSec);
+            _progress = _currentPosition.inSeconds / _totalDuration.inSeconds;
+          }
+        });
+      });
+    } else {
+      _timer?.cancel();
+    }
+  }
+
+  void _seek(double value) {
+    setState(() {
+      _progress = value;
+      _currentPosition = Duration(seconds: (value * _totalDuration.inSeconds).toInt());
+    });
+  }
+
+  void _skip(int seconds) {
+    setState(() {
+      final newSecs = (_currentPosition.inSeconds + seconds).clamp(0, _totalDuration.inSeconds);
+      _currentPosition = Duration(seconds: newSecs);
+      _progress = _currentPosition.inSeconds / _totalDuration.inSeconds;
+    });
+  }
+
+  void _toggleSpeed() {
+    setState(() {
+      if (_playbackSpeed == 1.0) {
+        _playbackSpeed = 1.5;
+      } else if (_playbackSpeed == 1.5) {
+        _playbackSpeed = 2.0;
+      } else {
+        _playbackSpeed = 1.0;
+      }
+      if (_isPlaying) {
+        _timer?.cancel();
+        _isPlaying = false;
+        _togglePlay();
+      }
+    });
+  }
+
+  String _formatDuration(Duration d) {
+    final minutes = d.inMinutes.remainder(60).toString().padLeft(2, '0');
+    final seconds = d.inSeconds.remainder(60).toString().padLeft(2, '0');
+    return '$minutes:$seconds';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColors>()!;
+    final isVideo = widget.item['type'] == 'video';
+
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      child: GlassContainer(
+        backgroundColor: colors.card,
+        borderColor: AppTheme.primaryBlue.withValues(alpha: 0.3),
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.courseName.toUpperCase(),
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: colors.textHint,
+                          letterSpacing: 1.5,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        widget.item['title'] ?? '',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                          color: colors.textPrimary,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(LucideIcons.x, color: colors.textSecondary),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(24),
+              child: Container(
+                width: double.infinity,
+                height: 180,
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  border: Border.all(color: colors.borderSubtle),
+                ),
+                child: isVideo
+                    ? Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Opacity(
+                            opacity: 0.4,
+                            child: Image.network(
+                              'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&auto=format&fit=crop',
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              height: double.infinity,
+                              errorBuilder: (_, __, ___) => Container(
+                                decoration: const BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          if (_isPlaying)
+                            Positioned(
+                              top: 12,
+                              left: 12,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: Colors.redAccent.withValues(alpha: 0.8),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: const Row(
+                                  children: [
+                                    Icon(LucideIcons.play, size: 8, color: Colors.white),
+                                    SizedBox(width: 4),
+                                    Text('LIVE PREVIEW', style: TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold)),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          GestureDetector(
+                            onTap: _togglePlay,
+                            child: Container(
+                              width: 60,
+                              height: 60,
+                              decoration: BoxDecoration(
+                                color: AppTheme.primaryBlue.withValues(alpha: 0.8),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                _isPlaying ? LucideIcons.pause : LucideIcons.play,
+                                color: Colors.black,
+                                size: 30,
+                              ),
+                            ),
+                          ),
+                        ],
+                      )
+                    : Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(LucideIcons.mic, color: AppTheme.primaryBlue.withValues(alpha: 0.8), size: 36),
+                          const SizedBox(height: 16),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                            child: AudioWaveformVisualizer(isPlaying: _isPlaying),
+                          ),
+                        ],
+                      ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  _formatDuration(_currentPosition),
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: colors.textSecondary,
+                  ),
+                ),
+                Text(
+                  _formatDuration(_totalDuration),
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: colors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            SliderTheme(
+              data: SliderThemeData(
+                trackHeight: 4,
+                activeTrackColor: AppTheme.primaryBlue,
+                inactiveTrackColor: colors.surfaceLight,
+                thumbColor: AppTheme.primaryBlue,
+                overlayColor: AppTheme.primaryBlue.withValues(alpha: 0.1),
+                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
+              ),
+              child: Slider(
+                value: _progress,
+                onChanged: _seek,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                GestureDetector(
+                  onTap: _toggleSpeed,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: colors.surfaceLight,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '${_playbackSpeed}x',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w900,
+                        color: colors.textPrimary,
+                      ),
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(LucideIcons.skipBack, color: colors.textPrimary),
+                  onPressed: () => _skip(-10),
+                ),
+                GestureDetector(
+                  onTap: _togglePlay,
+                  child: Container(
+                    width: 56,
+                    height: 56,
+                    decoration: const BoxDecoration(
+                      color: AppTheme.primaryBlue,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      _isPlaying ? LucideIcons.pause : LucideIcons.play,
+                      color: Colors.black,
+                      size: 28,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(LucideIcons.skipForward, color: colors.textPrimary),
+                  onPressed: () => _skip(10),
+                ),
+                IconButton(
+                  icon: Icon(LucideIcons.externalLink, color: colors.textSecondary),
+                  onPressed: () {
+                    try {
+                      launchUrl(Uri.parse(widget.item['url']), mode: LaunchMode.externalApplication);
+                    } catch (_) {}
+                  },
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class AudioWaveformVisualizer extends StatefulWidget {
+  final bool isPlaying;
+
+  const AudioWaveformVisualizer({
+    super.key,
+    required this.isPlaying,
+  });
+
+  @override
+  State<AudioWaveformVisualizer> createState() => _AudioWaveformVisualizerState();
+}
+
+class _AudioWaveformVisualizerState extends State<AudioWaveformVisualizer> {
+  final List<double> _heights = List.generate(30, (_) => 8.0);
+  async_lib.Timer? _visualizerTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _randomizeHeights();
+    if (widget.isPlaying) {
+      _startAnimation();
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant AudioWaveformVisualizer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isPlaying != oldWidget.isPlaying) {
+      if (widget.isPlaying) {
+        _startAnimation();
+      } else {
+        _visualizerTimer?.cancel();
+        setState(() {
+          _randomizeHeights();
+        });
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _visualizerTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startAnimation() {
+    _visualizerTimer?.cancel();
+    _visualizerTimer = async_lib.Timer.periodic(const Duration(milliseconds: 120), (timer) {
+      if (!mounted) return;
+      setState(() {
+        _randomizeHeights();
+      });
+    });
+  }
+
+  void _randomizeHeights() {
+    final random = math_lib.Random();
+    for (int i = 0; i < _heights.length; i++) {
+      if (widget.isPlaying) {
+        _heights[i] = 4.0 + random.nextDouble() * 32.0;
+      } else {
+        _heights[i] = 8.0;
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: List.generate(_heights.length, (index) {
+        return Expanded(
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 1.5),
+            height: _heights[index],
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.bottomCenter,
+                end: Alignment.topCenter,
+                colors: [
+                  AppTheme.primaryBlue,
+                  Colors.purpleAccent,
+                ],
+              ),
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+        );
+      }),
     );
   }
 }

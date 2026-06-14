@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/data_provider.dart';
@@ -18,6 +18,7 @@ class _TimetableTabState extends State<TimetableTab> {
   DateTime? _weekStart;
   String _viewMode = 'my-section'; // my-section | all-sections
   String _scheduleType = 'lectures'; // lectures | exams
+  late ScrollController _dayScrollController;
 
   final List<Map<String, String>> _days = [
     {'id': 'Sunday', 'short': 'Sun'},
@@ -33,8 +34,28 @@ class _TimetableTabState extends State<TimetableTab> {
   void initState() {
     super.initState();
     final today = DateTime.now();
-    _selectedDay = _days[today.weekday == 7 ? 0 : today.weekday]['id']!;
+    final todayDayIndex = today.weekday == 7 ? 0 : today.weekday;
+    _selectedDay = _days[todayDayIndex]['id']!;
     _weekStart = _getStartOfWeek(today);
+
+    _dayScrollController = ScrollController();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_dayScrollController.hasClients) {
+        final offset = todayDayIndex * 88.0;
+        final maxScroll = _dayScrollController.position.maxScrollExtent;
+        _dayScrollController.animateTo(
+          offset.clamp(0.0, maxScroll),
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _dayScrollController.dispose();
+    super.dispose();
   }
 
   DateTime _getStartOfWeek(DateTime date) {
@@ -184,41 +205,76 @@ class _TimetableTabState extends State<TimetableTab> {
               
               if (effectiveScheduleType == 'lectures') ...[
               // --- HORIZONTAL DAY SELECTOR ---
-             Container(
-               margin: const EdgeInsets.fromLTRB(24, 24, 24, 24),
-               padding: const EdgeInsets.all(8),
-               decoration: BoxDecoration(color: colors.card, borderRadius: BorderRadius.circular(32), border: Border.all(color: colors.borderSubtle)),
-               child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: _days.asMap().entries.map((e) {
-                      final i = e.key;
-                      final d = e.value;
-                      final isActive = _selectedDay == d['id'];
-                      final dateDay = _weekStart != null ? _weekStart!.add(Duration(days: i)).day.toString() : '';
+              Container(
+                height: 105,
+                margin: const EdgeInsets.symmetric(vertical: 16),
+                child: ListView.builder(
+                  controller: _dayScrollController,
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 18),
+                  itemCount: _days.length,
+                  itemBuilder: (context, i) {
+                    final d = _days[i];
+                    final isActive = _selectedDay == d['id'];
+                    final dateDay = _weekStart != null ? _weekStart!.add(Duration(days: i)).day.toString() : '';
 
-                      return GestureDetector(
-                         onTap: () => setState(() => _selectedDay = d['id']!),
-                         child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 300),
-                            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 10),
-                            decoration: BoxDecoration(
-                               color: isActive ? AppTheme.primaryBlue : Colors.transparent,
-                               borderRadius: BorderRadius.circular(24),
-                               boxShadow: isActive ? [BoxShadow(color: AppTheme.primaryBlue.withValues(alpha: 0.4), blurRadius: 16)] : []
+                    return GestureDetector(
+                      onTap: () => setState(() => _selectedDay = d['id']!),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        width: 76,
+                        margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: isActive ? AppTheme.primaryBlue : colors.card,
+                          borderRadius: BorderRadius.circular(24),
+                          border: Border.all(
+                            color: isActive ? AppTheme.primaryBlue : colors.borderSubtle,
+                            width: 1.2,
+                          ),
+                          boxShadow: isActive
+                              ? [
+                                  BoxShadow(
+                                    color: AppTheme.primaryBlue.withValues(alpha: 0.35),
+                                    blurRadius: 16,
+                                    offset: const Offset(0, 6),
+                                  )
+                                ]
+                              : [
+                                  BoxShadow(
+                                    color: colors.cardShadow.withValues(alpha: 0.04),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4),
+                                  )
+                                ],
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              d['short']!.toUpperCase(),
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                color: isActive ? Colors.black : colors.textSecondary,
+                                letterSpacing: 1.2,
+                              ),
                             ),
-                            child: Column(
-                               mainAxisSize: MainAxisSize.min,
-                               children: [
-                                  Text(d['short']!.toUpperCase(), style: TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: isActive ? Colors.black : colors.textSecondary, letterSpacing: 1.2)),
-                                  const SizedBox(height: 4),
-                                  Text(dateDay, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: isActive ? Colors.black : colors.textPrimary)),
-                               ],
-                            )
-                         )
-                      );
-                  }).toList()
-               )
-             ),
+                            const SizedBox(height: 6),
+                            Text(
+                              dateDay,
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w900,
+                                color: isActive ? Colors.black : colors.textPrimary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
 
              Expanded(
                 child: dp.isLoadingTimetable 

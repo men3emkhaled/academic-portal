@@ -55,7 +55,8 @@ const studentLogin = async (req, res) => {
         department_id: student.department_id,
         avatar_url: student.avatar_url || null,
         role: student.role || 'student',
-        permissions: student.permissions || []
+        permissions: student.permissions || [],
+        batch: student.batch
       }
     });
   } catch (error) {
@@ -87,7 +88,8 @@ const getCurrentStudent = async (req, res) => {
       department_id: student.department_id,
       avatar_url: student.avatar_url || null,
       role: student.role || 'student',
-      permissions: student.permissions || []
+      permissions: student.permissions || [],
+      batch: student.batch
     });
   } catch (error) {
     console.error('❌ Error in getCurrentStudent:', error);
@@ -321,7 +323,8 @@ const googleLogin = async (req, res) => {
         section: student.section,
         department_id: student.department_id,
         email: student.email,
-        avatar_url: student.avatar_url || null
+        avatar_url: student.avatar_url || null,
+        batch: student.batch
       }
     });
   } catch (error) {
@@ -406,7 +409,8 @@ const microsoftLogin = async (req, res) => {
         section: student.section,
         department_id: student.department_id,
         email: student.email,
-        avatar_url: student.avatar_url || null
+        avatar_url: student.avatar_url || null,
+        batch: student.batch
       }
     });
   } catch (error) {

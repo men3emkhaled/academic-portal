@@ -11,6 +11,7 @@ import 'providers/theme_provider.dart';
 import 'providers/locale_provider.dart';
 import 'screens/login_screen.dart';
 import 'screens/app_layout.dart';
+import 'screens/doctor_layout.dart';
 import 'config/msal_config.dart';
 
 
@@ -85,7 +86,14 @@ class _UniversityAppState extends State<UniversityApp> {
         ),
         GoRoute(
           path: '/dashboard',
-          builder: (context, state) => const AppLayout(),
+          builder: (context, state) {
+            final authProvider = context.read<AuthProvider>();
+            if (authProvider.isDoctor) {
+              return const DoctorLayout();
+            } else {
+              return const AppLayout();
+            }
+          },
         ),
       ],
     );
@@ -103,13 +111,16 @@ class _UniversityAppState extends State<UniversityApp> {
   Widget build(BuildContext context) {
     final themeProvider = context.watch<ThemeProvider>();
     final localeProvider = context.watch<LocaleProvider>();
-    final auth = context.read<AuthProvider>();
+    final auth = context.watch<AuthProvider>();
     final router = _getRouter(auth);
 
     return MaterialApp.router(
       title: 'ZNU Portal',
       debugShowCheckedModeBanner: false,
-      theme: themeProvider.isDarkMode ? AppTheme.darkTheme : AppTheme.lightTheme,
+      theme: AppTheme.getTheme(
+        isDark: themeProvider.isDarkMode,
+        role: auth.role ?? 'student',
+      ),
       locale: localeProvider.locale,
       supportedLocales: const [Locale('en'), Locale('ar')],
       localizationsDelegates: const [

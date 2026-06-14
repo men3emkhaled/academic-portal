@@ -219,7 +219,7 @@ const getMyGrades = async (req, res) => {
     const student = await Student.findById(studentId);
     if (!student) return res.status(404).json({ message: 'Student not found' });
     
-    // جلب المواد المسجلة مع درجاتها – فقط الفصل الثاني
+    // جلب المواد المسجلة مع درجاتها (الحالية والمنتهية)
     const grades = await db.query(
       `SELECT 
         c.id as course_id,
@@ -229,6 +229,7 @@ const getMyGrades = async (req, res) => {
         c.midterm_max,
         c.practical_max,
         c.oral_max,
+        sc.status as enrollment_status,
         g.midterm_score,
         g.midterm_status,
         g.practical_score,
@@ -239,7 +240,7 @@ const getMyGrades = async (req, res) => {
       FROM student_courses sc
       JOIN courses c ON c.id = sc.course_id
       LEFT JOIN grades g ON g.enrollment_id = sc.id
-      WHERE sc.student_id = $1 AND c.semester = 2
+      WHERE sc.student_id = $1
       ORDER BY c.name`,
       [studentId]
     );

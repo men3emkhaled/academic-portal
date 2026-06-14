@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -12,6 +12,8 @@ import 'timetable_tab.dart';
 import 'materials_tab.dart';
 import 'grades_tab.dart';
 import 'extra_tabs.dart';
+import 'course_registration_tab.dart';
+
 import '../providers/data_provider.dart';
 import '../providers/auth_provider.dart';
 import '../services/api_service.dart';
@@ -38,6 +40,8 @@ class _AppLayoutState extends State<AppLayout> with TickerProviderStateMixin {
     const NotificationsTab(),   // 6
     const TasksTab(),           // 7
     const SettingsTab(),        // 8
+    const MenuTab(),            // 9 — full-page menu
+    const CourseRegistrationTab(), // 10
   ];
 
   @override
@@ -156,227 +160,55 @@ class _AppLayoutState extends State<AppLayout> with TickerProviderStateMixin {
     _NavItem(LucideIcons.barChart2, LucideIcons.barChart2, 'Grades', 3),
   ];
 
-  void _showMenuSheet() {
-    final auth = context.read<AuthProvider>();
-    final student = auth.student;
-    final colors = Theme.of(context).extension<AppColors>()!;
 
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (ctx) {
-        return Container(
-          margin: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-          decoration: BoxDecoration(
-            color: colors.card,
-            borderRadius: BorderRadius.circular(32),
-            border: Border.all(color: colors.borderSubtle),
-            boxShadow: [BoxShadow(color: colors.cardShadow, blurRadius: 40)],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(32),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-              child: SafeArea(
-                top: false,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Drag handle
-                    Container(
-                      width: 40, height: 4, margin: const EdgeInsets.symmetric(vertical: 12),
-                      decoration: BoxDecoration(color: colors.textHint, borderRadius: BorderRadius.circular(2)),
-                    ),
-
-                    // Header with user info
-                    Container(
-                      padding: const EdgeInsets.fromLTRB(20, 4, 16, 16),
-                      decoration: BoxDecoration(
-                        border: Border(bottom: BorderSide(color: colors.divider)),
-                      ),
-                      child: Row(children: [
-                        Container(
-                          width: 48, height: 48,
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(colors: [AppTheme.primary, Color(0xFF5CA846)]),
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          child: Center(
-                            child: ShaderMask(
-                              shaderCallback: (b) => const LinearGradient(colors: [Colors.white, AppTheme.primary]).createShader(b),
-                              child: const Text('Z', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: Colors.white)),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                          Text(tr(context, 'znu_menu'), style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: colors.textPrimary)),
-                          if (student != null) ...[
-                            Text(
-                              student['name']?.toString().split(' ').take(2).join(' ') ?? '',
-                              style: const TextStyle(fontSize: 14, color: AppTheme.primary, fontWeight: FontWeight.bold),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            if (student['email'] != null && student['email'].toString().isNotEmpty)
-                              Text(
-                                student['email'].toString(),
-                                style: TextStyle(fontSize: 11, color: colors.textSecondary, fontWeight: FontWeight.w500),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                          ],
-                        ])),
-                        IconButton(
-                          icon: Icon(LucideIcons.x, color: colors.textSecondary, size: 20),
-                          onPressed: () => Navigator.pop(ctx),
-                        ),
-                      ]),
-                    ),
-
-                    // Menu Items
-                    Flexible(
-                      child: SingleChildScrollView(
-                        padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-                        child: Column(children: [
-                          _menuItem(ctx, LucideIcons.barChart2, tr(context, 'grades'), 3, colors),
-                          _menuItem(ctx, LucideIcons.helpCircle, tr(context, 'quizzes'), 4, colors),
-                          _menuItem(ctx, LucideIcons.map, tr(context, 'career_roadmap'), 5, colors),
-                          _menuItem(ctx, LucideIcons.bell, tr(context, 'notifications'), 6, colors,
-                              badge: context.watch<DataProvider>().notifications.where((n) => n['is_read'] != 1 && n['is_read'] != true).length),
-                          _menuItem(ctx, LucideIcons.checkSquare, tr(context, 'my_tasks'), 7, colors),
-                          _menuItem(ctx, LucideIcons.settings, tr(context, 'settings'), 8, colors),
-
-                          if (student?['role'] == 'assistant' || student?['role'] == 'admin') ...[
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-                              child: Divider(color: colors.divider),
-                            ),
-                            ListTile(
-                              leading: Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(color: Colors.amber.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
-                                child: const Icon(LucideIcons.shieldCheck, color: Colors.amber, size: 20),
-                              ),
-                              title: const Text('Admin Panel', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.amber, fontSize: 15)),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                              onTap: () async {
-                                Navigator.pop(ctx);
-                                final url = Uri.parse('https://znu-cs.online/admin');
-                                if (await canLaunchUrl(url)) {
-                                  await launchUrl(url, mode: LaunchMode.externalApplication);
-                                }
-                              },
-                            ),
-                          ],
-
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-                            child: Divider(color: colors.divider),
-                          ),
-
-                          // Logout
-                          ListTile(
-                            leading: Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(color: Colors.redAccent.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
-                              child: Icon(LucideIcons.logOut, color: Colors.redAccent, size: 20),
-                            ),
-                            title: Text(tr(context, 'logout'), style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.redAccent, fontSize: 15)),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                            onTap: () {
-                              Navigator.pop(ctx);
-                              context.read<AuthProvider>().logout();
-                              context.go('/login');
-                            },
-                          ),
-                          const SizedBox(height: 8),
-                        ]),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _menuItem(BuildContext ctx, IconData icon, String title, int index, AppColors colors, {int badge = 0}) {
-    final bool isActive = _currentIndex == index;
-    return Container(
-      margin: const EdgeInsets.only(bottom: 4),
-      child: ListTile(
-        leading: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: isActive ? AppTheme.primary.withValues(alpha: 0.15) : colors.surfaceLight,
-                borderRadius: BorderRadius.circular(12),
-                border: isActive ? Border.all(color: AppTheme.primary.withValues(alpha: 0.3)) : null,
-              ),
-              child: Icon(icon, color: isActive ? AppTheme.primary : colors.textSecondary, size: 20),
-            ),
-            if (badge > 0)
-              Positioned(
-                top: -4, right: -4,
-                child: Container(
-                  width: 16, height: 16,
-                  decoration: const BoxDecoration(color: AppTheme.primary, shape: BoxShape.circle),
-                  child: Center(child: Text(badge > 9 ? '9+' : '$badge', style: const TextStyle(fontSize: 8, fontWeight: FontWeight.w900, color: Colors.black))),
-                ),
-              ),
-          ],
-        ),
-        title: Text(title, style: TextStyle(
-          fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-          color: isActive ? AppTheme.primary : colors.textSecondary,
-          fontSize: 15,
-        )),
-        trailing: isActive ? Icon(LucideIcons.chevronRight, color: AppTheme.primary, size: 20) : null,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: isActive ? BorderSide(color: AppTheme.primary.withValues(alpha: 0.2)) : BorderSide.none,
-        ),
-        tileColor: isActive ? AppTheme.primary.withValues(alpha: 0.08) : Colors.transparent,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
-        onTap: () {
-          setState(() => _currentIndex = index);
-          Navigator.pop(ctx);
-        },
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
-    final int activeBottomIndex = _currentIndex >= 3 ? 3 : _currentIndex; // 3 = "More" pseudo index
+    int activeBottomIndex;
+    if (_currentIndex == 0) {
+      activeBottomIndex = 0;
+    } else if (_currentIndex == 1) {
+      activeBottomIndex = 1;
+    } else if (_currentIndex == 2) {
+      activeBottomIndex = 2;
+    } else if (_currentIndex == 6) {
+      activeBottomIndex = 3;
+    } else {
+      activeBottomIndex = 4;
+    }
 
-    // Unread notification count for badge
     final unread = context.watch<DataProvider>().notifications
         .where((n) => n['is_read'] != 1 && n['is_read'] != true)
         .length;
 
-    return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _tabs,
-      ),
-      bottomNavigationBar: _BottomNav(
-        currentIndex: activeBottomIndex,
-        unread: unread,
-        onTap: (i) {
-          if (i == 3) {
-            _showMenuSheet();
-          } else {
-            setState(() => _currentIndex = i);
-          }
-        },
+    return NotificationListener<TabSwitchNotification>(
+      onNotification: (notification) {
+        setState(() => _currentIndex = notification.index);
+        return true;
+      },
+      child: Scaffold(
+        extendBody: true,
+        body: IndexedStack(
+          index: _currentIndex,
+          children: _tabs,
+        ),
+        bottomNavigationBar: _BottomNav(
+          currentIndex: activeBottomIndex,
+          unread: unread,
+          onTap: (i) {
+            if (i == 0) {
+              setState(() => _currentIndex = 0);
+            } else if (i == 1) {
+              setState(() => _currentIndex = 1);
+            } else if (i == 2) {
+              setState(() => _currentIndex = 2);
+            } else if (i == 3) {
+              setState(() => _currentIndex = 6); // Notifications tab index
+            } else if (i == 4) {
+              setState(() => _currentIndex = 9); // Menu tab index
+            }
+          },
+        ),
       ),
     );
   }
@@ -391,7 +223,7 @@ class _NavItem {
   const _NavItem(this.icon, this.activeIcon, this.label, this.index);
 }
 
-// ── Custom animated bottom nav ──
+// ── Floating Glassmorphic Pill Nav Bar ──
 class _BottomNav extends StatelessWidget {
   final int currentIndex;
   final int unread;
@@ -402,75 +234,482 @@ class _BottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColors>()!;
+    final isDark = colors.isDark;
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
+
     final items = [
-      (LucideIcons.home, LucideIcons.home, tr(context, 'home')),
-      (LucideIcons.calendar, LucideIcons.calendar, tr(context, 'timetable')),
-      (LucideIcons.bookOpen, LucideIcons.bookOpen, tr(context, 'materials')),
-      (LucideIcons.menu, LucideIcons.menu, tr(context, 'more')),
+      (LucideIcons.home,     tr(context, 'home')),
+      (LucideIcons.calendar, tr(context, 'timetable')),
+      (LucideIcons.bookOpen, tr(context, 'materials')),
+      (LucideIcons.bell,     tr(context, 'notifications')),
+      (LucideIcons.menu,     tr(context, 'more')),
     ];
 
-    return Container(
-      padding: const EdgeInsets.only(bottom: 8, top: 4),
-      decoration: BoxDecoration(
-        color: colors.card,
-        border: Border(top: BorderSide(color: colors.divider)),
-        boxShadow: [BoxShadow(color: colors.cardShadow, blurRadius: 20, offset: const Offset(0, -4))],
-      ),
-      child: Row(
-        children: List.generate(items.length, (i) {
-          final (ico, activeIco, label) = items[i];
-          final isActive = currentIndex == i;
-          final showBadge = i == 3 && unread > 0;
+    const double navHeight   = 66.0;
+    const double pillVertPad = 8.0;
+    const double pillHorzPad = 8.0;
 
-          return Expanded(
-            child: GestureDetector(
-              onTap: () => onTap(i),
-              behavior: HitTestBehavior.opaque,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: Column(mainAxisSize: MainAxisSize.min, children: [
-                  Stack(clipBehavior: Clip.none, children: [
-                    AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: isActive ? AppTheme.primary.withValues(alpha: 0.15) : Colors.transparent,
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: Icon(
-                        isActive ? activeIco : ico,
-                        color: isActive ? AppTheme.primary : colors.textSecondary,
-                        size: 22,
-                      ),
+    return Container(
+      color: Colors.transparent,
+      padding: EdgeInsets.only(
+        bottom: bottomPadding + 16,
+        left: 24,
+        right: 24,
+      ),
+      child: SizedBox(
+        height: navHeight,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final double totalWidth = constraints.maxWidth;
+            final double tabWidth   = totalWidth / items.length;
+
+            return ClipRRect(
+              borderRadius: BorderRadius.circular(navHeight / 2),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? const Color(0xFF0E0E14).withValues(alpha: 0.90)
+                        : Colors.white.withValues(alpha: 0.92),
+                    borderRadius: BorderRadius.circular(navHeight / 2),
+                    border: Border.all(
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.06)
+                          : const Color(0xFFE2E4EA).withValues(alpha: 0.95),
+                      width: 1.2,
                     ),
-                    if (showBadge)
-                      Positioned(
-                        top: -2, right: -2,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: isDark ? 0.45 : 0.09),
+                        blurRadius: 36,
+                        offset: const Offset(0, 14),
+                      ),
+                    ],
+                  ),
+                  child: Stack(
+                    children: [
+                      // ── Animated sliding selection pill ──
+                      AnimatedPositioned(
+                        duration: const Duration(milliseconds: 340),
+                        curve: Curves.easeOutBack,
+                        left:  currentIndex * tabWidth + pillHorzPad,
+                        top:   pillVertPad,
+                        width: tabWidth - (pillHorzPad * 2),
+                        height: navHeight - (pillVertPad * 2),
                         child: Container(
-                          width: 14, height: 14,
-                          decoration: const BoxDecoration(color: AppTheme.primary, shape: BoxShape.circle),
-                          child: Center(child: Text(unread > 9 ? '9+' : '$unread',
-                              style: const TextStyle(fontSize: 7, fontWeight: FontWeight.w900, color: Colors.black))),
+                          decoration: BoxDecoration(
+                            color: AppTheme.primary,
+                            borderRadius: BorderRadius.circular(navHeight),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppTheme.primary.withValues(alpha: 0.38),
+                                blurRadius: 18,
+                                offset: const Offset(0, 5),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                  ]),
-                  const SizedBox(height: 4),
-                  AnimatedDefaultTextStyle(
-                    duration: const Duration(milliseconds: 200),
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-                      color: isActive ? AppTheme.primary : colors.textSecondary,
-                    ),
-                    child: Text(label),
+
+                      // ── Tab icons row ──
+                      Row(
+                        children: List.generate(items.length, (i) {
+                          final (icon, _) = items[i];
+                          final bool isActive = currentIndex == i;
+                          final bool showBadge = i == 3 && unread > 0;
+
+                          return Expanded(
+                            child: GestureDetector(
+                              onTap: () => onTap(i),
+                              behavior: HitTestBehavior.opaque,
+                              child: Center(
+                                child: AnimatedScale(
+                                  scale: isActive ? 1.12 : 0.92,
+                                  duration: const Duration(milliseconds: 280),
+                                  curve: Curves.easeOutBack,
+                                  child: Stack(
+                                    clipBehavior: Clip.none,
+                                    children: [
+                                      Icon(
+                                        icon,
+                                        size: 21,
+                                        color: isActive
+                                            ? Colors.black.withValues(alpha: 0.82)
+                                            : isDark
+                                                ? Colors.white.withValues(alpha: 0.35)
+                                                : const Color(0xFF94A3B8),
+                                      ),
+                                      if (showBadge)
+                                        Positioned(
+                                          top: -4, right: -6,
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                            decoration: BoxDecoration(
+                                              color: isActive ? Colors.black.withValues(alpha: 0.7) : const Color(0xFFEF4444),
+                                              borderRadius: BorderRadius.circular(10),
+                                            ),
+                                            constraints: const BoxConstraints(
+                                              minWidth: 14,
+                                              minHeight: 14,
+                                            ),
+                                            alignment: Alignment.center,
+                                            child: Text(
+                                              unread > 9 ? '9+' : '$unread',
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 8,
+                                                fontWeight: FontWeight.w900,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        }),
+                      ),
+                    ],
                   ),
-                ]),
+                ),
               ),
-            ),
-          );
-        }),
+            );
+          },
+        ),
       ),
     );
   }
 }
+
+// ─────────────────────────────────────────────
+// Full-page Menu Tab (replaces bottom sheet)
+// ─────────────────────────────────────────────
+class MenuTab extends StatelessWidget {
+  const MenuTab({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final auth    = context.read<AuthProvider>();
+    final student = auth.student;
+    final colors  = Theme.of(context).extension<AppColors>()!;
+    final isDark  = colors.isDark;
+    final unread  = context.watch<DataProvider>()
+        .notifications
+        .where((n) => n['is_read'] != 1 && n['is_read'] != true)
+        .length;
+
+    return Scaffold(
+      backgroundColor: colors.background,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.only(bottom: 120),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ── Hero header ──
+              Container(
+                padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Avatar
+                    Container(
+                      width: 64, height: 64,
+                      decoration: BoxDecoration(
+                        color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: colors.borderSubtle,
+                          width: 1,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
+                            blurRadius: 10, offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      padding: const EdgeInsets.all(8),
+                      child: Image.asset(
+                        'assets/logo.png',
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+
+                    // Name + email
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            tr(context, 'znu_menu'),
+                            style: TextStyle(
+                              fontSize: 12, fontWeight: FontWeight.w600,
+                              letterSpacing: 0.8,
+                              color: colors.textSecondary,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          if (student != null)
+                            Text(
+                              student['name']?.toString().split(' ').take(2).join(' ') ?? '',
+                              style: TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.w800,
+                                color: colors.textPrimary,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          if (student?['email'] != null && student!['email'].toString().isNotEmpty)
+                            Text(
+                              student['email'].toString(),
+                              style: TextStyle(
+                                fontSize: 12, color: colors.textSecondary,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // ── Main navigation group ──
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: _MenuGroup(
+                  colors: colors,
+                  isDark: isDark,
+                  items: [
+                    _MenuItem(LucideIcons.barChart2,    tr(context, 'grades'),         3),
+                    _MenuItem(LucideIcons.helpCircle,   tr(context, 'quizzes'),        4),
+                    _MenuItem(LucideIcons.map,          tr(context, 'career_roadmap'), 5),
+                    _MenuItem(LucideIcons.checkSquare,  tr(context, 'my_tasks'),       7),
+                    _MenuItem(LucideIcons.settings,     tr(context, 'settings'),       8),
+                    _MenuItem(LucideIcons.bookOpen,     tr(context, 'course_registration'), 10),
+                  ],
+                ),
+              ),
+
+              // ── Admin Panel (role-gated) ──
+              if (student?['role'] == 'assistant' || student?['role'] == 'admin') ...[
+                const SizedBox(height: 12),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: _ActionTile(
+                    icon: LucideIcons.shieldCheck,
+                    label: 'Admin Panel',
+                    color: const Color(0xFFF59E0B),
+                    isDark: isDark,
+                    onTap: () async {
+                      final url = Uri.parse('https://znu-cs.online/admin');
+                      if (await canLaunchUrl(url)) {
+                        await launchUrl(url, mode: LaunchMode.externalApplication);
+                      }
+                    },
+                  ),
+                ),
+              ],
+
+              // ── Logout ──
+              const SizedBox(height: 12),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: _ActionTile(
+                  icon: LucideIcons.logOut,
+                  label: tr(context, 'logout'),
+                  color: const Color(0xFFEF4444),
+                  isDark: isDark,
+                  onTap: () {
+                    context.read<AuthProvider>().logout();
+                    context.go('/login');
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Grouped menu card ──
+class _MenuGroup extends StatelessWidget {
+  final AppColors colors;
+  final bool isDark;
+  final List<_MenuItem> items;
+
+  const _MenuGroup({required this.colors, required this.isDark, required this.items});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: colors.card,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: colors.borderSubtle),
+        boxShadow: [
+          BoxShadow(
+            color: colors.cardShadow.withValues(alpha: 0.06),
+            blurRadius: 16, offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: items.asMap().entries.map((entry) {
+          final i    = entry.key;
+          final item = entry.value;
+          return Column(
+            children: [
+              _MenuRowTile(item: item, colors: colors),
+              if (i < items.length - 1)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Divider(height: 1, color: colors.borderSubtle),
+                ),
+            ],
+          );
+        }).toList(),
+      ),
+    );
+  }
+}
+
+// ── Single row inside group ──
+class _MenuRowTile extends StatelessWidget {
+  final _MenuItem item;
+  final AppColors colors;
+
+  const _MenuRowTile({required this.item, required this.colors});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(20),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: () => TabSwitchNotification(item.tabIndex).dispatch(context),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+          child: Row(
+            children: [
+              Stack(clipBehavior: Clip.none, children: [
+                Icon(item.icon, size: 20, color: colors.textSecondary),
+                if (item.badge > 0)
+                  Positioned(
+                    top: -4, right: -6,
+                    child: Container(
+                      width: 16, height: 16,
+                      decoration: const BoxDecoration(
+                        color: AppTheme.primary, shape: BoxShape.circle,
+                      ),
+                      child: Center(child: Text(
+                        item.badge > 9 ? '9+' : '${item.badge}',
+                        style: const TextStyle(fontSize: 8, fontWeight: FontWeight.w900, color: Colors.black),
+                      )),
+                    ),
+                  ),
+              ]),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  item.title,
+                  style: TextStyle(
+                    fontSize: 15, fontWeight: FontWeight.w500,
+                    color: colors.textPrimary,
+                  ),
+                ),
+              ),
+              Icon(LucideIcons.chevronRight, size: 16, color: colors.textHint),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Standalone action tile (admin / logout) ──
+class _ActionTile extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final bool isDark;
+  final VoidCallback onTap;
+
+  const _ActionTile({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.isDark,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColors>()!;
+    return Container(
+      decoration: BoxDecoration(
+        color: colors.card,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withValues(alpha: 0.18)),
+        boxShadow: [
+          BoxShadow(
+            color: colors.cardShadow.withValues(alpha: 0.06),
+            blurRadius: 16, offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(20),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(icon, size: 18, color: color),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 15, fontWeight: FontWeight.w600, color: color,
+                    ),
+                  ),
+                ),
+                Icon(LucideIcons.chevronRight, size: 16, color: color.withValues(alpha: 0.5)),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Data model for menu item ──
+class _MenuItem {
+  final IconData icon;
+  final String title;
+  final int tabIndex;
+  final int badge;
+
+  const _MenuItem(this.icon, this.title, this.tabIndex, {this.badge = 0});
+}
+

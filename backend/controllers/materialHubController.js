@@ -12,67 +12,138 @@ const getPosts = async (req, res) => {
     const perms = req.user.permissions || [];
     const isReviewer = req.user.role === 'admin' || perms.includes('manage_resources');
     
+    // Get student's batch
+    const studentResult = await db.query(
+      'SELECT batch FROM students WHERE id = $1',
+      [studentId]
+    );
+    const studentBatch = studentResult.rows[0]?.batch || 2025;
+
+    const reqBatch = req.query.batch;
+    
     let queryText;
     let queryParams;
 
     if (isReviewer) {
       // Reviewers can see all posts (pending, approved, rejected)
-      queryText = `
-        SELECT 
-          p.*, 
-          s.name as student_name, 
-          s.avatar_url as student_avatar_url, 
-          rev.name as reviewer_name,
-          COALESCE(u.upvotes_count, 0)::INTEGER as upvotes_count,
-          COALESCE(c.comments_count, 0)::INTEGER as comments_count,
-          EXISTS(SELECT 1 FROM material_hub_upvotes WHERE post_id = p.id AND student_id = $2) as has_upvoted,
-          EXISTS(SELECT 1 FROM material_hub_bookmarks WHERE post_id = p.id AND student_id = $2) as has_bookmarked
-        FROM material_hub_posts p
-        LEFT JOIN students s ON p.student_id = s.id
-        LEFT JOIN students rev ON p.reviewed_by = rev.id
-        LEFT JOIN (
-          SELECT post_id, COUNT(*) as upvotes_count 
-          FROM material_hub_upvotes 
-          GROUP BY post_id
-        ) u ON p.id = u.post_id
-        LEFT JOIN (
-          SELECT post_id, COUNT(*) as comments_count 
-          FROM material_hub_comments 
-          GROUP BY post_id
-        ) c ON p.id = c.post_id
-        WHERE p.course_id = $1
-        ORDER BY p.created_at DESC
-      `;
-      queryParams = [courseId, studentId];
+      if (reqBatch === 'all') {
+        queryText = `
+          SELECT 
+            p.*, 
+            s.name as student_name, 
+            s.avatar_url as student_avatar_url, 
+            rev.name as reviewer_name,
+            COALESCE(u.upvotes_count, 0)::INTEGER as upvotes_count,
+            COALESCE(c.comments_count, 0)::INTEGER as comments_count,
+            EXISTS(SELECT 1 FROM material_hub_upvotes WHERE post_id = p.id AND student_id = $2) as has_upvoted,
+            EXISTS(SELECT 1 FROM material_hub_bookmarks WHERE post_id = p.id AND student_id = $2) as has_bookmarked
+          FROM material_hub_posts p
+          LEFT JOIN students s ON p.student_id = s.id
+          LEFT JOIN students rev ON p.reviewed_by = rev.id
+          LEFT JOIN (
+            SELECT post_id, COUNT(*) as upvotes_count 
+            FROM material_hub_upvotes 
+            GROUP BY post_id
+          ) u ON p.id = u.post_id
+          LEFT JOIN (
+            SELECT post_id, COUNT(*) as comments_count 
+            FROM material_hub_comments 
+            GROUP BY post_id
+          ) c ON p.id = c.post_id
+          WHERE p.course_id = $1
+          ORDER BY p.batch DESC, p.created_at DESC
+        `;
+        queryParams = [courseId, studentId];
+      } else {
+        const filterBatch = reqBatch ? parseInt(reqBatch, 10) : studentBatch;
+        queryText = `
+          SELECT 
+            p.*, 
+            s.name as student_name, 
+            s.avatar_url as student_avatar_url, 
+            rev.name as reviewer_name,
+            COALESCE(u.upvotes_count, 0)::INTEGER as upvotes_count,
+            COALESCE(c.comments_count, 0)::INTEGER as comments_count,
+            EXISTS(SELECT 1 FROM material_hub_upvotes WHERE post_id = p.id AND student_id = $2) as has_upvoted,
+            EXISTS(SELECT 1 FROM material_hub_bookmarks WHERE post_id = p.id AND student_id = $2) as has_bookmarked
+          FROM material_hub_posts p
+          LEFT JOIN students s ON p.student_id = s.id
+          LEFT JOIN students rev ON p.reviewed_by = rev.id
+          LEFT JOIN (
+            SELECT post_id, COUNT(*) as upvotes_count 
+            FROM material_hub_upvotes 
+            GROUP BY post_id
+          ) u ON p.id = u.post_id
+          LEFT JOIN (
+            SELECT post_id, COUNT(*) as comments_count 
+            FROM material_hub_comments 
+            GROUP BY post_id
+          ) c ON p.id = c.post_id
+          WHERE p.course_id = $1 AND p.batch = $3
+          ORDER BY p.created_at DESC
+        `;
+        queryParams = [courseId, studentId, filterBatch];
+      }
     } else {
       // Normal students only see approved posts OR their own posts
-      queryText = `
-        SELECT 
-          p.*, 
-          s.name as student_name, 
-          s.avatar_url as student_avatar_url, 
-          rev.name as reviewer_name,
-          COALESCE(u.upvotes_count, 0)::INTEGER as upvotes_count,
-          COALESCE(c.comments_count, 0)::INTEGER as comments_count,
-          EXISTS(SELECT 1 FROM material_hub_upvotes WHERE post_id = p.id AND student_id = $2) as has_upvoted,
-          EXISTS(SELECT 1 FROM material_hub_bookmarks WHERE post_id = p.id AND student_id = $2) as has_bookmarked
-        FROM material_hub_posts p
-        LEFT JOIN students s ON p.student_id = s.id
-        LEFT JOIN students rev ON p.reviewed_by = rev.id
-        LEFT JOIN (
-          SELECT post_id, COUNT(*) as upvotes_count 
-          FROM material_hub_upvotes 
-          GROUP BY post_id
-        ) u ON p.id = u.post_id
-        LEFT JOIN (
-          SELECT post_id, COUNT(*) as comments_count 
-          FROM material_hub_comments 
-          GROUP BY post_id
-        ) c ON p.id = c.post_id
-        WHERE p.course_id = $1 AND (p.status = 'approved' OR p.student_id = $2)
-        ORDER BY p.created_at DESC
-      `;
-      queryParams = [courseId, studentId];
+      if (reqBatch === 'all') {
+        queryText = `
+          SELECT 
+            p.*, 
+            s.name as student_name, 
+            s.avatar_url as student_avatar_url, 
+            rev.name as reviewer_name,
+            COALESCE(u.upvotes_count, 0)::INTEGER as upvotes_count,
+            COALESCE(c.comments_count, 0)::INTEGER as comments_count,
+            EXISTS(SELECT 1 FROM material_hub_upvotes WHERE post_id = p.id AND student_id = $2) as has_upvoted,
+            EXISTS(SELECT 1 FROM material_hub_bookmarks WHERE post_id = p.id AND student_id = $2) as has_bookmarked
+          FROM material_hub_posts p
+          LEFT JOIN students s ON p.student_id = s.id
+          LEFT JOIN students rev ON p.reviewed_by = rev.id
+          LEFT JOIN (
+            SELECT post_id, COUNT(*) as upvotes_count 
+            FROM material_hub_upvotes 
+            GROUP BY post_id
+          ) u ON p.id = u.post_id
+          LEFT JOIN (
+            SELECT post_id, COUNT(*) as comments_count 
+            FROM material_hub_comments 
+            GROUP BY post_id
+          ) c ON p.id = c.post_id
+          WHERE p.course_id = $1 AND (p.status = 'approved' OR p.student_id = $2)
+          ORDER BY p.batch DESC, p.created_at DESC
+        `;
+        queryParams = [courseId, studentId];
+      } else {
+        const filterBatch = reqBatch ? parseInt(reqBatch, 10) : studentBatch;
+        queryText = `
+          SELECT 
+            p.*, 
+            s.name as student_name, 
+            s.avatar_url as student_avatar_url, 
+            rev.name as reviewer_name,
+            COALESCE(u.upvotes_count, 0)::INTEGER as upvotes_count,
+            COALESCE(c.comments_count, 0)::INTEGER as comments_count,
+            EXISTS(SELECT 1 FROM material_hub_upvotes WHERE post_id = p.id AND student_id = $2) as has_upvoted,
+            EXISTS(SELECT 1 FROM material_hub_bookmarks WHERE post_id = p.id AND student_id = $2) as has_bookmarked
+          FROM material_hub_posts p
+          LEFT JOIN students s ON p.student_id = s.id
+          LEFT JOIN students rev ON p.reviewed_by = rev.id
+          LEFT JOIN (
+            SELECT post_id, COUNT(*) as upvotes_count 
+            FROM material_hub_upvotes 
+            GROUP BY post_id
+          ) u ON p.id = u.post_id
+          LEFT JOIN (
+            SELECT post_id, COUNT(*) as comments_count 
+            FROM material_hub_comments 
+            GROUP BY post_id
+          ) c ON p.id = c.post_id
+          WHERE p.course_id = $1 AND (p.status = 'approved' OR p.student_id = $2) AND p.batch = $3
+          ORDER BY p.created_at DESC
+        `;
+        queryParams = [courseId, studentId, filterBatch];
+      }
     }
 
     const result = await db.query(queryText, queryParams);
@@ -86,7 +157,7 @@ const getPosts = async (req, res) => {
 // Create a new post
 const createPost = async (req, res) => {
   try {
-    const { courseId, type, caption } = req.body;
+    const { courseId, type, caption, batch } = req.body;
     const studentId = req.user.id;
 
     if (!courseId || !type) {
@@ -130,10 +201,18 @@ const createPost = async (req, res) => {
     const isTrustedPublisher = req.user.role === 'admin' || perms.includes('manage_resources') || perms.includes('manage_material_hub');
     const initialStatus = isTrustedPublisher ? 'approved' : 'pending';
 
+    // Get student's batch
+    const studentResult = await db.query(
+      'SELECT batch FROM students WHERE id = $1',
+      [studentId]
+    );
+    const studentBatch = studentResult.rows[0]?.batch || 2025;
+    const postBatch = batch ? parseInt(batch, 10) : studentBatch;
+
     const insertQuery = `
       INSERT INTO material_hub_posts (
-        course_id, student_id, type, caption, file_url, file_name, file_size, status
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        course_id, student_id, type, caption, file_url, file_name, file_size, status, batch
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       RETURNING *
     `;
 
@@ -145,7 +224,8 @@ const createPost = async (req, res) => {
       publicUrl,
       file.originalname,
       file.size,
-      initialStatus
+      initialStatus,
+      postBatch
     ]);
 
     res.status(201).json(result.rows[0]);
@@ -155,48 +235,77 @@ const createPost = async (req, res) => {
   }
 };
 
-// Review a post (Approve or Reject)
+// Review or update a post
 const reviewPost = async (req, res) => {
   try {
     const { id } = req.params;
-    const { status, rejectReason } = req.body;
+    const { status, rejectReason, batch, caption, type } = req.body;
     const reviewerId = req.user.id;
 
     const isReviewer = req.user.role === 'admin' || (req.user.permissions || []).includes('manage_resources');
-    if (!isReviewer) {
-      return res.status(403).json({ message: 'Access denied. You do not have permission to moderate materials.' });
-    }
-
-    if (!['approved', 'rejected'].includes(status)) {
-      return res.status(400).json({ message: 'Invalid status. Must be "approved" or "rejected"' });
-    }
-
-    const checkQuery = await db.query('SELECT id FROM material_hub_posts WHERE id = $1', [id]);
+    
+    const checkQuery = await db.query('SELECT * FROM material_hub_posts WHERE id = $1', [id]);
     if (checkQuery.rows.length === 0) {
       return res.status(404).json({ message: 'Post not found' });
     }
+    const post = checkQuery.rows[0];
 
+    // Only owner or reviewer can edit/moderate
+    if (!isReviewer && post.student_id !== req.user.id) {
+      return res.status(403).json({ message: 'Access denied. You do not have permission to modify this material.' });
+    }
+
+    const updates = [];
+    const values = [];
+    let idx = 1;
+
+    if (status !== undefined) {
+      if (!isReviewer) {
+        return res.status(403).json({ message: 'Access denied. Only moderators can change status.' });
+      }
+      if (!['approved', 'rejected', 'pending'].includes(status)) {
+        return res.status(400).json({ message: 'Invalid status' });
+      }
+      updates.push(`status = $${idx++}`); values.push(status);
+      
+      if (status === 'rejected') {
+        updates.push(`reject_reason = $${idx++}`); values.push(rejectReason || '');
+      } else {
+        updates.push(`reject_reason = $${idx++}`); values.push(null);
+      }
+      updates.push(`reviewed_by = $${idx++}`); values.push(reviewerId);
+      updates.push(`reviewed_at = CURRENT_TIMESTAMP`);
+    }
+
+    if (batch !== undefined) {
+      updates.push(`batch = $${idx++}`); values.push(parseInt(batch, 10));
+    }
+    if (caption !== undefined) {
+      updates.push(`caption = $${idx++}`); values.push(caption);
+    }
+    if (type !== undefined) {
+      if (!['lecture', 'exam'].includes(type)) {
+        return res.status(400).json({ message: 'Type must be "lecture" or "exam"' });
+      }
+      updates.push(`type = $${idx++}`); values.push(type);
+    }
+
+    if (updates.length === 0) {
+      return res.status(400).json({ message: 'No fields to update' });
+    }
+
+    values.push(id);
     const updateQuery = `
       UPDATE material_hub_posts 
-      SET 
-        status = $1, 
-        reject_reason = $2, 
-        reviewed_by = $3, 
-        reviewed_at = CURRENT_TIMESTAMP
-      WHERE id = $4
+      SET ${updates.join(', ')}
+      WHERE id = $${idx}
       RETURNING *
     `;
 
-    const result = await db.query(updateQuery, [
-      status,
-      status === 'rejected' ? (rejectReason || '') : null,
-      reviewerId,
-      id
-    ]);
-
+    const result = await db.query(updateQuery, values);
     res.json(result.rows[0]);
   } catch (error) {
-    console.error('Error reviewing material hub post:', error);
+    console.error('Error reviewing/updating material hub post:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };

@@ -18,13 +18,22 @@ const MaterialHubTab = ({ courseId }) => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterType, setFilterType] = useState('all'); // all, lecture, exam, bookmarks
+  const [filterType, setFilterType] = useState('all');
+  const [selectedBatch, setSelectedBatch] = useState(student?.batch || 2025);
+  const [availableHubBatches, setAvailableHubBatches] = useState([]);
 
   // Upload Form State
   const [caption, setCaption] = useState('');
   const [type, setType] = useState('lecture'); // lecture, exam
+  const [uploadBatch, setUploadBatch] = useState(student?.batch || 2025);
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
+
+  // Edit Batch/Caption State
+  const [editingPostId, setEditingPostId] = useState(null);
+  const [editBatch, setEditBatch] = useState('');
+  const [editCaption, setEditCaption] = useState('');
+  const [savingEdit, setSavingEdit] = useState(false);
 
   // Rejection State
   const [rejectingId, setRejectingId] = useState(null);
@@ -33,9 +42,10 @@ const MaterialHubTab = ({ courseId }) => {
 
   const isReviewer = student?.role === 'admin' || (student?.permissions || []).includes('manage_resources');
 
-  const fetchPosts = useCallback(async () => {
+  const fetchPosts = useCallback(async (batchVal) => {
+    const batch = batchVal !== undefined ? batchVal : selectedBatch;
     try {
-      const res = await studentApi.get(`/material-hub/${courseId}`);
+      const res = await studentApi.get(`/material-hub/${courseId}?batch=${batch}`);
       setPosts(res.data);
     } catch (err) {
       console.error('Error fetching material hub posts:', err);
@@ -43,11 +53,23 @@ const MaterialHubTab = ({ courseId }) => {
     } finally {
       setLoading(false);
     }
-  }, [courseId, isAr]);
+  }, [courseId, isAr, selectedBatch]);
+
+  const fetchAvailableHubBatches = useCallback(async () => {
+    try {
+      const res = await studentApi.get(`/material-hub/${courseId}?batch=all`);
+      const batches = [...new Set(res.data.map(p => p.batch).filter(Boolean))]
+        .sort((a, b) => b - a);
+      setAvailableHubBatches(batches);
+    } catch (err) {
+      console.error('Error fetching available batches:', err);
+    }
+  }, [courseId]);
 
   useEffect(() => {
     fetchPosts();
-  }, [fetchPosts]);
+    fetchAvailableHubBatches();
+  }, [fetchPosts, fetchAvailableHubBatches]);
 
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
@@ -72,13 +94,12 @@ const MaterialHubTab = ({ courseId }) => {
     formData.append('courseId', courseId);
     formData.append('type', type);
     formData.append('caption', caption);
+    formData.append('batch', uploadBatch);
     formData.append('file', file);
 
     try {
       await studentApi.post('/material-hub', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
+        headers: { 'Content-Type': 'multipart/form-data' }
       });
       toast.success(
         isReviewer
@@ -95,6 +116,29 @@ const MaterialHubTab = ({ courseId }) => {
       toast.error(err.response?.data?.message || (isAr ? 'فشل في رفع الملف' : 'Failed to upload file'));
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handleEditPost = (post) => {
+    setEditingPostId(post.id);
+    setEditBatch(post.batch || student?.batch || 2025);
+    setEditCaption(post.caption || '');
+  };
+
+  const handleSaveEdit = async (postId) => {
+    setSavingEdit(true);
+    try {
+      await studentApi.put(`/material-hub/${postId}`, {
+        batch: editBatch,
+        caption: editCaption
+      });
+      toast.success(isAr ? 'تم الحفظ بنجاح' : 'Saved successfully');
+      setEditingPostId(null);
+      fetchPosts();
+    } catch (err) {
+      toast.error(isAr ? 'فشل الحفظ' : 'Failed to save');
+    } finally {
+      setSavingEdit(false);
     }
   };
 
@@ -292,6 +336,8 @@ const MaterialHubTab = ({ courseId }) => {
     return matchesType && matchesSearch;
   });
 
+
+
   return (
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500 text-start">
       
@@ -307,35 +353,42 @@ const MaterialHubTab = ({ courseId }) => {
         </div>
 
         <form onSubmit={handleCreatePost} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Category Toggle */}
             <div className="space-y-2">
               <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ms-4">
                 {isAr ? 'القسم / التصنيف' : 'Category / Classification'}
               </label>
               <div className="flex p-1.5 bg-white dark:bg-black/40 rounded-[2rem] border border-gray-100 dark:border-white/5">
-                <button
-                  type="button"
-                  onClick={() => setType('lecture')}
+                <button type="button" onClick={() => setType('lecture')}
                   className={`flex-1 py-3.5 rounded-[1.6rem] text-[10px] font-black uppercase tracking-widest transition-all ${
-                    type === 'lecture'
-                      ? 'bg-[#10b981] dark:bg-[#2cfc7d] text-white dark:text-black shadow-md'
-                      : 'text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                  }`}
-                >
-                  {isAr ? 'محاضرات ومراجع' : 'Lectures & Resources'}
+                    type === 'lecture' ? 'bg-[#10b981] dark:bg-[#2cfc7d] text-white dark:text-black shadow-md' : 'text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                  }`}>
+                  {isAr ? 'محاضرات' : 'Lectures'}
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setType('exam')}
+                <button type="button" onClick={() => setType('exam')}
                   className={`flex-1 py-3.5 rounded-[1.6rem] text-[10px] font-black uppercase tracking-widest transition-all ${
-                    type === 'exam'
-                      ? 'bg-[#10b981] dark:bg-[#2cfc7d] text-white dark:text-black shadow-md'
-                      : 'text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                  }`}
-                >
-                  {isAr ? 'امتحانات وأسئلة' : 'Exams & Quizzes'}
+                    type === 'exam' ? 'bg-[#10b981] dark:bg-[#2cfc7d] text-white dark:text-black shadow-md' : 'text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                  }`}>
+                  {isAr ? 'امتحانات' : 'Exams'}
                 </button>
+              </div>
+            </div>
+
+            {/* Academic Year Selector */}
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ms-4">
+                {isAr ? 'العام الأكاديمي المستهدف' : 'Target Academic Year'}
+              </label>
+              <div className="flex p-1.5 bg-white dark:bg-black/40 rounded-[2rem] border border-gray-100 dark:border-white/5 gap-1">
+                {(availableHubBatches.length > 0 ? availableHubBatches : [student?.batch || 2025]).map(b => (
+                  <button key={b} type="button" onClick={() => setUploadBatch(b)}
+                    className={`flex-1 py-3.5 rounded-[1.6rem] text-[10px] font-black uppercase tracking-widest transition-all ${
+                      uploadBatch === b ? 'bg-[#10b981] dark:bg-[#2cfc7d] text-white dark:text-black shadow-md' : 'text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                    }`}>
+                    {b}
+                  </button>
+                ))}
               </div>
             </div>
 
@@ -346,7 +399,7 @@ const MaterialHubTab = ({ courseId }) => {
               </label>
               <input
                 type="text"
-                placeholder={isAr ? 'اكتب تفاصيل (مثلاً: حل شيت 2، ملخص الباب الأول...)' : 'e.g. Solution of sheet 2, Summary...'}
+                placeholder={isAr ? 'اكتب تفاصيل...' : 'e.g. Summary, Sheet 2...'}
                 value={caption}
                 onChange={(e) => setCaption(e.target.value)}
                 className="w-full bg-white dark:bg-black/40 border border-gray-100 dark:border-white/5 rounded-[2rem] px-6 py-4 text-sm font-bold focus:outline-none focus:border-[#2cfc7d] text-gray-900 dark:text-white"
@@ -354,7 +407,7 @@ const MaterialHubTab = ({ courseId }) => {
             </div>
           </div>
 
-          {/* File input and details */}
+          {/* File input and submit */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
             <label className="flex-1 relative flex flex-col items-center justify-center gap-3 cursor-pointer bg-white dark:bg-black/20 border border-gray-100 dark:border-white/5 border-dashed rounded-[2.5rem] p-6 sm:p-8 hover:border-[#2cfc7d]/40 hover:bg-[#2cfc7d]/5 transition-all group/label shadow-inner overflow-hidden">
               <Paperclip className="w-8 h-8 text-gray-300 group-hover/label:text-[#2cfc7d] group-hover/label:scale-110 transition-all duration-300" />
@@ -365,67 +418,73 @@ const MaterialHubTab = ({ courseId }) => {
                   isAr ? 'اضغط لاختيار ملف (PDF, Slides, Zip, Images)' : 'Click to attach file (PDF, Slides, Zip, Images)'
                 )}
               </span>
-              <input 
-                id="materialFileInput" 
-                type="file" 
-                onChange={handleFileChange} 
-                className="absolute inset-0 opacity-0 cursor-pointer" 
-              />
+              <input id="materialFileInput" type="file" onChange={handleFileChange} className="absolute inset-0 opacity-0 cursor-pointer" />
             </label>
 
-            <button
-              type="submit"
-              disabled={uploading || !file}
-              className="bg-[#10b981] dark:bg-[#2cfc7d] text-white dark:text-black font-black py-5 sm:py-8 px-10 rounded-[2rem] shadow-xl hover:scale-[1.02] active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
-            >
-              {uploading ? (
-                <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
-              ) : (
-                <>
-                  <Upload className="w-5 h-5" />
-                  <span className="text-[10px] uppercase tracking-widest">{isAr ? 'إرسال للمشاركة' : 'Submit Material'}</span>
-                </>
-              )}
+            <button type="submit" disabled={uploading || !file}
+              className="bg-[#10b981] dark:bg-[#2cfc7d] text-white dark:text-black font-black py-5 sm:py-8 px-10 rounded-[2rem] shadow-xl hover:scale-[1.02] active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3">
+              {uploading
+                ? <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                : <><Upload className="w-5 h-5" /><span className="text-[10px] uppercase tracking-widest">{isAr ? 'إرسال' : 'Submit'}</span></>}
             </button>
           </div>
         </form>
       </div>
 
-      {/* 🔍 Filter & Search Options */}
-      <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
-        {/* Filter type */}
-        <div className="flex bg-white dark:bg-white/5 p-1 rounded-[1.8rem] border border-gray-100 dark:border-white/5 max-w-md">
-          {[
-            { id: 'all', label: isAr ? 'الكل' : 'All' },
-            { id: 'lecture', label: isAr ? 'المحاضرات' : 'Lectures' },
-            { id: 'exam', label: isAr ? 'الامتحانات' : 'Exams' },
-            { id: 'bookmarks', label: isAr ? 'المحفوظات' : 'Saved' }
-          ].map(btn => (
-            <button
-              key={btn.id}
-              onClick={() => setFilterType(btn.id)}
-              className={`px-6 py-2.5 rounded-[1.4rem] text-[10px] font-black uppercase tracking-widest transition-all ${
-                filterType === btn.id
-                  ? 'bg-black dark:bg-white text-white dark:text-black shadow-sm'
-                  : 'text-gray-400 hover:text-gray-900 dark:hover:text-white'
-              }`}
-            >
-              {btn.label}
-            </button>
-          ))}
+      {/* 🔍 Filter, Batch & Search Options */}
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
+          {/* Filter type */}
+          <div className="flex bg-white dark:bg-white/5 p-1 rounded-[1.8rem] border border-gray-100 dark:border-white/5">
+            {[
+              { id: 'all', label: isAr ? 'الكل' : 'All' },
+              { id: 'lecture', label: isAr ? 'المحاضرات' : 'Lectures' },
+              { id: 'exam', label: isAr ? 'الامتحانات' : 'Exams' },
+              { id: 'bookmarks', label: isAr ? 'المحفوظات' : 'Saved' }
+            ].map(btn => (
+              <button key={btn.id} onClick={() => setFilterType(btn.id)}
+                className={`px-6 py-2.5 rounded-[1.4rem] text-[10px] font-black uppercase tracking-widest transition-all ${
+                  filterType === btn.id ? 'bg-black dark:bg-white text-white dark:text-black shadow-sm' : 'text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                }`}>
+                {btn.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Search bar */}
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute inset-inline-start-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input type="text"
+              placeholder={isAr ? 'البحث في المواد الدراسية...' : 'Search shared materials...'}
+              value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[2rem] ps-12 pe-6 py-3.5 text-xs font-bold text-gray-900 dark:text-white focus:outline-none focus:border-[#2cfc7d]"
+            />
+          </div>
         </div>
 
-        {/* Search bar */}
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute inset-inline-start-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input
-            type="text"
-            placeholder={isAr ? 'البحث في المواد الدراسية...' : 'Search shared materials...'}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[2rem] ps-12 pe-6 py-3.5 text-xs font-bold text-gray-900 dark:text-white focus:outline-none focus:border-[#2cfc7d]"
-          />
-        </div>
+        {/* Academic Year filter row - simple tabs only */}
+        {availableHubBatches.length > 0 && (
+          <div className="flex items-center gap-1 bg-white dark:bg-white/5 p-1.5 rounded-[1.8rem] border border-gray-100 dark:border-white/5 self-start">
+            <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 px-3 shrink-0">
+              {isAr ? 'العام:' : 'Academic Year:'}
+            </span>
+            {availableHubBatches.map(b => {
+              const isSel = selectedBatch === b;
+              return (
+                <button key={b}
+                  onClick={() => {
+                    setSelectedBatch(b);
+                    fetchPosts(b);
+                  }}
+                  className={`px-5 py-2 rounded-[1.2rem] text-[10px] font-black tracking-widest transition-all ${
+                    isSel ? 'bg-black dark:bg-white text-white dark:text-black shadow-sm' : 'text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                  }`}>
+                  {b}
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* 📄 Material feed */}
@@ -498,38 +557,91 @@ const MaterialHubTab = ({ courseId }) => {
                   </div>
 
                   {/* Badges / Actions */}
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-wrap items-center gap-2 justify-end">
+                    {/* Academic Year Badge */}
+                    {post.batch && (
+                      <span className="px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border text-indigo-400 border-indigo-400/20 bg-indigo-400/5">
+                        {isAr ? 'عام' : 'Year'} {post.batch}
+                      </span>
+                    )}
+
                     {/* Category Type Badge */}
                     <span className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest border ${
                       post.type === 'lecture'
                         ? 'text-blue-500 border-blue-500/20 bg-blue-500/5'
                         : 'text-purple-500 border-purple-500/20 bg-purple-500/5'
                     }`}>
-                      {post.type === 'lecture' ? (isAr ? 'محاضرة / مرجع' : 'Lecture / Ref') : (isAr ? 'امتحان / أسئلة' : 'Exam / Quiz')}
+                      {post.type === 'lecture' ? (isAr ? 'محاضرة' : 'Lecture') : (isAr ? 'امتحان' : 'Exam')}
                     </span>
 
                     {/* Status Badge */}
                     {isPending && (
                       <span className="px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest border text-amber-500 border-amber-500/20 bg-amber-500/5 flex items-center gap-1.5">
                         <Clock className="w-3.5 h-3.5 animate-pulse" />
-                        {isAr ? 'قيد المراجعة' : 'Pending Review'}
+                        {isAr ? 'قيد المراجعة' : 'Pending'}
                       </span>
                     )}
-
                     {isRejected && (
                       <span className="px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest border text-rose-500 border-rose-500/20 bg-rose-500/5 flex items-center gap-1.5">
                         <ShieldAlert className="w-3.5 h-3.5" />
                         {isAr ? 'مرفوض' : 'Rejected'}
                       </span>
                     )}
+
+                    {/* Edit button for owner or reviewer */}
+                    {(isOwner || isReviewer) && editingPostId !== post.id && (
+                      <button
+                        onClick={() => handleEditPost(post)}
+                        className="w-8 h-8 rounded-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 flex items-center justify-center text-gray-400 hover:text-indigo-400 hover:border-indigo-400/30 transition-all"
+                        title={isAr ? 'تعديل العام الدراسي والوصف' : 'Edit academic year & caption'}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
+                        </svg>
+                      </button>
+                    )}
                   </div>
                 </div>
 
-                {/* Caption / Comments */}
-                {post.caption && (
-                  <p className="text-gray-600 dark:text-white/70 font-semibold text-sm leading-relaxed ps-16">
-                    {post.caption}
-                  </p>
+                {/* Caption */}
+                {editingPostId === post.id ? (
+                  <div className="flex flex-col sm:flex-row gap-3 ps-16 animate-in slide-in-from-top-2 duration-300">
+                    <div className="flex items-center gap-2 flex-1">
+                      <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 shrink-0">{isAr ? 'العام:' : 'Year:'}</span>
+                      <div className="flex gap-1.5 bg-gray-50 dark:bg-white/5 p-1 rounded-2xl">
+                        {uniqueBatches.map(b => (
+                          <button key={b} type="button" onClick={() => setEditBatch(b)}
+                            className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                              editBatch === b ? 'bg-indigo-500 text-white shadow-sm' : 'text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                            }`}>{b}</button>
+                        ))}
+                      </div>
+                    </div>
+                    <input
+                      type="text"
+                      value={editCaption}
+                      onChange={e => setEditCaption(e.target.value)}
+                      placeholder={isAr ? 'وصف...' : 'Caption...'}
+                      className="flex-1 bg-white dark:bg-black/30 border border-gray-100 dark:border-white/5 rounded-2xl px-4 py-2 text-sm font-bold focus:outline-none focus:border-indigo-500 text-gray-900 dark:text-white"
+                    />
+                    <div className="flex gap-2 shrink-0">
+                      <button onClick={() => handleSaveEdit(post.id)} disabled={savingEdit}
+                        className="flex items-center gap-1.5 px-5 py-2 rounded-2xl bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all disabled:opacity-50">
+                        {savingEdit ? <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                        {isAr ? 'حفظ' : 'Save'}
+                      </button>
+                      <button onClick={() => setEditingPostId(null)}
+                        className="px-4 py-2 rounded-2xl bg-gray-100 dark:bg-white/10 text-gray-500 text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all">
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  post.caption && (
+                    <p className="text-gray-600 dark:text-white/70 font-semibold text-sm leading-relaxed ps-16">
+                      {post.caption}
+                    </p>
+                  )
                 )}
 
                 {/* Attachment File Card */}

@@ -44,7 +44,7 @@ const ResourceManager = () => {
   const [selectedCourseName, setSelectedCourseName] = useState('');
   const [resources, setResources] = useState([]);
   const [editingResource, setEditingResource] = useState(null);
-  const [formData, setFormData] = useState({ type: 'video', title: '', url: '' });
+  const [formData, setFormData] = useState({ type: 'video', title: '', url: '', batch: 2025 });
   const [loading, setLoading] = useState(false);
   const [recordingFile, setRecordingFile] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -200,6 +200,7 @@ const ResourceManager = () => {
       type: resource.type,
       title: resource.title,
       url: resource.url,
+      batch: resource.batch || 2025
     });
     setRecordingFile(null);
     setShowForm(true);
@@ -208,7 +209,7 @@ const ResourceManager = () => {
   const resetForm = () => {
     setShowForm(false);
     setEditingResource(null);
-    setFormData({ type: 'video', title: '', url: '' });
+    setFormData({ type: 'video', title: '', url: '', batch: 2025 });
     setRecordingFile(null);
   };
 
@@ -407,9 +408,14 @@ const ResourceManager = () => {
                         </div>
 
                         <div className="space-y-2">
-                            <span className="text-[10px] font-black uppercase tracking-[0.4em] opacity-40 group-hover:opacity-100 transition-opacity">
-                                {item.type.toUpperCase()}
-                            </span>
+                            <div className="flex items-center gap-2">
+                                <span className="text-[10px] font-black uppercase tracking-[0.4em] opacity-40 group-hover:opacity-100 transition-opacity">
+                                    {item.type.toUpperCase()}
+                                </span>
+                                <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 group-hover:bg-white/10 group-hover:text-white transition-all">
+                                    {isAr ? 'عام' : 'Year'} {item.batch || 2025}
+                                </span>
+                            </div>
                             <h3 className="text-xl sm:text-2xl font-black tracking-tighter uppercase leading-[1.1] line-clamp-3">
                                 {item.title}
                             </h3>
@@ -501,6 +507,22 @@ const ResourceManager = () => {
                                         <option value="summary">{t('admin.resources.types.summary')}</option>
                                         <option value="playlist">{t('admin.resources.types.playlist')}</option>
                                         <option value="recording">{t('admin.resources.types.recording')}</option>
+                                    </select>
+                                    <ChevronRight className="absolute inset-inline-end-5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 rotate-90" />
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{isAr ? 'العام الدراسي المستهدف' : 'Target Academic Year'}</label>
+                                <div className="relative">
+                                    <select
+                                        value={formData.batch}
+                                        onChange={(e) => setFormData({ ...formData, batch: parseInt(e.target.value, 10) })}
+                                        className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl px-5 py-4 font-black focus:ring-4 focus:ring-[#8b5cf6]/10 outline-none transition-all shadow-inner appearance-none uppercase tracking-widest text-[11px]"
+                                    >
+                                        {[2026, 2025, 2024, 2023].map(yr => (
+                                            <option key={yr} value={yr}>{isAr ? `عام ${yr}` : `Academic Year ${yr}`}</option>
+                                        ))}
                                     </select>
                                     <ChevronRight className="absolute inset-inline-end-5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 rotate-90" />
                                 </div>

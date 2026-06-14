@@ -23,16 +23,31 @@ const StudentMaterials = () => {
   const location = useLocation();
   
   const [selectedCourse, setSelectedCourse] = useState(null);
+  const [selectedBatch, setSelectedBatch] = useState(student?.batch || 2025);
   const [resources, setResources] = useState({ videos: [], pdfs: [], summaries: [], playlists: [], recordings: [] });
+  const [availableBatches, setAvailableBatches] = useState([]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('progress');
   const [progressData, setProgressData] = useState({ items: [], stats: { total: 0, completed: 0, pending: 0, percentage: 0 } });
   const [loadingProgress, setLoadingProgress] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [activeSemester, setActiveSemester] = useState(null);
   const dropdownRef = useRef(null);
 
+  useEffect(() => {
+    studentApi.get('/student/active-semester')
+      .then(res => setActiveSemester(Number(res.data?.active_semester) || null))
+      .catch(() => setActiveSemester(null));
+  }, []);
+
   const courses = useMemo(() => {
-    const grades = gradesData.grades || [];
+    const all = gradesData.grades || [];
+    const grades = activeSemester !== null
+      ? all.filter(g =>
+          (g.enrollment_status === 'active' || !g.enrollment_status) &&
+          Number(g.semester) >= activeSemester
+        )
+      : all.filter(g => g.enrollment_status === 'active' || !g.enrollment_status);
     const uniqueCourses = [];
     const courseMap = new Map();
     for (const grade of grades) {
@@ -49,10 +64,11 @@ const StudentMaterials = () => {
     }
     uniqueCourses.sort((a, b) => a.semester !== b.semester ? a.semester - b.semester : a.name.localeCompare(b.name));
     return uniqueCourses;
-  }, [gradesData.grades]);
+  }, [gradesData.grades, activeSemester]);
 
   useEffect(() => {
     if (!student) navigate('/student/login');
+    else if (student.batch) setSelectedBatch(student.batch);
   }, [student, navigate]);
 
   useEffect(() => {
@@ -67,10 +83,11 @@ const StudentMaterials = () => {
       }
 
       setSelectedCourse(targetCourse);
-      fetchResources(targetCourse.id);
+      fetchAvailableBatches(targetCourse.id);
+      fetchResources(targetCourse.id, student?.batch || 2025);
       fetchProgress(targetCourse.id);
     }
-  }, [loadingGrades, courses, selectedCourse, location.state]);
+  }, [loadingGrades, courses, selectedCourse, location.state, student]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -82,10 +99,11 @@ const StudentMaterials = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const fetchResources = async (courseId) => {
+  const fetchResources = async (courseId, batchVal) => {
     setLoading(true);
     try {
-      const response = await studentApi.get(`/resources/course/${courseId}`);
+      const activeBatch = batchVal !== undefined ? batchVal : selectedBatch;
+      const response = await studentApi.get(`/resources/course/${courseId}?batch=${activeBatch}`);
       const organized = { videos: [], pdfs: [], summaries: [], playlists: [], recordings: [] };
       response.data.forEach(resource => {
         if (resource.type === 'video') organized.videos.push(resource);
@@ -100,6 +118,24 @@ const StudentMaterials = () => {
       toast.error(t('common.error_load'));
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchAvailableBatches = async (courseId) => {
+    try {
+      const response = await studentApi.get(`/resources/course/${courseId}?batch=all`);
+      const batches = [...new Set(response.data.map(r => r.batch).filter(Boolean))]
+        .sort((a, b) => b - a); // Descending
+      setAvailableBatches(batches);
+      // Auto-select student's own batch if present, else first available
+      const studentBatch = student?.batch;
+      const best = batches.includes(studentBatch) ? studentBatch : batches[0];
+      if (best !== undefined && best !== selectedBatch) {
+        setSelectedBatch(best);
+        fetchResources(courseId, best);
+      }
+    } catch (error) {
+      console.error('Error fetching available batches:', error);
     }
   };
 
@@ -119,7 +155,9 @@ const StudentMaterials = () => {
   const handleCourseChange = (course) => {
     setSelectedCourse(course);
     setIsDropdownOpen(false);
-    fetchResources(course.id);
+    setAvailableBatches([]);
+    fetchAvailableBatches(course.id);
+    fetchResources(course.id, selectedBatch);
     fetchProgress(course.id);
   };
 
@@ -268,6 +306,35 @@ const StudentMaterials = () => {
 
           {selectedCourse && (
             <div className="space-y-12">
+              
+              {/* ACADEMIC YEAR TABS - Simple inline */}
+              {availableBatches.length > 0 && (
+                <div className="flex items-center gap-1 bg-white dark:bg-white/5 p-1.5 rounded-[1.8rem] border border-gray-100 dark:border-white/5 self-start">
+                  <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 px-3 shrink-0">
+                    {isAr ? 'العام:' : 'Academic Year:'}
+                  </span>
+                  {availableBatches.map((b) => {
+                    const isSel = selectedBatch === b;
+                    return (
+                      <button
+                        key={b}
+                        onClick={() => {
+                          setSelectedBatch(b);
+                          fetchResources(selectedCourse.id, b);
+                        }}
+                        className={`px-5 py-2.5 rounded-[1.2rem] text-[10px] font-black tracking-widest transition-all ${
+                          isSel
+                            ? 'bg-gray-900 dark:bg-white text-white dark:text-black shadow-sm'
+                            : 'text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                        }`}
+                      >
+                        {b}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
               {/* TABS NAVIGATION */}
               <div className="flex flex-wrap gap-3 bg-white dark:bg-white/5 p-3 rounded-[3rem] border border-gray-100 dark:border-white/5 overflow-x-auto no-scrollbar shadow-lg">
                 {tabs.map(tab => {

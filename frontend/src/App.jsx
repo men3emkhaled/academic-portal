@@ -23,6 +23,8 @@ import StudentMaterials from './pages/StudentMaterials';
 import StudentNotifications from './pages/StudentNotifications';
 import StudentSettings from './pages/StudentSettings';
 import StudentPersonalTasks from './pages/StudentPersonalTasks';
+import StudentCourseRegistration from './pages/StudentCourseRegistration';
+import StudentMenu from './pages/StudentMenu';
 import ResetPassword from './pages/ResetPassword';
 import VerifyEmail from './pages/VerifyEmail';
 import LandingPage from './pages/LandingPage';
@@ -121,13 +123,15 @@ function AppContent() {
     '/student/dashboard',
     '/student/timetable',
     '/student/course',
+    '/student/registration',
     '/student/quizzes',
     '/student/grades',
     '/student/roadmap',
     '/student/materials',
     '/student/personal-tasks',
     '/student/notifications',
-    '/student/settings'
+    '/student/settings',
+    '/student/menu'
   ];
 
   useEffect(() => {
@@ -205,7 +209,8 @@ function AppContent() {
           <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/student/dashboard" element={<ProtectedStudentRoute><StudentDashboard /></ProtectedStudentRoute>} />
           <Route path="/student/course/:courseId" element={<ProtectedStudentRoute><StudentCourseHub /></ProtectedStudentRoute>} />
-          <Route path="/student/grades" element={<Navigate to="/student/dashboard" replace />} />
+          <Route path="/student/registration" element={<ProtectedStudentRoute><StudentCourseRegistration /></ProtectedStudentRoute>} />
+          <Route path="/student/grades" element={<ProtectedStudentRoute><StudentGrades /></ProtectedStudentRoute>} />
           <Route path="/student/quizzes" element={<ProtectedStudentRoute><StudentQuizzes /></ProtectedStudentRoute>} />
           <Route path="/student/timetable" element={<ProtectedStudentRoute><StudentTimetable /></ProtectedStudentRoute>} />
           <Route path="/student/roadmap" element={<ProtectedStudentRoute><StudentRoadmap /></ProtectedStudentRoute>} />
@@ -213,6 +218,7 @@ function AppContent() {
           <Route path="/student/notifications" element={<ProtectedStudentRoute><StudentNotifications /></ProtectedStudentRoute>} />
           <Route path="/student/settings" element={<ProtectedStudentRoute><StudentSettings /></ProtectedStudentRoute>} />
           <Route path="/student/personal-tasks" element={<ProtectedStudentRoute><StudentPersonalTasks /></ProtectedStudentRoute>} />
+          <Route path="/student/menu" element={<ProtectedStudentRoute><StudentMenu /></ProtectedStudentRoute>} />
 
           {/* ✅ مسارات الاختبارات */}
           <Route path="/student/quizzes/:quizId/take" element={<ProtectedStudentRoute><QuizPage /></ProtectedStudentRoute>} />

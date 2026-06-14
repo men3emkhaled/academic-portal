@@ -72,9 +72,9 @@ if (process.env.FRONTEND_URL) {
 }
 
 const isOriginAllowed = (origin) => {
-  // ✅ Security: Don't allow requests with no origin in production
-  // (Server-to-server calls like curl have no origin header)
-  if (!origin) return process.env.NODE_ENV !== 'production';
+  // ✅ Allow requests with no origin (mobile apps, API clients, curl)
+  // CORS is a browser security feature — native mobile apps don't send Origin headers
+  if (!origin) return true;
   return allowedOrigins.some(allowed => {
     if (allowed instanceof RegExp) return allowed.test(origin);
     return allowed === origin;

@@ -26,7 +26,7 @@ const CoursesManager = ({ departments }) => {
   const fetchCourses = async () => {
     setLoading(true);
     try {
-      const res = await api.get('/courses');
+      const res = await api.get('/courses?clear=true');
       setCourses(res.data);
     } catch (error) {
       toast.error(t('admin.messages.load_courses_failed'));
@@ -165,76 +165,133 @@ const CoursesManager = ({ departments }) => {
         </div>
       </div>
 
-      {/* Course Cards Grid */}
-      <div className="space-y-6 sm:space-y-8 relative z-10">
-        <div className="flex items-center gap-2 text-start">
-          <div className="w-1.5 h-1.5 rounded-full bg-[#2cfc7d]"></div>
-          <h2 className={`text-2xl sm:text-3xl font-black uppercase tracking-tight ${isAr ? 'font-arabic' : ''}`}>
-             {t('admin.courses.validated_modules')}
-          </h2>
-        </div>
+      {/* Courses Grouped by Department → Semester */}
+      {(() => {
+        // Build a map: department_name → semester → courses[]
+        const deptMap = new Map();
+        courses.forEach(course => {
+          const deptKey = course.department_name || 'Shared / General';
+          const sem = course.semester ?? 1;
+          if (!deptMap.has(deptKey)) deptMap.set(deptKey, new Map());
+          const semMap = deptMap.get(deptKey);
+          if (!semMap.has(sem)) semMap.set(sem, []);
+          semMap.get(sem).push(course);
+        });
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-          {courses.length === 0 ? (
-            <div className="col-span-full py-28 sm:py-40 text-center border-2 border-dashed border-gray-100 dark:border-white/10 rounded-[3rem] opacity-30 grayscale">
+        if (courses.length === 0) {
+          return (
+            <div className="py-28 sm:py-40 text-center border-2 border-dashed border-gray-100 dark:border-white/10 rounded-[3rem] opacity-30 grayscale relative z-10">
               <BookOpen className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-6 text-gray-400" />
               <p className="text-gray-500 font-black uppercase tracking-[0.3em] text-xs">{t('admin.courses.no_courses')}</p>
             </div>
-          ) : (
-            courses.map((course) => (
-              <div 
-                  key={course.id}
-                  className="group relative bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-6 sm:p-10 hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all duration-700 shadow-sm flex flex-col justify-between min-h-[340px] sm:min-h-[400px] overflow-hidden text-start"
-              >
-                  {/* Background Decor */}
-                  <div className="absolute top-[-10%] inset-inline-end-[-5%] w-32 h-32 bg-[#8b5cf6]/10 blur-3xl rounded-full group-hover:bg-white/20 transition-all duration-700" />
-                  
-                  <div className="space-y-6 sm:space-y-8 relative z-10">
-                      <div className="flex justify-between items-start">
-                          <div className="w-12 h-12 sm:w-14 sm:h-14 bg-[#8b5cf6]/10 rounded-2xl flex items-center justify-center text-[#8b5cf6] dark:text-[#d4a3ff] group-hover:bg-white/20 transition-all duration-500">
-                              <Tag className="w-6 h-6 sm:w-7 sm:h-7" />
-                          </div>
-                          <div className="flex gap-2">
-                             <button onClick={(e) => { e.stopPropagation(); editCourse(course); }} className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl border border-gray-100 dark:border-white/10 flex items-center justify-center hover:bg-[#8b5cf6] hover:border-[#8b5cf6] hover:text-white transition-all shadow-sm">
-                               <Edit3 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                             </button>
-                             <button onClick={(e) => { e.stopPropagation(); handleDelete(course.id, course.name); }} className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl border border-gray-100 dark:border-white/10 flex items-center justify-center hover:bg-rose-500 hover:border-rose-500 hover:text-white transition-all shadow-sm">
-                               <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                             </button>
-                           </div>
-                      </div>
+          );
+        }
 
-                      <div className="space-y-2">
-                          <span className="text-[10px] font-black uppercase tracking-[0.4em] opacity-40 group-hover:opacity-100 transition-opacity">
-                              {course.code}
-                          </span>
-                          <h3 className="text-xl sm:text-2xl font-black tracking-tighter uppercase leading-[1.1] line-clamp-3">
-                              {course.name}
-                          </h3>
-                      </div>
+        const semColors = {
+          1: 'from-violet-500/10 to-violet-500/5 border-violet-500/20 text-violet-500',
+          2: 'from-blue-500/10 to-blue-500/5 border-blue-500/20 text-blue-500',
+          3: 'from-emerald-500/10 to-emerald-500/5 border-emerald-500/20 text-emerald-500',
+          4: 'from-amber-500/10 to-amber-500/5 border-amber-500/20 text-amber-500',
+          5: 'from-rose-500/10 to-rose-500/5 border-rose-500/20 text-rose-500',
+          6: 'from-cyan-500/10 to-cyan-500/5 border-cyan-500/20 text-cyan-500',
+          7: 'from-pink-500/10 to-pink-500/5 border-pink-500/20 text-pink-500',
+          8: 'from-orange-500/10 to-orange-500/5 border-orange-500/20 text-orange-500',
+        };
 
-                      <div className="flex flex-wrap gap-2 pt-2 sm:pt-4">
-                          <span className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 text-[9px] sm:text-[10px] font-black uppercase tracking-widest group-hover:bg-white/10 transition-colors">
-                             {t('admin.courses.semester')} {course.semester}
-                          </span>
-                          <span className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 text-[9px] sm:text-[10px] font-black uppercase tracking-widest group-hover:bg-white/10 transition-colors">
-                             {course.credits} {t('admin.courses.credits')}
-                          </span>
-                      </div>
+        return (
+          <div className="space-y-16 relative z-10">
+            {[...deptMap.entries()].map(([deptName, semMap]) => (
+              <div key={deptName} className="space-y-10">
+                {/* Department Header */}
+                <div className="flex items-center gap-4">
+                  <div className="w-2 h-10 rounded-full bg-gradient-to-b from-[#8b5cf6] to-[#2cfc7d]" />
+                  <div>
+                    <p className="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 dark:text-white/30">Department</p>
+                    <h2 className={`text-2xl sm:text-3xl font-black uppercase tracking-tight text-gray-900 dark:text-white ${isAr ? 'font-arabic' : ''}`}>
+                      {deptName}
+                    </h2>
                   </div>
-
-                  <div className="pt-6 sm:pt-8 border-t border-gray-100 dark:border-white/5 flex items-center justify-between relative z-10 group-hover:border-white/20 transition-all">
-                      <div className="flex items-center gap-3">
-                          <div className="w-2 h-2 rounded-full bg-[#2cfc7d] shadow-[0_0_12px_rgba(44,252,125,0.5)] group-hover:bg-white group-hover:shadow-[0_0_12px_rgba(255,255,255,0.5)] transition-all"></div>
-                          <span className="text-[10px] font-black uppercase tracking-[0.3em] opacity-40">{t('admin.courses.active_course')}</span>
-                      </div>
-                      <ChevronRight className={`w-4 h-4 sm:w-5 h-5 opacity-20 group-hover:opacity-100 group-hover:translate-x-1 transition-all ${isAr ? 'rotate-180 group-hover:-translate-x-1' : ''}`} />
+                  <div className="ms-auto bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 px-5 py-2.5 rounded-full">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+                      {[...semMap.values()].flat().length} modules
+                    </span>
                   </div>
+                </div>
+
+                {/* Semesters within this department */}
+                <div className="space-y-8 ps-6 border-s-2 border-gray-100 dark:border-white/5">
+                  {[...semMap.entries()].sort(([a],[b]) => a - b).map(([sem, semCourses]) => {
+                    const colorClass = semColors[sem] || semColors[1];
+                    return (
+                      <div key={sem} className="space-y-6">
+                        {/* Semester Badge */}
+                        <div className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl border bg-gradient-to-r ${colorClass}`}>
+                          <span className="text-[10px] font-black uppercase tracking-[0.3em]">Semester {sem}</span>
+                          <span className="text-[9px] font-black opacity-60">· {semCourses.length} courses</span>
+                        </div>
+
+                        {/* Course Cards */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+                          {semCourses.map((course) => (
+                            <div
+                              key={course.id}
+                              className="group relative bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-6 sm:p-10 hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all duration-700 shadow-sm flex flex-col justify-between min-h-[300px] sm:min-h-[350px] overflow-hidden text-start"
+                            >
+                              <div className="absolute top-[-10%] inset-inline-end-[-5%] w-32 h-32 bg-[#8b5cf6]/10 blur-3xl rounded-full group-hover:bg-white/20 transition-all duration-700" />
+
+                              <div className="space-y-6 sm:space-y-8 relative z-10">
+                                <div className="flex justify-between items-start">
+                                  <div className="w-12 h-12 sm:w-14 sm:h-14 bg-[#8b5cf6]/10 rounded-2xl flex items-center justify-center text-[#8b5cf6] dark:text-[#d4a3ff] group-hover:bg-white/20 transition-all duration-500">
+                                    <Tag className="w-6 h-6 sm:w-7 sm:h-7" />
+                                  </div>
+                                  <div className="flex gap-2">
+                                    <button onClick={(e) => { e.stopPropagation(); editCourse(course); }} className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl border border-gray-100 dark:border-white/10 flex items-center justify-center hover:bg-[#8b5cf6] hover:border-[#8b5cf6] hover:text-white transition-all shadow-sm">
+                                      <Edit3 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                    </button>
+                                    <button onClick={(e) => { e.stopPropagation(); handleDelete(course.id, course.name); }} className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl border border-gray-100 dark:border-white/10 flex items-center justify-center hover:bg-rose-500 hover:border-rose-500 hover:text-white transition-all shadow-sm">
+                                      <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                    </button>
+                                  </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                  <span className="text-[10px] font-black uppercase tracking-[0.4em] opacity-40 group-hover:opacity-100 transition-opacity">
+                                    {course.code || '—'}
+                                  </span>
+                                  <h3 className="text-xl sm:text-2xl font-black tracking-tighter uppercase leading-[1.1] line-clamp-3">
+                                    {course.name}
+                                  </h3>
+                                </div>
+
+                                <div className="flex flex-wrap gap-2 pt-2 sm:pt-4">
+                                  <span className="px-3 py-1.5 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 text-[9px] sm:text-[10px] font-black uppercase tracking-widest group-hover:bg-white/10 transition-colors">
+                                    SEM {course.semester}
+                                  </span>
+                                  <span className="px-3 py-1.5 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 text-[9px] sm:text-[10px] font-black uppercase tracking-widest group-hover:bg-white/10 transition-colors">
+                                    {course.credit_hours || course.credits || 3} CRD
+                                  </span>
+                                </div>
+                              </div>
+
+                              <div className="pt-6 sm:pt-8 border-t border-gray-100 dark:border-white/5 flex items-center justify-between relative z-10 group-hover:border-white/20 transition-all">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-2 h-2 rounded-full bg-[#2cfc7d] shadow-[0_0_12px_rgba(44,252,125,0.5)] group-hover:bg-white group-hover:shadow-[0_0_12px_rgba(255,255,255,0.5)] transition-all" />
+                                  <span className="text-[10px] font-black uppercase tracking-[0.3em] opacity-40">{t('admin.courses.active_course')}</span>
+                                </div>
+                                <ChevronRight className={`w-4 h-4 sm:w-5 sm:h-5 opacity-20 group-hover:opacity-100 group-hover:translate-x-1 transition-all ${isAr ? 'rotate-180 group-hover:-translate-x-1' : ''}`} />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            ))
-          )}
-        </div>
-      </div>
+            ))}
+          </div>
+        );
+      })()}
 
       {/* Cinematic Modal (Using global admin classes!) */}
       {showForm && (

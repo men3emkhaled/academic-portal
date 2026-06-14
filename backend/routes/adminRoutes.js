@@ -38,17 +38,14 @@ router.get('/students', adminAuth, studentController.getAllStudents);
 // ✅ إضافة طالب يدويًا
 router.post('/students', adminAuth, async (req, res) => {
   try {
-    const { id, name, password, level, section, department_id } = req.body;
+    const { id, name, password, level, section, department_id, batch } = req.body;
     if (!id || !name) {
       return res.status(400).json({ message: 'Student ID and name are required' });
     }
     const Student = require('../models/Student');
-    const student = await Student.create(id, name, password || '123456', level || 1, section, department_id);
+    const student = await Student.create(id, name, password || '123456', level || 1, section, department_id, batch || 2025);
     
-    // تسجيل الطالب تلقائياً في مواد القسم (إذا تم تحديده)
-    if (department_id) {
-      await Student.enrollInDepartmentCourses(id, department_id);
-    }
+    // ✅ Auto-enrollment removed — students register courses manually now
     
     res.status(201).json(student);
   } catch (error) {
@@ -85,13 +82,14 @@ router.delete('/students/:studentId/courses/:courseId', adminAuth, studentCourse
 router.put('/students/:id', adminAuth, async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, level, section, department_id } = req.body;
+    const { name, level, section, department_id, batch } = req.body;
     const updates = [];
     const values = [];
     if (name) { updates.push(`name = $${updates.length + 1}`); values.push(name); }
     if (level !== undefined) { updates.push(`level = $${updates.length + 1}`); values.push(parseInt(level)); }
     if (section !== undefined) { updates.push(`section = $${updates.length + 1}`); values.push(section); }
     if (department_id !== undefined) { updates.push(`department_id = $${updates.length + 1}`); values.push(department_id); }
+    if (batch !== undefined) { updates.push(`batch = $${updates.length + 1}`); values.push(parseInt(batch)); }
     if (updates.length === 0) return res.status(400).json({ message: 'No fields to update' });
     const query = `UPDATE students SET ${updates.join(', ')}, updated_at = CURRENT_TIMESTAMP WHERE id = $${updates.length + 1} RETURNING *`;
     values.push(id);
@@ -147,5 +145,50 @@ router.get('/attempts/:attemptId/details', checkPermission('manage_quizzes'), qu
 router.get('/quizzes/pending-reviews', checkPermission('manage_quizzes'), quizController.getPendingReviews);
 router.get('/quizzes/attempts/:attemptId/review', checkPermission('manage_quizzes'), quizController.getAttemptForReview);
 router.patch('/quizzes/answers/:answerId/grade', checkPermission('manage_quizzes'), quizController.gradeWrittenAnswer);
+
+// ── Upgrade Semester ──
+router.post('/upgrade-semester', adminAuth, async (req, res) => {
+  const client = await db.pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    // 1. Get current active semester
+    const semRes = await client.query("SELECT value FROM system_settings WHERE key = 'active_semester'");
+    const currentSem = semRes.rows.length > 0 ? parseInt(semRes.rows[0].value, 10) : 2;
+    const nextSem = currentSem + 1;
+
+    // 2. Update active semester
+    await client.query(
+      "INSERT INTO system_settings (key, value) VALUES ('active_semester', $1) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value",
+      [String(nextSem)]
+    );
+
+    // 3. Archive all current active student courses
+    // 'active' -> 'completed'
+    await client.query(
+      "UPDATE student_courses SET status = 'completed' WHERE status = 'active'"
+    );
+
+    // 4. Clear timetable and exam schedule for the new semester
+    await client.query("DELETE FROM timetable");
+    await client.query("DELETE FROM exam_schedules");
+
+    // 5. If the next semester is odd (3, 5, 7, etc.), increment students level by 1
+    if (nextSem % 2 !== 0) {
+      await client.query(
+        "UPDATE students SET level = level + 1 WHERE level < 4"
+      );
+    }
+
+    await client.query('COMMIT');
+    res.json({ message: 'Semester upgraded successfully', active_semester: nextSem });
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error during semester transition:', error);
+    res.status(500).json({ message: error.message });
+  } finally {
+    client.release();
+  }
+});
 
 module.exports = router;

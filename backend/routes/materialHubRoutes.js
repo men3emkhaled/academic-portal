@@ -18,6 +18,7 @@ const {
 router.get('/:courseId', studentAuth, getPosts);
 router.post('/', studentAuth, uploadMaterial.single('file'), handleMulterError, createPost);
 router.patch('/:id/review', studentAuth, reviewPost);
+router.put('/:id', studentAuth, reviewPost);
 router.delete('/:id', studentAuth, deletePost);
 
 // Upvote, Bookmark & Comments routes

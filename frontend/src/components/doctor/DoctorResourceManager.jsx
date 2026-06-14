@@ -16,7 +16,7 @@ const DoctorResourceManager = ({ courses }) => {
   const [resources, setResources] = useState([]);
   const [editingResource, setEditingResource] = useState(null);
   const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({ type: 'video', title: '', url: '' });
+  const [formData, setFormData] = useState({ type: 'video', title: '', url: '', batch: 2025 });
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(false);
   const [recordingFile, setRecordingFile] = useState(null);
@@ -106,14 +106,14 @@ const DoctorResourceManager = ({ courses }) => {
   const resetForm = () => {
     setEditingResource(null);
     setShowForm(false);
-    setFormData({ type: 'video', title: '', url: '' });
+    setFormData({ type: 'video', title: '', url: '', batch: 2025 });
     setRecordingFile(null);
   };
 
   const startEdit = (r) => {
     setEditingResource(r);
     setShowForm(true);
-    setFormData({ type: r.type, title: r.title, url: r.url });
+    setFormData({ type: r.type, title: r.title, url: r.url, batch: r.batch || 2025 });
     setRecordingFile(null);
   };
 
@@ -310,7 +310,7 @@ const DoctorResourceManager = ({ courses }) => {
                                         <div className="flex items-start justify-between gap-6 mb-8 relative z-10">
                                             <div className="min-w-0">
                                                 <h4 className="text-gray-900 dark:text-white font-black text-xl leading-tight truncate mb-2 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">{resource.title}</h4>
-                                                <div className="flex items-center gap-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                                                <div className="flex flex-wrap items-center gap-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">
                                                     <div className="flex items-center gap-1.5">
                                                       <Clock className="w-3.5 h-3.5" />
                                                       {new Date(resource.created_at).toLocaleDateString()}
@@ -318,6 +318,9 @@ const DoctorResourceManager = ({ courses }) => {
                                                     <div className="flex items-center gap-1.5">
                                                       <FileCheck className="w-3.5 h-3.5" />
                                                       {config.label}
+                                                    </div>
+                                                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-violet-500/10 text-violet-500 border border-violet-500/20">
+                                                      <span>Batch {resource.batch || 2025}</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -390,7 +393,7 @@ const DoctorResourceManager = ({ courses }) => {
                   </div>
                   
                   <form onSubmit={handleSubmit} className="p-8 space-y-8">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                           <div className="space-y-3">
                               <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ms-1">Type</label>
                               <div className="relative">
@@ -403,6 +406,21 @@ const DoctorResourceManager = ({ courses }) => {
                                     <option value="pdf" className="bg-white dark:bg-black">PDF Document</option>
                                     <option value="recording" className="bg-white dark:bg-black">Audio Clip</option>
                                     <option value="playlist" className="bg-white dark:bg-black">Study Playlist</option>
+                                </select>
+                                <ChevronDown className="absolute end-6 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                              </div>
+                          </div>
+                          <div className="space-y-3">
+                              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ms-1">Target Batch</label>
+                              <div className="relative">
+                                <select
+                                    value={formData.batch}
+                                    onChange={(e) => setFormData({ ...formData, batch: parseInt(e.target.value, 10) })}
+                                    className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-white/10 rounded-2xl py-5 px-8 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-4 focus:ring-violet-500/5 transition-all font-bold appearance-none cursor-pointer"
+                                >
+                                    {[2026, 2025, 2024, 2023].map(yr => (
+                                        <option key={yr} value={yr} className="bg-white dark:bg-black">Batch {yr}</option>
+                                    ))}
                                 </select>
                                 <ChevronDown className="absolute end-6 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                               </div>

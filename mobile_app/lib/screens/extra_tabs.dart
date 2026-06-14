@@ -1,10 +1,11 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:image_picker/image_picker.dart';
 import '../providers/data_provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/theme_provider.dart';
@@ -328,6 +329,70 @@ class _QuizzesTabState extends State<QuizzesTab> {
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
       children: [
+        Row(
+          children: [
+            Expanded(
+              child: GlassContainer(
+                padding: const EdgeInsets.all(16),
+                backgroundColor: colors.card,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(LucideIcons.barChart2, color: AppTheme.primaryBlue, size: 24),
+                    const SizedBox(height: 8),
+                    Text('AVG SCORE', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: colors.textSecondary, letterSpacing: 1.2)),
+                    const SizedBox(height: 4),
+                    Text('${avg.toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '')}%', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: colors.textPrimary)),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: GlassContainer(
+                padding: const EdgeInsets.all(16),
+                backgroundColor: colors.card,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(LucideIcons.checkCircle, color: Colors.greenAccent, size: 24),
+                    const SizedBox(height: 8),
+                    Text('COMPLETED', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: colors.textSecondary, letterSpacing: 1.2)),
+                    const SizedBox(height: 4),
+                    Text('$comp Completed', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: colors.textPrimary)),
+                    Text('$pend Pending', style: TextStyle(fontSize: 11, color: colors.textHint, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        GlassContainer(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          backgroundColor: colors.card,
+          child: Row(
+            children: [
+              const Icon(LucideIcons.refreshCw, color: Colors.green, size: 16),
+              const SizedBox(width: 8),
+              Text(
+                'Sync status:',
+                style: TextStyle(fontSize: 12, color: colors.textSecondary, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(width: 4),
+              const Text(
+                'Synced with Server',
+                style: TextStyle(fontSize: 12, color: Colors.green, fontWeight: FontWeight.w900),
+              ),
+              const Spacer(),
+              Text(
+                'Just Now',
+                style: TextStyle(fontSize: 10, color: colors.textHint),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 24),
         Stack(
           clipBehavior: Clip.none,
           children: [
@@ -824,6 +889,7 @@ class TasksTab extends StatefulWidget {
 class _TasksTabState extends State<TasksTab> {
   final TextEditingController _titleCtl = TextEditingController();
   final TextEditingController _descCtl = TextEditingController();
+  dynamic _editingTask;
 
   void _toggle(dynamic t, bool st) {
     final dp = context.read<DataProvider>();
@@ -874,21 +940,43 @@ class _TasksTabState extends State<TasksTab> {
     if (mounted) context.read<DataProvider>().fetchExtraModules();
   }
 
-  Future<void> _add() async {
+  Future<void> _saveTask() async {
     if (_titleCtl.text.trim().isEmpty) return;
-    await ApiService().dio.post(
-      '/student/personal-tasks',
-      data: {'title': _titleCtl.text, 'description': _descCtl.text},
-    );
+    if (_editingTask != null) {
+      await ApiService().dio.put(
+        '/student/personal-tasks/${_editingTask['id']}',
+        data: {
+          'title': _titleCtl.text.trim(),
+          'description': _descCtl.text.trim(),
+          'is_completed': _editingTask['is_completed'] ?? 0,
+          'order_index': _editingTask['order_index'] ?? 0,
+        },
+      );
+    } else {
+      await ApiService().dio.post(
+        '/student/personal-tasks',
+        data: {'title': _titleCtl.text.trim(), 'description': _descCtl.text.trim()},
+      );
+    }
     _titleCtl.clear();
     _descCtl.clear();
+    _editingTask = null;
     if (mounted) {
       Navigator.pop(context);
       context.read<DataProvider>().fetchExtraModules();
     }
   }
 
-  void _showForm() {
+  void _showForm({dynamic task}) {
+    if (task != null) {
+      _editingTask = task;
+      _titleCtl.text = task['title'] ?? '';
+      _descCtl.text = task['description'] ?? '';
+    } else {
+      _editingTask = null;
+      _titleCtl.clear();
+      _descCtl.clear();
+    }
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -907,9 +995,9 @@ class _TasksTabState extends State<TasksTab> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'New Task',
-                style: TextStyle(
+              Text(
+                _editingTask != null ? 'Edit Task' : 'New Task',
+                style: const TextStyle(
                   color: AppTheme.primaryBlue,
                   fontWeight: FontWeight.bold,
                   fontSize: 20,
@@ -992,7 +1080,7 @@ class _TasksTabState extends State<TasksTab> {
                   Expanded(
                     flex: 2,
                     child: GestureDetector(
-                      onTap: _add,
+                      onTap: _saveTask,
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         decoration: BoxDecoration(
@@ -1345,6 +1433,17 @@ class _TasksTabState extends State<TasksTab> {
                                     ),
                                     Row(
                                       children: [
+                                        GestureDetector(
+                                          onTap: () => _showForm(task: t),
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Icon(
+                                              LucideIcons.edit3,
+                                              color: colors.textSecondary,
+                                              size: 20,
+                                            ),
+                                          ),
+                                        ),
                                         GestureDetector(
                                           onTap: () => _del(t),
                                           child: const Padding(
@@ -1711,17 +1810,71 @@ class NotificationsTab extends StatelessWidget {
     ctx.read<DataProvider>().fetchExtraModules();
   }
 
-  String _formatDate(String iso) {
+  String _formatDate(BuildContext context, String iso) {
     try {
+      final isAr = context.read<LocaleProvider>().languageCode == 'ar';
       final date = DateTime.parse(iso).toLocal();
       final diff = DateTime.now().difference(date);
-      if (diff.inMinutes < 1) return 'Just now';
-      if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
-      if (diff.inHours < 24) return '${diff.inHours}h ago';
-      if (diff.inDays == 1) return 'Yesterday';
-      return '${diff.inDays}d ago';
+      if (isAr) {
+        if (diff.inMinutes < 1) return 'الآن';
+        if (diff.inMinutes < 60) return 'منذ ${diff.inMinutes} دقيقة';
+        if (diff.inHours < 24) return 'منذ ${diff.inHours} ساعة';
+        if (diff.inDays == 1) return 'أمس';
+        if (diff.inDays < 7) return 'منذ ${diff.inDays} أيام';
+        return '${date.year}/${date.month}/${date.day}';
+      } else {
+        if (diff.inMinutes < 1) return 'Just now';
+        if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
+        if (diff.inHours < 24) return '${diff.inHours}h ago';
+        if (diff.inDays == 1) return 'Yesterday';
+        if (diff.inDays < 7) return '${diff.inDays} days ago';
+        return '${date.year}/${date.month}/${date.day}';
+      }
     } catch (_) {
       return '';
+    }
+  }
+
+  Map<String, dynamic> _getStyle(String title, String content) {
+    final tL = title.toLowerCase();
+    final cL = content.toLowerCase();
+    
+    final isGrade = tL.contains('grade') || cL.contains('grade') || tL.contains('score') || cL.contains('score') ||
+                     tL.contains('درجات') || cL.contains('درجات') || tL.contains('درجة') || cL.contains('درجة');
+    final isSecurity = tL.contains('security') || cL.contains('security') || tL.contains('login') || cL.contains('login') ||
+                       tL.contains('password') || cL.contains('password') || tL.contains('أمان') || cL.contains('دخول') ||
+                       tL.contains('كلمة المرور') || cL.contains('كلمة المرور');
+    final isEvent = tL.contains('contest') || cL.contains('contest') || tL.contains('event') || cL.contains('event') ||
+                    tL.contains('مسابقة') || cL.contains('مسابقة') || tL.contains('فعالية') || cL.contains('فعالية');
+                    
+    if (isGrade) {
+      return {
+        'icon': LucideIcons.trendingUp,
+        'color': const Color(0xFF3B82F6), // Blue
+        'category_en': 'Grades Release',
+        'category_ar': 'نزول الدرجات',
+      };
+    } else if (isSecurity) {
+      return {
+        'icon': LucideIcons.shieldCheck,
+        'color': const Color(0xFFF43F5E), // Rose Red
+        'category_en': 'Security Alert',
+        'category_ar': 'تنبيه أمان',
+      };
+    } else if (isEvent) {
+      return {
+        'icon': LucideIcons.trophy,
+        'color': const Color(0xFF10B981), // Emerald Green
+        'category_en': 'Contest & Events',
+        'category_ar': 'مسابقات وفعاليات',
+      };
+    } else {
+      return {
+        'icon': LucideIcons.info,
+        'color': const Color(0xFF10B981), // Emerald Green
+        'category_en': 'System Info',
+        'category_ar': 'تحديث النظام',
+      };
     }
   }
 
@@ -1730,216 +1883,365 @@ class NotificationsTab extends StatelessWidget {
     final dp = context.watch<DataProvider>();
     final colors = Theme.of(context).extension<AppColors>()!;
     final notifs = dp.notifications;
+    final isAr = context.read<LocaleProvider>().languageCode == 'ar';
+    final unreadCount = notifs.where((n) => n['is_read'] != 1 && n['is_read'] != true).length;
 
     return Scaffold(
       backgroundColor: colors.background,
       body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Stack(
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const GradientText('Notifications'),
-                  if (notifs.any(
-                    (n) => n['is_read'] != 1 && n['is_read'] != true,
-                  ))
-                    TextButton(
-                      onPressed: () => _readAll(context),
-                      child: const Text(
-                        'MARK ALL READ',
-                        style: TextStyle(
-                          color: Colors.white54,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 10,
-                          letterSpacing: 1.2,
-                        ),
-                      ),
-                    ),
-                ],
+            // Background Decor (Gradient Bubbles)
+            Positioned(
+              top: -80,
+              right: -80,
+              child: ImageFiltered(
+                imageFilter: ImageFilter.blur(sigmaX: 80, sigmaY: 80),
+                child: Container(
+                  width: 200,
+                  height: 200,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF8B5CF6).withOpacity(0.06), // purple
+                    shape: BoxShape.circle,
+                  ),
+                ),
               ),
             ),
-            Expanded(
-              child: notifs.isEmpty
-                  ? Center(
-                      child: Text(
-                        'All caught up! ✅',
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: colors.textSecondary,
+            Positioned(
+              bottom: 40,
+              left: -60,
+              child: ImageFiltered(
+                imageFilter: ImageFilter.blur(sigmaX: 70, sigmaY: 70),
+                child: Container(
+                  width: 180,
+                  height: 180,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF2CFC7D).withOpacity(0.04), // bright green
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+            ),
+
+            // Scrollable Content
+            CustomScrollView(
+              physics: const BouncingScrollPhysics(),
+              slivers: [
+                // Hero header
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 28, 24, 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              width: 6,
+                              height: 6,
+                              decoration: const BoxDecoration(
+                                color: Color(0xFF2CFC7D),
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              isAr ? 'تنبيهات النظام' : 'SYSTEM ALERTS',
+                              style: TextStyle(
+                                fontSize: 9,
+                                fontWeight: FontWeight.w900,
+                                color: colors.textHint,
+                                letterSpacing: 2.5,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    )
-                  : ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      itemCount: notifs.length,
-                      itemBuilder: (ctx, i) {
-                        final n = notifs[i];
-                        final isRead =
-                            n['is_read'] == 1 || n['is_read'] == true;
-
-                        Color color = AppTheme.primaryBlue;
-                        IconData ico = LucideIcons.info;
-                        final tL = (n['title'] ?? '').toString().toLowerCase();
-                        if (tL.contains('grade')) {
-                          color = Colors.purpleAccent;
-                          ico = LucideIcons.trendingUp;
-                        } else if (tL.contains('security') ||
-                            tL.contains('login')) {
-                          color = Colors.orangeAccent;
-                          ico = LucideIcons.shield;
-                        } else if (tL.contains('contest')) {
-                          color = Colors.yellowAccent;
-                          ico = LucideIcons.trophy;
-                        }
-
-                        return GestureDetector(
-                          onTap: () {
-                            if (!isRead) _read(context, n);
-                          },
-                          child: GlassContainer(
-                            backgroundColor: colors.card,
-                            borderColor: isRead
-                                ? Colors.transparent
-                                : color.withOpacity(0.3),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    if (!isRead)
-                                      Container(
-                                        width: 3,
-                                        height: 44,
-                                        margin: const EdgeInsets.only(
-                                          right: 10,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: color,
-                                          borderRadius: BorderRadius.circular(
-                                            2,
-                                          ),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: color.withOpacity(0.4),
-                                              blurRadius: 8,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    Container(
-                                      width: 44,
-                                      height: 44,
-                                      decoration: BoxDecoration(
-                                        color: color.withOpacity(0.15),
-                                        borderRadius: BorderRadius.circular(14),
-                                      ),
-                                      child: Icon(ico, color: color, size: 22),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            n['title'] ?? '',
-                                            softWrap: true,
-                                            textDirection: detectTextDir(
-                                              n['title'] ?? '',
-                                            ),
-                                            style: TextStyle(
-                                              fontWeight: isRead
-                                                  ? FontWeight.bold
-                                                  : FontWeight.w900,
-                                              fontSize: 15,
-                                              color: isRead
-                                                  ? colors.textSecondary
-                                                  : colors.textPrimary,
-                                            ),
-                                          ),
-                                          if ((n['created_at'] ?? '')
-                                              .toString()
-                                              .isNotEmpty)
-                                            Text(
-                                              _formatDate(
-                                                n['created_at'].toString(),
-                                              ),
-                                              style: TextStyle(
-                                                fontSize: 10,
-                                                color: color.withOpacity(0.7),
-                                                fontWeight: FontWeight.bold,
-                                                letterSpacing: 1,
-                                              ),
-                                            ),
-                                        ],
-                                      ),
-                                    ),
-                                    if (!isRead)
-                                      Container(
-                                        width: 8,
-                                        height: 8,
-                                        decoration: BoxDecoration(
-                                          color: color,
-                                          shape: BoxShape.circle,
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: color.withOpacity(0.5),
-                                              blurRadius: 6,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                  ],
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                isAr ? 'الإشعارات' : 'Notification',
+                                style: TextStyle(
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.w900,
+                                  color: colors.textPrimary,
+                                  letterSpacing: -1,
                                 ),
-                                const SizedBox(height: 10),
-                                RenderContent(
-                                  text: n['content'] ?? n['message'] ?? '',
-                                  textStyle: TextStyle(
-                                    color: colors.textSecondary,
-                                    fontSize: 13,
-                                    height: 1.5,
+                              ),
+                            ),
+                            if (unreadCount > 0)
+                              GestureDetector(
+                                onTap: () => _readAll(context),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF2CFC7D),
+                                    borderRadius: BorderRadius.circular(20),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color(0xFF2CFC7D).withOpacity(0.3),
+                                        blurRadius: 12,
+                                        offset: const Offset(0, 4),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Text(
+                                    isAr ? 'تحديد الكل كمقروء' : 'MARK ALL READ',
+                                    style: const TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w900,
+                                      letterSpacing: 0.5,
+                                    ),
                                   ),
                                 ),
-                                if (!isRead) ...[
-                                  const SizedBox(height: 10),
-                                  Align(
-                                    alignment: Alignment.centerRight,
-                                    child: GestureDetector(
-                                      onTap: () => _read(context, n),
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 12,
-                                          vertical: 6,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: color.withOpacity(0.1),
-                                          borderRadius: BorderRadius.circular(
-                                            20,
-                                          ),
-                                        ),
-                                        child: Text(
-                                          'MARK AS READ',
-                                          style: TextStyle(
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.w900,
-                                            color: color,
-                                            letterSpacing: 1.2,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ],
+                              ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // Bento Statistics Card
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                    child: GlassContainer(
+                      backgroundColor: colors.card,
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            isAr 
+                              ? 'تنبيهات حالة النظام، نزول درجات المواد، والإعلانات الرسمية.'
+                              : 'Grades, announcements, and system updates.',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                              color: colors.textSecondary,
+                              height: 1.4,
                             ),
                           ),
-                        );
-                      },
+                          const SizedBox(height: 20),
+                          Container(
+                            height: 1,
+                            color: colors.borderSubtle,
+                          ),
+                          const SizedBox(height: 20),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      '$unreadCount',
+                                      style: const TextStyle(
+                                        fontSize: 32,
+                                        fontWeight: FontWeight.w900,
+                                        color: Color(0xFF2CFC7D),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      isAr ? 'غير مقروء' : 'UNREAD',
+                                      style: TextStyle(
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.w900,
+                                        color: colors.textHint,
+                                        letterSpacing: 1.5,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                width: 1,
+                                height: 50,
+                                color: colors.borderSubtle,
+                              ),
+                              const SizedBox(width: 24),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      '${notifs.length}',
+                                      style: TextStyle(
+                                        fontSize: 32,
+                                        fontWeight: FontWeight.w900,
+                                        color: colors.textPrimary,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      isAr ? 'الإجمالي' : 'TOTAL',
+                                      style: TextStyle(
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.w900,
+                                        color: colors.textHint,
+                                        letterSpacing: 1.5,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
+                  ),
+                ),
+
+                const SliverToBoxAdapter(child: SizedBox(height: 16)),
+
+                // Notifications List
+                notifs.isEmpty
+                    ? SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(LucideIcons.bellOff, size: 48, color: colors.textHint),
+                              const SizedBox(height: 16),
+                              Text(
+                                isAr ? 'لا توجد إشعارات جديدة ✅' : 'All caught up! ✅',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: colors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    : SliverPadding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        sliver: SliverList(
+                          delegate: SliverChildBuilderDelegate(
+                            (ctx, i) {
+                              final n = notifs[i];
+                              final isRead = n['is_read'] == 1 || n['is_read'] == true;
+                              final style = _getStyle(n['title'] ?? '', n['content'] ?? n['message'] ?? '');
+                              final Color categoryColor = style['color'];
+                              final IconData categoryIcon = style['icon'];
+
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 16),
+                                child: GestureDetector(
+                                  onTap: () {
+                                    if (!isRead) _read(context, n);
+                                  },
+                                  child: GlassContainer(
+                                    backgroundColor: colors.card,
+                                    margin: EdgeInsets.zero,
+                                    padding: const EdgeInsets.all(20),
+                                    borderColor: isRead
+                                        ? colors.borderSubtle
+                                        : categoryColor.withOpacity(0.2),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                          children: [
+                                            Container(
+                                              padding: const EdgeInsets.all(10),
+                                              decoration: BoxDecoration(
+                                                color: categoryColor.withOpacity(0.12),
+                                                borderRadius: BorderRadius.circular(12),
+                                              ),
+                                              child: Icon(
+                                                categoryIcon,
+                                                color: categoryColor,
+                                                size: 20,
+                                              ),
+                                            ),
+                                            Text(
+                                              _formatDate(context, n['created_at']?.toString() ?? ''),
+                                              style: TextStyle(
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.w900,
+                                                color: colors.textHint,
+                                                letterSpacing: 0.5,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 16),
+                                        Text(
+                                          n['title'] ?? '',
+                                          softWrap: true,
+                                          textDirection: detectTextDir(n['title'] ?? ''),
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w900,
+                                            fontSize: 17,
+                                            letterSpacing: -0.5,
+                                            color: isRead
+                                                ? colors.textSecondary
+                                                : colors.textPrimary,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        RenderContent(
+                                          text: n['content'] ?? n['message'] ?? '',
+                                          textStyle: TextStyle(
+                                            color: isRead
+                                                ? colors.textSecondary.withOpacity(0.7)
+                                                : colors.textSecondary,
+                                            fontSize: 13.5,
+                                            height: 1.5,
+                                          ),
+                                        ),
+                                        if (!isRead) ...[
+                                          const SizedBox(height: 16),
+                                          Container(
+                                            height: 1,
+                                            color: colors.borderSubtle,
+                                          ),
+                                          const SizedBox(height: 12),
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.end,
+                                            children: [
+                                              Icon(
+                                                LucideIcons.zap,
+                                                size: 12,
+                                                color: categoryColor,
+                                              ),
+                                              const SizedBox(width: 6),
+                                              Text(
+                                                isAr ? 'اضغط للتحديد كمقروء' : 'TAP TO MARK READ',
+                                                style: TextStyle(
+                                                  fontSize: 10,
+                                                  fontWeight: FontWeight.w900,
+                                                  color: categoryColor,
+                                                  letterSpacing: 1,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                            childCount: notifs.length,
+                          ),
+                        ),
+                      ),
+                const SliverToBoxAdapter(child: SizedBox(height: 100)),
+              ],
             ),
           ],
         ),
@@ -1964,6 +2266,187 @@ class _SettingsTabState extends State<SettingsTab> {
   final TextEditingController _newPassCtl = TextEditingController();
   final TextEditingController _confirmPassCtl = TextEditingController();
   bool _isLoadingPW = false;
+  bool _isUploadingAvatar = false;
+
+  Future<void> _pickAndUploadAvatar() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 80,
+      maxWidth: 500,
+    );
+    if (pickedFile == null) return;
+
+    setState(() => _isUploadingAvatar = true);
+    final auth = context.read<AuthProvider>();
+    final res = await auth.uploadAvatar(pickedFile.path);
+    setState(() => _isUploadingAvatar = false);
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: res['success'] == true ? Colors.greenAccent : Colors.redAccent,
+          content: Text(
+            res['success'] == true ? 'Avatar updated successfully!' : (res['message'] ?? 'Failed to upload avatar'),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: res['success'] == true ? Colors.black : Colors.white,
+            ),
+          ),
+        ),
+      );
+    }
+  }
+
+  Widget _buildProfileCard(AppColors colors) {
+    final student = context.watch<AuthProvider>().student;
+    if (student == null) return const SizedBox.shrink();
+
+    final avatarUrl = student['avatar_url']?.toString() ?? '';
+    final name = student['name']?.toString() ?? '';
+    final studentId = student['id']?.toString() ?? '';
+    final level = student['level']?.toString() ?? '';
+    final section = student['section']?.toString() ?? '';
+
+    return GlassContainer(
+      padding: const EdgeInsets.all(20),
+      backgroundColor: colors.card,
+      borderColor: colors.borderSubtle,
+      child: Row(
+        children: [
+          // Avatar
+          GestureDetector(
+            onTap: _isUploadingAvatar ? null : _pickAndUploadAvatar,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: AppTheme.primaryBlue.withValues(alpha: 0.3), width: 2),
+                    image: avatarUrl.isNotEmpty
+                        ? DecorationImage(image: NetworkImage(avatarUrl), fit: BoxFit.cover)
+                        : null,
+                  ),
+                  child: avatarUrl.isEmpty
+                      ? Icon(LucideIcons.user, size: 40, color: colors.textSecondary)
+                      : null,
+                ),
+                if (_isUploadingAvatar)
+                  Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.5),
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    child: const Center(
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppTheme.primaryBlue,
+                      ),
+                    ),
+                  )
+                else
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        color: AppTheme.primaryBlue,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(LucideIcons.camera, size: 12, color: Colors.black),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 16),
+          // Info
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      'ZNU-$studentId',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: colors.textHint,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: AppTheme.primaryBlue.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: const Text(
+                        'ACTIVE',
+                        style: TextStyle(
+                          fontSize: 8,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.primaryBlue,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  name,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                    color: colors.textPrimary,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 8),
+                // Level / Section Row
+                Row(
+                  children: [
+                    _buildBadge('Level $level', colors),
+                    const SizedBox(width: 8),
+                    _buildBadge('Sec $section', colors),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBadge(String text, AppColors colors) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: colors.surfaceLight,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: colors.borderSubtle, width: 0.5),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.bold,
+          color: colors.textSecondary,
+        ),
+      ),
+    );
+  }
 
   @override
   void initState() {
@@ -2722,6 +3205,9 @@ class _SettingsTabState extends State<SettingsTab> {
               child: ListView(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 children: [
+                  const SizedBox(height: 12),
+                  _buildProfileCard(colors),
+                  const SizedBox(height: 24),
                   Text(
                     'ACCOUNT',
                     style: TextStyle(

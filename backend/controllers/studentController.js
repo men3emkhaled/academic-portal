@@ -74,6 +74,8 @@ const uploadStudentsExcel = async (req, res) => {
         department_id = deptMap[deptCode];
       }
 
+      const batch = row['Batch'] || row['batch'] || existingStudent.batch || 2025;
+
       // بناء جملة UPDATE ديناميكياً لكل طالب
       const updates = [];
       const values = [];
@@ -91,6 +93,9 @@ const uploadStudentsExcel = async (req, res) => {
       updates.push(`department_id = $${paramIndex++}`);
       values.push(department_id);
 
+      updates.push(`batch = $${paramIndex++}`);
+      values.push(parseInt(batch, 10));
+
       if (passwordHashToSet !== null) {
         updates.push(`password_hash = $${paramIndex++}`);
         values.push(passwordHashToSet);
@@ -105,10 +110,7 @@ const uploadStudentsExcel = async (req, res) => {
       if (result.rows.length > 0) {
         const updatedStudent = result.rows[0];
         updatedStudents.push(updatedStudent);
-        // تسجيل الطالب في مواد القسم
-        if (department_id) {
-          await Student.enrollInDepartmentCourses(studentId, department_id, client);
-        }
+        // ✅ Auto-enrollment removed — students register courses manually now
       }
     }
 
@@ -182,7 +184,7 @@ const updateStudentDepartment = async (req, res) => {
       return res.status(404).json({ message: 'Student not found' });
     }
 
-    await Student.enrollInDepartmentCourses(id, department_id);
+    // ✅ Auto-enrollment removed — students register courses manually now
 
     res.json(student);
   } catch (error) {

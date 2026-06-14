@@ -36,6 +36,7 @@ const StudentDashboard = () => {
 
   const [greeting, setGreeting] = useState('');
   const [isCardExpanded, setIsCardExpanded] = useState(false);
+  const [activeSemester, setActiveSemester] = useState(null);
 
   useEffect(() => {
     setGreeting(t(getGreeting()));
@@ -43,11 +44,24 @@ const StudentDashboard = () => {
     return () => clearInterval(interval);
   }, [t]);
 
+  useEffect(() => {
+    studentApi.get('/student/active-semester')
+      .then(res => setActiveSemester(Number(res.data?.active_semester) || null))
+      .catch(() => setActiveSemester(null));
+  }, []);
+
   const notifications = useMemo(() => {
     return allNotifications.slice(0, 3);
   }, [allNotifications]);
 
-  const grades = gradesData.grades || [];
+  const grades = useMemo(() => {
+    const all = gradesData.grades || [];
+    if (activeSemester === null) return all.filter(g => g.enrollment_status === 'active' || !g.enrollment_status);
+    return all.filter(g =>
+      (g.enrollment_status === 'active' || !g.enrollment_status) &&
+      Number(g.semester) >= activeSemester
+    );
+  }, [gradesData.grades, activeSemester]);
   const loading = loadingGrades;
   const notifLoading = loadingNotifications;
 
@@ -148,13 +162,13 @@ const StudentDashboard = () => {
                     <div 
                       key={idx}
                       onClick={() => navigate(`/student/course/${grade.course_id}`)}
-                      className="group bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-8 space-y-8 cursor-pointer hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all duration-700 hover:-translate-y-2 hover:shadow-2xl shadow-sm"
+                      className="group bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-8 space-y-8 cursor-pointer hover:border-[#10b981] dark:hover:border-[#2cfc7d] transition-all duration-700 hover:-translate-y-2 hover:shadow-2xl shadow-sm"
                     >
                       <div className="flex justify-between items-start">
-                         <div className="w-12 h-12 rounded-2xl bg-gray-50 dark:bg-[#2cfc7d]/10 flex items-center justify-center text-[#10b981] dark:text-[#2cfc7d] group-hover:bg-emerald-500 dark:group-hover:bg-black group-hover:text-white transition-all duration-500">
+                         <div className="w-12 h-12 rounded-2xl bg-gray-50 dark:bg-[#2cfc7d]/10 flex items-center justify-center text-[#10b981] dark:text-[#2cfc7d] group-hover:bg-[#10b981] dark:group-hover:bg-[#2cfc7d] group-hover:text-white dark:group-hover:text-black transition-all duration-500">
                             <BookOpen className="w-6 h-6" />
                          </div>
-                         <div className="w-10 h-10 rounded-full border border-gray-100 dark:border-white/10 flex items-center justify-center group-hover:border-white/30 transition-all duration-500">
+                         <div className="w-10 h-10 rounded-full border border-gray-100 dark:border-white/10 flex items-center justify-center group-hover:border-[#10b981] dark:group-hover:border-[#2cfc7d] group-hover:text-[#10b981] dark:group-hover:text-[#2cfc7d] transition-all duration-500">
                             <ArrowRight className={`w-4 h-4 ${isAr ? 'rotate-180' : ''}`} />
                          </div>
                       </div>

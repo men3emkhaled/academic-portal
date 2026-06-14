@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-  static const String baseUrl = String.fromEnvironment('API_URL', defaultValue: 'https://your-server.com/api');
+  static const String baseUrl = String.fromEnvironment('API_URL', defaultValue: 'https://academic-portal-production-2d7a.up.railway.app/api');
   final Dio dio;
 
   ApiService()
@@ -10,7 +10,7 @@ class ApiService {
           baseUrl: baseUrl,
           connectTimeout: const Duration(seconds: 15),
           receiveTimeout: const Duration(seconds: 15),
-          headers: {'Content-Type': 'application/json'},
+          headers: {'Content-Type': 'application/json', 'Origin': 'https://www.znu-cs.online'},
         )) {
     dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {

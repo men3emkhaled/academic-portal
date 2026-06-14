@@ -9,10 +9,14 @@ const COURSES_CACHE_KEY = 'courses:all';
 // جلب جميع المواد (مع معلومات القسم إذا وجد)
 const getAllCourses = async (req, res) => {
     try {
-        // 1. التحقق من وجود الداتا في الكاش
-        const cachedCourses = await getCache(COURSES_CACHE_KEY);
-        if (cachedCourses) {
-            return res.json(cachedCourses);
+        // 1. التحقق من وجود الداتا في الكاش (تخطي في حالة طلب مسح الكاش)
+        if (req.query.clear === 'true') {
+            await clearCachePattern('courses:*');
+        } else {
+            const cachedCourses = await getCache(COURSES_CACHE_KEY);
+            if (cachedCourses) {
+                return res.json(cachedCourses);
+            }
         }
 
         // 2. إذا لم تكن في الكاش، جلبها من الداتابيز
@@ -70,28 +74,30 @@ const createCourse = async (req, res) => {
     try {
         console.log('📦 Received body for POST /api/courses:', req.body);
         
-        const { name, semester, description, max_score, department_id } = req.body;
+        const { name, semester, description, max_score, department_id, code, credits, credit_hours } = req.body;
         
         // التحقق من الحقول المطلوبة
-        if (!name || !semester || !description) {
+        if (!name || !semester) {
             return res.status(400).json({ 
-                message: 'Missing required fields: name, semester, description' 
+                message: 'Missing required fields: name, semester' 
             });
         }
         
-        // إذا كان department_id غير موجود، يمكنك تعيين قيمة افتراضية (مثلاً 1 لقسم CS)
-        // أو إرجاع خطأ إذا كان الحقل مطلوباً
         const finalDepartmentId = department_id || null;
+        const finalMaxScore = max_score || 40;
+        const finalCreditHours = credit_hours || credits || 3;
         
         const safeName = xss(name);
-        const safeDescription = xss(description);
+        const safeDescription = xss(description || '.');
         
         const course = await Course.create(
             safeName, 
             semester, 
             safeDescription, 
-            max_score || 40, 
-            finalDepartmentId
+            finalMaxScore, 
+            finalDepartmentId,
+            code || null,
+            finalCreditHours
         );
         
         // مسح الكاش لأن البيانات تغيرت
@@ -100,7 +106,6 @@ const createCourse = async (req, res) => {
         res.status(201).json(course);
     } catch (error) {
         console.error('❌ Error in createCourse:', error);
-        // إرجاع رسالة خطأ مفصلة للمطور (في بيئة التطوير)
         res.status(500).json({ 
             message: error.message,
             details: process.env.NODE_ENV === 'development' ? error.stack : undefined
@@ -112,18 +117,22 @@ const createCourse = async (req, res) => {
 const updateCourse = async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, semester, description, max_score, department_id } = req.body;
+        const { name, semester, description, max_score, department_id, code, credits, credit_hours } = req.body;
         
         const safeName = name ? xss(name) : undefined;
         const safeDescription = description ? xss(description) : undefined;
+        const finalMaxScore = max_score || 40; // fallback to avoid NOT NULL violation
+        const finalCreditHours = credit_hours || credits || 3;
         
         const course = await Course.update(
             id, 
             safeName, 
             semester, 
             safeDescription, 
-            max_score, 
-            department_id
+            finalMaxScore, 
+            department_id,
+            code,
+            finalCreditHours
         );
         
         if (!course) return res.status(404).json({ message: 'Course not found' });

@@ -33,7 +33,7 @@ import {
   CheckCircle, Database, LogOut, Lock, UserCheck,
   TrendingUp, Award, Activity, ShieldCheck, ChevronRight,
   Smartphone, Heart, ScrollText, Mail, ClipboardList, Sun, Moon, CheckSquare, Menu, X,
-  Terminal, Shield
+  Terminal, Shield, Zap, Loader2
 } from 'lucide-react';
 
 import AdminSidebar from '../components/admin/AdminSidebar';
@@ -116,6 +116,32 @@ const AdminDashboard = () => {
   const [editingNotification, setEditingNotification] = useState(null);
   const [editNotifForm, setEditNotifForm] = useState({ title: '', content: '', is_read: false });
   const [studentsFile, setStudentsFile] = useState(null);
+  const [transitioning, setTransitioning] = useState(false);
+
+  const handleUpgradeSemester = async () => {
+    const isAr = i18n.language === 'ar';
+    const confirmMessage = isAr
+      ? 'تحذير هام جداً!\n\nهل أنت متأكد من ترقية الفصل الدراسي؟ هذا الإجراء سيقوم بـ:\n1. أرشفة جميع المواد الحالية للطلاب كـ "مواد مكتملة".\n2. مسح الجدول الدراسي وجدول الامتحانات الحالي.\n3. ترقية مستوى (ليفل) الطلاب في حال الانتقال لسنة دراسية جديدة (ترم فردي).\n4. فتح التسجيل للطلاب يدوياً للترم الجديد.\n\nهذا الإجراء غير قابل للتراجع. هل تريد الاستمرار؟'
+      : 'CRITICAL WARNING!\n\nAre you sure you want to upgrade the semester? This will:\n1. Archive all active student courses as completed.\n2. Delete current timetable and exam schedules.\n3. Upgrade student levels if transitioning to a new academic year.\n4. Students must register manually for the new semester.\n\nThis action cannot be undone. Do you wish to proceed?';
+
+    if (!window.confirm(confirmMessage)) return;
+
+    setTransitioning(true);
+    try {
+      await api.post('/admin/upgrade-semester');
+      toast.success(isAr ? 'تم ترقية الفصل الدراسي بنجاح!' : 'Semester upgraded successfully!');
+      fetchStudents();
+      fetchCourses();
+      fetchDepartments();
+      fetchNotifications();
+    } catch (error) {
+      console.error(error);
+      const msg = error.response?.data?.message || error.message;
+      toast.error((isAr ? 'فشلت عملية الترقية: ' : 'Upgrade failed: ') + msg);
+    } finally {
+      setTransitioning(false);
+    }
+  };
 
   // Lazy fetch: only load data needed for the active tab
   useEffect(() => {
@@ -488,6 +514,41 @@ const AdminDashboard = () => {
                         </div>
                       ))}
                     </div>
+                  </div>
+                </div>
+
+                {/* System Management / Semester Transition */}
+                <div className="bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[3rem] p-8 lg:p-12 shadow-sm relative overflow-hidden group">
+                  <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 to-transparent pointer-events-none" />
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 relative z-10">
+                    <div className="space-y-3 text-start">
+                      <h4 className="text-3xl font-black uppercase tracking-tight">
+                        {i18n.language === 'ar' ? 'ترقية الفصل الدراسي' : 'Upgrade Semester'}
+                      </h4>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xl font-medium">
+                        {i18n.language === 'ar' 
+                          ? 'عند الترقية، سيتم زيادة رقم الفصل الدراسي بمقدار ١، ونقل تسجيلات الطلاب الحالية إلى الأرشيف كـ (مواد منتهية). سيتم أيضاً مسح الجدول الدراسي وجدول الامتحانات الحاليين ليقوم الطلاب بالتسجيل يدوياً للترم الجديد. إذا انتقل الترم للفصل الدراسي التالي (فردي)، فسيتم ترقية ليفل الطلاب تلقائياً.'
+                          : 'Upgrading the semester will increment the active semester, archive currently registered student courses as completed, and clear the timetable/exam schedule. Students will manually enroll for the new semester. If moving to an odd semester, students level will be promoted.'}
+                      </p>
+                    </div>
+                    
+                    <button
+                      onClick={handleUpgradeSemester}
+                      disabled={transitioning}
+                      className="px-8 py-5 bg-black dark:bg-[#2cfc7d] text-white dark:text-black hover:bg-red-600 dark:hover:bg-red-500 dark:hover:text-white rounded-[2rem] font-black uppercase tracking-wider text-sm flex items-center justify-center gap-3 transition-all duration-300 shadow-xl hover:scale-105 active:scale-95 disabled:opacity-50 disabled:pointer-events-none self-start md:self-center shrink-0 border-2 border-transparent hover:border-red-600"
+                    >
+                      {transitioning ? (
+                        <>
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                          <span>{i18n.language === 'ar' ? 'جاري الترقية...' : 'Upgrading...'}</span>
+                        </>
+                      ) : (
+                        <>
+                          <Zap className="w-5 h-5" />
+                          <span>{i18n.language === 'ar' ? 'ترقية الترم الدراسي' : 'Upgrade Semester'}</span>
+                        </>
+                      )}
+                    </button>
                   </div>
                 </div>
               </div>

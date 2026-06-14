@@ -137,6 +137,31 @@ router.get('/completed-quizzes', studentAuth, async (req, res) => {
   }
 });
 
+// ── Active Semester ──
+router.get('/active-semester', async (req, res) => {
+  try {
+    const activeSemester = await db.getActiveSemester();
+    res.json({ active_semester: activeSemester });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// ── Course Registration (Student Self-Service) ──
+const {
+  getAvailableCourses: getRegAvailable,
+  getRegisteredCourses,
+  registerCourse,
+  dropCourse,
+  registerBulk,
+} = require('../controllers/courseRegistrationController');
+
+router.get('/registration/available-courses', studentAuth, getRegAvailable);
+router.get('/registration/my-courses', studentAuth, getRegisteredCourses);
+router.post('/registration/register', studentAuth, registerCourse);
+router.post('/registration/register-bulk', studentAuth, registerBulk);
+router.delete('/registration/drop/:courseId', studentAuth, dropCourse);
+
 router.get('/my-timetable', studentAuth, async (req, res) => {
   try {
     const Student = require('../models/Student');

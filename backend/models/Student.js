@@ -5,7 +5,7 @@ const SALT_ROUNDS = 10;
 class Student {
   static async findById(id) {
     const result = await db.query(
-      `SELECT s.id, s.name, s.email, s.level, s.section, s.department_id, s.role, s.permissions, s.avatar_url,
+      `SELECT s.id, s.name, s.email, s.level, s.section, s.department_id, s.role, s.permissions, s.avatar_url, s.batch,
               d.name as department_name, d.code as department_code
        FROM students s
        LEFT JOIN departments d ON s.department_id = d.id
@@ -18,7 +18,7 @@ class Student {
   // ✅ Security: Only use this for password verification / reset flows
   static async findByIdWithHash(id) {
     const result = await db.query(
-      'SELECT id, name, email, department_id, password_hash FROM students WHERE id = $1',
+      'SELECT id, name, email, department_id, password_hash, batch FROM students WHERE id = $1',
       [id]
     );
     return result.rows[0];
@@ -26,30 +26,32 @@ class Student {
 
   static async findByUsername(username) {
     const result = await db.query(
-      'SELECT id, name, email, level, section, department_id, password_hash, role, permissions, avatar_url FROM students WHERE id = $1',
+      'SELECT id, name, email, level, section, department_id, password_hash, role, permissions, avatar_url, batch FROM students WHERE id = $1',
       [username]
     );
     return result.rows[0];
   }
 
-  static async create(id, name, password, level = 1, section = null, department_id = null) {
+  static async create(id, name, password, level = 1, section = null, department_id = null, batch = 2025) {
     let finalPassword = password;
     if (password && password !== null && password !== undefined) {
       finalPassword = await bcrypt.hash(password, SALT_ROUNDS);
     }
     const sectionInt = section ? parseInt(section, 10) : null;
+    const batchInt = batch ? parseInt(batch, 10) : 2025;
     
     const result = await db.query(
-      `INSERT INTO students (id, name, password_hash, level, section, department_id) 
-       VALUES ($1, $2, $3, $4, $5, $6) 
+      `INSERT INTO students (id, name, password_hash, level, section, department_id, batch) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7) 
        ON CONFLICT (id) DO UPDATE SET 
          name = EXCLUDED.name,
          password_hash = COALESCE(EXCLUDED.password_hash, students.password_hash),
          level = EXCLUDED.level,
          section = COALESCE(EXCLUDED.section, students.section),
-         department_id = COALESCE(EXCLUDED.department_id, students.department_id)
-       RETURNING id, name, level, section, department_id`,
-      [id, name, finalPassword, level, sectionInt, department_id]
+         department_id = COALESCE(EXCLUDED.department_id, students.department_id),
+         batch = EXCLUDED.batch
+       RETURNING id, name, level, section, department_id, batch`,
+      [id, name, finalPassword, level, sectionInt, department_id, batchInt]
     );
     return result.rows[0];
   }
@@ -70,7 +72,7 @@ class Student {
 
   static async getAll() {
     const result = await db.query(`
-      SELECT s.id, s.name, s.email, s.level, s.section, s.department_id, s.role, s.permissions, s.avatar_url,
+      SELECT s.id, s.name, s.email, s.level, s.section, s.department_id, s.role, s.permissions, s.avatar_url, s.batch,
              d.name as department_name, d.code as department_code
       FROM students s
       LEFT JOIN departments d ON s.department_id = d.id
@@ -118,27 +120,9 @@ class Student {
     return result.rows[0];
   }
 
-  // ✅ تسجيل الطالب تلقائياً في جميع مواد القسم
-  static async enrollInDepartmentCourses(studentId, departmentId, client = null) {
-    if (!departmentId) return;
-    
-    const executor = client || db;
-    const coursesResult = await executor.query(
-      'SELECT id FROM courses WHERE department_id = $1',
-      [departmentId]
-    );
-    
-    const courses = coursesResult.rows;
-    
-    for (const course of courses) {
-      await executor.query(
-        `INSERT INTO student_courses (student_id, course_id, progress_percentage, status)
-         VALUES ($1, $2, 0, 'active')
-         ON CONFLICT (student_id, course_id) DO NOTHING`,
-        [studentId, course.id]
-      );
-    }
-  }
+  // ✅ Removed: Auto-enrollment is no longer used.
+  // Students now register for courses manually via the Course Registration tab.
+
 }
 
 module.exports = Student;

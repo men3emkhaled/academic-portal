@@ -9,18 +9,29 @@ class Resource {
         return result.rows;
     }
 
-    static async create(courseId, type, title, url) {
+    static async create(courseId, type, title, url, batch = 2025) {
         const result = await db.query(
-            'INSERT INTO resources (course_id, type, title, url) VALUES ($1, $2, $3, $4) RETURNING *',
-            [courseId, type, title, url]
+            'INSERT INTO resources (course_id, type, title, url, batch) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+            [courseId, type, title, url, batch]
         );
         return result.rows[0];
     }
 
-    static async update(id, type, title, url) {
+    static async update(id, type, title, url, batch) {
+        const updates = [];
+        const values = [];
+        let index = 1;
+        if (type !== undefined) { updates.push(`type = $${index++}`); values.push(type); }
+        if (title !== undefined) { updates.push(`title = $${index++}`); values.push(title); }
+        if (url !== undefined) { updates.push(`url = $${index++}`); values.push(url); }
+        if (batch !== undefined) { updates.push(`batch = $${index++}`); values.push(batch); }
+        
+        if (updates.length === 0) return null;
+        
+        values.push(id);
         const result = await db.query(
-            'UPDATE resources SET type = $1, title = $2, url = $3, updated_at = CURRENT_TIMESTAMP WHERE id = $4 RETURNING *',
-            [type, title, url, id]
+            `UPDATE resources SET ${updates.join(', ')}, updated_at = CURRENT_TIMESTAMP WHERE id = $${index} RETURNING *`,
+            values
         );
         return result.rows[0];
     }
