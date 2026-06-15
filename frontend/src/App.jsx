@@ -6,7 +6,6 @@ import { AnimatePresence, motion } from 'framer-motion';
 import PortalSwitcher from './components/PortalSwitcher';
 import PullToRefresh from './components/PullToRefresh';
 import ErrorBoundary from './components/ErrorBoundary';
-import LoadingScreen from './components/LoadingScreen';
 import ProtectedStudentRoute from './components/ProtectedStudentRoute';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { Toaster } from 'react-hot-toast';
@@ -46,6 +45,9 @@ import DoctorLogin from './pages/DoctorLogin';
 import DoctorDashboard from './pages/DoctorDashboard';
 import AdminLogin from './pages/AdminLogin';
 
+// ✅ مساعد Zag AI
+import ZagAIChat from './pages/ZagAIChat';
+
 // مكون إعادة توجيه الطالب المسجل دخوله
 const StudentLoginRedirect = () => {
   const { token, loading } = useStudentAuth();
@@ -57,13 +59,21 @@ const StudentLoginRedirect = () => {
     }
   }, [token, loading, navigate]);
 
-  if (loading) return null;
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#010101]">
+        <div className="text-center space-y-4">
+          <div className="w-16 h-16 mx-auto rounded-full bg-white/5 animate-pulse" />
+          <div className="h-3 w-32 mx-auto bg-white/5 animate-pulse rounded" />
+        </div>
+      </div>
+    );
+  }
   return <StudentLogin />;
 };
 
 // المكون الرئيسي للتطبيق (بعد تحميل حالة المصادقة)
 function AppContent() {
-  const { loading } = useStudentAuth();
   const { token: adminToken } = useAuth();
   const { t, i18n } = useTranslation();
   const location = useLocation();
@@ -111,10 +121,6 @@ function AppContent() {
     document.documentElement.lang = i18n.language;
   }, [i18n.language]);
 
-  if (loading) {
-    return <LoadingScreen text="ZNU PORTAL" />;
-  }
-
   // Show the portal switcher on login/entry pages only, but hide it if admin is logged in on /admin
   const showSwitcher = [
     '/student/login',
@@ -156,6 +162,7 @@ function AppContent() {
             <Route path="/student/settings" element={<ProtectedStudentRoute><StudentSettings /></ProtectedStudentRoute>} />
             <Route path="/student/personal-tasks" element={<ProtectedStudentRoute><StudentPersonalTasks /></ProtectedStudentRoute>} />
             <Route path="/student/menu" element={<ProtectedStudentRoute><StudentMenu /></ProtectedStudentRoute>} />
+            <Route path="/student/ai" element={<ProtectedStudentRoute><ZagAIChat /></ProtectedStudentRoute>} />
 
             {/* ✅ مسارات الاختبارات */}
             <Route path="/student/quizzes/:quizId/take" element={<ProtectedStudentRoute><QuizPage /></ProtectedStudentRoute>} />

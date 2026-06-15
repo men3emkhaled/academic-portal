@@ -171,7 +171,8 @@ export const StudentDataContextProvider = ({ children }) => {
       if (fetchedRef.current[sessionKey]) return;
       fetchedRef.current[sessionKey] = true;
 
-      // Essential on mount: notifications (shown globally), quizzes (most visited)
+      // Essential on mount: grades (used in dashboard), notifications (shown globally), quizzes (most visited)
+      fetchGrades();
       fetchNotifications();
       fetchQuizzes();
       // Timetable is also commonly needed (sidebar indicators)
@@ -189,7 +190,7 @@ export const StudentDataContextProvider = ({ children }) => {
       setExams([]);
       setOfficialTasks([]);
     }
-  }, [student, token, fetchNotifications, fetchQuizzes, fetchTimetable]);
+  }, [student, token, fetchGrades, fetchNotifications, fetchQuizzes, fetchTimetable]);
 
   return (
     <StudentDataContext.Provider value={{

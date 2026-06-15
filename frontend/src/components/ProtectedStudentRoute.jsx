@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStudentAuth } from '../context/StudentAuthContext';
-import LoadingScreen from './LoadingScreen';
+import SkeletonLayout from './SkeletonLayout';
 
 const ProtectedStudentRoute = ({ children }) => {
   const { token, loading } = useStudentAuth();
@@ -14,7 +14,7 @@ const ProtectedStudentRoute = ({ children }) => {
   }, [token, loading, navigate]);
 
   if (loading) {
-    return <LoadingScreen text="ZNU PORTAL" />;
+    return <SkeletonLayout />;
   }
 
   return token ? (

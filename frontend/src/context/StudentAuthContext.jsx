@@ -26,25 +26,47 @@ export const StudentAuthProvider = ({ children }) => {
   }, [token]);
 
   useEffect(() => {
+    let cancelled = false;
+
     const initAuth = async () => {
       const savedToken = safeGetItem('studentToken');
 
       if (savedToken) {
         setToken(savedToken);
+
         try {
           const response = await studentApi.get('/student/me');
-          setStudent(response.data);
+          if (!cancelled) {
+            setStudent(response.data);
+          }
         } catch (error) {
-          console.error('Session expired or invalid token:', error);
-          safeRemoveItem('studentToken');
-          setToken(null);
-          setStudent(null);
+          if (!cancelled) {
+            console.error('Session expired or invalid token:', error);
+            safeRemoveItem('studentToken');
+            setToken(null);
+            setStudent(null);
+          }
         }
       }
-      setLoading(false);
+      if (!cancelled) {
+        setLoading(false);
+      }
     };
 
     initAuth();
+
+    // Safety: force loading to false after 10s regardless of API response
+    const safetyTimer = setTimeout(() => {
+      if (!cancelled) {
+        console.warn('Auth check timed out — forcing loading to false, keeping token');
+        setLoading(false);
+      }
+    }, 10000);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(safetyTimer);
+    };
   }, []);
 
   const login = async (username, password, signal) => {

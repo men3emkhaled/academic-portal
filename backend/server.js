@@ -217,6 +217,10 @@ app.use('/api/doctor', doctorRoutes);
 const materialHubRoutes = require('./routes/materialHubRoutes');
 app.use('/api/material-hub', materialHubRoutes);
 
+// ✅ مسارات الذكاء الاصطناعي Zag AI
+const aiRoutes = require('./routes/aiRoutes');
+app.use('/api/ai', aiRoutes);
+
 // Health check with DB ping
 app.get('/api/health', async (req, res) => {
   try {
