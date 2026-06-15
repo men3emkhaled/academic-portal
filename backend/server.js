@@ -38,6 +38,7 @@ const courseProgressRoutes = require('./routes/courseProgressRoutes');
 // ✅ استيراد مسارات سجل أنشطة الأدمن
 const adminLogRoutes = require('./routes/adminLogRoutes');
 const { adminActivityLogger } = require('./middleware/adminLogger');
+const { cacheMiddleware } = require('./middleware/cache');
 const AdminLog = require('./models/AdminLog');
 const StudentLog = require('./models/StudentLog');
 const studentLogRoutes = require('./routes/studentLogRoutes');
@@ -170,6 +171,9 @@ app.use((req, res, next) => {
 // ============= Routes =============
 // ✅ تطبيق logger على كل مسارات الأدمن (يسجل POST/PUT/DELETE)
 app.use('/api/admin', adminActivityLogger);
+// ✅ Auto-invalidate cache on write operations
+const { invalidateOnWrite } = require('./middleware/cache');
+app.use('/api/admin', invalidateOnWrite(['/api/courses', '/api/timetable', '/api/departments']));
 app.use('/api/courses', adminActivityLogger);
 app.use('/api/grades', adminActivityLogger);
 app.use('/api/timetable', adminActivityLogger);
@@ -180,15 +184,15 @@ app.use('/api/departments', adminActivityLogger);
 app.use('/api/events', adminActivityLogger);
 app.use('/api/progress', adminActivityLogger);
 
-app.use('/api/courses', courseRoutes);
+app.use('/api/courses', cacheMiddleware(3600), courseRoutes);     // 1 hour
 app.use('/api/grades', gradeRoutes);
 app.use('/api/admin', adminRoutes);
-app.use('/api/resources', resourceRoutes);
-app.use('/api/roadmap', roadmapRoutes);
+app.use('/api/resources', cacheMiddleware(3600), resourceRoutes);
+app.use('/api/roadmap', cacheMiddleware(600), roadmapRoutes);     // 10 min
 app.use('/api/student', studentRoutes);
-app.use('/api/timetable', timetableRoutes);
+app.use('/api/timetable', cacheMiddleware(1800), timetableRoutes); // 30 min
 app.use('/api/notifications', notificationRoutes);
-app.use('/api/departments', departmentRoutes);
+app.use('/api/departments', cacheMiddleware(3600), departmentRoutes); // 1 hour
 app.use('/api/student/personal-tasks', personalTaskRoutes);
 app.use('/api/events', eventRoutes);
 
@@ -213,12 +217,23 @@ app.use('/api/doctor', doctorRoutes);
 const materialHubRoutes = require('./routes/materialHubRoutes');
 app.use('/api/material-hub', materialHubRoutes);
 
-// Health check
-app.get('/api/health', (req, res) => {
-  res.status(200).json({
-    status: 'ok',
-    timestamp: new Date().toISOString()
-  });
+// Health check with DB ping
+app.get('/api/health', async (req, res) => {
+  try {
+    await db.query('SELECT 1');
+    res.status(200).json({
+      status: 'ok',
+      database: 'connected',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('❌ Health check — DB unreachable:', error.message);
+    res.status(503).json({
+      status: 'degraded',
+      database: 'disconnected',
+      timestamp: new Date().toISOString()
+    });
+  }
 });
 
 // App version check for mobile auto-update

@@ -59,48 +59,40 @@ router.post('/upload-avatar', studentAuth, (req, res, next) => {
 router.post('/inquiries', studentAuth, createInquiry);
 router.get('/my-inquiries', studentAuth, getStudentInquiries);
 
-// ✅ جلب الاختبارات المتاحة للطالب
+// ✅ جلب الاختبارات المتاحة للطالب (مع الـ attempts في query واحد — تم إصلاح N+1)
 router.get('/my-quizzes', studentAuth, async (req, res) => {
   try {
     const studentId = req.user.id;
-    const quizzesResult = await db.query(
-      `
-      SELECT 
+    const result = await db.query(
+      `SELECT 
         q.*,
         c.name as course_name,
         (SELECT COUNT(*) FROM questions WHERE quiz_id = q.id) as question_count,
         (SELECT COUNT(*) FROM quiz_attempts 
-         WHERE quiz_id = q.id AND student_id = $1 AND status = 'completed') as attempts_count
+         WHERE quiz_id = q.id AND student_id = $1 AND status = 'completed') as attempts_count,
+        COALESCE(
+          (SELECT json_agg(
+            json_build_object(
+              'id', qa.id,
+              'completed_at', qa.completed_at,
+              'score', qa.score,
+              'total_points', qa.total_points,
+              'percentage', ROUND((qa.score::numeric / qa.total_points) * 100)
+            ) ORDER BY qa.completed_at DESC
+          ) FROM quiz_attempts qa
+          WHERE qa.quiz_id = q.id AND qa.student_id = $1 AND qa.status = 'completed'),
+          '[]'::json
+        ) as attempts
       FROM quizzes q
       JOIN courses c ON q.course_id = c.id
       WHERE c.id IN (
         SELECT course_id FROM student_courses WHERE student_id = $1
       )
       AND q.is_published = true
-      ORDER BY q.created_at DESC
-      `,
+      ORDER BY q.created_at DESC`,
       [studentId]
     );
-
-    const quizzes = quizzesResult.rows;
-    for (const quiz of quizzes) {
-      const attemptsResult = await db.query(
-        `
-        SELECT 
-          id,
-          completed_at,
-          score,
-          total_points,
-          ROUND((score::numeric / total_points) * 100) as percentage
-        FROM quiz_attempts
-        WHERE quiz_id = $1 AND student_id = $2 AND status = 'completed'
-        ORDER BY completed_at DESC
-        `,
-        [quiz.id, studentId]
-      );
-      quiz.attempts = attemptsResult.rows;
-    }
-    res.json(quizzes);
+    res.json(result.rows);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -173,6 +165,61 @@ router.get('/my-timetable', studentAuth, async (req, res) => {
     const timetable = await Timetable.getBySection(section, deptId);
     res.json(timetable);
   } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// ✅ جلب بنك الأسئلة للمادة (كل الأسئلة الاختيارية من الاختبارات المنشورة)
+router.get('/course/:courseId/question-bank', studentAuth, async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const studentId = req.user.id;
+
+    // التحقق من تسجيل الطالب في المادة
+    const enrollment = await db.query(
+      `SELECT 1 FROM student_courses WHERE student_id = $1 AND course_id = $2`,
+      [studentId, courseId]
+    );
+    if (enrollment.rows.length === 0) {
+      return res.status(403).json({ message: 'Access denied: not registered in this course' });
+    }
+
+    const result = await db.query(
+      `SELECT 
+        q.id,
+        q.question_text,
+        q.question_type,
+        q.options,
+        q.correct_answer,
+        q.explanation,
+        q.image_url,
+        qz.title as quiz_title
+       FROM questions q
+       JOIN quizzes qz ON q.quiz_id = qz.id
+       WHERE qz.course_id = $1 AND qz.is_published = true 
+         AND q.question_type IN ('mcq', 'true_false')
+       ORDER BY qz.id, q.id`,
+      [courseId]
+    );
+
+    const questions = result.rows.map(row => {
+      let opts = row.options;
+      if (typeof opts === 'string') {
+        try {
+          opts = JSON.parse(opts);
+        } catch (e) {
+          opts = [];
+        }
+      }
+      return {
+        ...row,
+        options: Array.isArray(opts) ? opts : []
+      };
+    });
+
+    res.json(questions);
+  } catch (error) {
+    console.error('Error fetching course question bank:', error);
     res.status(500).json({ message: error.message });
   }
 });

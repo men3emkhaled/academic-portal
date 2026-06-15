@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback, useRef } from 'react';
 import studentApi from '../services/studentApi';
 import api from '../services/api';
 import { useStudentAuth } from './StudentAuthContext';
@@ -161,17 +161,21 @@ export const StudentDataContextProvider = ({ children }) => {
     }
   }, []);
 
-  // Fetch all when student logs in
+  // Track which data has been fetched per session to avoid redundant calls
+  const fetchedRef = useRef({});
+
+  // Fetch only critical data on mount; pages call their own fetchers as needed
   useEffect(() => {
     if (student && token) {
-      fetchGrades();
+      const sessionKey = student.id;
+      if (fetchedRef.current[sessionKey]) return;
+      fetchedRef.current[sessionKey] = true;
+
+      // Essential on mount: notifications (shown globally), quizzes (most visited)
       fetchNotifications();
-      fetchTimetable();
-      fetchTasks();
       fetchQuizzes();
-      fetchRoadmapTracks();
-      fetchExams();
-      fetchOfficialTasks();
+      // Timetable is also commonly needed (sidebar indicators)
+      fetchTimetable();
     } else {
       // Clear data if logged out
       setGradesData({ grades: [], summary: null });
@@ -185,7 +189,7 @@ export const StudentDataContextProvider = ({ children }) => {
       setExams([]);
       setOfficialTasks([]);
     }
-  }, [student, token, fetchGrades, fetchNotifications, fetchTimetable, fetchTasks, fetchQuizzes, fetchRoadmapTracks, fetchExams, fetchOfficialTasks]);
+  }, [student, token, fetchNotifications, fetchQuizzes, fetchTimetable]);
 
   return (
     <StudentDataContext.Provider value={{
