@@ -7,6 +7,8 @@ const jwt = require('jsonwebtoken');
 const path = require('path');
 const supabase = require('../config/supabase');
 const xss = require('xss');
+const asyncHandler = require('../utils/asyncHandler');
+const { NotFoundError, ValidationError } = require('../utils/AppError');
 const SALT_ROUNDS = 10;
 
 const uploadStudentsExcel = async (req, res) => {
@@ -134,85 +136,53 @@ const uploadStudentsExcel = async (req, res) => {
   }
 };
 
-const getAllStudents = async (req, res) => {
-  try {
-    const students = await Student.getAll();
-    res.json(students);
-  } catch (error) {
-    console.error('❌ Error in getAllStudents:', error);
-    console.error(error);
-    res.status(500).json({ message: 'Internal server error' });
+const getAllStudents = asyncHandler(async (req, res) => {
+  const students = await Student.getAll();
+  res.json({ success: true, data: students });
+});
+
+const updateStudentSection = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  let { section } = req.body;
+
+  if (!section) throw new ValidationError('Section is required');
+
+  section = parseInt(section, 10);
+  if (isNaN(section) || section < 1 || section > 6) {
+    throw new ValidationError('Section must be a number between 1 and 6');
   }
-};
 
-const updateStudentSection = async (req, res) => {
-  try {
-    const { id } = req.params;
-    let { section } = req.body;
+  const student = await Student.updateSection(id, section);
+  if (!student) throw new NotFoundError('Student');
 
-    if (!section) {
-      return res.status(400).json({ message: 'Section is required' });
-    }
+  res.json({ success: true, data: student });
+});
 
-    section = parseInt(section, 10);
-    if (isNaN(section) || section < 1 || section > 6) {
-      return res.status(400).json({ message: 'Section must be a number between 1 and 6' });
-    }
+const updateStudentDepartment = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  let { department_id } = req.body;
 
-    const student = await Student.updateSection(id, section);
-    if (!student) {
-      return res.status(404).json({ message: 'Student not found' });
-    }
-
-    res.json(student);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Internal server error' });
+  if (department_id === undefined || department_id === null) {
+    throw new ValidationError('Department ID is required');
   }
-};
 
-const updateStudentDepartment = async (req, res) => {
-  try {
-    const { id } = req.params;
-    let { department_id } = req.body;
+  const student = await Student.updateDepartment(id, department_id);
+  if (!student) throw new NotFoundError('Student');
 
-    if (department_id === undefined || department_id === null) {
-      return res.status(400).json({ message: 'Department ID is required' });
-    }
+  res.json({ success: true, data: student });
+});
 
-    const student = await Student.updateDepartment(id, department_id);
-    if (!student) {
-      return res.status(404).json({ message: 'Student not found' });
-    }
+const resetStudentPassword = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { newPassword } = req.body;
 
-    // ✅ Auto-enrollment removed — students register courses manually now
+  const student = await Student.findByUsername(id);
+  if (!student) throw new NotFoundError('Student');
 
-    res.json(student);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-};
-
-const resetStudentPassword = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { newPassword } = req.body;
-
-    const student = await Student.findByUsername(id);
-    if (!student) {
-      return res.status(404).json({ message: 'Student not found' });
-    }
-
-    const finalPassword = newPassword || '123456';
-    await Student.updatePassword(id, finalPassword);
-    // ✅ لا نُعيد كلمة المرور في الرد لأسباب أمنية
-    res.json({ message: 'Password reset successfully' });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-};
+  const finalPassword = newPassword || '123456';
+  await Student.updatePassword(id, finalPassword);
+  res.json({ success: true, message: 'Password reset successfully' });
+});
 
 const updateFcmToken = async (req, res) => {
   try {

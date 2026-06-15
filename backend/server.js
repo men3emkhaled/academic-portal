@@ -269,16 +269,22 @@ app.use((req, res) => {
   });
 });
 
-// Error handler
+// Error handler — standardized format
 app.use((err, req, res, next) => {
-  console.error('❌ Error:', err.stack);
-  const status = err.status || 500;
-  const message = process.env.NODE_ENV === 'production'
-    ? 'Internal Server Error'
-    : (err.message || 'Internal Server Error');
-  res.status(status).json({
-    message,
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
+  const statusCode = err.statusCode || err.status || 500;
+  const code = err.code || 'INTERNAL_ERROR';
+  const message = err.isOperational
+    ? err.message
+    : (process.env.NODE_ENV === 'production' ? 'Internal Server Error' : err.message);
+
+  if (!err.isOperational) {
+    console.error('❌ Unexpected error:', err);
+  }
+
+  res.status(statusCode).json({
+    success: false,
+    error: { message, code, ...(process.env.NODE_ENV !== 'production' && err.isOperational ? {} : {}) },
+    ...(process.env.NODE_ENV !== 'production' && { stack: err.stack }),
   });
 });
 

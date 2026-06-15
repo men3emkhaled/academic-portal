@@ -5,6 +5,9 @@ import { AnimatePresence, motion } from 'framer-motion';
 // components
 import PortalSwitcher from './components/PortalSwitcher';
 import PullToRefresh from './components/PullToRefresh';
+import ErrorBoundary from './components/ErrorBoundary';
+import LoadingScreen from './components/LoadingScreen';
+import ProtectedStudentRoute from './components/ProtectedStudentRoute';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { Toaster } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
@@ -42,55 +45,6 @@ import QuizResultPage from './pages/QuizResultPage';
 import DoctorLogin from './pages/DoctorLogin';
 import DoctorDashboard from './pages/DoctorDashboard';
 import AdminLogin from './pages/AdminLogin';
-
-// مكون حماية المسارات للطلاب
-const ProtectedStudentRoute = ({ children }) => {
-  const { token, loading } = useStudentAuth();
-  const { t } = useTranslation();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!loading && !token) {
-      navigate('/student/login', { replace: true });
-    }
-  }, [token, loading, navigate]);
-
-  if (loading) {
-    return (
-      <div className="flex flex-col justify-center items-center h-screen bg-gray-50 dark:bg-dark transition-colors duration-500 overflow-hidden relative">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-emerald-500/5 dark:bg-emerald-500/10 hidden rounded-full animate-pulse-slow"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/5 dark:bg-blue-500/10 hidden rounded-full animate-pulse-slow"></div>
-
-        <div className="relative z-10 flex flex-col items-center">
-          <div className="relative flex items-center justify-center w-20 h-20 mb-6">
-            <div className="absolute inset-0 border-4 border-emerald-500/20 dark:border-emerald-500/10 rounded-full"></div>
-            <div className="absolute inset-0 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-            <div className="w-12 h-12 bg-white dark:bg-white/5 rounded-full flex items-center justify-center overflow-hidden shadow-lg border border-emerald-500/20">
-              <img src="/logo.png" alt="ZNU Logo" className="w-full h-full object-contain p-1" />
-            </div>
-          </div>
-          <p className="text-gray-900 dark:text-white font-black text-[10px] uppercase tracking-[0.4em] mb-1 animate-pulse">ZNU PORTAL</p>
-          <p className="text-gray-500 dark:text-gray-400 font-bold text-xs tracking-wide">{t('dashboard.loading')}</p>
-        </div>
-      </div>
-    );
-  }
-
-  return token ? (
-    <div
-      className="w-full h-full min-h-screen"
-      style={{ animation: 'ultraLightFade 0.08s ease-out forwards' }}
-    >
-      <style>{`
-        @keyframes ultraLightFade {
-          from { opacity: 0.7; }
-          to { opacity: 1; }
-        }
-      `}</style>
-      {children}
-    </div>
-  ) : null;
-};
 
 // مكون إعادة توجيه الطالب المسجل دخوله
 const StudentLoginRedirect = () => {
@@ -158,25 +112,7 @@ function AppContent() {
   }, [i18n.language]);
 
   if (loading) {
-    return (
-      <div className="flex flex-col justify-center items-center h-screen bg-gray-50 dark:bg-dark transition-colors duration-500 overflow-hidden relative">
-        {/* Decorative Ambient Glows */}
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-emerald-500/5 dark:bg-emerald-500/10 hidden rounded-full animate-pulse-slow"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/5 dark:bg-blue-500/10 hidden rounded-full animate-pulse-slow"></div>
-
-        <div className="relative z-10 flex flex-col items-center">
-          <div className="relative flex items-center justify-center w-24 h-24 mb-8">
-            <div className="absolute inset-0 border-4 border-emerald-500/20 dark:border-emerald-500/10 rounded-full"></div>
-            <div className="absolute inset-0 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-            <div className="w-16 h-16 bg-white dark:bg-white/5 rounded-full flex items-center justify-center overflow-hidden shadow-xl border border-emerald-500/20">
-              <img src="/logo.png" alt="ZNU Logo" className="w-full h-full object-contain p-2" />
-            </div>
-          </div>
-          <p className="text-gray-900 dark:text-white font-black text-xs uppercase tracking-[0.4em] mb-2 animate-pulse">ZNU PORTAL</p>
-          <p className="text-gray-500 dark:text-gray-400 font-bold text-sm tracking-wide">{t('dashboard.loading')}</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen text="ZNU PORTAL" />;
   }
 
   // Show the portal switcher on login/entry pages only, but hide it if admin is logged in on /admin
@@ -194,39 +130,41 @@ function AppContent() {
         key={location.pathname}
         className="min-h-screen w-full relative"
       >
-        <Routes location={location}>
-          <Route path="/" element={<Navigate to="/student/login" replace />} />
-          <Route path="/programs" element={<ProgramsPage />} />
-          <Route path="/programs/:id" element={<ProgramDetailsPage />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/contact" element={<ContactPage />} />
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/doctor/login" element={<DoctorLogin />} />
-          <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
-          <Route path="/student/login" element={<StudentLoginRedirect />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/verify-email" element={<VerifyEmail />} />
-          <Route path="/student/dashboard" element={<ProtectedStudentRoute><StudentDashboard /></ProtectedStudentRoute>} />
-          <Route path="/student/course/:courseId" element={<ProtectedStudentRoute><StudentCourseHub /></ProtectedStudentRoute>} />
-          <Route path="/student/registration" element={<ProtectedStudentRoute><StudentCourseRegistration /></ProtectedStudentRoute>} />
-          <Route path="/student/grades" element={<ProtectedStudentRoute><StudentGrades /></ProtectedStudentRoute>} />
-          <Route path="/student/quizzes" element={<ProtectedStudentRoute><StudentQuizzes /></ProtectedStudentRoute>} />
-          <Route path="/student/timetable" element={<ProtectedStudentRoute><StudentTimetable /></ProtectedStudentRoute>} />
-          <Route path="/student/roadmap" element={<ProtectedStudentRoute><StudentRoadmap /></ProtectedStudentRoute>} />
-          <Route path="/student/materials" element={<ProtectedStudentRoute><StudentMaterials /></ProtectedStudentRoute>} />
-          <Route path="/student/notifications" element={<ProtectedStudentRoute><StudentNotifications /></ProtectedStudentRoute>} />
-          <Route path="/student/settings" element={<ProtectedStudentRoute><StudentSettings /></ProtectedStudentRoute>} />
-          <Route path="/student/personal-tasks" element={<ProtectedStudentRoute><StudentPersonalTasks /></ProtectedStudentRoute>} />
-          <Route path="/student/menu" element={<ProtectedStudentRoute><StudentMenu /></ProtectedStudentRoute>} />
+        <ErrorBoundary>
+          <Routes location={location}>
+            <Route path="/" element={<Navigate to="/student/login" replace />} />
+            <Route path="/programs" element={<ProgramsPage />} />
+            <Route path="/programs/:id" element={<ProgramDetailsPage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/doctor/login" element={<DoctorLogin />} />
+            <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
+            <Route path="/student/login" element={<StudentLoginRedirect />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
+            <Route path="/student/dashboard" element={<ProtectedStudentRoute><StudentDashboard /></ProtectedStudentRoute>} />
+            <Route path="/student/course/:courseId" element={<ProtectedStudentRoute><StudentCourseHub /></ProtectedStudentRoute>} />
+            <Route path="/student/registration" element={<ProtectedStudentRoute><StudentCourseRegistration /></ProtectedStudentRoute>} />
+            <Route path="/student/grades" element={<ProtectedStudentRoute><StudentGrades /></ProtectedStudentRoute>} />
+            <Route path="/student/quizzes" element={<ProtectedStudentRoute><StudentQuizzes /></ProtectedStudentRoute>} />
+            <Route path="/student/timetable" element={<ProtectedStudentRoute><StudentTimetable /></ProtectedStudentRoute>} />
+            <Route path="/student/roadmap" element={<ProtectedStudentRoute><StudentRoadmap /></ProtectedStudentRoute>} />
+            <Route path="/student/materials" element={<ProtectedStudentRoute><StudentMaterials /></ProtectedStudentRoute>} />
+            <Route path="/student/notifications" element={<ProtectedStudentRoute><StudentNotifications /></ProtectedStudentRoute>} />
+            <Route path="/student/settings" element={<ProtectedStudentRoute><StudentSettings /></ProtectedStudentRoute>} />
+            <Route path="/student/personal-tasks" element={<ProtectedStudentRoute><StudentPersonalTasks /></ProtectedStudentRoute>} />
+            <Route path="/student/menu" element={<ProtectedStudentRoute><StudentMenu /></ProtectedStudentRoute>} />
 
-          {/* ✅ مسارات الاختبارات */}
-          <Route path="/student/quizzes/:quizId/take" element={<ProtectedStudentRoute><QuizPage /></ProtectedStudentRoute>} />
-          <Route path="/student/quizzes/:quizId/result/:attemptId" element={<ProtectedStudentRoute><QuizResultPage /></ProtectedStudentRoute>} />
+            {/* ✅ مسارات الاختبارات */}
+            <Route path="/student/quizzes/:quizId/take" element={<ProtectedStudentRoute><QuizPage /></ProtectedStudentRoute>} />
+            <Route path="/student/quizzes/:quizId/result/:attemptId" element={<ProtectedStudentRoute><QuizResultPage /></ProtectedStudentRoute>} />
 
-          {/* مسار وهمي لتفادي تحذيرات React Router عند تفعيل مدير كلمات المرور في iOS */}
-          <Route path="/student/login-dummy" element={null} />
-        </Routes>
+            {/* مسار وهمي لتفادي تحذيرات React Router عند تفعيل مدير كلمات المرور في iOS */}
+            <Route path="/student/login-dummy" element={null} />
+          </Routes>
+        </ErrorBoundary>
       </div>
     </div>
   );
