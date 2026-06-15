@@ -4,11 +4,10 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Environment variables
+# Environment variables (actual secrets)
 .env
 .env.local
 .env.production
-.env.example
 # Build outputs
 dist/
 build/

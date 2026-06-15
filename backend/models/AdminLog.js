@@ -173,8 +173,10 @@ class AdminLog {
 
   // حذف logs قديمة (أكثر من 90 يوم)
   static async cleanupOld(days = 90) {
-    const query = `DELETE FROM admin_logs WHERE created_at < NOW() - INTERVAL '${days} days'`;
-    const result = await db.query(query);
+    const result = await db.query(
+      'DELETE FROM admin_logs WHERE created_at < NOW() - $1::interval',
+      [`${days} days`]
+    );
     return result.rowCount;
   }
 }

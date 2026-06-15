@@ -8,7 +8,7 @@ import { MsalProvider } from "@azure/msal-react";
 import { msalConfig } from "./config/microsoftAuthConfig";
 import './i18n';
 
-const GOOGLE_CLIENT_ID = '407444968316-d0mmu1duk58gcschp0udu4vv5vavua3o.apps.googleusercontent.com';
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '407444968316-d0mmu1duk58gcschp0udu4vv5vavua3o.apps.googleusercontent.com';
 
 const renderApp = (msalInstance) => {
   const root = ReactDOM.createRoot(document.getElementById('root'));

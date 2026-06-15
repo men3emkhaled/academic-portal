@@ -90,10 +90,109 @@ const studentCreationLimiter = rateLimit({
     }
 });
 
+// ============= تسجيل دخول الدكتور =============
+const doctorLoginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: isDev ? 50 : 5,
+    skipSuccessfulRequests: true,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: {
+        status: 429,
+        message: 'Too many failed login attempts. Please try again after 15 minutes.'
+    },
+    keyGenerator: (req) => {
+        const ipKey = ipKeyGenerator(req);
+        const username = req.body.username || 'unknown';
+        return `${ipKey}:${username}`;
+    },
+    handler: (req, res, next, options) => {
+        console.warn(`⚠️ Rate limit exceeded for doctor login: IP ${req.ip}, username ${req.body.username}`);
+        res.status(options.statusCode).json(options.message);
+    }
+});
+
+// ============= forgot-password (منع إغراق البريد الإلكتروني) =============
+const forgotPasswordLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: isDev ? 20 : 3,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: {
+        status: 429,
+        message: 'Too many password reset requests. Please try again after 15 minutes.'
+    },
+    keyGenerator: (req) => {
+        const ipKey = ipKeyGenerator(req);
+        const studentId = req.body.studentId || 'unknown';
+        return `${ipKey}:${studentId}`;
+    },
+    handler: (req, res, next, options) => {
+        console.warn(`⚠️ Rate limit exceeded for forgot-password: IP ${req.ip}, student ${req.body.studentId}`);
+        res.status(options.statusCode).json(options.message);
+    }
+});
+
+// ============= الاستفسارات (منع السبام) =============
+const inquiriesLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: isDev ? 50 : 5,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: {
+        status: 429,
+        message: 'Too many inquiries. Please try again after 15 minutes.'
+    },
+    keyGenerator: (req) => {
+        const ipKey = ipKeyGenerator(req);
+        const userId = req.user?.id || 'anonymous';
+        return `${ipKey}:${userId}`;
+    }
+});
+
+// ============= تسجيل المواد (منع الإساءة) =============
+const courseRegisterLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: isDev ? 100 : 10,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: {
+        status: 429,
+        message: 'Too many registration requests. Please try again after 15 minutes.'
+    },
+    keyGenerator: (req) => {
+        const ipKey = ipKeyGenerator(req);
+        const userId = req.user?.id || 'anonymous';
+        return `${ipKey}:${userId}`;
+    }
+});
+
+// ============= التسجيل الجماعي (باستخدام Excel) =============
+const registerBulkLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000,
+    max: isDev ? 20 : 2,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: {
+        status: 429,
+        message: 'Bulk registration limit reached. Please try again after an hour.'
+    },
+    keyGenerator: (req) => {
+        const ipKey = ipKeyGenerator(req);
+        const userId = req.user?.id || 'anonymous';
+        return `${ipKey}:${userId}`;
+    }
+});
+
 module.exports = {
     standardLimiter,
     studentLoginLimiter,
     adminLoginLimiter,
+    doctorLoginLimiter,
+    forgotPasswordLimiter,
+    inquiriesLimiter,
+    courseRegisterLimiter,
+    registerBulkLimiter,
     uploadLimiter,
     studentCreationLimiter
 };

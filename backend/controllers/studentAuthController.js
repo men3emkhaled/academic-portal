@@ -8,6 +8,10 @@ const { OAuth2Client } = require('google-auth-library');
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
+// In-memory cooldown for forgot-password to prevent email bombing
+const passwordResetCooldown = new Map();
+const RESET_COOLDOWN_MS = 60 * 1000; // 1 minute
+
 const studentLogin = async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -204,6 +208,16 @@ const forgotPassword = async (req, res) => {
   try {
     const { studentId, method } = req.body;
     if (!studentId) return res.status(400).json({ message: 'Student ID is required' });
+
+    // Cooldown check: prevent email bombing
+    const now = Date.now();
+    const lastSent = passwordResetCooldown.get(studentId);
+    if (lastSent && (now - lastSent) < RESET_COOLDOWN_MS) {
+      const remainingSeconds = Math.ceil((RESET_COOLDOWN_MS - (now - lastSent)) / 1000);
+      return res.status(429).json({
+        message: `Please wait ${remainingSeconds} seconds before requesting another reset email.`
+      });
+    }
     
     const student = await Student.findByIdWithHash(studentId);
     if (!student) return res.status(404).json({ message: 'Student not found' });
@@ -232,6 +246,7 @@ const forgotPassword = async (req, res) => {
     
     const sent = await sendPasswordResetEmail(targetEmail, `${student.id}-${token}`);
     if (sent) {
+      passwordResetCooldown.set(student.id, Date.now());
       res.json({ message: `Password reset link sent to your ${method === 'microsoft' ? 'Institutional' : 'Personal'} email (${targetEmail})` });
     } else {
       res.status(500).json({ message: 'Failed to send email. Please try again later.' });

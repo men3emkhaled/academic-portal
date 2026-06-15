@@ -48,6 +48,11 @@ const {
   standardLimiter,
   studentLoginLimiter,
   adminLoginLimiter,
+  doctorLoginLimiter,
+  forgotPasswordLimiter,
+  inquiriesLimiter,
+  courseRegisterLimiter,
+  registerBulkLimiter,
 } = require('./middleware/rateLimiter');
 
 const app = express();
@@ -123,12 +128,18 @@ app.use('/api', standardLimiter);
 // ✅ تطبيق محددات صارمة على نقاط تسجيل الدخول
 app.use('/api/student/login', studentLoginLimiter);
 app.use('/api/admin/login', adminLoginLimiter);
+app.use('/api/doctor/login', doctorLoginLimiter);
+app.use('/api/student/forgot-password', forgotPasswordLimiter);
+app.use('/api/student/inquiries', inquiriesLimiter);
+app.use('/api/student/registration/register', courseRegisterLimiter);
+app.use('/api/student/registration/register-bulk', registerBulkLimiter);
 
 if (!fs.existsSync('uploads')) {
   fs.mkdirSync('uploads');
 }
 
 // ✅ Security: حماية ملفات uploads بتوكن — لازم يكون المستخدم مسجل دخول
+// منع Path Traversal: التأكد أن المسار المطلوب داخل مجلد uploads فقط
 const jwt = require('jsonwebtoken');
 app.use('/uploads', (req, res, next) => {
   const token = req.query.token || req.headers.authorization?.replace('Bearer ', '');
@@ -137,10 +148,18 @@ app.use('/uploads', (req, res, next) => {
   }
   try {
     jwt.verify(token, process.env.JWT_SECRET);
-    next();
   } catch {
     return res.status(401).json({ message: 'Invalid or expired token' });
   }
+
+  // Path traversal protection: resolve the requested path and ensure it's within uploads
+  const requestedPath = path.resolve(path.join(__dirname, 'uploads', req.path));
+  const uploadsRoot = path.resolve(path.join(__dirname, 'uploads'));
+  if (!requestedPath.startsWith(uploadsRoot)) {
+    return res.status(403).json({ message: 'Access denied' });
+  }
+
+  next();
 }, express.static(path.join(__dirname, 'uploads')));
 
 app.use((req, res, next) => {

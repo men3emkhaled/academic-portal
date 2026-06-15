@@ -6,6 +6,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const path = require('path');
 const supabase = require('../config/supabase');
+const xss = require('xss');
 const SALT_ROUNDS = 10;
 
 const uploadStudentsExcel = async (req, res) => {
@@ -82,7 +83,7 @@ const uploadStudentsExcel = async (req, res) => {
       let paramIndex = 1;
 
       updates.push(`name = $${paramIndex++}`);
-      values.push(String(studentName));
+      values.push(xss(String(studentName)));
 
       updates.push(`level = $${paramIndex++}`);
       values.push(parseInt(level, 10));

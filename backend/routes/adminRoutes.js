@@ -5,6 +5,7 @@ const studentController = require('../controllers/studentController');
 const studentCourseController = require('../controllers/studentCourseController');
 const adminDoctorController = require('../controllers/adminDoctorController');
 const gradeController = require('../controllers/gradeController');
+const xss = require('xss');
 const { upload, handleMulterError } = require('../middleware/upload');
 const { adminAuth, checkPermission } = require('../middleware/auth');
 const { studentCreationLimiter } = require('../middleware/rateLimiter');
@@ -43,7 +44,7 @@ router.post('/students', adminAuth, async (req, res) => {
       return res.status(400).json({ message: 'Student ID and name are required' });
     }
     const Student = require('../models/Student');
-    const student = await Student.create(id, name, password || '123456', level || 1, section, department_id, batch || 2025);
+    const student = await Student.create(id, xss(name), password || '123456', level || 1, section, department_id, batch || 2025);
     
     // ✅ Auto-enrollment removed — students register courses manually now
     

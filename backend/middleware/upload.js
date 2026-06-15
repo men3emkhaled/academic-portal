@@ -84,10 +84,13 @@ const uploadAvatar = multer({
     storage: avatarStorage,
     limits: { fileSize: 2 * 1024 * 1024 },
     fileFilter: (req, file, cb) => {
-        if (file.mimetype.startsWith('image/')) {
+        const allowedImageMimes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+        const allowedImageExts = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
+        const ext = path.extname(file.originalname).toLowerCase();
+        if (allowedImageMimes.includes(file.mimetype) && allowedImageExts.includes(ext)) {
             cb(null, true);
         } else {
-            cb(new Error('Only image files are allowed!'), false);
+            cb(new Error('Only JPEG, PNG, GIF, and WEBP images are allowed!'), false);
         }
     }
 });
@@ -97,8 +100,22 @@ const uploadMaterial = multer({
     limits: { fileSize: 50 * 1024 * 1024 }, // 50MB max file size
     fileFilter: (req, file, cb) => {
         const allowedExts = ['.pdf', '.doc', '.docx', '.ppt', '.pptx', '.xls', '.xlsx', '.txt', '.zip', '.rar', '.png', '.jpg', '.jpeg', '.webp'];
+        const allowedMimes = [
+            'application/pdf',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/vnd.ms-powerpoint',
+            'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+            'application/vnd.ms-excel',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'text/plain',
+            'application/zip',
+            'application/x-rar-compressed',
+            'application/x-zip-compressed',
+            'image/png', 'image/jpeg', 'image/jpg', 'image/webp'
+        ];
         const ext = path.extname(file.originalname).toLowerCase();
-        if (allowedExts.includes(ext)) {
+        if (allowedExts.includes(ext) && allowedMimes.includes(file.mimetype)) {
             cb(null, true);
         } else {
             cb(new Error('Invalid file type. Allowed: PDF, Office documents, TXT, Zips/Rars, and Images'), false);
