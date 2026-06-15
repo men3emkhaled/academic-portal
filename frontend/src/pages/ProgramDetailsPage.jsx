@@ -208,7 +208,7 @@ export default function ProgramDetailsPage() {
                       <h3 className="text-xs font-black uppercase tracking-wider text-[#2cfc7d]">{isAr ? "أهداف البرنامج الأساسية:" : "Program Core Goals:"}</h3>
                       <ul className="space-y-3.5">
                         {currentDesc.points.map((pt, index) => (
-                          <li key={index} className="text-xs font-medium text-slate-500 dark:text-slate-300 flex items-start gap-3">
+                          <li key={pt?.id || index} className="text-xs font-medium text-slate-500 dark:text-slate-300 flex items-start gap-3">
                             <div className="w-1.5 h-1.5 rounded-full bg-[#2cfc7d] mt-1.5 flex-shrink-0" />
                             <span>{pt}</span>
                           </li>
@@ -240,7 +240,7 @@ export default function ProgramDetailsPage() {
                       <h3 className="text-xs font-black uppercase tracking-wider text-purple-500">{isAr ? "أهم بنود اللائحة:" : "Key Regulations:"}</h3>
                       <ul className="space-y-3.5">
                         {currentBylaw.points.map((pt, index) => (
-                          <li key={index} className="text-xs font-medium text-slate-500 dark:text-slate-300 flex items-start gap-3">
+                          <li key={pt?.id || index} className="text-xs font-medium text-slate-500 dark:text-slate-300 flex items-start gap-3">
                             <div className="w-1.5 h-1.5 rounded-full bg-purple-500 mt-1.5 flex-shrink-0" />
                             <span>{pt}</span>
                           </li>

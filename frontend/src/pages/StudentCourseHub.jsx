@@ -22,6 +22,7 @@ const StudentCourseHub = () => {
   const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [inquiries, setInquiries] = useState([]);
+  const [questionBank, setQuestionBank] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('announcements');
   const [showQr, setShowQr] = useState(false);
@@ -44,6 +45,9 @@ const StudentCourseHub = () => {
       
       const inqRes = await studentApi.get('/student/my-inquiries');
       setInquiries(inqRes.data.filter(i => String(i.course_id) === String(courseId)));
+
+      const qbRes = await studentApi.get(`/student/course/${courseId}/question-bank`);
+      setQuestionBank(qbRes.data || []);
     } catch (err) {
       toast.error(t('hub.messages.load_failed'));
       navigate('/student/dashboard');
@@ -115,6 +119,7 @@ const StudentCourseHub = () => {
     { id: 'tasks', label: t('hub.tabs.tasks'), icon: CheckCircle2, count: tasks.length },
     { id: 'attendance', label: t('hub.tabs.presence'), icon: Users },
     { id: 'materials', label: t('hub.tabs.materials', { defaultValue: 'Material Hub' }), icon: BookOpen },
+    { id: 'questions', label: isAr ? 'بنك الأسئلة' : 'Question Bank', icon: HelpCircle, count: questionBank.length },
     { id: 'inquiries', label: t('hub.tabs.support'), icon: MessageSquare, count: inquiries.length }
   ];
 
@@ -211,16 +216,9 @@ const StudentCourseHub = () => {
                   <Calendar className="w-3.5 h-3.5 text-[#8b5cf6]" />
                   {new Date().getFullYear()} {t('hub.session')}
                 </div>
-              </div>
-            </div>
-
-            <div className="hidden lg:flex flex-col items-center gap-4 bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 p-8 rounded-[3rem] shadow-xl group">
-               <div className="bg-white p-3 rounded-2xl shadow-inner border border-gray-100">
-                 <QRCodeSVG value={qrToken} size={120} level="H" fgColor="#0c0c14" bgColor="#FFFFFF" />
-               </div>
-               <span className="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 dark:text-white/30">{t('hub.qr_access')}</span>
             </div>
           </div>
+        </div>
 
           {/* QUICK STATS ROW */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -230,7 +228,7 @@ const StudentCourseHub = () => {
                { label: t('hub.attendance.title'), value: attendedCount, color: 'text-purple-500', bg: 'bg-purple-500/10', icon: Users },
                { label: t('hub.tabs.news'), value: announcements.length, color: 'text-amber-500', bg: 'bg-amber-500/10', icon: Megaphone }
              ].map((stat, i) => (
-               <div key={i} className="bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 p-8 rounded-[2.5rem] shadow-sm hover:shadow-xl transition-all">
+               <div key={stat.label || i} className="bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 p-8 rounded-[2.5rem] shadow-sm hover:shadow-xl transition-all">
                   <div className={`w-10 h-10 rounded-xl ${stat.bg} ${stat.color} flex items-center justify-center mb-4`}>
                     <stat.icon className="w-5 h-5" />
                   </div>
@@ -267,7 +265,7 @@ const StudentCourseHub = () => {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pb-24">
              
              {/* CONTENT AREA */}
-             <div className="lg:col-span-8">
+             <div className={activeTab === 'attendance' ? 'lg:col-span-8' : 'lg:col-span-12'}>
                 <div className="bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[3rem] p-10 min-h-[500px]">
                    
                    {activeTab === 'announcements' && (
@@ -451,31 +449,31 @@ const StudentCourseHub = () => {
              </div>
 
              {/* SIDEBAR WIDGETS */}
-             <div className="lg:col-span-4 space-y-8">
-                
-                {/* QR PASS CARD */}
-                <div className="bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[3rem] p-10 flex flex-col items-center text-center shadow-xl relative overflow-hidden group">
-                   <div className="absolute top-0 inset-inline-end-0 w-32 h-32 bg-[#2cfc7d]/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl group-hover:scale-150 transition-transform duration-1000" />
-                   
-                   <div className="w-16 h-16 rounded-2xl bg-gray-50 dark:bg-white/5 flex items-center justify-center text-gray-400 mb-8 border border-gray-100 dark:border-white/5">
-                      <QrCode className="w-8 h-8" />
-                   </div>
-                   
-                   <h3 className="text-2xl font-black uppercase tracking-tight mb-2">{t('hub.qr.title')}</h3>
-                   <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 dark:text-white/30 mb-10">{t('hub.qr.desc')}</p>
-                   
-                   <div className="bg-white p-5 rounded-[2.5rem] shadow-2xl border border-gray-100 group-hover:scale-105 transition-transform duration-500">
-                      <QRCodeSVG value={qrToken} size={180} level="H" fgColor="#0c0c14" bgColor="#FFFFFF" />
-                   </div>
+             {activeTab === 'attendance' && (
+               <div className="lg:col-span-4 space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
+                  
+                  {/* QR PASS CARD */}
+                  <div className="bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[3rem] p-10 flex flex-col items-center text-center shadow-xl relative overflow-hidden group">
+                     <div className="absolute top-0 inset-inline-end-0 w-32 h-32 bg-[#2cfc7d]/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl group-hover:scale-150 transition-transform duration-1000" />
+                     
+                     <div className="w-16 h-16 rounded-2xl bg-gray-50 dark:bg-white/5 flex items-center justify-center text-gray-400 mb-8 border border-gray-100 dark:border-white/5">
+                        <QrCode className="w-8 h-8" />
+                     </div>
+                     
+                     <h3 className="text-2xl font-black uppercase tracking-tight mb-2">{t('hub.qr.title')}</h3>
+                     <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 dark:text-white/30 mb-10">{t('hub.qr.desc')}</p>
+                     
+                     <div className="bg-white p-5 rounded-[2.5rem] shadow-2xl border border-gray-100 group-hover:scale-105 transition-transform duration-500">
+                        <QRCodeSVG value={qrToken} size={180} level="H" fgColor="#0c0c14" bgColor="#FFFFFF" />
+                     </div>
 
-                   <div className="mt-10 w-full flex items-center justify-center gap-2 py-4 bg-[#10b981]/10 dark:bg-[#2cfc7d]/10 text-[#10b981] dark:text-[#2cfc7d] rounded-2xl text-[10px] font-black uppercase tracking-widest border border-[#10b981]/20">
-                      <ShieldCheck className="w-4 h-4" />
-                      {t('hub.qr.secure_active')}
-                   </div>
-                </div>
-
-
-             </div>
+                     <div className="mt-10 w-full flex items-center justify-center gap-2 py-4 bg-[#10b981]/10 dark:bg-[#2cfc7d]/10 text-[#10b981] dark:text-[#2cfc7d] rounded-2xl text-[10px] font-black uppercase tracking-widest border border-[#10b981]/20">
+                        <ShieldCheck className="w-4 h-4" />
+                        {t('hub.qr.secure_active')}
+                     </div>
+                  </div>
+               </div>
+             )}
 
           </div>
         </section>
@@ -484,11 +482,286 @@ const StudentCourseHub = () => {
       </main>
 
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
-        .font-arabic { font-family: 'Cairo', sans-serif !important; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
+    </div>
+  );
+};
+
+const QuestionBankTab = ({ questions, isAr, t }) => {
+  const [selectedQuiz, setSelectedQuiz] = React.useState('all');
+  const [viewMode, setViewMode] = React.useState('card'); // 'card' or 'list'
+  const [currentIndex, setCurrentIndex] = React.useState(0);
+  const [userAnswers, setUserAnswers] = React.useState({});
+  const [revealed, setRevealed] = React.useState({});
+
+  // Filter questions based on selected quiz
+  const quizzes = React.useMemo(() => {
+    const list = questions.map(q => q.quiz_title).filter(Boolean);
+    return ['all', ...new Set(list)];
+  }, [questions]);
+
+  const filteredQuestions = React.useMemo(() => {
+    if (selectedQuiz === 'all') return questions;
+    return questions.filter(q => q.quiz_title === selectedQuiz);
+  }, [questions, selectedQuiz]);
+
+  // Reset current index if questions change
+  React.useEffect(() => {
+    setCurrentIndex(0);
+  }, [selectedQuiz]);
+
+  if (questions.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[300px] text-gray-300 dark:text-white/10 italic font-black uppercase tracking-widest text-center">
+        <HelpCircle className="w-12 h-12 mb-4 opacity-20" />
+        {isAr ? 'لا توجد أسئلة مضافة في بنك الأسئلة حالياً' : 'No questions in the Question Bank yet'}
+      </div>
+    );
+  }
+
+  const handleSelectOption = (questionId, option) => {
+    if (userAnswers[questionId]) return; // prevent re-answering
+    setUserAnswers(prev => ({ ...prev, [questionId]: option }));
+  };
+
+  const handleToggleReveal = (questionId) => {
+    setRevealed(prev => ({ ...prev, [questionId]: !prev[questionId] }));
+  };
+
+  const currentQuestion = filteredQuestions[currentIndex];
+  const totalQuestions = filteredQuestions.length;
+  const attemptedCount = filteredQuestions.filter(q => userAnswers[q.id] !== undefined).length;
+  const correctCount = filteredQuestions.filter(q => userAnswers[q.id] === q.correct_answer).length;
+  const scorePercentage = attemptedCount > 0 ? Math.round((correctCount / attemptedCount) * 100) : 0;
+
+  const renderQuestionCard = (q, indexShow = null) => {
+    const selectedOpt = userAnswers[q.id];
+    const isAnswered = selectedOpt !== undefined;
+    const isCorrect = selectedOpt === q.correct_answer;
+    const isRevealed = revealed[q.id];
+
+    return (
+      <div key={q.id} className="bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-8 space-y-6 shadow-sm hover:shadow-xl transition-all animate-in fade-in duration-300 mb-6">
+        <div className="flex flex-wrap justify-between items-center gap-4">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-black uppercase tracking-[0.25em] text-[#10b981] dark:text-[#2cfc7d]">
+              {indexShow !== null 
+                ? `${isAr ? 'سؤال' : 'Question'} ${(indexShow + 1).toString().padStart(2, '0')}` 
+                : `${isAr ? 'سؤال' : 'Question'} ${(currentIndex + 1).toString().padStart(2, '0')} / ${totalQuestions}`}
+            </span>
+            <span className="px-3 py-1 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-full text-[9px] font-black uppercase tracking-wider text-gray-500">
+              {q.quiz_title}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">
+              {q.question_type === 'true_false' ? (isAr ? 'صح / خطأ' : 'TRUE / FALSE') : (isAr ? 'اختياري' : 'MCQ')}
+            </span>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <h3 className="text-xl font-black leading-snug text-gray-900 dark:text-white uppercase tracking-tight">
+            {q.question_text}
+          </h3>
+          {q.image_url && (
+            <div className="relative overflow-hidden rounded-[2rem] border border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-black/20 max-h-72 flex justify-center">
+              <img src={q.image_url} alt="Question Context" className="object-contain max-h-72" />
+            </div>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 gap-3 pt-2">
+          {(q.options || []).map((opt, oIdx) => {
+            const isSelected = selectedOpt === opt;
+            const isCorrectOption = opt === q.correct_answer;
+            
+            let optClass = 'bg-gray-50 dark:bg-white/5 border-transparent text-gray-800 dark:text-white/80 hover:bg-gray-100 dark:hover:bg-white/10';
+            if (isAnswered) {
+              if (isCorrectOption) {
+                optClass = 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-bold';
+              } else if (isSelected) {
+                optClass = 'bg-rose-500/10 border-rose-500/30 text-rose-600 dark:text-rose-400 font-bold';
+              } else {
+                optClass = 'opacity-40 bg-gray-50 dark:bg-white/5 border-transparent text-gray-400 dark:text-white/20';
+              }
+            } else if (isRevealed && isCorrectOption) {
+              optClass = 'bg-emerald-500/15 border-emerald-500/40 text-emerald-600 dark:text-emerald-400 font-bold';
+            }
+
+            return (
+              <button
+                key={oIdx}
+                disabled={isAnswered}
+                onClick={() => handleSelectOption(q.id, opt)}
+                className={`w-full text-start flex items-center justify-between px-6 py-4 rounded-2xl border text-sm font-semibold transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] ${optClass}`}
+              >
+                <span>{opt}</span>
+                <div className="flex items-center gap-2">
+                  {isAnswered && isCorrectOption && (
+                    <div className="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px]">✓</div>
+                  )}
+                  {isAnswered && isSelected && !isCorrectOption && (
+                    <div className="w-5 h-5 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px]">✗</div>
+                  )}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-gray-100 dark:border-white/5">
+          <button
+            onClick={() => handleToggleReveal(q.id)}
+            className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+          >
+            <HelpCircle className="w-4 h-4" />
+            {isRevealed || isAnswered 
+              ? (isAr ? 'إخفاء الإجابة والتفسير' : 'Hide Answer & Explanation') 
+              : (isAr ? 'عرض الإجابة الصحيحة' : 'Show Correct Answer')}
+          </button>
+
+          {isAnswered && (
+            <span className={`text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-xl border ${isCorrect ? 'text-emerald-500 border-emerald-500/20 bg-emerald-500/5' : 'text-rose-500 border-rose-500/20 bg-rose-500/5'}`}>
+              {isCorrect ? (isAr ? 'إجابة صحيحة' : 'CORRECT') : (isAr ? 'إجابة خاطئة' : 'INCORRECT')}
+            </span>
+          )}
+        </div>
+
+        {(isRevealed || isAnswered) && (
+          <div className="p-6 bg-emerald-50 dark:bg-emerald-500/5 border-s-4 border-emerald-500 rounded-r-2xl rounded-l-md animate-in slide-in-from-top-2 duration-300">
+            <p className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-2">
+              {isAr ? 'الإجابة الصحيحة والتوضيح' : 'CORRECT ANSWER & EXPLANATION'}
+            </p>
+            <p className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
+              {q.correct_answer}
+            </p>
+            {q.explanation ? (
+              <p className="text-xs text-gray-500 dark:text-white/40 leading-relaxed font-medium">
+                {q.explanation}
+              </p>
+            ) : (
+              <p className="text-xs text-gray-400 dark:text-white/20 leading-relaxed font-medium italic">
+                {isAr ? 'لا يوجد تفسير إضافي متاح.' : 'No additional explanation available.'}
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      
+      {/* STATS HEADER */}
+      <div className="bg-gray-50 dark:bg-black/20 p-8 rounded-[2.5rem] border border-gray-100 dark:border-white/5 space-y-6">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+          <div>
+            <h3 className="text-2xl font-black uppercase tracking-tight text-gray-900 dark:text-white">
+              {isAr ? 'بنك أسئلة المادة' : 'Course Question Bank'}
+            </h3>
+            <p className="text-xs font-semibold text-gray-400 mt-1 leading-relaxed">
+              {isAr 
+                ? 'تدرب على كافة الأسئلة الاختيارية المنشورة لتعزيز فهمك للمادة' 
+                : 'Practice all published MCQ & True/False questions to master this course'}
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex p-1.5 bg-white dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5">
+              <button
+                onClick={() => setViewMode('card')}
+                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all ${viewMode === 'card' ? 'bg-[#10b981] dark:bg-[#2cfc7d] text-white dark:text-black shadow' : 'text-gray-400'}`}
+              >
+                {isAr ? 'سؤال سؤال' : 'Flashcard'}
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all ${viewMode === 'list' ? 'bg-[#10b981] dark:bg-[#2cfc7d] text-white dark:text-black shadow' : 'text-gray-400'}`}
+              >
+                {isAr ? 'قائمة كاملة' : 'Full List'}
+              </button>
+            </div>
+
+            {/* Quiz filter */}
+            <div className="relative">
+              <select
+                value={selectedQuiz}
+                onChange={(e) => setSelectedQuiz(e.target.value)}
+                className="appearance-none bg-white dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-2xl px-6 py-3 text-xs font-black uppercase tracking-wider focus:outline-none focus:border-[#10b981] pe-10"
+              >
+                {quizzes.map((q, idx) => (
+                  <option key={q || idx} value={q} className="dark:bg-[#0c0c14] dark:text-white">
+                    {q === 'all' ? (isAr ? 'كل الاختبارات' : 'ALL QUIZZES') : q}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-gray-400">
+                <ChevronDown className="w-4 h-4" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Practice Analytics */}
+        <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-100 dark:border-white/5">
+          <div className="bg-white dark:bg-white/5 p-4 rounded-2xl text-center">
+            <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">{isAr ? 'إجمالي الأسئلة' : 'TOTAL QUESTIONS'}</span>
+            <p className="text-2xl font-black text-gray-900 dark:text-white mt-1">{totalQuestions}</p>
+          </div>
+          <div className="bg-white dark:bg-white/5 p-4 rounded-2xl text-center">
+            <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">{isAr ? 'تمت الإجابة' : 'ANSWERED'}</span>
+            <p className="text-2xl font-black text-blue-500 mt-1">{attemptedCount}</p>
+          </div>
+          <div className="bg-white dark:bg-white/5 p-4 rounded-2xl text-center">
+            <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">{isAr ? 'نسبة الدقة' : 'ACCURACY RATE'}</span>
+            <p className="text-2xl font-black text-emerald-500 mt-1">{scorePercentage}%</p>
+          </div>
+        </div>
+      </div>
+
+      {/* QUESTION CONTENT */}
+      {totalQuestions === 0 ? (
+        <div className="text-center p-12 text-gray-400 italic">
+          {isAr ? 'لا توجد أسئلة تطابق الفلتر المختار.' : 'No questions matching the selected filter.'}
+        </div>
+      ) : viewMode === 'card' ? (
+        <div className="space-y-6">
+          {renderQuestionCard(currentQuestion)}
+
+          {/* Navigation Controls */}
+          <div className="flex justify-between items-center bg-gray-50 dark:bg-white/5 px-6 py-4 rounded-[2rem] border border-gray-100 dark:border-white/5">
+            <button
+              disabled={currentIndex === 0}
+              onClick={() => setCurrentIndex(prev => prev - 1)}
+              className="px-6 py-3 bg-white dark:bg-[#0c0c14] border border-gray-200 dark:border-white/10 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-gray-100 dark:hover:bg-white/5 disabled:opacity-30 transition-all flex items-center gap-2"
+            >
+              <ArrowLeft className="w-3.5 h-3.5 rotate-180" />
+              {isAr ? 'السابق' : 'Previous'}
+            </button>
+
+            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+              {currentIndex + 1} / {totalQuestions}
+            </span>
+
+            <button
+              disabled={currentIndex === totalQuestions - 1}
+              onClick={() => setCurrentIndex(prev => prev + 1)}
+              className="px-6 py-3 bg-white dark:bg-[#0c0c14] border border-gray-200 dark:border-white/10 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-gray-100 dark:hover:bg-white/5 disabled:opacity-30 transition-all flex items-center gap-2"
+            >
+              {isAr ? 'التالي' : 'Next'}
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {filteredQuestions.map((q, idx) => renderQuestionCard(q, idx))}
+        </div>
+      )}
     </div>
   );
 };

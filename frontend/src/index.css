@@ -425,3 +425,7 @@ input[type=number] {
     transform: translateX(100%);
   }
 }
+
+.font-arabic {
+  font-family: 'Cairo', sans-serif !important;
+}

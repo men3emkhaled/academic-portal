@@ -160,8 +160,8 @@ const StudentDashboard = () => {
                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                   {grades.map((grade, idx) => (
                     <div 
-                      key={idx}
-                      onClick={() => navigate(`/student/course/${grade.course_id}`)}
+                       key={grade.course_id || idx}
+                       onClick={() => navigate(`/student/course/${grade.course_id}`)}
                       className="group bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-8 space-y-8 cursor-pointer hover:border-[#10b981] dark:hover:border-[#2cfc7d] transition-all duration-700 hover:-translate-y-2 hover:shadow-2xl shadow-sm"
                     >
                       <div className="flex justify-between items-start">
@@ -266,8 +266,6 @@ const StudentDashboard = () => {
       )}
 
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
-        .font-arabic { font-family: 'Cairo', sans-serif !important; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>

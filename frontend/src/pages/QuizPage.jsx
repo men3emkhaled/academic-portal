@@ -398,7 +398,7 @@ const QuizPage = () => {
               const isSelected = answers[currentQuestion.id] === letter;
               return (
                 <button
-                  key={idx}
+                  key={opt || idx}
                   onClick={() => handleAnswerSelect(currentQuestion.id, letter)}
                   className={`w-full text-left p-6 rounded-2xl border transition-all flex items-center justify-between ${
                     isSelected

@@ -274,8 +274,6 @@ const Sidebar = ({ onLogout }) => {
       </div>
 
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
-        .font-arabic { font-family: 'Cairo', sans-serif !important; }
         .hidden-scrollbar::-webkit-scrollbar { display: none; }
         .hidden-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>

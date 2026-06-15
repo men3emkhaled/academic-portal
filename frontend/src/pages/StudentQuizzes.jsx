@@ -231,7 +231,7 @@ const StudentQuizzes = () => {
 
                       return (
                         <div 
-                          key={idx}
+                          key={quiz.id || idx}
                           className="group bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[3rem] p-10 space-y-10 hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all duration-700 hover:-translate-y-2 hover:shadow-2xl shadow-sm relative overflow-hidden"
                         >
                           <div className="flex justify-between items-start">
@@ -301,10 +301,7 @@ const StudentQuizzes = () => {
         </section>
       </main>
 
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
-        .font-arabic { font-family: 'Cairo', sans-serif !important; }
-      `}</style>
+
     </div>
   );
 };

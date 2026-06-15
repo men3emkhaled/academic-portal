@@ -219,7 +219,7 @@ const StudentMaterials = () => {
   const FakeWaveform = () => (
     <div className="flex items-center justify-center gap-1.5 h-14">
       {[...Array(32)].map((_, i) => (
-        <div key={i} className="w-1.5 bg-[#2cfc7d]/30 rounded-full animate-pulse"
+        <div key={_?.id || i} className="w-1.5 bg-[#2cfc7d]/30 rounded-full animate-pulse"
           style={{
             height: `${Math.random() * 80 + 20}%`,
             animationDelay: `${Math.random() * 1}s`,
@@ -539,8 +539,6 @@ const StudentMaterials = () => {
       </main>
 
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
-        .font-arabic { font-family: 'Cairo', sans-serif !important; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .custom-audio::-webkit-media-controls-panel { background-color: transparent; }

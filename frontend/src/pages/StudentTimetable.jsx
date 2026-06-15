@@ -365,7 +365,7 @@ const StudentTimetable = () => {
 
                       return (
                         <div 
-                          key={idx}
+                          key={entry?.id || idx}
                           onClick={() => scheduleType === 'lectures' ? handleLectureClick(entry) : navigate(`/student/course/${entry.course_id}`)}
                           className={`group bg-white/80 dark:bg-[#0c0c14]/80 backdrop-blur-md border rounded-[2rem] p-5 md:p-6 flex items-center justify-between gap-4 transition-all duration-500 relative overflow-hidden cursor-pointer ${borderLeftClass} ${isLive ? 'border-[#2cfc7d] shadow-[0_0_50px_rgba(44,252,125,0.08)]' : 'border-gray-100 dark:border-white/[0.03] hover:-translate-y-1 hover:border-purple-500/20 hover:shadow-2xl hover:shadow-purple-500/[0.04]'}`}
                         >
@@ -512,8 +512,6 @@ const StudentTimetable = () => {
       )}
 
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
-        .font-arabic { font-family: 'Cairo', sans-serif !important; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>

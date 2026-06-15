@@ -131,7 +131,7 @@ const StudentLogin = () => {
 
             <div className="flex justify-center gap-8 pt-6">
               {[GraduationCap, BookOpen, Clock].map((Icon, i) => (
-                <div key={i} className="flex flex-col items-center gap-3 group">
+                <div key={Icon?.displayName || i} className="flex flex-col items-center gap-3 group">
                   <div className={`w-16 h-16 rounded-2xl border flex items-center justify-center transition-all duration-500 group-hover:-translate-y-2 ${isDarkMode ? 'bg-white/[0.02] border-white/5' : 'bg-white border-gray-100 shadow-sm'}`}>
                     <Icon className="w-7 h-7 text-[#10b981] opacity-40 group-hover:opacity-100 transition-opacity" />
                   </div>
@@ -227,10 +227,7 @@ const StudentLogin = () => {
           </div>
         </div>
 
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
-        .font-arabic { font-family: 'Cairo', sans-serif !important; }
-      `}</style>
+
     </div>
   );
 };

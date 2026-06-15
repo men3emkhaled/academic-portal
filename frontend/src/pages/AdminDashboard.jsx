@@ -344,7 +344,7 @@ const AdminDashboard = () => {
               { label: t('admin.stats.protocol'), value: 'v4.0.2', icon: Shield, color: 'text-rose-500', bg: 'bg-rose-500/10' },
             ].map((stat, i) => (
               <div
-                key={i}
+                key={stat.label || i}
                 style={{ animationDelay: `${i * 60}ms` }}
                 className="group relative bg-white/80 dark:bg-white/[0.03] border border-gray-100 dark:border-white/5 p-6 lg:p-8 rounded-[2rem] lg:rounded-[2.5rem] shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden fade-in-up">
                 <div className={`w-10 h-10 lg:w-12 lg:h-12 rounded-2xl ${stat.bg} ${stat.color} flex items-center justify-center mb-6 relative z-10 group-hover:scale-105 transition-transform duration-200 will-change-transform`}>
@@ -454,7 +454,7 @@ const AdminDashboard = () => {
                     { label: t('admin.stats.protocol'), value: 'v4.0.2', icon: Shield, color: 'text-rose-500', bg: 'bg-rose-500/10' },
                   ].map((stat, i) => (
                     <div
-                      key={i}
+                      key={stat.label || i}
                       className="group bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-8 space-y-8 hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all duration-700 shadow-sm"
                     >
                       <div className="flex justify-between items-start">
@@ -505,7 +505,7 @@ const AdminDashboard = () => {
                         { label: t('admin.sidebar.tabs.departments'), value: departments.length, color: 'text-amber-500', icon: LayoutDashboard },
                         { label: t('admin.sidebar.tabs.notifications'), value: notifications.length, color: 'text-rose-500', icon: Bell },
                       ].map((s, i) => (
-                        <div key={i} className="flex items-center justify-between p-4 rounded-2xl bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5">
+                        <div key={s.label || i} className="flex items-center justify-between p-4 rounded-2xl bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5">
                           <div className="flex items-center gap-3">
                             <s.icon className={`w-4 h-4 ${s.color}`} />
                             <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">{s.label}</span>

@@ -23,14 +23,18 @@ class Quiz {
     }
 
     static async getQuestions(quizId, shuffle = true) {
-        let query = 'SELECT * FROM questions WHERE quiz_id = $1';
-        if (shuffle) {
-            query += ' ORDER BY RANDOM()';
-        } else {
-            query += ' ORDER BY order_index, id';
+        const result = await db.query(
+            'SELECT * FROM questions WHERE quiz_id = $1 ORDER BY order_index, id',
+            [quizId]
+        );
+        if (!shuffle) return result.rows;
+        // Fisher-Yates shuffle (avoids costly ORDER BY RANDOM() on DB)
+        const rows = [...result.rows];
+        for (let i = rows.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [rows[i], rows[j]] = [rows[j], rows[i]];
         }
-        const result = await db.query(query, [quizId]);
-        return result.rows;
+        return rows;
     }
 
     static async getTotalPoints(quizId) {

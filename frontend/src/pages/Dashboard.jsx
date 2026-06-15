@@ -1,17 +1,17 @@
-// frontend/src/pages/Dashboard.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useStudentAuth } from '../context/StudentAuthContext';
 import api from '../services/api';
-import toast from 'react-hot-toast';
 
 const Dashboard = () => {
+  const { t, i18n } = useTranslation();
   const { student } = useStudentAuth();
   const navigate = useNavigate();
   const [announcements, setAnnouncements] = useState([]);
   const [todaySchedule, setTodaySchedule] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [semesterProgress, setSemesterProgress] = useState(72); // وهمي مؤقت
+  const [semesterProgress] = useState(72);
 
   useEffect(() => {
     if (!student) return;
@@ -21,20 +21,10 @@ const Dashboard = () => {
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
-      // جلب الإعلانات (مؤقت من API موجود أو وهمي)
       const announcementsRes = await api.get('/announcements').catch(() => ({ data: [] }));
-      setAnnouncements(announcementsRes.data || [
-        { id: 1, title: 'Final Exam Schedule Published', content: 'The final examination schedule for the Fall 2023 semester is now available...', is_urgent: true, date: 'October 24, 2023' },
-        { id: 2, title: 'New Research Opportunity: AI Ethics Lab', content: 'The Faculty of CI is inviting students to participate...', is_urgent: false, date: 'October 22, 2023' },
-      ]);
-
-      // جلب جدول اليوم
+      setAnnouncements(announcementsRes.data || []);
       const timetableRes = await api.get('/timetable/today').catch(() => ({ data: [] }));
-      setTodaySchedule(timetableRes.data || [
-        { id: 1, course_name: 'Machine Learning', start_time: '09:00', end_time: '11:00', location: 'Main Hall 4 - Building B', lecturer: 'Inst. Sarah Johnson', type: 'lecture' },
-        { id: 2, course_name: 'Cryptography', start_time: '13:00', end_time: '14:30', location: 'Lab 302 - IT Center', lecturer: 'Inst. Mike Sterling', type: 'lecture' },
-      ]);
-
+      setTodaySchedule(timetableRes.data || []);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
     } finally {
@@ -51,24 +41,20 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="space-y-6 animate-fadeIn">
-      {/* Welcome Section */}
+    <div className="space-y-6 animate-fadeIn" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
       <div className="bg-gradient-to-r from-neon/10 to-transparent border border-neon/30 rounded-2xl p-6">
         <h1 className="text-3xl md:text-4xl font-bold text-white">
-          Welcome back, <span className="neon-text">{student?.name}</span>
+          {t('dashboard.welcome_back')}, <span className="neon-text">{student?.name}</span>
         </h1>
-        <p className="text-gray-300 mt-2">You're making great progress this semester. Keep it up!</p>
         <div className="flex gap-4 mt-4 text-sm">
-          <span className="text-gray-400">ID: {student?.id}</span>
-          <span className="text-gray-400">Level: {student?.level || 1}</span>
+          <span className="text-gray-400">{t('common.id')}: {student?.id}</span>
+          <span className="text-gray-400">{t('dashboard.level')}: {student?.level || 1}</span>
         </div>
       </div>
 
-      {/* Two Columns */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column - Announcements (2/3 width on large screens) */}
         <div className="lg:col-span-2 space-y-6">
-          <h2 className="text-2xl font-bold text-white border-l-4 border-neon pl-3">Latest Announcements</h2>
+          <h2 className="text-2xl font-bold text-white border-l-4 border-neon pl-3">{t('dashboard.announcements')}</h2>
           <div className="space-y-4">
             {announcements.map((ann) => (
               <div
@@ -80,7 +66,7 @@ const Dashboard = () => {
                 <div className="flex justify-between items-start mb-2">
                   <h3 className="text-lg font-semibold text-white">{ann.title}</h3>
                   {ann.is_urgent && (
-                    <span className="text-xs font-bold text-red-400 bg-red-500/20 px-2 py-1 rounded-full">URGENT</span>
+                    <span className="text-xs font-bold text-red-400 bg-red-500/20 px-2 py-1 rounded-full">{t('dashboard.urgent')}</span>
                   )}
                 </div>
                 <p className="text-gray-300 text-sm">{ann.content}</p>
@@ -90,16 +76,14 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Right Column - Today's Schedule + Quick Actions */}
         <div className="space-y-6">
-          {/* Today's Schedule */}
           <div className="bg-charcoal/50 border border-neon/30 rounded-xl p-5">
             <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-              <span>📅</span> Today's Schedule
+              <span>📅</span> {t('dashboard.today_schedule')}
             </h2>
             <div className="space-y-3">
               {todaySchedule.length === 0 ? (
-                <p className="text-gray-400 text-sm">No classes scheduled today.</p>
+                <p className="text-gray-400 text-sm">{t('dashboard.no_classes')}</p>
               ) : (
                 todaySchedule.map((item) => (
                   <div key={item.id} className="border-b border-white/10 pb-3 last:border-0">
@@ -113,27 +97,25 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Quick Actions */}
           <div className="bg-charcoal/50 border border-neon/30 rounded-xl p-5">
-            <h2 className="text-xl font-bold text-white mb-4">Quick Actions</h2>
+            <h2 className="text-xl font-bold text-white mb-4">{t('dashboard.quick_actions')}</h2>
             <div className="space-y-2">
               <button onClick={() => navigate('/courses')} className="w-full text-left px-4 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-neon">
-                📚 All Courses
+                📚 {t('dashboard.all_courses')}
               </button>
               <button onClick={() => navigate('/grades')} className="w-full text-left px-4 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-neon">
-                📊 View Grades
+                📊 {t('dashboard.view_grades')}
               </button>
               <button onClick={() => navigate('/roadmaps')} className="w-full text-left px-4 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-neon">
-                🗺️ Explore Roadmaps
+                🗺️ {t('dashboard.explore_roadmaps')}
               </button>
             </div>
           </div>
 
-          {/* Semester Progress */}
           <div className="bg-charcoal/50 border border-neon/30 rounded-xl p-5">
-            <h2 className="text-xl font-bold text-white mb-3">Semester Progress</h2>
+            <h2 className="text-xl font-bold text-white mb-3">{t('dashboard.semester_progress')}</h2>
             <div className="text-center">
-              <p className="text-3xl font-bold text-neon">WEEK {semesterProgress} OF 16</p>
+              <p className="text-3xl font-bold text-neon">{t('dashboard.week_progress', { week: semesterProgress, total: 16 })}</p>
               <div className="w-full bg-white/10 rounded-full h-2 mt-2">
                 <div className="bg-neon h-2 rounded-full" style={{ width: `${semesterProgress}%` }} />
               </div>

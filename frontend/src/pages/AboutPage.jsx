@@ -69,7 +69,7 @@ export default function AboutPage() {
           <div className="lg:col-span-6 space-y-6">
             {tLocal.about.features.map((feat, idx) => (
               <div
-                key={idx}
+                key={feat?.id || idx}
                 className="bg-white dark:bg-[#0d0d14] border border-gray-200/50 dark:border-white/5 p-7 rounded-[2rem] hover:scale-[1.02] transition-all hover:shadow-md"
               >
                 <div className="flex items-center gap-4 mb-3">

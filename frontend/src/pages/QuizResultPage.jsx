@@ -342,7 +342,7 @@ const QuizResultPage = () => {
 
                             return (
                               <div
-                                key={i}
+                                key={opt || i}
                                 className={`flex items-center gap-3 p-3 rounded-lg border ${bgClass} ${borderClass}`}
                               >
                                 <span className="font-bold mr-2 text-gray-600 dark:text-gray-400">{letter}.</span>
