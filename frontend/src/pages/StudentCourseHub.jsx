@@ -730,7 +730,7 @@ const QuestionBankTab = ({ questions, isAr, t }) => {
                     </span>
                   )}
                   {isAnswered && isSelected && !isCorrectOption && (
-                    <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-destructive text-[10px] text-white">✗</span>
+                    <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-destructive text-[10px] text-destructive-foreground">✗</span>
                   )}
                 </button>
               );

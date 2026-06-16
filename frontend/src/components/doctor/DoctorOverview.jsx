@@ -216,7 +216,7 @@ const DoctorOverview = ({ stats, doctor, timetable, setActiveTab }) => {
                 {timetable && timetable.length > 0 ? (
                   <div className="relative space-y-5">
                     {/* Vertical timeline track */}
-                    <div className="absolute inset-inline-start-[5px] top-2 bottom-2 w-px bg-border" />
+                    <div className="absolute start-[5px] top-2 bottom-2 w-px bg-border" />
 
                     {timetable.slice(0, 4).map((entry, i) => (
                       <div key={i} className="relative flex gap-4">

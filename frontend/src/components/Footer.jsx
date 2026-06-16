@@ -43,6 +43,7 @@ export default function Footer() {
               href="https://www.facebook.com/ZagazigNationalUniversity/"
               target="_blank"
               rel="noopener noreferrer"
+              aria-label="Facebook"
               className="w-9 h-9 rounded-md bg-muted hover:text-primary flex items-center justify-center transition-colors border border-border"
             >
               <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
@@ -53,6 +54,7 @@ export default function Footer() {
               href="https://www.linkedin.com/in/zagazig-national-university-znu-egypt-7159a4333/"
               target="_blank"
               rel="noopener noreferrer"
+              aria-label="LinkedIn"
               className="w-9 h-9 rounded-md bg-muted hover:text-primary flex items-center justify-center transition-colors border border-border"
             >
               <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">

@@ -59,7 +59,7 @@ const DoctorHeader = ({
           >
             <Bell className="size-4" />
             {unreadCount > 0 && (
-              <span className="absolute -top-0.5 -end-0.5 min-w-4 h-4 px-1 bg-destructive rounded-full border-2 border-background flex items-center justify-center text-[8px] font-semibold text-white">
+              <span className="absolute -top-0.5 -end-0.5 min-w-4 h-4 px-1 bg-destructive rounded-full border-2 border-background flex items-center justify-center text-[8px] font-semibold text-destructive-foreground">
                 {unreadCount > 9 ? '9+' : unreadCount}
               </span>
             )}

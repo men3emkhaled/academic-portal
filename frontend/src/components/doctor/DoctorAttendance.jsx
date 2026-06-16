@@ -288,7 +288,7 @@ const DoctorAttendance = ({ courses }) => {
                       }`}
                     >
                       {isActive && (
-                        <span className="absolute inset-inline-start-0 top-1/2 -translate-y-1/2 h-8 w-0.5 rounded-full bg-primary" />
+                        <span className="absolute start-0 top-1/2 -translate-y-1/2 h-8 w-0.5 rounded-full bg-primary" />
                       )}
                       <div className="ps-1.5">
                         <div className="flex items-center justify-between gap-2 mb-1.5">

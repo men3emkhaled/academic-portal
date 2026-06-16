@@ -68,7 +68,7 @@ const QuestionForm = ({
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <FormField label={t('admin.quizzes.questions.form.image_url')} htmlFor="image_url">
             <div className="relative">
-              <ImageIcon className="pointer-events-none absolute inset-inline-start-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <ImageIcon className="pointer-events-none absolute start-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 id="image_url"
                 type="text"
@@ -107,7 +107,7 @@ const QuestionForm = ({
                 const letter = String.fromCharCode(65 + idx);
                 return (
                   <div key={idx} className="relative">
-                    <span className="pointer-events-none absolute inset-inline-start-2.5 top-1/2 -translate-y-1/2 text-xs font-medium text-muted-foreground">
+                    <span className="pointer-events-none absolute start-2.5 top-1/2 -translate-y-1/2 text-xs font-medium text-muted-foreground">
                       {letter}
                     </span>
                     <Input

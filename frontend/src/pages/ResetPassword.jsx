@@ -28,7 +28,7 @@ const ResetPassword = () => {
       toast.error(t('auth.reset_password.error_invalid_token'));
       navigate('/student/login');
     }
-  }, [token, navigate]);
+  }, [token, navigate, t]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

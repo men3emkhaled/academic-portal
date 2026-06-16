@@ -150,7 +150,7 @@ const DoctorDashboard = () => {
         <DoctorHeader
           doctor={doctor}
           onSearch={setSearchQuery}
-          onCreateQuiz={() => setActiveTab('quizzes')}
+          onCreateQuiz={() => handleTabChange('quizzes')}
           notifications={notifications}
           unreadCount={unreadCount}
           onMarkRead={markNotificationAsRead}

@@ -130,7 +130,6 @@ const GradesUploader = ({ courses = [], departments = [] }) => {
         {/* Left: settings + file upload */}
         <div className="space-y-6 xl:col-span-2">
           <SectionCard
-            title={t('admin.grades.settings.title')}
             header={
               <header className="flex items-center gap-3 border-b border-border px-4 py-3">
                 <span className="flex size-8 shrink-0 items-center justify-center rounded-md border bg-muted text-muted-foreground">

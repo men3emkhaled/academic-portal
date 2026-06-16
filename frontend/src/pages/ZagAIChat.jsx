@@ -202,6 +202,7 @@ const ZagAIChat = () => {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
+                  aria-label={isAr ? 'اكتب رسالتك' : 'Message'}
                   placeholder={isAr ? 'اكتب رسالتك...' : 'Type your message...'}
                   rows={1}
                   className="flex-1 min-h-[40px] resize-none text-start"

@@ -243,7 +243,7 @@ const NotificationsManager = ({
                   required
                 >
                   <div className="relative">
-                    <Hash className="pointer-events-none absolute inset-inline-start-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                    <Hash className="pointer-events-none absolute start-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
                       id="notification_student_id"
                       type="text"
@@ -264,7 +264,7 @@ const NotificationsManager = ({
                   required
                 >
                   <div className="relative">
-                    <Hash className="pointer-events-none absolute inset-inline-start-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                    <Hash className="pointer-events-none absolute start-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
                       id="notification_doctor_id"
                       type="text"

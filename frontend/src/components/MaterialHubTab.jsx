@@ -508,10 +508,10 @@ const MaterialHubTab = ({ courseId }) => {
               >
                 {/* Status side-bar */}
                 {isPending && (
-                  <div className="absolute inset-y-0 inset-inline-start-0 w-0.5 bg-amber-500" />
+                  <div className="absolute inset-y-0 start-0 w-0.5 bg-amber-500" />
                 )}
                 {isRejected && (
-                  <div className="absolute inset-y-0 inset-inline-start-0 w-0.5 bg-destructive" />
+                  <div className="absolute inset-y-0 start-0 w-0.5 bg-destructive" />
                 )}
 
                 {/* Header: Student Info & Date */}
@@ -746,6 +746,7 @@ const MaterialHubTab = ({ courseId }) => {
                                   {(comment.student_id === student?.id || isReviewer) && (
                                     <button
                                       onClick={() => handleDeleteComment(post.id, comment.id)}
+                                      aria-label={isAr ? 'حذف التعليق' : 'Delete comment'}
                                       className="opacity-0 group-hover/comment:opacity-100 text-muted-foreground hover:text-destructive transition-colors"
                                     >
                                       <X className="size-3" />
@@ -770,6 +771,7 @@ const MaterialHubTab = ({ courseId }) => {
                       <div className="flex-1 flex items-center gap-2 bg-muted/40 border border-border rounded-lg px-3 py-1.5">
                         <input
                           type="text"
+                          aria-label={isAr ? 'اكتب تعليقك' : 'Write a comment'}
                           placeholder={isAr ? 'اكتب تعليقك...' : 'Write a comment...'}
                           value={commentText}
                           onChange={e => setCommentText(e.target.value)}
@@ -779,6 +781,7 @@ const MaterialHubTab = ({ courseId }) => {
                         <button
                           onClick={() => handleAddComment(post.id)}
                           disabled={submittingComment || !commentText.trim()}
+                          aria-label={isAr ? 'إرسال التعليق' : 'Send comment'}
                           className="text-primary transition-colors disabled:opacity-30 shrink-0"
                         >
                           {submittingComment

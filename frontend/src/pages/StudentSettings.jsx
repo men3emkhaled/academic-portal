@@ -160,7 +160,7 @@ const StudentSettings = () => {
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   className="relative flex size-24 items-center justify-center overflow-hidden rounded-xl border bg-muted text-muted-foreground transition-colors hover:border-primary"
-                  aria-label={t('settings.avatar_updated')}
+                  aria-label={isAr ? 'تغيير الصورة الشخصية' : 'Change profile photo'}
                 >
                   {student?.avatar_url ? (
                     <img

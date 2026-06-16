@@ -48,8 +48,6 @@ const AVAILABLE_PERMISSIONS = [
 const StudentsManager = ({
   students,
   fetchStudents,
-  uploadingStudents,
-  setUploadingStudents,
   studentsFile,
   setStudentsFile,
   handleResetPassword,

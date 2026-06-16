@@ -72,7 +72,7 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout, unreadCount 
   // ============= Desktop floating rail =============
   if (!isMobile) {
     return (
-      <div className="fixed inset-inline-start-6 top-6 bottom-6 w-64 z-50">
+      <div className="fixed start-6 top-6 bottom-6 w-64 z-50">
         <div className="h-full bg-card border border-border rounded-xl shadow-sm flex flex-col overflow-hidden">
 
           {/* Avatar header */}
@@ -120,7 +120,7 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout, unreadCount 
                     `}
                   >
                     {isActive && (
-                      <span className="absolute inset-inline-start-0 top-1/2 -translate-y-1/2 h-5 w-0.5 rounded-full bg-primary" />
+                      <span className="absolute start-0 top-1/2 -translate-y-1/2 h-5 w-0.5 rounded-full bg-primary" />
                     )}
                     <span className={isActive ? 'text-primary' : ''}>{item.icon}</span>
                     <span className="truncate">{item.label}</span>
@@ -141,7 +141,7 @@ const DoctorSidebar = ({ activeTab, setActiveTab, doctor, onLogout, unreadCount 
               `}
             >
               {activeTab === 'notifications' && (
-                <span className="absolute inset-inline-start-0 top-1/2 -translate-y-1/2 h-5 w-0.5 rounded-full bg-primary" />
+                <span className="absolute start-0 top-1/2 -translate-y-1/2 h-5 w-0.5 rounded-full bg-primary" />
               )}
               <span className="relative">
                 <Bell className={`size-5 ${activeTab === 'notifications' ? 'text-primary' : ''}`} />

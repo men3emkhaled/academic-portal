@@ -74,7 +74,7 @@ const QuizForm = ({
                   <SelectValue placeholder={t('admin.quizzes.modals.select_course')} />
                 </SelectTrigger>
                 <SelectContent>
-                  {courses.map((c) => (
+                  {(courses || []).map((c) => (
                     <SelectItem key={c.id} value={String(c.id)}>
                       {c.name} (S{c.semester})
                     </SelectItem>
@@ -115,7 +115,7 @@ const QuizForm = ({
                     className="pe-9"
                     required
                   />
-                  <Clock className="absolute inset-inline-end-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
+                  <Clock className="absolute end-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
                 </div>
               </FormField>
 
@@ -129,7 +129,7 @@ const QuizForm = ({
                     className="pe-9"
                     required
                   />
-                  <span className="absolute inset-inline-end-2.5 top-1/2 -translate-y-1/2 text-sm font-medium text-muted-foreground pointer-events-none">%</span>
+                  <span className="absolute end-2.5 top-1/2 -translate-y-1/2 text-sm font-medium text-muted-foreground pointer-events-none">%</span>
                 </div>
               </FormField>
             </div>
@@ -144,7 +144,7 @@ const QuizForm = ({
                     onChange={(e) => setQuizForm({ ...quizForm, max_attempts: e.target.value })}
                     className="pe-9"
                   />
-                  <RotateCcw className="absolute inset-inline-end-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
+                  <RotateCcw className="absolute end-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
                 </div>
               </FormField>
 

@@ -220,121 +220,11 @@
 }
 
 @layer components {
-  .neon-text {
-    @apply text-primary;
-    text-shadow: 0 0 5px rgba(46, 204, 113, 0.5);
-  }
-
-  .neon-button {
-    @apply bg-primary text-dark font-semibold py-2.5 px-6 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-[0_0_15px_rgba(46,204,113,0.5)] active:scale-95;
-  }
-
-  .glass-card {
-    @apply bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 shadow-xl;
-    backdrop-filter: blur(20px);
-  }
-
-  .admin-card {
-    @apply bg-white dark:bg-[#151520] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-6 sm:p-10 transition-all duration-500 hover:shadow-[0_32px_64px_rgba(0,0,0,0.1)] dark:hover:shadow-[0_32px_64px_rgba(0,0,0,0.4)];
-  }
-
+  /* Legacy glass/neon/luxury/admin-* component classes were removed during the
+     Linear redesign (all migrated to shadcn/ui + @/components/common primitives). */
   .max-dashboard {
     max-width: 1800px;
     margin: 0 auto;
-  }
-
-  .admin-panel {
-    @apply bg-white dark:bg-[#111111] border border-gray-200 dark:border-white/10 rounded-[2.5rem] shadow-xl dark:shadow-2xl;
-  }
-
-  .admin-input {
-    @apply w-full bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/10 rounded-2xl px-5 py-4 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-600 focus:border-[#8b5cf6]/50 focus:outline-none focus:ring-4 focus:ring-[#8b5cf6]/10 transition-all font-black text-xs sm:text-sm shadow-inner;
-  }
-
-  .admin-input-sm {
-    @apply bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/5 rounded-xl px-4 py-2 text-gray-900 dark:text-white text-sm placeholder-gray-400 dark:placeholder-slate-600 focus:border-[#8b5cf6]/50 focus:outline-none transition-all;
-  }
-
-  .admin-btn-primary {
-    @apply bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-black py-4 sm:py-5 px-8 sm:px-12 rounded-[2rem] sm:rounded-[2.5rem] shadow-xl shadow-purple-500/20 transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed uppercase tracking-widest text-xs sm:text-sm flex items-center justify-center gap-3;
-  }
-
-  .admin-btn-secondary {
-    @apply bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-slate-300 border border-gray-200 dark:border-white/10 py-4 sm:py-5 px-8 sm:px-12 rounded-[2rem] sm:rounded-[2.5rem] font-black transition-all hover:bg-gray-200 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white active:scale-95 uppercase tracking-widest text-xs sm:text-sm flex items-center justify-center gap-3;
-  }
-
-  .admin-btn-ghost {
-    @apply text-gray-600 dark:text-slate-400 bg-transparent border border-transparent dark:border-white/5 py-2.5 px-5 rounded-xl font-bold transition-all hover:bg-gray-100 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white;
-  }
-
-  .admin-modal-backdrop {
-    @apply fixed inset-0 bg-gray-950/40 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center z-[100] p-4 overflow-y-auto;
-  }
-
-  .admin-modal-panel {
-    @apply bg-white dark:bg-[#080808] border border-gray-100 dark:border-white/5 rounded-[2.5rem] sm:rounded-[3rem] p-6 sm:p-12 w-full max-w-3xl shadow-2xl relative overflow-hidden my-8;
-    animation: fadeInUp 0.6s ease-out forwards;
-  }
-
-  .admin-table {
-    @apply w-full min-w-full text-sm border-separate border-spacing-0;
-  }
-
-  .admin-table-head th {
-    @apply text-start py-3 px-4 text-primary;
-  }
-
-  .admin-table-row {
-    @apply border-b border-gray-200 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-white/5;
-  }
-
-  .admin-tag {
-    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold;
-  }
-
-  .neon-border {
-    @apply border border-primary/50 shadow-[0_0_10px_rgba(46,204,113,0.2)];
-  }
-
-  /* Liquid Glass Utilities */
-  .glass-premium {
-    background: rgba(255, 255, 255, 0.4);
-    backdrop-filter: blur(40px);
-    -webkit-backdrop-filter: blur(40px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-  }
-
-  .dark .glass-premium {
-    background: rgba(5, 5, 5, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-  }
-
-  .glow-primary {
-    box-shadow: 0 0 40px rgba(46, 204, 113, 0.2);
-  }
-
-  .glow-blue {
-    box-shadow: 0 0 40px rgba(59, 130, 246, 0.2);
-  }
-
-  /* Luxury Components */
-  .luxury-glass {
-    @apply bg-white/40 dark:bg-white/[0.02] backdrop-blur-3xl border border-white/20 dark:border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.08)] dark:shadow-none;
-  }
-
-  .luxury-card {
-    @apply relative overflow-hidden rounded-[2.5rem] bg-white dark:bg-[#0c0c0c] border border-gray-100 dark:border-white/[0.06] transition-all duration-500 hover:shadow-2xl hover:shadow-black/20;
-  }
-
-  .luxury-shimmer {
-    background: linear-gradient(
-      90deg,
-      transparent,
-      rgba(255, 255, 255, 0.05),
-      transparent
-    );
-    background-size: 200% 100%;
-    animation: shimmer 2s infinite;
   }
 }
 
@@ -565,29 +455,6 @@ input[type=number]::-webkit-outer-spin-button {
 input[type=number] {
   appearance: textfield;
   -moz-appearance: textfield;
-}
-
-/* ============= Mesh Gradient Animation ============= */
-@keyframes mesh-gradient {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-.mesh-bg {
-  background: linear-gradient(-45deg, #10b981, #3b82f6, #6366f1, #2dd4bf);
-  background-size: 400% 400%;
-  animation: mesh-gradient 15s ease infinite;
-}
-
-.dark .mesh-bg-dark {
-  background: linear-gradient(-45deg, #050505, #0a0a0a, #111, #050505);
-  background-size: 400% 400%;
-  animation: mesh-gradient 15s ease infinite;
-}
-
-.perspective-1000 {
-  perspective: 1000px;
 }
 
 /* ============= Shimmer Animation ============= */

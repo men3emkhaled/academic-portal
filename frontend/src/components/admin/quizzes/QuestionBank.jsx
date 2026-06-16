@@ -95,7 +95,7 @@ const QuestionBank = ({ questions, setShowQuestionForm, editQuestion, handleDele
                             alt="Question visual"
                             className="h-44 w-full object-cover"
                           />
-                          <div className="absolute top-2 inset-inline-end-2">
+                          <div className="absolute top-2 end-2">
                             <StatusBadge variant="neutral" icon={ImageIcon} className="bg-card/90">
                               {t('admin.quizzes.authorized_entities')}
                             </StatusBadge>

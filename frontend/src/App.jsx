@@ -61,10 +61,10 @@ const StudentLoginRedirect = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#010101]">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center space-y-4">
-          <div className="w-16 h-16 mx-auto rounded-full bg-white/5 animate-pulse" />
-          <div className="h-3 w-32 mx-auto bg-white/5 animate-pulse rounded" />
+          <div className="w-16 h-16 mx-auto rounded-full bg-muted animate-pulse" />
+          <div className="h-3 w-32 mx-auto bg-muted animate-pulse rounded" />
         </div>
       </div>
     );
@@ -130,7 +130,7 @@ function AppContent() {
   ].some((p) => location.pathname === p || location.pathname.startsWith(p)) && !(location.pathname.startsWith('/admin') && adminToken);
 
   return (
-    <div className={`min-h-screen overflow-x-hidden transition-colors duration-500 ${isDarkMode ? 'bg-[#010101]' : 'bg-[#fafafa]'}`}>
+    <div className="min-h-screen overflow-x-hidden transition-colors duration-500 bg-background">
       {showSwitcher && <PortalSwitcher />}
       <div
         key={location.pathname}

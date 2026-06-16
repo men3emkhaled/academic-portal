@@ -194,7 +194,7 @@ const DoctorSchedule = ({ timetable, onRefresh, courses }) => {
                     className="group relative overflow-hidden rounded-lg border bg-card p-4 transition-colors hover:bg-muted/50"
                   >
                     {/* Green start-spine */}
-                    <div className="absolute inset-y-0 inset-inline-start-0 w-1 bg-primary" />
+                    <div className="absolute inset-y-0 start-0 w-1 bg-primary" />
 
                     <div className="mb-3 flex items-start justify-between gap-2">
                       <StatusBadge variant="neutral">{entry.type}</StatusBadge>

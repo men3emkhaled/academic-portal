@@ -156,7 +156,7 @@ const AdminDashboard = () => {
   useEffect(() => {
     if (!token) return;
     if (activeTab === 'students' || activeTab === 'records') fetchStudents();
-    if (activeTab === 'grades' || activeTab === 'courses' || activeTab === 'records') fetchCourses();
+    if (activeTab === 'grades' || activeTab === 'courses' || activeTab === 'records' || activeTab === 'quizzes') fetchCourses();
     if (activeTab === 'notifications' || activeTab === 'mobile_center') fetchNotifications();
     if (activeTab === 'overview') { fetchStudents(); fetchCourses(); }
   }, [token, activeTab]);
@@ -442,7 +442,7 @@ const AdminDashboard = () => {
         </Suspense>
       );
       case 'departments': return <Suspense fallback={<LoadingState label={t('common.loading')} />}><DepartmentManager /></Suspense>;
-      case 'quizzes': return <Suspense fallback={<LoadingState label={t('common.loading')} />}><QuizManager /></Suspense>;
+      case 'quizzes': return <Suspense fallback={<LoadingState label={t('common.loading')} />}><QuizManager courses={courses} /></Suspense>;
       case 'reviews': return <Suspense fallback={<LoadingState label={t('common.loading')} />}><PendingReviews /></Suspense>;
       case 'events': return <Suspense fallback={<LoadingState label={t('common.loading')} />}><EventsManager /></Suspense>;
       case 'progress': return <Suspense fallback={<LoadingState label={t('common.loading')} />}><ProgressManager /></Suspense>;
