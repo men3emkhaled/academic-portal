@@ -1,5 +1,7 @@
 import React from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -18,23 +20,24 @@ class ErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-[#0a0a12] p-8">
-          <div className="bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[3rem] p-12 max-w-md w-full text-center shadow-xl">
-            <div className="w-20 h-20 mx-auto mb-8 rounded-3xl bg-red-50 dark:bg-red-500/10 flex items-center justify-center">
-              <AlertTriangle className="w-10 h-10 text-red-500" />
+        <div className="min-h-screen flex items-center justify-center bg-background p-6">
+          <Card className="w-full max-w-md p-6 text-center">
+            <div className="mx-auto flex size-12 items-center justify-center rounded-lg bg-destructive/10">
+              <AlertTriangle className="size-5 text-destructive" />
             </div>
-            <h2 className="text-2xl font-black mb-4">{this.props.title || 'Something went wrong'}</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-8">
+            <h2 className="text-xl font-semibold text-foreground">
+              {this.props.title || 'Something went wrong'}
+            </h2>
+            <p className="text-sm text-muted-foreground">
               {this.props.message || 'An unexpected error occurred. Please try refreshing the page.'}
             </p>
-            <button
-              onClick={() => window.location.reload()}
-              className="inline-flex items-center gap-2 px-8 py-4 bg-black dark:bg-white text-white dark:text-black rounded-2xl font-black text-sm hover:opacity-80 transition-all"
-            >
-              <RefreshCw className="w-4 h-4" />
-              Refresh Page
-            </button>
-          </div>
+            <div className="flex justify-center pt-1">
+              <Button onClick={() => window.location.reload()}>
+                <RefreshCw className="size-4" />
+                <span>Refresh Page</span>
+              </Button>
+            </div>
+          </Card>
         </div>
       );
     }

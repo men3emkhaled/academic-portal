@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Lock, CheckCircle, ArrowRight, Eye, EyeOff } from 'lucide-react';
+import { Lock, CheckCircle2, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { useStudentAuth } from '../context/StudentAuthContext';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
+import { FormField, Spinner } from '@/components/common';
 
 const ResetPassword = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isAr = i18n.language === 'ar';
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
   const navigate = useNavigate();
@@ -28,11 +33,11 @@ const ResetPassword = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      toast.error('Passwords do not match');
+      toast.error(t('auth.reset_password.error_mismatch'));
       return;
     }
     if (password.length < 4) {
-      toast.error('Password must be at least 4 characters');
+      toast.error(t('auth.reset_password.error_min_length'));
       return;
     }
 
@@ -42,101 +47,116 @@ const ResetPassword = () => {
 
     if (result.success) {
       setSuccess(true);
-      toast.success('Password reset successfully!');
+      toast.success(t('auth.reset_password.success_toast'));
       setTimeout(() => {
         navigate('/student/login');
       }, 3000);
     } else {
-      toast.error(result.message || 'Failed to reset password');
+      toast.error(result.message || t('auth.reset_password.error_failed'));
     }
   };
 
   if (!token) return null;
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-dark text-gray-900 dark:text-white font-body p-4 relative overflow-hidden transition-colors duration-300">
-      {/* Ambient Accents */}
-      <div className="absolute top-[10%] left-[20%] w-[30vw] h-[30vw] bg-primary/10 dark:bg-primary/5 hidden rounded-full pointer-events-none"></div>
-      <div className="absolute bottom-[10%] right-[10%] w-[40vw] h-[40vw] bg-primary/15 dark:bg-primary/10 hidden rounded-full pointer-events-none"></div>
-
-      <div className="w-full max-w-md relative z-10">
-        <div className="bg-white/90 dark:bg-dark-card/80 backdrop-blur-sm border border-gray-200 dark:border-white/10 rounded-[2rem] p-8 shadow-xl dark:shadow-2xl transition-colors duration-300">
-          <div className="flex flex-col items-center mb-8 text-center">
-            <div className="relative flex items-center justify-center w-16 h-16 mb-6 rounded-2xl bg-gradient-to-br from-primary to-[#5ca846] shadow-[0_0_30px_rgba(46,204,113,0.2)] dark:shadow-[0_0_30px_rgba(142,255,113,0.3)]">
-              <div className="absolute inset-[3px] bg-white dark:bg-[#111111] rounded-[1rem] transition-colors duration-300"></div>
-              <Lock className="relative w-7 h-7 text-primary" />
-            </div>
-            <h2 className="text-2xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-2">Create New Password</h2>
-            <p className="text-gray-500 dark:text-gray-400 text-sm">Please enter your new password below.</p>
-          </div>
-
-          {success ? (
-            <div className="text-center py-6">
-              <div className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400 flex items-center justify-center mx-auto mb-4">
-                <CheckCircle className="w-8 h-8" />
+    <div
+      className="min-h-screen flex flex-col items-center justify-center bg-background text-foreground p-4"
+      dir={isAr ? 'rtl' : 'ltr'}
+    >
+      <div className="w-full max-w-md">
+        <Card>
+          <CardContent className="p-2 sm:p-4">
+            <div className="flex flex-col items-center mb-6 text-center">
+              <div className="flex items-center justify-center size-12 mb-4 rounded-xl border border-border bg-muted">
+                <Lock className="size-5 text-primary" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Password Reset!</h3>
-              <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">Your password has been changed successfully.</p>
-              <button
-                onClick={() => navigate('/student/login')}
-                className="w-full bg-primary text-white dark:text-dark font-extrabold py-3.5 rounded-xl hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2"
-              >
-                Go to Login <ArrowRight className="w-4 h-4" />
-              </button>
+              <h1 className="text-xl font-semibold tracking-tight text-foreground">
+                {t('auth.reset_password.title')}
+              </h1>
+              <p className="mt-1.5 text-sm text-muted-foreground">
+                {t('auth.reset_password.desc')}
+              </p>
             </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-              <div className="flex flex-col gap-2">
-                <label className="text-xs uppercase tracking-widest text-primary font-bold px-1" htmlFor="new-password">New Password</label>
-                <div className="relative flex items-center">
-                  <Lock className="absolute left-4 w-5 h-5 text-gray-400 dark:text-gray-500" />
-                  <input
-                    id="new-password"
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-gray-50 dark:bg-[#161616] border border-gray-200 dark:border-white/10 rounded-2xl py-3.5 pl-12 pr-12 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all shadow-sm dark:shadow-inner"
-                    placeholder="••••••••"
-                    required
-                    disabled={loading}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-white transition-colors"
-                  >
-                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                  </button>
+
+            {success ? (
+              <div className="text-center py-4">
+                <div className="size-12 rounded-xl border border-border bg-primary/10 text-primary flex items-center justify-center mx-auto mb-4">
+                  <CheckCircle2 className="size-6" />
                 </div>
+                <h2 className="text-lg font-semibold text-foreground mb-1.5">
+                  {t('auth.reset_password.success_title')}
+                </h2>
+                <p className="text-sm text-muted-foreground mb-6">
+                  {t('auth.reset_password.success_desc')}
+                </p>
+                <Button
+                  className="w-full"
+                  onClick={() => navigate('/student/login')}
+                >
+                  {t('auth.reset_password.go_to_login')}
+                  <ArrowRight className={`size-4 ${isAr ? 'rotate-180' : ''}`} />
+                </Button>
               </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                <FormField
+                  label={t('auth.reset_password.new_password')}
+                  htmlFor="new-password"
+                  required
+                >
+                  <div className="relative flex items-center">
+                    <Input
+                      id="new-password"
+                      type={showPassword ? 'text' : 'password'}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="h-9 pe-9"
+                      placeholder="••••••••"
+                      required
+                      disabled={loading}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute end-2.5 text-muted-foreground hover:text-foreground transition-colors"
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                    </button>
+                  </div>
+                </FormField>
 
-              <div className="flex flex-col gap-2">
-                <label className="text-xs uppercase tracking-widest text-primary font-bold px-1" htmlFor="confirm-password">Confirm Password</label>
-                <div className="relative flex items-center">
-                  <Lock className="absolute left-4 w-5 h-5 text-gray-400 dark:text-gray-500" />
-                  <input
+                <FormField
+                  label={t('auth.reset_password.confirm_password')}
+                  htmlFor="confirm-password"
+                  required
+                >
+                  <Input
                     id="confirm-password"
                     type={showPassword ? 'text' : 'password'}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full bg-gray-50 dark:bg-[#161616] border border-gray-200 dark:border-white/10 rounded-2xl py-3.5 pl-12 pr-12 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all shadow-sm dark:shadow-inner"
+                    className="h-9"
                     placeholder="••••••••"
                     required
                     disabled={loading}
                   />
-                </div>
-              </div>
+                </FormField>
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-gradient-to-r from-primary to-[#7fe860] text-dark font-extrabold uppercase tracking-widest py-4 rounded-2xl shadow-[0_4px_15px_rgba(46,204,113,0.3)] dark:shadow-[0_4px_15px_rgba(142,255,113,0.3)] hover:shadow-[0_6px_25px_rgba(46,204,113,0.5)] dark:hover:shadow-[0_6px_25px_rgba(142,255,113,0.5)] active:scale-95 transition-all duration-200 mt-2 flex items-center justify-center gap-2 disabled:opacity-50"
-              >
-                {loading ? 'Resetting...' : 'Reset Password'}
-              </button>
-            </form>
-          )}
-        </div>
+                <Button type="submit" className="w-full mt-1" disabled={loading}>
+                  {loading ? (
+                    <>
+                      <Spinner className="text-current" />
+                      {t('auth.reset_password.resetting')}
+                    </>
+                  ) : (
+                    t('auth.reset_password.reset_btn')
+                  )}
+                </Button>
+              </form>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

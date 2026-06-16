@@ -1,34 +1,39 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-
-const Shimmer = ({ className }) => (
-  <div className={`animate-pulse bg-gray-200 dark:bg-white/[0.04] rounded-2xl ${className}`} />
-);
+import { Skeleton } from '@/components/ui/skeleton';
 
 const SkeletonSidebar = () => {
   return (
-    <div className="fixed z-50 w-72 transition-all duration-700" style={{ insetInlineStart: '1.5rem', top: '1rem', bottom: '1rem' }}>
-      <div className="h-full bg-white dark:bg-[#080808] border border-gray-100 dark:border-white/10 rounded-[3rem] shadow-[0_32px_64px_rgba(0,0,0,0.05)] dark:shadow-[0_32px_64px_rgba(0,0,0,0.4)] flex flex-col overflow-hidden">
-        <div className="p-8 pb-4 text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 mx-auto">
-            <Shimmer className="w-16 h-16 rounded-full" />
+    <div
+      className="fixed z-50 w-64"
+      style={{ insetInlineStart: '1rem', top: '1rem', bottom: '1rem' }}
+    >
+      <div className="h-full bg-card border border-border rounded-xl shadow-sm flex flex-col overflow-hidden">
+        {/* Brand */}
+        <div className="flex items-center gap-2.5 px-4 h-14 border-b border-border">
+          <Skeleton className="size-8 rounded-md shrink-0" />
+          <div className="flex-1 space-y-1.5">
+            <Skeleton className="h-3 w-20" />
+            <Skeleton className="h-2.5 w-24" />
           </div>
-          <Shimmer className="w-20 h-3 mx-auto mt-4" />
         </div>
-        <nav className="flex-1 px-4 space-y-2">
-          {[...Array(8)].map((_, i) => (
-            <div key={i} className="flex items-center gap-4 px-6 py-4">
-              <Shimmer className="w-5 h-5 rounded-lg flex-shrink-0" />
-              <Shimmer className="h-3 flex-1" />
+
+        {/* Nav */}
+        <nav className="flex-1 px-2 py-3 space-y-0.5 overflow-hidden">
+          {[...Array(9)].map((_, i) => (
+            <div key={i} className="flex items-center gap-3 px-3 py-2">
+              <Skeleton className="size-5 rounded-md shrink-0" />
+              <Skeleton className="h-3 flex-1" />
             </div>
           ))}
         </nav>
-        <div className="p-6 pt-0">
-          <div className="bg-gray-50/50 dark:bg-white/[0.02] rounded-[2rem] p-2 flex gap-1 border border-gray-100 dark:border-white/5">
-            {[...Array(3)].map((_, i) => (
-              <Shimmer key={i} className="flex-1 h-12 rounded-xl" />
-            ))}
-          </div>
+
+        {/* Tray */}
+        <div className="border-t border-border flex items-center gap-1 px-2 py-2">
+          <Skeleton className="size-9 rounded-md" />
+          <Skeleton className="size-9 rounded-md" />
+          <div className="flex-1" />
+          <Skeleton className="size-9 rounded-md" />
         </div>
       </div>
     </div>
@@ -37,47 +42,45 @@ const SkeletonSidebar = () => {
 
 const SkeletonContent = () => {
   return (
-    <div className="md:ps-72 p-6 lg:p-10 space-y-8">
-      {/* Hero/welcome card */}
-      <div className="bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[3rem] p-10">
-        <Shimmer className="h-8 w-64 mb-4" />
-        <Shimmer className="h-4 w-48" />
-        <div className="flex gap-6 mt-6">
-          <Shimmer className="h-3 w-24" />
-          <Shimmer className="h-3 w-24" />
-        </div>
+    <div className="md:ps-72 p-6 lg:p-10 space-y-6">
+      {/* Page header */}
+      <div className="space-y-2">
+        <Skeleton className="h-7 w-64" />
+        <Skeleton className="h-4 w-48" />
       </div>
 
       {/* Stats grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-8">
-            <Shimmer className="w-10 h-10 rounded-2xl mb-6" />
-            <Shimmer className="h-3 w-16 mb-2" />
-            <Shimmer className="h-7 w-24" />
+          <div key={i} className="rounded-xl border border-border bg-card p-4">
+            <div className="flex items-center justify-between gap-2">
+              <Skeleton className="h-3 w-16" />
+              <Skeleton className="size-8 rounded-md" />
+            </div>
+            <Skeleton className="mt-2 h-7 w-24" />
           </div>
         ))}
       </div>
 
       {/* Content grid: main + sidebar */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <div className="lg:col-span-8 space-y-6">
-          <Shimmer className="h-6 w-48 mb-2" />
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="lg:col-span-8 space-y-4">
+          <Skeleton className="h-5 w-48" />
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-8">
-              <Shimmer className="h-5 w-3/4 mb-3" />
-              <Shimmer className="h-3 w-full mb-2" />
-              <Shimmer className="h-3 w-2/3" />
+            <div key={i} className="rounded-xl border border-border bg-card p-5 space-y-3">
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-3 w-full" />
+              <Skeleton className="h-3 w-2/3" />
             </div>
           ))}
         </div>
-        <div className="lg:col-span-4 space-y-6">
+        <div className="lg:col-span-4 space-y-4">
           {[...Array(2)].map((_, i) => (
-            <div key={i} className="bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-8">
-              <Shimmer className="h-5 w-32 mb-6" />
-              <Shimmer className="h-3 w-full mb-3" />
-              <Shimmer className="h-3 w-3/4 mb-3" />
-              <Shimmer className="h-3 w-1/2" />
+            <div key={i} className="rounded-xl border border-border bg-card p-5 space-y-3">
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-3 w-full" />
+              <Skeleton className="h-3 w-3/4" />
+              <Skeleton className="h-3 w-1/2" />
             </div>
           ))}
         </div>
@@ -89,7 +92,7 @@ const SkeletonContent = () => {
 const SkeletonLayout = () => {
   const { i18n } = useTranslation();
   return (
-    <div className="min-h-screen bg-[#010101] overflow-hidden">
+    <div className="min-h-screen bg-background overflow-hidden">
       <div dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
         <SkeletonSidebar />
         <SkeletonContent />

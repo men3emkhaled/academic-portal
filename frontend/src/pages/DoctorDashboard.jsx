@@ -4,6 +4,7 @@ import { useDoctorAuth } from '../context/DoctorAuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
+import { LoadingState } from '@/components/common';
 
 // Components
 import DoctorSidebar from '../components/doctor/DoctorSidebar';
@@ -127,20 +128,14 @@ const DoctorDashboard = () => {
   // Full-screen loading
   if (authLoading || !doctor) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-doctor-bg">
-        <div className="text-center">
-          <div className="relative w-16 h-16 mx-auto mb-4">
-            <div className="absolute inset-0 rounded-full border-4 border-doctor-primary/20"></div>
-            <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-doctor-primary animate-spin"></div>
-          </div>
-          <p className="text-sm font-bold text-doctor-text-muted tracking-widest uppercase">Loading Portal</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <LoadingState label={t('common.loading', 'Loading')} />
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen bg-doctor-bg text-doctor-text font-sans overflow-hidden">
+    <div className="flex h-screen bg-background text-foreground font-sans overflow-hidden">
       {/* Sidebar / Bottom Bar */}
       <DoctorSidebar
         activeTab={activeTab}
@@ -152,10 +147,6 @@ const DoctorDashboard = () => {
 
       {/* Main Content Area */}
       <div className="flex-1 lg:ps-96 flex flex-col min-w-0 overflow-hidden relative transition-all duration-300">
-        {/* Background Glows */}
-        <div className="absolute top-[-20%] right-[-10%] w-[50%] h-[50%] bg-doctor-primary/10 hidden rounded-full pointer-events-none"></div>
-        <div className="absolute bottom-[-10%] left-[-5%] w-[40%] h-[40%] bg-doctor-primary/5 hidden rounded-full pointer-events-none"></div>
-
         <DoctorHeader
           doctor={doctor}
           onSearch={setSearchQuery}

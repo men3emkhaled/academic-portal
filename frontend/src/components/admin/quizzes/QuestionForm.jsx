@@ -1,6 +1,18 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { HelpCircle, X, Activity, ImageIcon, ChevronDown, CheckCircle2, Type, Save } from 'lucide-react';
+import { HelpCircle, ImageIcon, Save, Loader2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Modal, FormField } from '@/components/common';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 const QuestionForm = ({
   questionForm,
@@ -11,158 +23,172 @@ const QuestionForm = ({
   resetQuestionForm,
   handleOptionChange
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isAr = i18n.language === 'ar';
+
   return (
-    <div className="fixed inset-0 bg-gray-950/40 dark:bg-black/80 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-in fade-in duration-500" onClick={resetQuizForm}>
-      <div className="bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[3.5rem] p-10 lg:p-12 w-full max-w-4xl shadow-2xl relative overflow-hidden animate-in zoom-in duration-500 max-h-[95vh] overflow-y-auto no-scrollbar" onClick={e => e.stopPropagation()}>
-        
-        {/* Modal Background Glow */}
-        <div className="absolute top-0 inset-inline-end-0 w-96 h-96 bg-[#8b5cf6]/10 blur-[100px] rounded-full pointer-events-none"></div>
-
-        <div className="relative z-10 text-start">
-            <div className="flex items-center justify-between mb-12 pb-8 border-b border-gray-100 dark:border-white/5">
-                <div className="flex items-center gap-6">
-                    <div className="w-16 h-16 bg-[#8b5cf6]/10 dark:bg-[#8b5cf6]/20 rounded-[1.5rem] flex items-center justify-center border border-[#8b5cf6]/20 shadow-inner text-[#8b5cf6] dark:text-[#d4a3ff]">
-                        <HelpCircle className="w-8 h-8" />
-                    </div>
-                    <div>
-                        <h3 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">
-                            {editingQuestion ? t('admin.quizzes.questions.form.edit_title') : t('admin.quizzes.questions.form.add_title')}
-                        </h3>
-                        <p className="text-gray-400 text-[10px] font-black uppercase tracking-widest mt-1.5 italic">{t('admin.quizzes.registry_stream')}</p>
-                    </div>
-                </div>
-                <button onClick={resetQuestionForm} className="w-12 h-12 flex items-center justify-center rounded-full bg-gray-100 dark:bg-white/5 text-gray-500 hover:text-rose-600 transition-colors">
-                    <X className="w-6 h-6" />
-                </button>
-            </div>
-
-            <form onSubmit={handleSaveQuestion} className="space-y-12">
-                <div className="space-y-4">
-                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('admin.quizzes.questions.form.question_text')} *</label>
-                    <textarea placeholder={t('admin.quizzes.questions.form.question_placeholder')} value={questionForm.question_text} onChange={(e) => setQuestionForm({ ...questionForm, question_text: e.target.value })} className="w-full bg-gray-50 dark:bg-black/20 border border-gray-100 dark:border-white/10 rounded-[2rem] p-8 text-gray-900 dark:text-white text-xl font-black focus:ring-4 focus:ring-[#8b5cf6]/10 outline-none transition-all shadow-inner resize-none min-h-[160px] uppercase leading-relaxed" required />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                    <div className="space-y-4">
-                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('admin.quizzes.questions.form.image_url')}</label>
-                        <div className="relative">
-                            <input type="text" placeholder="https://..." value={questionForm.image_url} onChange={(e) => setQuestionForm({ ...questionForm, image_url: e.target.value })} className="w-full bg-gray-50 dark:bg-black/20 border border-gray-100 dark:border-white/10 rounded-2xl px-6 py-5 text-gray-900 dark:text-white font-bold focus:ring-4 focus:ring-[#8b5cf6]/10 outline-none transition-all shadow-inner ps-14" />
-                            <ImageIcon className="absolute inset-inline-start-5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8b5cf6]" />
-                        </div>
-                    </div>
-                    <div className="space-y-4">
-                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('admin.quizzes.questions.form.question_type')}</label>
-                        <div className="relative">
-                            <select value={questionForm.question_type} onChange={(e) => setQuestionForm({ ...questionForm, question_type: e.target.value })} className="w-full bg-gray-50 dark:bg-black/20 border border-gray-100 dark:border-white/10 rounded-2xl px-6 py-5 text-gray-900 dark:text-white font-black focus:ring-4 focus:ring-[#8b5cf6]/10 outline-none transition-all shadow-inner appearance-none uppercase tracking-widest text-[11px]">
-                                <option value="mcq" className="bg-white dark:bg-[#0d0d14]">{t('admin.quizzes.questions.form.types.mcq')}</option>
-                                <option value="true_false" className="bg-white dark:bg-[#0d0d14]">{t('admin.quizzes.questions.form.types.true_false')}</option>
-                                <option value="written" className="bg-white dark:bg-[#0d0d14]">{t('admin.quizzes.questions.form.types.written')}</option>
-                            </select>
-                            <ChevronDown className="absolute inset-inline-end-6 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8b5cf6] pointer-events-none" />
-                        </div>
-                    </div>
-                </div>
-
-                {questionForm.question_type === 'mcq' && (
-                    <div className="p-10 bg-gray-50 dark:bg-black/20 border border-gray-100 dark:border-white/5 rounded-[3rem] space-y-10 shadow-inner animate-in slide-in-from-top-4 duration-500">
-                         <div className="flex items-center gap-4">
-                            <Type className="w-5 h-5 text-[#8b5cf6]" />
-                            <h4 className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.2em]">{t('admin.quizzes.questions.form.answer_options')}</h4>
-                         </div>
-                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {questionForm.options.map((opt, idx) => {
-                                const letter = String.fromCharCode(65 + idx);
-                                return (
-                                    <div key={idx} className="relative group">
-                                        <input
-                                            type="text"
-                                            value={opt}
-                                            onChange={(e) => handleOptionChange(idx, e.target.value)}
-                                            className="w-full bg-white dark:bg-[#0d0d14] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl px-6 py-5 font-bold focus:border-[#8b5cf6] outline-none transition-all ps-16 shadow-sm uppercase tracking-tight"
-                                            placeholder={t('admin.quizzes.questions.form.option_placeholder', { letter })}
-                                            required
-                                        />
-                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center bg-gray-100 dark:bg-white/5 rounded-xl text-[10px] font-black text-[#8b5cf6] border border-gray-100 dark:border-white/5">{letter}</span>
-                                    </div>
-                                );
-                            })}
-                         </div>
-                         <div className="pt-6 space-y-6 text-start">
-                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('admin.quizzes.questions.form.correct_answer')}</label>
-                            <div className="flex flex-wrap gap-4">
-                                {['A', 'B', 'C', 'D'].map(letter => (
-                                    <button
-                                        key={letter}
-                                        type="button"
-                                        onClick={() => setQuestionForm({ ...questionForm, correct_answer: letter })}
-                                        className={`px-10 py-4.5 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all ${
-                                            questionForm.correct_answer === letter 
-                                            ? 'bg-[#8b5cf6] text-white border-[#8b5cf6] shadow-xl shadow-purple-500/20 scale-105' 
-                                            : 'bg-white dark:bg-black text-gray-400 border-gray-100 dark:border-white/10 hover:border-[#8b5cf6]/40'
-                                        }`}
-                                    >
-                                        {letter}
-                                    </button>
-                                ))}
-                            </div>
-                         </div>
-                    </div>
-                )}
-
-                {questionForm.question_type === 'true_false' && (
-                    <div className="grid grid-cols-2 gap-8 p-10 bg-gray-50 dark:bg-black/20 border border-gray-100 dark:border-white/5 rounded-[3rem] shadow-inner animate-in slide-in-from-top-4 duration-500">
-                         <button
-                            type="button"
-                            onClick={() => setQuestionForm({ ...questionForm, correct_answer: 'true' })}
-                            className={`py-6 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest border transition-all ${
-                                questionForm.correct_answer === 'true' 
-                                ? 'bg-[#8b5cf6] text-white border-[#8b5cf6] shadow-xl shadow-purple-500/20 scale-105' 
-                                : 'bg-white dark:bg-black text-gray-400 border-gray-100 dark:border-white/10 hover:border-[#8b5cf6]/40'
-                            }`}
-                         >
-                            {t('admin.quizzes.questions.form.true')}
-                         </button>
-                         <button
-                            type="button"
-                            onClick={() => setQuestionForm({ ...questionForm, correct_answer: 'false' })}
-                            className={`py-6 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest border transition-all ${
-                                questionForm.correct_answer === 'false' 
-                                ? 'bg-rose-500 text-white border-rose-500 shadow-xl shadow-rose-500/20 scale-105' 
-                                : 'bg-white dark:bg-black text-gray-400 border-gray-100 dark:border-white/10 hover:border-rose-500/40'
-                            }`}
-                         >
-                            {t('admin.quizzes.questions.form.false')}
-                         </button>
-                    </div>
-                )}
-
-                 <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-                    <div className="space-y-4">
-                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('admin.quizzes.questions.form.points')}</label>
-                        <input type="number" value={questionForm.points} onChange={(e) => setQuestionForm({ ...questionForm, points: parseInt(e.target.value) || 1 })} className="w-full bg-gray-50 dark:bg-black/20 border border-gray-100 dark:border-white/10 rounded-2xl px-6 py-5 text-gray-900 dark:text-white font-black focus:ring-4 focus:ring-[#8b5cf6]/10 outline-none transition-all shadow-inner" min="1" required />
-                    </div>
-                    <div className="md:col-span-2 space-y-4">
-                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('admin.quizzes.questions.form.explanation')}</label>
-                        <input type="text" placeholder={t('admin.quizzes.questions.form.explanation_placeholder')} value={questionForm.explanation} onChange={(e) => setQuestionForm({ ...questionForm, explanation: e.target.value })} className="w-full bg-gray-50 dark:bg-black/20 border border-gray-100 dark:border-white/10 rounded-2xl px-6 py-5 text-gray-900 dark:text-white font-bold focus:ring-4 focus:ring-[#8b5cf6]/10 outline-none transition-all shadow-inner uppercase tracking-tight" />
-                    </div>
-                </div>
-
-                <div className="flex gap-6 pt-10 border-t border-gray-100 dark:border-white/5">
-                    <button type="submit" disabled={loading} className="flex-1 bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-black py-6 rounded-[2.5rem] shadow-xl shadow-purple-500/20 transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4">
-                        {loading ? <Activity className="w-6 h-6 animate-spin" /> : (
-                            <>
-                                <Save className="w-6 h-6" />
-                                <span className="uppercase tracking-widest text-[11px]">{editingQuestion ? t('common.save') : t('admin.quizzes.questions.add_success')}</span>
-                            </>
-                        )}
-                    </button>
-                    <button type="button" onClick={resetQuestionForm} className="px-16 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 font-black py-6 rounded-[2.5rem] transition-all uppercase tracking-widest text-[11px]">{t('common.cancel')}</button>
-                </div>
-            </form>
+    <Modal
+      open
+      onOpenChange={(next) => { if (!next) resetQuestionForm(); }}
+      size="xl"
+      title={
+        <span className="flex items-center gap-2.5">
+          <span className="inline-flex size-7 items-center justify-center rounded-md bg-primary/10 text-primary">
+            <HelpCircle className="size-4" />
+          </span>
+          {editingQuestion
+            ? t('admin.quizzes.questions.form.edit_title')
+            : t('admin.quizzes.questions.form.add_title')}
+        </span>
+      }
+      footer={
+        <div className="flex items-center justify-end gap-2">
+          <Button type="button" variant="ghost" onClick={resetQuestionForm}>
+            {t('common.cancel')}
+          </Button>
+          <Button type="submit" form="question-form" disabled={loading}>
+            {loading ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
+            {editingQuestion ? t('common.save') : t('admin.quizzes.questions.add_success')}
+          </Button>
         </div>
-      </div>
-    </div>
+      }
+    >
+      <form id="question-form" onSubmit={handleSaveQuestion} className="space-y-5">
+        <FormField label={t('admin.quizzes.questions.form.question_text')} required htmlFor="question_text">
+          <Textarea
+            id="question_text"
+            placeholder={t('admin.quizzes.questions.form.question_placeholder')}
+            value={questionForm.question_text}
+            onChange={(e) => setQuestionForm({ ...questionForm, question_text: e.target.value })}
+            className="min-h-28"
+            required
+          />
+        </FormField>
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <FormField label={t('admin.quizzes.questions.form.image_url')} htmlFor="image_url">
+            <div className="relative">
+              <ImageIcon className="pointer-events-none absolute inset-inline-start-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                id="image_url"
+                type="text"
+                placeholder="https://..."
+                value={questionForm.image_url}
+                onChange={(e) => setQuestionForm({ ...questionForm, image_url: e.target.value })}
+                className="ps-9"
+              />
+            </div>
+          </FormField>
+
+          <FormField label={t('admin.quizzes.questions.form.question_type')}>
+            <Select
+              value={questionForm.question_type}
+              onValueChange={(value) => setQuestionForm({ ...questionForm, question_type: value })}
+            >
+              <SelectTrigger className="h-8 w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="mcq">{t('admin.quizzes.questions.form.types.mcq')}</SelectItem>
+                <SelectItem value="true_false">{t('admin.quizzes.questions.form.types.true_false')}</SelectItem>
+                <SelectItem value="written">{t('admin.quizzes.questions.form.types.written')}</SelectItem>
+              </SelectContent>
+            </Select>
+          </FormField>
+        </div>
+
+        {questionForm.question_type === 'mcq' && (
+          <div className="space-y-4 rounded-lg border bg-muted/30 p-4">
+            <h4 className={cn('text-sm font-medium text-foreground', isAr && 'font-arabic')}>
+              {t('admin.quizzes.questions.form.answer_options')}
+            </h4>
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+              {questionForm.options.map((opt, idx) => {
+                const letter = String.fromCharCode(65 + idx);
+                return (
+                  <div key={idx} className="relative">
+                    <span className="pointer-events-none absolute inset-inline-start-2.5 top-1/2 -translate-y-1/2 text-xs font-medium text-muted-foreground">
+                      {letter}
+                    </span>
+                    <Input
+                      type="text"
+                      value={opt}
+                      onChange={(e) => handleOptionChange(idx, e.target.value)}
+                      className="ps-8"
+                      placeholder={t('admin.quizzes.questions.form.option_placeholder', { letter })}
+                      required
+                    />
+                  </div>
+                );
+              })}
+            </div>
+            <FormField label={t('admin.quizzes.questions.form.correct_answer')} className="pt-1">
+              <div className="flex flex-wrap gap-2">
+                {['A', 'B', 'C', 'D'].map((letter) => (
+                  <Button
+                    key={letter}
+                    type="button"
+                    size="sm"
+                    variant={questionForm.correct_answer === letter ? 'default' : 'outline'}
+                    onClick={() => setQuestionForm({ ...questionForm, correct_answer: letter })}
+                    className="w-12"
+                  >
+                    {letter}
+                  </Button>
+                ))}
+              </div>
+            </FormField>
+          </div>
+        )}
+
+        {questionForm.question_type === 'true_false' && (
+          <FormField label={t('admin.quizzes.questions.form.correct_answer')}>
+            <div className="grid grid-cols-2 gap-3">
+              <Button
+                type="button"
+                variant={questionForm.correct_answer === 'true' ? 'default' : 'outline'}
+                onClick={() => setQuestionForm({ ...questionForm, correct_answer: 'true' })}
+              >
+                {t('admin.quizzes.questions.form.true')}
+              </Button>
+              <Button
+                type="button"
+                variant={questionForm.correct_answer === 'false' ? 'destructive' : 'outline'}
+                onClick={() => setQuestionForm({ ...questionForm, correct_answer: 'false' })}
+              >
+                {t('admin.quizzes.questions.form.false')}
+              </Button>
+            </div>
+          </FormField>
+        )}
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <FormField label={t('admin.quizzes.questions.form.points')} htmlFor="points">
+            <Input
+              id="points"
+              type="number"
+              value={questionForm.points}
+              onChange={(e) => setQuestionForm({ ...questionForm, points: parseInt(e.target.value) || 1 })}
+              min="1"
+              required
+            />
+          </FormField>
+          <FormField
+            label={t('admin.quizzes.questions.form.explanation')}
+            htmlFor="explanation"
+            className="md:col-span-2"
+          >
+            <Input
+              id="explanation"
+              type="text"
+              placeholder={t('admin.quizzes.questions.form.explanation_placeholder')}
+              value={questionForm.explanation}
+              onChange={(e) => setQuestionForm({ ...questionForm, explanation: e.target.value })}
+            />
+          </FormField>
+        </div>
+      </form>
+    </Modal>
   );
 };
 

@@ -1,8 +1,39 @@
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { PieChart, TrendingUp, Users, Award, Target, Zap, BarChart3 } from 'lucide-react';
+import { useDoctorAuth } from '../../context/DoctorAuthContext';
+import toast from 'react-hot-toast';
+import { PieChart, TrendingUp, Users, Award, Target, Zap, BarChart3, Clock } from 'lucide-react';
+import {
+  PageHeader,
+  StatCard,
+  SectionCard,
+  DataTable,
+  EmptyState,
+  LoadingState,
+  StatusBadge,
+} from '@/components/common';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+
+const ALL_RANGES = ['0-20', '20-40', '40-60', '60-80', '80-100'];
+
+// Semantic score color: green (good) / amber (mid) / red (low) — meaning only.
+const scoreColor = (score, good = 70, mid = 50) => {
+  if (score === null || score === undefined) return 'text-muted-foreground';
+  if (score >= good) return 'text-primary';
+  if (score >= mid) return 'text-amber-600 dark:text-amber-400';
+  return 'text-destructive';
+};
 
 const DoctorQuizAnalytics = ({ courses }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isAr = i18n.language === 'ar';
+  const dir = isAr ? 'rtl' : 'ltr';
   const { doctorApi } = useDoctorAuth();
   const [selectedCourseId, setSelectedCourseId] = useState('');
   const [analytics, setAnalytics] = useState(null);
@@ -28,207 +59,195 @@ const DoctorQuizAnalytics = ({ courses }) => {
     }
   };
 
-  const distColors = {
-    '0-20': { bg: 'bg-red-500', text: 'text-red-600 dark:text-red-400', light: 'bg-red-50 dark:bg-red-500/10' },
-    '20-40': { bg: 'bg-orange-500', text: 'text-orange-600 dark:text-orange-400', light: 'bg-orange-50 dark:bg-orange-500/10' },
-    '40-60': { bg: 'bg-amber-500', text: 'text-amber-600 dark:text-amber-400', light: 'bg-amber-50 dark:bg-amber-500/10' },
-    '60-80': { bg: 'bg-blue-500', text: 'text-blue-600 dark:text-blue-400', light: 'bg-blue-50 dark:bg-blue-500/10' },
-    '80-100': { bg: 'bg-emerald-500', text: 'text-emerald-600 dark:text-emerald-400', light: 'bg-emerald-50 dark:bg-emerald-500/10' },
-  };
+  const totalAttempts = analytics?.distribution
+    ? analytics.distribution.reduce((sum, d) => sum + parseInt(d.count), 0)
+    : 0;
 
-  const allRanges = ['0-20', '20-40', '40-60', '60-80', '80-100'];
+  const quizColumns = [
+    {
+      key: 'quiz',
+      header: t('doctor.quiz_analytics.per_quiz'),
+      render: (q) => (
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="truncate font-medium text-foreground">{q.title}</span>
+            <StatusBadge variant={q.is_published ? 'success' : 'neutral'}>
+              {q.is_published ? t('doctor.quiz_analytics.live') : t('doctor.quiz_analytics.draft')}
+            </StatusBadge>
+          </div>
+          <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
+            <span className="inline-flex items-center gap-1">
+              <Clock className="size-3" />
+              {q.time_limit_minutes}{t('doctor.quiz_analytics.time_limit')}
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <Target className="size-3" />
+              {t('doctor.quiz_analytics.pass_score')}: {q.passing_score}%
+            </span>
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: 'completed',
+      header: t('doctor.quiz_analytics.completed'),
+      headClassName: 'text-end',
+      cellClassName: 'text-end',
+      render: (q) => (
+        <span className="font-medium text-foreground tabular-nums">{q.completed_attempts || 0}</span>
+      ),
+    },
+    {
+      key: 'average',
+      header: t('doctor.quiz_analytics.average'),
+      headClassName: 'text-end',
+      cellClassName: 'text-end',
+      render: (q) => (
+        <span className={`font-medium tabular-nums ${scoreColor(q.avg_score || 0)}`}>
+          {q.avg_score !== null ? `${q.avg_score}%` : '—'}
+        </span>
+      ),
+    },
+    {
+      key: 'highest',
+      header: t('doctor.quiz_analytics.highest'),
+      headClassName: 'text-end',
+      cellClassName: 'text-end',
+      render: (q) => (
+        <span className="font-medium text-foreground tabular-nums">
+          {q.max_score !== null ? `${Math.round(q.max_score)}%` : '—'}
+        </span>
+      ),
+    },
+    {
+      key: 'pass_rate',
+      header: t('doctor.quiz_analytics.pass_rate'),
+      headClassName: 'text-end',
+      cellClassName: 'text-end',
+      render: (q) => {
+        const passRate = q.completed_attempts > 0
+          ? Math.round((q.passed_count / q.completed_attempts) * 100)
+          : 0;
+        return (
+          <span className={`font-medium tabular-nums ${scoreColor(passRate, 70, 40)}`}>
+            {q.completed_attempts > 0 ? `${passRate}%` : '—'}
+          </span>
+        );
+      },
+    },
+  ];
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h2 className="text-xl md:text-2xl font-black text-gray-900 dark:text-white flex items-center gap-2">
-          <PieChart className="w-6 h-6 text-indigo-500" /> {t('doctor.quiz_analytics.title')}
-        </h2>
-        <p className="text-sm text-gray-500 dark:text-slate-500 mt-1">
-          {t('doctor.quiz_analytics.description')}
-        </p>
-      </div>
+      <PageHeader
+        icon={PieChart}
+        title={t('doctor.quiz_analytics.title')}
+        description={t('doctor.quiz_analytics.description')}
+      />
 
       {/* Course Selector */}
-      <select
-        value={selectedCourseId}
-        onChange={(e) => setSelectedCourseId(e.target.value)}
-        className="w-full sm:max-w-md bg-white dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/5 rounded-xl p-3.5 text-gray-900 dark:text-white font-medium focus:border-indigo-500/50 focus:outline-none transition-colors"
-      >
-        <option value="">{t('doctor.quiz_analytics.select_course')}</option>
-        {courses.map(c => (
-          <option key={c.id} value={c.id}>{c.name}</option>
-        ))}
-      </select>
+      <div className="w-full sm:max-w-md">
+        <Select value={selectedCourseId} onValueChange={setSelectedCourseId} dir={dir}>
+          <SelectTrigger className="w-full" dir={dir}>
+            <SelectValue placeholder={t('doctor.quiz_analytics.select_course')} />
+          </SelectTrigger>
+          <SelectContent dir={dir}>
+            {courses.map((c) => (
+              <SelectItem key={c.id} value={String(c.id)} className={isAr ? 'font-arabic' : ''}>
+                {c.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
       {/* Content */}
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {[1,2,3,4].map(i => (
-            <div key={i} className="bg-white dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/5 rounded-2xl p-6 animate-pulse">
-              <div className="h-8 bg-gray-200 dark:bg-white/10 rounded w-1/2 mb-2"></div>
-              <div className="h-3 bg-gray-100 dark:bg-white/5 rounded w-3/4"></div>
-            </div>
-          ))}
-        </div>
+        <LoadingState />
       ) : !selectedCourseId ? (
-        <div className="bg-white dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/5 rounded-2xl p-16 text-center">
-          <BarChart3 className="w-14 h-14 text-gray-300 dark:text-slate-600 mx-auto mb-3" />
-          <p className="text-gray-500 dark:text-slate-500 font-medium">{t('doctor.quiz_analytics.select_hint')}</p>
-        </div>
+        <EmptyState
+          icon={BarChart3}
+          title={t('doctor.quiz_analytics.select_hint')}
+        />
       ) : !analytics ? null : (
         <>
           {/* Summary Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-white dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/5 rounded-2xl p-5">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 bg-indigo-500/10 rounded-xl flex items-center justify-center">
-                  <Award className="w-5 h-5 text-indigo-500" />
-                </div>
-              </div>
-              <p className="text-2xl font-black text-gray-900 dark:text-white">{analytics.summary?.total_quizzes || 0}</p>
-              <p className="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider">{t('doctor.quiz_analytics.total_quizzes')}</p>
-            </div>
-
-            <div className="bg-white dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/5 rounded-2xl p-5">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center">
-                  <Users className="w-5 h-5 text-blue-500" />
-                </div>
-              </div>
-              <p className="text-2xl font-black text-gray-900 dark:text-white">{analytics.summary?.students_attempted || 0}</p>
-              <p className="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider">{t('doctor.quiz_analytics.students_attempted')}</p>
-            </div>
-
-            <div className="bg-white dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/5 rounded-2xl p-5">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center">
-                  <TrendingUp className="w-5 h-5 text-emerald-500" />
-                </div>
-              </div>
-              <p className="text-2xl font-black text-emerald-500">{analytics.summary?.overall_avg || '—'}%</p>
-              <p className="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider">{t('doctor.quiz_analytics.overall_avg')}</p>
-            </div>
-
-            <div className="bg-white dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/5 rounded-2xl p-5">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 bg-amber-500/10 rounded-xl flex items-center justify-center">
-                  <Zap className="w-5 h-5 text-amber-500" />
-                </div>
-              </div>
-              <p className="text-2xl font-black text-gray-900 dark:text-white">{analytics.summary?.published_quizzes || 0}</p>
-              <p className="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider">{t('doctor.quiz_analytics.published')}</p>
-            </div>
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+            <StatCard
+              label={t('doctor.quiz_analytics.total_quizzes')}
+              value={analytics.summary?.total_quizzes || 0}
+              icon={Award}
+            />
+            <StatCard
+              label={t('doctor.quiz_analytics.students_attempted')}
+              value={analytics.summary?.students_attempted || 0}
+              icon={Users}
+            />
+            <StatCard
+              label={t('doctor.quiz_analytics.overall_avg')}
+              value={`${analytics.summary?.overall_avg || '—'}%`}
+              icon={TrendingUp}
+              accent
+            />
+            <StatCard
+              label={t('doctor.quiz_analytics.published')}
+              value={analytics.summary?.published_quizzes || 0}
+              icon={Zap}
+            />
           </div>
 
           {/* Score Distribution */}
           {analytics.distribution && analytics.distribution.length > 0 && (
-            <div className="bg-white dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/5 rounded-2xl p-6">
-              <h3 className="text-lg font-black text-gray-900 dark:text-white mb-5 flex items-center gap-2">
-                <Target className="w-5 h-5 text-indigo-500" /> {t('doctor.quiz_analytics.score_distribution')}
-              </h3>
+            <SectionCard title={t('doctor.quiz_analytics.score_distribution')}>
               <div className="space-y-3">
-                {allRanges.map(range => {
-                  const item = analytics.distribution.find(d => d.range === range);
+                {ALL_RANGES.map((range) => {
+                  const item = analytics.distribution.find((d) => d.range === range);
                   const count = item ? parseInt(item.count) : 0;
-                  const totalAttempts = analytics.distribution.reduce((sum, d) => sum + parseInt(d.count), 0);
                   const pct = totalAttempts > 0 ? (count / totalAttempts) * 100 : 0;
-                  const colors = distColors[range];
 
                   return (
                     <div key={range} className="flex items-center gap-4">
-                      <span className={`text-xs font-bold w-16 text-right ${colors.text}`}>{range}%</span>
-                      <div className="flex-1 bg-gray-100 dark:bg-white/5 rounded-full h-6 overflow-hidden relative">
+                      <span className="w-16 text-end text-xs font-medium text-muted-foreground tabular-nums">
+                        {range}%
+                      </span>
+                      <div className="relative h-6 flex-1 overflow-hidden rounded-md bg-muted">
                         <div
-                          className={`h-full ${colors.bg} rounded-full transition-all duration-700 flex items-center justify-end pr-2`}
+                          className="flex h-full items-center justify-end rounded-md bg-primary pe-2 transition-all duration-700"
                           style={{ width: `${Math.max(pct, count > 0 ? 8 : 0)}%` }}
                         >
                           {count > 0 && (
-                            <span className="text-[10px] font-bold text-white">{count}</span>
+                            <span className="text-[10px] font-medium text-primary-foreground tabular-nums">
+                              {count}
+                            </span>
                           )}
                         </div>
                       </div>
-                      <span className="text-xs font-bold text-gray-400 dark:text-slate-500 w-12">{pct.toFixed(0)}%</span>
+                      <span className="w-12 text-xs text-muted-foreground tabular-nums">
+                        {pct.toFixed(0)}%
+                      </span>
                     </div>
                   );
                 })}
               </div>
-            </div>
+            </SectionCard>
           )}
 
           {/* Per-Quiz Breakdown */}
           {analytics.quizzes && analytics.quizzes.length > 0 && (
-            <div className="space-y-3">
-              <h3 className="text-lg font-black text-gray-900 dark:text-white flex items-center gap-2">
-                <Award className="w-5 h-5 text-indigo-500" /> {t('doctor.quiz_analytics.per_quiz')}
-              </h3>
-              {analytics.quizzes.map(q => {
-                const passRate = q.completed_attempts > 0
-                  ? Math.round((q.passed_count / q.completed_attempts) * 100)
-                  : 0;
-
-                return (
-                  <div
-                    key={q.id}
-                    className="bg-white dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/5 rounded-2xl p-5 hover:shadow-md transition-all"
-                  >
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h4 className="font-bold text-gray-900 dark:text-white truncate">{q.title}</h4>
-                          <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-md ${
-                            q.is_published
-                              ? 'text-emerald-600 bg-emerald-50 dark:bg-emerald-500/10'
-                              : 'text-gray-500 bg-gray-100 dark:bg-white/5'
-                          }`}>
-                            {q.is_published ? t('doctor.quiz_analytics.live') : t('doctor.quiz_analytics.draft')}
-                          </span>
-                        </div>
-                        <p className="text-xs text-gray-400 dark:text-slate-500">
-                          ⏱ {q.time_limit_minutes}{t('doctor.quiz_analytics.time_limit')} · 🎯 {t('doctor.quiz_analytics.pass_score')}: {q.passing_score}%
-                        </p>
-                      </div>
-
-                      {/* Quiz Metrics */}
-                      <div className="flex flex-wrap gap-4">
-                        <div className="text-center">
-                          <p className="text-lg font-black text-gray-900 dark:text-white">{q.completed_attempts || 0}</p>
-                          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{t('doctor.quiz_analytics.completed')}</p>
-                        </div>
-                        <div className="text-center">
-                          <p className={`text-lg font-black ${
-                            (q.avg_score || 0) >= 70 ? 'text-emerald-500' : (q.avg_score || 0) >= 50 ? 'text-amber-500' : 'text-red-500'
-                          }`}>
-                            {q.avg_score !== null ? `${q.avg_score}%` : '—'}
-                          </p>
-                          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{t('doctor.quiz_analytics.average')}</p>
-                        </div>
-                        <div className="text-center">
-                          <p className="text-lg font-black text-blue-500">{q.max_score !== null ? `${Math.round(q.max_score)}%` : '—'}</p>
-                          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{t('doctor.quiz_analytics.highest')}</p>
-                        </div>
-                        <div className="text-center">
-                          <p className={`text-lg font-black ${passRate >= 70 ? 'text-emerald-500' : passRate >= 40 ? 'text-amber-500' : 'text-red-500'}`}>
-                            {q.completed_attempts > 0 ? `${passRate}%` : '—'}
-                          </p>
-                          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{t('doctor.quiz_analytics.pass_rate')}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            <DataTable
+              columns={quizColumns}
+              rows={analytics.quizzes}
+              getRowKey={(q) => q.id}
+            />
           )}
 
           {/* Empty state */}
           {analytics.quizzes && analytics.quizzes.length === 0 && (
-            <div className="bg-white dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/5 rounded-2xl p-16 text-center">
-              <Award className="w-14 h-14 text-gray-300 dark:text-slate-600 mx-auto mb-3" />
-              <p className="text-gray-500 dark:text-slate-500 font-medium">{t('doctor.quiz_analytics.no_quizzes')}</p>
-              <p className="text-xs text-gray-400 dark:text-slate-600 mt-1">{t('doctor.quiz_analytics.create_hint')}</p>
-            </div>
+            <EmptyState
+              icon={Award}
+              title={t('doctor.quiz_analytics.no_quizzes')}
+              description={t('doctor.quiz_analytics.create_hint')}
+            />
           )}
         </>
       )}
