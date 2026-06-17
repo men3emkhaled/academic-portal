@@ -985,21 +985,21 @@
       "error_failed": "فشل في تغيير الباسورد",
       "success_toast": "الباسورد اتغير بنجاح!"
     },
-  "dashboard": {
-    "welcome_back": "مرحباً بعودتك",
-    "level": "المستوى",
-    "announcements": "آخر الإعلانات",
-    "urgent": "عاجل",
-    "today_schedule": "جدول اليوم",
-    "no_classes": "لا توجد محاضرات اليوم.",
-    "quick_actions": "إجراءات سريعة",
-    "all_courses": "كل المواد",
-    "view_grades": "عرض الدرجات",
-    "explore_roadmaps": "اكتشف مسارات التعلم",
-    "semester_progress": "تقدم الفصل الدراسي",
-    "week_progress": "الأسبوع {{week}} من {{total}}"
-  },
-  "verify_email": {
+    "dashboard": {
+      "welcome_back": "مرحباً بعودتك",
+      "level": "المستوى",
+      "announcements": "آخر الإعلانات",
+      "urgent": "عاجل",
+      "today_schedule": "جدول اليوم",
+      "no_classes": "لا توجد محاضرات اليوم.",
+      "quick_actions": "إجراءات سريعة",
+      "all_courses": "كل المواد",
+      "view_grades": "عرض الدرجات",
+      "explore_roadmaps": "اكتشف مسارات التعلم",
+      "semester_progress": "تقدم الفصل الدراسي",
+      "week_progress": "الأسبوع {{week}} من {{total}}"
+    },
+    "verify_email": {
       "error_invalid_link": "لينك التحقق مش صح.",
       "error_enter_id": "اكتب كود الطالب"
     }
@@ -1356,5 +1356,25 @@
     "unassigned": "غير محدد",
     "matrix_node": "المصفوفة",
     "settings": "الاعدادات"
+  },
+  "ai": {
+    "title": "ZAG AI",
+    "subtitle": "دماغك الاحتياطي. اسألني أي شيء.",
+    "placeholder": "اسألني أي شيء...",
+    "send": "إرسال",
+    "stop": "إيقاف",
+    "regenerate": "إعادة",
+    "new_chat": "＋ محادثة جديدة",
+    "export": "↓ تحميل المحادثة",
+    "copied": "تم النسخ ✓",
+    "hide_reasoning": "▲ إخفاء التفكير",
+    "show_reasoning": "▼ إظهار التفكير",
+    "press_enter": "Enter للإرسال · Shift+Enter لسطر جديد",
+    "suggest_1": "إيه المواد المتاحة الفصل ده؟",
+    "suggest_2": "أزاى أحسب ال GPA بتاعى؟",
+    "suggest_3": "امتحانات امتى؟",
+    "speak_not_supported": "الصوت مش متصفحك",
+    "exported": "تم التحميل ✓",
+    "stopped": "تم الإيقاف"
   }
 }

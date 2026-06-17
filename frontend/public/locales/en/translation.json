@@ -985,21 +985,21 @@
       "error_failed": "Failed to reset password",
       "success_toast": "Password reset successfully!"
     },
-  "dashboard": {
-    "welcome_back": "Welcome back",
-    "level": "Level",
-    "announcements": "Latest Announcements",
-    "urgent": "URGENT",
-    "today_schedule": "Today's Schedule",
-    "no_classes": "No classes scheduled today.",
-    "quick_actions": "Quick Actions",
-    "all_courses": "All Courses",
-    "view_grades": "View Grades",
-    "explore_roadmaps": "Explore Roadmaps",
-    "semester_progress": "Semester Progress",
-    "week_progress": "WEEK {{week}} OF {{total}}"
-  },
-  "verify_email": {
+    "dashboard": {
+      "welcome_back": "Welcome back",
+      "level": "Level",
+      "announcements": "Latest Announcements",
+      "urgent": "URGENT",
+      "today_schedule": "Today's Schedule",
+      "no_classes": "No classes scheduled today.",
+      "quick_actions": "Quick Actions",
+      "all_courses": "All Courses",
+      "view_grades": "View Grades",
+      "explore_roadmaps": "Explore Roadmaps",
+      "semester_progress": "Semester Progress",
+      "week_progress": "WEEK {{week}} OF {{total}}"
+    },
+    "verify_email": {
       "error_invalid_link": "Invalid or missing verification link.",
       "error_enter_id": "Please enter your Student ID"
     }
@@ -1356,5 +1356,25 @@
     "unassigned": "Unassigned",
     "matrix_node": "Matrix",
     "settings": "Settings"
+  },
+  "ai": {
+    "title": "ZAG AI",
+    "subtitle": "Your brain's backup. Ask me anything.",
+    "placeholder": "Ask me anything...",
+    "send": "Send",
+    "stop": "Stop",
+    "regenerate": "Regenerate",
+    "new_chat": "＋ New conversation",
+    "export": "Download chat ↓",
+    "copied": "Copied ✓",
+    "hide_reasoning": "▲ Hide thinking",
+    "show_reasoning": "▼ Show thinking",
+    "press_enter": "Enter to send · Shift+Enter for new line",
+    "suggest_1": "What courses are available this semester?",
+    "suggest_2": "How do I calculate my GPA?",
+    "suggest_3": "When are the exams?",
+    "speak_not_supported": "Voice input isn't available on this browser",
+    "exported": "Chat downloaded ✓",
+    "stopped": "Stopped"
   }
 }

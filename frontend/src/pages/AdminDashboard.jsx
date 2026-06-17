@@ -1,4 +1,5 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
+import { createPortal } from 'react-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import toast from 'react-hot-toast';
@@ -117,14 +118,12 @@ const AdminDashboard = () => {
   const [editNotifForm, setEditNotifForm] = useState({ title: '', content: '', is_read: false });
   const [studentsFile, setStudentsFile] = useState(null);
   const [transitioning, setTransitioning] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordInput, setPasswordInput] = useState('');
+  const [verifyingPassword, setVerifyingPassword] = useState(false);
 
   const handleUpgradeSemester = async () => {
     const isAr = i18n.language === 'ar';
-    const confirmMessage = isAr
-      ? 'تحذير هام جداً!\n\nهل أنت متأكد من ترقية الفصل الدراسي؟ هذا الإجراء سيقوم بـ:\n1. أرشفة جميع المواد الحالية للطلاب كـ "مواد مكتملة".\n2. مسح الجدول الدراسي وجدول الامتحانات الحالي.\n3. ترقية مستوى (ليفل) الطلاب في حال الانتقال لسنة دراسية جديدة (ترم فردي).\n4. فتح التسجيل للطلاب يدوياً للترم الجديد.\n\nهذا الإجراء غير قابل للتراجع. هل تريد الاستمرار؟'
-      : 'CRITICAL WARNING!\n\nAre you sure you want to upgrade the semester? This will:\n1. Archive all active student courses as completed.\n2. Delete current timetable and exam schedules.\n3. Upgrade student levels if transitioning to a new academic year.\n4. Students must register manually for the new semester.\n\nThis action cannot be undone. Do you wish to proceed?';
-
-    if (!window.confirm(confirmMessage)) return;
 
     setTransitioning(true);
     try {
@@ -140,6 +139,38 @@ const AdminDashboard = () => {
       toast.error((isAr ? 'فشلت عملية الترقية: ' : 'Upgrade failed: ') + msg);
     } finally {
       setTransitioning(false);
+    }
+  };
+
+  const handleUpgradeClick = () => {
+    setPasswordInput('');
+    setShowPasswordModal(true);
+  };
+
+  const handlePasswordSubmit = async (e) => {
+    e.preventDefault();
+    if (!passwordInput.trim()) return;
+
+    const isAr = i18n.language === 'ar';
+    setVerifyingPassword(true);
+    try {
+      await api.post('/admin/login', {
+        username: 'admin',
+        password: passwordInput
+      });
+      setShowPasswordModal(false);
+      setPasswordInput('');
+      const confirmMessage = isAr
+        ? 'تحذير هام جداً!\n\nهل أنت متأكد من ترقية الفصل الدراسي؟ هذا الإجراء سيقوم بـ:\n1. أرشفة جميع المواد الحالية للطلاب كـ "مواد مكتملة".\n2. مسح الجدول الدراسي وجدول الامتحانات الحالي.\n3. ترقية مستوى (ليفل) الطلاب في حال الانتقال لسنة دراسية جديدة (ترم فردي).\n4. فتح التسجيل للطلاب يدوياً للترم الجديد.\n\nهذا الإجراء غير قابل للتراجع. هل تريد الاستمرار؟'
+        : 'CRITICAL WARNING!\n\nAre you sure you want to upgrade the semester? This will:\n1. Archive all active student courses as completed.\n2. Delete current timetable and exam schedules.\n3. Upgrade student levels if transitioning to a new academic year.\n4. Students must register manually for the new semester.\n\nThis action cannot be undone. Do you wish to proceed?';
+      if (!window.confirm(confirmMessage)) return;
+      await handleUpgradeSemester();
+    } catch (error) {
+      toast.error(isAr
+        ? 'كلمة المرور غير صحيحة. يجب استخدام كلمة مرور المدير الرئيسي.'
+        : 'Incorrect password. Must use the root admin password.');
+    } finally {
+      setVerifyingPassword(false);
     }
   };
 
@@ -161,7 +192,7 @@ const AdminDashboard = () => {
   const fetchStudents = async () => {
     try {
       const res = await api.get('/admin/students');
-      setStudents(res.data);
+      setStudents(res.data?.data ?? res.data);
     } catch (error) {
       console.error('Error fetching students:', error);
     }
@@ -533,7 +564,7 @@ const AdminDashboard = () => {
                     </div>
                     
                     <button
-                      onClick={handleUpgradeSemester}
+                      onClick={handleUpgradeClick}
                       disabled={transitioning}
                       className="px-8 py-5 bg-black dark:bg-[#2cfc7d] text-white dark:text-black hover:bg-red-600 dark:hover:bg-red-500 dark:hover:text-white rounded-[2rem] font-black uppercase tracking-wider text-sm flex items-center justify-center gap-3 transition-all duration-300 shadow-xl hover:scale-105 active:scale-95 disabled:opacity-50 disabled:pointer-events-none self-start md:self-center shrink-0 border-2 border-transparent hover:border-red-600"
                     >
@@ -556,6 +587,81 @@ const AdminDashboard = () => {
           </div>
         </main>
       </div>
+      {showPasswordModal && createPortal(
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 lg:p-10">
+          <div
+            onClick={() => setShowPasswordModal(false)}
+            className="absolute inset-0 bg-gray-950/40 dark:bg-black/80 backdrop-blur-sm"
+          />
+          <div
+            className="bg-white dark:bg-[#0c0c0e] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-6 sm:p-10 w-full max-w-md shadow-2xl relative overflow-hidden z-10 text-start animate-in zoom-in-95 duration-200"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-8 pb-6 border-b border-gray-100 dark:border-white/5">
+                <div className="flex items-center gap-5">
+                  <div className="w-14 h-14 bg-red-500/10 dark:bg-red-500/20 rounded-2xl flex items-center justify-center border border-red-500/20 shadow-inner">
+                    <Lock className="w-7 h-7 text-red-500 dark:text-red-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
+                      {i18n.language === 'ar' ? 'ترقية الفصل الدراسي' : 'Upgrade Semester'}
+                    </h3>
+                    <p className="text-gray-400 text-xs lg:text-sm font-black uppercase tracking-widest mt-1">
+                      {i18n.language === 'ar' ? 'يجب إدخال كلمة مرور المدير الرئيسي' : 'Root admin password required'}
+                    </p>
+                  </div>
+                </div>
+                <button onClick={() => setShowPasswordModal(false)} className="w-10 h-10 rounded-full hover:bg-gray-100 dark:hover:bg-white/5 flex items-center justify-center transition-colors">
+                  <X className="w-5 h-5 text-gray-400" />
+                </button>
+              </div>
+
+              <form onSubmit={handlePasswordSubmit} className="space-y-6">
+                <div className="space-y-3">
+                  <label className="text-xs lg:text-sm font-black text-gray-400 uppercase tracking-widest ml-1">
+                    {i18n.language === 'ar' ? 'كلمة المرور' : 'Password'}
+                  </label>
+                  <input
+                    type="password"
+                    value={passwordInput}
+                    onChange={(e) => setPasswordInput(e.target.value)}
+                    className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl px-6 py-4.5 text-base lg:text-lg font-black focus:ring-4 focus:ring-red-500/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner placeholder-gray-400/50"
+                    placeholder="••••••••"
+                    autoFocus
+                    required
+                  />
+                </div>
+
+                <div className="flex gap-4 pt-6 border-t border-gray-100 dark:border-white/5">
+                  <button
+                    type="submit"
+                    disabled={verifyingPassword}
+                    className="flex-1 bg-red-500 hover:bg-red-600 text-white font-black py-5 rounded-[2rem] shadow-xl shadow-red-500/20 transition-[color,background-color,border-color,transform,opacity] hover:scale-[1.02] active:scale-95 disabled:opacity-50 uppercase tracking-widest text-sm lg:text-base flex items-center justify-center gap-3"
+                  >
+                    {verifyingPassword ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <>
+                        <Lock className="w-5 h-5" />
+                        <span>{i18n.language === 'ar' ? 'تأكيد والترقية' : 'Verify & Upgrade'}</span>
+                      </>
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowPasswordModal(false)}
+                    className="px-8 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 font-black py-5 rounded-[2rem] transition-[color,background-color,border-color,transform,opacity] uppercase tracking-widest text-sm lg:text-base"
+                  >
+                    {i18n.language === 'ar' ? 'إلغاء' : 'Cancel'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 };

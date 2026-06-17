@@ -16,7 +16,6 @@ services:
       - "${DB_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
     networks:
       - academic_network
     healthcheck:
@@ -65,6 +64,8 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD:-redis_pass}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-blaifa/InternVL3}
+      OLLAMA_HOST: ${OLLAMA_HOST:-http://host.docker.internal:11434}
     depends_on:
       postgres:
         condition: service_healthy
@@ -74,6 +75,8 @@ services:
       - backend_uploads:/app/uploads
     networks:
       - academic_network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
 
   # React Frontend (Nginx)
