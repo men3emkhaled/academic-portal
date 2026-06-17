@@ -9,20 +9,13 @@ import {
   Check,
   FolderUp,
   Camera,
-  AlertCircle,
-  ArrowLeft,
-  ArrowRight,
-  Save,
-  Play,
-  Target,
-  RotateCcw,
-  MonitorPlay,
-  Activity,
-  Copy,
-  CheckCircle2,
+  AlertTriangle,
   FileQuestion,
-  Image as ImageIcon,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Modal, LoadingState, EmptyState } from "@/components/common";
+import { cn } from "@/lib/utils";
 
 const getDirectImageUrl = (url) => {
   if (!url) return "";
@@ -39,7 +32,8 @@ const QuizPage = () => {
   const { quizId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isAr = i18n.language === "ar";
   const { logout } = useStudentAuth();
 
   const queryParams = new URLSearchParams(location.search);
@@ -260,42 +254,30 @@ const QuizPage = () => {
 
   if (loading) {
     return (
-      <div className="flex flex-col justify-center items-center h-screen bg-gray-50 dark:bg-[#050505] transition-colors duration-500 overflow-hidden relative">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-emerald-500/5 dark:bg-emerald-500/10 hidden rounded-full animate-pulse-slow"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/5 dark:bg-blue-500/10 hidden rounded-full animate-pulse-slow"></div>
-
-        <div className="relative z-10 flex flex-col items-center">
-          <div className="relative flex items-center justify-center w-20 h-20 mb-6">
-            <div className="absolute inset-0 border-4 border-emerald-500/20 dark:border-emerald-500/10 rounded-full"></div>
-            <div className="absolute inset-0 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-            <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center animate-pulse">
-              <span className="text-xl font-black text-emerald-500">Z</span>
-            </div>
-          </div>
-          <p className="text-gray-900 dark:text-white font-black text-[10px] uppercase tracking-[0.4em] mb-1 animate-pulse">
-            ZNU PORTAL
-          </p>
-          <p className="text-gray-500 dark:text-gray-400 font-bold text-xs tracking-wide">
-            {t("quizzes.loading")}
-          </p>
-        </div>
+      <div
+        dir={isAr ? "rtl" : "ltr"}
+        className="flex min-h-screen items-center justify-center bg-background"
+      >
+        <LoadingState label={t("quizzes.loading")} />
       </div>
     );
   }
 
   if (!quizData || !quizData.questions || quizData.questions.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-dark text-gray-900 dark:text-white flex flex-col items-center justify-center p-6 transition-colors duration-300">
-        <div className="text-xl mb-4 text-center">
-          <AlertCircle className="w-8 h-8 text-primary mx-auto mb-4" /> 
-          <p>{t("quizzes.no_questions")}</p>
-        </div>
-        <button
-          onClick={() => navigate("/student/quizzes")}
-          className="px-6 py-3 bg-primary text-white dark:text-dark rounded-xl font-bold"
-        >
-          {t("quizzes.back_to_list")}
-        </button>
+      <div
+        dir={isAr ? "rtl" : "ltr"}
+        className="flex min-h-screen items-center justify-center bg-background p-6"
+      >
+        <EmptyState
+          icon={FileQuestion}
+          title={t("quizzes.no_questions")}
+          action={
+            <Button variant="outline" onClick={() => navigate("/student/quizzes")}>
+              {t("quizzes.back_to_list")}
+            </Button>
+          }
+        />
       </div>
     );
   }
@@ -303,69 +285,70 @@ const QuizPage = () => {
   const currentQuestion = quizData.questions[currentIndex];
   const answeredCount = Object.keys(answers).length;
   const progress = (answeredCount / quizData.questions.length) * 100;
+  const isLastQuestion = currentIndex === quizData.questions.length - 1;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-dark text-gray-900 dark:text-white font-body transition-colors duration-300">
-      <main className="pt-8 px-6 max-w-2xl mx-auto pb-8">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="font-headline font-extrabold text-2xl text-primary">
+    <div
+      dir={isAr ? "rtl" : "ltr"}
+      className="min-h-screen bg-background text-foreground"
+    >
+      <main className="mx-auto w-full max-w-2xl px-4 py-8 sm:px-6">
+        {/* Title + Timer */}
+        <div className="mb-6 flex items-center justify-between gap-3">
+          <h1 className="truncate text-lg font-semibold tracking-tight text-foreground">
             {quizData.quiz_title}
           </h1>
-          <div className="flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full border border-primary/20 dark:border-primary/10">
-            <span className="text-xl">
-              <Clock className="w-5 h-5 text-primary" />
-            </span>
-            <span className="font-mono text-primary font-bold text-lg tracking-widest">
+          <div className="flex shrink-0 items-center gap-2 rounded-lg border border-border bg-card px-3 py-1.5">
+            <Clock className="size-4 text-muted-foreground" />
+            <span className="font-mono text-sm font-medium tabular-nums text-foreground">
               {formatTime(timeLeft)}
             </span>
           </div>
         </div>
 
-        <div className="mb-8">
-          <div className="flex justify-between items-end mb-2">
-            <span className="text-3xl font-headline font-black text-primary italic">
+        {/* Progress */}
+        <div className="mb-6">
+          <div className="mb-2 flex items-end justify-between">
+            <span className="text-sm font-medium text-foreground">
               {currentIndex + 1}
-              <span className="text-primary/40 dark:text-primary/20 font-normal not-italic mx-1">
-                /
-              </span>
+              <span className="mx-1 text-muted-foreground">/</span>
               {quizData.questions.length}
             </span>
-            <span className="text-xs font-label font-medium text-primary/60 dark:text-primary/40 tracking-wider">
+            <span className="text-xs text-muted-foreground">
               {t("quizzes.progress_label")}
             </span>
           </div>
-          <div className="h-1.5 w-full bg-primary/20 dark:bg-primary/10 rounded-full overflow-hidden">
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
             <div
-              className="h-full bg-primary shadow-[0_0_15px_rgba(46,204,113,0.6)] dark:shadow-[0_0_15px_rgba(var(--primary),0.6)]"
+              className="h-full rounded-full bg-primary transition-all duration-300"
               style={{ width: `${progress}%` }}
             />
           </div>
         </div>
 
-        <div className="relative mb-10">
-          <div className="absolute -top-6 -left-6 w-32 h-32 bg-primary/10 dark:bg-primary/5 blur-3xl rounded-full"></div>
-          <div className="relative p-8 bg-white dark:bg-dark-card rounded-2xl border-l-4 border-primary shadow-sm dark:shadow-none">
-            <h2 className="text-2xl md:text-3xl font-headline font-bold leading-tight text-gray-900 dark:text-white">
-              {currentQuestion.question_text}
-            </h2>
-            {currentQuestion.image_url && (
-              <div className="mt-4 flex justify-center">
-                <img
-                  src={getDirectImageUrl(currentQuestion.image_url)}
-                  alt="Question illustration"
-                  className="max-h-64 rounded-lg border border-gray-200 dark:border-white/10/30"
-                  onError={(e) => {
-                    e.target.onerror = null;
-                    e.target.src =
-                      "https://via.placeholder.com/400x200/1a1a1a/8eff71?text=Image+Not+Available";
-                  }}
-                />
-              </div>
-            )}
-          </div>
+        {/* Question */}
+        <div className="mb-6 rounded-xl border border-border bg-card p-5">
+          <h2 className="text-lg font-semibold leading-snug text-foreground">
+            {currentQuestion.question_text}
+          </h2>
+          {currentQuestion.image_url && (
+            <div className="mt-4 flex justify-center">
+              <img
+                src={getDirectImageUrl(currentQuestion.image_url)}
+                alt="Question illustration"
+                className="max-h-64 rounded-lg border border-border"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src =
+                    "https://via.placeholder.com/400x200/1a1a1a/8eff71?text=Image+Not+Available";
+                }}
+              />
+            </div>
+          )}
         </div>
 
-        <div className="space-y-4 mb-12">
+        {/* Answers */}
+        <div className="mb-8 space-y-3">
           {currentQuestion.question_type === "true_false" ? (
             ["true", "false"].map((option) => {
               const isSelected = answers[currentQuestion.id] === option;
@@ -373,21 +356,25 @@ const QuizPage = () => {
                 <button
                   key={option}
                   onClick={() => handleAnswerSelect(currentQuestion.id, option)}
-                  className={`w-full text-left p-6 rounded-2xl border transition-all flex items-center justify-between ${
+                  className={cn(
+                    "flex w-full items-center justify-between rounded-lg border p-4 text-start transition-colors",
                     isSelected
-                      ? "bg-primary/10 border-2 border-primary shadow-[0_4px_15px_rgba(46,204,113,0.15)] dark:shadow-[0_0_30px_rgba(var(--primary),0.15)]"
-                      : "bg-white dark:bg-dark-glass border-gray-200 dark:border-transparent hover:border-primary/40 dark:hover:border-primary/20 shadow-sm dark:shadow-none"
-                  }`}
+                      ? "border-primary bg-primary/5"
+                      : "border-border bg-card hover:bg-muted/50",
+                  )}
                 >
-                  <span className="text-lg font-medium capitalize text-gray-900 dark:text-white">
+                  <span
+                    className={cn(
+                      "text-sm font-medium capitalize",
+                      isSelected ? "text-primary" : "text-foreground",
+                    )}
+                  >
                     {option}
                   </span>
                   {isSelected && (
-                    <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
-                      <span className="text-white dark:text-dark text-sm font-bold">
-                        <Check className="w-4 h-4 text-white dark:text-dark" />
-                      </span>
-                    </div>
+                    <span className="flex size-5 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                      <Check className="size-3.5" />
+                    </span>
                   )}
                 </button>
               );
@@ -400,45 +387,48 @@ const QuizPage = () => {
                 <button
                   key={opt || idx}
                   onClick={() => handleAnswerSelect(currentQuestion.id, letter)}
-                  className={`w-full text-left p-6 rounded-2xl border transition-all flex items-center justify-between ${
+                  className={cn(
+                    "flex w-full items-center justify-between rounded-lg border p-4 text-start transition-colors",
                     isSelected
-                      ? "bg-primary/10 border-2 border-primary shadow-[0_4px_15px_rgba(46,204,113,0.15)] dark:shadow-[0_0_30px_rgba(var(--primary),0.15)]"
-                      : "bg-white dark:bg-dark-glass border-gray-200 dark:border-transparent hover:border-primary/40 dark:hover:border-primary/20 shadow-sm dark:shadow-none"
-                  }`}
+                      ? "border-primary bg-primary/5"
+                      : "border-border bg-card hover:bg-muted/50",
+                  )}
                 >
-                  <div className="flex items-center gap-5">
+                  <div className="flex items-center gap-3">
                     <span
-                      className={`w-10 h-10 flex items-center justify-center rounded-xl font-black ${
+                      className={cn(
+                        "flex size-8 shrink-0 items-center justify-center rounded-md text-sm font-semibold",
                         isSelected
-                          ? "bg-primary text-white dark:text-dark"
-                          : "bg-primary/10 text-gray-500 dark:text-gray-400"
-                      }`}
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted text-muted-foreground",
+                      )}
                     >
                       {letter}
                     </span>
                     <span
-                      className={`text-lg ${isSelected ? "font-bold text-primary" : "font-medium text-gray-900 dark:text-white"}`}
+                      className={cn(
+                        "text-sm",
+                        isSelected ? "font-medium text-primary" : "text-foreground",
+                      )}
                     >
                       {opt}
                     </span>
                   </div>
                   {isSelected && (
-                    <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
-                      <span className="text-white dark:text-dark text-sm font-bold">
-                        <Check className="w-4 h-4 text-white dark:text-dark" />
-                      </span>
-                    </div>
+                    <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                      <Check className="size-3.5" />
+                    </span>
                   )}
                 </button>
               );
             })
           ) : (
-            <div className="bg-white dark:bg-dark-glass p-6 rounded-2xl border border-primary/20 shadow-sm dark:shadow-none">
-              <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm">
+            <div className="rounded-xl border border-border bg-card p-5">
+              <p className="mb-4 text-sm text-muted-foreground">
                 {t("quizzes.written_instruction")}
               </p>
 
-              <textarea
+              <Textarea
                 placeholder={t("quizzes.type_here")}
                 value={writtenText[currentQuestion.id] || ""}
                 onChange={(e) =>
@@ -447,12 +437,12 @@ const QuizPage = () => {
                     [currentQuestion.id]: e.target.value,
                   }))
                 }
-                className="w-full bg-gray-50 dark:bg-dark-card border border-primary/30 rounded-xl p-3 text-gray-900 dark:text-white mb-4 focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                className="mb-4"
                 rows="4"
               />
 
-              <div className="flex gap-3 mb-4">
-                <label className="flex-1 cursor-pointer bg-gray-50 dark:bg-dark-card border border-dashed border-primary/40 rounded-xl p-4 text-center hover:border-primary transition">
+              <div className="mb-4 flex gap-3">
+                <label className="flex flex-1 cursor-pointer flex-col items-center gap-2 rounded-lg border border-dashed border-border p-4 text-center transition-colors hover:border-primary/50 hover:bg-muted/50">
                   <input
                     type="file"
                     accept="image/*"
@@ -467,15 +457,13 @@ const QuizPage = () => {
                       }
                     }}
                   />
-                  <span className="text-2xl block mb-1">
-                    <FolderUp className="w-8 h-8 text-gray-400 dark:text-gray-500 mx-auto mb-2" />
-                  </span>
-                  <span className="text-primary text-sm font-medium">
+                  <FolderUp className="size-5 text-muted-foreground" />
+                  <span className="text-sm font-medium text-foreground">
                     {t("quizzes.choose_file")}
                   </span>
                 </label>
 
-                <label className="flex-1 cursor-pointer bg-gray-50 dark:bg-dark-card border border-dashed border-primary/40 rounded-xl p-4 text-center hover:border-primary transition">
+                <label className="flex flex-1 cursor-pointer flex-col items-center gap-2 rounded-lg border border-dashed border-border p-4 text-center transition-colors hover:border-primary/50 hover:bg-muted/50">
                   <input
                     type="file"
                     accept="image/*"
@@ -491,10 +479,8 @@ const QuizPage = () => {
                       }
                     }}
                   />
-                  <span className="text-2xl block mb-1">
-                    <Camera className="w-8 h-8 text-gray-400 dark:text-gray-500 mx-auto mb-2" />
-                  </span>
-                  <span className="text-primary text-sm font-medium">
+                  <Camera className="size-5 text-muted-foreground" />
+                  <span className="text-sm font-medium text-foreground">
                     {t("quizzes.take_photo")}
                   </span>
                 </label>
@@ -505,12 +491,15 @@ const QuizPage = () => {
                   <img
                     src={URL.createObjectURL(answers[currentQuestion.id])}
                     alt="Preview"
-                    className="max-h-48 rounded-lg mx-auto border border-gray-200 dark:border-white/10/30"
+                    className="mx-auto max-h-48 rounded-lg border border-border"
                   />
                 </div>
               )}
 
-              <button
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-4"
                 onClick={() => {
                   const text = writtenText[currentQuestion.id] || "";
                   const file =
@@ -525,51 +514,49 @@ const QuizPage = () => {
                   }
                   saveWrittenAnswer(currentQuestion.id, text, file);
                 }}
-                className="mt-4 bg-primary/10 dark:bg-primary/20 text-primary font-bold px-4 py-2 rounded-lg text-sm hover:bg-primary/20 dark:hover:bg-primary/30 transition"
               >
                 {t("quizzes.save_answer")}
-              </button>
+              </Button>
             </div>
           )}
         </div>
 
-        <div className="flex flex-col items-center gap-4">
-          <div className="flex gap-3 w-full">
-            <button
+        {/* Navigation */}
+        <div className="flex flex-col items-center gap-3">
+          <div className="flex w-full gap-3">
+            <Button
+              variant="outline"
+              size="lg"
               onClick={handlePrevious}
               disabled={currentIndex === 0}
-              className="flex-1 py-4 bg-white dark:bg-dark-glass text-gray-600 dark:text-gray-400 font-headline font-bold text-lg rounded-xl border border-gray-200 dark:border-white/10/30 hover:bg-gray-50 dark:hover:bg-primary/10 transition disabled:opacity-50 disabled:bg-gray-100 dark:disabled:opacity-30 disabled:cursor-not-allowed shadow-sm dark:shadow-none"
+              className="flex-1"
             >
-              ← {t("quizzes.prev")}
-            </button>
-            {currentIndex === quizData.questions.length - 1 ? (
-              <button
+              {t("quizzes.prev")}
+            </Button>
+            {isLastQuestion ? (
+              <Button
+                size="lg"
                 onClick={handleSubmitClick}
                 disabled={submitting || hasSubmittedRef.current}
-                className="flex-1 py-4 bg-primary text-white dark:text-dark font-headline font-black text-lg rounded-xl shadow-[0_4px_15px_rgba(46,204,113,0.3)] dark:shadow-[0_12px_40px_rgba(var(--primary),0.25)] hover:scale-[1.02] active:scale-95 transition-all uppercase tracking-tight"
+                className="flex-1"
               >
                 {submitting ? t("quizzes.submitting") : t("quizzes.submit")}
-              </button>
+              </Button>
             ) : (
-              <button
-                onClick={handleNext}
-                className="flex-1 py-4 bg-primary text-white dark:text-dark font-headline font-black text-lg rounded-xl shadow-[0_4px_15px_rgba(46,204,113,0.3)] dark:shadow-[0_12px_40px_rgba(var(--primary),0.25)] hover:scale-[1.02] active:scale-95 transition-all uppercase tracking-tight"
-              >
-                {t("quizzes.next")} →
-              </button>
+              <Button size="lg" onClick={handleNext} className="flex-1">
+                {t("quizzes.next")}
+              </Button>
             )}
           </div>
-          {currentIndex < quizData.questions.length - 1 && (
-            <button
-              onClick={handleNext}
-              className="text-primary/80 dark:text-primary/60 font-label font-bold text-xs uppercase tracking-[0.2em] hover:text-primary transition-colors py-2"
-            >
+          {!isLastQuestion && (
+            <Button variant="ghost" size="sm" onClick={handleNext}>
               {t("quizzes.skip")}
-            </button>
+            </Button>
           )}
         </div>
 
-        <div className="flex flex-wrap justify-center gap-2 mt-8">
+        {/* Question navigator */}
+        <div className="mt-8 flex flex-wrap justify-center gap-2">
           {quizData.questions.map((q, idx) => {
             const isAnswered = !!answers[q.id];
             const isCurrent = idx === currentIndex;
@@ -577,13 +564,14 @@ const QuizPage = () => {
               <button
                 key={q.id}
                 onClick={() => setCurrentIndex(idx)}
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition ${
+                className={cn(
+                  "flex size-8 items-center justify-center rounded-md text-xs font-medium transition-colors",
                   isCurrent
-                    ? "bg-primary text-white dark:text-dark shadow-sm"
+                    ? "bg-primary text-primary-foreground"
                     : isAnswered
-                      ? "bg-primary/20 dark:bg-primary/30 text-primary border border-primary"
-                      : "bg-white dark:bg-dark-glass text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-primary/10"
-                }`}
+                      ? "border border-primary bg-primary/10 text-primary"
+                      : "border border-border bg-card text-muted-foreground hover:bg-muted/50",
+                )}
               >
                 {idx + 1}
               </button>
@@ -591,37 +579,36 @@ const QuizPage = () => {
           })}
         </div>
 
-        {showWarningModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
-            <div className="bg-white dark:bg-[#111] border-2 border-red-500 rounded-3xl p-8 max-w-md w-full shadow-[0_0_50px_rgba(239,68,68,0.3)] animate-scaleIn">
-              <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                <AlertCircle className="w-10 h-10 text-red-500" />
-              </div>
-              <h3 className="text-2xl font-black text-center text-gray-900 dark:text-white mb-2">
+        {/* Strict mode anti-cheat warning */}
+        <Modal
+          open={showWarningModal}
+          onOpenChange={setShowWarningModal}
+          size="sm"
+          footer={
+            <Button
+              variant="destructive"
+              className="w-full"
+              onClick={() => setShowWarningModal(false)}
+            >
+              {t("quizzes.understand")}
+            </Button>
+          }
+        >
+          <div className="flex flex-col items-center gap-4 py-2 text-center">
+            <span className="flex size-12 items-center justify-center rounded-full border border-destructive/20 bg-destructive/10 text-destructive">
+              <AlertTriangle className="size-6" />
+            </span>
+            <div>
+              <h3 className="text-base font-semibold text-foreground">
                 {t("quizzes.strict_warning_title")}
               </h3>
-              <p className="text-center text-gray-600 dark:text-gray-300 mb-8 font-bold">
+              <p className="mt-1 text-sm text-muted-foreground">
                 {t("quizzes.strict_warning_msg")}
               </p>
-              <button
-                onClick={() => setShowWarningModal(false)}
-                className="w-full py-4 bg-red-500 text-white font-black text-lg rounded-xl hover:bg-red-600 transition-colors uppercase tracking-widest"
-              >
-                {t("quizzes.understand")}
-              </button>
             </div>
           </div>
-        )}
+        </Modal>
       </main>
-
-      <style>{`
-        .font-headline {
-          font-family: 'Manrope', 'Inter', sans-serif;
-        }
-        .font-body {
-          font-family: 'Inter', sans-serif;
-        }
-      `}</style>
     </div>
   );
 };

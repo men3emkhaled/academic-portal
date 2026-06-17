@@ -1,7 +1,25 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useDoctorAuth } from '../../context/DoctorAuthContext';
 import toast from 'react-hot-toast';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Megaphone, Plus, Trash2, Calendar, BookOpen, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  PageHeader,
+  SectionCard,
+  FormField,
+  EmptyState,
+  LoadingState,
+} from '@/components/common';
 
 const DoctorAnnouncements = ({ courses }) => {
   const { doctorApi } = useDoctorAuth();
@@ -62,105 +80,119 @@ const DoctorAnnouncements = ({ courses }) => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-xl md:text-2xl font-black text-gray-900 dark:text-white flex items-center gap-2">
-            <Megaphone className="w-6 h-6 text-amber-500" /> Course Announcements
-          </h2>
-          <p className="text-sm text-gray-500 dark:text-slate-500 mt-1">
-            Send notifications and updates to students enrolled in your courses
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        icon={Megaphone}
+        title="Course Announcements"
+        description="Send notifications and updates to students enrolled in your courses"
+      />
 
-      <div className="bg-white dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/5 rounded-2xl p-6">
+      {/* Compose form */}
+      <SectionCard title="New Announcement">
         <form onSubmit={handleCreateAnnouncement} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest ms-1">Select Course</label>
-              <select
-                value={selectedCourseId}
-                onChange={(e) => setSelectedCourseId(e.target.value)}
-                className="w-full bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl p-3 text-gray-900 dark:text-white font-medium focus:border-amber-500/50 focus:outline-none transition-colors"
-              >
-                <option value="">-- Choose a Course --</option>
-                {courses.map(c => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </select>
-            </div>
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest ms-1">Announcement Title</label>
-              <input
+            <FormField label="Select Course" htmlFor="announcement-course">
+              <Select value={selectedCourseId} onValueChange={setSelectedCourseId}>
+                <SelectTrigger id="announcement-course" className="w-full">
+                  <SelectValue placeholder="Choose a course" />
+                </SelectTrigger>
+                <SelectContent>
+                  {courses.map((c) => (
+                    <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FormField>
+
+            <FormField label="Announcement Title" htmlFor="announcement-title">
+              <Input
+                id="announcement-title"
                 type="text"
                 placeholder="e.g., Lecture Cancelled, Assignment Update"
                 value={newAnnouncement.title}
                 onChange={(e) => setNewAnnouncement({ ...newAnnouncement, title: e.target.value })}
-                className="w-full bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl p-3 text-gray-900 dark:text-white font-medium focus:border-amber-500/50 focus:outline-none transition-colors"
               />
-            </div>
+            </FormField>
           </div>
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest ms-1">Announcement Content</label>
-            <textarea
+
+          <FormField label="Announcement Content" htmlFor="announcement-content">
+            <Textarea
+              id="announcement-content"
               placeholder="Write your message here..."
-              rows="4"
+              rows={4}
               value={newAnnouncement.content}
               onChange={(e) => setNewAnnouncement({ ...newAnnouncement, content: e.target.value })}
-              className="w-full bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl p-3 text-gray-900 dark:text-white font-medium focus:border-amber-500/50 focus:outline-none transition-colors resize-none"
-            ></textarea>
-          </div>
-          <button
-            type="submit"
-            disabled={creating}
-            className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3.5 rounded-xl transition-all hover:shadow-lg hover:shadow-amber-500/20 active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50"
-          >
-            {creating ? <Loader2 className="w-5 h-5 animate-spin" /> : <Plus className="w-5 h-5" />}
-            Post Announcement
-          </button>
-        </form>
-      </div>
+              className="resize-none"
+            />
+          </FormField>
 
-      <div className="space-y-4">
-        <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
-          <Calendar className="w-5 h-5 text-gray-400" /> Recent Announcements
-        </h3>
+          <div className="flex justify-end">
+            <Button type="submit" disabled={creating}>
+              {creating ? <Loader2 className="size-4 animate-spin" /> : <Plus className="size-4" />}
+              <span>Post Announcement</span>
+            </Button>
+          </div>
+        </form>
+      </SectionCard>
+
+      {/* Feed */}
+      <SectionCard
+        title="Recent Announcements"
+        bodyClassName="p-0"
+      >
         {!selectedCourseId ? (
-          <div className="bg-gray-50 dark:bg-white/[0.02] border border-dashed border-gray-200 dark:border-white/10 rounded-2xl p-12 text-center">
-            <BookOpen className="w-12 h-12 text-gray-300 dark:text-slate-700 mx-auto mb-3" />
-            <p className="text-gray-500 dark:text-slate-500 font-medium">Select a course to view its announcements</p>
+          <div className="p-4">
+            <EmptyState
+              icon={BookOpen}
+              title="No course selected"
+              description="Select a course to view its announcements"
+            />
           </div>
         ) : loading ? (
-          <div className="flex justify-center py-12">
-            <Loader2 className="w-8 h-8 text-amber-500 animate-spin" />
-          </div>
+          <LoadingState className="min-h-[30vh]" />
         ) : announcements.length === 0 ? (
-          <div className="bg-gray-50 dark:bg-white/[0.02] border border-dashed border-gray-200 dark:border-white/10 rounded-2xl p-12 text-center">
-            <p className="text-gray-500 dark:text-slate-500 font-medium">No announcements found for this course.</p>
+          <div className="p-4">
+            <EmptyState
+              icon={Megaphone}
+              title="No announcements yet"
+              description="No announcements found for this course."
+            />
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-4">
-            {announcements.map((ann) => (
-              <div key={ann.id} className="bg-white dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/5 rounded-2xl p-5 hover:border-amber-500/30 transition-all group">
-                <div className="flex justify-between items-start mb-2">
-                  <h4 className="font-bold text-lg text-gray-900 dark:text-white">{ann.title}</h4>
-                  <button
-                    onClick={() => handleDeleteAnnouncement(ann.id)}
-                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-                <p className="text-gray-600 dark:text-slate-400 text-sm mb-4 whitespace-pre-wrap">{ann.content}</p>
-                <div className="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                  <Calendar className="w-3 h-3" />
-                  {new Date(ann.created_at).toLocaleString()}
-                </div>
-              </div>
-            ))}
-          </div>
+          <ul className="divide-y divide-border">
+            <AnimatePresence initial={false}>
+              {announcements.map((ann) => (
+                <motion.li
+                  key={ann.id}
+                  layout
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                  className="group px-4 py-3 hover:bg-muted/50 transition-colors"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <h4 className="text-sm font-semibold text-foreground">{ann.title}</h4>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      onClick={() => handleDeleteAnnouncement(ann.id)}
+                      className="shrink-0 text-muted-foreground hover:text-destructive lg:opacity-0 lg:group-hover:opacity-100"
+                      aria-label="Delete announcement"
+                    >
+                      <Trash2 className="size-4" />
+                    </Button>
+                  </div>
+                  <p className="mt-1 text-sm text-muted-foreground whitespace-pre-wrap">{ann.content}</p>
+                  <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <Calendar className="size-3" />
+                    {new Date(ann.created_at).toLocaleString()}
+                  </div>
+                </motion.li>
+              ))}
+            </AnimatePresence>
+          </ul>
         )}
-      </div>
+      </SectionCard>
     </div>
   );
 };

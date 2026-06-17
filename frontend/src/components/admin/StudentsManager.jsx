@@ -1,14 +1,37 @@
 import React, { useState } from 'react';
-import { createPortal } from 'react-dom';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
-import { 
-  Users, UserPlus, Trash2, Key, Edit3, 
-  Upload, FileSpreadsheet, ChevronRight, CheckCircle,
-  Activity, Shield, GraduationCap, Layers, ShieldCheck,
-  Search, Info, UserCircle, Settings, UploadCloud, X, User
+import {
+  Users, UserPlus, Trash2, Key, Edit3,
+  Upload, FileSpreadsheet, ShieldCheck,
+  Shield, GraduationCap, Info, User, X
 } from 'lucide-react';
+
+import {
+  PageContainer,
+  PageHeader,
+  StatCard,
+  SectionCard,
+  Toolbar,
+  SearchInput,
+  DataTable,
+  StatusBadge,
+  EmptyState,
+  FormField,
+  Modal,
+} from '@/components/common';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Switch } from '@/components/ui/switch';
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '@/components/ui/select';
 
 const AVAILABLE_PERMISSIONS = [
   { key: 'manage_courses', label_ar: 'المقررات والمهام الأكاديمية', label_en: 'Courses & Academic Tasks' },
@@ -25,8 +48,6 @@ const AVAILABLE_PERMISSIONS = [
 const StudentsManager = ({
   students,
   fetchStudents,
-  uploadingStudents,
-  setUploadingStudents,
   studentsFile,
   setStudentsFile,
   handleResetPassword,
@@ -208,678 +229,529 @@ const StudentsManager = ({
 
   const hasActiveFilter = isFilterActive || searchTerm.trim() !== '';
 
-  const filteredStudents = hasActiveFilter 
+  const filteredStudents = hasActiveFilter
     ? students.filter(s => {
         // Search term check
-        const matchesSearch = !searchTerm.trim() || 
-                             s.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        const matchesSearch = !searchTerm.trim() ||
+                             s.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                              s.id?.toString().includes(searchTerm);
-        
+
         // Department check
         const matchesDept = selectedDept === 'all' || s.department_id?.toString() === selectedDept.toString();
-        
+
         // Level check
         const matchesLevel = selectedLevel === 'all' || s.level?.toString() === selectedLevel.toString();
-        
+
         // Section check
         const matchesSection = selectedSection === 'all' || s.section?.toString() === selectedSection.toString();
-        
+
         return matchesSearch && matchesDept && matchesLevel && matchesSection;
       })
     : [];
 
+  const resetFilters = () => {
+    setSelectedDept('all');
+    setSelectedLevel('all');
+    setSelectedSection('all');
+    setIsFilterActive(false);
+    setSearchTerm('');
+  };
+
+  const showAllStudents = () => {
+    setSelectedDept('all');
+    setSelectedLevel('all');
+    setSelectedSection('all');
+    setIsFilterActive(true);
+  };
+
+  const tableColumns = [
+    {
+      key: 'name',
+      header: t('admin.students.name_id'),
+      render: (s) => (
+        <div className="flex items-center gap-3">
+          <Avatar>
+            {s.avatar_url ? <AvatarImage src={s.avatar_url} alt={s.name} /> : null}
+            <AvatarFallback>
+              <User className="size-4" />
+            </AvatarFallback>
+          </Avatar>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-medium text-foreground">{s.name}</p>
+            <p className="truncate text-xs text-muted-foreground">{s.id}</p>
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: 'level_section',
+      header: t('admin.students.level_section'),
+      render: (s) => (
+        <div className="flex flex-wrap items-center gap-1.5">
+          <StatusBadge variant="neutral">
+            {t('admin.students.level')} {s.level}
+          </StatusBadge>
+          <StatusBadge variant="neutral">
+            {t('admin.students.section')} {s.section || '—'}
+          </StatusBadge>
+          <StatusBadge variant="neutral">
+            {isAr ? 'العام الدراسي' : 'Academic Year'} {s.batch || 2025}
+          </StatusBadge>
+        </div>
+      ),
+    },
+    {
+      key: 'status',
+      header: t('admin.students.status'),
+      render: (s) => (
+        s.role && s.role !== 'student' ? (
+          <StatusBadge variant="accent" icon={ShieldCheck}>{s.role}</StatusBadge>
+        ) : (
+          <StatusBadge variant="neutral">{t('admin.students.protected')}</StatusBadge>
+        )
+      ),
+    },
+    {
+      key: 'actions',
+      header: t('admin.students.actions'),
+      headClassName: 'text-end',
+      cellClassName: 'text-end',
+      render: (s) => (
+        <div className="flex items-center justify-end gap-1">
+          <Button variant="ghost" size="icon" onClick={() => handleEditClick(s)} aria-label={t('admin.students.edit_details')} title={t('admin.students.edit_details')}>
+            <Edit3 className="size-4" />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={() => handleRoleClick(s)} aria-label={t('admin.students.change_role')} title={t('admin.students.change_role')}>
+            <Shield className="size-4" />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={() => handleResetPassword(s.id)} aria-label={t('admin.students.reset_password')} title={t('admin.students.reset_password')}>
+            <Key className="size-4" />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={() => handleDeleteStudent(s.id, s.name)} aria-label={t('admin.students.delete')} title={t('admin.students.delete')} className="hover:bg-destructive/10 hover:text-destructive">
+            <Trash2 className="size-4" />
+          </Button>
+        </div>
+      ),
+    },
+  ];
+
   return (
-    <div className="space-y-8 sm:space-y-16 lg:space-y-24 animate-in fade-in duration-700 pb-20 max-w-[1500px] mx-auto w-full px-4 sm:px-0 text-start relative z-10">
-      {/* Background Decor */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[-10%] inset-inline-end-[-5%] w-[50vw] h-[50vw] bg-[#8b5cf6]/5 blur-[120px] rounded-full"></div>
-        <div className="absolute bottom-[-10%] inset-inline-start-[-5%] w-[40vw] h-[40vw] bg-[#2cfc7d]/3 blur-[100px] rounded-full"></div>
+    <PageContainer size="wide" className={isAr ? 'font-arabic' : undefined}>
+      {/* Header */}
+      <PageHeader
+        icon={GraduationCap}
+        title={t('admin.students.title')}
+        description={t('admin.sidebar.tabs.students')}
+        actions={
+          <Button onClick={() => setShowAddModal(true)}>
+            <UserPlus className="size-4" />
+            {t('admin.students.add_student')}
+          </Button>
+        }
+      />
+
+      {/* Key metric + Import */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <StatCard
+          label={t('admin.students.total_students')}
+          value={students.length}
+          icon={GraduationCap}
+          hint={t('admin.students.active_nodes')}
+          accent
+        />
+
+        <SectionCard
+          title={t('admin.students.import_title')}
+          description={t('admin.students.import_description')}
+          className="lg:col-span-2"
+        >
+          <form onSubmit={handleUploadStudents} className="space-y-3">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch">
+              <label className="flex flex-1 cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed bg-muted/30 px-4 py-6 text-center transition-colors hover:border-primary/40 hover:bg-muted/50">
+                <FileSpreadsheet className="size-6 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">
+                  {studentsFile ? (
+                    <span className="break-all font-medium text-foreground">{studentsFile.name}</span>
+                  ) : t('admin.students.click_to_upload')}
+                </span>
+                <input
+                  id="studentsFileInput"
+                  type="file"
+                  accept=".xlsx,.xls,.csv"
+                  onChange={(e) => setStudentsFile(e.target.files[0])}
+                  className="sr-only"
+                />
+              </label>
+              <Button type="submit" size="lg" disabled={uploading || !studentsFile} className="sm:self-stretch">
+                <Upload className="size-4" />
+                {uploading ? t('common.loading') : t('admin.students.upload_button')}
+              </Button>
+            </div>
+
+            <div className="flex items-start gap-2 rounded-lg border bg-muted/30 p-3">
+              <Info className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+              <p className="text-xs text-muted-foreground">
+                {t('admin.students.import_hint')}
+              </p>
+            </div>
+          </form>
+        </SectionCard>
       </div>
 
-      {/* Hero Section */}
-      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 sm:gap-10 relative z-10">
-        <div className="space-y-2 sm:space-y-4 max-w-2xl text-start">
-          <div className="flex items-center gap-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-[#2cfc7d]"></div>
-            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 dark:text-white/30">{t('admin.sidebar.tabs.students')}</span>
-          </div>
-          <h1 className={`text-[clamp(2.5rem,6vw,5.5rem)] font-black leading-[0.95] tracking-tighter uppercase text-gray-900 dark:text-white ${i18n.language === 'ar' ? 'font-arabic' : ''}`}>
-            {t('admin.students.title')}
-          </h1>
-        </div>
-
-        <div className="bg-gradient-to-br from-[#8b5cf6] to-[#6d28d9] text-white p-6 sm:p-8 rounded-[2.5rem] shadow-lg shadow-purple-600/20 flex flex-col justify-between relative overflow-hidden group min-w-[280px] w-full lg:w-auto">
-          <div className="absolute inset-inline-end-0 top-0 w-32 h-32 bg-white/10 hidden rounded-full translate-x-1/2 -translate-y-1/2 group-hover:scale-150 transition-transform duration-700"></div>
-          <div className="flex justify-between items-start relative z-10">
-            <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
-              <GraduationCap className="w-5 h-5" />
-            </div>
-            <span className="text-[10px] font-black uppercase tracking-widest bg-black/10 px-3 py-1 rounded-full">{t('admin.students.total_students')}</span>
-          </div>
-          <div className="mt-4 relative z-10 text-start">
-            <p className="text-5xl sm:text-6xl font-black tracking-tighter">{students.length}</p>
-            <p className="text-[10px] font-black uppercase tracking-widest opacity-60 mt-1">{t('admin.students.active_nodes')}</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Grid: Actions & Import */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-8 relative z-20">
-        {/* Left: Quick Actions & Search */}
-        <div className="lg:col-span-4 space-y-4 sm:space-y-6">
-          <div className="relative group">
-            <Search className="absolute inset-inline-start-6 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-focus-within:text-[#8b5cf6] transition-colors" />
-            <input 
-              type="text"
-              placeholder={t('admin.students.search_placeholder')}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[2rem] ps-14 sm:ps-16 pe-6 sm:pe-8 py-4.5 sm:py-6 text-gray-900 dark:text-white font-black focus:ring-4 focus:ring-[#8b5cf6]/10 focus:border-[#8b5cf6]/30 outline-none transition-all shadow-inner uppercase tracking-widest text-[10px] sm:text-[11px]"
-            />
-          </div>
-
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="w-full group bg-black dark:bg-white text-white dark:text-black rounded-[2.5rem] p-6 sm:p-10 flex items-center justify-between gap-4 hover:scale-[1.02] active:scale-95 transition-all shadow-2xl relative overflow-hidden text-start"
-          >
-            <div className="absolute inset-0 bg-gradient-to-br from-[#8b5cf6]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-            <div className="flex items-center gap-4 sm:gap-6 relative z-10">
-              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-white/10 dark:bg-black/10 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-12 transition-all duration-500">
-                <UserPlus className="w-6 h-6 sm:w-8 sm:h-8" />
-              </div>
-              <div className="text-start">
-                 <span className="block text-lg sm:text-2xl font-black uppercase tracking-tighter leading-none">{t('admin.students.add_student')}</span>
-                 <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.3em] opacity-40 mt-1 sm:mt-1.5 block">{t('admin.students.init_node')}</span>
-              </div>
-            </div>
-            <ChevronRight className={`w-6 h-6 sm:w-8 sm:h-8 opacity-20 group-hover:opacity-100 group-hover:translate-x-2 transition-all ${i18n.language === 'ar' ? 'rotate-180 group-hover:-translate-x-2' : ''}`} />
-          </button>
-        </div>
-
-        {/* Right: Import Matrix */}
-        <div className="lg:col-span-8 bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[2.5rem] sm:rounded-[3.5rem] p-6 sm:p-10 lg:p-12 shadow-sm relative overflow-hidden group flex flex-col justify-between text-start">
-           <div className="absolute inset-inline-end-0 top-0 w-96 h-96 bg-[#8b5cf6]/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2 group-hover:scale-110 transition-transform duration-1000" />
-           
-           <div className="relative z-10 space-y-6 sm:space-y-8 text-start">
-              <div className="flex items-center gap-4 sm:gap-6">
-                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-[#8b5cf6]/10 rounded-2xl flex items-center justify-center border border-[#8b5cf6]/10 text-[#8b5cf6]">
-                  <UploadCloud className="w-6 h-6 sm:w-8 sm:h-8" />
-                </div>
-                <div>
-                    <h3 className="text-xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tighter uppercase leading-none">{t('admin.students.import_title')}</h3>
-                    <p className="text-[9px] sm:text-[10px] text-gray-400 font-black uppercase tracking-[0.3em] mt-1 sm:mt-1.5 block leading-none">{t('admin.students.import_description')}</p>
-                </div>
-              </div>
-
-              <form onSubmit={handleUploadStudents} className="flex flex-col md:flex-row items-stretch gap-4 sm:gap-6">
-                <label className="relative flex-1 flex flex-col items-center justify-center gap-3 sm:gap-4 cursor-pointer bg-gray-50 dark:bg-black/40 border-2 border-gray-100 dark:border-white/10 border-dashed rounded-[2.5rem] p-6 sm:p-12 hover:border-[#8b5cf6]/40 hover:bg-[#8b5cf6]/5 transition-all group/label shadow-inner overflow-hidden">
-                  <FileSpreadsheet className="w-10 h-10 sm:w-12 sm:h-12 text-gray-300 group-hover/label:text-[#8b5cf6] group-hover/label:scale-110 transition-all duration-500 relative z-10" />
-                  <span className="text-gray-500 dark:text-gray-400 font-black text-center text-[9px] sm:text-[10px] uppercase tracking-[0.2em] relative z-10">
-                    {studentsFile ? (
-                        <span className="text-[#8b5cf6] dark:text-[#d4a3ff] break-all px-4">{studentsFile.name}</span>
-                    ) : t('admin.students.click_to_upload')}
-                  </span>
-                  <input id="studentsFileInput" type="file" accept=".xlsx,.xls,.csv" onChange={(e) => setStudentsFile(e.target.files[0])} className="absolute inset-0 opacity-0 cursor-pointer" />
-                </label>
-                <button type="submit" disabled={uploading || !studentsFile} className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-black py-5 sm:py-8 px-8 sm:px-12 rounded-[2rem] sm:rounded-[2.5rem] shadow-xl shadow-purple-500/20 transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50 h-auto flex flex-col items-center justify-center gap-2 sm:gap-3 group/btn">
-                  {uploading ? (
-                    <Activity className="w-6 h-6 sm:w-8 sm:h-8 animate-spin" />
-                  ) : (
-                    <>
-                      <Upload className="w-6 h-6 sm:w-8 sm:h-8 group-hover/btn:-translate-y-1 transition-transform" />
-                      <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.3em]">{t('admin.students.upload_button')}</span>
-                    </>
-                  )}
-                </button>
-              </form>
-
-              <div className="flex items-start gap-3 sm:gap-4 p-4 sm:p-6 bg-[#8b5cf6]/5 rounded-3xl border border-[#8b5cf6]/10">
-                  <Info className="w-4 h-4 sm:w-5 sm:h-5 text-[#8b5cf6] mt-0.5 shrink-0" />
-                  <p className="text-[9px] sm:text-[10px] font-black text-gray-800/60 dark:text-[#d4a3ff]/60 leading-relaxed uppercase tracking-widest text-start">
-                      {t('admin.students.import_hint')}
-                  </p>
-              </div>
-           </div>
-        </div>
-      </div>
-
-      {/* Student Matrix Table */}
-      <div className="space-y-8">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-4">
-            <div className="flex items-center gap-4">
-                <h2 className="text-3xl font-black uppercase tracking-tighter">{t('admin.students.saved_students')}</h2>
-                {hasActiveFilter && (
-                  <div className="bg-[#2cfc7d]/10 px-4 py-2 rounded-xl text-[#2cfc7d] text-xs font-black animate-pulse">
-                     {filteredStudents.length}
-                  </div>
-                )}
-            </div>
-        </div>
-
-        {/* Filter Toolbar */}
-        <div className="flex flex-wrap items-center gap-4 bg-white dark:bg-[#0d0d14] p-6 rounded-[2rem] border border-gray-100 dark:border-white/5 shadow-sm">
-          {/* Department Select */}
-          <div className="flex-1 min-w-[200px] space-y-1 text-start">
-            <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ms-2">
-              {isAr ? 'القسم الدراسي' : 'Department'}
-            </label>
-            <div className="relative">
-              <select
-                value={selectedDept}
-                onChange={(e) => {
-                  setSelectedDept(e.target.value);
-                  setIsFilterActive(true);
-                }}
-                className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-xl px-4 py-3 text-xs font-black focus:ring-2 focus:ring-[#8b5cf6]/20 outline-none appearance-none cursor-pointer"
-              >
-                <option value="all">{isAr ? 'كل الأقسام' : 'All Departments'}</option>
-                {departments.map(d => (
-                  <option key={d.id} value={d.id}>{isAr ? d.name_ar : d.name}</option>
-                ))}
-              </select>
-              <ChevronRight className="absolute inset-inline-end-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 rotate-90 w-4 h-4" />
-            </div>
-          </div>
-
-          {/* Level Select */}
-          <div className="w-full sm:w-[150px] space-y-1 text-start">
-            <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ms-2">
-              {isAr ? 'المستوى' : 'Level'}
-            </label>
-            <div className="relative">
-              <select
-                value={selectedLevel}
-                onChange={(e) => {
-                  setSelectedLevel(e.target.value);
-                  setIsFilterActive(true);
-                }}
-                className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-xl px-4 py-3 text-xs font-black focus:ring-2 focus:ring-[#8b5cf6]/20 outline-none appearance-none cursor-pointer"
-              >
-                <option value="all">{isAr ? 'كل المستويات' : 'All Levels'}</option>
-                {uniqueLevels.map(lvl => (
-                  <option key={lvl} value={lvl}>{isAr ? `المستوى ${lvl}` : `Level ${lvl}`}</option>
-                ))}
-              </select>
-              <ChevronRight className="absolute inset-inline-end-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 rotate-90 w-4 h-4" />
-            </div>
-          </div>
-
-          {/* Section Select */}
-          <div className="w-full sm:w-[150px] space-y-1 text-start">
-            <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ms-2">
-              {isAr ? 'الشعبة' : 'Section'}
-            </label>
-            <div className="relative">
-              <select
-                value={selectedSection}
-                onChange={(e) => {
-                  setSelectedSection(e.target.value);
-                  setIsFilterActive(true);
-                }}
-                className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-xl px-4 py-3 text-xs font-black focus:ring-2 focus:ring-[#8b5cf6]/20 outline-none appearance-none cursor-pointer"
-              >
-                <option value="all">{isAr ? 'كل الشعب' : 'All Sections'}</option>
-                {uniqueSections.map(sec => (
-                  <option key={sec} value={sec}>{isAr ? `شعبة ${sec}` : `Section ${sec}`}</option>
-                ))}
-              </select>
-              <ChevronRight className="absolute inset-inline-end-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 rotate-90 w-4 h-4" />
-            </div>
-          </div>
-
-          {/* Clear/Reset Button */}
-          {hasActiveFilter && (
-            <button
-              onClick={() => {
-                setSelectedDept('all');
-                setSelectedLevel('all');
-                setSelectedSection('all');
-                setIsFilterActive(false);
-                setSearchTerm('');
-              }}
-              className="px-6 py-3 rounded-xl bg-rose-500/5 hover:bg-rose-500/10 text-rose-500 text-xs font-black uppercase tracking-widest border border-rose-500/10 transition-all flex items-center justify-center gap-2"
+      {/* Students table */}
+      <SectionCard
+        title={t('admin.students.saved_students')}
+        actions={
+          hasActiveFilter ? (
+            <StatusBadge variant="accent">{filteredStudents.length}</StatusBadge>
+          ) : null
+        }
+        bodyClassName="space-y-4"
+      >
+        {/* Filter toolbar */}
+        <Toolbar>
+          <SearchInput
+            placeholder={t('admin.students.search_placeholder')}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <div className="flex flex-wrap items-center gap-2">
+            <Select
+              value={selectedDept}
+              onValueChange={(v) => { setSelectedDept(v); setIsFilterActive(true); }}
             >
-              <X className="w-4 h-4" />
-              {isAr ? 'إعادة تعيين' : 'Reset'}
-            </button>
-          )}
-        </div>
+              <SelectTrigger className="h-8 w-full sm:w-44" aria-label={isAr ? 'القسم الدراسي' : 'Department'}>
+                <SelectValue placeholder={isAr ? 'كل الأقسام' : 'All Departments'} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{isAr ? 'كل الأقسام' : 'All Departments'}</SelectItem>
+                {departments.map(d => (
+                  <SelectItem key={d.id} value={d.id.toString()}>{isAr ? d.name_ar : d.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select
+              value={selectedLevel}
+              onValueChange={(v) => { setSelectedLevel(v); setIsFilterActive(true); }}
+            >
+              <SelectTrigger className="h-8 w-full sm:w-36" aria-label={isAr ? 'المستوى' : 'Level'}>
+                <SelectValue placeholder={isAr ? 'كل المستويات' : 'All Levels'} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{isAr ? 'كل المستويات' : 'All Levels'}</SelectItem>
+                {uniqueLevels.map(lvl => (
+                  <SelectItem key={lvl} value={lvl.toString()}>{isAr ? `المستوى ${lvl}` : `Level ${lvl}`}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select
+              value={selectedSection}
+              onValueChange={(v) => { setSelectedSection(v); setIsFilterActive(true); }}
+            >
+              <SelectTrigger className="h-8 w-full sm:w-36" aria-label={isAr ? 'الشعبة' : 'Section'}>
+                <SelectValue placeholder={isAr ? 'كل الشعب' : 'All Sections'} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{isAr ? 'كل الشعب' : 'All Sections'}</SelectItem>
+                {uniqueSections.map(sec => (
+                  <SelectItem key={sec} value={sec.toString()}>{isAr ? `شعبة ${sec}` : `Section ${sec}`}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {hasActiveFilter && (
+              <Button variant="ghost" size="sm" onClick={resetFilters}>
+                <X className="size-4" />
+                {isAr ? 'إعادة تعيين' : 'Reset'}
+              </Button>
+            )}
+          </div>
+        </Toolbar>
 
         {!hasActiveFilter ? (
-          <div className="bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[3rem] p-16 sm:p-24 text-center shadow-sm flex flex-col items-center justify-center relative overflow-hidden group">
-            <div className="absolute inset-0 bg-gradient-to-br from-[#8b5cf6]/2 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-700 pointer-events-none" />
-            <div className="w-20 h-20 bg-gray-50 dark:bg-white/5 rounded-[2rem] flex items-center justify-center text-gray-400 border border-gray-100 dark:border-white/5 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-sm relative z-10">
-              <Users className="w-10 h-10" />
-            </div>
-            <h3 className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white tracking-tighter uppercase mt-6 relative z-10">
-              {isAr ? 'حدد فلتر لعرض الطلاب' : 'Select filters to display students'}
-            </h3>
-            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mt-2 max-w-sm leading-relaxed relative z-10">
-              {isAr 
-                ? 'الرجاء اختيار قسم معين، شعبة، مستوى دراسي، أو البحث باسم الطالب لعرض النتائج وتجنب بطء التحميل.' 
-                : 'Please choose a department, section, level or type student name to load records. This optimizes portal speed.'}
-            </p>
-            <button
-              onClick={() => {
-                setSelectedDept('all');
-                setSelectedLevel('all');
-                setSelectedSection('all');
-                setIsFilterActive(true);
-              }}
-              className="mt-8 px-8 py-4 bg-black dark:bg-white text-white dark:text-black rounded-2xl text-[10px] font-black uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-md relative z-10"
-            >
-              {isAr ? 'عرض جميع الطلاب' : 'Show All Students'}
-            </button>
-          </div>
-        ) : (
-          <div className="bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[3rem] overflow-hidden shadow-sm">
-            <div className="overflow-x-auto custom-scrollbar">
-              <table className="w-full text-start border-collapse">
-                <thead>
-                  <tr className="bg-gray-50/50 dark:bg-white/[0.01]">
-                    <th className="py-8 px-10 text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-[0.3em] text-start">{t('admin.students.name_id')}</th>
-                    <th className="py-8 px-10 text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-[0.3em] text-start">{t('admin.students.level_section')}</th>
-                    <th className="py-8 px-10 text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-[0.3em] text-start">{t('admin.students.status')}</th>
-                    <th className="py-8 px-10 text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-[0.3em] text-inline-end">{t('admin.students.actions')}</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100 dark:divide-white/[0.03]">
-                  {filteredStudents.length === 0 ? (
-                    <tr>
-                        <td colSpan="4" className="text-center py-40">
-                            <div className="flex flex-col items-center gap-6 opacity-30 grayscale">
-                                <Users className="w-20 h-20 text-gray-400" />
-                                <p className="text-gray-500 font-black uppercase tracking-[0.3em] text-xs">{t('admin.students.no_students')}</p>
-                            </div>
-                        </td>
-                    </tr>
-                  ) : (
-                    filteredStudents.map((s) => (
-                      <tr key={s.id} className="group hover:bg-gray-50/30 dark:hover:bg-white/[0.01] transition-all">
-                        <td className="py-8 px-10 text-start">
-                          <div className="flex items-center gap-6">
-                            <div className="w-16 h-16 bg-white dark:bg-black rounded-2xl flex items-center justify-center border border-gray-100 dark:border-white/10 shadow-inner group-hover:scale-110 group-hover:rotate-3 transition-all duration-700 overflow-hidden relative">
-                              {s.avatar_url ? (
-                                <img src={s.avatar_url} alt={s.name} className="w-full h-full object-cover" />
-                              ) : (
-                                <div className="w-full h-full bg-[#8b5cf6]/10 dark:bg-white/5 flex items-center justify-center">
-                                  <User className="w-8 h-8 text-[#8b5cf6] dark:text-gray-400" />
-                                </div>
-                              )}
-                            </div>
-                            <div className="space-y-1 text-start">
-                              <h4 className="text-base font-black text-gray-900 dark:text-white leading-snug group-hover:text-[#8b5cf6] transition-colors">
-                                 {s.name}
-                              </h4>
-                              <span className="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
-                                 {s.id}
-                              </span>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="py-8 px-10 text-start">
-                          <div className="flex flex-wrap gap-2">
-                            <span className="px-4 py-2 rounded-xl bg-blue-500/5 border border-blue-500/10 text-blue-600 dark:text-blue-400 text-[10px] font-black uppercase tracking-widest">
-                              {t('admin.students.level')} {s.level}
-                            </span>
-                            <span className="px-4 py-2 rounded-xl bg-purple-500/5 border border-purple-500/10 text-purple-600 dark:text-purple-400 text-[10px] font-black uppercase tracking-widest">
-                              {t('admin.students.section')} {s.section || '—'}
-                            </span>
-                            <span className="px-4 py-2 rounded-xl bg-indigo-500/5 border border-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-black uppercase tracking-widest">
-                              {isAr ? 'العام الدراسي' : 'Academic Year'} {s.batch || 2025}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="py-8 px-10 text-start">
-                          <div className="flex items-center gap-3">
-                            {s.role && s.role !== 'student' ? (
-                              <span className="px-4 py-2 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-600 dark:text-[#d4a3ff] text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 animate-pulse">
-                                <ShieldCheck className="w-3.5 h-3.5" />
-                                {s.role}
-                              </span>
-                            ) : (
-                              <>
-                                <div className="w-2 h-2 rounded-full bg-[#2cfc7d] shadow-[0_0_12px_rgba(44,252,125,0.5)]"></div>
-                                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 italic opacity-60">{t('admin.students.protected')}</span>
-                              </>
-                            )}
-                          </div>
-                        </td>
-                        <td className="py-8 px-10 text-inline-end">
-                          <div className="flex items-center justify-inline-end gap-3 opacity-0 group-hover:opacity-100 transition-all scale-90 group-hover:scale-100">
-                            <button onClick={() => handleEditClick(s)} className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 text-gray-400 hover:text-amber-500 transition-all shadow-sm" title={t('admin.students.edit_details')}>
-                                <Edit3 className="w-5 h-5" />
-                            </button>
-                            <button onClick={() => handleRoleClick(s)} className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 text-gray-400 hover:text-purple-500 transition-all shadow-sm" title={t('admin.students.change_role')}>
-                                <Shield className="w-5 h-5" />
-                            </button>
-                            <button onClick={() => handleResetPassword(s.id)} className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 text-gray-400 hover:text-blue-500 transition-all shadow-sm" title={t('admin.students.reset_password')}>
-                                <Key className="w-5 h-5" />
-                            </button>
-                            <button onClick={() => handleDeleteStudent(s.id, s.name)} className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 text-gray-400 hover:text-rose-500 transition-all shadow-sm" title={t('admin.students.delete')}>
-                                <Trash2 className="w-5 h-5" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-      </div>      {/* Premium Add Student Modal */}
-      {showAddModal && createPortal(
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 lg:p-10">
-          <div 
-            onClick={() => setShowAddModal(false)}
-            className="absolute inset-0 bg-gray-950/40 dark:bg-black/80 backdrop-blur-sm" 
+          <EmptyState
+            icon={Users}
+            title={isAr ? 'حدد فلتر لعرض الطلاب' : 'Select filters to display students'}
+            description={isAr
+              ? 'الرجاء اختيار قسم معين، شعبة، مستوى دراسي، أو البحث باسم الطالب لعرض النتائج وتجنب بطء التحميل.'
+              : 'Please choose a department, section, level or type student name to load records. This optimizes portal speed.'}
+            action={
+              <Button variant="outline" size="sm" onClick={showAllStudents}>
+                {isAr ? 'عرض جميع الطلاب' : 'Show All Students'}
+              </Button>
+            }
           />
-          <div 
-            className="bg-white dark:bg-[#0c0c0e] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-6 sm:p-10 w-full max-w-2xl shadow-2xl relative overflow-hidden z-10 text-start animate-in zoom-in-95 duration-200" 
-            onClick={e => e.stopPropagation()}
-          >
-            {/* Modal Glows */}
-            <div className="absolute top-0 inset-inline-end-0 w-64 h-64 bg-purple-500/10 hidden rounded-full pointer-events-none group-hover:scale-110 transition-transform duration-1000"></div>
-            
-            <div className="relative z-10">
-              <div className="flex items-center justify-between mb-10 pb-6 border-b border-gray-100 dark:border-white/5">
-                <div className="flex items-center gap-5">
-                  <div className="w-14 h-14 bg-[#8b5cf6]/10 dark:bg-[#8b5cf6]/20 rounded-2xl flex items-center justify-center border border-[#8b5cf6]/20 shadow-inner">
-                    <UserPlus className="w-7 h-7 text-[#8b5cf6] dark:text-[#d4a3ff]" />
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">{t('admin.students.add_modal_title')}</h3>
-                    <p className="text-gray-400 text-xs lg:text-sm font-black uppercase tracking-widest mt-1">{t('admin.students.init_node')}</p>
-                  </div>
-                </div>
-                <button onClick={() => setShowAddModal(false)} className="w-10 h-10 rounded-full hover:bg-gray-100 dark:hover:bg-white/5 flex items-center justify-center transition-colors">
-                  <X className="w-5 h-5 text-gray-400" />
-                </button>
-              </div>
+        ) : (
+          <DataTable
+            columns={tableColumns}
+            rows={filteredStudents}
+            getRowKey={(s) => s.id}
+            empty={
+              <EmptyState icon={Users} title={t('admin.students.no_students')} />
+            }
+          />
+        )}
+      </SectionCard>
 
-              <form onSubmit={handleAddSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-3">
-                        <label className="text-xs lg:text-sm font-black text-gray-400 uppercase tracking-widest ml-1">{t('admin.students.student_id')} *</label>
-                        <input type="text" value={newStudent.id} onChange={(e) => setNewStudent({ ...newStudent, id: e.target.value })} className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl px-6 py-4.5 text-base lg:text-lg font-black focus:ring-4 focus:ring-[#8b5cf6]/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner placeholder-gray-400/50" placeholder="e.g. 2024001" required />
-                    </div>
-                    <div className="space-y-3">
-                        <label className="text-xs lg:text-sm font-black text-gray-400 uppercase tracking-widest ml-1">{t('admin.students.full_name')} *</label>
-                        <input type="text" value={newStudent.name} onChange={(e) => setNewStudent({ ...newStudent, name: e.target.value })} className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl px-6 py-4.5 text-base lg:text-lg font-black focus:ring-4 focus:ring-[#8b5cf6]/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner placeholder-gray-400/50" placeholder={t('admin.students.full_name')} required />
-                    </div>
-                </div>
-
-                <div className="space-y-3">
-                    <label className="text-xs lg:text-sm font-black text-gray-400 uppercase tracking-widest ml-1">{t('admin.students.password')}</label>
-                    <input type="text" value={newStudent.password} onChange={(e) => setNewStudent({ ...newStudent, password: e.target.value })} className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl px-6 py-4.5 text-base lg:text-lg font-black focus:ring-4 focus:ring-[#8b5cf6]/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner placeholder-gray-400/50" placeholder="Leave empty for default" />
-                    <p className="text-[11px] lg:text-xs text-[#8b5cf6] dark:text-[#d4a3ff] font-black uppercase tracking-widest opacity-60 ml-1">{t('admin.students.password_hint')}</p>
-                </div>
-
-                <div className="grid grid-cols-3 gap-6">
-                    <div className="space-y-3">
-                        <label className="text-xs lg:text-sm font-black text-gray-400 uppercase tracking-widest ml-1">{t('admin.students.level')}</label>
-                        <input type="number" value={newStudent.level} onChange={(e) => setNewStudent({ ...newStudent, level: e.target.value })} className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl px-6 py-4.5 text-base lg:text-lg font-black focus:ring-4 focus:ring-[#8b5cf6]/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner" min="1" max="4" />
-                    </div>
-                    <div className="space-y-3">
-                        <label className="text-xs lg:text-sm font-black text-gray-400 uppercase tracking-widest ml-1">{t('admin.students.section')}</label>
-                        <input type="text" value={newStudent.section} onChange={(e) => setNewStudent({ ...newStudent, section: e.target.value })} className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl px-6 py-4.5 text-base lg:text-lg font-black focus:ring-4 focus:ring-[#8b5cf6]/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner placeholder-gray-400/50" placeholder="e.g. 1" />
-                    </div>
-                    <div className="space-y-3">
-                        <label className="text-xs lg:text-sm font-black text-gray-400 uppercase tracking-widest ml-1">{isAr ? 'سنة الالتحاق' : 'Academic Year'}</label>
-                        <input type="number" value={newStudent.batch} onChange={(e) => setNewStudent({ ...newStudent, batch: e.target.value })} className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl px-6 py-4.5 text-base lg:text-lg font-black focus:ring-4 focus:ring-[#8b5cf6]/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner placeholder-gray-400/50" placeholder="e.g. 2025" />
-                    </div>
-                </div>
-
-                <div className="space-y-3">
-                    <label className="text-xs lg:text-sm font-black text-gray-400 uppercase tracking-widest ml-1">{t('admin.students.select_dept')}</label>
-                    <div className="relative">
-                        <select
-                            value={newStudent.department_id}
-                            onChange={(e) => setNewStudent({ ...newStudent, department_id: e.target.value })}
-                            className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl px-6 py-4.5 text-base lg:text-lg font-black focus:ring-4 focus:ring-[#8b5cf6]/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner appearance-none uppercase tracking-wider"
-                        >
-                            <option value="" className="bg-white dark:bg-[#0c0c0e] dark:text-white">{t('admin.students.no_dept')}</option>
-                            {departments.map(d => (
-                                <option key={d.id} value={d.id} className="bg-white dark:bg-[#0c0c0e] dark:text-white">{d.name} ({d.code})</option>
-                            ))}
-                        </select>
-                        <div className="absolute inset-inline-end-6 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                            <ChevronRight className="w-5 h-5 rotate-90" />
-                        </div>
-                    </div>
-                </div>
-
-                <div className="flex gap-4 pt-10 border-t border-gray-100 dark:border-white/5">
-                  <button type="submit" disabled={adding} className="flex-1 bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-black py-5 rounded-[2rem] shadow-xl shadow-purple-500/20 transition-[color,background-color,border-color,transform,opacity] hover:scale-[1.02] active:scale-95 disabled:opacity-50">
-                    {adding ? <Activity className="w-6 h-6 animate-spin mx-auto" /> : (
-                      <span className="uppercase tracking-widest text-sm lg:text-base">{t('admin.students.save_student')}</span>
-                    )}
-                  </button>
-                  <button type="button" onClick={() => setShowAddModal(false)} className="px-12 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 font-black py-5 rounded-[2rem] transition-[color,background-color,border-color,transform,opacity] uppercase tracking-widest text-sm lg:text-base">
-                    {t('common.cancel')}
-                  </button>
-                </div>
-              </form>
-            </div>
+      {/* Add Student Modal */}
+      <Modal
+        open={showAddModal}
+        onOpenChange={setShowAddModal}
+        title={t('admin.students.add_modal_title')}
+        description={t('admin.students.init_node')}
+        size="lg"
+        footer={
+          <>
+            <Button type="button" variant="ghost" onClick={() => setShowAddModal(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button type="submit" form="add-student-form" disabled={adding}>
+              {adding ? t('common.loading') : t('admin.students.save_student')}
+            </Button>
+          </>
+        }
+      >
+        <form id="add-student-form" onSubmit={handleAddSubmit} className="space-y-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <FormField label={t('admin.students.student_id')} htmlFor="add-student-id" required>
+              <Input
+                id="add-student-id"
+                type="text"
+                value={newStudent.id}
+                onChange={(e) => setNewStudent({ ...newStudent, id: e.target.value })}
+                placeholder="e.g. 2024001"
+                required
+              />
+            </FormField>
+            <FormField label={t('admin.students.full_name')} htmlFor="add-student-name" required>
+              <Input
+                id="add-student-name"
+                type="text"
+                value={newStudent.name}
+                onChange={(e) => setNewStudent({ ...newStudent, name: e.target.value })}
+                placeholder={t('admin.students.full_name')}
+                required
+              />
+            </FormField>
           </div>
-        </div>,
-        document.body
-      )}
+
+          <FormField label={t('admin.students.password')} htmlFor="add-student-password" hint={t('admin.students.password_hint')}>
+            <Input
+              id="add-student-password"
+              type="text"
+              value={newStudent.password}
+              onChange={(e) => setNewStudent({ ...newStudent, password: e.target.value })}
+              placeholder="Leave empty for default"
+            />
+          </FormField>
+
+          <div className="grid grid-cols-3 gap-4">
+            <FormField label={t('admin.students.level')} htmlFor="add-student-level">
+              <Input
+                id="add-student-level"
+                type="number"
+                value={newStudent.level}
+                onChange={(e) => setNewStudent({ ...newStudent, level: e.target.value })}
+                min="1"
+                max="4"
+              />
+            </FormField>
+            <FormField label={t('admin.students.section')} htmlFor="add-student-section">
+              <Input
+                id="add-student-section"
+                type="text"
+                value={newStudent.section}
+                onChange={(e) => setNewStudent({ ...newStudent, section: e.target.value })}
+                placeholder="e.g. 1"
+              />
+            </FormField>
+            <FormField label={isAr ? 'سنة الالتحاق' : 'Academic Year'} htmlFor="add-student-batch">
+              <Input
+                id="add-student-batch"
+                type="number"
+                value={newStudent.batch}
+                onChange={(e) => setNewStudent({ ...newStudent, batch: e.target.value })}
+                placeholder="e.g. 2025"
+              />
+            </FormField>
+          </div>
+
+          <FormField label={t('admin.students.select_dept')}>
+            <Select
+              value={newStudent.department_id ? newStudent.department_id.toString() : ''}
+              onValueChange={(v) => setNewStudent({ ...newStudent, department_id: v })}
+            >
+              <SelectTrigger className="h-8 w-full">
+                <SelectValue placeholder={t('admin.students.no_dept')} />
+              </SelectTrigger>
+              <SelectContent>
+                {departments.map(d => (
+                  <SelectItem key={d.id} value={d.id.toString()}>{d.name} ({d.code})</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </FormField>
+        </form>
+      </Modal>
 
       {/* Edit Student Modal */}
-      {showEditModal && createPortal(
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 lg:p-10">
-          <div 
-            onClick={() => setShowEditModal(false)}
-            className="absolute inset-0 bg-gray-950/40 dark:bg-black/80 backdrop-blur-sm" 
-          />
-          <div 
-            className="bg-white dark:bg-[#0c0c0e] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-6 sm:p-10 w-full max-w-2xl shadow-2xl relative overflow-hidden z-10 text-start animate-in zoom-in-95 duration-200" 
-            onClick={e => e.stopPropagation()}
-          >
-            <div className="relative z-10">
-              <div className="flex items-center justify-between mb-10 pb-6 border-b border-gray-100 dark:border-white/5">
-                <div className="flex items-center gap-5">
-                  <div className="w-14 h-14 bg-amber-500/10 dark:bg-amber-500/20 rounded-2xl flex items-center justify-center border border-amber-500/20 shadow-inner">
-                    <Edit3 className="w-7 h-7 text-amber-500 dark:text-amber-400" />
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">{t('admin.students.edit_details')}</h3>
-                    <p className="text-gray-400 text-xs lg:text-sm font-black uppercase tracking-widest mt-1">{selectedStudent?.id}</p>
-                  </div>
-                </div>
-                <button onClick={() => setShowEditModal(false)} className="w-10 h-10 rounded-full hover:bg-gray-100 dark:hover:bg-white/5 flex items-center justify-center transition-colors">
-                  <X className="w-5 h-5 text-gray-400" />
-                </button>
-              </div>
+      <Modal
+        open={showEditModal}
+        onOpenChange={setShowEditModal}
+        title={t('admin.students.edit_details')}
+        description={selectedStudent?.id}
+        size="lg"
+        footer={
+          <>
+            <Button type="button" variant="ghost" onClick={() => setShowEditModal(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button type="submit" form="edit-student-form" disabled={updating}>
+              {updating ? t('common.loading') : t('admin.students.save_student')}
+            </Button>
+          </>
+        }
+      >
+        <form id="edit-student-form" onSubmit={handleEditSubmit} className="space-y-4">
+          <FormField label={t('admin.students.full_name')} htmlFor="edit-student-name" required>
+            <Input
+              id="edit-student-name"
+              type="text"
+              value={editStudent.name}
+              onChange={(e) => setEditStudent({ ...editStudent, name: e.target.value })}
+              placeholder={t('admin.students.full_name')}
+              required
+            />
+          </FormField>
 
-              <form onSubmit={handleEditSubmit} className="space-y-6">
-                <div className="space-y-3">
-                    <label className="text-xs lg:text-sm font-black text-gray-400 uppercase tracking-widest ml-1">{t('admin.students.full_name')} *</label>
-                    <input type="text" value={editStudent.name} onChange={(e) => setEditStudent({ ...editStudent, name: e.target.value })} className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl px-6 py-4.5 text-base lg:text-lg font-black focus:ring-4 focus:ring-amber-500/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner placeholder-gray-400/50" required placeholder={t('admin.students.full_name')} />
-                </div>
-
-                <div className="grid grid-cols-3 gap-6">
-                    <div className="space-y-3">
-                        <label className="text-xs lg:text-sm font-black text-gray-400 uppercase tracking-widest ml-1">{t('admin.students.level')}</label>
-                        <input type="number" value={editStudent.level} onChange={(e) => setEditStudent({ ...editStudent, level: e.target.value })} className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl px-6 py-4.5 text-base lg:text-lg font-black focus:ring-4 focus:ring-amber-500/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner" min="1" max="4" />
-                    </div>
-                    <div className="space-y-3">
-                        <label className="text-xs lg:text-sm font-black text-gray-400 uppercase tracking-widest ml-1">{t('admin.students.section')}</label>
-                        <input type="text" value={editStudent.section} onChange={(e) => setEditStudent({ ...editStudent, section: e.target.value })} className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl px-6 py-4.5 text-base lg:text-lg font-black focus:ring-4 focus:ring-amber-500/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner placeholder-gray-400/50" placeholder="e.g. 1" />
-                    </div>
-                    <div className="space-y-3">
-                        <label className="text-xs lg:text-sm font-black text-gray-400 uppercase tracking-widest ml-1">{isAr ? 'سنة الالتحاق' : 'Academic Year'}</label>
-                        <input type="number" value={editStudent.batch} onChange={(e) => setEditStudent({ ...editStudent, batch: e.target.value })} className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl px-6 py-4.5 text-base lg:text-lg font-black focus:ring-4 focus:ring-amber-500/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner placeholder-gray-400/50" placeholder="e.g. 2025" />
-                    </div>
-                </div>
-
-                <div className="space-y-3">
-                    <label className="text-xs lg:text-sm font-black text-gray-400 uppercase tracking-widest ml-1">{t('admin.students.select_dept')}</label>
-                    <div className="relative">
-                        <select
-                            value={editStudent.department_id}
-                            onChange={(e) => setEditStudent({ ...editStudent, department_id: e.target.value })}
-                            className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl px-6 py-4.5 text-base lg:text-lg font-black focus:ring-4 focus:ring-amber-500/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner appearance-none uppercase tracking-wider"
-                        >
-                            <option value="" className="bg-white dark:bg-[#0c0c0e] dark:text-white">{t('admin.students.no_dept')}</option>
-                            {departments.map(d => (
-                                <option key={d.id} value={d.id} className="bg-white dark:bg-[#0c0c0e] dark:text-white">{d.name} ({d.code})</option>
-                            ))}
-                        </select>
-                        <div className="absolute inset-inline-end-6 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                            <ChevronRight className="w-5 h-5 rotate-90" />
-                        </div>
-                    </div>
-                </div>
-
-                <div className="flex gap-4 pt-10 border-t border-gray-100 dark:border-white/5">
-                  <button type="submit" disabled={updating} className="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-black py-5 rounded-[2rem] shadow-xl shadow-amber-500/20 transition-[color,background-color,border-color,transform,opacity] hover:scale-[1.02] active:scale-95 disabled:opacity-50">
-                    {updating ? <Activity className="w-6 h-6 animate-spin mx-auto" /> : (
-                      <span className="uppercase tracking-widest text-sm lg:text-base">{t('admin.students.save_student')}</span>
-                    )}
-                  </button>
-                  <button type="button" onClick={() => setShowEditModal(false)} className="px-12 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 font-black py-5 rounded-[2rem] transition-[color,background-color,border-color,transform,opacity] uppercase tracking-widest text-sm lg:text-base">
-                    {t('common.cancel')}
-                  </button>
-                </div>
-              </form>
-            </div>
+          <div className="grid grid-cols-3 gap-4">
+            <FormField label={t('admin.students.level')} htmlFor="edit-student-level">
+              <Input
+                id="edit-student-level"
+                type="number"
+                value={editStudent.level}
+                onChange={(e) => setEditStudent({ ...editStudent, level: e.target.value })}
+                min="1"
+                max="4"
+              />
+            </FormField>
+            <FormField label={t('admin.students.section')} htmlFor="edit-student-section">
+              <Input
+                id="edit-student-section"
+                type="text"
+                value={editStudent.section}
+                onChange={(e) => setEditStudent({ ...editStudent, section: e.target.value })}
+                placeholder="e.g. 1"
+              />
+            </FormField>
+            <FormField label={isAr ? 'سنة الالتحاق' : 'Academic Year'} htmlFor="edit-student-batch">
+              <Input
+                id="edit-student-batch"
+                type="number"
+                value={editStudent.batch}
+                onChange={(e) => setEditStudent({ ...editStudent, batch: e.target.value })}
+                placeholder="e.g. 2025"
+              />
+            </FormField>
           </div>
-        </div>,
-        document.body
-      )}
+
+          <FormField label={t('admin.students.select_dept')}>
+            <Select
+              value={editStudent.department_id ? editStudent.department_id.toString() : ''}
+              onValueChange={(v) => setEditStudent({ ...editStudent, department_id: v })}
+            >
+              <SelectTrigger className="h-8 w-full">
+                <SelectValue placeholder={t('admin.students.no_dept')} />
+              </SelectTrigger>
+              <SelectContent>
+                {departments.map(d => (
+                  <SelectItem key={d.id} value={d.id.toString()}>{d.name} ({d.code})</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </FormField>
+        </form>
+      </Modal>
 
       {/* Manage Role Modal */}
-      {showRoleModal && createPortal(
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 lg:p-10">
-          <div 
-            onClick={() => setShowRoleModal(false)}
-            className="absolute inset-0 bg-gray-950/40 dark:bg-black/80 backdrop-blur-sm" 
-          />
-          <div 
-            className="bg-white dark:bg-[#0c0c0e] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-6 sm:p-10 w-full max-w-2xl shadow-2xl relative overflow-hidden z-10 text-start animate-in zoom-in-95 duration-200" 
-            onClick={e => e.stopPropagation()}
-          >
-            <div className="relative z-10">
-              <div className="flex items-center justify-between mb-10 pb-6 border-b border-gray-100 dark:border-white/5">
-                <div className="flex items-center gap-5">
-                  <div className="w-14 h-14 bg-purple-500/10 dark:bg-purple-500/20 rounded-2xl flex items-center justify-center border border-purple-500/20 shadow-inner">
-                    <Shield className="w-7 h-7 text-purple-500 dark:text-purple-400" />
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">{t('admin.students.change_role')}</h3>
-                    <p className="text-gray-400 text-xs lg:text-sm font-black uppercase tracking-widest mt-1">{selectedStudent?.name} ({selectedStudent?.id})</p>
-                  </div>
-                </div>
-                <button onClick={() => setShowRoleModal(false)} className="w-10 h-10 rounded-full hover:bg-gray-100 dark:hover:bg-white/5 flex items-center justify-center transition-colors">
-                  <X className="w-5 h-5 text-gray-400" />
-                </button>
-              </div>
-
-              <form onSubmit={handleRoleSubmit} className="space-y-6">
-                <div className="space-y-3">
-                    <label className="text-xs lg:text-sm font-black text-gray-400 uppercase tracking-widest ml-1">{t('admin.students.change_role')}</label>
-                    <div className="relative">
-                        <select
-                            value={editRole.role}
-                            onChange={(e) => setEditRole({ ...editRole, role: e.target.value })}
-                            className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl px-6 py-4.5 text-base lg:text-lg font-black focus:ring-4 focus:ring-purple-500/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner appearance-none uppercase tracking-wider"
-                        >
-                            <option value="student" className="bg-white dark:bg-[#0c0c0e] dark:text-white">Student (طالب)</option>
-                            <option value="assistant" className="bg-white dark:bg-[#0c0c0e] dark:text-white">Assistant (معيد / مساعد محاضر)</option>
-                            <option value="admin" className="bg-white dark:bg-[#0c0c0e] dark:text-white">Admin (مسؤول إدارة النظام)</option>
-                        </select>
-                        <div className="absolute inset-inline-end-6 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                            <ChevronRight className="w-5 h-5 rotate-90" />
-                        </div>
-                    </div>
-                </div>
-
-                {/* Permissions Toggles for Assistant Role */}
-                {editRole.role === 'assistant' && (
-                  <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-300 text-start">
-                    <label className="text-xs lg:text-sm font-black text-gray-400 uppercase tracking-widest ml-1">
-                      {i18n.language === 'ar' ? 'التبويبات المتاحة للوصول' : 'Accessible Tabs / Permissions'}
-                    </label>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 bg-gray-50/50 dark:bg-white/[0.01] border border-gray-100 dark:border-white/5 rounded-[2rem] p-5 max-h-[220px] overflow-y-auto custom-scrollbar">
-                      {AVAILABLE_PERMISSIONS.map((perm) => {
-                        const isChecked = (editRole.permissions || []).includes(perm.key);
-                        return (
-                          <div 
-                            key={perm.key}
-                            onClick={() => handlePermissionToggle(perm.key)}
-                            className={`flex items-center justify-between p-3.5 rounded-2xl border transition-all duration-300 cursor-pointer select-none
-                              ${isChecked 
-                                ? 'bg-purple-500/10 border-purple-500/30 text-purple-600 dark:text-purple-400 font-bold scale-[1.01]' 
-                                : 'bg-white dark:bg-[#101015]/40 border-gray-100 dark:border-white/5 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/[0.03]'
-                              }
-                            `}
-                          >
-                            <span className="text-[11px] lg:text-xs font-black tracking-wide text-start">
-                              {i18n.language === 'ar' ? perm.label_ar : perm.label_en}
-                            </span>
-                            <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all
-                              ${isChecked 
-                                ? 'bg-purple-500 border-purple-500 text-white' 
-                                : 'border-gray-300 dark:border-white/20'
-                              }
-                            `}>
-                              {isChecked && (
-                                <svg className="w-3.5 h-3.5 stroke-[3] stroke-white" fill="none" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                                </svg>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-
-                {/* Admin Complete Access Info */}
-                {editRole.role === 'admin' && (
-                  <div className="p-5 rounded-[2rem] bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-bold leading-relaxed text-start flex items-start gap-4 animate-in fade-in duration-300">
-                    <Shield className="w-5 h-5 flex-shrink-0 mt-0.5" />
-                    <span>
-                      {i18n.language === 'ar' 
-                        ? 'يمتلك مسؤول إدارة النظام (Admin) صلاحيات وصول كاملة ومطلقة لجميع تبويبات وأدوات النظام بشكل تلقائي.' 
-                        : 'Administrators (Admins) automatically have full, unrestricted access to all tabs and system tools.'}
-                    </span>
-                  </div>
-                )}
-
-                <div className="flex gap-4 pt-10 border-t border-gray-100 dark:border-white/5">
-                  <button type="submit" disabled={updating} className="flex-1 bg-purple-500 hover:bg-purple-600 text-white font-black py-5 rounded-[2rem] shadow-xl shadow-purple-500/20 transition-[color,background-color,border-color,transform,opacity] hover:scale-[1.02] active:scale-95 disabled:opacity-50">
-                    {updating ? <Activity className="w-6 h-6 animate-spin mx-auto" /> : (
-                      <span className="uppercase tracking-widest text-sm lg:text-base">{t('admin.students.save_student')}</span>
-                    )}
-                  </button>
-                  <button type="button" onClick={() => setShowRoleModal(false)} className="px-12 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 font-black py-5 rounded-[2rem] transition-[color,background-color,border-color,transform,opacity] uppercase tracking-widest text-sm lg:text-base">
-                    {t('common.cancel')}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>,
-        document.body
-      )}
-
-      <style>{`
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { 
-          background: rgba(139, 92, 246, 0.2); 
-          border-radius: 10px;
+      <Modal
+        open={showRoleModal}
+        onOpenChange={setShowRoleModal}
+        title={t('admin.students.change_role')}
+        description={selectedStudent ? `${selectedStudent.name} (${selectedStudent.id})` : undefined}
+        size="lg"
+        footer={
+          <>
+            <Button type="button" variant="ghost" onClick={() => setShowRoleModal(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button type="submit" form="role-student-form" disabled={updating}>
+              {updating ? t('common.loading') : t('admin.students.save_student')}
+            </Button>
+          </>
         }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(139, 92, 246, 0.4); }
-      `}</style>
-    </div>
+      >
+        <form id="role-student-form" onSubmit={handleRoleSubmit} className="space-y-4">
+          <FormField label={t('admin.students.change_role')}>
+            <Select
+              value={editRole.role}
+              onValueChange={(v) => setEditRole({ ...editRole, role: v })}
+            >
+              <SelectTrigger className="h-8 w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="student">Student (طالب)</SelectItem>
+                <SelectItem value="assistant">Assistant (معيد / مساعد محاضر)</SelectItem>
+                <SelectItem value="admin">Admin (مسؤول إدارة النظام)</SelectItem>
+              </SelectContent>
+            </Select>
+          </FormField>
+
+          {/* Permissions toggles for assistant role */}
+          {editRole.role === 'assistant' && (
+            <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
+              <p className="text-sm font-medium text-foreground">
+                {isAr ? 'التبويبات المتاحة للوصول' : 'Accessible Tabs / Permissions'}
+              </p>
+              <div className="grid max-h-[260px] grid-cols-1 gap-1.5 overflow-y-auto rounded-lg border bg-muted/30 p-2 md:grid-cols-2">
+                {AVAILABLE_PERMISSIONS.map((perm) => {
+                  const isChecked = (editRole.permissions || []).includes(perm.key);
+                  return (
+                    <label
+                      key={perm.key}
+                      className="flex cursor-pointer items-center justify-between gap-3 rounded-md border bg-card px-3 py-2 transition-colors hover:bg-muted/50"
+                    >
+                      <span className="text-xs text-foreground">
+                        {isAr ? perm.label_ar : perm.label_en}
+                      </span>
+                      <Switch
+                        checked={isChecked}
+                        onCheckedChange={() => handlePermissionToggle(perm.key)}
+                      />
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Admin complete access info */}
+          {editRole.role === 'admin' && (
+            <div className="flex items-start gap-3 rounded-lg border border-primary/20 bg-primary/10 p-3 text-sm text-primary animate-in fade-in duration-200">
+              <Shield className="mt-0.5 size-4 shrink-0" />
+              <span>
+                {isAr
+                  ? 'يمتلك مسؤول إدارة النظام (Admin) صلاحيات وصول كاملة ومطلقة لجميع تبويبات وأدوات النظام بشكل تلقائي.'
+                  : 'Administrators (Admins) automatically have full, unrestricted access to all tabs and system tools.'}
+              </span>
+            </div>
+          )}
+        </form>
+      </Modal>
+    </PageContainer>
   );
 };
 

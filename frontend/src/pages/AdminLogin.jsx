@@ -3,16 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import toast from 'react-hot-toast';
-import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import { Terminal, Lock, Fingerprint, ArrowRight, ShieldCheck, Activity, Cpu } from 'lucide-react';
+import { Terminal, Fingerprint, ArrowRight, ShieldCheck, Activity, Cpu } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { FormField, Spinner } from '@/components/common';
 
 const AdminLogin = () => {
    const { token, login } = useAuth();
-   const { isDarkMode } = useTheme();
    const { t, i18n } = useTranslation();
    const navigate = useNavigate();
+   const isAr = i18n.language === 'ar';
    const [credentials, setCredentials] = useState({ username: '', password: '' });
    const [loading, setLoading] = useState(false);
 
@@ -36,136 +38,103 @@ const AdminLogin = () => {
    };
 
    return (
-      <div
-         className={`min-h-screen w-full flex overflow-hidden font-sans relative ${isDarkMode ? 'bg-[#010101] text-white' : 'bg-[#fafafa] text-gray-900'}`}
-      >
-         {/* Background -- single combined gradient layer */}
-         <div className="absolute inset-0 z-0 pointer-events-none">
-            <div
-               className="absolute inset-0"
-               style={{
-                  background: isDarkMode
-                     ? 'radial-gradient(ellipse at top right, rgba(16,185,129,0.06), transparent 50%), radial-gradient(ellipse at bottom left, rgba(20,184,166,0.06), transparent 50%)'
-                     : 'radial-gradient(ellipse at top right, rgba(16,185,129,0.05), transparent 50%), radial-gradient(ellipse at bottom left, rgba(20,184,166,0.05), transparent 50%)',
-               }}
-            />
-         </div>
-
-         <div className="w-full flex relative z-10">
-            {/* LEFT PANEL: CENTERED ADMIN AUTHORITY */}
-            <div
-               className={`hidden lg:flex w-[55%] flex-col justify-center items-center text-center p-20 relative overflow-hidden border-e transition-colors duration-500 ${isDarkMode ? 'border-white/5 bg-black/20' : 'border-gray-100 bg-white/40'}`}
+      <div className="min-h-screen w-full flex bg-background text-foreground font-sans">
+         {/* LEFT PANEL: BRAND */}
+         <div className="hidden lg:flex w-[55%] flex-col justify-center items-center text-center p-16 border-e border-border bg-muted/40">
+            <motion.div
+               initial={{ opacity: 0, y: 8 }}
+               animate={{ opacity: 1, y: 0 }}
+               transition={{ duration: 0.3, ease: 'easeOut' }}
+               className="w-full max-w-md space-y-10"
             >
-               {/* Logo Section */}
-               <motion.div 
-                 initial={{ opacity: 0, scale: 0.9 }}
-                 animate={{ opacity: 1, scale: 1 }}
-                 transition={{ duration: 0.3, ease: "easeOut" }}
-                 className="relative z-10"
-               >
-                  <div className="w-64 h-64 flex items-center justify-center mb-0">
-                     <img src="/logo.png" className="w-full h-full object-contain" alt="Logo" />
-                  </div>
-               </motion.div>
+               <div className="flex justify-center">
+                  <img src="/logo.png" className="w-44 h-44 object-contain" alt="Logo" />
+               </div>
 
-               <motion.div 
-                 initial={{ opacity: 0, y: 20 }}
-                 animate={{ opacity: 1, y: 0 }}
-                 transition={{ duration: 0.3, delay: 0.1, ease: "easeOut" }}
-                 className="relative z-10 space-y-10"
-               >
-                  <div className="space-y-4">
-                     <h1 className={`text-[clamp(4rem,8vw,8rem)] font-black uppercase text-gray-900 dark:text-white ${i18n.language === 'ar' ? 'font-arabic leading-[1.2] tracking-normal' : 'leading-[0.9] tracking-tighter'}`}>
-                        {t('auth.admin_portal').split(' ')[0]} <br />
-                        <span className="text-emerald-500">{t('auth.admin_portal').split(' ')[1]}.</span>
-                     </h1>
-                  </div>
-                  
-                  <p className={`text-2xl font-medium max-w-lg leading-relaxed mx-auto ${isDarkMode ? 'text-white/30' : 'text-gray-400'}`}>
+               <div className="space-y-3">
+                  <h1 className="text-3xl font-semibold tracking-tight">
+                     {t('auth.admin_portal')}
+                  </h1>
+                  <p className="text-sm text-muted-foreground leading-relaxed max-w-sm mx-auto">
                      {t('mavi.login_desc')}
                   </p>
+               </div>
 
-                  <div className="flex justify-center gap-8 pt-6">
-         {[ShieldCheck, Activity, Cpu].map((Icon, i) => (
-            <div key={Icon?.displayName || i} className="flex flex-col items-center gap-3 group">
-                           <div className={`w-16 h-16 rounded-2xl border flex items-center justify-center transition-all duration-500 group-hover:-translate-y-2 ${isDarkMode ? 'bg-white/[0.02] border-white/5' : 'bg-white border-gray-100 shadow-sm'}`}>
-                              <Icon className="w-7 h-7 text-emerald-500 opacity-40 group-hover:opacity-100 transition-opacity" />
-                           </div>
-                        </div>
-                     ))}
-                  </div>
-               </motion.div>
-            </div>
-
-            {/* RIGHT PANEL: SECURE LOGIN */}
-            <div
-               className={`flex-1 flex flex-col items-center justify-center p-8 lg:p-24 relative overflow-hidden transition-colors duration-500 ${isDarkMode ? 'bg-[#010101]' : 'bg-[#fafafa]'}`}
-            >
-               <motion.div 
-                 initial={{ opacity: 0, y: 20 }}
-                 animate={{ opacity: 1, x: 0 }}
-                 transition={{ duration: 0.4, ease: "easeOut" }}
-                 className="w-full max-w-md relative z-10 text-center flex flex-col"
-               >
-                  {/* Elegant Brand Icon for Mobile */}
-                  <div className="lg:hidden mb-10 flex flex-col items-center">
-                     <img src="/logo.png" className="w-20 h-20 object-contain mb-4" alt="Logo" />
-                     <div className="h-px w-12 bg-emerald-500/30"></div>
-                  </div>
-
-                  <div className="text-start mb-12">
-                     <h2 className="text-5xl lg:text-6xl font-black uppercase tracking-tighter text-gray-900 dark:text-white leading-none">{t('auth.sign_in')}</h2>
-                     <p className="mt-4 text-sm font-bold text-gray-400 uppercase tracking-widest">{t('auth.admin_portal')}</p>
-                  </div>
-
-                  <form onSubmit={handleSubmit} className="space-y-10">
-                     <div className="space-y-6">
-                        <div className="space-y-3">
-                           <label className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 ms-6">{t('auth.admin_id')}</label>
-                           <div className={`group relative flex items-center rounded-[2.5rem] border transition-all duration-500 focus-within:ring-8 focus-within:ring-emerald-500/5 ${isDarkMode ? 'bg-black/40 border-white/5 focus-within:border-emerald-500' : 'bg-gray-50 border-gray-100 focus-within:border-emerald-500 shadow-inner'}`}>
-                              <Terminal className={`ms-8 w-6 h-6 transition-colors ${isDarkMode ? 'text-white/10 group-focus-within:text-emerald-500' : 'text-gray-300 group-focus-within:text-emerald-500'}`} />
-                              <input
-                                 type="text"
-                                 value={credentials.username}
-                                 onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
-                                 placeholder={t('auth.enter_id')}
-                                 className="w-full bg-transparent py-7 px-8 text-xl font-bold outline-none placeholder:opacity-20 uppercase tracking-tight"
-                              />
-                           </div>
-                        </div>
-
-                        <div className="space-y-3">
-                           <label className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 ms-6">{t('auth.access_key')}</label>
-                           <div className={`group relative flex items-center rounded-[2.5rem] border transition-all duration-500 focus-within:ring-8 focus-within:ring-emerald-500/5 ${isDarkMode ? 'bg-black/40 border-white/5 focus-within:border-emerald-500' : 'bg-gray-50 border-gray-100 focus-within:border-emerald-500 shadow-inner'}`}>
-                              <Fingerprint className={`ms-8 w-6 h-6 transition-colors ${isDarkMode ? 'text-white/10 group-focus-within:text-emerald-500' : 'text-gray-300 group-focus-within:text-emerald-500'}`} />
-                              <input
-                                 type="password"
-                                 value={credentials.password}
-                                 onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
-                                 placeholder="••••••••"
-                                 className="w-full bg-transparent py-7 px-8 text-xl font-bold outline-none tracking-widest placeholder:tracking-normal placeholder:opacity-20"
-                              />
-                           </div>
-                        </div>
-                     </div>
-
-                     <motion.button
-                        whileHover={{ scale: 1.02, y: -4 }}
-                        whileTap={{ scale: 0.98 }}
-                        disabled={loading}
-                        className={`w-full font-black py-7 rounded-[2.5rem] flex items-center justify-center gap-4 text-xs uppercase tracking-[0.6em] shadow-[0_20px_50px_rgba(0,0,0,0.3)] relative overflow-hidden group ${isDarkMode ? 'bg-white text-black' : 'bg-gray-900 text-white'} ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+               <div className="flex justify-center gap-3 pt-2">
+                  {[ShieldCheck, Activity, Cpu].map((Icon, i) => (
+                     <div
+                        key={Icon?.displayName || i}
+                        className="size-11 rounded-lg border border-border bg-card flex items-center justify-center"
                      >
-                        <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/0 via-emerald-500/20 to-emerald-500/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                        {loading ? (
-                          <div className="flex items-center gap-3">
-                            <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
-                            <span>{t('auth.processing')}</span>
-                          </div>
-                        ) : <>{t('auth.authenticate')} <ArrowRight className={`w-6 h-6 ${i18n.language === 'ar' ? 'rotate-180' : ''}`} /></>}
-                     </motion.button>
-                  </form>
-               </motion.div>
-            </div>
+                        <Icon className="size-5 text-primary" />
+                     </div>
+                  ))}
+               </div>
+            </motion.div>
+         </div>
+
+         {/* RIGHT PANEL: SECURE LOGIN */}
+         <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-10 lg:p-16">
+            <motion.div
+               initial={{ opacity: 0, y: 8 }}
+               animate={{ opacity: 1, y: 0 }}
+               transition={{ duration: 0.3, ease: 'easeOut' }}
+               className="w-full max-w-sm"
+            >
+               {/* Brand icon for mobile */}
+               <div className="lg:hidden mb-8 flex flex-col items-center gap-3">
+                  <img src="/logo.png" className="w-16 h-16 object-contain" alt="Logo" />
+               </div>
+
+               <div className="text-start mb-8">
+                  <h2 className="text-2xl font-semibold tracking-tight">{t('auth.sign_in')}</h2>
+                  <p className="mt-1.5 text-sm text-muted-foreground">{t('auth.admin_portal')}</p>
+               </div>
+
+               <form onSubmit={handleSubmit} className="space-y-5">
+                  <FormField label={t('auth.admin_id')} htmlFor="admin-username">
+                     <div className="relative">
+                        <Terminal className="pointer-events-none absolute top-1/2 -translate-y-1/2 start-2.5 size-4 text-muted-foreground" />
+                        <Input
+                           id="admin-username"
+                           type="text"
+                           value={credentials.username}
+                           onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
+                           placeholder={t('auth.enter_id')}
+                           className="ps-9"
+                        />
+                     </div>
+                  </FormField>
+
+                  <FormField label={t('auth.access_key')} htmlFor="admin-password">
+                     <div className="relative">
+                        <Fingerprint className="pointer-events-none absolute top-1/2 -translate-y-1/2 start-2.5 size-4 text-muted-foreground" />
+                        <Input
+                           id="admin-password"
+                           type="password"
+                           value={credentials.password}
+                           onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
+                           placeholder="••••••••"
+                           className="ps-9"
+                        />
+                     </div>
+                  </FormField>
+
+                  <Button type="submit" size="lg" disabled={loading} className="w-full">
+                     {loading ? (
+                        <>
+                           <Spinner className="text-current" />
+                           <span>{t('auth.processing')}</span>
+                        </>
+                     ) : (
+                        <>
+                           <span>{t('auth.authenticate')}</span>
+                           <ArrowRight className={`size-4 ${isAr ? 'rotate-180' : ''}`} />
+                        </>
+                     )}
+                  </Button>
+               </form>
+            </motion.div>
          </div>
       </div>
    );

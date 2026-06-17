@@ -3,12 +3,24 @@ import { useTranslation } from 'react-i18next';
 import { useStudentAuth } from '../context/StudentAuthContext';
 import studentApi from '../services/studentApi';
 import toast from 'react-hot-toast';
-import { 
-  BookOpen, FileText, Upload, Trash2, Check, X,
-  Search, Paperclip, MessageSquare, AlertCircle, FileCode,
-  Download, Clock, CheckCircle2, ShieldAlert, ArrowDown, ExternalLink, Image,
-  ThumbsUp, Bookmark, Send
+import {
+  BookOpen, FileText, Upload, Trash2, Check, X, XCircle,
+  Paperclip, MessageSquare, ShieldAlert,
+  Download, Clock, CheckCircle2, Image,
+  ThumbsUp, Bookmark, Send, Pencil
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
+import {
+  SectionCard,
+  SegmentedTabs,
+  SearchInput,
+  StatusBadge,
+  EmptyState,
+  LoadingState,
+  Spinner,
+} from '@/components/common';
 
 const MaterialHubTab = ({ courseId }) => {
   const { t, i18n } = useTranslation();
@@ -180,7 +192,7 @@ const MaterialHubTab = ({ courseId }) => {
   // ── Upvote ──────────────────────────────────────────────────────────────
   const handleToggleUpvote = async (postId) => {
     let originalPost = null;
-    
+
     // Optimistic Update
     setPosts(prev => prev.map(p => {
       if (p.id !== postId) return p;
@@ -321,6 +333,12 @@ const MaterialHubTab = ({ courseId }) => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
   };
 
+  // Batch options for the upload / edit selectors. Falls back to the student's
+  // own batch when the hub has no posts yet so the selector is never empty.
+  const batchOptions = availableHubBatches.length > 0
+    ? availableHubBatches
+    : [student?.batch || 2025];
+
   // Filter & Search posts
   const filteredPosts = posts.filter(post => {
     let matchesType = true;
@@ -336,169 +354,140 @@ const MaterialHubTab = ({ courseId }) => {
     return matchesType && matchesSearch;
   });
 
-
-
   return (
-    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500 text-start">
-      
-      {/* 🚀 Top Action Card: Upload Form */}
-      <div className="bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-8 sm:p-10 space-y-6">
-        <div className="flex flex-col items-center justify-center text-center gap-3 w-full">
-          <div className="w-12 h-12 bg-[#2cfc7d]/10 text-[#2cfc7d] rounded-2xl flex items-center justify-center border border-[#2cfc7d]/10">
-            <Upload className="w-6 h-6" />
-          </div>
-          <h3 className="text-xl font-black tracking-tight text-gray-900 dark:text-white uppercase">
-            {isAr ? 'مشاركة مادة دراسية' : 'Share Course Material'}
-          </h3>
-        </div>
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300 text-start">
 
-        <form onSubmit={handleCreatePost} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Upload Form */}
+      <SectionCard
+        title={isAr ? 'مشاركة مادة دراسية' : 'Share Course Material'}
+        description={isAr ? 'ارفع محاضرة أو امتحان لزملائك في الدفعة' : 'Upload a lecture or exam for your batch peers'}
+      >
+        <form onSubmit={handleCreatePost} className="space-y-5">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Category Toggle */}
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ms-4">
-                {isAr ? 'القسم / التصنيف' : 'Category / Classification'}
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground">
+                {isAr ? 'القسم / التصنيف' : 'Category'}
               </label>
-              <div className="flex p-1.5 bg-white dark:bg-black/40 rounded-[2rem] border border-gray-100 dark:border-white/5">
-                <button type="button" onClick={() => setType('lecture')}
-                  className={`flex-1 py-3.5 rounded-[1.6rem] text-[10px] font-black uppercase tracking-widest transition-all ${
-                    type === 'lecture' ? 'bg-[#10b981] dark:bg-[#2cfc7d] text-white dark:text-black shadow-md' : 'text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                  }`}>
-                  {isAr ? 'محاضرات' : 'Lectures'}
-                </button>
-                <button type="button" onClick={() => setType('exam')}
-                  className={`flex-1 py-3.5 rounded-[1.6rem] text-[10px] font-black uppercase tracking-widest transition-all ${
-                    type === 'exam' ? 'bg-[#10b981] dark:bg-[#2cfc7d] text-white dark:text-black shadow-md' : 'text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                  }`}>
-                  {isAr ? 'امتحانات' : 'Exams'}
-                </button>
-              </div>
+              <SegmentedTabs
+                value={type}
+                onChange={setType}
+                className="flex w-full"
+                options={[
+                  { value: 'lecture', label: isAr ? 'محاضرات' : 'Lectures' },
+                  { value: 'exam', label: isAr ? 'امتحانات' : 'Exams' },
+                ]}
+              />
             </div>
 
             {/* Academic Year Selector */}
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ms-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground">
                 {isAr ? 'العام الأكاديمي المستهدف' : 'Target Academic Year'}
               </label>
-              <div className="flex p-1.5 bg-white dark:bg-black/40 rounded-[2rem] border border-gray-100 dark:border-white/5 gap-1">
-                {(availableHubBatches.length > 0 ? availableHubBatches : [student?.batch || 2025]).map(b => (
-                  <button key={b} type="button" onClick={() => setUploadBatch(b)}
-                    className={`flex-1 py-3.5 rounded-[1.6rem] text-[10px] font-black uppercase tracking-widest transition-all ${
-                      uploadBatch === b ? 'bg-[#10b981] dark:bg-[#2cfc7d] text-white dark:text-black shadow-md' : 'text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                    }`}>
-                    {b}
-                  </button>
-                ))}
-              </div>
+              <SegmentedTabs
+                value={uploadBatch}
+                onChange={setUploadBatch}
+                className="flex w-full flex-wrap"
+                options={batchOptions.map(b => ({ value: b, label: String(b) }))}
+              />
             </div>
 
             {/* Description/Caption */}
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ms-4">
+            <div className="space-y-1.5">
+              <label htmlFor="materialCaption" className="text-xs font-medium text-muted-foreground">
                 {isAr ? 'وصف أو تعليق' : 'Caption / Description'}
               </label>
-              <input
+              <Input
+                id="materialCaption"
                 type="text"
                 placeholder={isAr ? 'اكتب تفاصيل...' : 'e.g. Summary, Sheet 2...'}
                 value={caption}
                 onChange={(e) => setCaption(e.target.value)}
-                className="w-full bg-white dark:bg-black/40 border border-gray-100 dark:border-white/5 rounded-[2rem] px-6 py-4 text-sm font-bold focus:outline-none focus:border-[#2cfc7d] text-gray-900 dark:text-white"
               />
             </div>
           </div>
 
           {/* File input and submit */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
-            <label className="flex-1 relative flex flex-col items-center justify-center gap-3 cursor-pointer bg-white dark:bg-black/20 border border-gray-100 dark:border-white/5 border-dashed rounded-[2.5rem] p-6 sm:p-8 hover:border-[#2cfc7d]/40 hover:bg-[#2cfc7d]/5 transition-all group/label shadow-inner overflow-hidden">
-              <Paperclip className="w-8 h-8 text-gray-300 group-hover/label:text-[#2cfc7d] group-hover/label:scale-110 transition-all duration-300" />
-              <span className="text-gray-500 dark:text-gray-400 font-black text-center text-[10px] uppercase tracking-widest">
+          <div className="flex flex-col sm:flex-row items-stretch gap-3">
+            <label className="flex-1 flex flex-col items-center justify-center gap-2 cursor-pointer bg-muted/30 border border-dashed border-border rounded-lg p-6 hover:border-primary/40 hover:bg-muted/50 transition-colors">
+              <Paperclip className="size-5 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground text-center">
                 {file ? (
-                  <span className="text-[#10b981] dark:text-[#2cfc7d] break-all px-4">{file.name} ({formatBytes(file.size)})</span>
+                  <span className="text-primary break-all px-2 font-medium">{file.name} ({formatBytes(file.size)})</span>
                 ) : (
                   isAr ? 'اضغط لاختيار ملف (PDF, Slides, Zip, Images)' : 'Click to attach file (PDF, Slides, Zip, Images)'
                 )}
               </span>
-              <input id="materialFileInput" type="file" onChange={handleFileChange} className="absolute inset-0 opacity-0 cursor-pointer" />
+              <input id="materialFileInput" type="file" onChange={handleFileChange} className="absolute opacity-0 w-0 h-0" />
             </label>
 
-            <button type="submit" disabled={uploading || !file}
-              className="bg-[#10b981] dark:bg-[#2cfc7d] text-white dark:text-black font-black py-5 sm:py-8 px-10 rounded-[2rem] shadow-xl hover:scale-[1.02] active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3">
+            <Button type="submit" disabled={uploading || !file} className="sm:w-auto sm:self-stretch sm:h-auto px-6">
               {uploading
-                ? <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
-                : <><Upload className="w-5 h-5" /><span className="text-[10px] uppercase tracking-widest">{isAr ? 'إرسال' : 'Submit'}</span></>}
-            </button>
+                ? <Spinner className="text-current" />
+                : <><Upload className="size-4" /><span>{isAr ? 'إرسال' : 'Submit'}</span></>}
+            </Button>
           </div>
         </form>
-      </div>
+      </SectionCard>
 
-      {/* 🔍 Filter, Batch & Search Options */}
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
+      {/* Filter, Batch & Search Options */}
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col md:flex-row gap-3 md:items-center justify-between">
           {/* Filter type */}
-          <div className="flex bg-white dark:bg-white/5 p-1 rounded-[1.8rem] border border-gray-100 dark:border-white/5">
-            {[
-              { id: 'all', label: isAr ? 'الكل' : 'All' },
-              { id: 'lecture', label: isAr ? 'المحاضرات' : 'Lectures' },
-              { id: 'exam', label: isAr ? 'الامتحانات' : 'Exams' },
-              { id: 'bookmarks', label: isAr ? 'المحفوظات' : 'Saved' }
-            ].map(btn => (
-              <button key={btn.id} onClick={() => setFilterType(btn.id)}
-                className={`px-6 py-2.5 rounded-[1.4rem] text-[10px] font-black uppercase tracking-widest transition-all ${
-                  filterType === btn.id ? 'bg-black dark:bg-white text-white dark:text-black shadow-sm' : 'text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                }`}>
-                {btn.label}
-              </button>
-            ))}
-          </div>
+          <SegmentedTabs
+            value={filterType}
+            onChange={setFilterType}
+            options={[
+              { value: 'all', label: isAr ? 'الكل' : 'All' },
+              { value: 'lecture', label: isAr ? 'المحاضرات' : 'Lectures' },
+              { value: 'exam', label: isAr ? 'الامتحانات' : 'Exams' },
+              { value: 'bookmarks', label: isAr ? 'المحفوظات' : 'Saved' },
+            ]}
+          />
 
           {/* Search bar */}
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute inset-inline-start-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input type="text"
-              placeholder={isAr ? 'البحث في المواد الدراسية...' : 'Search shared materials...'}
-              value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[2rem] ps-12 pe-6 py-3.5 text-xs font-bold text-gray-900 dark:text-white focus:outline-none focus:border-[#2cfc7d]"
-            />
-          </div>
+          <SearchInput
+            placeholder={isAr ? 'البحث في المواد الدراسية...' : 'Search shared materials...'}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="sm:w-72"
+          />
         </div>
 
-        {/* Academic Year filter row - simple tabs only */}
+        {/* Academic Year filter row */}
         {availableHubBatches.length > 0 && (
-          <div className="flex items-center gap-1 bg-white dark:bg-white/5 p-1.5 rounded-[1.8rem] border border-gray-100 dark:border-white/5 self-start">
-            <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 px-3 shrink-0">
+          <div className="flex items-center gap-2 self-start">
+            <span className="text-xs text-muted-foreground shrink-0">
               {isAr ? 'العام:' : 'Academic Year:'}
             </span>
-            {availableHubBatches.map(b => {
-              const isSel = selectedBatch === b;
-              return (
-                <button key={b}
-                  onClick={() => {
-                    setSelectedBatch(b);
-                    fetchPosts(b);
-                  }}
-                  className={`px-5 py-2 rounded-[1.2rem] text-[10px] font-black tracking-widest transition-all ${
-                    isSel ? 'bg-black dark:bg-white text-white dark:text-black shadow-sm' : 'text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                  }`}>
-                  {b}
-                </button>
-              );
-            })}
+            <SegmentedTabs
+              value={selectedBatch}
+              onChange={(b) => {
+                setSelectedBatch(b);
+                fetchPosts(b);
+              }}
+              size="sm"
+              options={availableHubBatches.map(b => ({ value: b, label: String(b) }))}
+            />
           </div>
         )}
       </div>
 
-      {/* 📄 Material feed */}
+      {/* Material feed */}
       {loading ? (
-        <div className="flex flex-col justify-center items-center py-24">
-          <div className="w-10 h-10 border-2 border-gray-200 dark:border-white/10 border-t-[#2cfc7d] rounded-full animate-spin"></div>
-        </div>
+        <LoadingState />
       ) : filteredPosts.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-gray-300 dark:text-white/10 italic font-black uppercase tracking-widest text-center">
-          <BookOpen className="w-14 h-14 mb-4 opacity-25" />
-          {filterType === 'bookmarks' ? (isAr ? 'مفيش مواد محفوظة لحد دلوقتي' : 'No saved materials yet') : (isAr ? 'مفيش مواد دراسية مرفوعة هنا بعد' : 'No materials uploaded here yet')}
-        </div>
+        <EmptyState
+          icon={BookOpen}
+          title={
+            filterType === 'bookmarks'
+              ? (isAr ? 'مفيش مواد محفوظة لحد دلوقتي' : 'No saved materials yet')
+              : (isAr ? 'مفيش مواد دراسية مرفوعة هنا بعد' : 'No materials uploaded here yet')
+          }
+        />
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-4">
           {filteredPosts.map(post => {
             const FileIcon = getFileIcon(post.file_name);
             const isOwner = post.student_id === student?.id;
@@ -506,51 +495,50 @@ const MaterialHubTab = ({ courseId }) => {
             const isRejected = post.status === 'rejected';
 
             return (
-              <div 
-                key={post.id} 
-                className={`p-6 sm:p-8 bg-white dark:bg-[#0d0d14] border rounded-[2.5rem] space-y-4 hover:shadow-xl transition-all relative overflow-hidden ${
-                  isPending 
-                    ? 'border-amber-500/30 bg-amber-500/[0.01]' 
-                    : isRejected 
-                    ? 'border-rose-500/20 bg-rose-500/[0.01]' 
-                    : 'border-gray-100 dark:border-white/5'
-                }`}
+              <div
+                key={post.id}
+                className={cn(
+                  'relative overflow-hidden rounded-xl border bg-card text-card-foreground p-4 sm:p-5 space-y-4',
+                  isPending
+                    ? 'border-amber-500/30'
+                    : isRejected
+                      ? 'border-destructive/30'
+                      : 'border-border'
+                )}
               >
-                {/* Pending overlay glow */}
+                {/* Status side-bar */}
                 {isPending && (
-                  <div className="absolute inset-y-0 inset-inline-start-0 w-1 bg-amber-500" />
+                  <div className="absolute inset-y-0 start-0 w-0.5 bg-amber-500" />
                 )}
                 {isRejected && (
-                  <div className="absolute inset-y-0 inset-inline-start-0 w-1 bg-rose-500" />
+                  <div className="absolute inset-y-0 start-0 w-0.5 bg-destructive" />
                 )}
 
                 {/* Header: Student Info & Date */}
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
                     {/* Avatar */}
-                    <div className="w-12 h-12 bg-gray-50 dark:bg-white/5 rounded-2xl flex items-center justify-center border border-gray-100 dark:border-white/5 overflow-hidden">
+                    <div className="size-10 bg-muted rounded-lg flex items-center justify-center border border-border overflow-hidden shrink-0">
                       {post.student_avatar_url ? (
                         <img src={post.student_avatar_url} alt={post.student_name} className="w-full h-full object-cover" />
                       ) : (
-                        <span className="text-[#2cfc7d] font-black text-sm uppercase">
+                        <span className="text-primary font-semibold text-sm uppercase">
                           {post.student_name ? post.student_name.substring(0, 2) : 'ST'}
                         </span>
                       )}
                     </div>
 
-                    <div>
-                      <h4 className="font-black text-gray-900 dark:text-white tracking-tight text-base flex items-center gap-2">
+                    <div className="min-w-0">
+                      <h4 className="font-medium text-foreground text-sm flex items-center gap-2">
                         {post.student_name || (isAr ? 'طالب' : 'Student')}
-                        
+
                         {/* Owner Badge */}
                         {isOwner && (
-                          <span className="text-[8px] font-black uppercase bg-[#2cfc7d]/10 text-[#2cfc7d] border border-[#2cfc7d]/10 px-2 py-0.5 rounded-full">
-                            {isAr ? 'أنت' : 'You'}
-                          </span>
+                          <StatusBadge variant="success">{isAr ? 'أنت' : 'You'}</StatusBadge>
                         )}
                       </h4>
-                      <div className="flex items-center gap-2 text-[10px] text-gray-400 font-black uppercase tracking-widest mt-0.5">
-                        <Clock className="w-3.5 h-3.5" />
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
+                        <Clock className="size-3.5" />
                         {new Date(post.created_at).toLocaleDateString()}
                       </div>
                     </div>
@@ -560,210 +548,212 @@ const MaterialHubTab = ({ courseId }) => {
                   <div className="flex flex-wrap items-center gap-2 justify-end">
                     {/* Academic Year Badge */}
                     {post.batch && (
-                      <span className="px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border text-indigo-400 border-indigo-400/20 bg-indigo-400/5">
+                      <StatusBadge variant="neutral">
                         {isAr ? 'عام' : 'Year'} {post.batch}
-                      </span>
+                      </StatusBadge>
                     )}
 
                     {/* Category Type Badge */}
-                    <span className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest border ${
-                      post.type === 'lecture'
-                        ? 'text-blue-500 border-blue-500/20 bg-blue-500/5'
-                        : 'text-purple-500 border-purple-500/20 bg-purple-500/5'
-                    }`}>
+                    <StatusBadge variant="neutral">
                       {post.type === 'lecture' ? (isAr ? 'محاضرة' : 'Lecture') : (isAr ? 'امتحان' : 'Exam')}
-                    </span>
+                    </StatusBadge>
 
                     {/* Status Badge */}
                     {isPending && (
-                      <span className="px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest border text-amber-500 border-amber-500/20 bg-amber-500/5 flex items-center gap-1.5">
-                        <Clock className="w-3.5 h-3.5 animate-pulse" />
+                      <StatusBadge variant="warning" icon={Clock}>
                         {isAr ? 'قيد المراجعة' : 'Pending'}
-                      </span>
+                      </StatusBadge>
                     )}
                     {isRejected && (
-                      <span className="px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest border text-rose-500 border-rose-500/20 bg-rose-500/5 flex items-center gap-1.5">
-                        <ShieldAlert className="w-3.5 h-3.5" />
+                      <StatusBadge variant="danger" icon={ShieldAlert}>
                         {isAr ? 'مرفوض' : 'Rejected'}
-                      </span>
+                      </StatusBadge>
                     )}
 
                     {/* Edit button for owner or reviewer */}
                     {(isOwner || isReviewer) && editingPostId !== post.id && (
-                      <button
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
                         onClick={() => handleEditPost(post)}
-                        className="w-8 h-8 rounded-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 flex items-center justify-center text-gray-400 hover:text-indigo-400 hover:border-indigo-400/30 transition-all"
+                        className="text-muted-foreground"
                         title={isAr ? 'تعديل العام الدراسي والوصف' : 'Edit academic year & caption'}
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
-                        </svg>
-                      </button>
+                        <Pencil className="size-3.5" />
+                      </Button>
                     )}
                   </div>
                 </div>
 
                 {/* Caption */}
                 {editingPostId === post.id ? (
-                  <div className="flex flex-col sm:flex-row gap-3 ps-16 animate-in slide-in-from-top-2 duration-300">
+                  <div className="flex flex-col sm:flex-row gap-3 ps-13 animate-in slide-in-from-top-2 duration-300">
                     <div className="flex items-center gap-2 flex-1">
-                      <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 shrink-0">{isAr ? 'العام:' : 'Year:'}</span>
-                      <div className="flex gap-1.5 bg-gray-50 dark:bg-white/5 p-1 rounded-2xl">
-                        {uniqueBatches.map(b => (
-                          <button key={b} type="button" onClick={() => setEditBatch(b)}
-                            className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
-                              editBatch === b ? 'bg-indigo-500 text-white shadow-sm' : 'text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                            }`}>{b}</button>
-                        ))}
-                      </div>
+                      <span className="text-xs text-muted-foreground shrink-0">{isAr ? 'العام:' : 'Year:'}</span>
+                      <SegmentedTabs
+                        value={editBatch}
+                        onChange={setEditBatch}
+                        size="sm"
+                        className="flex-wrap"
+                        options={batchOptions.map(b => ({ value: b, label: String(b) }))}
+                      />
                     </div>
-                    <input
+                    <Input
                       type="text"
                       value={editCaption}
                       onChange={e => setEditCaption(e.target.value)}
                       placeholder={isAr ? 'وصف...' : 'Caption...'}
-                      className="flex-1 bg-white dark:bg-black/30 border border-gray-100 dark:border-white/5 rounded-2xl px-4 py-2 text-sm font-bold focus:outline-none focus:border-indigo-500 text-gray-900 dark:text-white"
+                      className="flex-1"
                     />
                     <div className="flex gap-2 shrink-0">
-                      <button onClick={() => handleSaveEdit(post.id)} disabled={savingEdit}
-                        className="flex items-center gap-1.5 px-5 py-2 rounded-2xl bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all disabled:opacity-50">
-                        {savingEdit ? <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                      <Button onClick={() => handleSaveEdit(post.id)} disabled={savingEdit} size="sm">
+                        {savingEdit ? <Spinner className="text-current" /> : <Check className="size-3.5" />}
                         {isAr ? 'حفظ' : 'Save'}
-                      </button>
-                      <button onClick={() => setEditingPostId(null)}
-                        className="px-4 py-2 rounded-2xl bg-gray-100 dark:bg-white/10 text-gray-500 text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all">
-                        <X className="w-3.5 h-3.5" />
-                      </button>
+                      </Button>
+                      <Button variant="ghost" size="icon-sm" onClick={() => setEditingPostId(null)} title={isAr ? 'إلغاء' : 'Cancel'}>
+                        <X className="size-3.5" />
+                      </Button>
                     </div>
                   </div>
                 ) : (
                   post.caption && (
-                    <p className="text-gray-600 dark:text-white/70 font-semibold text-sm leading-relaxed ps-16">
+                    <p className="text-foreground text-sm leading-relaxed ps-13">
                       {post.caption}
                     </p>
                   )
                 )}
 
                 {/* Attachment File Card */}
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-5 bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 rounded-3xl ms-0 sm:ms-16">
-                  <div className="flex items-center gap-4 flex-1 min-w-0">
-                    <div className="w-12 h-12 bg-white dark:bg-black rounded-2xl flex items-center justify-center border border-gray-100 dark:border-white/10 text-[#2cfc7d] shadow-sm shrink-0">
-                      <FileIcon className="w-6 h-6" />
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 bg-muted/40 border border-border rounded-lg ms-0 sm:ms-13">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className="size-10 bg-card rounded-lg flex items-center justify-center border border-border text-primary shrink-0">
+                      <FileIcon className="size-5" />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-gray-900 dark:text-white font-black text-sm truncate leading-none mb-1.5">{post.file_name}</p>
-                      <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest leading-none">{formatBytes(post.file_size)}</p>
+                      <p className="text-foreground font-medium text-sm truncate mb-0.5">{post.file_name}</p>
+                      <p className="text-xs text-muted-foreground">{formatBytes(post.file_size)}</p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
-                    <a
-                      href={post.file_url}
-                      download={post.file_name}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="w-10 h-10 rounded-full bg-white dark:bg-white/5 flex items-center justify-center text-gray-400 hover:text-[#2cfc7d] hover:bg-[#2cfc7d]/10 border border-gray-100 dark:border-white/5 transition-all shadow-sm shrink-0"
+                  <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+                    <Button
+                      asChild
+                      variant="outline"
+                      size="icon-sm"
                       title={isAr ? 'تحميل الملف' : 'Download File'}
                     >
-                      <Download className="w-4 h-4" />
-                    </a>
+                      <a
+                        href={post.file_url}
+                        download={post.file_name}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        <Download className="size-4" />
+                      </a>
+                    </Button>
 
                     {/* Delete post (owner or reviewer) */}
                     {(isOwner || isReviewer) && (
-                      <button
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
                         onClick={() => handleDeletePost(post.id)}
-                        className="w-10 h-10 rounded-full bg-white dark:bg-white/5 flex items-center justify-center text-gray-400 hover:text-rose-500 hover:bg-rose-500/10 border border-gray-100 dark:border-white/5 transition-all shadow-sm shrink-0"
+                        className="text-muted-foreground hover:text-destructive"
                         title={isAr ? 'حذف المنشور' : 'Delete Post'}
                       >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                        <Trash2 className="size-4" />
+                      </Button>
                     )}
                   </div>
                 </div>
 
                 {/* ── Action Bar: Upvote · Bookmark · Comments ── */}
-                <div className="flex items-center gap-5 pt-2 ps-0 sm:ps-16">
+                <div className="flex items-center gap-2 pt-1 ps-0 sm:ps-13">
                   {/* Upvote */}
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => handleToggleUpvote(post.id)}
-                    className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all hover:scale-105 active:scale-95 ${
-                      post.has_upvoted
-                        ? 'text-[#2cfc7d]'
-                        : 'text-gray-400 hover:text-[#2cfc7d]'
-                    }`}
+                    className={cn(
+                      'gap-1.5',
+                      post.has_upvoted ? 'text-primary' : 'text-muted-foreground hover:text-primary'
+                    )}
                   >
-                    <ThumbsUp className={`w-4 h-4 ${post.has_upvoted ? 'fill-[#2cfc7d] stroke-[#2cfc7d]' : ''}`} />
+                    <ThumbsUp className={cn('size-4', post.has_upvoted && 'fill-current')} />
                     <span>{post.upvotes_count > 0 ? post.upvotes_count : (isAr ? 'مفيد' : 'Helpful')}</span>
-                  </button>
+                  </Button>
 
                   {/* Comments toggle */}
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => handleToggleComments(post.id)}
-                    className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all hover:scale-105 active:scale-95 ${
-                      openCommentsId === post.id
-                        ? 'text-blue-400'
-                        : 'text-gray-400 hover:text-blue-400'
-                    }`}
+                    className={cn(
+                      'gap-1.5',
+                      openCommentsId === post.id ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
+                    )}
                   >
-                    <MessageSquare className="w-4 h-4" />
+                    <MessageSquare className="size-4" />
                     <span>{post.comments_count > 0 ? post.comments_count : (isAr ? 'تعليق' : 'Comment')}</span>
-                  </button>
+                  </Button>
 
                   {/* Bookmark */}
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
                     onClick={() => handleToggleBookmark(post.id)}
-                    className={`ms-auto flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest transition-all hover:scale-105 active:scale-95 ${
-                      post.has_bookmarked
-                        ? 'text-amber-400'
-                        : 'text-gray-400 hover:text-amber-400'
-                    }`}
+                    className={cn(
+                      'ms-auto',
+                      post.has_bookmarked ? 'text-primary' : 'text-muted-foreground hover:text-primary'
+                    )}
                     title={post.has_bookmarked ? (isAr ? 'إزالة من المحفوظات' : 'Remove from saved') : (isAr ? 'حفظ في المفضلة' : 'Save')}
                   >
-                    <Bookmark className={`w-4 h-4 ${post.has_bookmarked ? 'fill-amber-400 stroke-amber-400' : ''}`} />
-                  </button>
+                    <Bookmark className={cn('size-4', post.has_bookmarked && 'fill-current')} />
+                  </Button>
                 </div>
 
                 {/* ── Comments Section ── */}
                 {openCommentsId === post.id && (
-                  <div className="ms-0 sm:ms-16 space-y-3 animate-in slide-in-from-top-2 duration-300">
-                    <div className="h-px bg-gray-100 dark:bg-white/5" />
+                  <div className="ms-0 sm:ms-13 space-y-3 animate-in slide-in-from-top-2 duration-300">
+                    <div className="h-px bg-border" />
 
                     {/* Comments list */}
                     {commentsLoading && !commentsMap[post.id] ? (
                       <div className="flex justify-center py-4">
-                        <div className="w-5 h-5 border-2 border-gray-200 dark:border-white/10 border-t-[#2cfc7d] rounded-full animate-spin" />
+                        <Spinner className="size-5 text-primary" />
                       </div>
                     ) : (
                       <div className="space-y-2 max-h-60 overflow-y-auto">
                         {(commentsMap[post.id] || []).length === 0 ? (
-                          <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest text-center py-3">
+                          <p className="text-xs text-muted-foreground text-center py-3">
                             {isAr ? 'لا توجد تعليقات بعد — كن أول من يعلّق!' : 'No comments yet — be the first!'}
                           </p>
                         ) : (
                           (commentsMap[post.id] || []).map(comment => (
                             <div key={comment.id} className="flex items-start gap-3 group/comment">
-                              <div className="w-7 h-7 bg-gray-100 dark:bg-white/5 rounded-xl flex items-center justify-center border border-gray-100 dark:border-white/5 overflow-hidden shrink-0">
+                              <div className="size-7 bg-muted rounded-lg flex items-center justify-center border border-border overflow-hidden shrink-0">
                                 {comment.student_avatar_url ? (
                                   <img src={comment.student_avatar_url} alt="" className="w-full h-full object-cover" />
                                 ) : (
-                                  <span className="text-[9px] font-black text-[#2cfc7d] uppercase">
+                                  <span className="text-[10px] font-medium text-primary uppercase">
                                     {comment.student_name?.substring(0, 2) || 'ST'}
                                   </span>
                                 )}
                               </div>
-                              <div className="flex-1 bg-gray-50 dark:bg-white/[0.03] rounded-2xl px-4 py-2.5 border border-gray-100 dark:border-white/5">
+                              <div className="flex-1 bg-muted/40 rounded-lg px-3 py-2 border border-border">
                                 <div className="flex items-center justify-between mb-1">
-                                  <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">{comment.student_name || 'Student'}</span>
+                                  <span className="text-xs font-medium text-muted-foreground">{comment.student_name || 'Student'}</span>
                                   {(comment.student_id === student?.id || isReviewer) && (
                                     <button
                                       onClick={() => handleDeleteComment(post.id, comment.id)}
-                                      className="opacity-0 group-hover/comment:opacity-100 text-gray-300 hover:text-rose-400 transition-all"
+                                      aria-label={isAr ? 'حذف التعليق' : 'Delete comment'}
+                                      className="opacity-0 group-hover/comment:opacity-100 text-muted-foreground hover:text-destructive transition-colors"
                                     >
-                                      <X className="w-3 h-3" />
+                                      <X className="size-3" />
                                     </button>
                                   )}
                                 </div>
-                                <p className="text-sm text-gray-700 dark:text-white/80 font-medium leading-snug">{comment.content}</p>
+                                <p className="text-sm text-foreground leading-snug">{comment.content}</p>
                               </div>
                             </div>
                           ))
@@ -773,28 +763,30 @@ const MaterialHubTab = ({ courseId }) => {
 
                     {/* Comment input */}
                     <div className="flex items-center gap-3 pt-1">
-                      <div className="w-7 h-7 bg-gray-100 dark:bg-white/5 rounded-xl flex items-center justify-center border border-gray-100 dark:border-white/5 shrink-0">
-                        <span className="text-[9px] font-black text-[#2cfc7d] uppercase">
+                      <div className="size-7 bg-muted rounded-lg flex items-center justify-center border border-border shrink-0">
+                        <span className="text-[10px] font-medium text-primary uppercase">
                           {student?.name?.substring(0, 2) || 'ST'}
                         </span>
                       </div>
-                      <div className="flex-1 flex items-center gap-2 bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/5 rounded-2xl px-4 py-2">
+                      <div className="flex-1 flex items-center gap-2 bg-muted/40 border border-border rounded-lg px-3 py-1.5">
                         <input
                           type="text"
+                          aria-label={isAr ? 'اكتب تعليقك' : 'Write a comment'}
                           placeholder={isAr ? 'اكتب تعليقك...' : 'Write a comment...'}
                           value={commentText}
                           onChange={e => setCommentText(e.target.value)}
                           onKeyDown={e => e.key === 'Enter' && handleAddComment(post.id)}
-                          className="flex-1 bg-transparent text-sm font-medium text-gray-700 dark:text-white/80 outline-none placeholder:text-gray-300 dark:placeholder:text-white/20"
+                          className="flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
                         />
                         <button
                           onClick={() => handleAddComment(post.id)}
                           disabled={submittingComment || !commentText.trim()}
-                          className="text-[#2cfc7d] hover:scale-110 active:scale-90 transition-all disabled:opacity-30 shrink-0"
+                          aria-label={isAr ? 'إرسال التعليق' : 'Send comment'}
+                          className="text-primary transition-colors disabled:opacity-30 shrink-0"
                         >
                           {submittingComment
-                            ? <div className="w-4 h-4 border-2 border-[#2cfc7d] border-t-transparent rounded-full animate-spin" />
-                            : <Send className="w-4 h-4" />}
+                            ? <Spinner className="size-4 text-primary" />
+                            : <Send className="size-4" />}
                         </button>
                       </div>
                     </div>
@@ -803,10 +795,10 @@ const MaterialHubTab = ({ courseId }) => {
 
                 {/* Rejection Details Info Box */}
                 {isRejected && post.reject_reason && (
-                  <div className="p-4 bg-rose-500/5 border border-rose-500/10 rounded-2xl ms-0 sm:ms-16 text-xs text-rose-500 font-bold flex items-start gap-3">
-                    <ShieldAlert className="w-4 h-4 mt-0.5 shrink-0" />
+                  <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg ms-0 sm:ms-13 text-sm text-destructive flex items-start gap-2.5">
+                    <ShieldAlert className="size-4 mt-0.5 shrink-0" />
                     <div>
-                      <span className="block font-black uppercase tracking-wider text-[10px] opacity-70 mb-1">{isAr ? 'سبب الرفض:' : 'Rejection Reason:'}</span>
+                      <span className="block font-medium text-xs opacity-80 mb-0.5">{isAr ? 'سبب الرفض:' : 'Rejection Reason:'}</span>
                       <span>{post.reject_reason}</span>
                     </div>
                   </div>
@@ -814,59 +806,62 @@ const MaterialHubTab = ({ courseId }) => {
 
                 {/* Moderation Controls (only for pending posts and reviewers) */}
                 {isReviewer && isPending && (
-                  <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center justify-between pt-4 border-t border-gray-100 dark:border-white/5 ms-0 sm:ms-16 animate-in slide-in-from-top-4 duration-300">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-[#2cfc7d] flex items-center gap-1.5">
-                      <Clock className="w-4 h-4" />
+                  <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between pt-3 border-t border-border ms-0 sm:ms-13 animate-in slide-in-from-top-2 duration-300">
+                    <span className="text-xs font-medium text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
+                      <Clock className="size-4" />
                       {isAr ? 'مطلوب اتخاذ قرار للموافقة على المنشور' : 'Action Required to Moderate Post'}
                     </span>
 
-                    <div className="flex items-center gap-3 justify-end">
+                    <div className="flex items-center gap-2 justify-end">
                       {rejectingId === post.id ? (
-                        <div className="flex items-center gap-3 w-full sm:w-auto">
-                          <input
+                        <div className="flex items-center gap-2 w-full sm:w-auto">
+                          <Input
                             type="text"
                             placeholder={isAr ? 'اكتب سبب الرفض...' : 'Enter rejection reason...'}
                             value={rejectReason}
                             onChange={(e) => setRejectReason(e.target.value)}
-                            className="bg-white dark:bg-black/40 border border-gray-100 dark:border-white/5 rounded-2xl px-4 py-2 text-xs font-bold focus:outline-none focus:border-rose-500 w-full sm:w-60"
+                            className="w-full sm:w-60"
                           />
-                          <button
+                          <Button
+                            variant="destructive"
+                            size="icon-sm"
                             onClick={() => handleReviewPost(post.id, 'rejected', rejectReason)}
                             disabled={submittingReview}
-                            className="p-2.5 rounded-full bg-rose-500 text-white hover:scale-105 active:scale-95 transition-all shrink-0"
                             title={isAr ? 'تأكيد الرفض' : 'Confirm Reject'}
                           >
-                            <Check className="w-4 h-4 stroke-[3]" />
-                          </button>
-                          <button
+                            <Check className="size-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
                             onClick={() => {
                               setRejectingId(null);
                               setRejectReason('');
                             }}
-                            className="p-2.5 rounded-full bg-gray-100 dark:bg-white/10 text-gray-500 hover:scale-105 active:scale-95 transition-all shrink-0"
                             title={isAr ? 'إلغاء' : 'Cancel'}
                           >
-                            <X className="w-4 h-4" />
-                          </button>
+                            <X className="size-4" />
+                          </Button>
                         </div>
                       ) : (
                         <>
-                          <button
+                          <Button
                             onClick={() => handleReviewPost(post.id, 'approved')}
                             disabled={submittingReview}
-                            className="flex items-center gap-2 bg-[#10b981] dark:bg-[#2cfc7d] hover:bg-emerald-600 text-white dark:text-black px-6 py-2.5 rounded-[1.4rem] text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-md"
+                            size="sm"
                           >
-                            <CheckCircle2 className="w-4 h-4" />
+                            <CheckCircle2 className="size-4" />
                             {isAr ? 'موافقة وقبول' : 'Approve & Publish'}
-                          </button>
+                          </Button>
 
-                          <button
+                          <Button
+                            variant="destructive"
+                            size="sm"
                             onClick={() => setRejectingId(post.id)}
-                            className="flex items-center gap-2 bg-rose-500 hover:bg-rose-600 text-white px-6 py-2.5 rounded-[1.4rem] text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-md"
                           >
-                            <XCircle className="w-4 h-4" />
+                            <XCircle className="size-4" />
                             {isAr ? 'رفض' : 'Reject'}
-                          </button>
+                          </Button>
                         </>
                       )}
                     </div>

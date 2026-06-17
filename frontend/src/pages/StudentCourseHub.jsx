@@ -1,20 +1,57 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { AnimatePresence, motion } from 'framer-motion';
 import Sidebar from '../components/Sidebar';
 import MaterialHubTab from '../components/MaterialHubTab';
 import studentApi from '../services/studentApi';
 import { QRCodeSVG } from 'qrcode.react';
 import toast from 'react-hot-toast';
-import { 
-  Megaphone, QrCode, ListChecks, CheckCircle2, Circle, 
-  ArrowLeft, Calendar, User, ExternalLink, Users,
-  Loader2, Clock, BookOpen, X, Check, XCircle,
-  Lock, Zap, Award, MessageSquare, AlertCircle, Send,
-  HelpCircle, ShieldAlert, ArrowRight, MousePointer2, ShieldCheck,
+import {
+  Megaphone, QrCode, ListChecks, CheckCircle2, Circle,
+  ArrowLeft, Calendar, ExternalLink, Users,
+  Loader2, BookOpen, Check,
+  Zap, Award, MessageSquare, Send,
+  HelpCircle, ArrowRight, ShieldCheck,
   ChevronDown
 } from 'lucide-react';
 import { useStudentData } from '../context/StudentDataContext';
+import {
+  PageContainer,
+  PageHeader,
+  SectionCard,
+  StatCard,
+  StatusBadge,
+  EmptyState,
+  LoadingState,
+  SegmentedTabs,
+  FormField,
+} from '@/components/common';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { cn } from '@/lib/utils';
+
+const fade = {
+  initial: { opacity: 0, y: 8 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: 8 },
+  transition: { duration: 0.2 },
+};
 
 const StudentCourseHub = () => {
   const { t, i18n } = useTranslation();
@@ -25,12 +62,10 @@ const StudentCourseHub = () => {
   const [questionBank, setQuestionBank] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('announcements');
-  const [showQr, setShowQr] = useState(false);
   const [submissionUrls, setSubmissionUrls] = useState({});
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const { gradesData } = useStudentData();
   const courses = gradesData?.grades || [];
-  
+
   // Inquiry Form State
   const [inquiryType, setInquiryType] = useState('question');
   const [inquirySubject, setInquirySubject] = useState('');
@@ -42,7 +77,7 @@ const StudentCourseHub = () => {
     try {
       const res = await studentApi.get(`/student/course/${courseId}/hub`);
       setData(res.data);
-      
+
       const inqRes = await studentApi.get('/student/my-inquiries');
       setInquiries(inqRes.data.filter(i => String(i.course_id) === String(courseId)));
 
@@ -68,7 +103,7 @@ const StudentCourseHub = () => {
         if (!url) return toast.error(t('messages.enter_submission_link'));
         payload.submission_url = url;
       }
-      
+
       await studentApi.patch(`/official-tasks/${taskId}/toggle`, payload);
       if (!currentStatus) toast.success(t('hub.messages.submit_success'));
       fetchHubData();
@@ -80,7 +115,7 @@ const StudentCourseHub = () => {
   const handleSubmitInquiry = async (e) => {
     e.preventDefault();
     if (!inquiryContent.trim()) return toast.error(t('hub.messages.message_req'));
-    
+
     setSubmittingInquiry(true);
     try {
       await studentApi.post('/student/inquiries', {
@@ -92,7 +127,7 @@ const StudentCourseHub = () => {
       toast.success(t('hub.messages.send_success'));
       setInquirySubject('');
       setInquiryContent('');
-      
+
       // Refresh inquiries
       const inqRes = await studentApi.get('/student/my-inquiries');
       setInquiries(inqRes.data.filter(i => String(i.course_id) === String(courseId)));
@@ -112,379 +147,465 @@ const StudentCourseHub = () => {
   const tasks = data?.tasks || [];
   const attendance = data?.attendance || [];
   const attendedCount = attendance.filter(a => a.is_present).length;
+  const progressPct = progress.length > 0
+    ? Math.round((progress.filter(p => p.is_completed).length / progress.length) * 100)
+    : 0;
 
   const tabs = [
-    { id: 'announcements', label: t('hub.tabs.news'), icon: Megaphone, count: announcements.length },
-    { id: 'progress', label: t('hub.tabs.progress'), icon: ListChecks },
-    { id: 'tasks', label: t('hub.tabs.tasks'), icon: CheckCircle2, count: tasks.length },
-    { id: 'attendance', label: t('hub.tabs.presence'), icon: Users },
-    { id: 'materials', label: t('hub.tabs.materials', { defaultValue: 'Material Hub' }), icon: BookOpen },
-    { id: 'questions', label: isAr ? 'بنك الأسئلة' : 'Question Bank', icon: HelpCircle, count: questionBank.length },
-    { id: 'inquiries', label: t('hub.tabs.support'), icon: MessageSquare, count: inquiries.length }
+    { value: 'announcements', label: t('hub.tabs.news'), icon: Megaphone, count: announcements.length },
+    { value: 'progress', label: t('hub.tabs.progress'), icon: ListChecks },
+    { value: 'tasks', label: t('hub.tabs.tasks'), icon: CheckCircle2, count: tasks.length },
+    { value: 'attendance', label: t('hub.tabs.presence'), icon: Users },
+    { value: 'materials', label: t('hub.tabs.materials', { defaultValue: 'Material Hub' }), icon: BookOpen },
+    { value: 'questions', label: isAr ? 'بنك الأسئلة' : 'Question Bank', icon: HelpCircle, count: questionBank.length },
+    { value: 'inquiries', label: t('hub.tabs.support'), icon: MessageSquare, count: inquiries.length },
   ];
 
-  return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0c0c14] text-gray-900 dark:text-white font-sans transition-colors duration-500 overflow-x-hidden relative" dir={isAr ? 'rtl' : 'ltr'}>
-      
-      {/* Background Decor */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[-10%] inset-inline-end-[-5%] w-[50vw] h-[50vw] bg-[#8b5cf6]/3 blur-[120px] rounded-full"></div>
-        <div className="absolute bottom-[-10%] inset-inline-start-[-5%] w-[40vw] h-[40vw] bg-[#2cfc7d]/2 blur-[100px] rounded-full"></div>
+  if (loading || !data) {
+    return (
+      <div className="min-h-screen bg-background text-foreground font-sans" dir={isAr ? 'rtl' : 'ltr'}>
+        <Sidebar />
+        <main className="md:ps-72 min-h-screen">
+          <LoadingState />
+        </main>
       </div>
+    );
+  }
 
+  // Title-as-dropdown course switcher
+  const courseSwitcher = (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          className={cn(
+            'group flex items-center gap-2 truncate text-xl font-semibold tracking-tight text-foreground transition-colors hover:text-primary focus:outline-none',
+            isAr ? 'font-arabic' : ''
+          )}
+        >
+          <span className="truncate">{course.name}</span>
+          <ChevronDown className="size-4 shrink-0 text-muted-foreground transition-transform group-aria-expanded:rotate-180" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align={isAr ? 'end' : 'start'} className="max-h-96 w-72 overflow-y-auto">
+        <DropdownMenuLabel>{isAr ? 'اختر مادة أخرى' : 'Switch Course'}</DropdownMenuLabel>
+        {courses.map((c) => {
+          const isActive = String(c.course_id) === String(courseId);
+          return (
+            <DropdownMenuItem
+              key={c.course_id}
+              onSelect={() => navigate(`/student/course/${c.course_id}`)}
+              className={cn('justify-between', isActive && 'text-primary')}
+            >
+              <span className="flex min-w-0 items-center gap-2">
+                <BookOpen className="size-4 shrink-0 text-muted-foreground" />
+                <span className="truncate">{c.course_name}</span>
+              </span>
+              {isActive && <span className="size-1.5 shrink-0 rounded-full bg-primary" />}
+            </DropdownMenuItem>
+          );
+        })}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
+  return (
+    <div className="min-h-screen bg-background text-foreground font-sans" dir={isAr ? 'rtl' : 'ltr'}>
       <Sidebar />
 
-      <main className="md:ps-72 min-h-screen relative z-10 flex flex-col">
-        {loading || !data ? (
-          <div className="flex flex-col justify-center items-center flex-1 min-h-[60vh]">
-            <div className="w-12 h-12 border-2 border-gray-200 dark:border-white/10 border-t-[#2cfc7d] rounded-full animate-spin"></div>
-          </div>
-        ) : (
-        <>
-        {/* HERO SECTION - REPLICA OF DASHBOARD STYLE */}
-        <section className="px-6 lg:px-10 pt-16 pb-12 max-w-[1500px] mx-auto w-full space-y-12">
-          
-          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-10">
-            <div className="space-y-4 max-w-3xl">
-              
-              <button 
-                onClick={() => navigate('/student/dashboard')}
-                className="flex w-fit items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 hover:text-[#10b981] dark:hover:text-[#2cfc7d] transition-colors group mb-2"
-              >
-                <ArrowLeft className={`w-3.5 h-3.5 transition-transform ${isAr ? 'rotate-180 group-hover:translate-x-1' : 'group-hover:-translate-x-1'}`} />
-                {t('hub.back', { defaultValue: isAr ? 'العودة للرئيسية' : 'Back to Dashboard' })}
-              </button>
+      <main className="md:ps-72 min-h-screen">
+        <PageContainer>
+          {/* Back link */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate('/student/dashboard')}
+            className="-ms-1 w-fit text-muted-foreground"
+          >
+            <ArrowLeft className={cn('size-4', isAr && 'rotate-180')} />
+            {t('hub.back', { defaultValue: isAr ? 'العودة للرئيسية' : 'Back to Dashboard' })}
+          </Button>
 
-              <div className="relative inline-block text-start z-30">
-                <button
-                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className={`group flex items-center gap-3 text-[clamp(2.5rem,6vw,5rem)] font-black leading-[0.95] tracking-tighter uppercase text-gray-900 dark:text-white ${isAr ? 'font-arabic' : ''} text-start hover:text-[#10b981] dark:hover:text-[#2cfc7d] transition-colors focus:outline-none`}
-                >
-                  <span className="border-b-2 border-transparent group-hover:border-[#10b981] dark:group-hover:border-[#2cfc7d] transition-all">
-                    {course.name}
-                  </span>
-                  <ChevronDown className={`w-8 h-8 text-gray-400 group-hover:text-[#10b981] dark:group-hover:text-[#2cfc7d] transition-all duration-300 shrink-0 ${isDropdownOpen ? 'rotate-180' : ''}`} />
-                </button>
-                
-                {isDropdownOpen && (
-                  <>
-                    <div className="fixed inset-0 z-40" onClick={() => setIsDropdownOpen(false)} />
-                    <div className="absolute z-50 mt-4 w-80 max-h-96 overflow-y-auto bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/10 rounded-[2.5rem] shadow-2xl p-4 animate-in fade-in slide-in-from-top-4 duration-300 backdrop-blur-xl">
-                      <div className="px-4 py-2 border-b border-gray-100 dark:border-white/5 mb-3">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
-                          {isAr ? 'اختر مادة أخرى' : 'Switch Course'}
-                        </span>
-                      </div>
-                      <div className="space-y-1">
-                        {courses.map((c) => {
-                          const isActive = String(c.course_id) === String(courseId);
-                          return (
-                            <button
-                              key={c.course_id}
-                              onClick={() => {
-                                setIsDropdownOpen(false);
-                                navigate(`/student/course/${c.course_id}`);
-                              }}
-                              className={`w-full text-start flex items-center justify-between p-4 rounded-2xl transition-all ${
-                                isActive
-                                  ? 'bg-[#10b981]/10 dark:bg-[#2cfc7d]/10 border border-[#10b981]/20 dark:border-[#2cfc7d]/20 text-[#10b981] dark:text-[#2cfc7d]'
-                                  : 'hover:bg-gray-50 dark:hover:bg-white/5 border border-transparent text-gray-700 dark:text-white/80'
-                              }`}
-                            >
-                              <div className="flex items-center gap-3 min-w-0">
-                                <BookOpen className="w-4 h-4 shrink-0 text-gray-400" />
-                                <span className="font-bold text-sm truncate uppercase">{c.course_name}</span>
-                              </div>
-                              {isActive && (
-                                <div className="w-2 h-2 rounded-full bg-[#10b981] dark:bg-[#2cfc7d]" />
-                              )}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-              
-              <div className="flex flex-wrap items-center gap-4 pt-2">
-                <div className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-full text-xs font-black uppercase tracking-widest">
-                  <Zap className="w-3.5 h-3.5 text-[#2cfc7d]" />
+          {/* Header with course switcher + meta */}
+          <PageHeader
+            icon={BookOpen}
+            title={courseSwitcher}
+            description={
+              <span className="flex flex-wrap items-center gap-3">
+                <span className="inline-flex items-center gap-1.5">
+                  <Zap className="size-3.5 text-primary" />
                   {course.code || 'CORE-ID'}
-                </div>
-                <div className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-full text-xs font-black uppercase tracking-widest">
-                  <Calendar className="w-3.5 h-3.5 text-[#8b5cf6]" />
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <Calendar className="size-3.5" />
                   {new Date().getFullYear()} {t('hub.session')}
-                </div>
-            </div>
-          </div>
-        </div>
+                </span>
+              </span>
+            }
+          />
 
-          {/* QUICK STATS ROW */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-             {[
-               { label: t('hub.progress.title'), value: `${progress.length > 0 ? Math.round((progress.filter(p => p.is_completed).length / progress.length) * 100) : 0}%`, color: 'text-emerald-500', bg: 'bg-emerald-500/10', icon: ListChecks },
-               { label: t('hub.tasks.title'), value: tasks.length, color: 'text-blue-500', bg: 'bg-blue-500/10', icon: CheckCircle2 },
-               { label: t('hub.attendance.title'), value: attendedCount, color: 'text-purple-500', bg: 'bg-purple-500/10', icon: Users },
-               { label: t('hub.tabs.news'), value: announcements.length, color: 'text-amber-500', bg: 'bg-amber-500/10', icon: Megaphone }
-             ].map((stat, i) => (
-               <div key={stat.label || i} className="bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 p-8 rounded-[2.5rem] shadow-sm hover:shadow-xl transition-all">
-                  <div className={`w-10 h-10 rounded-xl ${stat.bg} ${stat.color} flex items-center justify-center mb-4`}>
-                    <stat.icon className="w-5 h-5" />
-                  </div>
-                  <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 dark:text-white/30 mb-1">{stat.label}</p>
-                  <p className="text-3xl font-black text-gray-900 dark:text-white">{stat.value}</p>
-               </div>
-             ))}
-          </div>
-
-          {/* TABS NAVIGATION */}
-          <div className="flex flex-wrap gap-3 bg-white dark:bg-white/5 p-2 rounded-[2.5rem] border border-gray-100 dark:border-white/5">
-             {tabs.map(tab => (
-               <button
-                 key={tab.id}
-                 onClick={() => setActiveTab(tab.id)}
-                 className={`flex-1 min-w-[140px] flex items-center justify-center gap-3 py-4 rounded-[1.8rem] text-[11px] font-black uppercase tracking-widest transition-all ${
-                   activeTab === tab.id 
-                     ? 'bg-[#10b981] dark:bg-[#2cfc7d] text-white dark:text-black shadow-lg' 
-                     : 'text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                 }`}
-               >
-                 <tab.icon className="w-4 h-4" />
-                 {tab.label}
-                 {tab.count !== undefined && tab.count > 0 && (
-                   <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[9px] ${activeTab === tab.id ? 'bg-black/10 text-black' : 'bg-gray-100 dark:bg-white/10'}`}>
-                     {tab.count}
-                   </span>
-                 )}
-               </button>
-             ))}
+          {/* Stat row */}
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            <StatCard
+              label={t('hub.progress.title')}
+              value={`${progressPct}%`}
+              icon={ListChecks}
+              accent
+            />
+            <StatCard
+              label={t('hub.tasks.title')}
+              value={tasks.length}
+              icon={CheckCircle2}
+            />
+            <StatCard
+              label={t('hub.attendance.title')}
+              value={attendedCount}
+              icon={Users}
+            />
+            <StatCard
+              label={t('hub.tabs.news')}
+              value={announcements.length}
+              icon={Megaphone}
+            />
           </div>
 
-          {/* MAIN CONTENT PANELS */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pb-24">
-             
-             {/* CONTENT AREA */}
-             <div className={activeTab === 'attendance' ? 'lg:col-span-8' : 'lg:col-span-12'}>
-                <div className="bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[3rem] p-10 min-h-[500px]">
-                   
-                   {activeTab === 'announcements' && (
-                     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                        {announcements.length === 0 ? (
-                           <div className="flex flex-col items-center justify-center h-[300px] text-gray-300 dark:text-white/10 italic font-black uppercase tracking-widest text-center">
-                              <Megaphone className="w-12 h-12 mb-4 opacity-20" />
-                              {t('hub.announcements.no_news')}
-                           </div>
-                        ) : (
-                          announcements.map(ann => (
-                            <div key={ann.id} className="group relative ps-8 border-s-2 border-gray-100 dark:border-white/5 hover:border-[#10b981] dark:hover:border-[#2cfc7d] transition-colors">
-                               <div className="absolute top-0 -start-[5px] w-[10px] h-[10px] rounded-full bg-gray-200 dark:bg-white/10 group-hover:bg-[#10b981] dark:group-hover:bg-[#2cfc7d] transition-colors" />
-                               <span className="text-[10px] font-black text-[#10b981] dark:text-[#2cfc7d] uppercase tracking-[0.3em]">{new Date(ann.created_at).toLocaleDateString()}</span>
-                               <h3 className="text-2xl font-black mt-2 mb-4 group-hover:text-[#10b981] dark:group-hover:text-[#2cfc7d] transition-colors uppercase tracking-tight">{ann.title}</h3>
-                               <p className="text-gray-500 dark:text-white/40 leading-relaxed font-medium">{ann.content}</p>
+          {/* Tab bar */}
+          <div className="overflow-x-auto pb-1">
+            <SegmentedTabs
+              value={activeTab}
+              onChange={setActiveTab}
+              options={tabs}
+              className="flex-nowrap"
+            />
+          </div>
+
+          {/* Content */}
+          <div className={cn(
+            'grid grid-cols-1 gap-6',
+            activeTab === 'attendance' && 'lg:grid-cols-12'
+          )}>
+            <div className={activeTab === 'attendance' ? 'lg:col-span-8' : ''}>
+              <AnimatePresence mode="wait">
+                <motion.div key={activeTab} {...fade}>
+
+                  {activeTab === 'announcements' && (
+                    <SectionCard title={t('hub.tabs.news')}>
+                      {announcements.length === 0 ? (
+                        <EmptyState
+                          icon={Megaphone}
+                          title={t('hub.announcements.no_news')}
+                        />
+                      ) : (
+                        <div className="space-y-6">
+                          {announcements.map(ann => (
+                            <div
+                              key={ann.id}
+                              className="relative ps-5 border-s-2 border-border"
+                            >
+                              <span className="absolute top-1.5 -start-[5px] size-2 rounded-full bg-primary" />
+                              <span className="text-xs font-medium text-muted-foreground">
+                                {new Date(ann.created_at).toLocaleDateString()}
+                              </span>
+                              <h3 className="mt-1 text-sm font-semibold text-foreground">{ann.title}</h3>
+                              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{ann.content}</p>
                             </div>
-                          ))
+                          ))}
+                        </div>
+                      )}
+                    </SectionCard>
+                  )}
+
+                  {activeTab === 'progress' && (
+                    <div className="space-y-6">
+                      <SectionCard>
+                        <div className="flex items-end justify-between gap-4">
+                          <div>
+                            <p className="text-xs font-medium text-muted-foreground">{t('hub.progress.title')}</p>
+                            <span className="mt-1 block text-3xl font-semibold tracking-tight text-primary">
+                              {progressPct}%
+                            </span>
+                          </div>
+                          <span className="flex size-10 items-center justify-center rounded-md border border-primary/20 bg-primary/10 text-primary">
+                            <Award className="size-5" />
+                          </span>
+                        </div>
+                        <div className="mt-4 h-2 overflow-hidden rounded-full bg-muted">
+                          <div
+                            className="h-full rounded-full bg-primary transition-all duration-700"
+                            style={{ width: `${progressPct}%` }}
+                          />
+                        </div>
+                      </SectionCard>
+
+                      <SectionCard title={t('hub.progress.title')} bodyClassName="p-0">
+                        {progress.length === 0 ? (
+                          <div className="p-4">
+                            <EmptyState icon={ListChecks} title={t('hub.progress.title')} />
+                          </div>
+                        ) : (
+                          <ul className="divide-y divide-border">
+                            {progress.map((item, idx) => (
+                              <li key={item.id} className="flex items-center gap-3 px-4 py-2.5">
+                                <span
+                                  className={cn(
+                                    'flex size-8 shrink-0 items-center justify-center rounded-md border text-xs font-medium',
+                                    item.is_completed
+                                      ? 'border-primary/20 bg-primary/10 text-primary'
+                                      : 'bg-muted text-muted-foreground'
+                                  )}
+                                >
+                                  {item.is_completed ? <Check className="size-4" /> : (idx + 1).toString().padStart(2, '0')}
+                                </span>
+                                <div className="min-w-0">
+                                  <h4 className={cn(
+                                    'truncate text-sm font-medium',
+                                    item.is_completed ? 'text-primary' : 'text-foreground'
+                                  )}>
+                                    {item.title}
+                                  </h4>
+                                  <p className="text-xs text-muted-foreground">
+                                    {item.is_completed
+                                      ? t('hub.progress.completed_topic')
+                                      : (isAr ? 'وحدة قادمة' : 'Upcoming module')}
+                                  </p>
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
                         )}
-                     </div>
-                   )}
+                      </SectionCard>
+                    </div>
+                  )}
 
-                   {activeTab === 'progress' && (
-                     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                        <div className="bg-gray-50 dark:bg-black/20 p-10 rounded-[2.5rem] space-y-6">
-                           <div className="flex justify-between items-end">
-                              <div>
-                                 <h3 className="text-sm font-black uppercase tracking-widest text-gray-400 dark:text-white/30 mb-2">{t('hub.progress.title')}</h3>
-                                 <span className="text-6xl font-black text-[#10b981] dark:text-[#2cfc7d]">
-                                   {Math.round((progress.filter(p => p.is_completed).length / progress.length) * 100)}%
-                                 </span>
-                              </div>
-                              <Award className="w-16 h-16 text-[#8b5cf6] dark:text-[#d4a3ff] opacity-20" />
-                           </div>
-                           <div className="h-4 bg-white dark:bg-white/5 rounded-full overflow-hidden p-1">
-                              <div className="h-full bg-gradient-to-r from-[#10b981] to-[#2cfc7d] rounded-full transition-all duration-1000" style={{ width: `${(progress.filter(p => p.is_completed).length / progress.length) * 100}%` }} />
-                           </div>
+                  {activeTab === 'tasks' && (
+                    <SectionCard title={t('hub.tasks.title')} bodyClassName="p-0">
+                      {tasks.length === 0 ? (
+                        <div className="p-4">
+                          <EmptyState icon={CheckCircle2} title={t('hub.tasks.title')} />
                         </div>
-
-                        <div className="grid grid-cols-1 gap-4">
-                           {progress.map((item, idx) => (
-                             <div key={item.id} className="flex items-center gap-6 p-6 bg-white dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-[1.8rem] hover:scale-[1.02] transition-all">
-                                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black text-xs ${item.is_completed ? 'bg-[#10b981] dark:bg-[#2cfc7d] text-white dark:text-black shadow-lg shadow-emerald-500/20' : 'bg-gray-100 dark:bg-white/10 text-gray-400'}`}>
-                                   {item.is_completed ? <Check className="w-6 h-6 stroke-[3px]" /> : (idx + 1).toString().padStart(2, '0')}
-                                </div>
-                                <div>
-                                   <h4 className={`text-lg font-black uppercase tracking-tight ${item.is_completed ? 'text-[#10b981] dark:text-[#2cfc7d]' : 'text-gray-900 dark:text-white'}`}>{item.title}</h4>
-                                   <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-white/30">{item.is_completed ? t('hub.progress.completed_topic') : 'UPCOMING MODULE'}</p>
-                                </div>
-                             </div>
-                           ))}
-                        </div>
-                     </div>
-                   )}
-
-                   {activeTab === 'tasks' && (
-                     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                        {tasks.map(task => (
-                          <div key={task.id} className="bg-gray-50 dark:bg-white/5 p-8 rounded-[2.5rem] space-y-6 group border border-transparent hover:border-[#10b981]/30 transition-all">
-                             <div className="flex justify-between items-start">
-                                <div className="flex gap-6 items-center">
-                                   <div className={`w-14 h-14 rounded-[1.2rem] flex items-center justify-center transition-all ${task.is_completed ? 'bg-[#10b981] dark:bg-[#2cfc7d] text-white dark:text-black' : 'bg-white dark:bg-white/10 text-gray-300'}`}>
-                                      {task.is_completed ? <CheckCircle2 className="w-8 h-8" /> : <Circle className="w-8 h-8" />}
-                                   </div>
-                                   <div>
-                                      <h3 className={`text-xl font-black uppercase tracking-tight ${task.is_completed ? 'line-through opacity-30' : 'text-gray-900 dark:text-white'}`}>{task.title}</h3>
-                                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">{t('hub.tasks.due', { date: new Date(task.deadline).toLocaleDateString() })}</span>
-                                   </div>
+                      ) : (
+                        <ul className="divide-y divide-border">
+                          {tasks.map(task => (
+                            <li key={task.id} className="space-y-3 px-4 py-3">
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="flex min-w-0 items-center gap-3">
+                                  <span className={cn(
+                                    'flex size-9 shrink-0 items-center justify-center rounded-md border',
+                                    task.is_completed
+                                      ? 'border-primary/20 bg-primary/10 text-primary'
+                                      : 'bg-muted text-muted-foreground'
+                                  )}>
+                                    {task.is_completed ? <CheckCircle2 className="size-5" /> : <Circle className="size-5" />}
+                                  </span>
+                                  <div className="min-w-0">
+                                    <h3 className={cn(
+                                      'truncate text-sm font-medium',
+                                      task.is_completed ? 'text-muted-foreground line-through' : 'text-foreground'
+                                    )}>
+                                      {task.title}
+                                    </h3>
+                                    <span className="text-xs text-muted-foreground">
+                                      {t('hub.tasks.due', { date: new Date(task.deadline).toLocaleDateString() })}
+                                    </span>
+                                  </div>
                                 </div>
                                 {task.drive_link && (
-                                  <a href={task.drive_link} target="_blank" rel="noreferrer" className="w-12 h-12 rounded-full bg-white dark:bg-white/5 flex items-center justify-center text-gray-400 hover:text-[#10b981] transition-all">
-                                     <ExternalLink className="w-5 h-5" />
-                                  </a>
+                                  <Button asChild variant="ghost" size="icon-sm" className="text-muted-foreground">
+                                    <a href={task.drive_link} target="_blank" rel="noreferrer" aria-label={t('hub.tabs.materials', { defaultValue: 'Material Hub' })}>
+                                      <ExternalLink className="size-4" />
+                                    </a>
+                                  </Button>
                                 )}
-                             </div>
+                              </div>
 
-                             {task.requires_submission && !task.is_completed && (
-                               <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-100 dark:border-white/5">
-                                 <input 
-                                   type="url"
-                                   placeholder={t('hub.tasks.submit_link_placeholder')}
-                                   value={submissionUrls[task.id] || ''}
-                                   onChange={(e) => setSubmissionUrls({...submissionUrls, [task.id]: e.target.value})}
-                                   className="flex-1 bg-white dark:bg-black/30 border border-gray-100 dark:border-white/5 rounded-2xl px-6 py-4 text-sm font-bold focus:outline-none focus:border-[#10b981]"
-                                 />
-                                 <button 
-                                   onClick={() => handleToggleTask(task.id, false, true)}
-                                   className="bg-[#10b981] dark:bg-[#2cfc7d] text-white dark:text-black px-10 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 transition-all"
-                                 >
-                                   {t('hub.tasks.submit_btn')}
-                                 </button>
-                               </div>
-                             )}
+                              {task.requires_submission && !task.is_completed && (
+                                <div className="flex flex-col gap-2 border-t border-border pt-3 sm:flex-row">
+                                  <Input
+                                    type="url"
+                                    placeholder={t('hub.tasks.submit_link_placeholder')}
+                                    value={submissionUrls[task.id] || ''}
+                                    onChange={(e) => setSubmissionUrls({ ...submissionUrls, [task.id]: e.target.value })}
+                                    className="flex-1"
+                                  />
+                                  <Button onClick={() => handleToggleTask(task.id, false, true)}>
+                                    {t('hub.tasks.submit_btn')}
+                                  </Button>
+                                </div>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </SectionCard>
+                  )}
+
+                  {activeTab === 'attendance' && (
+                    <div className="space-y-6">
+                      <div className="grid grid-cols-2 gap-3">
+                        <StatCard
+                          label={t('hub.attendance.present')}
+                          value={attendedCount}
+                          icon={CheckCircle2}
+                          accent
+                        />
+                        <div className="rounded-xl border bg-card p-4">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="truncate text-xs font-medium text-muted-foreground">{t('hub.attendance.absent')}</span>
+                            <span className="flex size-8 shrink-0 items-center justify-center rounded-md border border-destructive/20 bg-destructive/10 text-destructive">
+                              <Users className="size-4" />
+                            </span>
                           </div>
-                        ))}
-                     </div>
-                   )}
-
-                   {activeTab === 'attendance' && (
-                     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                        <div className="grid grid-cols-2 gap-6">
-                           <div className="bg-emerald-50 dark:bg-emerald-500/5 p-8 rounded-[2.5rem] border border-emerald-100 dark:border-emerald-500/10">
-                              <span className="text-[9px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400">{t('hub.attendance.present')}</span>
-                              <p className="text-5xl font-black text-emerald-600 dark:text-emerald-400 mt-2">{attendedCount}</p>
-                           </div>
-                           <div className="bg-rose-50 dark:bg-rose-500/5 p-8 rounded-[2.5rem] border border-rose-100 dark:border-rose-500/10">
-                              <span className="text-[9px] font-black uppercase tracking-widest text-rose-600 dark:text-rose-400">{t('hub.attendance.absent')}</span>
-                              <p className="text-5xl font-black text-rose-600 dark:text-rose-400 mt-2">{attendance.length - attendedCount}</p>
-                           </div>
+                          <div className="mt-2 text-2xl font-semibold tracking-tight text-foreground">
+                            {attendance.length - attendedCount}
+                          </div>
                         </div>
+                      </div>
 
-                        <div className="space-y-4">
-                           {attendance.map(record => (
-                             <div key={record.id} className="flex items-center justify-between p-6 bg-gray-50 dark:bg-white/5 rounded-[2rem] border border-transparent hover:border-gray-200 dark:hover:border-white/10 transition-all">
-                                <div className="flex gap-4 items-center">
-                                   <div className={`w-3 h-3 rounded-full ${record.is_present ? 'bg-[#10b981] dark:bg-[#2cfc7d]' : 'bg-rose-500'}`} />
-                                   <div>
-                                      <p className="font-black text-gray-900 dark:text-white uppercase tracking-tight">{new Date(record.date).toLocaleDateString()}</p>
-                                      <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">{record.is_present ? 'VERIFIED ENTRY' : 'MISSED CHANNEL'}</span>
-                                   </div>
-                                </div>
-                                <span className={`text-[9px] font-black uppercase tracking-widest px-4 py-2 rounded-xl border ${record.is_present ? 'text-[#10b981] border-[#10b981]/20' : 'text-rose-500 border-rose-500/20'}`}>
-                                   {record.is_present ? 'PRESENT' : 'ABSENT'}
-                                </span>
-                             </div>
-                           ))}
-                        </div>
-                     </div>
-                   )}
-
-                   {activeTab === 'inquiries' && (
-                     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                        <form onSubmit={handleSubmitInquiry} className="space-y-6">
-                           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                              <div className="space-y-2">
-                                 <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ms-4">{t('hub.support.type')}</label>
-                                 <div className="flex p-2 bg-gray-50 dark:bg-black/20 rounded-[2rem] border border-gray-100 dark:border-white/5">
-                                    <button type="button" onClick={() => setInquiryType('question')} className={`flex-1 py-3 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${inquiryType === 'question' ? 'bg-[#10b981] text-white shadow-lg' : 'text-gray-400'}`}>{t('hub.support.question')}</button>
-                                    <button type="button" onClick={() => setInquiryType('complaint')} className={`flex-1 py-3 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${inquiryType === 'complaint' ? 'bg-rose-500 text-white shadow-lg' : 'text-gray-400'}`}>{t('hub.support.complaint')}</button>
-                                 </div>
-                              </div>
-                              <div className="space-y-2">
-                                 <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ms-4">{t('hub.support.subject')}</label>
-                                 <input type="text" value={inquirySubject} onChange={(e) => setInquirySubject(e.target.value)} className="w-full bg-gray-50 dark:bg-black/20 border border-gray-100 dark:border-white/5 rounded-[2rem] px-6 py-4 text-sm font-bold focus:outline-none focus:border-[#10b981]" />
-                              </div>
-                           </div>
-                           <div className="space-y-2">
-                              <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ms-4">{t('hub.support.message')}</label>
-                              <textarea rows="4" value={inquiryContent} onChange={(e) => setInquiryContent(e.target.value)} className="w-full bg-gray-50 dark:bg-black/20 border border-gray-100 dark:border-white/5 rounded-[2.5rem] px-8 py-6 text-sm font-bold focus:outline-none focus:border-[#10b981] resize-none" />
-                           </div>
-                           <button type="submit" disabled={submittingInquiry} className="w-full py-5 bg-[#10b981] dark:bg-[#2cfc7d] text-white dark:text-black rounded-[2rem] font-black text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-xl disabled:opacity-50">
-                              {submittingInquiry ? <Loader2 className="w-6 h-6 animate-spin mx-auto" /> : t('hub.support.send')}
-                           </button>
-                        </form>
-
-                        <div className="space-y-4">
-                           {inquiries.map(inq => (
-                             <div key={inq.id} className="p-8 bg-gray-50 dark:bg-black/20 rounded-[2.5rem] border border-gray-100 dark:border-white/5 space-y-4">
-                                <div className="flex justify-between">
-                                   <span className={`text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full border ${inq.status === 'replied' ? 'text-[#10b981] border-[#10b981]/20 bg-[#10b981]/5' : 'text-amber-500 border-amber-500/20 bg-amber-500/5'}`}>{inq.status}</span>
-                                   <span className="text-[9px] font-black text-gray-400">{new Date(inq.created_at).toLocaleDateString()}</span>
-                                </div>
-                                <h4 className="text-lg font-black uppercase tracking-tight">{inq.subject}</h4>
-                                <p className="text-sm text-gray-500 dark:text-white/40 font-medium italic">"{inq.content}"</p>
-                                {inq.doctor_reply && (
-                                  <div className="mt-6 p-6 bg-white dark:bg-white/5 rounded-2xl border-s-4 border-[#10b981]">
-                                     <p className="text-xs font-black text-[#10b981] uppercase tracking-widest mb-2">INSTRUCTOR REPLY</p>
-                                     <p className="text-sm font-bold text-gray-700 dark:text-gray-200">{inq.doctor_reply}</p>
+                      <SectionCard title={t('hub.attendance.title')} bodyClassName="p-0">
+                        {attendance.length === 0 ? (
+                          <div className="p-4">
+                            <EmptyState icon={Users} title={t('hub.attendance.title')} />
+                          </div>
+                        ) : (
+                          <ul className="divide-y divide-border">
+                            {attendance.map(record => (
+                              <li key={record.id} className="flex items-center justify-between gap-3 px-4 py-2.5">
+                                <div className="flex items-center gap-3">
+                                  <span className={cn(
+                                    'size-2 shrink-0 rounded-full',
+                                    record.is_present ? 'bg-primary' : 'bg-destructive'
+                                  )} />
+                                  <div>
+                                    <p className="text-sm font-medium text-foreground">
+                                      {new Date(record.date).toLocaleDateString()}
+                                    </p>
+                                    <span className="text-xs text-muted-foreground">
+                                      {record.is_present
+                                        ? (isAr ? 'حضور موثّق' : 'Verified entry')
+                                        : (isAr ? 'غياب مسجّل' : 'Missed session')}
+                                    </span>
                                   </div>
-                                )}
-                             </div>
-                           ))}
+                                </div>
+                                <StatusBadge variant={record.is_present ? 'success' : 'danger'}>
+                                  {record.is_present
+                                    ? t('hub.attendance.present')
+                                    : t('hub.attendance.absent')}
+                                </StatusBadge>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </SectionCard>
+                    </div>
+                  )}
+
+                  {activeTab === 'materials' && (
+                    <MaterialHubTab courseId={courseId} />
+                  )}
+
+                  {activeTab === 'questions' && (
+                    <QuestionBankTab questions={questionBank} isAr={isAr} t={t} />
+                  )}
+
+                  {activeTab === 'inquiries' && (
+                    <div className="space-y-6">
+                      <SectionCard title={t('hub.tabs.support')}>
+                        <form onSubmit={handleSubmitInquiry} className="space-y-4">
+                          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                            <FormField label={t('hub.support.type')}>
+                              <SegmentedTabs
+                                value={inquiryType}
+                                onChange={setInquiryType}
+                                options={[
+                                  { value: 'question', label: t('hub.support.question') },
+                                  { value: 'complaint', label: t('hub.support.complaint') },
+                                ]}
+                                className="w-full"
+                              />
+                            </FormField>
+                            <FormField label={t('hub.support.subject')} htmlFor="inquiry-subject">
+                              <Input
+                                id="inquiry-subject"
+                                type="text"
+                                value={inquirySubject}
+                                onChange={(e) => setInquirySubject(e.target.value)}
+                              />
+                            </FormField>
+                          </div>
+                          <FormField label={t('hub.support.message')} htmlFor="inquiry-content">
+                            <Textarea
+                              id="inquiry-content"
+                              rows={4}
+                              value={inquiryContent}
+                              onChange={(e) => setInquiryContent(e.target.value)}
+                            />
+                          </FormField>
+                          <Button type="submit" disabled={submittingInquiry} className="w-full sm:w-auto">
+                            {submittingInquiry ? (
+                              <Loader2 className="size-4 animate-spin" />
+                            ) : (
+                              <>
+                                <Send className="size-4" />
+                                {t('hub.support.send')}
+                              </>
+                            )}
+                          </Button>
+                        </form>
+                      </SectionCard>
+
+                      {inquiries.length > 0 && (
+                        <div className="space-y-3">
+                          {inquiries.map(inq => (
+                            <SectionCard key={inq.id}>
+                              <div className="flex items-center justify-between gap-3">
+                                <StatusBadge variant={inq.status === 'replied' ? 'success' : 'warning'}>
+                                  {inq.status}
+                                </StatusBadge>
+                                <span className="text-xs text-muted-foreground">
+                                  {new Date(inq.created_at).toLocaleDateString()}
+                                </span>
+                              </div>
+                              <h4 className="mt-3 text-sm font-semibold text-foreground">{inq.subject}</h4>
+                              <p className="mt-1 text-sm italic text-muted-foreground">"{inq.content}"</p>
+                              {inq.doctor_reply && (
+                                <div className="mt-4 rounded-lg border-s-2 border-primary bg-muted/50 p-3">
+                                  <p className="text-xs font-medium text-primary">
+                                    {isAr ? 'رد المحاضر' : 'Instructor reply'}
+                                  </p>
+                                  <p className="mt-1 text-sm text-foreground">{inq.doctor_reply}</p>
+                                </div>
+                              )}
+                            </SectionCard>
+                          ))}
                         </div>
-                     </div>
-                   )}
+                      )}
+                    </div>
+                  )}
 
-                   {activeTab === 'materials' && (
-                     <MaterialHubTab courseId={courseId} />
-                   )}
-                </div>
-             </div>
+                </motion.div>
+              </AnimatePresence>
+            </div>
 
-             {/* SIDEBAR WIDGETS */}
-             {activeTab === 'attendance' && (
-               <div className="lg:col-span-4 space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
-                  
-                  {/* QR PASS CARD */}
-                  <div className="bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[3rem] p-10 flex flex-col items-center text-center shadow-xl relative overflow-hidden group">
-                     <div className="absolute top-0 inset-inline-end-0 w-32 h-32 bg-[#2cfc7d]/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl group-hover:scale-150 transition-transform duration-1000" />
-                     
-                     <div className="w-16 h-16 rounded-2xl bg-gray-50 dark:bg-white/5 flex items-center justify-center text-gray-400 mb-8 border border-gray-100 dark:border-white/5">
-                        <QrCode className="w-8 h-8" />
-                     </div>
-                     
-                     <h3 className="text-2xl font-black uppercase tracking-tight mb-2">{t('hub.qr.title')}</h3>
-                     <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 dark:text-white/30 mb-10">{t('hub.qr.desc')}</p>
-                     
-                     <div className="bg-white p-5 rounded-[2.5rem] shadow-2xl border border-gray-100 group-hover:scale-105 transition-transform duration-500">
-                        <QRCodeSVG value={qrToken} size={180} level="H" fgColor="#0c0c14" bgColor="#FFFFFF" />
-                     </div>
-
-                     <div className="mt-10 w-full flex items-center justify-center gap-2 py-4 bg-[#10b981]/10 dark:bg-[#2cfc7d]/10 text-[#10b981] dark:text-[#2cfc7d] rounded-2xl text-[10px] font-black uppercase tracking-widest border border-[#10b981]/20">
-                        <ShieldCheck className="w-4 h-4" />
-                        {t('hub.qr.secure_active')}
-                     </div>
+            {/* QR pass card (attendance only) */}
+            {activeTab === 'attendance' && (
+              <div className="lg:col-span-4">
+                <SectionCard title={t('hub.qr.title')} description={t('hub.qr.desc')}>
+                  <div className="flex flex-col items-center gap-4 text-center">
+                    <span className="flex size-10 items-center justify-center rounded-md border bg-muted text-muted-foreground">
+                      <QrCode className="size-5" />
+                    </span>
+                    <div className="rounded-lg border bg-white p-4">
+                      <QRCodeSVG value={qrToken} size={176} level="H" fgColor="#0c0c14" bgColor="#FFFFFF" />
+                    </div>
+                    <StatusBadge variant="success" icon={ShieldCheck}>
+                      {t('hub.qr.secure_active')}
+                    </StatusBadge>
                   </div>
-               </div>
-             )}
-
+                </SectionCard>
+              </div>
+            )}
           </div>
-        </section>
-        </>
-        )}
+        </PageContainer>
       </main>
-
-      <style>{`
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-      `}</style>
     </div>
   );
 };
@@ -514,10 +635,10 @@ const QuestionBankTab = ({ questions, isAr, t }) => {
 
   if (questions.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-[300px] text-gray-300 dark:text-white/10 italic font-black uppercase tracking-widest text-center">
-        <HelpCircle className="w-12 h-12 mb-4 opacity-20" />
-        {isAr ? 'لا توجد أسئلة مضافة في بنك الأسئلة حالياً' : 'No questions in the Question Bank yet'}
-      </div>
+      <EmptyState
+        icon={HelpCircle}
+        title={isAr ? 'لا توجد أسئلة مضافة في بنك الأسئلة حالياً' : 'No questions in the Question Bank yet'}
+      />
     );
   }
 
@@ -543,222 +664,217 @@ const QuestionBankTab = ({ questions, isAr, t }) => {
     const isRevealed = revealed[q.id];
 
     return (
-      <div key={q.id} className="bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-8 space-y-6 shadow-sm hover:shadow-xl transition-all animate-in fade-in duration-300 mb-6">
-        <div className="flex flex-wrap justify-between items-center gap-4">
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] font-black uppercase tracking-[0.25em] text-[#10b981] dark:text-[#2cfc7d]">
-              {indexShow !== null 
-                ? `${isAr ? 'سؤال' : 'Question'} ${(indexShow + 1).toString().padStart(2, '0')}` 
-                : `${isAr ? 'سؤال' : 'Question'} ${(currentIndex + 1).toString().padStart(2, '0')} / ${totalQuestions}`}
-            </span>
-            <span className="px-3 py-1 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-full text-[9px] font-black uppercase tracking-wider text-gray-500">
-              {q.quiz_title}
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">
-              {q.question_type === 'true_false' ? (isAr ? 'صح / خطأ' : 'TRUE / FALSE') : (isAr ? 'اختياري' : 'MCQ')}
-            </span>
-          </div>
-        </div>
-
+      <SectionCard key={q.id} className="mb-4">
         <div className="space-y-4">
-          <h3 className="text-xl font-black leading-snug text-gray-900 dark:text-white uppercase tracking-tight">
-            {q.question_text}
-          </h3>
-          {q.image_url && (
-            <div className="relative overflow-hidden rounded-[2rem] border border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-black/20 max-h-72 flex justify-center">
-              <img src={q.image_url} alt="Question Context" className="object-contain max-h-72" />
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs font-medium text-primary">
+                {indexShow !== null
+                  ? `${isAr ? 'سؤال' : 'Question'} ${(indexShow + 1).toString().padStart(2, '0')}`
+                  : `${isAr ? 'سؤال' : 'Question'} ${(currentIndex + 1).toString().padStart(2, '0')} / ${totalQuestions}`}
+              </span>
+              {q.quiz_title && (
+                <StatusBadge variant="neutral">{q.quiz_title}</StatusBadge>
+              )}
+            </div>
+            <span className="text-xs text-muted-foreground">
+              {q.question_type === 'true_false'
+                ? (isAr ? 'صح / خطأ' : 'True / False')
+                : (isAr ? 'اختياري' : 'MCQ')}
+            </span>
+          </div>
+
+          <div className="space-y-3">
+            <h3 className="text-sm font-semibold leading-snug text-foreground">
+              {q.question_text}
+            </h3>
+            {q.image_url && (
+              <div className="flex max-h-72 justify-center overflow-hidden rounded-lg border bg-muted">
+                <img src={q.image_url} alt="Question Context" className="max-h-72 object-contain" />
+              </div>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 gap-2">
+            {(q.options || []).map((opt, oIdx) => {
+              const isSelected = selectedOpt === opt;
+              const isCorrectOption = opt === q.correct_answer;
+
+              let optClass = 'border-border bg-muted/40 text-foreground hover:bg-muted';
+              if (isAnswered) {
+                if (isCorrectOption) {
+                  optClass = 'border-primary/30 bg-primary/10 text-primary font-medium';
+                } else if (isSelected) {
+                  optClass = 'border-destructive/30 bg-destructive/10 text-destructive font-medium';
+                } else {
+                  optClass = 'border-border bg-muted/40 text-muted-foreground opacity-60';
+                }
+              } else if (isRevealed && isCorrectOption) {
+                optClass = 'border-primary/40 bg-primary/10 text-primary font-medium';
+              }
+
+              return (
+                <button
+                  key={oIdx}
+                  disabled={isAnswered}
+                  onClick={() => handleSelectOption(q.id, opt)}
+                  className={cn(
+                    'flex w-full items-center justify-between gap-2 rounded-lg border px-4 py-2.5 text-start text-sm transition-colors',
+                    optClass
+                  )}
+                >
+                  <span>{opt}</span>
+                  {isAnswered && isCorrectOption && (
+                    <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">
+                      <Check className="size-3" />
+                    </span>
+                  )}
+                  {isAnswered && isSelected && !isCorrectOption && (
+                    <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-destructive text-[10px] text-destructive-foreground">✗</span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleToggleReveal(q.id)}
+              className="text-muted-foreground"
+            >
+              <HelpCircle className="size-4" />
+              {isRevealed || isAnswered
+                ? (isAr ? 'إخفاء الإجابة والتفسير' : 'Hide Answer & Explanation')
+                : (isAr ? 'عرض الإجابة الصحيحة' : 'Show Correct Answer')}
+            </Button>
+
+            {isAnswered && (
+              <StatusBadge variant={isCorrect ? 'success' : 'danger'}>
+                {isCorrect
+                  ? (isAr ? 'إجابة صحيحة' : 'Correct')
+                  : (isAr ? 'إجابة خاطئة' : 'Incorrect')}
+              </StatusBadge>
+            )}
+          </div>
+
+          {(isRevealed || isAnswered) && (
+            <div className="rounded-lg border-s-2 border-primary bg-muted/50 p-3">
+              <p className="text-xs font-medium text-primary">
+                {isAr ? 'الإجابة الصحيحة والتوضيح' : 'Correct answer & explanation'}
+              </p>
+              <p className="mt-1 text-sm font-medium text-foreground">
+                {q.correct_answer}
+              </p>
+              {q.explanation ? (
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                  {q.explanation}
+                </p>
+              ) : (
+                <p className="mt-1 text-xs italic leading-relaxed text-muted-foreground">
+                  {isAr ? 'لا يوجد تفسير إضافي متاح.' : 'No additional explanation available.'}
+                </p>
+              )}
             </div>
           )}
         </div>
-
-        <div className="grid grid-cols-1 gap-3 pt-2">
-          {(q.options || []).map((opt, oIdx) => {
-            const isSelected = selectedOpt === opt;
-            const isCorrectOption = opt === q.correct_answer;
-            
-            let optClass = 'bg-gray-50 dark:bg-white/5 border-transparent text-gray-800 dark:text-white/80 hover:bg-gray-100 dark:hover:bg-white/10';
-            if (isAnswered) {
-              if (isCorrectOption) {
-                optClass = 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-bold';
-              } else if (isSelected) {
-                optClass = 'bg-rose-500/10 border-rose-500/30 text-rose-600 dark:text-rose-400 font-bold';
-              } else {
-                optClass = 'opacity-40 bg-gray-50 dark:bg-white/5 border-transparent text-gray-400 dark:text-white/20';
-              }
-            } else if (isRevealed && isCorrectOption) {
-              optClass = 'bg-emerald-500/15 border-emerald-500/40 text-emerald-600 dark:text-emerald-400 font-bold';
-            }
-
-            return (
-              <button
-                key={oIdx}
-                disabled={isAnswered}
-                onClick={() => handleSelectOption(q.id, opt)}
-                className={`w-full text-start flex items-center justify-between px-6 py-4 rounded-2xl border text-sm font-semibold transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] ${optClass}`}
-              >
-                <span>{opt}</span>
-                <div className="flex items-center gap-2">
-                  {isAnswered && isCorrectOption && (
-                    <div className="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px]">✓</div>
-                  )}
-                  {isAnswered && isSelected && !isCorrectOption && (
-                    <div className="w-5 h-5 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px]">✗</div>
-                  )}
-                </div>
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-gray-100 dark:border-white/5">
-          <button
-            onClick={() => handleToggleReveal(q.id)}
-            className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-          >
-            <HelpCircle className="w-4 h-4" />
-            {isRevealed || isAnswered 
-              ? (isAr ? 'إخفاء الإجابة والتفسير' : 'Hide Answer & Explanation') 
-              : (isAr ? 'عرض الإجابة الصحيحة' : 'Show Correct Answer')}
-          </button>
-
-          {isAnswered && (
-            <span className={`text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-xl border ${isCorrect ? 'text-emerald-500 border-emerald-500/20 bg-emerald-500/5' : 'text-rose-500 border-rose-500/20 bg-rose-500/5'}`}>
-              {isCorrect ? (isAr ? 'إجابة صحيحة' : 'CORRECT') : (isAr ? 'إجابة خاطئة' : 'INCORRECT')}
-            </span>
-          )}
-        </div>
-
-        {(isRevealed || isAnswered) && (
-          <div className="p-6 bg-emerald-50 dark:bg-emerald-500/5 border-s-4 border-emerald-500 rounded-r-2xl rounded-l-md animate-in slide-in-from-top-2 duration-300">
-            <p className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-2">
-              {isAr ? 'الإجابة الصحيحة والتوضيح' : 'CORRECT ANSWER & EXPLANATION'}
-            </p>
-            <p className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
-              {q.correct_answer}
-            </p>
-            {q.explanation ? (
-              <p className="text-xs text-gray-500 dark:text-white/40 leading-relaxed font-medium">
-                {q.explanation}
-              </p>
-            ) : (
-              <p className="text-xs text-gray-400 dark:text-white/20 leading-relaxed font-medium italic">
-                {isAr ? 'لا يوجد تفسير إضافي متاح.' : 'No additional explanation available.'}
-              </p>
-            )}
-          </div>
-        )}
-      </div>
+      </SectionCard>
     );
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      
-      {/* STATS HEADER */}
-      <div className="bg-gray-50 dark:bg-black/20 p-8 rounded-[2.5rem] border border-gray-100 dark:border-white/5 space-y-6">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-          <div>
-            <h3 className="text-2xl font-black uppercase tracking-tight text-gray-900 dark:text-white">
-              {isAr ? 'بنك أسئلة المادة' : 'Course Question Bank'}
-            </h3>
-            <p className="text-xs font-semibold text-gray-400 mt-1 leading-relaxed">
-              {isAr 
-                ? 'تدرب على كافة الأسئلة الاختيارية المنشورة لتعزيز فهمك للمادة' 
-                : 'Practice all published MCQ & True/False questions to master this course'}
-            </p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="flex p-1.5 bg-white dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5">
-              <button
-                onClick={() => setViewMode('card')}
-                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all ${viewMode === 'card' ? 'bg-[#10b981] dark:bg-[#2cfc7d] text-white dark:text-black shadow' : 'text-gray-400'}`}
-              >
-                {isAr ? 'سؤال سؤال' : 'Flashcard'}
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all ${viewMode === 'list' ? 'bg-[#10b981] dark:bg-[#2cfc7d] text-white dark:text-black shadow' : 'text-gray-400'}`}
-              >
-                {isAr ? 'قائمة كاملة' : 'Full List'}
-              </button>
-            </div>
-
-            {/* Quiz filter */}
-            <div className="relative">
-              <select
-                value={selectedQuiz}
-                onChange={(e) => setSelectedQuiz(e.target.value)}
-                className="appearance-none bg-white dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-2xl px-6 py-3 text-xs font-black uppercase tracking-wider focus:outline-none focus:border-[#10b981] pe-10"
-              >
+    <div className="space-y-6">
+      {/* Stats header */}
+      <SectionCard
+        title={isAr ? 'بنك أسئلة المادة' : 'Course Question Bank'}
+        description={
+          isAr
+            ? 'تدرب على كافة الأسئلة الاختيارية المنشورة لتعزيز فهمك للمادة'
+            : 'Practice all published MCQ & True/False questions to master this course'
+        }
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <SegmentedTabs
+              size="sm"
+              value={viewMode}
+              onChange={setViewMode}
+              options={[
+                { value: 'card', label: isAr ? 'سؤال سؤال' : 'Flashcard' },
+                { value: 'list', label: isAr ? 'قائمة كاملة' : 'Full List' },
+              ]}
+            />
+            <Select value={selectedQuiz} onValueChange={setSelectedQuiz}>
+              <SelectTrigger size="sm" className="w-auto min-w-36">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
                 {quizzes.map((q, idx) => (
-                  <option key={q || idx} value={q} className="dark:bg-[#0c0c14] dark:text-white">
-                    {q === 'all' ? (isAr ? 'كل الاختبارات' : 'ALL QUIZZES') : q}
-                  </option>
+                  <SelectItem key={q || idx} value={q}>
+                    {q === 'all' ? (isAr ? 'كل الاختبارات' : 'All Quizzes') : q}
+                  </SelectItem>
                 ))}
-              </select>
-              <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-gray-400">
-                <ChevronDown className="w-4 h-4" />
-              </div>
-            </div>
+              </SelectContent>
+            </Select>
           </div>
-        </div>
-
+        }
+      >
         {/* Practice Analytics */}
-        <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-100 dark:border-white/5">
-          <div className="bg-white dark:bg-white/5 p-4 rounded-2xl text-center">
-            <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">{isAr ? 'إجمالي الأسئلة' : 'TOTAL QUESTIONS'}</span>
-            <p className="text-2xl font-black text-gray-900 dark:text-white mt-1">{totalQuestions}</p>
+        <div className="grid grid-cols-3 gap-3">
+          <div className="rounded-lg border bg-muted/40 p-3 text-center">
+            <span className="text-xs text-muted-foreground">{isAr ? 'إجمالي الأسئلة' : 'Total Questions'}</span>
+            <p className="mt-1 text-xl font-semibold text-foreground">{totalQuestions}</p>
           </div>
-          <div className="bg-white dark:bg-white/5 p-4 rounded-2xl text-center">
-            <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">{isAr ? 'تمت الإجابة' : 'ANSWERED'}</span>
-            <p className="text-2xl font-black text-blue-500 mt-1">{attemptedCount}</p>
+          <div className="rounded-lg border bg-muted/40 p-3 text-center">
+            <span className="text-xs text-muted-foreground">{isAr ? 'تمت الإجابة' : 'Answered'}</span>
+            <p className="mt-1 text-xl font-semibold text-foreground">{attemptedCount}</p>
           </div>
-          <div className="bg-white dark:bg-white/5 p-4 rounded-2xl text-center">
-            <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">{isAr ? 'نسبة الدقة' : 'ACCURACY RATE'}</span>
-            <p className="text-2xl font-black text-emerald-500 mt-1">{scorePercentage}%</p>
+          <div className="rounded-lg border bg-muted/40 p-3 text-center">
+            <span className="text-xs text-muted-foreground">{isAr ? 'نسبة الدقة' : 'Accuracy Rate'}</span>
+            <p className="mt-1 text-xl font-semibold text-primary">{scorePercentage}%</p>
           </div>
         </div>
-      </div>
+      </SectionCard>
 
-      {/* QUESTION CONTENT */}
+      {/* Question content */}
       {totalQuestions === 0 ? (
-        <div className="text-center p-12 text-gray-400 italic">
-          {isAr ? 'لا توجد أسئلة تطابق الفلتر المختار.' : 'No questions matching the selected filter.'}
-        </div>
+        <EmptyState
+          icon={HelpCircle}
+          title={isAr ? 'لا توجد أسئلة تطابق الفلتر المختار.' : 'No questions matching the selected filter.'}
+        />
       ) : viewMode === 'card' ? (
-        <div className="space-y-6">
+        <div className="space-y-4">
           {renderQuestionCard(currentQuestion)}
 
           {/* Navigation Controls */}
-          <div className="flex justify-between items-center bg-gray-50 dark:bg-white/5 px-6 py-4 rounded-[2rem] border border-gray-100 dark:border-white/5">
-            <button
+          <div className="flex items-center justify-between rounded-xl border bg-card px-4 py-3">
+            <Button
+              variant="outline"
+              size="sm"
               disabled={currentIndex === 0}
               onClick={() => setCurrentIndex(prev => prev - 1)}
-              className="px-6 py-3 bg-white dark:bg-[#0c0c14] border border-gray-200 dark:border-white/10 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-gray-100 dark:hover:bg-white/5 disabled:opacity-30 transition-all flex items-center gap-2"
             >
-              <ArrowLeft className="w-3.5 h-3.5 rotate-180" />
+              <ArrowLeft className={cn('size-4', isAr && 'rotate-180')} />
               {isAr ? 'السابق' : 'Previous'}
-            </button>
+            </Button>
 
-            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+            <span className="text-xs font-medium text-muted-foreground">
               {currentIndex + 1} / {totalQuestions}
             </span>
 
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               disabled={currentIndex === totalQuestions - 1}
               onClick={() => setCurrentIndex(prev => prev + 1)}
-              className="px-6 py-3 bg-white dark:bg-[#0c0c14] border border-gray-200 dark:border-white/10 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-gray-100 dark:hover:bg-white/5 disabled:opacity-30 transition-all flex items-center gap-2"
             >
               {isAr ? 'التالي' : 'Next'}
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
+              <ArrowRight className={cn('size-4', isAr && 'rotate-180')} />
+            </Button>
           </div>
         </div>
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-4">
           {filteredQuestions.map((q, idx) => renderQuestionCard(q, idx))}
         </div>
       )}

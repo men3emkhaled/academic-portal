@@ -2,41 +2,58 @@ import React, { useState, useEffect, useCallback } from 'react';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
-  Activity, Search, Filter, RefreshCw, Trash2,
+  Activity, Filter, RefreshCw, Trash2,
   ChevronLeft, ChevronRight, Clock, User, Shield,
-  Database, BarChart3, Users, AlertTriangle, X,
-  Terminal, Eye, ArrowUpRight, Calendar, Globe, Fingerprint
+  Database, BarChart3, AlertTriangle,
+  Calendar, Globe, Fingerprint, ArrowUpRight,
 } from 'lucide-react';
 
-const MODULE_COLORS = {
-  'Auth': { bg: 'bg-yellow-500/10', text: 'text-yellow-600 dark:text-yellow-400', border: 'border-yellow-500/20' },
-  'Students': { bg: 'bg-blue-500/10', text: 'text-blue-600 dark:text-blue-400', border: 'border-blue-500/20' },
-  'Courses': { bg: 'bg-[#8b5cf6]/10', text: 'text-[#8b5cf6] dark:text-[#8b5cf6]', border: 'border-[#8b5cf6]/20' },
-  'Grades': { bg: 'bg-purple-500/10', text: 'text-purple-600 dark:text-purple-400', border: 'border-purple-500/20' },
-  'Timetable': { bg: 'bg-cyan-500/10', text: 'text-cyan-600 dark:text-cyan-400', border: 'border-cyan-500/20' },
-  'Notifications': { bg: 'bg-red-500/10', text: 'text-red-600 dark:text-red-400', border: 'border-red-500/20' },
-  'Quizzes': { bg: 'bg-orange-500/10', text: 'text-orange-600 dark:text-orange-400', border: 'border-orange-500/20' },
-  'Resources': { bg: 'bg-teal-500/10', text: 'text-teal-600 dark:text-teal-400', border: 'border-teal-500/20' },
-  'Roadmap': { bg: 'bg-indigo-500/10', text: 'text-indigo-600 dark:text-indigo-400', border: 'border-indigo-500/20' },
-  'Departments': { bg: 'bg-pink-500/10', text: 'text-pink-600 dark:text-pink-400', border: 'border-pink-500/20' },
-  'Events': { bg: 'bg-rose-500/10', text: 'text-rose-600 dark:text-rose-400', border: 'border-rose-500/20' },
-  'Progress': { bg: 'bg-lime-500/10', text: 'text-lime-600 dark:text-lime-400', border: 'border-lime-500/20' },
-  'Student Courses': { bg: 'bg-sky-500/10', text: 'text-sky-600 dark:text-sky-400', border: 'border-sky-500/20' },
+import {
+  StatCard,
+  Toolbar,
+  SearchInput,
+  SectionCard,
+  DataTable,
+  Modal,
+  FormField,
+  StatusBadge,
+  EmptyState,
+} from '@/components/common';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+
+// Known modules (drives the module filter dropdown). Colour is collapsed to a
+// single neutral/accent token system via getModuleVariant below.
+const MODULES = [
+  'Auth', 'Students', 'Courses', 'Grades', 'Timetable', 'Notifications',
+  'Quizzes', 'Resources', 'Roadmap', 'Departments', 'Events', 'Progress',
+  'Student Courses',
+];
+
+// HTTP method -> semantic StatusBadge variant.
+// success(green)=create, warning(amber)=mutate, danger(red)=delete, neutral=read.
+const METHOD_VARIANT = {
+  POST: 'success',
+  PUT: 'warning',
+  PATCH: 'warning',
+  DELETE: 'danger',
+  GET: 'neutral',
 };
 
-const METHOD_COLORS = {
-  'POST': 'bg-green-500/10 dark:bg-green-500/20 text-green-600 dark:text-green-400 border-green-500/20',
-  'PUT': 'bg-yellow-500/10 dark:bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 border-yellow-500/20',
-  'DELETE': 'bg-red-500/10 dark:bg-red-500/20 text-red-600 dark:text-red-400 border-red-500/20',
-  'PATCH': 'bg-orange-500/10 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400 border-orange-500/20',
-  'GET': 'bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 border-blue-500/20',
-};
-
-const getModuleColor = (mod) => MODULE_COLORS[mod] || { bg: 'bg-gray-100 dark:bg-white/5', text: 'text-gray-500 dark:text-slate-400', border: 'border-gray-200 dark:border-white/10' };
+const getMethodVariant = (method) => METHOD_VARIANT[method] || 'neutral';
 
 const ActivityLogsManager = () => {
   const { t, i18n } = useTranslation();
+  const isAr = i18n.language === 'ar';
   const [logs, setLogs] = useState([]);
   const [pagination, setPagination] = useState({ total: 0, page: 1, limit: 30, totalPages: 0 });
   const [stats, setStats] = useState(null);
@@ -93,275 +110,309 @@ const ActivityLogsManager = () => {
     return `${Math.floor(diff / 86400)}d ${t('common.ago', 'ago')}`;
   };
 
-  return (
-    <div className="p-8 space-y-12 text-start">
-      {/* Action Bar */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-          <div className="flex items-center gap-4">
-              <button 
-                onClick={() => setShowFilters(!showFilters)}
-                className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-[color,background-color,border-color,transform,opacity] border ${
-                  showFilters 
-                    ? 'bg-[#8b5cf6] text-white border-[#8b5cf6] shadow-lg shadow-purple-500/20' 
-                    : 'bg-white dark:bg-white/5 text-gray-500 border-gray-100 dark:border-white/10 hover:border-[#8b5cf6]/30'
-                }`}
-              >
-                <Filter className="w-3.5 h-3.5" /> {t('admin.logs.filters.title')}
-              </button>
-              <button 
-                onClick={() => { fetchLogs(); fetchStats(); }}
-                className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest text-gray-500 hover:border-[#8b5cf6]/30 transition-[color,background-color,border-color,transform,opacity]"
-              >
-                <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} /> {t('admin.logs.sync')}
-              </button>
-          </div>
-          <button 
-            onClick={handleCleanup}
-            className="flex items-center gap-2 px-6 py-3 bg-rose-500/5 hover:bg-rose-500 text-rose-600 hover:text-white border border-rose-500/10 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-[color,background-color,border-color,transform,opacity]"
-          >
-            <Trash2 className="w-3.5 h-3.5" /> {t('admin.logs.purge')}
-          </button>
-      </div>
+  const statCards = stats ? [
+    { label: t('admin.logs.stats.total'), value: stats.total_actions || 0, icon: Database, accent: true },
+    { label: t('admin.logs.stats.today'), value: stats.today_actions || 0, icon: Clock },
+    { label: t('admin.logs.stats.weekly'), value: stats.week_actions || 0, icon: BarChart3 },
+    { label: t('admin.logs.stats.admins'), value: stats.unique_admins || 0, icon: Shield },
+  ] : [];
 
-      {/* Stats Bento Grid */}
+  const columns = [
+    {
+      key: 'method',
+      header: t('admin.logs.table.method'),
+      headClassName: 'w-24',
+      render: (log) => (
+        <StatusBadge variant={getMethodVariant(log.method)}>{log.method}</StatusBadge>
+      ),
+    },
+    {
+      key: 'module',
+      header: t('admin.logs.table.module'),
+      render: (log) => (
+        <StatusBadge variant="neutral" className="whitespace-nowrap">{log.module}</StatusBadge>
+      ),
+    },
+    {
+      key: 'action',
+      header: t('admin.logs.table.operation'),
+      render: (log) => (
+        <p className="max-w-[220px] truncate text-sm font-medium text-foreground">{log.action}</p>
+      ),
+    },
+    {
+      key: 'admin',
+      header: t('admin.logs.table.admin'),
+      render: (log) => (
+        <div className="flex items-center gap-2.5">
+          <span className="flex size-7 shrink-0 items-center justify-center rounded-full border bg-muted text-muted-foreground">
+            <User className="size-3.5" />
+          </span>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-medium text-foreground">{log.admin_name}</p>
+            <p className="truncate text-xs text-muted-foreground">{log.admin_role}</p>
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: 'temporal',
+      header: t('admin.logs.table.temporal'),
+      render: (log) => (
+        <div className="flex flex-col whitespace-nowrap">
+          <span className="text-sm text-foreground">{timeAgo(log.created_at)}</span>
+          <span className="text-xs text-muted-foreground">
+            {new Date(log.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          </span>
+        </div>
+      ),
+    },
+    {
+      key: 'view',
+      header: '',
+      headClassName: 'w-10',
+      cellClassName: 'text-end',
+      render: () => (
+        <ChevronRight className={`inline size-4 text-muted-foreground ${isAr ? 'rotate-180' : ''}`} />
+      ),
+    },
+  ];
+
+  const detailItems = selectedLog ? [
+    { icon: Fingerprint, label: t('admin.logs.table.details.admin_id'), value: `#${selectedLog.admin_id}` },
+    { icon: Globe, label: t('admin.logs.table.details.source_address'), value: selectedLog.ip_address || 'Internal' },
+    { icon: Calendar, label: t('admin.logs.table.details.full_timestamp'), value: formatDate(selectedLog.created_at) },
+  ] : [];
+
+  return (
+    <div className="space-y-6 p-4 sm:p-6 text-start">
+      {/* Toolbar: search + filter toggle + refresh / purge */}
+      <Toolbar>
+        <div className="flex flex-1 flex-col gap-2 sm:flex-row sm:items-center">
+          <SearchInput
+            value={filters.action}
+            onChange={(e) => setFilters({ ...filters, action: e.target.value })}
+            placeholder={t('admin.logs.filters.placeholder_action')}
+            onKeyDown={(e) => { if (e.key === 'Enter') fetchLogs(1); }}
+          />
+          <div className="flex items-center gap-2">
+            <Button
+              variant={showFilters ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              <Filter className="size-3.5" />
+              {t('admin.logs.filters.title')}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => { fetchLogs(); fetchStats(); }}
+            >
+              <RefreshCw className={`size-3.5 ${loading ? 'animate-spin' : ''}`} />
+              {t('admin.logs.sync')}
+            </Button>
+          </div>
+        </div>
+        <Button variant="destructive" size="sm" onClick={handleCleanup}>
+          <Trash2 className="size-3.5" />
+          {t('admin.logs.purge')}
+        </Button>
+      </Toolbar>
+
+      {/* Stats */}
       {stats && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {[
-            { label: t('admin.logs.stats.total'), value: stats.total_actions, icon: <Database className="w-5 h-5" />, bg: 'bg-emerald-500/10 dark:bg-emerald-500/20', text: 'text-emerald-600 dark:text-emerald-400', border: 'border-emerald-500/20', glow: 'text-emerald-500/5' },
-            { label: t('admin.logs.stats.today'), value: stats.today_actions, icon: <Clock className="w-5 h-5" />, bg: 'bg-[#8b5cf6]/10 dark:bg-[#8b5cf6]/20', text: 'text-[#8b5cf6] dark:text-[#8b5cf6]', border: 'border-[#8b5cf6]/20', glow: 'text-[#8b5cf6]/5' },
-            { label: t('admin.logs.stats.weekly'), value: stats.week_actions, icon: <BarChart3 className="w-5 h-5" />, bg: 'bg-blue-500/10 dark:bg-blue-500/20', text: 'text-blue-600 dark:text-blue-400', border: 'border-blue-500/20', glow: 'text-blue-500/5' },
-            { label: t('admin.logs.stats.admins'), value: stats.unique_admins, icon: <Shield className="w-5 h-5" />, bg: 'bg-purple-500/10 dark:bg-purple-500/20', text: 'text-purple-600 dark:text-purple-400', border: 'border-purple-500/20', glow: 'text-purple-500/5' },
-          ].map((s, i) => (
-            <div key={i} className="group relative bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[2rem] p-8 overflow-hidden hover:border-[#8b5cf6]/30 transition-[color,background-color,border-color,transform,opacity] duration-500 shadow-sm">
-                <div className={`absolute -inset-inline-end-4 -bottom-4 w-24 h-24 ${s.glow} group-hover:scale-125 transition-transform duration-500`}>
-                    {s.icon}
-                </div>
-                <div className={`w-10 h-10 ${s.bg} rounded-xl flex items-center justify-center ${s.text} mb-6 border ${s.border}`}>
-                    {s.icon}
-                </div>
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 dark:text-slate-400 mb-2">{s.label}</p>
-                <p className="text-3xl font-black text-gray-900 dark:text-white tracking-tighter">{s.value || 0}</p>
-            </div>
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+          {statCards.map((s, i) => (
+            <StatCard key={i} label={s.label} value={s.value} icon={s.icon} accent={s.accent} />
           ))}
         </div>
       )}
 
-      {/* Filters Interface */}
-      {showFilters && (
-        <div className="bg-white/50 dark:bg-[#0d0d14] border border-gray-100 dark:border-white/10 rounded-[2.5rem] p-10 space-y-8 animate-in slide-in-from-top-4 duration-500">
-           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
-              <div className="space-y-3">
-                 <label className="text-[10px] font-black uppercase tracking-widest text-[#8b5cf6] ms-5">{t('admin.logs.filters.admin')}</label>
-                 <div className="relative">
-                    <User className="absolute inset-inline-start-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <input type="text" placeholder="Search ID..." value={filters.admin_id}
-                      onChange={e => setFilters({ ...filters, admin_id: e.target.value })}
-                      className="w-full bg-white dark:bg-black/40 border border-gray-100 dark:border-white/10 rounded-2xl py-4 ps-14 pe-6 text-sm font-bold focus:ring-2 focus:ring-[#8b5cf6]/50 outline-none transition-[color,background-color,border-color,transform,opacity]" />
-                 </div>
+      {/* Filters panel */}
+      <AnimatePresence initial={false}>
+        {showFilters && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+            className="overflow-hidden"
+          >
+            <SectionCard title={t('admin.logs.filters.title')}>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+                <FormField label={t('admin.logs.filters.admin')} htmlFor="logs-admin-id">
+                  <Input
+                    id="logs-admin-id"
+                    type="text"
+                    placeholder={t('admin.logs.filters.admin')}
+                    value={filters.admin_id}
+                    onChange={(e) => setFilters({ ...filters, admin_id: e.target.value })}
+                  />
+                </FormField>
+                <FormField label={t('admin.logs.filters.module')}>
+                  <Select
+                    value={filters.module || 'all'}
+                    onValueChange={(v) => setFilters({ ...filters, module: v === 'all' ? '' : v })}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder={t('admin.logs.filters.all_modules')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">{t('admin.logs.filters.all_modules')}</SelectItem>
+                      {MODULES.map((m) => (
+                        <SelectItem key={m} value={m}>{m}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormField>
+                <FormField label={t('admin.logs.filters.action')} htmlFor="logs-action">
+                  <Input
+                    id="logs-action"
+                    type="text"
+                    placeholder={t('admin.logs.filters.placeholder_action')}
+                    value={filters.action}
+                    onChange={(e) => setFilters({ ...filters, action: e.target.value })}
+                  />
+                </FormField>
+                <FormField label={t('admin.logs.filters.date_from')} htmlFor="logs-date-from">
+                  <Input
+                    id="logs-date-from"
+                    type="date"
+                    value={filters.date_from}
+                    onChange={(e) => setFilters({ ...filters, date_from: e.target.value })}
+                  />
+                </FormField>
+                <FormField label={t('admin.logs.filters.date_to')} htmlFor="logs-date-to">
+                  <Input
+                    id="logs-date-to"
+                    type="date"
+                    value={filters.date_to}
+                    onChange={(e) => setFilters({ ...filters, date_to: e.target.value })}
+                  />
+                </FormField>
               </div>
-              <div className="space-y-3">
-                 <label className="text-[10px] font-black uppercase tracking-widest text-[#8b5cf6] ms-5">{t('admin.logs.filters.module')}</label>
-                 <select value={filters.module} onChange={e => setFilters({ ...filters, module: e.target.value })}
-                   className="w-full bg-white dark:bg-black/40 border border-gray-100 dark:border-white/10 rounded-2xl py-4 px-6 text-sm font-bold focus:ring-2 focus:ring-[#8b5cf6]/50 outline-none appearance-none transition-[color,background-color,border-color,transform,opacity]">
-                   <option value="" className="bg-white dark:bg-[#0d0d14] dark:text-white">{t('admin.logs.filters.all_modules')}</option>
-                   {Object.keys(MODULE_COLORS).map(m => <option key={m} value={m} className="bg-white dark:bg-[#0d0d14] dark:text-white">{m}</option>)}
-                 </select>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <Button size="sm" onClick={() => fetchLogs(1)}>
+                  {t('admin.logs.filters.execute')}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setFilters({ admin_id: '', module: '', action: '', date_from: '', date_to: '' })}
+                >
+                  {t('admin.logs.filters.reset')}
+                </Button>
               </div>
-              <div className="space-y-3">
-                 <label className="text-[10px] font-black uppercase tracking-widest text-[#8b5cf6] ms-5">{t('admin.logs.filters.action')}</label>
-                 <input type="text" placeholder={t('admin.logs.filters.placeholder_action')} value={filters.action}
-                   onChange={e => setFilters({ ...filters, action: e.target.value })}
-                   className="w-full bg-white dark:bg-black/40 border border-gray-100 dark:border-white/10 rounded-2xl py-4 px-6 text-sm font-bold focus:ring-2 focus:ring-[#8b5cf6]/50 outline-none transition-[color,background-color,border-color,transform,opacity]" />
-              </div>
-              <div className="space-y-3">
-                 <label className="text-[10px] font-black uppercase tracking-widest text-[#8b5cf6] ms-5">{t('admin.logs.filters.date_from')}</label>
-                 <input type="date" value={filters.date_from}
-                   onChange={e => setFilters({ ...filters, date_from: e.target.value })}
-                   className="w-full bg-white dark:bg-black/40 border border-gray-100 dark:border-white/10 rounded-2xl py-4 px-6 text-sm font-bold focus:ring-2 focus:ring-[#8b5cf6]/50 outline-none transition-[color,background-color,border-color,transform,opacity]" />
-              </div>
-              <div className="space-y-3">
-                 <label className="text-[10px] font-black uppercase tracking-widest text-[#8b5cf6] ms-5">{t('admin.logs.filters.date_to')}</label>
-                 <input type="date" value={filters.date_to}
-                   onChange={e => setFilters({ ...filters, date_to: e.target.value })}
-                   className="w-full bg-white dark:bg-black/40 border border-gray-100 dark:border-white/10 rounded-2xl py-4 px-6 text-sm font-bold focus:ring-2 focus:ring-[#8b5cf6]/50 outline-none transition-[color,background-color,border-color,transform,opacity]" />
-              </div>
-           </div>
-           <div className="flex gap-4 pt-4">
-              <button onClick={() => fetchLogs(1)} className="px-10 py-4 bg-[#8b5cf6] text-white font-black rounded-2xl text-[10px] uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-[color,background-color,border-color,transform,opacity] shadow-xl shadow-purple-500/20">
-                {t('admin.logs.filters.execute')}
-              </button>
-              <button onClick={() => setFilters({ admin_id: '', module: '', action: '', date_from: '', date_to: '' })}
-                className="px-10 py-4 bg-white dark:bg-white/5 text-gray-500 font-black rounded-2xl text-[10px] uppercase tracking-widest border border-gray-100 dark:border-white/10 hover:border-[#8b5cf6]/30 transition-[color,background-color,border-color,transform,opacity]">
-                {t('admin.logs.filters.reset')}
-              </button>
-           </div>
-        </div>
-      )}
-
-      {/* Main Table View */}
-      <div className="bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/10 rounded-[3rem] overflow-hidden shadow-2xl transition-[color,background-color,border-color,transform,opacity] duration-500">
-        <div className="px-10 py-8 border-b border-gray-50 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.01] flex justify-between items-center">
-            <div className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-[#8b5cf6]/10 rounded-xl flex items-center justify-center border border-[#8b5cf6]/20">
-                    <Terminal className="w-5 h-5 text-[#8b5cf6]" />
-                </div>
-                <h3 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">{t('admin.logs.registry')}</h3>
-            </div>
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
-              {t('admin.logs.scan_results', { count: logs.length, total: pagination.total })}
-            </p>
-        </div>
-
-        {loading ? (
-          <div className="flex flex-col items-center justify-center py-32 opacity-50">
-             <div className="w-12 h-12 border-4 border-[#8b5cf6]/20 border-t-[#8b5cf6] rounded-full animate-spin mb-6"></div>
-             <p className="text-[10px] font-black uppercase tracking-widest">{t('admin.tasks.loading')}</p>
-          </div>
-        ) : logs.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-32 text-gray-400">
-            <AlertTriangle className="w-12 h-12 mb-4 opacity-20" />
-            <p className="font-black text-sm uppercase tracking-widest">{t('admin.tasks.no_tasks')}</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-inline-start border-collapse">
-              <thead>
-                <tr className="bg-gray-50/50 dark:bg-transparent border-b border-gray-50 dark:border-white/5">
-                  <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">{t('admin.logs.table.method')}</th>
-                  <th className="px-6 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">{t('admin.logs.table.module')}</th>
-                  <th className="px-6 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">{t('admin.logs.table.operation')}</th>
-                  <th className="px-6 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">{t('admin.logs.table.admin')}</th>
-                  <th className="px-6 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">{t('admin.logs.table.temporal')}</th>
-                  <th className="px-10 py-6 text-inline-end"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50 dark:divide-white/5">
-                {logs.map(log => {
-                  const mc = getModuleColor(log.module);
-                  const isExpanded = selectedLog?.id === log.id;
-                  return (
-                    <React.Fragment key={log.id}>
-                      <tr 
-                        onClick={() => setSelectedLog(isExpanded ? null : log)}
-                        className={`group cursor-pointer transition-[color,background-color,border-color,transform,opacity] ${isExpanded ? 'bg-[#8b5cf6]/5 dark:bg-[#8b5cf6]/10' : 'hover:bg-gray-50 dark:hover:bg-white/[0.02]'}`}
-                      >
-                        <td className="px-10 py-6">
-                           <span className={`text-[9px] font-black px-2.5 py-1 rounded-lg border ${METHOD_COLORS[log.method] || 'bg-gray-100 text-gray-500 border-gray-200'}`}>
-                             {log.method}
-                           </span>
-                        </td>
-                        <td className="px-6 py-6">
-                           <span className={`text-[9px] font-black px-2.5 py-1 rounded-lg border ${mc.bg} ${mc.text} ${mc.border} whitespace-nowrap`}>
-                             {log.module}
-                           </span>
-                        </td>
-                        <td className="px-6 py-6">
-                           <p className="text-sm font-bold text-gray-900 dark:text-white truncate max-w-[200px]">{log.action}</p>
-                        </td>
-                        <td className="px-6 py-6">
-                           <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center border border-gray-200 dark:border-white/10 group-hover:border-[#8b5cf6]/30 transition-colors">
-                                 <User className="w-4 h-4 text-gray-400 group-hover:text-[#8b5cf6] transition-colors" />
-                              </div>
-                              <div>
-                                 <p className="text-xs font-black text-gray-700 dark:text-gray-300">{log.admin_name}</p>
-                                 <p className="text-[8px] font-black text-[#8b5cf6] uppercase tracking-widest">{log.admin_role}</p>
-                              </div>
-                           </div>
-                        </td>
-                        <td className="px-6 py-6 whitespace-nowrap">
-                           <div className="flex flex-col">
-                              <span className="text-xs font-bold text-gray-900 dark:text-white">{timeAgo(log.created_at)}</span>
-                              <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest">{new Date(log.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                           </div>
-                        </td>
-                        <td className="px-10 py-6 text-inline-end">
-                           <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-[color,background-color,border-color,transform,opacity] ${isExpanded ? 'bg-[#8b5cf6] text-white rotate-180' : 'bg-gray-100 dark:bg-white/5 text-gray-400 group-hover:text-[#8b5cf6]'}`}>
-                              <ChevronRight className="w-4 h-4" />
-                           </div>
-                        </td>
-                      </tr>
-                      {isExpanded && (
-                        <tr>
-                          <td colSpan="6" className="px-10 pb-10 pt-4 bg-[#8b5cf6]/5 dark:bg-[#8b5cf6]/10">
-                             <div className="grid grid-cols-1 md:grid-cols-4 gap-8 bg-white dark:bg-black/60 border border-[#8b5cf6]/20 rounded-[2rem] p-8 animate-in zoom-in-95 duration-300">
-                                <div className="space-y-4">
-                                   <div>
-                                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1 flex items-center gap-2"><Fingerprint className="w-3 h-3 text-[#8b5cf6]" /> {t('admin.logs.table.details.admin_id')}</p>
-                                      <p className="text-sm font-black text-gray-900 dark:text-white">#{log.admin_id}</p>
-                                   </div>
-                                   <div>
-                                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1 flex items-center gap-2"><Globe className="w-3 h-3 text-[#8b5cf6]" /> {t('admin.logs.table.details.source_address')}</p>
-                                      <p className="text-sm font-black text-gray-900 dark:text-white">{log.ip_address || 'Internal'}</p>
-                                   </div>
-                                </div>
-                                <div className="space-y-4">
-                                   <div>
-                                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1 flex items-center gap-2"><Activity className="w-3 h-3 text-[#8b5cf6]" /> {t('admin.logs.table.details.signal_status')}</p>
-                                      <p className={`text-sm font-black ${log.status_code < 400 ? 'text-green-500' : 'text-rose-500'}`}>
-                                        {log.status_code || '200 OK'} • {t('admin.logs.table.details.authorized')}
-                                      </p>
-                                   </div>
-                                   <div>
-                                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1 flex items-center gap-2"><Calendar className="w-3 h-3 text-[#8b5cf6]" /> {t('admin.logs.table.details.full_timestamp')}</p>
-                                      <p className="text-sm font-black text-gray-900 dark:text-white">{formatDate(log.created_at)}</p>
-                                   </div>
-                                </div>
-                                <div className="md:col-span-2 space-y-4">
-                                   <div>
-                                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1 flex items-center gap-2"><ArrowUpRight className="w-3 h-3 text-[#8b5cf6]" /> {t('admin.logs.table.details.resource_mapping')}</p>
-                                      <code className="text-[10px] font-mono font-black text-[#8b5cf6] bg-[#8b5cf6]/5 dark:bg-[#8b5cf6]/10 px-3 py-1.5 rounded-lg border border-[#8b5cf6]/10 block break-all">
-                                        {log.endpoint}
-                                      </code>
-                                   </div>
-                                   {log.details && Object.keys(log.details).length > 0 && (
-                                      <div>
-                                         <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">{t('admin.logs.table.details.payload_matrix')}</p>
-                                         <div className="max-h-48 overflow-y-auto no-scrollbar bg-black dark:bg-black/40 rounded-xl p-4 border border-white/5">
-                                            <pre className="text-[10px] font-mono text-[#8b5cf6] leading-relaxed whitespace-pre-wrap">
-                                               {JSON.stringify(log.details, null, 2)}
-                                            </pre>
-                                         </div>
-                                      </div>
-                                   )}
-                                </div>
-                             </div>
-                          </td>
-                        </tr>
-                      )}
-                    </React.Fragment>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+            </SectionCard>
+          </motion.div>
         )}
+      </AnimatePresence>
 
-        {/* Pagination Console */}
+      {/* Registry */}
+      <SectionCard
+        title={t('admin.logs.registry')}
+        actions={
+          <span className="text-xs text-muted-foreground">
+            {t('admin.logs.scan_results', { count: logs.length, total: pagination.total })}
+          </span>
+        }
+        bodyClassName="p-0"
+      >
+        <DataTable
+          columns={columns}
+          rows={logs}
+          getRowKey={(log) => log.id}
+          loading={loading}
+          onRowClick={(log) => setSelectedLog(log)}
+          className="rounded-none border-0"
+          empty={
+            <EmptyState
+              icon={AlertTriangle}
+              title={t('admin.tasks.no_tasks')}
+            />
+          }
+        />
+
+        {/* Pagination */}
         {pagination.totalPages > 1 && (
-          <div className="px-10 py-8 border-t border-gray-50 dark:border-white/5 flex items-center justify-between bg-gray-50/30 dark:bg-white/[0.01]">
-            <button 
-              onClick={() => fetchLogs(pagination.page - 1)} 
+          <div className="flex items-center justify-between gap-3 border-t px-4 py-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => fetchLogs(pagination.page - 1)}
               disabled={pagination.page <= 1}
-              className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-500 hover:border-[#8b5cf6]/30 transition-[color,background-color,border-color,transform,opacity] disabled:opacity-30 disabled:cursor-not-allowed"
             >
-              <ChevronLeft className="w-4 h-4" /> {t('common.previous')}
-            </button>
-            <div className="flex items-center gap-4">
-               <div className="px-4 py-2 bg-[#8b5cf6]/10 border border-[#8b5cf6]/20 rounded-xl">
-                  <span className="text-xs font-black text-[#8b5cf6]">{t('admin.logs.registry')} {pagination.page} / {pagination.totalPages}</span>
-               </div>
-            </div>
-            <button 
-              onClick={() => fetchLogs(pagination.page + 1)} 
+              <ChevronLeft className={`size-4 ${isAr ? 'rotate-180' : ''}`} />
+              {t('common.previous')}
+            </Button>
+            <span className="text-xs font-medium text-muted-foreground">
+              {pagination.page} / {pagination.totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => fetchLogs(pagination.page + 1)}
               disabled={pagination.page >= pagination.totalPages}
-              className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-500 hover:border-[#8b5cf6]/30 transition-[color,background-color,border-color,transform,opacity] disabled:opacity-30 disabled:cursor-not-allowed"
             >
-              {t('common.next')} <ChevronRight className="w-4 h-4" />
-            </button>
+              {t('common.next')}
+              <ChevronRight className={`size-4 ${isAr ? 'rotate-180' : ''}`} />
+            </Button>
           </div>
         )}
-      </div>
+      </SectionCard>
+
+      {/* Detail modal */}
+      <Modal
+        open={!!selectedLog}
+        onOpenChange={(open) => { if (!open) setSelectedLog(null); }}
+        size="lg"
+        title={selectedLog?.action}
+        description={selectedLog ? `${selectedLog.module} • ${selectedLog.admin_name}` : undefined}
+      >
+        {selectedLog && (
+          <div className="space-y-5">
+            <div className="flex flex-wrap items-center gap-2">
+              <StatusBadge variant={getMethodVariant(selectedLog.method)}>{selectedLog.method}</StatusBadge>
+              <StatusBadge variant="neutral">{selectedLog.module}</StatusBadge>
+              <StatusBadge variant={selectedLog.status_code && selectedLog.status_code >= 400 ? 'danger' : 'success'} icon={Activity}>
+                {selectedLog.status_code || '200 OK'} • {t('admin.logs.table.details.authorized')}
+              </StatusBadge>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              {detailItems.map((item, i) => (
+                <div key={i}>
+                  <p className="mb-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <item.icon className="size-3.5" /> {item.label}
+                  </p>
+                  <p className="text-sm font-medium text-foreground break-all">{item.value}</p>
+                </div>
+              ))}
+            </div>
+
+            <div>
+              <p className="mb-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+                <ArrowUpRight className="size-3.5" /> {t('admin.logs.table.details.resource_mapping')}
+              </p>
+              <code className="block break-all rounded-md border bg-muted px-3 py-2 font-mono text-xs text-foreground">
+                {selectedLog.endpoint}
+              </code>
+            </div>
+
+            {selectedLog.details && Object.keys(selectedLog.details).length > 0 && (
+              <div>
+                <p className="mb-1 text-xs text-muted-foreground">{t('admin.logs.table.details.payload_matrix')}</p>
+                <div className="max-h-64 overflow-y-auto rounded-md border bg-muted p-3">
+                  <pre className="whitespace-pre-wrap font-mono text-xs leading-relaxed text-foreground">
+                    {JSON.stringify(selectedLog.details, null, 2)}
+                  </pre>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { 
-  BookOpen, FileText, Map, CheckSquare, Settings, ShieldCheck, 
-  Languages, Sun, Moon, LogOut, ArrowRight, User, GraduationCap, 
-  Layers, Users, Bell, CalendarDays, TrendingUp
+import {
+  BookOpen, FileText, Map, CheckSquare, Settings, ShieldCheck,
+  Languages, Sun, Moon, LogOut, ArrowRight, User, GraduationCap,
+  Layers, Users, TrendingUp
 } from 'lucide-react';
 import { useStudentAuth } from '../context/StudentAuthContext';
 import { useStudentData } from '../context/StudentDataContext';
@@ -13,14 +13,16 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import { motion } from 'framer-motion';
 import studentApi from '../services/studentApi';
+import { PageContainer, PageHeader, SectionCard, StatusBadge } from '@/components/common';
+import { cn } from '@/lib/utils';
 
 const StudentMenu = () => {
   const { t, i18n } = useTranslation();
   const { student, logout } = useStudentAuth();
   const { theme, toggleTheme } = useTheme();
-  const { 
-    notifications, 
-    tasks: personalTasks, 
+  const {
+    notifications,
+    tasks: personalTasks,
     officialTasks,
     gradesData
   } = useStudentData();
@@ -28,7 +30,7 @@ const StudentMenu = () => {
 
   const isAr = i18n.language === 'ar';
   const [activeSemester, setActiveSemester] = useState(null);
-  
+
   useEffect(() => {
     if (!student) navigate('/student/login');
   }, [student, navigate]);
@@ -61,70 +63,63 @@ const StudentMenu = () => {
   ).length;
 
   const menuItems = [
-    { 
-      id: 'course-registration', 
-      label: t('sidebar.course_registration'), 
+    {
+      id: 'course-registration',
+      label: t('sidebar.course_registration'),
       desc: isAr ? 'تسجيل وتعديل المواد الدراسية الخاصة بالترم' : 'Enroll and modify your semester academic courses',
-      icon: <BookOpen className="w-8 h-8" />, 
+      icon: <BookOpen className="size-5" />,
       path: '/student/registration',
-      color: 'from-blue-500/10 to-indigo-500/10 dark:from-blue-500/20 dark:to-indigo-500/20 text-blue-600 dark:text-blue-400 border-blue-500/20',
       badge: registeredCoursesCount > 0 ? `${registeredCoursesCount} ${isAr ? 'مواد' : 'Courses'}` : null
     },
-    { 
-      id: 'grades', 
-      label: t('sidebar.courses_grades'), 
+    {
+      id: 'grades',
+      label: t('sidebar.courses_grades'),
       desc: isAr ? 'عرض النتائج ودرجات المواد والتقديرات الأكاديمية' : 'View semester grading results, course marks and academic GPA',
-      icon: <TrendingUp className="w-8 h-8" />, 
+      icon: <TrendingUp className="size-5" />,
       path: '/student/grades',
-      color: 'from-pink-500/10 to-rose-500/10 dark:from-pink-500/20 dark:to-rose-500/20 text-pink-600 dark:text-pink-400 border-pink-500/20',
       badge: gradesData.summary?.overallPercentage ? `${gradesData.summary.overallPercentage}%` : null
     },
-    { 
-      id: 'quizzes', 
-      label: t('sidebar.quizzes'), 
+    {
+      id: 'quizzes',
+      label: t('sidebar.quizzes'),
       desc: isAr ? 'الاختبارات الإلكترونية المستمرة والتقييمات' : 'Online assessment quizzes and scoring tests',
-      icon: <FileText className="w-8 h-8" />, 
+      icon: <FileText className="size-5" />,
       path: '/student/quizzes',
-      color: 'from-emerald-500/10 to-teal-500/10 dark:from-emerald-500/20 dark:to-teal-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
       badge: null
     },
-    { 
-      id: 'roadmap', 
-      label: t('sidebar.roadmap'), 
+    {
+      id: 'roadmap',
+      label: t('sidebar.roadmap'),
       desc: isAr ? 'خطة تخرجك الدراسي والتقدم التعليمي لسنواتك' : 'Your graduation curriculum roadmap and year progress',
-      icon: <Map className="w-8 h-8" />, 
+      icon: <Map className="size-5" />,
       path: '/student/roadmap',
-      color: 'from-amber-500/10 to-orange-500/10 dark:from-amber-500/20 dark:to-orange-500/20 text-amber-600 dark:text-amber-400 border-amber-500/20',
       badge: isAr ? `مستوى ${student?.level || 1}` : `Level ${student?.level || 1}`
     },
-    { 
-      id: 'personal-tasks', 
-      label: t('sidebar.personal_tasks'), 
+    {
+      id: 'personal-tasks',
+      label: t('sidebar.personal_tasks'),
       desc: isAr ? 'قائمة مهامك اليومية وجدول المذاكرة الخاص بك' : 'Daily checklist tasks and personalized study schedules',
-      icon: <CheckSquare className="w-8 h-8" />, 
+      icon: <CheckSquare className="size-5" />,
       path: '/student/personal-tasks',
-      color: 'from-purple-500/10 to-fuchsia-500/10 dark:from-purple-500/20 dark:to-fuchsia-500/20 text-purple-600 dark:text-purple-400 border-purple-500/20',
       badge: totalPendingTasks > 0 ? `${totalPendingTasks} ${isAr ? 'معلقة' : 'Pending'}` : null
     },
-    { 
-      id: 'settings', 
-      label: t('sidebar.settings'), 
+    {
+      id: 'settings',
+      label: t('sidebar.settings'),
       desc: isAr ? 'تعديل الملف الشخصي والمظهر وخيارات الحساب' : 'Edit profile details, UI themes and account options',
-      icon: <Settings className="w-8 h-8" />, 
+      icon: <Settings className="size-5" />,
       path: '/student/settings',
-      color: 'from-gray-500/10 to-slate-500/10 dark:from-gray-500/20 dark:to-slate-500/20 text-gray-600 dark:text-gray-400 border-gray-500/20',
       badge: null
     },
   ];
 
   if (student && (student.role === 'assistant' || student.role === 'admin')) {
-    menuItems.push({ 
-      id: 'admin-panel', 
-      label: t('sidebar.admin_panel'), 
+    menuItems.push({
+      id: 'admin-panel',
+      label: t('sidebar.admin_panel'),
       desc: isAr ? 'لوحة التحكم والتحليل وإدارة شؤون الطلاب' : 'Dashboard control center and student manager portal',
-      icon: <ShieldCheck className="w-8 h-8" />, 
+      icon: <ShieldCheck className="size-5" />,
       path: '/admin',
-      color: 'from-rose-500/10 to-pink-500/10 dark:from-rose-500/20 dark:to-pink-500/20 text-rose-600 dark:text-rose-400 border-rose-500/20',
       badge: isAr ? 'إدارة' : 'Admin'
     });
   }
@@ -133,170 +128,165 @@ const StudentMenu = () => {
   const pageDirection = isAr ? 'rtl' : 'ltr';
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0c0c14] text-gray-900 dark:text-white font-sans transition-colors duration-500 overflow-x-hidden relative" dir={pageDirection}>
-      
-      {/* Ambient Glowing Blobs */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[-10%] inset-inline-end-[-5%] w-[50vw] h-[50vw] bg-[#8b5cf6]/5 blur-[120px] rounded-full"></div>
-        <div className="absolute bottom-[-10%] inset-inline-start-[-5%] w-[40vw] h-[40vw] bg-[#2cfc7d]/3 blur-[100px] rounded-full"></div>
-      </div>
+    <div className="min-h-screen bg-background text-foreground font-sans" dir={pageDirection}>
 
       <Sidebar onLogout={handleLogout} />
 
-      <main className="md:ps-72 min-h-screen relative z-10 flex flex-col pb-28 md:pb-10">
-        <section className="px-6 lg:px-10 pt-10 md:pt-16 pb-12 max-w-[1400px] mx-auto w-full space-y-10">
-          
-          {/* Header & Student Identity Card */}
-          <div className="flex flex-col md:flex-row items-center justify-between gap-8 bg-white dark:bg-[#0e0e16] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-8 md:p-10 shadow-sm relative overflow-hidden group">
-            {/* Ambient Background Gradient for the Identity Card */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-[#8b5cf6]/2 to-[#2cfc7d]/2 opacity-50 dark:opacity-20 pointer-events-none" />
-            
-            <div className="flex flex-col sm:flex-row items-center gap-6 relative z-10 text-center sm:text-start">
-              <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-3xl font-black shadow-lg shadow-indigo-500/20 transform group-hover:scale-105 transition-transform duration-500">
-                {student?.name ? student.name.charAt(0).toUpperCase() : <User className="w-10 h-10" />}
-              </div>
-              <div className="space-y-2">
-                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                  <h1 className={`text-2xl md:text-3xl font-black tracking-tight text-gray-900 dark:text-white ${isAr ? 'font-arabic' : ''}`}>
-                    {student?.name}
-                  </h1>
-                  <span className="px-3 py-1 rounded-full bg-[#2cfc7d]/10 text-[#10b981] dark:text-[#2cfc7d] text-[10px] font-black uppercase tracking-widest border border-[#2cfc7d]/20">
-                    {isAr ? 'طالب نشط' : 'Active Student'}
-                  </span>
-                </div>
-                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-xs font-semibold text-gray-400 dark:text-white/40">
-                  <span className="flex items-center gap-1.5">
-                    <GraduationCap className="w-4 h-4 text-primary" />
-                    {student?.department_name || student?.department_code || (isAr ? 'القسم العام' : 'General Department')}
-                  </span>
-                  <span className="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-white/10 hidden sm:inline-block"></span>
-                  <span className="flex items-center gap-1.5">
-                    <Layers className="w-4 h-4 text-indigo-400" />
-                    {isAr ? `المستوى ${student?.level || 1}` : `Level ${student?.level || 1}`}
-                  </span>
-                  <span className="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-white/10 hidden sm:inline-block"></span>
-                  <span className="flex items-center gap-1.5">
-                    <Users className="w-4 h-4 text-amber-400" />
-                    {isAr ? `شعبة ${student?.section || '—'}` : `Section ${student?.section || '—'}`}
-                  </span>
-                </div>
-              </div>
-            </div>
+      <main className="md:ps-72 min-h-screen flex flex-col pb-28 md:pb-10">
+        <PageContainer>
 
-            <div className="flex items-center gap-4 relative z-10 shrink-0">
-              <div className="text-center md:text-inline-end space-y-1">
-                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 dark:text-white/20">
+          <PageHeader
+            title={t('sidebar.menu')}
+            description={isAr ? 'كل أدوات البوابة الأكاديمية في مكان واحد' : 'Every portal tool in one place'}
+          />
+
+          {/* Student Identity Card */}
+          <SectionCard bodyClassName="p-5">
+            <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:items-center sm:text-start">
+                <div className="flex size-14 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-xl font-semibold text-primary">
+                  {student?.name ? student.name.charAt(0).toUpperCase() : <User className="size-6" />}
+                </div>
+                <div className="space-y-2">
+                  <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
+                    <h2 className={cn('text-lg font-semibold tracking-tight text-foreground', isAr && 'font-arabic')}>
+                      {student?.name}
+                    </h2>
+                    <StatusBadge variant="success">
+                      {isAr ? 'طالب نشط' : 'Active Student'}
+                    </StatusBadge>
+                  </div>
+                  <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-muted-foreground sm:justify-start">
+                    <span className="flex items-center gap-1.5">
+                      <GraduationCap className="size-4 text-muted-foreground" />
+                      {student?.department_name || student?.department_code || (isAr ? 'القسم العام' : 'General Department')}
+                    </span>
+                    <span className="hidden size-1 rounded-full bg-border sm:inline-block" />
+                    <span className="flex items-center gap-1.5">
+                      <Layers className="size-4 text-muted-foreground" />
+                      {isAr ? `المستوى ${student?.level || 1}` : `Level ${student?.level || 1}`}
+                    </span>
+                    <span className="hidden size-1 rounded-full bg-border sm:inline-block" />
+                    <span className="flex items-center gap-1.5">
+                      <Users className="size-4 text-muted-foreground" />
+                      {isAr ? `شعبة ${student?.section || '—'}` : `Section ${student?.section || '—'}`}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="shrink-0 rounded-lg border bg-muted/40 px-4 py-2.5 text-center sm:text-end">
+                <p className="text-xs text-muted-foreground">
                   {isAr ? 'كود الطالب' : 'Student ID'}
                 </p>
-                <p className="text-lg font-black tracking-widest text-gray-900 dark:text-white opacity-80">
+                <p className="mt-0.5 text-base font-semibold tracking-wide text-foreground">
                   {student?.id}
                 </p>
               </div>
             </div>
-          </div>
+          </SectionCard>
 
-          {/* Menu Main Grid (Bento Grid Style) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Menu navigation grid */}
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
             {menuItems.map((item, idx) => (
-              <motion.div
+              <motion.button
                 key={item.id}
-                initial={{ opacity: 0, y: 15 }}
+                type="button"
+                initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: idx * 0.05 }}
+                transition={{ duration: 0.25, delay: idx * 0.04 }}
                 onClick={() => navigate(item.path)}
-                className="group bg-white dark:bg-[#0e0e16] border border-gray-100 dark:border-white/5 rounded-[2.2rem] p-8 flex flex-col justify-between gap-8 hover:shadow-xl hover:border-primary/20 dark:hover:border-primary/20 hover:-translate-y-1.5 transition-all duration-500 cursor-pointer relative overflow-hidden"
+                className="group flex flex-col gap-4 rounded-xl border bg-card p-4 text-start transition-colors hover:border-primary/30 hover:bg-muted/40"
               >
-                {/* Micro Ambient Hover Glow */}
-                <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700 pointer-events-none" />
-
-                <div className="space-y-6">
-                  <div className="flex justify-between items-start">
-                    <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${item.color} flex items-center justify-center border shadow-inner`}>
-                      {item.icon}
-                    </div>
-                    {item.badge && (
-                      <span className="px-4 py-1.5 rounded-full bg-gray-50 dark:bg-white/5 text-gray-900 dark:text-white text-[10px] font-black uppercase tracking-widest border border-gray-100 dark:border-white/10 group-hover:bg-primary group-hover:text-white dark:group-hover:text-black transition-all">
-                        {item.badge}
-                      </span>
-                    )}
-                  </div>
-                  
-                  <div className="space-y-2 text-start">
-                    <h3 className={`text-xl font-black uppercase tracking-tight text-gray-900 dark:text-white ${isAr ? 'font-arabic' : ''}`}>
-                      {item.label}
-                    </h3>
-                    <p className={`text-xs text-gray-400 dark:text-white/30 font-semibold leading-relaxed ${isAr ? 'font-arabic' : ''}`}>
-                      {item.desc}
-                    </p>
-                  </div>
+                <div className="flex items-start justify-between gap-2">
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-lg border bg-muted text-muted-foreground transition-colors group-hover:border-primary/20 group-hover:bg-primary/10 group-hover:text-primary">
+                    {item.icon}
+                  </span>
+                  {item.badge && (
+                    <StatusBadge variant="neutral">{item.badge}</StatusBadge>
+                  )}
                 </div>
 
-                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary opacity-60 group-hover:opacity-100 group-hover:translate-x-1.5 transition-all duration-300">
+                <div className="space-y-1">
+                  <h3 className={cn('text-sm font-semibold text-foreground', isAr && 'font-arabic')}>
+                    {item.label}
+                  </h3>
+                  <p className={cn('text-xs leading-relaxed text-muted-foreground', isAr && 'font-arabic')}>
+                    {item.desc}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors group-hover:text-primary">
                   <span>{isAr ? 'انتقال الآن' : 'Go Now'}</span>
-                  <ArrowRight className={`w-4 h-4 ${isAr ? 'rotate-180' : ''}`} />
+                  <ArrowRight className={cn('size-3.5', isAr && 'rotate-180')} />
                 </div>
-              </motion.div>
+              </motion.button>
             ))}
           </div>
 
-          {/* Quick Actions & Preferences Row */}
-          <div className="bg-white dark:bg-[#0e0e16] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-6 shadow-sm">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {/* Quick Actions & Preferences */}
+          <SectionCard
+            title={isAr ? 'تفضيلات سريعة' : 'Quick preferences'}
+            bodyClassName="p-3"
+          >
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
               <button
+                type="button"
                 onClick={toggleLanguage}
-                className="flex items-center justify-between p-5 rounded-[2rem] bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 hover:bg-gray-100 dark:hover:bg-white/5 transition-all active:scale-98 group"
+                className="group flex items-center justify-between gap-3 rounded-lg border bg-card p-3 text-start transition-colors hover:bg-muted/50"
               >
-                <div className="flex items-center gap-4 text-start">
-                  <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
-                    <Languages className="w-5 h-5" />
-                  </div>
+                <div className="flex items-center gap-3">
+                  <span className="flex size-9 shrink-0 items-center justify-center rounded-md border bg-muted text-muted-foreground transition-colors group-hover:border-primary/20 group-hover:bg-primary/10 group-hover:text-primary">
+                    <Languages className="size-4" />
+                  </span>
                   <div>
-                    <p className={`text-xs font-black uppercase tracking-widest text-gray-400 ${isAr ? 'font-arabic' : ''}`}>{isAr ? 'اللغة' : 'Language'}</p>
-                    <p className="text-sm font-black text-gray-900 dark:text-white">{isAr ? 'English' : 'العربية'}</p>
+                    <p className={cn('text-xs text-muted-foreground', isAr && 'font-arabic')}>{isAr ? 'اللغة' : 'Language'}</p>
+                    <p className="text-sm font-medium text-foreground">{isAr ? 'English' : 'العربية'}</p>
                   </div>
                 </div>
-                <ArrowRight className={`w-4 h-4 opacity-30 group-hover:opacity-100 transition-all ${isAr ? 'rotate-180' : ''}`} />
+                <ArrowRight className={cn('size-4 text-muted-foreground transition-colors group-hover:text-foreground', isAr && 'rotate-180')} />
               </button>
 
               <button
+                type="button"
                 onClick={toggleTheme}
-                className="flex items-center justify-between p-5 rounded-[2rem] bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 hover:bg-gray-100 dark:hover:bg-white/5 transition-all active:scale-98 group"
+                className="group flex items-center justify-between gap-3 rounded-lg border bg-card p-3 text-start transition-colors hover:bg-muted/50"
               >
-                <div className="flex items-center gap-4 text-start">
-                  <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 shadow-inner">
-                    {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-                  </div>
+                <div className="flex items-center gap-3">
+                  <span className="flex size-9 shrink-0 items-center justify-center rounded-md border bg-muted text-muted-foreground transition-colors group-hover:border-primary/20 group-hover:bg-primary/10 group-hover:text-primary">
+                    {theme === 'dark' ? <Sun className="size-4" /> : <Moon className="size-4" />}
+                  </span>
                   <div>
-                    <p className={`text-xs font-black uppercase tracking-widest text-gray-400 ${isAr ? 'font-arabic' : ''}`}>{isAr ? 'المظهر' : 'Theme'}</p>
-                    <p className="text-sm font-black text-gray-900 dark:text-white">
+                    <p className={cn('text-xs text-muted-foreground', isAr && 'font-arabic')}>{isAr ? 'المظهر' : 'Theme'}</p>
+                    <p className="text-sm font-medium text-foreground">
                       {theme === 'dark' ? (isAr ? 'الوضع المضيء' : 'Light Mode') : (isAr ? 'الوضع المظلم' : 'Dark Mode')}
                     </p>
                   </div>
                 </div>
-                <ArrowRight className={`w-4 h-4 opacity-30 group-hover:opacity-100 transition-all ${isAr ? 'rotate-180' : ''}`} />
+                <ArrowRight className={cn('size-4 text-muted-foreground transition-colors group-hover:text-foreground', isAr && 'rotate-180')} />
               </button>
 
               <button
+                type="button"
                 onClick={handleLogout}
-                className="flex items-center justify-between p-5 rounded-[2rem] bg-rose-500/5 dark:bg-rose-500/10 border border-rose-500/10 hover:bg-rose-500/10 transition-all active:scale-98 group"
+                className="group flex items-center justify-between gap-3 rounded-lg border border-destructive/20 bg-destructive/5 p-3 text-start transition-colors hover:bg-destructive/10"
               >
-                <div className="flex items-center gap-4 text-start">
-                  <div className="w-12 h-12 rounded-2xl bg-rose-500/10 flex items-center justify-center text-rose-500 shadow-inner">
-                    <LogOut className="w-5 h-5" />
-                  </div>
+                <div className="flex items-center gap-3">
+                  <span className="flex size-9 shrink-0 items-center justify-center rounded-md border border-destructive/20 bg-destructive/10 text-destructive">
+                    <LogOut className="size-4" />
+                  </span>
                   <div>
-                    <p className={`text-xs font-black uppercase tracking-widest text-rose-400/60 ${isAr ? 'font-arabic' : ''}`}>{isAr ? 'تسجيل الخروج' : 'Account'}</p>
-                    <p className="text-sm font-black text-rose-500">{t('sidebar.logout')}</p>
+                    <p className={cn('text-xs text-destructive/70', isAr && 'font-arabic')}>{isAr ? 'تسجيل الخروج' : 'Account'}</p>
+                    <p className="text-sm font-medium text-destructive">{t('sidebar.logout')}</p>
                   </div>
                 </div>
-                <ArrowRight className={`w-4 h-4 text-rose-500 opacity-40 group-hover:opacity-100 transition-all ${isAr ? 'rotate-180' : ''}`} />
+                <ArrowRight className={cn('size-4 text-destructive', isAr && 'rotate-180')} />
               </button>
             </div>
-          </div>
+          </SectionCard>
 
-        </section>
+        </PageContainer>
       </main>
-
 
     </div>
   );

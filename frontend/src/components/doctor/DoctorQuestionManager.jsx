@@ -4,11 +4,28 @@ import { useTranslation } from 'react-i18next';
 import { supabase } from '../../services/supabase';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  ArrowLeft, Plus, Edit3, Trash2, ListChecks, Type, Image as ImageIcon, 
-  ChevronRight, Save, X, HelpCircle, Target, Sparkles, Zap, Layout,
-  CheckCircle2, AlertCircle, FileText, UploadCloud, Eye, Microscope
+import {
+  ArrowLeft, Plus, Edit3, Trash2, ListChecks, Save,
+  CheckCircle2, UploadCloud, Eye, HelpCircle
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  PageHeader,
+  SectionCard,
+  FormField,
+  EmptyState,
+  StatusBadge,
+  Spinner,
+} from '@/components/common';
 
 const DoctorQuestionManager = ({ quiz, onBack }) => {
     const { t } = useTranslation();
@@ -132,297 +149,258 @@ const DoctorQuestionManager = ({ quiz, onBack }) => {
         setFormData({ ...formData, options: newOptions });
     };
 
-    const containerVariants = {
-        hidden: { opacity: 0 },
-        visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
-    };
-
-    const itemVariants = {
-        hidden: { x: -20, opacity: 0 },
-        visible: { x: 0, opacity: 1, transition: { type: 'spring', stiffness: 100 } }
-    };
-
     return (
-        <div className="max-w-[1600px] mx-auto pb-20 space-y-10 px-4">
+        <div className="space-y-6">
             {/* Header Area */}
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-                <div className="flex items-center gap-6">
-                    <motion.button 
-                        whileHover={{ scale: 1.1, x: -5 }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={onBack} 
-                        className="w-14 h-14 rounded-2xl bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 flex items-center justify-center text-gray-400 hover:text-violet-500 transition-all shadow-sm"
-                    >
-                        <ArrowLeft className="w-6 h-6" />
-                    </motion.button>
-                    <div>
-                        <div className="flex items-center gap-3 mb-1">
-                            <h2 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">{quiz.title}</h2>
-                            <span className="px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-[9px] font-black text-violet-500 uppercase tracking-widest">{t('doctor.questions.title_suffix')}</span>
-                        </div>
-                        <p className="text-sm text-gray-400 font-bold uppercase tracking-widest flex items-center gap-2">
-                            <Layout className="w-4 h-4" /> {t('doctor.questions.edit_mode')}
-                        </p>
-                    </div>
-                </div>
-            </div>
+            <PageHeader
+                icon={ListChecks}
+                title={quiz.title}
+                description={t('doctor.questions.edit_mode')}
+                actions={
+                    <>
+                        <StatusBadge variant="accent">{t('doctor.questions.title_suffix')}</StatusBadge>
+                        <Button variant="outline" size="sm" onClick={onBack}>
+                            <ArrowLeft className="size-4" />
+                            <span>{t('common.back', 'Back')}</span>
+                        </Button>
+                    </>
+                }
+            />
 
-            <div className="grid grid-cols-1 xl:grid-cols-12 gap-10">
+            <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
                 {/* Form Column */}
-                <div className="xl:col-span-4 space-y-8">
-                    <div className="sticky top-10">
-                        <motion.div 
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            className="bg-white dark:bg-[#0c0c0e] border border-gray-100 dark:border-white/5 p-8 rounded-[3rem] shadow-2xl relative overflow-hidden"
+                <div className="xl:col-span-4">
+                    <div className="xl:sticky xl:top-6">
+                        <SectionCard
+                            title={editingQuestion ? t('doctor.questions.edit_question') : t('doctor.questions.add_question')}
+                            actions={
+                                <span className="flex size-7 items-center justify-center rounded-md border bg-muted text-muted-foreground">
+                                    {editingQuestion ? <Edit3 className="size-4" /> : <Plus className="size-4" />}
+                                </span>
+                            }
+                            bodyClassName="p-5"
                         >
-                            <div className="absolute top-0 right-0 p-8 opacity-5">
-                                <Zap className="w-24 h-24 text-violet-500" />
-                            </div>
-
-                            <h3 className="text-2xl font-black mb-10 flex items-center gap-4 text-gray-900 dark:text-white uppercase tracking-tight">
-                                <div className="w-10 h-10 rounded-xl bg-violet-600 flex items-center justify-center shadow-lg shadow-violet-600/20">
-                                    {editingQuestion ? <Edit3 className="w-5 h-5 text-white" /> : <Plus className="w-5 h-5 text-white" />}
-                                </div>
-                                {editingQuestion ? t('doctor.questions.edit_question') : t('doctor.questions.add_question')}
-                            </h3>
-
-                            <form onSubmit={handleSubmit} className="space-y-8">
-                                <div className="grid grid-cols-2 gap-6">
-                                    <div className="space-y-3">
-                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('doctor.questions.type_label')}</label>
-                                        <select
+                            <form onSubmit={handleSubmit} className="space-y-5">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <FormField label={t('doctor.questions.type_label')} htmlFor="question_type">
+                                        <Select
                                             value={formData.question_type}
-                                            onChange={(e) => setFormData({ ...formData, question_type: e.target.value })}
-                                            className="w-full bg-gray-50 dark:bg-white/[0.05] border border-gray-100 dark:border-white/10 rounded-2xl py-4 px-5 text-sm font-black appearance-none cursor-pointer outline-none focus:ring-4 focus:ring-violet-500/10 dark:text-white [color-scheme:dark]"
+                                            onValueChange={(value) => setFormData({ ...formData, question_type: value })}
                                         >
-                                            <option value="multiple_choice" className="dark:bg-[#0A0A0A]">MCQ</option>
-                                            <option value="true_false" className="dark:bg-[#0A0A0A]">True / False</option>
-                                            <option value="written" className="dark:bg-[#0A0A0A]">Written</option>
-                                        </select>
-                                    </div>
+                                            <SelectTrigger id="question_type" className="w-full">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="multiple_choice">MCQ</SelectItem>
+                                                <SelectItem value="true_false">True / False</SelectItem>
+                                                <SelectItem value="written">Written</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </FormField>
 
-                                    <div className="space-y-3">
-                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('doctor.questions.points_label')}</label>
-                                        <div className="relative">
-                                            <Target className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500" />
-                                            <input
-                                                type="number"
-                                                min="1"
-                                                value={formData.points}
-                                                onChange={(e) => setFormData({ ...formData, points: parseInt(e.target.value) })}
-                                                className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/10 rounded-2xl py-4 pl-12 pr-5 text-sm font-black outline-none focus:ring-4 focus:ring-violet-500/10 dark:text-white"
-                                                required
-                                            />
-                                        </div>
-                                    </div>
+                                    <FormField label={t('doctor.questions.points_label')} htmlFor="points">
+                                        <Input
+                                            id="points"
+                                            type="number"
+                                            min="1"
+                                            value={formData.points}
+                                            onChange={(e) => setFormData({ ...formData, points: parseInt(e.target.value) })}
+                                            required
+                                        />
+                                    </FormField>
                                 </div>
 
-                                <div className="space-y-3">
-                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('doctor.questions.text_label')}</label>
-                                    <textarea
+                                <FormField label={t('doctor.questions.text_label')} htmlFor="question_text">
+                                    <Textarea
+                                        id="question_text"
                                         value={formData.question_text}
                                         onChange={(e) => setFormData({ ...formData, question_text: e.target.value })}
-                                        className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/10 rounded-3xl py-5 px-6 text-sm font-semibold min-h-[120px] resize-none outline-none focus:ring-4 focus:ring-violet-500/10 dark:text-white"
+                                        className="min-h-28 resize-none"
                                         placeholder={t('doctor.questions.text_placeholder')}
                                         required
                                     />
-                                </div>
+                                </FormField>
 
-                                <div className="space-y-3">
-                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('doctor.questions.image_label')}</label>
-                                    <div className="relative group">
-                                        <div className={`flex flex-col items-center justify-center w-full min-h-[100px] border-2 border-dashed rounded-[2rem] transition-all cursor-pointer ${imageFile ? 'bg-emerald-500/5 border-emerald-500/30' : 'bg-gray-50 dark:bg-white/[0.02] border-gray-200 dark:border-white/10 hover:border-violet-500/30'}`}>
-                                            <input
-                                                type="file"
-                                                accept="image/*"
-                                                onChange={(e) => setImageFile(e.target.files[0])}
-                                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                            />
-                                            {imageFile ? (
-                                                <div className="flex items-center gap-3 text-emerald-500">
-                                                    <CheckCircle2 className="w-5 h-5" />
-                                                    <span className="text-xs font-black uppercase tracking-widest truncate max-w-[150px]">{imageFile.name}</span>
-                                                </div>
-                                            ) : (
-                                                <div className="flex flex-col items-center gap-2 text-gray-400">
-                                                    <UploadCloud className="w-6 h-6 group-hover:text-violet-500 transition-colors" />
-                                                    <span className="text-[9px] font-black uppercase tracking-[0.2em]">{t('doctor.questions.upload_hint')}</span>
-                                                </div>
-                                            )}
-                                        </div>
+                                <FormField label={t('doctor.questions.image_label')}>
+                                    <div className={`group relative flex min-h-24 w-full flex-col items-center justify-center rounded-lg border border-dashed transition-colors ${imageFile ? 'border-primary/40 bg-primary/5' : 'border-border bg-muted/30 hover:border-primary/40'}`}>
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={(e) => setImageFile(e.target.files[0])}
+                                            className="absolute inset-0 size-full cursor-pointer opacity-0"
+                                        />
+                                        {imageFile ? (
+                                            <div className="flex items-center gap-2 px-4 text-primary">
+                                                <CheckCircle2 className="size-4" />
+                                                <span className="max-w-[180px] truncate text-sm font-medium">{imageFile.name}</span>
+                                            </div>
+                                        ) : (
+                                            <div className="flex flex-col items-center gap-1.5 text-muted-foreground">
+                                                <UploadCloud className="size-5 transition-colors group-hover:text-primary" />
+                                                <span className="text-xs">{t('doctor.questions.upload_hint')}</span>
+                                            </div>
+                                        )}
                                     </div>
-                                </div>
+                                </FormField>
 
                                 {formData.question_type === 'multiple_choice' && (
-                                    <div className="space-y-4 pt-4">
-                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('doctor.questions.options_label')}</label>
-                                        <div className="space-y-3">
+                                    <FormField label={t('doctor.questions.options_label')}>
+                                        <div className="space-y-2">
                                             {formData.options.map((opt, i) => (
-                                                <div key={i} className={`flex items-center gap-4 p-3 rounded-2xl border transition-all ${formData.correct_answer === String(i) ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-white dark:bg-white/5 border-gray-100 dark:border-white/5'}`}>
+                                                <div key={i} className={`flex items-center gap-3 rounded-lg border p-2.5 transition-colors ${formData.correct_answer === String(i) ? 'border-primary/30 bg-primary/5' : 'border-border bg-card'}`}>
                                                     <input
                                                         type="radio"
                                                         name="correct_answer"
                                                         checked={formData.correct_answer === String(i)}
                                                         onChange={() => setFormData({ ...formData, correct_answer: String(i) })}
-                                                        className="w-5 h-5 accent-emerald-500 cursor-pointer"
+                                                        className="size-4 accent-primary cursor-pointer"
                                                     />
                                                     <input
                                                         type="text"
                                                         value={opt}
                                                         onChange={(e) => handleOptionChange(i, e.target.value)}
                                                         placeholder={`${t('doctor.questions.option_placeholder')} ${i + 1}`}
-                                                        className="flex-1 bg-transparent border-none outline-none text-sm font-bold placeholder-gray-300 dark:text-white"
+                                                        className="flex-1 border-none bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
                                                         required
                                                     />
                                                 </div>
                                             ))}
                                         </div>
-                                    </div>
+                                    </FormField>
                                 )}
 
                                 {formData.question_type === 'true_false' && (
-                                    <div className="grid grid-cols-2 gap-4 pt-4">
-                                        {['True', 'False'].map((val) => (
-                                            <button
-                                                key={val}
-                                                type="button"
-                                                onClick={() => setFormData({ ...formData, correct_answer: val })}
-                                                className={`py-4 rounded-2xl border-2 font-black text-xs uppercase tracking-widest transition-all ${formData.correct_answer === val ? 'bg-emerald-500 text-white border-emerald-500 shadow-lg shadow-emerald-500/20' : 'bg-gray-50 dark:bg-white/5 border-gray-100 dark:border-white/5 text-gray-400 hover:border-gray-300'}`}
-                                            >
-                                                {val}
-                                            </button>
-                                        ))}
-                                    </div>
+                                    <FormField label={t('doctor.questions.options_label')}>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            {['True', 'False'].map((val) => (
+                                                <button
+                                                    key={val}
+                                                    type="button"
+                                                    onClick={() => setFormData({ ...formData, correct_answer: val })}
+                                                    className={`rounded-lg border py-2.5 text-sm font-medium transition-colors ${formData.correct_answer === val ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card text-muted-foreground hover:bg-muted/50 hover:text-foreground'}`}
+                                                >
+                                                    {val}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </FormField>
                                 )}
 
-                                <div className="flex gap-4 pt-10">
-                                    <motion.button
-                                        whileHover={{ scale: 1.02 }}
-                                        whileTap={{ scale: 0.98 }}
-                                        type="submit"
-                                        disabled={loading}
-                                        className="flex-1 bg-violet-600 hover:bg-violet-700 text-white font-black py-5 rounded-[1.5rem] shadow-xl shadow-violet-600/20 disabled:opacity-50 flex items-center justify-center gap-3 text-xs uppercase tracking-widest"
-                                    >
-                                        {loading ? <div className="w-5 h-5 border-4 border-white/20 border-t-white rounded-full animate-spin"></div> : <><Save className="w-4 h-4" /> {t('doctor.questions.save_btn')}</>}
-                                    </motion.button>
+                                <div className="flex gap-2 pt-2">
+                                    <Button type="submit" disabled={loading} className="flex-1">
+                                        {loading ? (
+                                            <Spinner className="text-primary-foreground" />
+                                        ) : (
+                                            <>
+                                                <Save className="size-4" />
+                                                <span>{t('doctor.questions.save_btn')}</span>
+                                            </>
+                                        )}
+                                    </Button>
                                     {editingQuestion && (
-                                        <button
-                                            type="button"
-                                            onClick={resetForm}
-                                            className="px-8 bg-gray-100 dark:bg-white/5 hover:bg-rose-500/10 hover:text-rose-500 text-gray-400 font-black py-5 rounded-[1.5rem] transition-all text-xs uppercase tracking-widest"
-                                        >
+                                        <Button type="button" variant="outline" onClick={resetForm}>
                                             {t('common.cancel')}
-                                        </button>
+                                        </Button>
                                     )}
                                 </div>
                             </form>
-                        </motion.div>
+                        </SectionCard>
                     </div>
                 </div>
 
                 {/* List Column */}
                 <div className="xl:col-span-8">
-                    <div className="bg-white dark:bg-[#0c0c0e] border border-gray-100 dark:border-white/5 rounded-[3.5rem] p-10 min-h-[900px] flex flex-col shadow-sm">
-                        <div className="flex items-center justify-between mb-12">
-                            <h3 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter flex items-center gap-4">
-                                <div className="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/20">
-                                    <ListChecks className="w-5 h-5 text-white" />
-                                </div>
-                                {t('doctor.questions.list_title')} <span className="text-gray-300 font-bold">/ {questions.length} {t('doctor.questions.items_suffix')}</span>
-                            </h3>
-                            <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5">
-                                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{t('doctor.questions.auto_save')}</span>
-                            </div>
-                        </div>
-
-                        <motion.div 
-                            variants={containerVariants}
-                            initial="hidden"
-                            animate="visible"
-                            className="flex-1 space-y-6 pr-2 overflow-y-auto hidden-scrollbar"
-                        >
-                            {questions.length === 0 ? (
-                                <div className="flex flex-col items-center justify-center h-full opacity-30 py-32">
-                                    <Microscope className="w-24 h-24 mb-6 text-gray-400" />
-                                    <p className="text-xl font-black uppercase tracking-widest">{t('doctor.questions.no_found')}</p>
-                                </div>
-                            ) : (
-                                questions.map((q, idx) => (
-                                    <motion.div 
-                                        variants={itemVariants}
-                                        key={q.id} 
-                                        className="group bg-gray-50 dark:bg-white/[0.01] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-8 transition-all hover:border-violet-500/30 hover:bg-white dark:hover:bg-white/[0.02] hover:shadow-2xl hover:shadow-violet-500/5"
-                                    >
-                                        <div className="flex justify-between items-start gap-8">
-                                            <div className="flex items-start gap-6 flex-1 min-w-0">
-                                                <div className="bg-white dark:bg-white/5 text-violet-600 dark:text-violet-400 font-black w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 border border-gray-100 dark:border-white/10 shadow-sm text-lg">
-                                                    {idx + 1}
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="flex flex-wrap gap-2 mb-4">
-                                                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-400 bg-white dark:bg-white/5 px-3 py-1.5 rounded-xl border border-gray-100 dark:border-white/10">
-                                                            {q.question_type.replace('_', ' ')}
-                                                        </span>
-                                                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-emerald-500 bg-emerald-500/5 px-3 py-1.5 rounded-xl border border-emerald-500/10">
-                                                            {q.points} {t('doctor.questions.points_suffix')}
-                                                        </span>
+                    <SectionCard
+                        title={t('doctor.questions.list_title')}
+                        description={`${questions.length} ${t('doctor.questions.items_suffix')}`}
+                        actions={
+                            <StatusBadge variant="success" icon={CheckCircle2}>
+                                {t('doctor.questions.auto_save')}
+                            </StatusBadge>
+                        }
+                        bodyClassName="p-4"
+                    >
+                        {questions.length === 0 ? (
+                            <EmptyState
+                                icon={HelpCircle}
+                                title={t('doctor.questions.no_found')}
+                            />
+                        ) : (
+                            <div className="space-y-3">
+                                <AnimatePresence initial={false}>
+                                    {questions.map((q, idx) => (
+                                        <motion.div
+                                            key={q.id}
+                                            initial={{ opacity: 0, y: 6 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0 }}
+                                            transition={{ duration: 0.15 }}
+                                            className="group rounded-lg border bg-card p-4 transition-colors hover:bg-muted/30"
+                                        >
+                                            <div className="flex items-start justify-between gap-4">
+                                                <div className="flex min-w-0 flex-1 items-start gap-3">
+                                                    <div className="flex size-8 shrink-0 items-center justify-center rounded-md border bg-muted text-sm font-medium text-muted-foreground">
+                                                        {idx + 1}
                                                     </div>
-                                                    <h4 className="text-xl font-bold text-gray-900 dark:text-white leading-relaxed mb-6">
-                                                        {q.question_text}
-                                                    </h4>
-                                                    
-                                                    {q.image_url && (
-                                                        <div className="mb-6 relative group/img inline-block">
-                                                            <img src={q.image_url} alt="Question" className="rounded-3xl max-h-48 object-cover border-4 border-white dark:border-white/5 shadow-2xl transition-transform group-hover/img:scale-105" />
-                                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity rounded-3xl flex items-center justify-center">
-                                                                <Eye className="text-white w-8 h-8" />
-                                                            </div>
+                                                    <div className="min-w-0 flex-1">
+                                                        <div className="mb-2 flex flex-wrap gap-1.5">
+                                                            <StatusBadge variant="neutral">
+                                                                {q.question_type.replace('_', ' ')}
+                                                            </StatusBadge>
+                                                            <StatusBadge variant="accent">
+                                                                {q.points} {t('doctor.questions.points_suffix')}
+                                                            </StatusBadge>
                                                         </div>
-                                                    )}
+                                                        <h4 className="mb-3 text-sm font-medium leading-relaxed text-foreground">
+                                                            {q.question_text}
+                                                        </h4>
 
-                                                    {q.question_type === 'multiple_choice' && (
-                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
-                                                            {q.options?.map((opt, i) => (
-                                                                <div key={i} className={`p-4 rounded-2xl text-xs font-bold border transition-all ${q.correct_answer === String(i) ? 'bg-emerald-500 text-white border-emerald-500 shadow-lg shadow-emerald-500/10' : 'bg-white dark:bg-white/5 border-gray-100 dark:border-white/10 text-gray-400'}`}>
-                                                                    <span className="opacity-40 mr-2">{String.fromCharCode(65 + i)} .</span> {opt}
+                                                        {q.image_url && (
+                                                            <div className="group/img relative mb-3 inline-block">
+                                                                <img src={q.image_url} alt="Question" className="max-h-48 rounded-lg border object-cover" />
+                                                                <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/40 opacity-0 transition-opacity group-hover/img:opacity-100">
+                                                                    <Eye className="size-6 text-white" />
                                                                 </div>
-                                                            ))}
-                                                        </div>
-                                                    )}
+                                                            </div>
+                                                        )}
 
-                                                    {q.question_type === 'true_false' && (
-                                                        <div className="mt-4">
-                                                            <span className="inline-flex items-center gap-3 bg-emerald-500 text-white font-black text-[10px] px-5 py-2.5 rounded-2xl shadow-lg shadow-emerald-500/20 uppercase tracking-widest">
-                                                                <CheckCircle2 className="w-4 h-4" /> {t('doctor.questions.correct_answer')}: {q.correct_answer}
-                                                            </span>
-                                                        </div>
-                                                    )}
+                                                        {q.question_type === 'multiple_choice' && (
+                                                            <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2">
+                                                                {q.options?.map((opt, i) => (
+                                                                    <div key={i} className={`rounded-md border p-2.5 text-sm transition-colors ${q.correct_answer === String(i) ? 'border-primary/30 bg-primary/10 text-primary' : 'border-border bg-muted/30 text-muted-foreground'}`}>
+                                                                        <span className="me-2 opacity-50">{String.fromCharCode(65 + i)}.</span>{opt}
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        )}
+
+                                                        {q.question_type === 'true_false' && (
+                                                            <div className="mt-3">
+                                                                <StatusBadge variant="success" icon={CheckCircle2}>
+                                                                    {t('doctor.questions.correct_answer')}: {q.correct_answer}
+                                                                </StatusBadge>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex shrink-0 flex-col gap-1.5 opacity-0 transition-opacity group-hover:opacity-100">
+                                                    <Button variant="ghost" size="icon-sm" onClick={() => startEdit(q)} aria-label={t('doctor.questions.edit_question')}>
+                                                        <Edit3 className="size-4" />
+                                                    </Button>
+                                                    <Button variant="ghost" size="icon-sm" onClick={() => handleDelete(q.id)} className="text-muted-foreground hover:text-destructive" aria-label="Delete">
+                                                        <Trash2 className="size-4" />
+                                                    </Button>
                                                 </div>
                                             </div>
-                                            
-                                            <div className="flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all -translate-y-2 group-hover:translate-y-0">
-                                                <button onClick={() => startEdit(q)} className="w-12 h-12 bg-white dark:bg-white/5 hover:bg-violet-500 hover:text-white border border-gray-100 dark:border-white/10 rounded-xl flex items-center justify-center text-gray-400 transition-all shadow-xl shadow-black/5">
-                                                    <Edit3 className="w-5 h-5" />
-                                                </button>
-                                                <button onClick={() => handleDelete(q.id)} className="w-12 h-12 bg-white dark:bg-white/5 hover:bg-rose-500 hover:text-white border border-gray-100 dark:border-white/10 rounded-xl flex items-center justify-center text-rose-400 transition-all shadow-xl shadow-black/5">
-                                                    <Trash2 className="w-5 h-5" />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </motion.div>
-                                ))
-                            )}
-                        </motion.div>
-                    </div>
+                                        </motion.div>
+                                    ))}
+                                </AnimatePresence>
+                            </div>
+                        )}
+                    </SectionCard>
                 </div>
             </div>
-
-            <style>{`
-                .hidden-scrollbar::-webkit-scrollbar { display: none; }
-                .hidden-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-            `}</style>
         </div>
     );
 };

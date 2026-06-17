@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { 
-  UserCheck, MapPin, ClipboardList, Coffee, 
-  CheckCircle2, Calendar, Clock, Layout, 
-  ChevronRight, ArrowRight, Zap, Info, 
-  AlertCircle, LayoutDashboard, CalendarDays,
-  QrCode, X, ScanLine, RefreshCw
+import {
+  UserCheck, MapPin, Coffee,
+  CheckCircle2, Clock,
+  ArrowRight, QrCode, ScanLine, RefreshCw
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useStudentAuth } from '../context/StudentAuthContext';
@@ -14,6 +12,18 @@ import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import Sidebar from '../components/Sidebar';
 import { useTranslation } from 'react-i18next';
+import {
+  PageContainer,
+  PageHeader,
+  SectionCard,
+  StatusBadge,
+  EmptyState,
+  LoadingState,
+  SegmentedTabs,
+  Modal,
+} from '@/components/common';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 const StudentTimetable = () => {
   const { t, i18n } = useTranslation();
@@ -115,7 +125,7 @@ const StudentTimetable = () => {
   const handleLectureClick = useCallback(async (entry) => {
     let courseId = entry.course_id;
     if (!courseId && gradesData?.grades) {
-      const matched = gradesData.grades.find(g => 
+      const matched = gradesData.grades.find(g =>
         g.course_name?.trim().toLowerCase() === entry.course_name?.trim().toLowerCase()
       );
       if (matched) {
@@ -163,176 +173,131 @@ const StudentTimetable = () => {
     }
   };
 
+  // Whether a row belongs to the student's own section (drives the green start-spine).
+  const isOwnSection = (entry) => {
+    if (!student?.section) return false;
+    if (viewMode === 'my-section') return true;
+    const own = String(student.section);
+    if (Array.isArray(entry.sections)) {
+      return entry.sections.map(String).includes(own);
+    }
+    if (entry.section != null) return String(entry.section) === own;
+    return false;
+  };
+
   const currentDayEntries = getTimetableForDay(selectedDay);
   const hasEntries = currentDayEntries.length > 0;
   const currentDayObj = days.find(d => d.id === selectedDay);
-  const currentDayName = scheduleType === 'lectures' 
+  const currentDayName = scheduleType === 'lectures'
     ? (isAr ? currentDayObj?.arabic : currentDayObj?.name)
     : t('timetable.exams');
 
+  const scheduleTabs = [
+    { value: 'lectures', label: t('timetable.lectures') },
+    { value: 'exams', label: t('timetable.exams') },
+  ];
+
+  const sectionTabs = [
+    { value: 'my-section', label: `${t('timetable.my_section')}${student?.section ? ` (${student.section})` : ''}` },
+    { value: 'all-sections', label: t('timetable.all_sections') },
+  ];
+
   if (loading) {
     return (
-      <div className="flex flex-col justify-center items-center h-screen bg-white dark:bg-[#0c0c14]">
-        <div className="w-12 h-12 border-2 border-gray-200 dark:border-white/10 border-t-[#2cfc7d] rounded-full animate-spin"></div>
+      <div className="min-h-screen bg-background" dir={isAr ? 'rtl' : 'ltr'}>
+        <Sidebar onLogout={handleLogout} />
+        <main className="md:ps-72 min-h-screen">
+          <LoadingState />
+        </main>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0c0c14] text-gray-900 dark:text-white font-sans transition-colors duration-500 overflow-x-hidden relative" dir={isAr ? 'rtl' : 'ltr'}>
-      
-      {/* Background Decor */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[-10%] inset-inline-end-[-5%] w-[50vw] h-[50vw] bg-[#8b5cf6]/5 blur-[120px] rounded-full"></div>
-        <div className="absolute bottom-[-10%] inset-inline-start-[-5%] w-[40vw] h-[40vw] bg-[#2cfc7d]/3 blur-[100px] rounded-full"></div>
-      </div>
-
+    <div className="min-h-screen bg-background text-foreground font-sans" dir={isAr ? 'rtl' : 'ltr'}>
       <Sidebar onLogout={handleLogout} />
 
-      <main className="md:ps-72 min-h-screen relative z-10 flex flex-col">
-        
-        {/* HERO SECTION */}
-        <section className="px-6 lg:px-10 pt-16 pb-12 max-w-[1500px] mx-auto w-full space-y-12">
-          
-          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-10">
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-[#2cfc7d]"></div>
-                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 dark:text-white/30">{t('sidebar.timetable')}</span>
-              </div>
-              <h1 className={`text-[clamp(2.5rem,6vw,5.5rem)] font-black leading-[0.95] tracking-tighter uppercase text-gray-900 dark:text-white ${isAr ? 'font-arabic' : ''}`}>
-                {currentDayName}
-              </h1>
-            </div>
+      <main className="md:ps-72 min-h-screen">
+        <PageContainer>
+          <PageHeader
+            title={scheduleType === 'lectures' ? currentDayName : t('timetable.exams')}
+            description={t('sidebar.timetable')}
+            actions={
+              <SegmentedTabs
+                value={scheduleType}
+                onChange={setScheduleType}
+                options={scheduleTabs}
+              />
+            }
+          />
 
-            <div className="flex bg-white dark:bg-white/5 p-2 rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-xl">
-              <button
-                onClick={() => setScheduleType('lectures')}
-                className={`px-8 py-4 rounded-[1.8rem] text-[11px] font-black uppercase tracking-widest transition-all ${scheduleType === 'lectures' ? 'bg-[#10b981] dark:bg-[#2cfc7d] text-white dark:text-black shadow-lg' : 'text-gray-400'}`}
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+
+            {/* LEFT COLUMN: Filters & Day Selector */}
+            <div className="space-y-6 lg:col-span-4">
+              <SectionCard title={t('common.filter')}>
+                <SegmentedTabs
+                  value={viewMode}
+                  onChange={setViewMode}
+                  options={sectionTabs}
+                  className="w-full"
+                />
+              </SectionCard>
+
+              <SectionCard
+                title={t('common.navigation')}
+                className={cn(
+                  'transition-opacity',
+                  scheduleType === 'exams' && 'pointer-events-none opacity-50'
+                )}
               >
-                {t('timetable.lectures')}
-              </button>
-              <button
-                onClick={() => setScheduleType('exams')}
-                className={`px-8 py-4 rounded-[1.8rem] text-[11px] font-black uppercase tracking-widest transition-all ${scheduleType === 'exams' ? 'bg-[#10b981] dark:bg-[#2cfc7d] text-white dark:text-black shadow-lg' : 'text-gray-400'}`}
-              >
-                {t('timetable.exams')}
-              </button>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pb-20">
-            
-            {/* MOBILE ONLY: Horizontal Day Picker & Section Toggle */}
-            <div className="lg:hidden space-y-6">
-               <div className="flex bg-white dark:bg-white/5 p-2 rounded-[2rem] border border-gray-100 dark:border-white/5 shadow-xl">
-                  <button
-                    onClick={() => setViewMode('my-section')}
-                    className={`flex-1 py-3 rounded-[1.5rem] text-[9px] font-black uppercase tracking-widest transition-all ${viewMode === 'my-section' ? 'bg-[#10b981] dark:bg-[#2cfc7d] text-white dark:text-black shadow-lg' : 'text-gray-400'}`}
-                  >
-                    {t('timetable.my_section')}
-                  </button>
-                  <button
-                    onClick={() => setViewMode('all-sections')}
-                    className={`flex-1 py-3 rounded-[1.5rem] text-[9px] font-black uppercase tracking-widest transition-all ${viewMode === 'all-sections' ? 'bg-[#10b981] dark:bg-[#2cfc7d] text-white dark:text-black shadow-lg' : 'text-gray-400'}`}
-                  >
-                    {t('timetable.all_sections')}
-                  </button>
-               </div>
-
-               <div className={`flex items-center gap-3 overflow-x-auto no-scrollbar pb-2 transition-all duration-500 ${scheduleType === 'exams' ? 'opacity-40 pointer-events-none' : ''}`}>
+                <div className="grid grid-cols-2 gap-2">
                   {days.map(day => {
                     const isActive = selectedDay === day.id;
                     return (
                       <button
                         key={day.id}
                         onClick={() => setSelectedDay(day.id)}
-                        className={`flex-shrink-0 px-6 py-4 rounded-[1.8rem] flex flex-col items-center gap-1 border transition-all duration-300 ${isActive ? 'bg-black dark:bg-white text-white dark:text-black border-transparent shadow-xl scale-105' : 'bg-white dark:bg-white/5 border-gray-100 dark:border-white/5 text-gray-400'}`}
+                        aria-pressed={isActive}
+                        className={cn(
+                          'flex items-center justify-center rounded-lg border px-3 py-2.5 text-sm font-medium transition-colors',
+                          isAr ? 'font-arabic' : '',
+                          isActive
+                            ? 'border-primary/30 bg-primary/10 text-primary'
+                            : 'border-border bg-muted/40 text-muted-foreground hover:bg-muted/60 hover:text-foreground'
+                        )}
                       >
-                        <span className={`text-sm font-black ${isAr ? 'font-arabic' : ''}`}>{isAr ? day.arabic : day.id.slice(0, 3)}</span>
+                        {isAr ? day.arabic : day.name}
                       </button>
                     );
                   })}
-               </div>
+                </div>
+              </SectionCard>
             </div>
 
-            {/* LEFT COLUMN: Controls & Day Selector (Desktop Only) */}
-            <div className={`hidden lg:block lg:col-span-4 space-y-8 transition-all duration-500 ${scheduleType === 'exams' ? 'opacity-40 pointer-events-none' : ''}`}>
-              
-              {/* Context Selector */}
-              <div className="bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-10 space-y-8">
-                 <div className="flex items-center justify-between">
-                    <h2 className="text-[9px] font-black uppercase tracking-[0.5em] text-gray-400 dark:text-white/30">{t('common.filter')}</h2>
-                    <Zap className="w-4 h-4 text-[#8b5cf6]" />
-                 </div>
-                 <div className="space-y-4">
-                    <button
-                      onClick={() => setViewMode('my-section')}
-                      className={`w-full flex items-center justify-between p-6 rounded-[1.5rem] border transition-all ${viewMode === 'my-section' ? 'bg-[#10b981]/5 border-[#10b981]/20 text-[#10b981] dark:text-[#2cfc7d]' : 'bg-gray-50 dark:bg-white/5 border-transparent text-gray-400'}`}
-                    >
-                      <span className="text-xs font-black uppercase tracking-widest">{t('timetable.my_section')} ({student?.section})</span>
-                      {viewMode === 'my-section' && <CheckCircle2 className="w-4 h-4" />}
-                    </button>
-                    <button
-                      onClick={() => setViewMode('all-sections')}
-                      className={`w-full flex items-center justify-between p-6 rounded-[1.5rem] border transition-all ${viewMode === 'all-sections' ? 'bg-[#10b981]/5 border-[#10b981]/20 text-[#10b981] dark:text-[#2cfc7d]' : 'bg-gray-50 dark:bg-white/5 border-transparent text-gray-400'}`}
-                    >
-                      <span className="text-xs font-black uppercase tracking-widest">{t('timetable.all_sections')}</span>
-                      {viewMode === 'all-sections' && <CheckCircle2 className="w-4 h-4" />}
-                    </button>
-                 </div>
-              </div>
-
-              {/* Day Selector Matrix */}
-              <div className="bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-10 space-y-8">
-                 <div className="flex items-center justify-between">
-                    <h2 className="text-[9px] font-black uppercase tracking-[0.5em] text-gray-400 dark:text-white/30">{t('common.navigation')}</h2>
-                    <CalendarDays className="w-4 h-4 text-[#2cfc7d]" />
-                 </div>
-                 <div className="grid grid-cols-2 gap-4">
-                    {days.map(day => {
-                      const isActive = selectedDay === day.id;
-                      return (
-                        <button
-                          key={day.id}
-                          onClick={() => setSelectedDay(day.id)}
-                          className={`p-6 rounded-[1.5rem] flex flex-col items-center gap-2 border transition-all duration-500 ${isActive ? 'bg-black dark:bg-white text-white dark:text-black border-transparent shadow-2xl scale-105' : 'bg-gray-50 dark:bg-white/5 border-transparent text-gray-400 hover:bg-gray-100'}`}
-                        >
-                          <span className={`text-xl font-black ${isAr ? 'font-arabic' : ''}`}>{isAr ? day.arabic : day.name}</span>
-                        </button>
-                      );
-                    })}
-                 </div>
-              </div>
-            </div>
-
-            {/* RIGHT COLUMN: Schedule Visualization */}
-            <div className="lg:col-span-8 space-y-8">
-               <div className="flex items-center justify-between px-2">
-                  <div className="flex flex-col">
-                    <h2 className={`text-3xl font-black uppercase tracking-tight ${isAr ? 'font-arabic' : ''}`}>
-                      {scheduleType === 'lectures' ? t('timetable.lectures') : t('timetable.exams')}
-                    </h2>
-                  </div>
-                  <div className="bg-[#10b981]/10 dark:bg-[#2cfc7d]/10 px-6 py-2 rounded-2xl text-[#10b981] dark:text-[#2cfc7d] text-xs font-black uppercase tracking-widest">
-                     {currentDayEntries.length} {isAr ? 'محاضرة' : 'Lecture'}
-                  </div>
-               </div>
-
-               <div className="space-y-6">
-                  {!hasEntries ? (
-                    <div className="bg-white dark:bg-[#0d0d14] border border-dashed border-gray-200 dark:border-white/10 rounded-[3rem] p-24 text-center">
-                       <div className="w-24 h-24 rounded-full bg-gray-50 dark:bg-white/5 flex items-center justify-center mx-auto mb-8">
-                          <Coffee className="w-10 h-10 text-gray-200 dark:text-white/10" />
-                       </div>
-                       <h3 className="text-2xl font-black uppercase tracking-tighter opacity-20">{scheduleType === 'lectures' ? t('timetable.holiday') : t('timetable.no_exams')}</h3>
-                       <p className="text-[10px] font-black uppercase tracking-[0.4em] opacity-10 mt-2">{scheduleType === 'lectures' ? t('timetable.holiday_desc') : t('timetable.no_exams_desc')}</p>
-                    </div>
-                  ) : (
-                    currentDayEntries.map((entry, idx) => {
+            {/* RIGHT COLUMN: Schedule */}
+            <div className="lg:col-span-8">
+              <SectionCard
+                title={scheduleType === 'lectures' ? t('timetable.lectures') : t('timetable.exams')}
+                actions={
+                  <StatusBadge variant="neutral">
+                    {currentDayEntries.length} {isAr ? 'محاضرة' : 'Lecture'}
+                  </StatusBadge>
+                }
+                bodyClassName="p-3 sm:p-4"
+              >
+                {!hasEntries ? (
+                  <EmptyState
+                    icon={Coffee}
+                    title={scheduleType === 'lectures' ? t('timetable.holiday') : t('timetable.no_exams')}
+                    description={scheduleType === 'lectures' ? t('timetable.holiday_desc') : t('timetable.no_exams_desc')}
+                  />
+                ) : (
+                  <div className="space-y-2">
+                    {currentDayEntries.map((entry, idx) => {
                       const now = new Date();
                       const todayName = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][now.getDay()];
-                      
+
                       let isLive = false;
                       let isCompleted = false;
 
@@ -344,7 +309,7 @@ const StudentTimetable = () => {
                         const examDate = new Date(entry.exam_date);
                         const entryDateOnly = new Date(examDate.getFullYear(), examDate.getMonth(), examDate.getDate());
                         const todayDateOnly = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-                        
+
                         if (entryDateOnly < todayDateOnly) {
                           isCompleted = true;
                         } else if (entryDateOnly.getTime() === todayDateOnly.getTime()) {
@@ -353,133 +318,130 @@ const StudentTimetable = () => {
                         }
                       }
 
-                      const borderLeftClass = 
-                        entry.type === 'Lecture' ? 'border-s-[5px] border-s-blue-500' :
-                        entry.type === 'Lab' ? 'border-s-[5px] border-s-purple-500' :
-                        entry.type === 'Section' ? 'border-s-[5px] border-s-emerald-500' : 'border-s-[5px] border-s-[#8b5cf6]';
-
-                      const typeBadgeColor = 
-                        entry.type === 'Lecture' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' :
-                        entry.type === 'Lab' ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20' :
-                        entry.type === 'Section' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-[#8b5cf6]/10 text-[#8b5cf6] border border-[#8b5cf6]/20';
+                      const ownSection = isOwnSection(entry);
 
                       return (
-                        <div 
+                        <div
                           key={entry?.id || idx}
                           onClick={() => scheduleType === 'lectures' ? handleLectureClick(entry) : navigate(`/student/course/${entry.course_id}`)}
-                          className={`group bg-white/80 dark:bg-[#0c0c14]/80 backdrop-blur-md border rounded-[2rem] p-5 md:p-6 flex items-center justify-between gap-4 transition-all duration-500 relative overflow-hidden cursor-pointer ${borderLeftClass} ${isLive ? 'border-[#2cfc7d] shadow-[0_0_50px_rgba(44,252,125,0.08)]' : 'border-gray-100 dark:border-white/[0.03] hover:-translate-y-1 hover:border-purple-500/20 hover:shadow-2xl hover:shadow-purple-500/[0.04]'}`}
+                          className={cn(
+                            'group relative flex cursor-pointer items-center justify-between gap-4 overflow-hidden rounded-lg border bg-card px-3 py-3 transition-colors hover:bg-muted/50',
+                            isLive ? 'border-primary/40' : 'border-border'
+                          )}
                         >
-                          {isLive && (
-                            <div className="absolute top-0 inset-inline-end-0 bg-[#2cfc7d] text-black px-4 py-1 rounded-bl-[1rem] font-black text-[8px] uppercase tracking-[0.2em] animate-pulse">
-                               {t('mavi.live_now')}
-                            </div>
+                          {/* Green start-spine for the student's own section */}
+                          {ownSection && (
+                            <span className="absolute inset-y-2 start-0 w-0.5 rounded-full bg-primary" />
                           )}
 
-                          <div className="flex items-center gap-4 md:gap-6 flex-1 min-w-0">
-                             <div className={`w-14 h-14 md:w-16 md:h-16 rounded-[1.25rem] md:rounded-[1.5rem] flex flex-col items-center justify-center border transition-all duration-500 shrink-0 ${isLive ? 'bg-[#2cfc7d] text-black border-transparent shadow-xl' : 'bg-gray-50 dark:bg-white/[0.03] border-gray-100 dark:border-white/5 text-gray-400 dark:text-purple-300/80 group-hover:bg-black dark:group-hover:bg-white group-hover:text-white dark:group-hover:text-black group-hover:border-transparent'}`}>
-                                <Clock className="w-4 h-4 md:w-5 md:h-5 mb-0.5" />
-                                <span className="text-[8px] md:text-[9px] font-black tracking-wider">{entry.start_time?.substring(0, 5)}</span>
-                             </div>
+                          <div className="flex min-w-0 flex-1 items-center gap-3 ps-1.5">
+                            {/* Time chip */}
+                            <div
+                              className={cn(
+                                'flex size-12 shrink-0 flex-col items-center justify-center rounded-lg border',
+                                isLive
+                                  ? 'border-primary/30 bg-primary/10 text-primary'
+                                  : 'border-border bg-muted/40 text-muted-foreground'
+                              )}
+                            >
+                              <Clock className="mb-0.5 size-4" />
+                              <span className="text-[10px] font-medium tabular-nums">{entry.start_time?.substring(0, 5)}</span>
+                            </div>
 
-                             <div className="space-y-1.5 min-w-0 flex-1">
-                                <div className="flex items-center gap-2">
-                                   <span className={`px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest ${typeBadgeColor}`}>
-                                      {entry.type}
-                                   </span>
-                                   {viewMode === 'all-sections' && (
-                                     <span className="px-2 py-0.5 rounded-full bg-gray-100/80 dark:bg-white/[0.04] text-gray-500 dark:text-white/40 text-[8px] font-black uppercase tracking-widest border border-gray-200/20 dark:border-white/[0.02]">
-                                        SEC: {entry.sections_text}
-                                     </span>
-                                   )}
-                                </div>
-                                 <div className="flex items-center gap-2">
-                                   <h3 className={`text-base md:text-xl font-black uppercase tracking-tighter truncate text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors ${isAr ? 'font-arabic' : ''} ${isCompleted ? 'line-through opacity-40' : ''}`}>
-                                     {entry.course_name}
-                                   </h3>
-                                    {entry.exam_date && (
-                                      <span className="px-4 py-1 rounded-xl bg-[#10b981]/10 text-[#10b981] dark:text-[#2cfc7d] text-xs font-black uppercase tracking-widest whitespace-nowrap">
-                                        {new Date(entry.exam_date).toLocaleDateString(isAr ? 'ar-EG' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric' })}
-                                      </span>
-                                    )}
-                                  </div>
-                                  {(entry.instructor || entry.location) && (
-                                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1">
-                                      {entry.instructor && (
-                                        <div className="flex items-center gap-1.5 text-gray-500 dark:text-slate-400">
-                                          <UserCheck size={12} className="text-[#a855f7]/70" />
-                                          <span className="text-[9px] font-black uppercase tracking-widest truncate max-w-[120px] md:max-w-none text-gray-400 dark:text-gray-400/80">{entry.instructor}</span>
-                                        </div>
-                                      )}
-                                      {entry.location && (
-                                        <div className="flex items-center gap-1.5 text-gray-500 dark:text-slate-400">
-                                          <MapPin size={12} className="text-[#2cfc7d]/70" />
-                                          <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-400/80">{entry.location}</span>
-                                        </div>
-                                      )}
+                            <div className="min-w-0 flex-1 space-y-1.5">
+                              <div className="flex flex-wrap items-center gap-1.5">
+                                <StatusBadge variant="neutral">{entry.type}</StatusBadge>
+                                {isLive && (
+                                  <StatusBadge variant="success">{t('mavi.live_now')}</StatusBadge>
+                                )}
+                                {viewMode === 'all-sections' && (
+                                  <StatusBadge variant="neutral">SEC: {entry.sections_text}</StatusBadge>
+                                )}
+                              </div>
+
+                              <div className="flex flex-wrap items-center gap-2">
+                                <h3
+                                  className={cn(
+                                    'truncate text-sm font-medium text-foreground',
+                                    isAr ? 'font-arabic' : '',
+                                    isCompleted && 'text-muted-foreground line-through'
+                                  )}
+                                >
+                                  {entry.course_name}
+                                </h3>
+                                {entry.exam_date && (
+                                  <StatusBadge variant="success">
+                                    {new Date(entry.exam_date).toLocaleDateString(isAr ? 'ar-EG' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric' })}
+                                  </StatusBadge>
+                                )}
+                              </div>
+
+                              {(entry.instructor || entry.location) && (
+                                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                                  {entry.instructor && (
+                                    <div className="flex min-w-0 items-center gap-1.5">
+                                      <UserCheck className="size-3.5 shrink-0" />
+                                      <span className="truncate">{entry.instructor}</span>
                                     </div>
                                   )}
-                              </div>
+                                  {entry.location && (
+                                    <div className="flex items-center gap-1.5">
+                                      <MapPin className="size-3.5 shrink-0" />
+                                      <span className="truncate">{entry.location}</span>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
                           </div>
 
-                          <div className={`w-10 h-10 md:w-12 md:h-12 rounded-[1rem] md:rounded-xl flex items-center justify-center transition-all duration-300 border shrink-0 ${isCompleted ? 'bg-[#10b981] border-[#10b981] text-white shadow-lg shadow-emerald-500/10' : scheduleType === 'lectures' ? 'bg-[#8b5cf6]/10 hover:bg-[#8b5cf6] text-[#8b5cf6] hover:text-white border-[#8b5cf6]/20 hover:border-transparent shadow-md hover:shadow-purple-500/30' : 'bg-gray-50 dark:bg-white/5 border-gray-100 dark:border-white/5 text-gray-200 dark:text-white/5'}`}>
-                             {isCompleted ? <CheckCircle2 className="w-5 h-5" /> : scheduleType === 'lectures' ? <QrCode className="w-4 h-4 md:w-5 md:h-5" /> : <ArrowRight className={`w-5 h-5 ${isAr ? 'rotate-180' : ''}`} />}
+                          {/* Trailing action / status */}
+                          <div
+                            className={cn(
+                              'flex size-9 shrink-0 items-center justify-center rounded-lg border transition-colors',
+                              isCompleted
+                                ? 'border-primary/30 bg-primary/10 text-primary'
+                                : 'border-border bg-muted/40 text-muted-foreground group-hover:text-foreground'
+                            )}
+                          >
+                            {isCompleted
+                              ? <CheckCircle2 className="size-4" />
+                              : scheduleType === 'lectures'
+                                ? <QrCode className="size-4" />
+                                : <ArrowRight className={cn('size-4', isAr && 'rotate-180')} />}
                           </div>
                         </div>
                       );
-                    })
-                  )}
-               </div>
+                    })}
+                  </div>
+                )}
+              </SectionCard>
             </div>
 
           </div>
-        </section>
+        </PageContainer>
       </main>
 
       {/* QR Attendance Modal */}
-      {qrModal && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-6" dir={isAr ? 'rtl' : 'ltr'}>
-          <div
-            onClick={() => setQrModal(null)}
-            className="absolute inset-0 bg-black/70 backdrop-blur-md"
-          />
-          <div className="relative z-10 bg-white dark:bg-[#0c0c0e] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-8 sm:p-10 w-full max-w-sm shadow-2xl animate-in zoom-in-95 duration-200 text-center">
-            {/* Glow */}
-            <div className="absolute top-0 inset-inline-end-0 w-64 h-64 bg-[#8b5cf6]/10 blur-[80px] rounded-full pointer-events-none" />
-
-            {/* Close */}
-            <button
-              onClick={() => setQrModal(null)}
-              className="absolute top-5 right-5 rtl:left-5 rtl:right-auto z-50 w-10 h-10 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer"
-            >
-              <X className="w-4 h-4 pointer-events-none" />
-            </button>
-
-            {/* Header */}
-            <div className="flex flex-col items-center gap-3 mb-8 relative z-10">
-              <div className="w-14 h-14 rounded-2xl bg-[#8b5cf6]/10 border border-[#8b5cf6]/20 flex items-center justify-center">
-                <QrCode className="w-7 h-7 text-[#8b5cf6]" />
-              </div>
-              <div>
-                <h3 className="text-lg font-black text-gray-900 dark:text-white tracking-tight uppercase">
-                  {qrModal.courseName}
-                </h3>
-                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mt-1">
-                  {isAr ? 'رمز الحضور' : 'ATTENDANCE QR'}
-                </p>
-              </div>
-            </div>
-
-            {/* QR or Loader */}
-            <div className="relative z-10 flex items-center justify-center">
+      <Modal
+        open={!!qrModal}
+        onOpenChange={(open) => { if (!open) setQrModal(null); }}
+        title={qrModal?.courseName}
+        description={isAr ? 'رمز الحضور' : 'Attendance QR'}
+        size="sm"
+      >
+        {qrModal && (
+          <div className="flex flex-col items-center gap-6 py-2">
+            <div className="flex items-center justify-center">
               {qrLoading || !qrModal.token ? (
-                <div className="w-[220px] h-[220px] flex flex-col items-center justify-center gap-4 bg-gray-50 dark:bg-white/[0.02] rounded-[2rem] border border-gray-100 dark:border-white/5">
-                  <ScanLine className="w-10 h-10 text-[#8b5cf6] animate-pulse" />
-                  <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+                <div className="flex size-[220px] flex-col items-center justify-center gap-3 rounded-lg border bg-muted/40">
+                  <ScanLine className="size-8 text-primary animate-pulse" />
+                  <span className="text-xs text-muted-foreground">
                     {isAr ? 'جارٍ التحميل...' : 'Loading...'}
                   </span>
                 </div>
               ) : (
-                <div className="p-4 bg-white rounded-[1.5rem] shadow-xl border border-gray-100 dark:border-white/10">
+                <div className="rounded-lg border bg-white p-4">
                   <QRCodeSVG
                     value={qrModal.token}
                     size={200}
@@ -492,29 +454,24 @@ const StudentTimetable = () => {
               )}
             </div>
 
-            {/* Hint */}
             {qrModal.token && (
-              <div className="mt-8 relative z-10">
-                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+              <div className="flex flex-col items-center gap-3 text-center">
+                <p className="text-xs text-muted-foreground">
                   {isAr ? 'اعرض الرمز للدكتور لتسجيل حضورك' : 'Show this QR to your instructor'}
                 </p>
-                <button
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => handleLectureClick({ course_id: qrModal.courseId, course_name: qrModal.courseName })}
-                  className="mt-4 flex items-center gap-2 mx-auto text-[#8b5cf6] text-[10px] font-black uppercase tracking-widest hover:opacity-70 transition-opacity"
                 >
-                  <RefreshCw className="w-3.5 h-3.5" />
+                  <RefreshCw className="size-3.5" />
                   {isAr ? 'تحديث' : 'Refresh'}
-                </button>
+                </Button>
               </div>
             )}
           </div>
-        </div>
-      )}
-
-      <style>{`
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-      `}</style>
+        )}
+      </Modal>
     </div>
   );
 };

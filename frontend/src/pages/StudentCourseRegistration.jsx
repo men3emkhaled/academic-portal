@@ -3,13 +3,20 @@ import { useTranslation } from 'react-i18next';
 import { useStudentAuth } from '../context/StudentAuthContext';
 import { useStudentData } from '../context/StudentDataContext';
 import { useNavigate } from 'react-router-dom';
-import { 
-  BookOpen, Plus, Trash2, Search, CheckSquare, 
-  Layers, AlertTriangle, HelpCircle, Loader2, Clock, Zap, CheckCircle2
+import { AnimatePresence, motion } from 'framer-motion';
+import {
+  BookOpen, Plus, Trash2, CheckSquare,
+  Layers, AlertTriangle, Clock, Zap, CheckCircle2, Check
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Sidebar from '../components/Sidebar';
 import studentApi from '../services/studentApi';
+import {
+  PageContainer, PageHeader, SectionCard, StatCard, StatusBadge,
+  EmptyState, LoadingState, SearchInput, Toolbar, SegmentedTabs, Modal,
+} from '@/components/common';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 const StudentCourseRegistration = () => {
   const { student, logout } = useStudentAuth();
@@ -181,33 +188,38 @@ const StudentCourseRegistration = () => {
       id: 'past',
       labelEn: 'Done',
       labelAr: 'المواد المنتهية',
-      icon: <CheckCircle2 className="w-4 h-4" />,
+      icon: CheckCircle2,
       courses: pastCourses,
-      color: 'bg-gray-900 dark:bg-white text-white dark:text-black',
-      activeColor: 'text-gray-400',
     },
     {
       id: 'active',
       labelEn: 'Now',
       labelAr: 'الترم الحالي',
-      icon: <Zap className="w-4 h-4" />,
+      icon: Zap,
       courses: activeCourses,
-      color: 'bg-[#2cfc7d] text-black shadow-lg shadow-emerald-500/20',
-      activeColor: 'text-gray-400',
     },
     {
       id: 'upcoming',
       labelEn: 'Next',
       labelAr: 'مواد قادمة',
-      icon: <Clock className="w-4 h-4" />,
+      icon: Clock,
       courses: upcomingCourses,
-      color: 'bg-[#8b5cf6] text-white',
-      activeColor: 'text-gray-400',
     },
   ];
 
-  const currentTabData = tabs.find(t => t.id === activeTab);
+  const tabOptions = tabs.map(tab => ({
+    value: tab.id,
+    label: isAr ? tab.labelAr : tab.labelEn,
+    icon: tab.icon,
+    count: tab.courses.length,
+  }));
+
+  const currentTabData = tabs.find(tab => tab.id === activeTab);
   const displayCourses = currentTabData?.courses || [];
+
+  const sectionDescription = isAr
+    ? (activeTab === 'past' ? 'مواد الفصول السابقة — يمكنك التعديل بحرية' : activeTab === 'active' ? 'مواد الفصل الحالي' : 'مواد الفصول القادمة — سجّل مسبقاً')
+    : (activeTab === 'past' ? 'Past semesters — edit freely' : activeTab === 'active' ? 'Current semester courses' : 'Upcoming semesters — register early');
 
   // Group display courses by semester
   const bySemester = useMemo(() => {
@@ -221,286 +233,228 @@ const StudentCourseRegistration = () => {
   }, [displayCourses]);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0c0c14] text-gray-900 dark:text-white font-sans transition-colors duration-500 overflow-x-hidden relative" dir={isAr ? 'rtl' : 'ltr'}>
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[-10%] inset-inline-end-[-5%] w-[50vw] h-[50vw] bg-[#8b5cf6]/5 blur-[120px] rounded-full" />
-        <div className="absolute bottom-[-10%] inset-inline-start-[-5%] w-[40vw] h-[40vw] bg-[#2cfc7d]/3 blur-[100px] rounded-full" />
-      </div>
-
+    <div className="min-h-screen bg-background text-foreground font-sans" dir={isAr ? 'rtl' : 'ltr'}>
       <Sidebar onLogout={handleLogout} />
 
-      <main className="md:ps-72 min-h-screen relative z-10 flex flex-col">
-        <section className="px-6 lg:px-10 pt-16 pb-12 max-w-[1500px] mx-auto w-full space-y-12">
+      <main className="md:ps-72 min-h-screen">
+        <PageContainer>
+          <PageHeader
+            icon={BookOpen}
+            title={isAr ? 'تسجيل الكورسات' : 'My Courses'}
+            description={t('course_registration.title')}
+            actions={
+              <StatCard
+                label={t('course_registration.total_credits')}
+                value={totalCredits}
+                icon={Layers}
+                accent
+                className="min-w-[10rem]"
+              />
+            }
+          />
 
-          {/* HERO */}
-          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-10">
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-[#2cfc7d]" />
-                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 dark:text-white/30">
-                  {t('course_registration.title')}
-                </span>
-              </div>
-              <h1 className={`text-[clamp(2.5rem,6vw,5.5rem)] font-black leading-[0.95] tracking-tighter uppercase text-gray-900 dark:text-white ${isAr ? 'font-arabic' : ''}`}>
-                {isAr ? 'تسجيل الكورسات' : 'My Courses'}
-              </h1>
-            </div>
+          <Toolbar>
+            <SegmentedTabs
+              value={activeTab}
+              onChange={(val) => { setActiveTab(val); setSearchQuery(''); setSelectedCourses(new Set()); }}
+              options={tabOptions}
+            />
+            <SearchInput
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              placeholder={isAr ? 'بحث...' : 'Search courses...'}
+            />
+          </Toolbar>
 
-            <div className="bg-white dark:bg-white/5 border border-gray-100 dark:border-white/5 p-10 rounded-[3rem] shadow-xl flex items-center gap-8 group">
-              <div className="w-20 h-20 rounded-full bg-[#10b981]/10 dark:bg-[#2cfc7d]/10 flex items-center justify-center text-[#10b981] dark:text-[#2cfc7d] group-hover:scale-110 transition-transform shadow-inner">
-                <Layers className="w-10 h-10" />
-              </div>
-              <div>
-                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 dark:text-white/30">
-                  {t('course_registration.total_credits')}
-                </span>
-                <div className="text-5xl font-black tracking-tighter text-gray-900 dark:text-white">{totalCredits}</div>
-              </div>
-            </div>
-          </div>
-
-          {/* 3-TAB SWITCHER + SEARCH */}
-          <div className="flex flex-col md:flex-row items-center gap-4 justify-between bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 p-3 rounded-[2rem] shadow-md">
-            <div className="flex gap-1.5 w-full md:w-auto overflow-x-auto sm:overflow-x-visible no-scrollbar pb-1 sm:pb-0">
-              {tabs.map(tab => {
-                const isSel = activeTab === tab.id;
+          {loading ? (
+            <LoadingState label={t('dashboard.loading')} />
+          ) : displayCourses.length === 0 ? (
+            <EmptyState
+              icon={BookOpen}
+              title={isAr ? 'لا توجد مواد هنا' : 'No courses here'}
+              description={sectionDescription}
+            />
+          ) : (
+            <div className="space-y-5 pb-28">
+              {Object.keys(bySemester).sort((a, b) => Number(a) - Number(b)).map(semKey => {
+                const coursesInSem = bySemester[semKey];
+                const notEnrolledHere = coursesInSem.filter(c => !c.enrolled);
+                const allSelectedHere = notEnrolledHere.length > 0 && notEnrolledHere.every(c => selectedCourses.has(c.id));
                 return (
-                  <button
-                    key={tab.id}
-                    onClick={() => { setActiveTab(tab.id); setSearchQuery(''); setSelectedCourses(new Set()); }}
-                    className={`flex-1 md:flex-initial flex items-center justify-center gap-1 sm:gap-2 px-3 sm:px-5 py-3.5 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider sm:tracking-widest transition-all ${isSel ? tab.color : 'text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
+                  <SectionCard
+                    key={semKey}
+                    title={isAr ? `الترم ${semKey}` : `Semester ${semKey}`}
+                    description={sectionDescription}
+                    bodyClassName="p-0"
+                    actions={
+                      notEnrolledHere.length > 0 ? (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => toggleAllCourses(notEnrolledHere)}
+                          className="text-primary hover:text-primary"
+                        >
+                          {allSelectedHere
+                            ? (isAr ? 'إلغاء تحديد الكل' : 'Deselect All')
+                            : (isAr ? 'تحديد الكل' : 'Select All')}
+                        </Button>
+                      ) : null
+                    }
                   >
-                    {tab.icon}
-                    <span className="whitespace-nowrap">{isAr ? tab.labelAr : tab.labelEn}</span>
-                    <span className={`text-[8px] sm:text-[9px] px-1.5 py-0.5 rounded-full ${isSel ? 'bg-black/10' : 'bg-gray-200 dark:bg-white/10 text-gray-500'}`}>
-                      {tab.courses.length}
-                    </span>
-                  </button>
+                    <ul className="divide-y divide-border">
+                      {coursesInSem.map(course => (
+                        <CourseRow
+                          key={course.id}
+                          course={course}
+                          isEnrolled={course.enrolled}
+                          isSelected={selectedCourses.has(course.id)}
+                          onToggleSelect={() => toggleSelectCourse(course.id)}
+                          onRegister={() => handleRegisterSingle(course.id)}
+                          onDrop={() => setConfirmDropCourse(course)}
+                          actionLoading={actionLoading}
+                          isAr={isAr}
+                          t={t}
+                        />
+                      ))}
+                    </ul>
+                  </SectionCard>
                 );
               })}
             </div>
-
-            <div className="relative w-full md:w-80">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                placeholder={isAr ? 'بحث...' : 'Search courses...'}
-                className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-xl px-6 py-3.5 ps-12 text-sm focus:outline-none focus:border-[#2cfc7d] text-gray-900 dark:text-white transition-all"
-              />
-              <Search className="w-4 h-4 text-gray-400 absolute start-4 top-1/2 -translate-y-1/2" />
-            </div>
-          </div>
-
-          {/* CONTENT */}
-          {loading ? (
-            <div className="flex flex-col justify-center items-center py-20">
-              <Loader2 className="w-12 h-12 text-[#2cfc7d] animate-spin mb-4" />
-              <p className="text-gray-400 text-sm font-bold uppercase tracking-widest">{t('dashboard.loading')}</p>
-            </div>
-          ) : (
-            <div className="space-y-12 pb-32">
-
-              {/* Section label */}
-              <div className="flex items-center gap-3 px-1">
-                <div className={`w-2 h-2 rounded-full ${activeTab === 'active' ? 'bg-[#2cfc7d]' : activeTab === 'upcoming' ? 'bg-[#8b5cf6]' : 'bg-gray-400'}`} />
-                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 dark:text-white/30">
-                  {isAr
-                    ? (activeTab === 'past' ? 'مواد الفصول السابقة — يمكنك التعديل بحرية' : activeTab === 'active' ? 'مواد الفصل الحالي' : 'مواد الفصول القادمة — سجّل مسبقاً')
-                    : (activeTab === 'past' ? 'Past semesters — edit freely' : activeTab === 'active' ? 'Current semester courses' : 'Upcoming semesters — register early')
-                  }
-                </span>
-              </div>
-
-              {displayCourses.length === 0 ? (
-                <div className="bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[3rem] p-16 text-center space-y-4">
-                  <HelpCircle className="w-16 h-16 text-gray-300 dark:text-white/20 mx-auto" />
-                  <p className="text-gray-400 font-bold text-sm">
-                    {isAr ? 'لا توجد مواد هنا' : 'No courses here'}
-                  </p>
-                </div>
-              ) : (
-                Object.keys(bySemester).sort((a, b) => Number(a) - Number(b)).map(semKey => {
-                  const coursesInSem = bySemester[semKey];
-                  const notEnrolledHere = coursesInSem.filter(c => !c.enrolled);
-                  return (
-                    <div key={semKey} className="space-y-6">
-                      <div className="flex items-center justify-between px-2">
-                        <h2 className="text-2xl font-black uppercase tracking-tight">
-                          {isAr ? `الترم ${semKey}` : `Semester ${semKey}`}
-                        </h2>
-                        {notEnrolledHere.length > 0 && (
-                          <button
-                            onClick={() => toggleAllCourses(notEnrolledHere)}
-                            className="text-xs font-black uppercase tracking-widest text-[#2cfc7d] hover:underline"
-                          >
-                            {notEnrolledHere.every(c => selectedCourses.has(c.id))
-                              ? (isAr ? 'إلغاء تحديد الكل' : 'Deselect All')
-                              : (isAr ? 'تحديد الكل' : 'Select All')}
-                          </button>
-                        )}
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-                        {coursesInSem.map(course => (
-                          <CourseCard
-                            key={course.id}
-                            course={course}
-                            isEnrolled={course.enrolled}
-                            isSelected={selectedCourses.has(course.id)}
-                            onToggleSelect={() => toggleSelectCourse(course.id)}
-                            onRegister={() => handleRegisterSingle(course.id)}
-                            onDrop={() => setConfirmDropCourse(course)}
-                            actionLoading={actionLoading}
-                            isAr={isAr}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })
-              )}
-            </div>
           )}
-        </section>
+        </PageContainer>
       </main>
 
       {/* BULK REGISTER BAR */}
-      {selectedCourses.size > 0 && (
-        <div className="fixed bottom-10 start-6 end-6 md:start-[21rem] md:end-6 z-[60] bg-[#10b981] dark:bg-[#2cfc7d] text-black rounded-[2rem] p-6 shadow-2xl flex items-center justify-between gap-6 animate-slideUp">
-          <div className="flex items-center gap-4">
-            <CheckSquare className="w-6 h-6" />
-            <span className="text-sm font-black uppercase tracking-wider">
-              {isAr ? `${selectedCourses.size} مواد محددة` : `${selectedCourses.size} selected`}
-            </span>
-          </div>
-          <button
-            onClick={handleRegisterBulk}
-            disabled={actionLoading}
-            className="bg-black text-white px-8 py-4 rounded-xl text-xs font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all flex items-center gap-2 disabled:opacity-50"
+      <AnimatePresence>
+        {selectedCourses.size > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 16 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+            className="fixed bottom-6 start-4 end-4 md:start-[20rem] md:end-6 z-[60] flex items-center justify-between gap-4 rounded-xl border bg-card p-3 shadow-sm"
           >
-            {actionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
-            {isAr ? 'تسجيل المحدد' : 'Register'}
-          </button>
-        </div>
-      )}
+            <div className="flex items-center gap-2 ps-1 text-sm font-medium text-foreground">
+              <span className="flex size-7 items-center justify-center rounded-md border border-primary/20 bg-primary/10 text-primary">
+                <CheckSquare className="size-4" />
+              </span>
+              {isAr ? `${selectedCourses.size} مواد محددة` : `${selectedCourses.size} selected`}
+            </div>
+            <Button onClick={handleRegisterBulk} disabled={actionLoading}>
+              {actionLoading ? <Spinner /> : <Plus className="size-4" />}
+              {isAr ? 'تسجيل المحدد' : 'Register'}
+            </Button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* CONFIRM DROP MODAL */}
-      {confirmDropCourse && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60 dark:bg-black/90 backdrop-blur-sm" onClick={() => setConfirmDropCourse(null)} />
-          <div className="relative w-full max-w-[500px] bg-white dark:bg-[#0c0c14] border border-gray-200 dark:border-white/10 rounded-[2.5rem] overflow-hidden shadow-2xl p-8 space-y-6 animate-in zoom-in-95 duration-300 text-start">
-            <div className="flex items-center gap-3 text-rose-500">
-              <AlertTriangle className="w-8 h-8" />
-              <h3 className="text-xl font-black uppercase tracking-tight">
-                {isAr ? 'إلغاء تسجيل المادة' : 'Drop Course'}
-              </h3>
-            </div>
-            <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
-              {isAr
-                ? `هل أنت متأكد من إلغاء تسجيل "${confirmDropCourse.name}"؟ سيتم حذف جميع درجاتك نهائياً.`
-                : `Drop "${confirmDropCourse.name}"? All grades for this course will be permanently deleted.`}
-            </p>
-            <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-white/5">
-              <button
-                onClick={() => setConfirmDropCourse(null)}
-                className="px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest text-gray-400 hover:text-gray-900 dark:hover:text-white"
-              >
-                {isAr ? 'إلغاء' : 'Cancel'}
-              </button>
-              <button
-                onClick={handleDropCourse}
-                disabled={actionLoading}
-                className="bg-rose-500 hover:bg-rose-600 text-white px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all flex items-center gap-2 disabled:opacity-50"
-              >
-                {actionLoading && <Loader2 className="w-4 h-4 animate-spin" />}
-                {isAr ? 'إلغاء التسجيل' : 'Drop'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <style>{`
-        @keyframes slideUp {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
+      <Modal
+        open={!!confirmDropCourse}
+        onOpenChange={(open) => { if (!open) setConfirmDropCourse(null); }}
+        size="sm"
+        title={
+          <span className="flex items-center gap-2 text-destructive">
+            <AlertTriangle className="size-5" />
+            {isAr ? 'إلغاء تسجيل المادة' : 'Drop Course'}
+          </span>
         }
-        .animate-slideUp { animation: slideUp 0.3s ease-out forwards; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-      `}</style>
+        description={
+          confirmDropCourse
+            ? (isAr
+                ? `هل أنت متأكد من إلغاء تسجيل "${confirmDropCourse.name}"؟ سيتم حذف جميع درجاتك نهائياً.`
+                : `Drop "${confirmDropCourse.name}"? All grades for this course will be permanently deleted.`)
+            : undefined
+        }
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setConfirmDropCourse(null)}>
+              {isAr ? 'إلغاء' : 'Cancel'}
+            </Button>
+            <Button variant="destructive" onClick={handleDropCourse} disabled={actionLoading}>
+              {actionLoading && <Spinner />}
+              {isAr ? 'إلغاء التسجيل' : 'Drop'}
+            </Button>
+          </>
+        }
+      />
     </div>
   );
 };
 
-const CourseCard = ({ course, isEnrolled, isSelected, onToggleSelect, onRegister, onDrop, actionLoading, isAr }) => {
+const Spinner = () => (
+  <span className="inline-block size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+);
+
+const CourseRow = ({ course, isEnrolled, isSelected, onToggleSelect, onRegister, onDrop, actionLoading, isAr, t }) => {
   return (
-    <div
+    <li
       onClick={!isEnrolled ? onToggleSelect : undefined}
-      className={`group bg-white dark:bg-[#0d0d14] border rounded-[2.5rem] p-8 space-y-6 transition-all duration-500 relative overflow-hidden shadow-sm
-        ${!isEnrolled ? 'cursor-pointer hover:border-[#2cfc7d]/40' : ''}
-        ${isSelected ? 'border-[#10b981] dark:border-[#2cfc7d] bg-emerald-500/5' : 'border-gray-100 dark:border-white/5'}
-        ${isEnrolled ? 'ring-1 ring-[#2cfc7d]/20' : ''}
-      `}
+      className={cn(
+        'flex items-center gap-3 px-4 py-3 transition-colors',
+        !isEnrolled && 'cursor-pointer hover:bg-muted/50',
+        isSelected && 'bg-primary/5'
+      )}
     >
-      {/* Enrolled badge */}
-      {isEnrolled && (
-        <div className="absolute top-6 inset-inline-end-6">
-          <span className="flex items-center gap-1 text-[8px] font-black uppercase tracking-widest text-[#10b981] dark:text-[#2cfc7d] bg-[#10b981]/10 dark:bg-[#2cfc7d]/10 px-2.5 py-1 rounded-full">
-            <CheckCircle2 className="w-3 h-3" />
-            {isAr ? 'مسجل' : 'Enrolled'}
-          </span>
-        </div>
+      {/* Selection control / enrolled marker */}
+      {!isEnrolled ? (
+        <span
+          className={cn(
+            'flex size-5 shrink-0 items-center justify-center rounded-md border transition-colors',
+            isSelected ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-transparent'
+          )}
+        >
+          {isSelected && <Check className="size-3.5" />}
+        </span>
+      ) : (
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-md border border-primary/20 bg-primary/10 text-primary">
+          <BookOpen className="size-4" />
+        </span>
       )}
 
-      <div className="flex justify-between items-start">
-        <div className="w-12 h-12 rounded-2xl bg-gray-50 dark:bg-white/5 flex items-center justify-center text-[#10b981] dark:text-[#2cfc7d] shadow-inner">
-          <BookOpen className="w-6 h-6" />
+      {/* Course identity */}
+      <div className="min-w-0 flex-1 text-start">
+        <div className="flex items-center gap-2">
+          <p className={cn('truncate text-sm font-medium text-foreground', isAr && 'font-arabic')}>
+            {course.name}
+          </p>
+          {isEnrolled && (
+            <StatusBadge variant="success" icon={CheckCircle2}>
+              {isAr ? 'مسجل' : 'Enrolled'}
+            </StatusBadge>
+          )}
         </div>
-
-        {!isEnrolled ? (
-          <div className={`w-6 h-6 rounded-md border flex items-center justify-center transition-all ${isSelected ? 'bg-[#10b981] dark:bg-[#2cfc7d] border-transparent' : 'border-gray-300 dark:border-white/10 bg-transparent'}`}>
-            {isSelected && <span className="text-black font-black text-xs">✓</span>}
-          </div>
-        ) : (
-          <button
-            onClick={e => { e.stopPropagation(); onDrop(); }}
-            disabled={actionLoading}
-            className="w-10 h-10 rounded-full border border-gray-100 dark:border-white/10 flex items-center justify-center hover:bg-rose-500/15 hover:text-rose-500 hover:border-transparent transition-all duration-300 disabled:opacity-50"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
-        )}
+        <p className="mt-0.5 text-xs text-muted-foreground">
+          {course.code} · {course.credit_hours || 3} {isAr ? 'ساعة' : 'cr'}
+        </p>
       </div>
 
-      <div className="space-y-1.5 text-start">
-        <span className="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 dark:text-white/20">{course.code}</span>
-        <h3 className={`text-xl font-black leading-tight uppercase tracking-tighter ${isAr ? 'font-arabic' : ''}`}>
-          {course.name}
-        </h3>
-      </div>
-
-      <div className="flex items-center justify-between border-t border-black/5 dark:border-white/5 pt-6">
-        <div className="flex flex-col text-start">
-          <span className="text-[8px] font-black uppercase tracking-widest text-gray-400 mb-1">
-            {isAr ? 'ساعات معتمدة' : 'Credits'}
-          </span>
-          <span className="text-sm font-black text-gray-900 dark:text-white">{course.credit_hours || 3}</span>
-        </div>
-
-        {!isEnrolled && (
-          <button
-            onClick={e => { e.stopPropagation(); onRegister(); }}
-            disabled={actionLoading}
-            className="bg-[#10b981]/15 hover:bg-[#10b981] dark:bg-[#2cfc7d]/15 dark:hover:bg-[#2cfc7d] text-[#10b981] dark:text-[#2cfc7d] hover:text-black dark:hover:text-black px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-1.5 disabled:opacity-50"
-          >
-            {actionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
-            {isAr ? 'تسجيل' : 'Add'}
-          </button>
-        )}
-      </div>
-    </div>
+      {/* Actions */}
+      {!isEnrolled ? (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={e => { e.stopPropagation(); onRegister(); }}
+          disabled={actionLoading}
+          className="shrink-0"
+        >
+          {actionLoading ? <Spinner /> : <Plus className="size-3.5" />}
+          {isAr ? 'تسجيل' : 'Add'}
+        </Button>
+      ) : (
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          onClick={e => { e.stopPropagation(); onDrop(); }}
+          disabled={actionLoading}
+          aria-label={isAr ? 'إلغاء التسجيل' : 'Drop'}
+          className="shrink-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+        >
+          <Trash2 className="size-4" />
+        </Button>
+      )}
+    </li>
   );
 };
 

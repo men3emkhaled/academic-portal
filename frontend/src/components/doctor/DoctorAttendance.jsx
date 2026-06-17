@@ -2,13 +2,28 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useDoctorAuth } from '../../context/DoctorAuthContext';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Users, QrCode, Plus, CheckCircle2, Circle, Search, X, Edit2, 
-  Trash2, Save, FileSpreadsheet, Calendar, Clock, ChevronRight, 
-  UserPlus, History, BarChart2, Zap, Sparkles, ShieldCheck,
-  Target, Activity, ArrowRight, UserCheck
+import {
+  QrCode, Plus, Circle, X, Edit2,
+  Trash2, Save, FileSpreadsheet, Calendar, Clock,
+  History, CheckCircle2, UserCheck, Activity
 } from 'lucide-react';
 import { Scanner } from '@yudiel/react-qr-scanner';
+import {
+  PageHeader,
+  SectionCard,
+  StatCard,
+  EmptyState,
+  SearchInput,
+} from '@/components/common';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 const DoctorAttendance = ({ courses }) => {
   const { doctorApi } = useDoctorAuth();
@@ -92,7 +107,7 @@ const DoctorAttendance = ({ courses }) => {
 
   const handleScan = async (detectedCodes) => {
     if (!detectedCodes || detectedCodes.length === 0 || !activeSession) return;
-    
+
     const tokenValue = detectedCodes[0]?.rawValue || '';
     if (!tokenValue) return;
 
@@ -196,283 +211,252 @@ const DoctorAttendance = ({ courses }) => {
     return sName.includes(query) || sId.includes(query);
   });
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.05 } }
-  };
-
-  const itemVariants = {
-    hidden: { y: 10, opacity: 0 },
-    visible: { y: 0, opacity: 1 }
-  };
+  const presenceDensity = students.length ? Math.round((records.length / students.length) * 100) : 0;
 
   return (
-    <motion.div 
-      initial="hidden"
-      animate="visible"
-      variants={containerVariants}
-      className="space-y-10 pb-12"
-    >
-      {/* Header Area */}
-      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
-        <div className="space-y-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
-              <Zap className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-            </div>
-            <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">Real-time Monitoring</span>
-          </div>
-          <h2 className="text-4xl font-black text-gray-900 dark:text-white tracking-tight leading-none">Attendance Hub</h2>
-          <p className="text-gray-500 dark:text-gray-400 font-semibold max-w-xl">
-            Synchronize student presence through neural QR scanning and manual manifest management.
-          </p>
-        </div>
+    <div className="space-y-6">
+      <PageHeader
+        icon={UserCheck}
+        title="Attendance"
+        description="Track student presence via QR scanning and manual roll-call."
+        actions={selectedCourseId ? (
+          <>
+            <Button onClick={handleCreateSession}>
+              <Plus className="size-4" />
+              <span>New Session</span>
+            </Button>
+            <Button variant="outline" onClick={handleExportAttendance}>
+              <FileSpreadsheet className="size-4" />
+              <span>Export CSV</span>
+            </Button>
+          </>
+        ) : null}
+      />
 
-        <div className="flex flex-wrap gap-4">
-          {selectedCourseId && (
-            <>
-              <motion.button
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={handleCreateSession}
-                className="bg-emerald-500 text-white font-black px-8 py-4.5 rounded-2xl shadow-2xl shadow-emerald-500/20 flex items-center gap-4 transition-all"
-              >
-                <Plus className="w-5 h-5" />
-                <span className="text-xs uppercase tracking-widest">Initialize Sync</span>
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={handleExportAttendance}
-                className="bg-gray-900 dark:bg-white text-white dark:text-black font-black px-8 py-4.5 rounded-2xl shadow-2xl shadow-black/10 flex items-center gap-4 transition-all"
-              >
-                <FileSpreadsheet className="w-5 h-5" />
-                <span className="text-xs uppercase tracking-widest">Export Manifest</span>
-              </motion.button>
-            </>
-          )}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-10 items-start">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
         {/* Course & Sessions Sidebar */}
-        <div className="xl:col-span-4 space-y-8">
-          <div className="bg-white dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-8 shadow-sm">
-            <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6">Source Selection</h3>
-            <div className="relative group">
-              <select
-                value={selectedCourseId}
-                onChange={(e) => setSelectedCourseId(e.target.value)}
-                className="w-full bg-gray-50 dark:bg-black/20 border border-gray-100 dark:border-white/10 rounded-2xl p-5 pr-12 text-gray-900 dark:text-white font-bold focus:ring-4 focus:ring-emerald-500/5 outline-none transition-all appearance-none cursor-pointer"
-              >
-                <option value="">Select Target Course</option>
-                {courses.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-              </select>
-              <ChevronRight className="absolute right-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 rotate-90 pointer-events-none" />
-            </div>
-          </div>
+        <div className="xl:col-span-4 space-y-6">
+          <SectionCard title="Course">
+            <Select value={selectedCourseId} onValueChange={setSelectedCourseId}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select a course" />
+              </SelectTrigger>
+              <SelectContent>
+                {courses.map(c => (
+                  <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </SectionCard>
 
-          <div className="bg-white dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-8 shadow-sm">
-            <div className="flex items-center justify-between mb-8">
-              <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Mission Logs</h3>
-              <History className="w-4 h-4 text-gray-400" />
-            </div>
-            
-            <div className="space-y-4 max-h-[500px] overflow-y-auto pr-4 custom-scrollbar">
+          <SectionCard
+            title="Session log"
+            actions={<History className="size-4 text-muted-foreground" />}
+            bodyClassName="p-3"
+          >
+            <div className="space-y-2 max-h-[500px] overflow-y-auto pe-1 custom-scrollbar">
               {!selectedCourseId ? (
-                <div className="py-12 text-center border-2 border-dashed border-gray-100 dark:border-white/5 rounded-[2rem]">
-                  <p className="text-[9px] text-gray-400 font-black uppercase tracking-widest">Awaiting Module</p>
-                </div>
+                <EmptyState
+                  icon={History}
+                  title="No course selected"
+                  description="Choose a course to view its sessions."
+                />
               ) : loading ? (
                 Array(4).fill(0).map((_, i) => (
-                  <div key={i} className="h-24 bg-gray-50 dark:bg-white/5 rounded-2xl animate-pulse"></div>
+                  <div key={i} className="h-16 rounded-lg border bg-muted/40 animate-pulse" />
                 ))
               ) : sessions.length === 0 ? (
-                <div className="py-12 text-center text-gray-400 text-[9px] font-black uppercase tracking-widest">No Sessions Detected</div>
+                <EmptyState
+                  icon={Calendar}
+                  title="No sessions yet"
+                  description="Create a session to start taking attendance."
+                />
               ) : (
-                sessions.map(session => (
-                  <motion.button
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    key={session.id}
-                    onClick={() => setActiveSession(session)}
-                    className={`w-full group text-left p-6 rounded-2xl border transition-all relative overflow-hidden ${
-                      activeSession?.id === session.id
-                        ? 'bg-emerald-500/[0.05] border-emerald-500/30'
-                        : 'bg-white dark:bg-transparent border-gray-100 dark:border-white/5 hover:border-emerald-500/20'
-                    }`}
-                  >
-                    {activeSession?.id === session.id && (
-                      <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500 shadow-[2px_0_10px_rgba(16,185,129,0.5)]"></div>
-                    )}
-                    <div className="flex justify-between items-start mb-4">
-                      <div className="font-black text-sm text-gray-900 dark:text-white uppercase tracking-tight group-hover:text-emerald-500 transition-colors">
-                        {session.title || `Session Sync #${session.id}`}
+                sessions.map(session => {
+                  const isActive = activeSession?.id === session.id;
+                  return (
+                    <motion.button
+                      initial={{ opacity: 0, x: -6 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.15 }}
+                      key={session.id}
+                      onClick={() => setActiveSession(session)}
+                      className={`w-full relative text-start p-3 rounded-lg border transition-colors ${
+                        isActive
+                          ? 'border-primary/40 bg-primary/5'
+                          : 'border-border bg-card hover:bg-muted/50'
+                      }`}
+                    >
+                      {isActive && (
+                        <span className="absolute start-0 top-1/2 -translate-y-1/2 h-8 w-0.5 rounded-full bg-primary" />
+                      )}
+                      <div className="ps-1.5">
+                        <div className="flex items-center justify-between gap-2 mb-1.5">
+                          <span className={`text-sm font-medium truncate ${isActive ? 'text-foreground' : 'text-foreground'}`}>
+                            {session.title || `Session #${session.id}`}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1.5">
+                            <Calendar className="size-3.5" />
+                            {new Date(session.date).toLocaleDateString()}
+                          </span>
+                          <span className="flex items-center gap-1.5">
+                            <Clock className="size-3.5" />
+                            {new Date(session.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </div>
                       </div>
-                      <span className="text-[8px] font-black text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20">ARCHIVE</span>
-                    </div>
-                    <div className="flex items-center gap-6">
-                      <div className="flex items-center gap-2 text-gray-400">
-                        <Calendar className="w-3.5 h-3.5" />
-                        <span className="text-[9px] font-black uppercase">{new Date(session.date).toLocaleDateString()}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-gray-400">
-                        <Clock className="w-3.5 h-3.5" />
-                        <span className="text-[9px] font-black uppercase">{new Date(session.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                      </div>
-                    </div>
-                  </motion.button>
-                ))
+                    </motion.button>
+                  );
+                })
               )}
             </div>
-          </div>
+          </SectionCard>
         </div>
 
         {/* Workspace Area */}
         <div className="xl:col-span-8">
           <AnimatePresence mode="wait">
             {!activeSession ? (
-              <motion.div 
+              <motion.div
                 key="empty"
-                initial={{ opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.98 }}
-                className="bg-white dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 rounded-[3.5rem] p-20 text-center shadow-sm h-full flex flex-col items-center justify-center min-h-[600px]"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.15 }}
               >
-                <div className="w-32 h-32 rounded-full bg-emerald-500/5 flex items-center justify-center mb-10">
-                  <Activity className="w-16 h-16 text-emerald-500/20 animate-pulse" />
-                </div>
-                <h3 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-widest mb-4">Workspace Offline</h3>
-                <p className="text-gray-400 font-semibold max-w-sm mx-auto">
-                  Initialize a new session or select a log from the history to begin real-time student synchronization.
-                </p>
+                <EmptyState
+                  icon={Activity}
+                  title="No session open"
+                  description="Create a new session or select one from the log to start taking attendance."
+                  className="min-h-[480px]"
+                />
               </motion.div>
             ) : (
-              <motion.div 
+              <motion.div
                 key="active"
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="space-y-8"
+                transition={{ duration: 0.15 }}
+                className="space-y-6"
               >
                 {/* Control Panel */}
-                <div className="bg-white dark:bg-white/[0.03] backdrop-blur-sm border border-gray-100 dark:border-white/5 rounded-[3rem] p-10 shadow-2xl">
-                  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-10">
-                    <div className="flex-1 space-y-6">
-                      <div className="flex items-center gap-6">
-                        {isEditingSession ? (
-                          <div className="flex items-center gap-4 flex-1 max-w-md">
-                            <input
-                              type="text"
-                              value={editSessionTitle}
-                              onChange={(e) => setEditSessionTitle(e.target.value)}
-                              className="flex-1 bg-gray-50 dark:bg-black border-2 border-emerald-500/30 rounded-2xl px-6 py-3.5 text-sm font-black focus:ring-4 focus:ring-emerald-500/5 outline-none text-gray-900 dark:text-white"
-                              autoFocus
-                            />
-                            <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={handleUpdateSession} className="p-4 bg-emerald-500 text-white rounded-xl shadow-lg shadow-emerald-500/20"><Save className="w-5 h-5" /></motion.button>
-                            <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => setIsEditingSession(false)} className="p-4 bg-gray-100 dark:bg-white/5 text-gray-400 rounded-xl"><X className="w-5 h-5" /></motion.button>
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-6 group">
-                            <h2 className="text-4xl font-black text-gray-900 dark:text-white tracking-tight leading-none">
-                              {activeSession.title || 'Live Session Log'}
-                            </h2>
-                            <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-all">
-                              <button onClick={() => setIsEditingSession(true)} className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-white/5 flex items-center justify-center text-gray-400 hover:text-emerald-500 transition-all"><Edit2 className="w-4 h-4" /></button>
-                              <button onClick={handleDeleteSession} className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-white/5 flex items-center justify-center text-gray-400 hover:text-rose-500 transition-all"><Trash2 className="w-4 h-4" /></button>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                      
-                      <div className="flex items-center gap-8">
-                        <div className="space-y-1">
-                          <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Neural Sync Stats</p>
-                          <p className="text-3xl font-black text-gray-900 dark:text-white">
-                            {records.length} <span className="text-sm text-gray-400 opacity-60">/ {students.length}</span>
-                          </p>
+                <SectionCard>
+                  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                    <div className="flex-1 min-w-0 space-y-4">
+                      {isEditingSession ? (
+                        <div className="flex items-center gap-2 max-w-md">
+                          <Input
+                            type="text"
+                            value={editSessionTitle}
+                            onChange={(e) => setEditSessionTitle(e.target.value)}
+                            autoFocus
+                          />
+                          <Button size="icon" onClick={handleUpdateSession} aria-label="Save">
+                            <Save className="size-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => setIsEditingSession(false)} aria-label="Cancel">
+                            <X className="size-4" />
+                          </Button>
                         </div>
-                        <div className="w-px h-10 bg-gray-100 dark:bg-white/5"></div>
-                        <div className="space-y-1">
-                          <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Presence Density</p>
-                          <p className="text-3xl font-black text-emerald-500">
-                            {students.length ? Math.round((records.length / students.length) * 100) : 0}%
-                          </p>
+                      ) : (
+                        <div className="flex items-center gap-2 group">
+                          <h2 className="text-lg font-semibold text-foreground truncate">
+                            {activeSession.title || 'Live Session'}
+                          </h2>
+                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button variant="ghost" size="icon-sm" onClick={() => setIsEditingSession(true)} aria-label="Rename session">
+                              <Edit2 className="size-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon-sm" onClick={handleDeleteSession} className="hover:text-destructive" aria-label="Delete session">
+                              <Trash2 className="size-4" />
+                            </Button>
+                          </div>
                         </div>
+                      )}
+
+                      <div className="grid grid-cols-2 gap-3 max-w-sm">
+                        <StatCard
+                          label="Checked in"
+                          value={<>{records.length}<span className="text-base font-normal text-muted-foreground"> / {students.length}</span></>}
+                          icon={CheckCircle2}
+                        />
+                        <StatCard
+                          label="Presence"
+                          value={`${presenceDensity}%`}
+                          accent
+                          icon={Activity}
+                        />
                       </div>
                     </div>
 
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                    <Button
                       onClick={() => setScanning(!scanning)}
-                      className={`h-28 px-12 rounded-[2.5rem] font-black flex items-center gap-6 transition-all shadow-2xl ${
-                        scanning 
-                          ? 'bg-rose-500 text-white shadow-rose-500/20' 
-                          : 'bg-emerald-500 text-white shadow-emerald-500/20'
-                      }`}
+                      variant={scanning ? 'destructive' : 'default'}
+                      size="lg"
+                      className="h-14 px-6"
                     >
-                      <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center">
-                        {scanning ? <X className="w-8 h-8" /> : <QrCode className="w-8 h-8" />}
-                      </div>
-                      <div className="text-left">
-                        <p className="text-[10px] font-black uppercase tracking-widest opacity-80">{scanning ? 'Emergency' : 'Neural'}</p>
-                        <p className="text-2xl leading-none uppercase tracking-widest">{scanning ? 'Stop' : 'Scan'}</p>
-                      </div>
-                    </motion.button>
+                      {scanning ? <X className="size-5" /> : <QrCode className="size-5" />}
+                      <span className="text-base">{scanning ? 'Stop scanning' : 'Scan QR'}</span>
+                    </Button>
                   </div>
-                </div>
+                </SectionCard>
 
-                {scanning && (
-                  <motion.div 
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    className="rounded-[3.5rem] overflow-hidden border-8 border-white dark:border-[#0f0f0f] shadow-2xl relative bg-black aspect-video lg:aspect-auto lg:h-[400px]"
-                  >
-                    <div className="absolute inset-0 z-20 pointer-events-none">
-                      <div className="w-full h-full border-[80px] border-black/40 flex items-center justify-center">
-                        <div className="w-full h-full max-w-[300px] max-h-[300px] border-2 border-emerald-400/50 rounded-[3rem] relative">
-                          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-emerald-400 to-transparent shadow-[0_0_20px_rgba(52,211,153,1)] animate-scan-y"></div>
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <Target className="w-12 h-12 text-emerald-400/20 animate-ping" />
+                {/* QR Scanner */}
+                <AnimatePresence>
+                  {scanning && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.18 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="rounded-xl overflow-hidden border border-primary/40 relative bg-black aspect-video lg:aspect-auto lg:h-[400px]">
+                        {/* Clean neutral scan frame */}
+                        <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center">
+                          <div className="relative size-[260px] max-w-[80%] max-h-[80%]">
+                            {/* Corner markers */}
+                            <span className="absolute top-0 start-0 size-7 border-t-2 border-s-2 border-primary rounded-tl-md" />
+                            <span className="absolute top-0 end-0 size-7 border-t-2 border-e-2 border-primary rounded-tr-md" />
+                            <span className="absolute bottom-0 start-0 size-7 border-b-2 border-s-2 border-primary rounded-bl-md" />
+                            <span className="absolute bottom-0 end-0 size-7 border-b-2 border-e-2 border-primary rounded-br-md" />
+                            {/* Subtle scan line */}
+                            <div className="absolute inset-x-2 top-0 h-px bg-primary/70 animate-scan-y" />
                           </div>
                         </div>
+                        <Scanner
+                          onScan={handleScan}
+                          onError={(err) => console.log(err)}
+                          scanDelay={300}
+                          components={{ audio: false, finder: false }}
+                        />
                       </div>
-                    </div>
-                    <Scanner 
-                      onScan={handleScan} 
-                      onError={(err) => console.log(err)} 
-                      scanDelay={300}
-                      components={{ audio: false, finder: false }}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* Student roster */}
+                <SectionCard
+                  title="Students"
+                  actions={
+                    <SearchInput
+                      placeholder="Filter students..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full sm:w-56"
                     />
-                  </motion.div>
-                )}
-
-                {/* Manifest Grid */}
-                <div className="bg-white dark:bg-white/[0.03] border border-gray-100 dark:border-white/5 rounded-[3.5rem] p-10 shadow-sm space-y-8">
-                  <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-2xl bg-violet-500/10 flex items-center justify-center">
-                        <UserCheck className="w-6 h-6 text-violet-600 dark:text-violet-400" />
-                      </div>
-                      <h3 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">Student Manifest</h3>
-                    </div>
-                    <div className="relative group w-full md:w-96">
-                      <Search className="w-4 h-4 absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-emerald-500 transition-colors" />
-                      <input
-                        type="text"
-                        placeholder="Filter manifest..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full bg-gray-50 dark:bg-black/20 border border-gray-100 dark:border-white/10 rounded-[1.5rem] pl-14 pr-6 py-4 text-sm font-black focus:ring-4 focus:ring-emerald-500/5 outline-none transition-all"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5 max-h-[600px] overflow-y-auto pr-4 custom-scrollbar">
+                  }
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-[600px] overflow-y-auto pe-1 custom-scrollbar">
                     {filteredStudents.length === 0 ? (
-                      <div className="col-span-full py-20 text-center">
-                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em]">No Records Detected</p>
+                      <div className="col-span-full">
+                        <EmptyState
+                          icon={UserCheck}
+                          title="No students found"
+                          description="No students match the current filter."
+                        />
                       </div>
                     ) : (
                       filteredStudents.map(student => {
@@ -480,43 +464,47 @@ const DoctorAttendance = ({ courses }) => {
                         const sName = student.name || student.student_name || student.student?.name || 'Unknown Student';
                         const isPresent = presentStudentIds.includes(sId);
                         return (
-                          <div 
+                          <button
                             key={sId}
                             onClick={() => handleManualToggle(sId)}
-                            className={`flex items-center justify-between p-5 rounded-[2.5rem] border cursor-pointer transition-all active:scale-95 group ${
-                              isPresent 
-                                ? 'bg-emerald-500/[0.05] border-emerald-500/30' 
-                                : 'bg-white dark:bg-transparent border-gray-100 dark:border-white/5 hover:border-emerald-500/20'
+                            className={`flex items-center justify-between gap-3 p-3 rounded-lg border text-start transition-colors ${
+                              isPresent
+                                ? 'border-primary/40 bg-primary/5'
+                                : 'border-border bg-card hover:bg-muted/50'
                             }`}
                           >
-                            <div className="flex items-center gap-5">
-                              <div className={`w-14 h-14 rounded-2xl overflow-hidden flex items-center justify-center font-black transition-all border ${
-                                isPresent ? 'bg-emerald-500 text-white border-emerald-500/20 shadow-lg shadow-emerald-500/20' : 'bg-gray-100 dark:bg-white/5 text-gray-400 border-transparent'
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div className={`size-9 rounded-md overflow-hidden flex items-center justify-center text-sm font-medium border shrink-0 ${
+                                isPresent
+                                  ? 'border-primary/20 bg-primary/10 text-primary'
+                                  : 'border-transparent bg-muted text-muted-foreground'
                               }`}>
                                 {student.avatar_url ? (
-                                  <img src={student.avatar_url} alt={sName} className="w-full h-full object-cover" />
+                                  <img src={student.avatar_url} alt={sName} className="size-full object-cover" />
                                 ) : (
-                                  sName.charAt(0)
+                                  sName.charAt(0).toUpperCase()
                                 )}
                               </div>
                               <div className="min-w-0">
-                                <p className={`font-black text-sm truncate max-w-[150px] ${isPresent ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white'}`}>
+                                <p className={`text-sm font-medium truncate ${isPresent ? 'text-foreground' : 'text-foreground'}`}>
                                   {sName}
                                 </p>
-                                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mt-1">ID: {sId}</p>
+                                <p className="text-xs text-muted-foreground truncate">ID: {sId}</p>
                               </div>
                             </div>
-                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
-                              isPresent ? 'bg-emerald-500 text-white' : 'bg-gray-100 dark:bg-white/5 text-gray-300'
+                            <span className={`flex size-7 items-center justify-center rounded-md shrink-0 ${
+                              isPresent
+                                ? 'bg-primary text-primary-foreground'
+                                : 'bg-muted text-muted-foreground'
                             }`}>
-                              {isPresent ? <ShieldCheck className="w-5 h-5" /> : <Circle className="w-5 h-5" />}
-                            </div>
-                          </div>
+                              {isPresent ? <CheckCircle2 className="size-4" /> : <Circle className="size-4" />}
+                            </span>
+                          </button>
                         );
                       })
                     )}
                   </div>
-                </div>
+                </SectionCard>
               </motion.div>
             )}
           </AnimatePresence>
@@ -526,19 +514,18 @@ const DoctorAttendance = ({ courses }) => {
       <style>{`
         @keyframes scan-y {
           0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(140px); }
+          50% { transform: translateY(256px); }
         }
         .animate-scan-y { animation: scan-y 2.5s ease-in-out infinite; }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { 
-          background: rgba(16, 185, 129, 0.1); 
-          border-radius: 10px; 
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: var(--border);
+          border-radius: 10px;
         }
       `}</style>
-    </motion.div>
+    </div>
   );
 };
 
 export default DoctorAttendance;
-

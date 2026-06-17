@@ -1,16 +1,18 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useTheme } from '../context/ThemeContext';
 import { useStudentAuth } from '../context/StudentAuthContext';
-import { Bot, Send, User, Loader2, Sparkles, Volume2, Copy, Check, ArrowRight } from 'lucide-react';
+import { Send, Loader2, Sparkles, User, Volume2, Copy, Check, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Sidebar from '../components/Sidebar';
 import studentApi from '../services/studentApi';
+import { PageHeader } from '@/components/common';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { cn } from '@/lib/utils';
 
 const ZagAIChat = () => {
   const { t, i18n } = useTranslation();
-  const { isDarkMode } = useTheme();
   const { student, logout } = useStudentAuth();
   const navigate = useNavigate();
   const isAr = i18n.language === 'ar';
@@ -94,71 +96,80 @@ const ZagAIChat = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0c0c14] text-gray-900 dark:text-white font-sans transition-colors duration-500 overflow-x-hidden relative" dir={isAr ? 'rtl' : 'ltr'}>
-      
-      {/* Background Decor */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[-10%] inset-inline-end-[-5%] w-[50vw] h-[50vw] bg-[#8b5cf6]/5 blur-[120px] rounded-full"></div>
-        <div className="absolute bottom-[-10%] inset-inline-start-[-5%] w-[40vw] h-[40vw] bg-[#2cfc7d]/3 blur-[100px] rounded-full"></div>
-      </div>
-
+    <div className="min-h-screen bg-background text-foreground font-sans" dir={isAr ? 'rtl' : 'ltr'}>
       <Sidebar onLogout={handleLogout} />
 
-      <main className="md:ps-72 min-h-screen relative z-10 flex flex-col">
-        <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full px-6 lg:px-10 pt-16 pb-8">
-          
-          {/* Page Header */}
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-[#2cfc7d]"></div>
-            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 dark:text-white/30">Zag AI</span>
-          </div>
-          <h1 className={`text-[clamp(2rem,5vw,4rem)] font-black leading-[0.95] tracking-tighter uppercase text-gray-900 dark:text-white mb-2 ${isAr ? 'font-arabic' : ''}`}>
-            Zag AI
-          </h1>
-          <p className="text-sm text-gray-400 dark:text-white/40 mb-10">
-            {isAr ? 'مساعدك الذكي للدراسة' : 'Your intelligent study assistant'}
-          </p>
+      <main className="md:ps-72 min-h-screen flex flex-col">
+        <div className="flex-1 flex flex-col w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8 space-y-6">
 
-          {/* Chat Container */}
-          <div className="bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[3rem] shadow-[0_32px_64px_rgba(0,0,0,0.05)] dark:shadow-[0_32px_64px_rgba(0,0,0,0.4)] flex flex-col overflow-hidden flex-1">
-            
+          <PageHeader
+            title="Zag AI"
+            description={isAr ? 'مساعدك الذكي للدراسة' : 'Your intelligent study assistant'}
+            icon={Sparkles}
+          />
+
+          {/* Chat panel */}
+          <div className="flex-1 flex flex-col overflow-hidden rounded-xl border bg-card text-card-foreground">
+
             {/* Messages */}
-            <div className="flex-1 p-6 lg:p-10 space-y-5 overflow-y-auto min-h-[400px] max-h-[600px] scrollbar-thin">
+            <div className="flex-1 overflow-y-auto min-h-[400px] max-h-[600px] p-4 sm:p-5 space-y-4">
               {messages.map((msg) => {
                 const isUser = msg.role === 'user';
                 return (
-                  <div key={msg.id} className={`flex gap-4 ${isUser ? 'flex-row-reverse' : ''}`}>
-                    <div className={`flex-shrink-0 w-10 h-10 rounded-2xl flex items-center justify-center border ${
-                      isUser
-                        ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
-                        : 'bg-white/5 border-white/10 text-white/40'
-                    }`}>
-                      {isUser ? <User className="w-5 h-5" /> : <Sparkles className="w-5 h-5 text-emerald-400" />}
-                    </div>
-                    <div className={`group max-w-[80%] flex flex-col ${isUser ? 'items-end' : 'items-start'}`}>
-                      <div className={`px-6 py-4 text-sm leading-relaxed ${
+                  <div key={msg.id} className={cn('flex gap-3', isUser && 'flex-row-reverse')}>
+                    <div
+                      className={cn(
+                        'shrink-0 size-9 rounded-lg border flex items-center justify-center',
                         isUser
-                          ? 'bg-emerald-500/10 text-gray-900 dark:text-white border border-emerald-500/20 rounded-[2rem] rounded-tr-md'
+                          ? 'bg-primary/10 border-primary/20 text-primary'
                           : msg.error
-                            ? 'bg-red-500/10 text-red-400 border border-red-500/20 rounded-[2rem] rounded-tl-md'
-                            : 'bg-gray-50 dark:bg-white/[0.03] text-gray-700 dark:text-gray-200 border border-gray-100 dark:border-white/5 rounded-[2rem] rounded-tl-md'
-                      }`}>
+                            ? 'bg-destructive/10 border-destructive/20 text-destructive'
+                            : 'bg-muted border-border text-muted-foreground'
+                      )}
+                    >
+                      {isUser ? (
+                        <User className="size-4" />
+                      ) : msg.error ? (
+                        <AlertCircle className="size-4" />
+                      ) : (
+                        <Sparkles className="size-4" />
+                      )}
+                    </div>
+
+                    <div className={cn('group max-w-[80%] flex flex-col', isUser ? 'items-end' : 'items-start')}>
+                      <div
+                        className={cn(
+                          'px-4 py-2.5 text-sm leading-relaxed rounded-lg',
+                          isUser
+                            ? 'bg-primary/10 text-foreground border border-primary/20 rounded-se-sm'
+                            : msg.error
+                              ? 'bg-destructive/10 text-destructive border border-destructive/20 rounded-ss-sm'
+                              : 'bg-muted text-foreground border border-border rounded-ss-sm'
+                        )}
+                      >
                         {msg.text}
                       </div>
-                      {!isUser && (
-                        <div className="flex gap-1.5 mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                          <button
+
+                      {!isUser && !msg.error && (
+                        <div className="flex gap-1 mt-1.5 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
                             onClick={() => handleCopy(msg.text, msg.id)}
-                            className="p-1.5 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors"
+                            aria-label={isAr ? 'نسخ' : 'Copy'}
+                            className="text-muted-foreground"
                           >
-                            {copiedId === msg.id ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                          </button>
-                          <button
+                            {copiedId === msg.id ? <Check className="size-3.5 text-primary" /> : <Copy className="size-3.5" />}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
                             onClick={() => handleSpeak(msg.text)}
-                            className="p-1.5 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors"
+                            aria-label={isAr ? 'استماع' : 'Speak'}
+                            className="text-muted-foreground"
                           >
-                            <Volume2 className="w-3.5 h-3.5" />
-                          </button>
+                            <Volume2 className="size-3.5" />
+                          </Button>
                         </div>
                       )}
                     </div>
@@ -167,15 +178,15 @@ const ZagAIChat = () => {
               })}
 
               {sending && (
-                <div className="flex gap-4">
-                  <div className="flex-shrink-0 w-10 h-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
-                    <Sparkles className="w-5 h-5 text-emerald-400" />
+                <div className="flex gap-3">
+                  <div className="shrink-0 size-9 rounded-lg border border-border bg-muted text-muted-foreground flex items-center justify-center">
+                    <Sparkles className="size-4" />
                   </div>
-                  <div className="bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/5 px-6 py-4 rounded-[2rem] rounded-tl-md">
-                    <div className="flex gap-2">
-                      <span className="w-2 h-2 bg-emerald-400/60 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                      <span className="w-2 h-2 bg-emerald-400/60 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                      <span className="w-2 h-2 bg-emerald-400/60 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                  <div className="bg-muted border border-border px-4 py-3 rounded-lg rounded-ss-sm">
+                    <div className="flex gap-1.5">
+                      <span className="size-1.5 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <span className="size-1.5 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <span className="size-1.5 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: '300ms' }} />
                     </div>
                   </div>
                 </div>
@@ -183,39 +194,36 @@ const ZagAIChat = () => {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Input */}
-            <div className="border-t border-gray-100 dark:border-white/5 p-6 lg:p-8">
-              <div className="flex gap-4 items-end">
-                <div className="flex-1 relative">
-                  <textarea
-                    ref={inputRef}
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    placeholder={isAr ? 'اكتب رسالتك...' : 'Type your message...'}
-                    rows={1}
-                    className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/10 rounded-[2rem] px-6 py-4 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-white/20 resize-none focus:outline-none focus:border-emerald-500/40 focus:ring-1 focus:ring-emerald-500/20 transition-all"
-                    style={{ minHeight: '52px', maxHeight: '120px' }}
-                    onInput={(e) => {
-                      e.target.style.height = 'auto';
-                      e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`;
-                    }}
-                  />
-                </div>
-                <button
+            {/* Composer */}
+            <div className="border-t border-border p-3 sm:p-4">
+              <div className="flex gap-2 items-end">
+                <Textarea
+                  ref={inputRef}
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  aria-label={isAr ? 'اكتب رسالتك' : 'Message'}
+                  placeholder={isAr ? 'اكتب رسالتك...' : 'Type your message...'}
+                  rows={1}
+                  className="flex-1 min-h-[40px] resize-none text-start"
+                  style={{ maxHeight: '120px' }}
+                  onInput={(e) => {
+                    e.target.style.height = 'auto';
+                    e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`;
+                  }}
+                />
+                <Button
+                  size="icon-lg"
                   onClick={sendMessage}
                   disabled={sending || !input.trim()}
-                  className="flex-shrink-0 h-[52px] w-[52px] rounded-[1.5rem] bg-emerald-500 hover:bg-emerald-400 disabled:bg-gray-100 dark:disabled:bg-white/5 disabled:text-gray-300 dark:disabled:text-gray-600 text-white flex items-center justify-center transition-all active:scale-95 shadow-lg"
+                  aria-label={isAr ? 'إرسال' : 'Send'}
                 >
-                  {sending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
-                </button>
+                  {sending ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
+                </Button>
               </div>
-              <div className="flex items-center justify-center gap-2 mt-4">
-                <div className="w-1 h-1 rounded-full bg-emerald-400/50"></div>
-                <p className="text-[10px] text-gray-400 dark:text-white/20 uppercase tracking-widest font-medium">
-                  Zag AI — {isAr ? 'النموذج قيد التدريب' : 'Model is being trained'}
-                </p>
-              </div>
+              <p className="mt-2.5 text-center text-xs text-muted-foreground">
+                Zag AI — {isAr ? 'النموذج قيد التدريب' : 'Model is being trained'}
+              </p>
             </div>
 
           </div>
