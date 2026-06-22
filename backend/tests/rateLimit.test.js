@@ -20,6 +20,8 @@ describe('Rate limiting enforcement', () => {
   beforeAll(() => {
     process.env.NODE_ENV = 'production';
     process.env.JWT_SECRET = 'test-secret';
+    process.env.ADMIN_USERNAME = 'admin';
+    process.env.ADMIN_PASSWORD = 'correctpassword';
     process.env.PORT = '0';
 
     jest.resetModules();
