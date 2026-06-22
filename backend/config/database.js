@@ -4,6 +4,9 @@ dotenv.config();
 
 const logger = require('../utils/logger');
 
+const isProduction = process.env.NODE_ENV === 'production';
+const poolMax = parseInt(process.env.DB_POOL_MAX, 10) || (isProduction ? 25 : 10);
+
 let poolConfig;
 
 if (process.env.DATABASE_URL) {
@@ -11,10 +14,11 @@ if (process.env.DATABASE_URL) {
     poolConfig = {
         connectionString: process.env.DATABASE_URL,
         ssl: { rejectUnauthorized },
-        max: parseInt(process.env.DB_POOL_MAX, 10) || 10,
-        idleTimeoutMillis: 30000,
+        max: poolMax,
+        idleTimeoutMillis: 10000,
         connectionTimeoutMillis: 5000,
-        statement_timeout: 10000,
+        statement_timeout: 15000,
+        allowExitOnIdle: true,
     };
     if (!rejectUnauthorized) {
         logger.warn('SSL certificate validation is DISABLED. Set DB_SSL_REJECT_UNAUTHORIZED=true for production.');
@@ -26,10 +30,11 @@ if (process.env.DATABASE_URL) {
         database: process.env.DB_NAME || 'academic_portal',
         user: process.env.DB_USER || 'postgres',
         password: process.env.DB_PASSWORD,
-        max: parseInt(process.env.DB_POOL_MAX, 10) || 10,
-        idleTimeoutMillis: 30000,
+        max: poolMax,
+        idleTimeoutMillis: 10000,
         connectionTimeoutMillis: 5000,
-        statement_timeout: 10000,
+        statement_timeout: 15000,
+        allowExitOnIdle: true,
     };
 }
 
@@ -38,6 +43,23 @@ const pool = new Pool(poolConfig);
 pool.on('error', (err) => {
     logger.error({ err }, 'Unexpected PostgreSQL pool error');
 });
+
+const queryWithTimeout = async (text, params, timeout = 10000) => {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeout);
+
+    try {
+        const result = await pool.query(text, params);
+        return result;
+    } catch (err) {
+        if (controller.signal.aborted) {
+            throw new Error(`Query timed out after ${timeout}ms: ${text.slice(0, 80)}`);
+        }
+        throw err;
+    } finally {
+        clearTimeout(timer);
+    }
+};
 
 pool.connect(async (err, client, release) => {
     if (err) {
@@ -64,6 +86,19 @@ pool.connect(async (err, client, release) => {
     }
 });
 
+let keepAliveTimer;
+const startKeepAlive = () => {
+    if (!isProduction) return;
+    keepAliveTimer = setInterval(async () => {
+        try {
+            await pool.query('SELECT 1');
+        } catch {
+            // ignore keepalive failures
+        }
+    }, 15000);
+};
+startKeepAlive();
+
 const getActiveSemester = async () => {
     try {
         const res = await pool.query("SELECT value FROM system_settings WHERE key = 'active_semester'");
@@ -77,7 +112,7 @@ const getActiveSemester = async () => {
 };
 
 module.exports = {
-    query: (text, params) => pool.query(text, params),
+    query: (text, params) => queryWithTimeout(text, params),
     pool,
     getActiveSemester,
 };
