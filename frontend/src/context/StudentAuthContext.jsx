@@ -74,6 +74,9 @@ export const StudentAuthProvider = ({ children }) => {
       const response = await studentApi.post('/student/login', { username, password }, { signal });
       const { token: newToken, student: studentData } = response.data;
 
+      safeSetItem('studentToken', newToken);
+      studentApi.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
+
       setToken(newToken);
       setStudent(studentData);
 
@@ -151,6 +154,9 @@ export const StudentAuthProvider = ({ children }) => {
       const response = await studentApi.post('/student/google-login', payload);
       const { token: newToken, student: studentData } = response.data;
 
+      safeSetItem('studentToken', newToken);
+      studentApi.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
+
       setToken(newToken);
       setStudent(studentData);
 
@@ -177,6 +183,9 @@ export const StudentAuthProvider = ({ children }) => {
     try {
       const response = await studentApi.post('/student/microsoft-login', { accessToken });
       const { token: newToken, student: studentData } = response.data;
+
+      safeSetItem('studentToken', newToken);
+      studentApi.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
 
       setToken(newToken);
       setStudent(studentData);
