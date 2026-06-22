@@ -7,7 +7,7 @@ on:
     branches: [master]
 
 env:
-  NODE_VERSION: '18'
+  NODE_VERSION: '22'
   REGISTRY_IMAGE_BACKEND: ${{ secrets.DOCKER_USERNAME }}/academic-portal-backend
   REGISTRY_IMAGE_FRONTEND: ${{ secrets.DOCKER_USERNAME }}/academic-portal-frontend
 
