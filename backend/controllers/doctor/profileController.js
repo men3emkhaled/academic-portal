@@ -26,6 +26,19 @@ const changePassword = async (req, res) => {
             return res.status(400).json({ message: 'Current password is incorrect' });
         }
         
+        const strengthErrors = [];
+        if (newPassword.length < 8) strengthErrors.push('At least 8 characters');
+        if (!/[A-Z]/.test(newPassword)) strengthErrors.push('One uppercase letter');
+        if (!/[a-z]/.test(newPassword)) strengthErrors.push('One lowercase letter');
+        if (!/[0-9]/.test(newPassword)) strengthErrors.push('One number');
+        if (!/[!@#$%^&*()_\-+=[\]{}|;:'",.<>/?`~]/.test(newPassword)) strengthErrors.push('One special character');
+
+        if (strengthErrors.length > 0) {
+            return res.status(400).json({
+                message: 'Password must include: ' + strengthErrors.join(', ')
+            });
+        }
+
         await Doctor.updatePassword(req.doctor.id, newPassword);
         res.json({ message: 'Password updated successfully' });
     } catch (error) {

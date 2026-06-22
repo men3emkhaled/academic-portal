@@ -246,7 +246,7 @@ const AdminDashboard = () => {
   const handleResetPassword = async (id) => {
     if (!window.confirm(t('admin.messages.reset_pass_confirm'))) return;
     try {
-      await api.post(`/admin/reset-password/${id}`);
+      await api.put(`/admin/students/${id}/reset-password`);
       toast.success(t('common.success'));
     } catch (error) {
       toast.error(t('admin.messages.reset_pass_failed'));

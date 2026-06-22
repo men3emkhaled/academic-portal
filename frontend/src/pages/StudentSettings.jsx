@@ -69,7 +69,7 @@ const StudentSettings = () => {
       toast.error(t('settings.pass_mismatch'));
       return;
     }
-    if (passwordData.newPassword.length < 6) {
+    if (passwordData.newPassword.length < 8) {
       toast.error(t('settings.pass_length'));
       return;
     }
@@ -259,20 +259,25 @@ const StudentSettings = () => {
                            className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-[2rem] px-8 py-5 font-black text-xs uppercase tracking-widest focus:ring-2 focus:ring-amber-500 outline-none"
                         />
                      </div>
-                     <input 
-                        type="password"
-                        value={passwordData.newPassword}
-                        onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
-                        placeholder={t('settings.new_password')}
-                        className="bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-[2rem] px-8 py-5 font-black text-xs uppercase tracking-widest focus:ring-2 focus:ring-amber-500 outline-none"
-                     />
-                     <input 
-                        type="password"
-                        value={passwordData.confirmPassword}
-                        onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
-                        placeholder={t('settings.confirm_password')}
-                        className="bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-[2rem] px-8 py-5 font-black text-xs uppercase tracking-widest focus:ring-2 focus:ring-amber-500 outline-none"
-                     />
+                      <div className="relative">
+                         <input 
+                            type="password"
+                            value={passwordData.newPassword}
+                            onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
+                            placeholder={t('settings.new_password')}
+                            className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-[2rem] px-8 py-5 font-black text-xs uppercase tracking-widest focus:ring-2 focus:ring-amber-500 outline-none"
+                         />
+                         {passwordData.newPassword && (
+                            <PasswordStrengthBar password={passwordData.newPassword} />
+                         )}
+                      </div>
+                      <input 
+                         type="password"
+                         value={passwordData.confirmPassword}
+                         onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
+                         placeholder={t('settings.confirm_password')}
+                         className="bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-[2rem] px-8 py-5 font-black text-xs uppercase tracking-widest focus:ring-2 focus:ring-amber-500 outline-none"
+                      />
                      <button 
                         type="submit"
                         disabled={isChangingPassword}
@@ -356,6 +361,39 @@ const StudentSettings = () => {
       </main>
 
 
+    </div>
+  );
+};
+
+const PasswordStrengthBar = ({ password }) => {
+  const getStrength = (pw) => {
+    let score = 0;
+    if (pw.length >= 8) score++;
+    if (pw.length >= 12) score++;
+    if (/[a-z]/.test(pw) && /[A-Z]/.test(pw)) score++;
+    if (/[0-9]/.test(pw)) score++;
+    if (/[!@#$%^&*()_\-+=[\]{}|;:'",.<>/?`~]/.test(pw)) score++;
+    return score;
+  };
+
+  const score = getStrength(password);
+  const maxScore = 5;
+  const pct = (score / maxScore) * 100;
+
+  const labels = ['', 'Weak', 'Fair', 'Good', 'Strong', 'Very Strong'];
+  const colors = ['', 'bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-lime-500', 'bg-green-500'];
+
+  return (
+    <div className="mt-2 px-2 space-y-1">
+      <div className="w-full h-1.5 bg-gray-200 dark:bg-white/10 rounded-full overflow-hidden">
+        <div
+          className={`h-full rounded-full transition-all duration-300 ${colors[score] || 'bg-gray-400'}`}
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+      <p className={`text-[9px] font-black uppercase tracking-wider ${score <= 2 ? 'text-red-500' : score <= 3 ? 'text-yellow-500' : 'text-green-500'}`}>
+        {labels[score]}
+      </p>
     </div>
   );
 };

@@ -211,7 +211,7 @@ export const StudentAuthProvider = ({ children }) => {
 
   const changePassword = async (oldPassword, newPassword) => {
     try {
-      const response = await studentApi.post('/student/change-password', { oldPassword, newPassword });
+      const response = await studentApi.post('/student/change-password', { currentPassword: oldPassword, newPassword });
       return { success: true, message: response.data.message };
     } catch (error) {
       return {

@@ -126,8 +126,17 @@ const changePassword = async (req, res) => {
       return res.status(401).json({ message: 'Current password is incorrect' });
     }
     
-    if (newPass.length < 8) {
-      return res.status(400).json({ message: 'Password must be at least 8 characters' });
+    const strengthErrors = [];
+    if (newPass.length < 8) strengthErrors.push('At least 8 characters');
+    if (!/[A-Z]/.test(newPass)) strengthErrors.push('One uppercase letter');
+    if (!/[a-z]/.test(newPass)) strengthErrors.push('One lowercase letter');
+    if (!/[0-9]/.test(newPass)) strengthErrors.push('One number');
+    if (!/[!@#$%^&*()_\-+=[\]{}|;:'",.<>/?`~]/.test(newPass)) strengthErrors.push('One special character');
+
+    if (strengthErrors.length > 0) {
+      return res.status(400).json({
+        message: 'Password must include: ' + strengthErrors.join(', ')
+      });
     }
     
     await Student.updatePassword(studentId, newPass);
