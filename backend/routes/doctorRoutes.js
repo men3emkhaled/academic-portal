@@ -5,10 +5,17 @@ const analyticsController = require('../controllers/analyticsController');
 const inquiryController = require('../controllers/inquiryController');
 const notificationController = require('../controllers/notificationController');
 const { doctorAuth } = require('../middleware/doctorAuth');
+const { taAuth } = require('../middleware/taAuth');
 const { uploadAvatar, handleMulterError } = require('../middleware/upload');
+const taController = require('../controllers/taController');
 
 // ==================== AUTH ====================
 router.post('/login', doctorController.login);
+
+// TA Dashboard (Standalone - uses req.ta, no doctorAuth)
+router.get('/ta/stats', taAuth, taController.getTADashboardStats);
+router.get('/ta/courses', taAuth, taController.getTACourses);
+router.get('/ta/courses/:courseId/students', taAuth, taController.getTAStudents);
 
 // ==================== PROTECTED ROUTES ====================
 router.use(doctorAuth); // كل المسارات اللي تحت محمية
@@ -117,5 +124,18 @@ router.delete('/announcements/:id', doctorController.deleteAnnouncement);
 // Inquiries
 router.get('/inquiries', inquiryController.getDoctorInquiries);
 router.post('/inquiries/:id/reply', inquiryController.replyToInquiry);
+
+// TA Management
+router.get('/my-tas', doctorController.getMyTAs);
+router.post('/tas', doctorController.createTA);
+router.post('/tas/:taId/assign/:courseId', doctorController.assignTAToCourse);
+router.delete('/tas/:taId/assign/:courseId', doctorController.removeTAFromCourse);
+router.get('/courses/:courseId/tas', doctorController.getCourseTAs);
+
+// Instructor-Section Management
+router.get('/courses/:courseId/instructor-sections', doctorController.getCourseInstructorSections);
+router.post('/courses/:courseId/instructor-sections', doctorController.createInstructorSection);
+router.delete('/courses/:courseId/instructor-sections/:id', doctorController.deleteInstructorSection);
+router.get('/courses/:courseId/instructors', doctorController.getCourseInstructors);
 
 module.exports = router;

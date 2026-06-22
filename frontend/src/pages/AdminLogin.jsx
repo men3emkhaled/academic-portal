@@ -26,10 +26,10 @@ const AdminLogin = () => {
       try {
          const res = await api.post('/admin/login', credentials);
          login(res.data.token);
-         toast.success(t('auth.admin_portal') + ' Authorized');
+          toast.success(t('auth.admin_portal') + ' ' + t('auth.authorized'));
          navigate('/admin', { replace: true });
       } catch (error) {
-         toast.error(t('auth.login_failed'));
+         toast.error(error.response?.data?.message || t('auth.login_failed'));
       } finally {
          setLoading(false);
       }
@@ -129,7 +129,7 @@ const AdminLogin = () => {
                                  value={credentials.username}
                                  onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
                                  placeholder={t('auth.enter_id')}
-                                 className="w-full bg-transparent py-7 px-8 text-xl font-bold outline-none placeholder:opacity-20 uppercase tracking-tight"
+                                 className="w-full bg-transparent py-7 px-8 text-xl font-bold outline-none placeholder:opacity-20 tracking-tight"
                               />
                            </div>
                         </div>

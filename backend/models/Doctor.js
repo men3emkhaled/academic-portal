@@ -65,10 +65,15 @@ class Doctor {
         return result.rows;
     }
 
-    static async hasCourseAccess(doctorId, courseId) {
-        const result = await db.query(
+    static async hasCourseAccess(instructorId, courseId) {
+        let result = await db.query(
             'SELECT 1 FROM doctor_courses WHERE doctor_id = $1 AND course_id = $2',
-            [doctorId, courseId]
+            [instructorId, courseId]
+        );
+        if (result.rows.length > 0) return true;
+        result = await db.query(
+            'SELECT 1 FROM ta_courses WHERE ta_id = $1 AND course_id = $2',
+            [instructorId, courseId]
         );
         return result.rows.length > 0;
     }

@@ -144,31 +144,44 @@ const sendToAll = async (req, res) => {
 };
 
 const sendToDepartment = async (req, res) => {
-  try {
-    const { department_id, title, content, sendPush, isMobileOnly } = req.body;
-    if (!department_id || !title || !content) {
-      return res.status(400).json({ message: 'Department, title, and content are required' });
-    }
-    const safeTitle = xss(title);
-    const safeContent = xss(content);
-    const notification = await Notification.sendToDepartment(department_id, safeTitle, safeContent, isMobileOnly);
+    try {
+        const { department_id, title, content, sendPush, isMobileOnly } = req.body;
+        if (!department_id || !title || !content) {
+            return res.status(400).json({ message: 'Department, title, and content are required' });
+        }
+        const safeTitle = xss(title);
+        const safeContent = xss(content);
+        const notification = await Notification.sendToDepartment(department_id, safeTitle, safeContent, isMobileOnly);
 
-    // Send Push if requested
-    if (sendPush || isMobileOnly) {
-      const studentsResult = await db.query('SELECT fcm_token FROM students WHERE department_id = $1 AND fcm_token IS NOT NULL', [department_id]);
-      const tokens = studentsResult.rows.map(r => r.fcm_token);
-      if (tokens.length > 0) {
-        await sendPushNotification(tokens, {
-          title: title,
-          body: stripMarkdown(content)
-        }, { type: 'department', id: String(department_id) });
-      }
-    }
+        // Also notify all doctors in this department
+        let doctorCount = 0;
+        const deptNameResult = await db.query('SELECT name FROM departments WHERE id = $1', [department_id]);
+        const deptName = deptNameResult.rows[0]?.name;
+        if (deptName) {
+            const doctorsResult = await db.query('SELECT id FROM doctors WHERE department = $1', [deptName]);
+            doctorCount = doctorsResult.rows.length;
+            for (const doctor of doctorsResult.rows) {
+                await Notification.sendToDoctor(doctor.id, safeTitle, safeContent);
+            }
+        }
 
-    res.status(201).json({ message: `Sent to ${notification.affected_count} nodes`, count: notification.affected_count });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
+        // Send Push if requested
+        if (sendPush || isMobileOnly) {
+            const studentsResult = await db.query('SELECT fcm_token FROM students WHERE department_id = $1 AND fcm_token IS NOT NULL', [department_id]);
+            const tokens = studentsResult.rows.map(r => r.fcm_token);
+            if (tokens.length > 0) {
+                await sendPushNotification(tokens, {
+                    title: title,
+                    body: stripMarkdown(content)
+                }, { type: 'department', id: String(department_id) });
+            }
+        }
+
+        const totalAffected = notification.affected_count + doctorCount;
+        res.status(201).json({ message: `Sent to ${totalAffected} nodes`, count: totalAffected });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
 };
 
 const updateNotification = async (req, res) => {

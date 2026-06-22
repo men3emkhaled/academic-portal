@@ -4,6 +4,7 @@ const adminController = require('../controllers/adminController');
 const studentController = require('../controllers/studentController');
 const studentCourseController = require('../controllers/studentCourseController');
 const adminDoctorController = require('../controllers/adminDoctorController');
+const adminTAController = require('../controllers/adminTeachingAssistantController');
 const gradeController = require('../controllers/gradeController');
 const xss = require('xss');
 const { upload, handleMulterError } = require('../middleware/upload');
@@ -110,7 +111,6 @@ router.delete('/students/:id', adminAuth, async (req, res) => {
     await db.query('DELETE FROM grades WHERE student_id = $1', [id]);
     await db.query('DELETE FROM notifications WHERE student_id = $1', [id]);
     await db.query('DELETE FROM student_task_progress WHERE student_id = $1', [id]);
-    await db.query('DELETE FROM student_roadmap_progress WHERE student_id = $1', [id]);
     await db.query('DELETE FROM student_courses WHERE student_id = $1', [id]);
     await db.query('DELETE FROM students WHERE id = $1', [id]);
     res.json({ message: 'Student and all related data deleted successfully' });
@@ -127,6 +127,15 @@ router.delete('/doctors/:id', adminAuth, adminDoctorController.deleteDoctor);
 router.get('/doctors/:id/courses', adminAuth, adminDoctorController.getDoctorCourses);
 router.post('/doctors/:id/courses/:courseId', adminAuth, adminDoctorController.assignCourseToDoctor);
 router.delete('/doctors/:id/courses/:courseId', adminAuth, adminDoctorController.removeCourseFromDoctor);
+
+// ==================== TEACHING ASSISTANTS MANAGEMENT (ADMIN) ====================
+router.get('/teaching-assistants', adminAuth, adminTAController.getAllTAs);
+router.post('/teaching-assistants', adminAuth, adminTAController.createTA);
+router.put('/teaching-assistants/:id', adminAuth, adminTAController.updateTA);
+router.delete('/teaching-assistants/:id', adminAuth, adminTAController.deleteTA);
+router.get('/teaching-assistants/:id/courses', adminAuth, adminTAController.getTACourses);
+router.post('/teaching-assistants/:id/courses/:courseId', adminAuth, adminTAController.assignCourseToTA);
+router.delete('/teaching-assistants/:id/courses/:courseId', adminAuth, adminTAController.removeCourseFromTA);
 
 // ==================== QUIZ MANAGEMENT (ADMIN) ====================
 router.get('/quizzes', checkPermission('manage_quizzes'), quizController.getAllQuizzes);

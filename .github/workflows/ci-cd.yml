@@ -8,6 +8,8 @@ on:
 
 env:
   NODE_VERSION: '18'
+  REGISTRY_IMAGE_BACKEND: ${{ secrets.DOCKER_USERNAME }}/academic-portal-backend
+  REGISTRY_IMAGE_FRONTEND: ${{ secrets.DOCKER_USERNAME }}/academic-portal-frontend
 
 # Cancel in-progress runs for the same branch
 concurrency:
@@ -15,7 +17,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-
+  # ────────────────────────────────────────────
+  # 1. Lint & Security Audit
+  # ────────────────────────────────────────────
   lint:
     name: 🔍 Lint & Security
     runs-on: ubuntu-latest
@@ -41,17 +45,18 @@ jobs:
         working-directory: ./frontend
 
       - name: 🔒 Security audit (Backend)
-        run: npm audit --audit-level=high || true
+        run: npm audit --audit-level=critical
         working-directory: ./backend
+        continue-on-error: true
 
       - name: 🔒 Security audit (Frontend)
-        run: npm audit --audit-level=high || true
+        run: npm audit --audit-level=critical
         working-directory: ./frontend
+        continue-on-error: true
 
       - name: 🔍 Check for hardcoded secrets
         run: |
           echo "🔍 Scanning for potential secrets..."
-          # Check for common secret patterns
           if grep -rn "password.*=.*['\"]" --include="*.js" --include="*.jsx" \
              --exclude-dir=node_modules --exclude="*.example" . | \
              grep -v "your_password" | grep -v "process.env" | grep -v "test_"; then
@@ -60,10 +65,60 @@ jobs:
             echo "✅ No hardcoded secrets detected"
           fi
 
+  # ────────────────────────────────────────────
+  # 2. Test
+  # ────────────────────────────────────────────
+  test:
+    name: 🧪 Tests
+    runs-on: ubuntu-latest
+    needs: lint
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_DB: academic_portal_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: 📦 Install backend dependencies
+        run: npm ci
+        working-directory: ./backend
+
+      - name: 🧪 Run backend tests
+        run: npm run test:ci
+        working-directory: ./backend
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/academic_portal_test
+          NODE_ENV: test
+          JWT_SECRET: test-jwt-secret-for-ci
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
+          REDIS_PASSWORD: test
+
+  # ────────────────────────────────────────────
+  # 3. Build
+  # ────────────────────────────────────────────
   build:
     name: 🏗️ Build
     runs-on: ubuntu-latest
-    needs: lint
+    needs: test
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
@@ -89,7 +144,7 @@ jobs:
           du -sh dist/
           echo ""
           echo "📁 File breakdown:"
-          find dist/ -type f -name "*.js" -o -name "*.css" | \
+          find dist/ -type f \( -name "*.js" -o -name "*.css" \) | \
             xargs ls -lh | awk '{print $5, $9}'
         working-directory: ./frontend
 
@@ -100,8 +155,11 @@ jobs:
           path: frontend/dist/
           retention-days: 7
 
+  # ────────────────────────────────────────────
+  # 4. Docker Build & Push
+  # ────────────────────────────────────────────
   docker:
-    name: 🐳 Docker Build
+    name: 🐳 Docker Build & Push
     runs-on: ubuntu-latest
     needs: build
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -132,8 +190,8 @@ jobs:
           context: ./backend
           push: true
           tags: |
-            ${{ secrets.DOCKER_USERNAME }}/academic-portal-backend:latest
-            ${{ secrets.DOCKER_USERNAME }}/academic-portal-backend:${{ steps.meta.outputs.sha_short }}
+            ${{ env.REGISTRY_IMAGE_BACKEND }}:latest
+            ${{ env.REGISTRY_IMAGE_BACKEND }}:${{ steps.meta.outputs.sha_short }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -143,37 +201,111 @@ jobs:
           context: ./frontend
           push: true
           tags: |
-            ${{ secrets.DOCKER_USERNAME }}/academic-portal-frontend:latest
-            ${{ secrets.DOCKER_USERNAME }}/academic-portal-frontend:${{ steps.meta.outputs.sha_short }}
+            ${{ env.REGISTRY_IMAGE_FRONTEND }}:latest
+            ${{ env.REGISTRY_IMAGE_FRONTEND }}:${{ steps.meta.outputs.sha_short }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          
+
+  # ────────────────────────────────────────────
+  # 5. Deploy to Production (main branch)
+  # ────────────────────────────────────────────
   deploy:
-    name: 🚀 Deploy
+    name: 🚀 Deploy Production
     runs-on: ubuntu-latest
     needs: docker
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     environment: production
     steps:
-      - name: 🚀 Deploy to Railway/VPS
+      - name: 🚀 Deploy via Railway webhook
         run: |
-          echo "🚀 Deploying to production..."
-          # Option 1: Railway
-          # curl -X POST ${{ secrets.RAILWAY_DEPLOY_WEBHOOK }}
+          curl -X POST ${{ secrets.RAILWAY_DEPLOY_WEBHOOK }}
+        continue-on-error: true
 
-          # Option 2: SSH to VPS
-          # ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
-          #   cd /opt/academic-portal
-          #   docker compose pull
-          #   docker compose up -d
-          #   docker system prune -f
-          # EOF
-
-          echo "✅ Deployment triggered successfully!"
+      - name: 🔄 Deploy via SSH to VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /opt/academic-portal
+            docker compose pull
+            docker compose up -d
+            docker system prune -f
 
       - name: 🏥 Health check
         run: |
           echo "🏥 Waiting for deployment..."
           sleep 30
-          # curl -f https://your-api-domain.com/api/health || exit 1
+          curl -sf https://${{ secrets.PRODUCTION_URL }}/api/health || exit 1
           echo "✅ Health check passed!"
+
+  # ────────────────────────────────────────────
+  # 6. Deploy to Staging (develop branch)
+  # ────────────────────────────────────────────
+  deploy-staging:
+    name: 🚀 Deploy Staging
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+    environment: staging
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔄 Deploy staging via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.STAGING_VPS_HOST || secrets.VPS_HOST }}
+          username: ${{ secrets.STAGING_VPS_USER || secrets.VPS_USER }}
+          key: ${{ secrets.STAGING_VPS_SSH_KEY || secrets.VPS_SSH_KEY }}
+          script: |
+            cd /opt/academic-portal-staging
+            git pull origin develop
+            docker compose -f docker-compose.yml -f docker-compose.staging.yml up --build -d
+            docker system prune -f
+
+      - name: 🏥 Staging health check
+        run: |
+          sleep 20
+          curl -sf https://${{ secrets.STAGING_URL }}/api/health || exit 1
+          echo "✅ Staging health check passed!"
+
+  # ────────────────────────────────────────────
+  # 7. Release & Tag (main branch only)
+  # ────────────────────────────────────────────
+  release:
+    name: 🏷️ Create Release
+    runs-on: ubuntu-latest
+    needs: deploy
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Read version from package.json
+        id: version
+        run: |
+          VERSION=$(node -p "require('./backend/package.json').version")
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: 🏷️ Create Git tag
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git tag -a "v${{ steps.version.outputs.version }}-${{ github.run_number }}" \
+            -m "Release v${{ steps.version.outputs.version }}-${{ github.run_number }}"
+          git push origin "v${{ steps.version.outputs.version }}-${{ github.run_number }}"
+
+      - name: 📝 Generate release notes
+        id: release_notes
+        run: |
+          echo "notes=🚀 Automated deployment of version ${{ steps.version.outputs.version }}" >> $GITHUB_OUTPUT
+
+      - name: 🏷️ Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "v${{ steps.version.outputs.version }}-${{ github.run_number }}"
+          name: "Release v${{ steps.version.outputs.version }}-${{ github.run_number }}"
+          body: ${{ steps.release_notes.outputs.notes }}
+          generate_release_notes: true

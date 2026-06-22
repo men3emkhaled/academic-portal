@@ -1,0 +1,42 @@
+# Staging override — use with:
+#   docker compose -f docker-compose.yml -f docker-compose.staging.yml up -d
+services:
+  postgres:
+    ports:
+      - "${STAGING_DB_PORT:-5433}:5432"
+    environment:
+      POSTGRES_DB: ${STAGING_DB_NAME:-academic_portal_staging}
+      POSTGRES_USER: ${STAGING_DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${STAGING_DB_PASSWORD}
+    volumes:
+      - postgres_data_staging:/var/lib/postgresql/data
+
+  redis:
+    ports:
+      - "${STAGING_REDIS_PORT:-6380}:6379"
+
+  backend:
+    container_name: academic_portal_backend_staging
+    ports:
+      - "${STAGING_BACKEND_PORT:-5001}:5000"
+    env_file:
+      - ./backend/.env.staging
+    environment:
+      NODE_ENV: staging
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${STAGING_DB_NAME:-academic_portal_staging}
+      DB_USER: ${STAGING_DB_USER:-postgres}
+      DB_PASSWORD: ${STAGING_DB_PASSWORD}
+      JWT_SECRET: ${STAGING_JWT_SECRET}
+      REDIS_HOST: redis
+      REDIS_PASSWORD: ${STAGING_REDIS_PASSWORD}
+
+  frontend:
+    container_name: academic_portal_frontend_staging
+    ports:
+      - "${STAGING_FRONTEND_PORT:-8080}:80"
+
+volumes:
+  postgres_data_staging:
+    driver: local

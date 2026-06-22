@@ -88,8 +88,8 @@ const StudentLogin = () => {
           className="absolute inset-0"
           style={{
             background: isDarkMode
-              ? 'radial-gradient(ellipse at top right, rgba(16,185,129,0.06), transparent 50%), radial-gradient(ellipse at bottom left, rgba(20,184,166,0.06), transparent 50%)'
-              : 'radial-gradient(ellipse at top right, rgba(16,185,129,0.05), transparent 50%), radial-gradient(ellipse at bottom left, rgba(16,185,129,0.05), transparent 50%)',
+              ? 'radial-gradient(ellipse at top right, rgba(5,150,105,0.06), transparent 50%), radial-gradient(ellipse at bottom left, rgba(5,150,105,0.06), transparent 50%)'
+              : 'radial-gradient(ellipse at top right, rgba(5,150,105,0.05), transparent 50%), radial-gradient(ellipse at bottom left, rgba(5,150,105,0.05), transparent 50%)',
           }}
         />
       </div>
@@ -121,7 +121,7 @@ const StudentLogin = () => {
             <div className="space-y-4">
                <h1 className={`text-[clamp(4rem,8vw,8rem)] font-black uppercase text-gray-900 dark:text-white ${isAr ? 'font-arabic leading-[1.2] tracking-normal' : 'leading-[0.9] tracking-tighter'}`}>
                  {t('auth.student_portal').split(' ')[0]} <br />
-                 <span className="text-[#10b981] dark:text-[#2cfc7d]">{t('auth.student_portal').split(' ')[1]}.</span>
+                 <span className="text-[#059669] dark:text-[#34d399]">{t('auth.student_portal').split(' ')[1]}.</span>
                </h1>
             </div>
             
@@ -133,7 +133,7 @@ const StudentLogin = () => {
               {[GraduationCap, BookOpen, Clock].map((Icon, i) => (
                 <div key={Icon?.displayName || i} className="flex flex-col items-center gap-3 group">
                   <div className={`w-16 h-16 rounded-2xl border flex items-center justify-center transition-all duration-500 group-hover:-translate-y-2 ${isDarkMode ? 'bg-white/[0.02] border-white/5' : 'bg-white border-gray-100 shadow-sm'}`}>
-                    <Icon className="w-7 h-7 text-[#10b981] opacity-40 group-hover:opacity-100 transition-opacity" />
+                    <Icon className="w-7 h-7 text-[#059669] opacity-40 group-hover:opacity-100 transition-opacity" />
                   </div>
                 </div>
               ))}
@@ -154,7 +154,7 @@ const StudentLogin = () => {
                   {/* Elegant Brand Icon for Mobile */}
                   <div className="lg:hidden mb-10 flex flex-col items-center">
                      <img src="/logo.png" className="w-20 h-20 object-contain mb-4" alt="Logo" />
-                     <div className="h-px w-12 bg-emerald-500/30"></div>
+                     <div className="h-px w-12 bg-[#059669]/30"></div>
                   </div>
 
                   <div className="text-start mb-12">
@@ -167,22 +167,22 @@ const StudentLogin = () => {
               <div className="space-y-6">
                 <div className="space-y-3">
                   <label className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 ms-6">{t('auth.student_id')}</label>
-                  <div className={`group relative flex items-center rounded-[2.5rem] border transition-all duration-500 focus-within:ring-8 focus-within:ring-emerald-500/5 ${isDarkMode ? 'bg-black/40 border-white/5 focus-within:border-emerald-500' : 'bg-gray-50 border-gray-100 focus-within:border-emerald-500 shadow-inner'}`}>
-                    <Mail className={`ms-8 w-6 h-6 transition-colors ${isDarkMode ? 'text-white/10 group-focus-within:text-emerald-500' : 'text-gray-300 group-focus-within:text-emerald-500'}`} />
+                  <div className={`group relative flex items-center rounded-[2.5rem] border transition-all duration-500 focus-within:ring-8 focus-within:ring-[#059669]/5 ${isDarkMode ? 'bg-black/40 border-white/5 focus-within:border-[#059669]' : 'bg-gray-50 border-gray-100 focus-within:border-[#059669] shadow-inner'}`}>
+                    <Mail className={`ms-8 w-6 h-6 transition-colors ${isDarkMode ? 'text-white/10 group-focus-within:text-[#059669]' : 'text-gray-300 group-focus-within:text-[#059669]'}`} />
                     <input
                       type="text"
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
                       placeholder={t('auth.enter_id')}
-                      className="w-full bg-transparent py-7 px-8 text-xl font-bold outline-none placeholder:opacity-20 uppercase tracking-tight"
+                      className="w-full bg-transparent py-7 px-8 text-xl font-bold outline-none placeholder:opacity-20 tracking-tight"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-3">
                   <label className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 ms-6">{t('auth.access_key')}</label>
-                  <div className={`group relative flex items-center rounded-[2.5rem] border transition-all duration-500 focus-within:ring-8 focus-within:ring-emerald-500/5 ${isDarkMode ? 'bg-black/40 border-white/5 focus-within:border-emerald-500' : 'bg-gray-50 border-gray-100 focus-within:border-emerald-500 shadow-inner'}`}>
-                    <Lock className={`ms-8 w-6 h-6 transition-colors ${isDarkMode ? 'text-white/10 group-focus-within:text-emerald-500' : 'text-gray-300 group-focus-within:text-emerald-500'}`} />
+                  <div className={`group relative flex items-center rounded-[2.5rem] border transition-all duration-500 focus-within:ring-8 focus-within:ring-[#059669]/5 ${isDarkMode ? 'bg-black/40 border-white/5 focus-within:border-[#059669]' : 'bg-gray-50 border-gray-100 focus-within:border-[#059669] shadow-inner'}`}>
+                    <Lock className={`ms-8 w-6 h-6 transition-colors ${isDarkMode ? 'text-white/10 group-focus-within:text-[#059669]' : 'text-gray-300 group-focus-within:text-[#059669]'}`} />
                     <input
                       type="password"
                       value={password}
@@ -200,7 +200,7 @@ const StudentLogin = () => {
                   disabled={loading}
                   className={`w-full font-black py-7 rounded-[2.5rem] flex items-center justify-center gap-4 text-xs uppercase tracking-[0.6em] shadow-[0_20px_50px_rgba(0,0,0,0.3)] relative overflow-hidden group ${isDarkMode ? 'bg-white text-black' : 'bg-gray-900 text-white'} ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-r from-[#2cfc7d]/0 via-[#2cfc7d]/20 to-[#2cfc7d]/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#34d399]/0 via-[#34d399]/20 to-[#34d399]/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
                   {loading ? (
                     <div className="flex items-center gap-3">
                       <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
@@ -210,7 +210,7 @@ const StudentLogin = () => {
                 </motion.button>
 
                 <div className="grid grid-cols-2 gap-5 pt-2">
-                  <button onClick={() => triggerGoogleLogin()} type="button" className={`flex items-center justify-center gap-4 py-6 border rounded-[2rem] text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${isDarkMode ? 'bg-white/[0.02] border-white/5 hover:bg-white/[0.05] hover:border-[#10b981]' : 'bg-white border-gray-100 hover:bg-gray-50 hover:border-[#10b981]'}`}>
+                  <button onClick={() => triggerGoogleLogin()} type="button" className={`flex items-center justify-center gap-4 py-6 border rounded-[2rem] text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${isDarkMode ? 'bg-white/[0.02] border-white/5 hover:bg-white/[0.05] hover:border-[#059669]' : 'bg-white border-gray-100 hover:bg-gray-50 hover:border-[#059669]'}`}>
                     <img src="https://www.google.com/favicon.ico" className="w-4 h-4 grayscale group-hover:grayscale-0 transition-all" alt="G" /> {t('auth.google_sign_in')}
                   </button>
                   <button onClick={handleMicrosoftLogin} type="button" className={`flex items-center justify-center gap-4 py-6 border rounded-[2rem] text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${isDarkMode ? 'bg-white/[0.02] border-white/5 hover:bg-white/[0.05] hover:border-blue-500' : 'bg-white border-gray-100 hover:bg-gray-50 hover:border-blue-500'}`}>
@@ -223,7 +223,7 @@ const StudentLogin = () => {
 
           {/* Floating Aesthetic Nodes */}
           <div className="absolute bottom-10 left-10 w-24 h-24 opacity-5 pointer-events-none">
-             <Database className="w-full h-full text-[#2cfc7d]" />
+             <Database className="w-full h-full text-[#34d399]" />
           </div>
         </div>
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDoctorAuth } from '../context/DoctorAuthContext';
-import api from '../services/api';
+import doctorApi from '../services/doctorApi';
 import toast from 'react-hot-toast';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
@@ -24,12 +24,12 @@ const DoctorLogin = () => {
       e.preventDefault();
       setLoading(true);
       try {
-         const res = await api.post('/doctor/login', credentials);
+         const res = await doctorApi.post('/doctor/login', credentials);
          login(res.data.token, res.data.doctor);
          toast.success(t('auth.instructor_portal') + ' Authorized');
          navigate('/doctor/dashboard', { replace: true });
       } catch (error) {
-         toast.error(t('auth.login_failed'));
+         toast.error(error.response?.data?.message || t('auth.login_failed'));
       } finally {
          setLoading(false);
       }
@@ -129,7 +129,7 @@ const DoctorLogin = () => {
                                  value={credentials.email}
                                  onChange={(e) => setCredentials({ ...credentials, email: e.target.value })}
                                  placeholder="staff@znu.edu"
-                                 className="w-full bg-transparent py-7 px-8 text-xl font-bold outline-none placeholder:opacity-20 uppercase tracking-tight"
+                                 className="w-full bg-transparent py-7 px-8 text-xl font-bold outline-none placeholder:opacity-20 tracking-tight"
                               />
                            </div>
                         </div>

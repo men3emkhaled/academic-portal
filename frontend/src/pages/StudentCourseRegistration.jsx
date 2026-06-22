@@ -4,8 +4,8 @@ import { useStudentAuth } from '../context/StudentAuthContext';
 import { useStudentData } from '../context/StudentDataContext';
 import { useNavigate } from 'react-router-dom';
 import { 
-  BookOpen, Plus, Trash2, Search, CheckSquare, 
-  Layers, AlertTriangle, HelpCircle, Loader2, Clock, Zap, CheckCircle2
+  Trash2,
+  Loader2
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Sidebar from '../components/Sidebar';
@@ -61,7 +61,7 @@ const StudentCourseRegistration = () => {
       setActiveSemester(Number(semRes.data?.active_semester) || 2);
     } catch (error) {
       console.error('Error fetching course registration details:', error);
-      toast.error(isAr ? 'فشل تحميل بيانات تسجيل المواد' : 'Failed to load data.');
+      toast.error(t('courseRegistrationPage.load_failed'));
     } finally {
       setLoading(false);
     }
@@ -73,20 +73,20 @@ const StudentCourseRegistration = () => {
     const courseToRegister = availableCourses.find(c => c.id === courseId);
     const courseCredits = courseToRegister ? (Number(courseToRegister.credit_hours) || 3) : 3;
     if (totalCredits + courseCredits > 18) {
-      toast.error(isAr ? 'عذراً، لا يمكنك تسجيل أكثر من 18 ساعة معتمدة.' : 'Sorry, you cannot register more than 18 credit hours.');
+      toast.error(t('courseRegistrationPage.max_credits'));
       return;
     }
 
     setActionLoading(true);
     try {
       await studentApi.post('/student/registration/register', { course_id: courseId });
-      toast.success(isAr ? 'تم تسجيل المادة!' : 'Course registered!');
+      toast.success(t('courseRegistrationPage.register_success_one'));
       await Promise.all([fetchGrades(), fetchTimetable()]);
       setSelectedCourses(prev => { const n = new Set(prev); n.delete(courseId); return n; });
       await fetchData();
     } catch (error) {
       const errMsg = error.response?.data?.message || error.message;
-      toast.error((isAr ? 'خطأ: ' : 'Error: ') + errMsg);
+      toast.error(t('courseRegistrationPage.error_prefix') + errMsg);
     } finally {
       setActionLoading(false);
     }
@@ -101,20 +101,20 @@ const StudentCourseRegistration = () => {
       if (c) selectedCredits += (Number(c.credit_hours) || 3);
     });
     if (totalCredits + selectedCredits > 18) {
-      toast.error(isAr ? 'عذراً، إجمالي الساعات بعد التسجيل سيتجاوز الحد الأقصى (18 ساعة).' : 'Sorry, total credit hours after registration will exceed the maximum (18 credit hours).');
+      toast.error(t('courseRegistrationPage.exceeds_max'));
       return;
     }
 
     setActionLoading(true);
     try {
       await studentApi.post('/student/registration/register-bulk', { course_ids: Array.from(selectedCourses) });
-      toast.success(isAr ? 'تم تسجيل المواد!' : 'Courses registered!');
+      toast.success(t('courseRegistrationPage.register_success_multi'));
       await Promise.all([fetchGrades(), fetchTimetable()]);
       setSelectedCourses(new Set());
       await fetchData();
     } catch (error) {
       const errMsg = error.response?.data?.message || error.message;
-      toast.error((isAr ? 'خطأ: ' : 'Error: ') + errMsg);
+      toast.error(t('courseRegistrationPage.error_prefix') + errMsg);
     } finally {
       setActionLoading(false);
     }
@@ -125,13 +125,13 @@ const StudentCourseRegistration = () => {
     setActionLoading(true);
     try {
       await studentApi.delete(`/student/registration/drop/${confirmDropCourse.id}`);
-      toast.success(isAr ? 'تم إلغاء تسجيل المادة.' : 'Course dropped.');
+      toast.success(t('courseRegistrationPage.drop_success'));
       await Promise.all([fetchGrades(), fetchTimetable()]);
       setConfirmDropCourse(null);
       await fetchData();
     } catch (error) {
       const errMsg = error.response?.data?.message || error.message;
-      toast.error((isAr ? 'خطأ: ' : 'Error: ') + errMsg);
+      toast.error(t('courseRegistrationPage.error_prefix') + errMsg);
     } finally {
       setActionLoading(false);
     }
@@ -179,29 +179,23 @@ const StudentCourseRegistration = () => {
   const tabs = [
     {
       id: 'past',
-      labelEn: 'Done',
-      labelAr: 'المواد المنتهية',
-      icon: <CheckCircle2 className="w-4 h-4" />,
+      labelKey: 'courseRegistrationPage.done_label',
       courses: pastCourses,
       color: 'bg-gray-900 dark:bg-white text-white dark:text-black',
       activeColor: 'text-gray-400',
     },
     {
       id: 'active',
-      labelEn: 'Now',
-      labelAr: 'الترم الحالي',
-      icon: <Zap className="w-4 h-4" />,
+      labelKey: 'courseRegistrationPage.now_label',
       courses: activeCourses,
-      color: 'bg-[#2cfc7d] text-black shadow-lg shadow-emerald-500/20',
+      color: 'bg-[#34d399] text-black shadow-lg shadow-[#059669]/20',
       activeColor: 'text-gray-400',
     },
     {
       id: 'upcoming',
-      labelEn: 'Next',
-      labelAr: 'مواد قادمة',
-      icon: <Clock className="w-4 h-4" />,
+      labelKey: 'courseRegistrationPage.next_label',
       courses: upcomingCourses,
-      color: 'bg-[#8b5cf6] text-white',
+      color: 'bg-[#059669] text-white',
       activeColor: 'text-gray-400',
     },
   ];
@@ -223,8 +217,8 @@ const StudentCourseRegistration = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[#0c0c14] text-gray-900 dark:text-white font-sans transition-colors duration-500 overflow-x-hidden relative" dir={isAr ? 'rtl' : 'ltr'}>
       <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[-10%] inset-inline-end-[-5%] w-[50vw] h-[50vw] bg-[#8b5cf6]/5 blur-[120px] rounded-full" />
-        <div className="absolute bottom-[-10%] inset-inline-start-[-5%] w-[40vw] h-[40vw] bg-[#2cfc7d]/3 blur-[100px] rounded-full" />
+        <div className="absolute top-[-10%] inset-inline-end-[-5%] w-[50vw] h-[50vw] bg-[#059669]/5 blur-[120px] rounded-full" />
+        <div className="absolute bottom-[-10%] inset-inline-start-[-5%] w-[40vw] h-[40vw] bg-[#34d399]/3 blur-[100px] rounded-full" />
       </div>
 
       <Sidebar onLogout={handleLogout} />
@@ -235,22 +229,13 @@ const StudentCourseRegistration = () => {
           {/* HERO */}
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-10">
             <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-[#2cfc7d]" />
-                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 dark:text-white/30">
-                  {t('course_registration.title')}
-                </span>
-              </div>
               <h1 className={`text-[clamp(2.5rem,6vw,5.5rem)] font-black leading-[0.95] tracking-tighter uppercase text-gray-900 dark:text-white ${isAr ? 'font-arabic' : ''}`}>
-                {isAr ? 'تسجيل الكورسات' : 'My Courses'}
+                {t('courseRegistrationPage.title')}
               </h1>
             </div>
 
             <div className="bg-white dark:bg-white/5 border border-gray-100 dark:border-white/5 p-10 rounded-[3rem] shadow-xl flex items-center gap-8 group">
-              <div className="w-20 h-20 rounded-full bg-[#10b981]/10 dark:bg-[#2cfc7d]/10 flex items-center justify-center text-[#10b981] dark:text-[#2cfc7d] group-hover:scale-110 transition-transform shadow-inner">
-                <Layers className="w-10 h-10" />
-              </div>
-              <div>
+              <div className="space-y-1">
                 <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 dark:text-white/30">
                   {t('course_registration.total_credits')}
                 </span>
@@ -270,9 +255,8 @@ const StudentCourseRegistration = () => {
                     onClick={() => { setActiveTab(tab.id); setSearchQuery(''); setSelectedCourses(new Set()); }}
                     className={`flex-1 md:flex-initial flex items-center justify-center gap-1 sm:gap-2 px-3 sm:px-5 py-3.5 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider sm:tracking-widest transition-all ${isSel ? tab.color : 'text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
                   >
-                    {tab.icon}
-                    <span className="whitespace-nowrap">{isAr ? tab.labelAr : tab.labelEn}</span>
-                    <span className={`text-[8px] sm:text-[9px] px-1.5 py-0.5 rounded-full ${isSel ? 'bg-black/10' : 'bg-gray-200 dark:bg-white/10 text-gray-500'}`}>
+                    <span className="whitespace-nowrap">{t(tab.labelKey)}</span>
+                    <span className={`text-[10px] sm:text-xs px-2 py-0.5 rounded-full ${isSel ? 'bg-black/10' : 'bg-gray-200 dark:bg-white/10 text-gray-500'}`}>
                       {tab.courses.length}
                     </span>
                   </button>
@@ -285,38 +269,27 @@ const StudentCourseRegistration = () => {
                 type="text"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                placeholder={isAr ? 'بحث...' : 'Search courses...'}
-                className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-xl px-6 py-3.5 ps-12 text-sm focus:outline-none focus:border-[#2cfc7d] text-gray-900 dark:text-white transition-all"
+                placeholder={t('courseRegistrationPage.search_placeholder')}
+                className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-xl px-6 py-3.5 text-sm focus:outline-none focus:border-[#34d399] text-gray-900 dark:text-white transition-all"
               />
-              <Search className="w-4 h-4 text-gray-400 absolute start-4 top-1/2 -translate-y-1/2" />
             </div>
           </div>
 
           {/* CONTENT */}
           {loading ? (
             <div className="flex flex-col justify-center items-center py-20">
-              <Loader2 className="w-12 h-12 text-[#2cfc7d] animate-spin mb-4" />
-              <p className="text-gray-400 text-sm font-bold uppercase tracking-widest">{t('dashboard.loading')}</p>
+              <Loader2 className="w-12 h-12 text-[#34d399] animate-spin mb-4" />
+              <p className="text-gray-400 text-sm font-black uppercase tracking-widest">{t('dashboard.loading')}</p>
             </div>
           ) : (
             <div className="space-y-12 pb-32">
 
-              {/* Section label */}
-              <div className="flex items-center gap-3 px-1">
-                <div className={`w-2 h-2 rounded-full ${activeTab === 'active' ? 'bg-[#2cfc7d]' : activeTab === 'upcoming' ? 'bg-[#8b5cf6]' : 'bg-gray-400'}`} />
-                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 dark:text-white/30">
-                  {isAr
-                    ? (activeTab === 'past' ? 'مواد الفصول السابقة — يمكنك التعديل بحرية' : activeTab === 'active' ? 'مواد الفصل الحالي' : 'مواد الفصول القادمة — سجّل مسبقاً')
-                    : (activeTab === 'past' ? 'Past semesters — edit freely' : activeTab === 'active' ? 'Current semester courses' : 'Upcoming semesters — register early')
-                  }
-                </span>
-              </div>
+
 
               {displayCourses.length === 0 ? (
                 <div className="bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[3rem] p-16 text-center space-y-4">
-                  <HelpCircle className="w-16 h-16 text-gray-300 dark:text-white/20 mx-auto" />
-                  <p className="text-gray-400 font-bold text-sm">
-                    {isAr ? 'لا توجد مواد هنا' : 'No courses here'}
+                  <p className="text-gray-400 text-sm font-black uppercase tracking-widest">
+                    {t('courseRegistrationPage.no_courses')}
                   </p>
                 </div>
               ) : (
@@ -327,16 +300,16 @@ const StudentCourseRegistration = () => {
                     <div key={semKey} className="space-y-6">
                       <div className="flex items-center justify-between px-2">
                         <h2 className="text-2xl font-black uppercase tracking-tight">
-                          {isAr ? `الترم ${semKey}` : `Semester ${semKey}`}
+                          {t('courseRegistrationPage.semester_label', { sem: semKey })}
                         </h2>
                         {notEnrolledHere.length > 0 && (
                           <button
                             onClick={() => toggleAllCourses(notEnrolledHere)}
-                            className="text-xs font-black uppercase tracking-widest text-[#2cfc7d] hover:underline"
+                            className="text-xs font-black uppercase tracking-widest text-[#34d399] hover:underline"
                           >
                             {notEnrolledHere.every(c => selectedCourses.has(c.id))
-                              ? (isAr ? 'إلغاء تحديد الكل' : 'Deselect All')
-                              : (isAr ? 'تحديد الكل' : 'Select All')}
+                              ? t('courseRegistrationPage.deselect_all')
+                              : t('courseRegistrationPage.select_all')}
                           </button>
                         )}
                       </div>
@@ -367,11 +340,10 @@ const StudentCourseRegistration = () => {
 
       {/* BULK REGISTER BAR */}
       {selectedCourses.size > 0 && (
-        <div className="fixed bottom-10 start-6 end-6 md:start-[21rem] md:end-6 z-[60] bg-[#10b981] dark:bg-[#2cfc7d] text-black rounded-[2rem] p-6 shadow-2xl flex items-center justify-between gap-6 animate-slideUp">
+        <div className="fixed bottom-10 start-6 end-6 md:start-[21rem] md:end-6 z-[60] bg-[#059669] dark:bg-[#34d399] text-black rounded-[2rem] p-6 shadow-2xl flex items-center justify-between gap-6 animate-slideUp">
           <div className="flex items-center gap-4">
-            <CheckSquare className="w-6 h-6" />
             <span className="text-sm font-black uppercase tracking-wider">
-              {isAr ? `${selectedCourses.size} مواد محددة` : `${selectedCourses.size} selected`}
+              {selectedCourses.size} {t('courseRegistrationPage.selected_suffix')}
             </span>
           </div>
           <button
@@ -379,8 +351,8 @@ const StudentCourseRegistration = () => {
             disabled={actionLoading}
             className="bg-black text-white px-8 py-4 rounded-xl text-xs font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all flex items-center gap-2 disabled:opacity-50"
           >
-            {actionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
-            {isAr ? 'تسجيل المحدد' : 'Register'}
+            {actionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <span className="text-lg leading-none">+</span>}
+            {t('courseRegistrationPage.register_btn')}
           </button>
         </div>
       )}
@@ -391,22 +363,19 @@ const StudentCourseRegistration = () => {
           <div className="absolute inset-0 bg-black/60 dark:bg-black/90 backdrop-blur-sm" onClick={() => setConfirmDropCourse(null)} />
           <div className="relative w-full max-w-[500px] bg-white dark:bg-[#0c0c14] border border-gray-200 dark:border-white/10 rounded-[2.5rem] overflow-hidden shadow-2xl p-8 space-y-6 animate-in zoom-in-95 duration-300 text-start">
             <div className="flex items-center gap-3 text-rose-500">
-              <AlertTriangle className="w-8 h-8" />
               <h3 className="text-xl font-black uppercase tracking-tight">
-                {isAr ? 'إلغاء تسجيل المادة' : 'Drop Course'}
+                {t('courseRegistrationPage.drop_modal_title')}
               </h3>
             </div>
             <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
-              {isAr
-                ? `هل أنت متأكد من إلغاء تسجيل "${confirmDropCourse.name}"؟ سيتم حذف جميع درجاتك نهائياً.`
-                : `Drop "${confirmDropCourse.name}"? All grades for this course will be permanently deleted.`}
+              {t('courseRegistrationPage.drop_modal_confirm')}
             </p>
             <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-white/5">
               <button
                 onClick={() => setConfirmDropCourse(null)}
                 className="px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest text-gray-400 hover:text-gray-900 dark:hover:text-white"
               >
-                {isAr ? 'إلغاء' : 'Cancel'}
+                {t('courseRegistrationPage.drop_modal_cancel')}
               </button>
               <button
                 onClick={handleDropCourse}
@@ -414,7 +383,7 @@ const StudentCourseRegistration = () => {
                 className="bg-rose-500 hover:bg-rose-600 text-white px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all flex items-center gap-2 disabled:opacity-50"
               >
                 {actionLoading && <Loader2 className="w-4 h-4 animate-spin" />}
-                {isAr ? 'إلغاء التسجيل' : 'Drop'}
+                {t('courseRegistrationPage.drop_modal_drop')}
               </button>
             </div>
           </div>
@@ -435,44 +404,32 @@ const StudentCourseRegistration = () => {
 };
 
 const CourseCard = ({ course, isEnrolled, isSelected, onToggleSelect, onRegister, onDrop, actionLoading, isAr }) => {
+  const { t } = useTranslation();
   return (
     <div
       onClick={!isEnrolled ? onToggleSelect : undefined}
       className={`group bg-white dark:bg-[#0d0d14] border rounded-[2.5rem] p-8 space-y-6 transition-all duration-500 relative overflow-hidden shadow-sm
-        ${!isEnrolled ? 'cursor-pointer hover:border-[#2cfc7d]/40' : ''}
-        ${isSelected ? 'border-[#10b981] dark:border-[#2cfc7d] bg-emerald-500/5' : 'border-gray-100 dark:border-white/5'}
-        ${isEnrolled ? 'ring-1 ring-[#2cfc7d]/20' : ''}
+        ${!isEnrolled ? 'cursor-pointer hover:border-[#34d399]/40' : ''}
+        ${isSelected ? 'border-[#059669] dark:border-[#34d399] bg-[#059669]/5' : 'border-gray-100 dark:border-white/5'}
+        ${isEnrolled ? 'ring-1 ring-[#34d399]/20' : ''}
       `}
     >
       {/* Enrolled badge */}
       {isEnrolled && (
         <div className="absolute top-6 inset-inline-end-6">
-          <span className="flex items-center gap-1 text-[8px] font-black uppercase tracking-widest text-[#10b981] dark:text-[#2cfc7d] bg-[#10b981]/10 dark:bg-[#2cfc7d]/10 px-2.5 py-1 rounded-full">
-            <CheckCircle2 className="w-3 h-3" />
-            {isAr ? 'مسجل' : 'Enrolled'}
+          <span className="flex items-center gap-1 text-[8px] font-black uppercase tracking-widest text-[#059669] dark:text-[#34d399] bg-[#059669]/10 dark:bg-[#34d399]/10 px-2.5 py-1 rounded-full">
+            {t('courseRegistrationPage.enrolled_badge')}
           </span>
         </div>
       )}
 
-      <div className="flex justify-between items-start">
-        <div className="w-12 h-12 rounded-2xl bg-gray-50 dark:bg-white/5 flex items-center justify-center text-[#10b981] dark:text-[#2cfc7d] shadow-inner">
-          <BookOpen className="w-6 h-6" />
-        </div>
-
-        {!isEnrolled ? (
-          <div className={`w-6 h-6 rounded-md border flex items-center justify-center transition-all ${isSelected ? 'bg-[#10b981] dark:bg-[#2cfc7d] border-transparent' : 'border-gray-300 dark:border-white/10 bg-transparent'}`}>
+      {!isEnrolled && (
+        <div className="flex justify-between items-start">
+          <div className={`w-6 h-6 rounded-md border flex items-center justify-center transition-all ${isSelected ? 'bg-[#059669] dark:bg-[#34d399] border-transparent' : 'border-gray-300 dark:border-white/10 bg-transparent'}`}>
             {isSelected && <span className="text-black font-black text-xs">✓</span>}
           </div>
-        ) : (
-          <button
-            onClick={e => { e.stopPropagation(); onDrop(); }}
-            disabled={actionLoading}
-            className="w-10 h-10 rounded-full border border-gray-100 dark:border-white/10 flex items-center justify-center hover:bg-rose-500/15 hover:text-rose-500 hover:border-transparent transition-all duration-300 disabled:opacity-50"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
-        )}
-      </div>
+        </div>
+      )}
 
       <div className="space-y-1.5 text-start">
         <span className="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 dark:text-white/20">{course.code}</span>
@@ -483,20 +440,28 @@ const CourseCard = ({ course, isEnrolled, isSelected, onToggleSelect, onRegister
 
       <div className="flex items-center justify-between border-t border-black/5 dark:border-white/5 pt-6">
         <div className="flex flex-col text-start">
-          <span className="text-[8px] font-black uppercase tracking-widest text-gray-400 mb-1">
-            {isAr ? 'ساعات معتمدة' : 'Credits'}
+          <span className="text-xs font-black uppercase tracking-widest text-gray-400 mb-1">
+            {t('courseRegistrationPage.credits_label')}
           </span>
-          <span className="text-sm font-black text-gray-900 dark:text-white">{course.credit_hours || 3}</span>
+          <span className="text-lg font-black text-gray-900 dark:text-white">{course.credit_hours || 3}</span>
         </div>
 
-        {!isEnrolled && (
+        {!isEnrolled ? (
           <button
             onClick={e => { e.stopPropagation(); onRegister(); }}
             disabled={actionLoading}
-            className="bg-[#10b981]/15 hover:bg-[#10b981] dark:bg-[#2cfc7d]/15 dark:hover:bg-[#2cfc7d] text-[#10b981] dark:text-[#2cfc7d] hover:text-black dark:hover:text-black px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-1.5 disabled:opacity-50"
+            className="bg-[#059669]/15 hover:bg-[#059669] dark:bg-[#34d399]/15 dark:hover:bg-[#34d399] text-[#059669] dark:text-[#34d399] hover:text-black dark:hover:text-black px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-1.5 disabled:opacity-50"
           >
-            {actionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
-            {isAr ? 'تسجيل' : 'Add'}
+            {actionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <span className="text-lg leading-none">+</span>}
+            {t('courseRegistrationPage.add_btn')}
+          </button>
+        ) : (
+          <button
+            onClick={e => { e.stopPropagation(); onDrop(); }}
+            disabled={actionLoading}
+            className="w-10 h-10 rounded-full border border-gray-100 dark:border-white/10 flex items-center justify-center hover:bg-rose-500/15 hover:text-rose-500 hover:border-transparent transition-all duration-300 disabled:opacity-50"
+          >
+            <Trash2 className="w-4 h-4" />
           </button>
         )}
       </div>

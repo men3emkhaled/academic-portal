@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDoctorAuth } from '../../context/DoctorAuthContext';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -9,6 +10,7 @@ import {
 } from 'lucide-react';
 
 const DoctorCourses = ({ courses, onRefresh }) => {
+  const { t } = useTranslation();
   const { doctorApi } = useDoctorAuth();
   const [activeTab, setActiveTab] = useState('active'); // active, archive
   const [searchQuery, setSearchQuery] = useState('');
@@ -61,7 +63,7 @@ const DoctorCourses = ({ courses, onRefresh }) => {
       const filtered = (res.data || []).filter(c => !currentCourseIds.includes(c.id));
       setAvailableCourses(filtered);
     } catch (err) {
-      toast.error('Failed to load courses');
+      toast.error(t('doctor.courses.failed_load_courses'));
     }
   };
 
@@ -75,12 +77,12 @@ const DoctorCourses = ({ courses, onRefresh }) => {
       if (formData.description) {
          await doctorApi('put', `/doctor/courses/${formData.course_id}`, { description: formData.description });
       }
-      toast.success('Course added successfully');
+      toast.success(t('doctor.courses.course_added'));
       setShowAddModal(false);
       setFormData({ department_id: '', course_id: '', description: '' });
       onRefresh();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to add course');
+      toast.error(err.response?.data?.message || t('doctor.courses.failed_add_course'));
     } finally {
       setLoading(false);
     }
@@ -91,12 +93,12 @@ const DoctorCourses = ({ courses, onRefresh }) => {
     setLoading(true);
     try {
       await doctorApi('put', `/doctor/courses/${showEditModal.id}`, { description: formData.description });
-      toast.success('Course updated');
+      toast.success(t('doctor.courses.course_updated'));
       setShowEditModal(null);
       setFormData({ department_id: '', course_id: '', description: '' });
       onRefresh();
     } catch (err) {
-      toast.error('Failed to update course');
+      toast.error(t('doctor.courses.failed_update_course'));
     } finally {
       setLoading(false);
     }
@@ -110,11 +112,11 @@ const DoctorCourses = ({ courses, onRefresh }) => {
     const nextStatus = currentStatus === true ? false : true;
     try {
       await doctorApi('patch', `/doctor/courses/${courseId}/archive`, { is_archived: nextStatus });
-      toast.success(nextStatus ? 'Archived' : 'Activated');
+      toast.success(nextStatus ? t('doctor.courses.archived') : t('doctor.courses.activated'));
       setOpenMenuId(null);
       if (onRefresh) await onRefresh();
     } catch (err) {
-      toast.error('Failed to update status');
+      toast.error(t('doctor.courses.failed_update_status'));
     }
   };
 
@@ -149,14 +151,14 @@ const DoctorCourses = ({ courses, onRefresh }) => {
       <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-8">
         <div>
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-violet-500/10 flex items-center justify-center">
-              <Book className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+            <div className="w-10 h-10 rounded-xl bg-[#059669]/10 flex items-center justify-center">
+              <Book className="w-5 h-5 text-[#059669] dark:text-[#34d399]" />
             </div>
-            <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">Curriculum Management</span>
+            <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">{t('doctor.courses.curriculum_management')}</span>
           </div>
-          <h2 className="text-4xl font-black text-gray-900 dark:text-white tracking-tight leading-none mb-3">Courses Hub</h2>
+          <h2 className="text-4xl font-black text-gray-900 dark:text-white tracking-tight leading-none mb-3">{t('doctor.courses.courses_hub')}</h2>
           <p className="text-gray-500 dark:text-gray-400 font-semibold max-w-2xl leading-relaxed">
-            Manage your academic curriculum, monitor class performance, and organize your teaching resources.
+            {t('doctor.courses.subtitle')}
           </p>
         </div>
         
@@ -167,7 +169,7 @@ const DoctorCourses = ({ courses, onRefresh }) => {
               onClick={() => setActiveTab(tab)}
               className={`px-10 py-3 rounded-[1.5rem] font-black text-xs uppercase tracking-widest transition-all duration-300 ${activeTab === tab ? 'bg-white dark:bg-white text-gray-900 dark:text-black shadow-xl shadow-gray-200 dark:shadow-none' : 'text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
             >
-              {tab}
+              {t(`doctor.courses.${tab}`)}
             </button>
           ))}
         </div>
@@ -182,18 +184,18 @@ const DoctorCourses = ({ courses, onRefresh }) => {
           className="w-full lg:w-auto bg-gray-900 dark:bg-white text-white dark:text-black font-black px-10 py-5 rounded-[2rem] flex items-center justify-center gap-4 shadow-2xl transition-all"
         >
           <Plus className="w-6 h-6" />
-          <span className="text-xs uppercase tracking-widest">Enroll New Course</span>
+          <span className="text-xs uppercase tracking-widest">{t('doctor.courses.enroll_new_course')}</span>
         </motion.button>
 
         <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">
           <div className="relative w-full sm:w-64 group">
-            <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-violet-500 transition-colors" />
+            <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-[#059669] transition-colors" />
             <input 
               type="text" 
-              placeholder="Search..."
+              placeholder={t('doctor.courses.search')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-white/50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/5 rounded-[1.5rem] py-4 pl-14 pr-6 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-violet-500/5 transition-all font-semibold"
+              className="w-full bg-white/50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/5 rounded-[1.5rem] py-4 pl-14 pr-6 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-[#059669]/5 transition-all font-semibold"
             />
           </div>
 
@@ -204,7 +206,7 @@ const DoctorCourses = ({ courses, onRefresh }) => {
                onChange={(e) => setDeptFilter(e.target.value)}
                className="w-full bg-white/50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/5 rounded-[1.5rem] py-4 pl-14 pr-12 text-gray-900 dark:text-white font-black text-xs uppercase tracking-widest focus:outline-none transition-all appearance-none cursor-pointer"
              >
-               <option value="all" className="bg-white dark:bg-black">All Departments</option>
+                <option value="all" className="bg-white dark:bg-black">{t('doctor.courses.all_departments')}</option>
                {departments.map(d => <option key={d.id} value={d.id} className="bg-white dark:bg-black">{d.name}</option>)}
              </select>
              <ChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
@@ -226,14 +228,14 @@ const DoctorCourses = ({ courses, onRefresh }) => {
                 initial="hidden"
                 animate="visible"
                 exit={{ opacity: 0, scale: 0.9 }}
-                className="bg-white/40 dark:bg-white/[0.02] border border-gray-200/50 dark:border-white/5 p-8 rounded-[3rem] hover:border-violet-500/30 transition-all group relative overflow-hidden backdrop-blur-sm"
+                className="bg-white/40 dark:bg-white/[0.02] border border-gray-200/50 dark:border-white/5 p-8 rounded-[3rem] hover:border-[#059669]/30 transition-all group relative overflow-hidden backdrop-blur-sm"
               >
                 {/* Background Decor */}
-                <div className="absolute top-0 right-0 w-40 h-40 bg-violet-500/5 hidden rounded-full -translate-y-1/2 translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <div className="absolute top-0 right-0 w-40 h-40 bg-[#059669]/5 hidden rounded-full -translate-y-1/2 translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 
                 <div className="flex items-start justify-between mb-8 relative z-10">
-                  <div className="w-16 h-16 rounded-[1.75rem] bg-gray-100/50 dark:bg-white/5 flex items-center justify-center border border-gray-200/30 dark:border-white/5 group-hover:scale-110 group-hover:bg-violet-500/10 transition-all duration-500">
-                     <Layers className="w-8 h-8 text-gray-400 group-hover:text-violet-500 transition-colors" />
+                  <div className="w-16 h-16 rounded-[1.75rem] bg-gray-100/50 dark:bg-white/5 flex items-center justify-center border border-gray-200/30 dark:border-white/5 group-hover:scale-110 group-hover:bg-[#059669]/10 transition-all duration-500">
+                     <Layers className="w-8 h-8 text-gray-400 group-hover:text-[#059669] transition-colors" />
                   </div>
                   <div className="relative">
                     <button 
@@ -263,14 +265,14 @@ const DoctorCourses = ({ courses, onRefresh }) => {
                             }}
                             className="w-full flex items-center gap-3 px-6 py-4 text-xs font-black uppercase tracking-widest text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 transition-all text-left"
                           >
-                            <Edit3 className="w-4 h-4 text-violet-500" /> Manage Info
+                            <Edit3 className="w-4 h-4 text-[#059669]" /> {t('doctor.courses.manage_info')}
                           </button>
                           <button 
                             onClick={(e) => handleToggleArchive(e, course.id, course.is_archived)}
                             className="w-full flex items-center gap-3 px-6 py-4 text-xs font-black uppercase tracking-widest text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 transition-all text-left border-t border-gray-100 dark:border-white/5"
                           >
                             <Archive className={`w-4 h-4 ${course.is_archived ? 'text-emerald-500' : 'text-amber-500'}`} /> 
-                            {course.is_archived ? 'Activate' : 'Archive'}
+                            {course.is_archived ? t('doctor.courses.activate') : t('doctor.courses.archive_action')}
                           </button>
                         </motion.div>
                       )}
@@ -279,15 +281,15 @@ const DoctorCourses = ({ courses, onRefresh }) => {
                 </div>
 
                 <div className="relative z-10">
-                  <h3 className="text-2xl font-black text-gray-900 dark:text-white mb-1.5 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors truncate">{course.name}</h3>
+                  <h3 className="text-2xl font-black text-gray-900 dark:text-white mb-1.5 group-hover:text-[#059669] dark:group-hover:text-[#34d399] transition-colors truncate">{course.name}</h3>
                   <div className="flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-6">
                     <span className="px-2.5 py-1 bg-gray-100 dark:bg-white/5 rounded-full">{course.code}</span>
                     <span className="w-1 h-1 bg-gray-300 dark:bg-white/20 rounded-full"></span>
-                    <span>Sem {course.semester}</span>
+                    <span>{t('doctor.courses.sem')} {course.semester}</span>
                   </div>
                   
                   <p className="text-gray-500 dark:text-gray-500 text-[14px] leading-relaxed mb-8 line-clamp-2 min-h-[3rem] font-medium">
-                    {course.description || `Specialized course focusing on the advanced principles of ${course.name.toLowerCase()}.`}
+                     {course.description || `Advanced course on ${course.name.toLowerCase()}.`}
                   </p>
 
                   <div className="flex items-center justify-between mb-4">
@@ -299,9 +301,9 @@ const DoctorCourses = ({ courses, onRefresh }) => {
                           </div>
                         ))}
                       </div>
-                      <span className="text-[11px] font-black text-gray-400 uppercase tracking-widest">{course.student_count || 0} Students</span>
+                      <span className="text-[11px] font-black text-gray-400 uppercase tracking-widest">{course.student_count || 0} {t('doctor.courses.students_label')}</span>
                     </div>
-                    <span className="text-[11px] font-black text-violet-500 uppercase tracking-widest">{progress}% syllabus</span>
+                    <span className="text-[11px] font-black text-[#059669] uppercase tracking-widest">{progress}% {t('doctor.courses.syllabus_label')}</span>
                   </div>
 
                   <div className="h-2 w-full bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden">
@@ -309,7 +311,7 @@ const DoctorCourses = ({ courses, onRefresh }) => {
                       initial={{ width: 0 }}
                       animate={{ width: `${progress}%` }}
                       transition={{ duration: 1.5, ease: "circOut" }}
-                      className="h-full bg-gradient-to-r from-violet-600 to-indigo-600 rounded-full"
+                      className="h-full bg-gradient-to-r from-[#059669] to-[#34d399] rounded-full"
                     ></motion.div>
                   </div>
                 </div>
@@ -327,7 +329,7 @@ const DoctorCourses = ({ courses, onRefresh }) => {
              <div className="w-24 h-24 bg-gray-100/50 dark:bg-white/[0.02] rounded-[3rem] flex items-center justify-center mx-auto mb-8 border border-gray-200/50 dark:border-white/5">
                 <BookOpen className="w-10 h-10 text-gray-300 dark:text-white/10" />
              </div>
-             <p className="text-gray-400 dark:text-gray-500 text-xl font-bold">No academic materials found.</p>
+             <p className="text-gray-400 dark:text-gray-500 text-xl font-bold">{t('doctor.courses.no_courses')}</p>
           </motion.div>
         )}
       </div>
@@ -355,14 +357,14 @@ const DoctorCourses = ({ courses, onRefresh }) => {
               </button>
 
               <div className="mb-12">
-                <div className="w-14 h-14 rounded-2xl bg-violet-500/10 flex items-center justify-center mb-6">
-                  <Sparkles className="w-7 h-7 text-violet-600 dark:text-violet-400" />
+                <div className="w-14 h-14 rounded-2xl bg-[#059669]/10 flex items-center justify-center mb-6">
+                  <Sparkles className="w-7 h-7 text-[#059669] dark:text-[#34d399]" />
                 </div>
                 <h3 className="text-4xl font-black text-gray-900 dark:text-white tracking-tight mb-3">
-                  {showAddModal ? 'Course Enrollment' : 'Edit Curriculum'}
+                  {showAddModal ? t('doctor.courses.course_enrollment') : t('doctor.courses.edit_curriculum')}
                 </h3>
                 <p className="text-gray-500 dark:text-gray-400 font-semibold leading-relaxed">
-                  {showAddModal ? 'Join a new academic course to begin managing your student materials.' : 'Keep your course description up to date for your students.'}
+                  {showAddModal ? t('doctor.courses.enrollment_subtitle') : t('doctor.courses.edit_subtitle')}
                 </p>
               </div>
 
@@ -370,15 +372,15 @@ const DoctorCourses = ({ courses, onRefresh }) => {
                 {showAddModal && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-3">
-                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Department</label>
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('doctor.courses.department_label')}</label>
                       <div className="relative">
                         <select 
                           required
                           value={formData.department_id}
                           onChange={(e) => setFormData({...formData, department_id: e.target.value, course_id: ''})}
-                          className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-white/10 rounded-2xl py-5 px-8 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-4 focus:ring-violet-500/5 focus:border-violet-500/30 transition-all font-bold appearance-none cursor-pointer"
+                          className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-white/10 rounded-2xl py-5 px-8 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-4 focus:ring-[#059669]/5 focus:border-[#059669]/30 transition-all font-bold appearance-none cursor-pointer"
                         >
-                          <option value="" className="bg-white dark:bg-black">Select...</option>
+                          <option value="" className="bg-white dark:bg-black">{t('doctor.courses.select_department')}</option>
                           {departments.map(d => <option key={d.id} value={d.id} className="bg-white dark:bg-black">{d.name}</option>)}
                         </select>
                         <ChevronDown className="absolute right-6 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
@@ -386,16 +388,16 @@ const DoctorCourses = ({ courses, onRefresh }) => {
                     </div>
 
                     <div className="space-y-3">
-                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Academic Course</label>
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('doctor.courses.academic_course_label')}</label>
                       <div className="relative">
                         <select 
                           required
                           disabled={!formData.department_id}
                           value={formData.course_id}
                           onChange={(e) => setFormData({...formData, course_id: e.target.value})}
-                          className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-white/10 rounded-2xl py-5 px-8 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-4 focus:ring-violet-500/5 focus:border-violet-500/30 transition-all font-bold appearance-none cursor-pointer disabled:opacity-30"
+                          className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-white/10 rounded-2xl py-5 px-8 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-4 focus:ring-[#059669]/5 focus:border-[#059669]/30 transition-all font-bold appearance-none cursor-pointer disabled:opacity-30"
                         >
-                          <option value="" className="bg-white dark:bg-black">Select...</option>
+                          <option value="" className="bg-white dark:bg-black">{t('doctor.courses.select_course')}</option>
                           {availableCourses.map(c => (
                             <option key={c.id} value={c.id} className="bg-white dark:bg-black">
                               {c.name} ({c.code})
@@ -409,13 +411,13 @@ const DoctorCourses = ({ courses, onRefresh }) => {
                 )}
 
                 <div className="space-y-3">
-                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Description / Overview</label>
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('doctor.courses.description_label')}</label>
                   <textarea 
                     rows="4"
                     value={formData.description}
                     onChange={(e) => setFormData({...formData, description: e.target.value})}
-                    placeholder="Enter a professional overview of your teaching approach..."
-                    className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-white/10 rounded-3xl py-6 px-8 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-violet-500/5 focus:border-violet-500/30 transition-all font-semibold resize-none"
+                    placeholder={t('doctor.courses.description_placeholder')}
+                    className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-white/10 rounded-3xl py-6 px-8 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-[#059669]/5 focus:border-[#059669]/30 transition-all font-semibold resize-none"
                   />
                 </div>
 
@@ -431,7 +433,7 @@ const DoctorCourses = ({ courses, onRefresh }) => {
                       <div className="w-6 h-6 border-4 border-gray-400 border-t-gray-900 dark:border-gray-200 dark:border-t-black rounded-full animate-spin"></div>
                     ) : (
                       <>
-                        <span className="text-xs uppercase tracking-[0.2em]">{showAddModal ? 'Add to My Courses' : 'Update Curriculum'}</span>
+                        <span className="text-xs uppercase tracking-[0.2em]">{showAddModal ? t('doctor.courses.add_to_my_courses') : t('doctor.courses.update_curriculum')}</span>
                         <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                       </>
                     )}

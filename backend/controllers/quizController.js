@@ -236,6 +236,9 @@ const saveAnswer = async (req, res) => {
 
 const submitQuiz = async (req, res) => {
     try {
+        if (!supabase) {
+            return res.status(503).json({ message: 'File upload is not available (Supabase not configured)' });
+        }
         const studentId = req.user.id;
         const { attemptId } = req.params;
 

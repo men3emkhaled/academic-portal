@@ -28,11 +28,11 @@ const ResetPassword = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      toast.error('Passwords do not match');
+      toast.error(t('auth.reset_password.error_mismatch'));
       return;
     }
     if (password.length < 4) {
-      toast.error('Password must be at least 4 characters');
+      toast.error(t('auth.reset_password.error_min_length'));
       return;
     }
 
@@ -42,12 +42,12 @@ const ResetPassword = () => {
 
     if (result.success) {
       setSuccess(true);
-      toast.success('Password reset successfully!');
+      toast.success(t('auth.reset_password.success_toast'));
       setTimeout(() => {
         navigate('/student/login');
       }, 3000);
     } else {
-      toast.error(result.message || 'Failed to reset password');
+      toast.error(result.message || t('auth.reset_password.error_failed'));
     }
   };
 
@@ -66,8 +66,8 @@ const ResetPassword = () => {
               <div className="absolute inset-[3px] bg-white dark:bg-[#111111] rounded-[1rem] transition-colors duration-300"></div>
               <Lock className="relative w-7 h-7 text-primary" />
             </div>
-            <h2 className="text-2xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-2">Create New Password</h2>
-            <p className="text-gray-500 dark:text-gray-400 text-sm">Please enter your new password below.</p>
+            <h2 className="text-2xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-2">{t('auth.reset_password.title')}</h2>
+            <p className="text-gray-500 dark:text-gray-400 text-sm">{t('auth.reset_password.desc')}</p>
           </div>
 
           {success ? (
@@ -75,19 +75,19 @@ const ResetPassword = () => {
               <div className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400 flex items-center justify-center mx-auto mb-4">
                 <CheckCircle className="w-8 h-8" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Password Reset!</h3>
-              <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">Your password has been changed successfully.</p>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{t('auth.reset_password.success_title')}</h3>
+              <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">{t('auth.reset_password.success_desc')}</p>
               <button
                 onClick={() => navigate('/student/login')}
                 className="w-full bg-primary text-white dark:text-dark font-extrabold py-3.5 rounded-xl hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2"
               >
-                Go to Login <ArrowRight className="w-4 h-4" />
+                {t('auth.reset_password.go_to_login')} <ArrowRight className="w-4 h-4" />
               </button>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
               <div className="flex flex-col gap-2">
-                <label className="text-xs uppercase tracking-widest text-primary font-bold px-1" htmlFor="new-password">New Password</label>
+                <label className="text-xs uppercase tracking-widest text-primary font-bold px-1" htmlFor="new-password">{t('auth.reset_password.new_password')}</label>
                 <div className="relative flex items-center">
                   <Lock className="absolute left-4 w-5 h-5 text-gray-400 dark:text-gray-500" />
                   <input
@@ -111,7 +111,7 @@ const ResetPassword = () => {
               </div>
 
               <div className="flex flex-col gap-2">
-                <label className="text-xs uppercase tracking-widest text-primary font-bold px-1" htmlFor="confirm-password">Confirm Password</label>
+                <label className="text-xs uppercase tracking-widest text-primary font-bold px-1" htmlFor="confirm-password">{t('auth.reset_password.confirm_password')}</label>
                 <div className="relative flex items-center">
                   <Lock className="absolute left-4 w-5 h-5 text-gray-400 dark:text-gray-500" />
                   <input
@@ -132,7 +132,7 @@ const ResetPassword = () => {
                 disabled={loading}
                 className="w-full bg-gradient-to-r from-primary to-[#7fe860] text-dark font-extrabold uppercase tracking-widest py-4 rounded-2xl shadow-[0_4px_15px_rgba(46,204,113,0.3)] dark:shadow-[0_4px_15px_rgba(142,255,113,0.3)] hover:shadow-[0_6px_25px_rgba(46,204,113,0.5)] dark:hover:shadow-[0_6px_25px_rgba(142,255,113,0.5)] active:scale-95 transition-all duration-200 mt-2 flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                {loading ? 'Resetting...' : 'Reset Password'}
+                {loading ? t('auth.reset_password.resetting') : t('auth.reset_password.reset_btn')}
               </button>
             </form>
           )}

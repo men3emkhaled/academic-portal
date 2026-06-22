@@ -1,5 +1,6 @@
 const rateLimit = require('express-rate-limit');
-const { ipKeyGenerator } = require('express-rate-limit'); // ✅ استيراد الدالة المساعدة لـ IPv6
+const { ipKeyGenerator } = require('express-rate-limit');
+const logger = require('../utils/logger');
 
 const isDev = process.env.NODE_ENV === 'development';
 
@@ -34,7 +35,7 @@ const studentLoginLimiter = rateLimit({
         return `${ipKey}:${username}`; // مفتاح يجمع بين IP واسم المستخدم
     },
     handler: (req, res, next, options) => {
-        console.warn(`⚠️ Rate limit exceeded for student login: IP ${req.ip}, username ${req.body.username}`);
+        logger.warn({ ip: req.ip, username: req.body.username }, 'Rate limit exceeded for student login');
         res.status(options.statusCode).json(options.message);
     }
 });
@@ -51,7 +52,7 @@ const adminLoginLimiter = rateLimit({
         message: 'Too many failed admin login attempts. Your IP has been temporarily blocked.'
     },
     handler: (req, res, next, options) => {
-        console.error(`🚨 Admin login rate limit exceeded: IP ${req.ip}, username ${req.body.username}`);
+        logger.error({ ip: req.ip, username: req.body.username }, 'Admin login rate limit exceeded');
         res.status(options.statusCode).json(options.message);
     }
 });
@@ -107,7 +108,7 @@ const doctorLoginLimiter = rateLimit({
         return `${ipKey}:${username}`;
     },
     handler: (req, res, next, options) => {
-        console.warn(`⚠️ Rate limit exceeded for doctor login: IP ${req.ip}, username ${req.body.username}`);
+        logger.warn({ ip: req.ip, username: req.body.username }, 'Rate limit exceeded for doctor login');
         res.status(options.statusCode).json(options.message);
     }
 });
@@ -128,7 +129,7 @@ const forgotPasswordLimiter = rateLimit({
         return `${ipKey}:${studentId}`;
     },
     handler: (req, res, next, options) => {
-        console.warn(`⚠️ Rate limit exceeded for forgot-password: IP ${req.ip}, student ${req.body.studentId}`);
+        logger.warn({ ip: req.ip, studentId: req.body.studentId }, 'Rate limit exceeded for forgot-password');
         res.status(options.statusCode).json(options.message);
     }
 });

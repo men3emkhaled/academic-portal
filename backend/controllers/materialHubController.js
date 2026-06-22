@@ -157,6 +157,9 @@ const getPosts = async (req, res) => {
 // Create a new post
 const createPost = async (req, res) => {
   try {
+    if (!supabase) {
+      return res.status(503).json({ message: 'File upload is not available (Supabase not configured)' });
+    }
     const { courseId, type, caption, batch } = req.body;
     const studentId = req.user.id;
 

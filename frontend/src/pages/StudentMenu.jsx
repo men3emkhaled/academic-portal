@@ -64,16 +64,16 @@ const StudentMenu = () => {
     { 
       id: 'course-registration', 
       label: t('sidebar.course_registration'), 
-      desc: isAr ? 'تسجيل وتعديل المواد الدراسية الخاصة بالترم' : 'Enroll and modify your semester academic courses',
+      desc: t('studentMenu.register_courses_desc'),
       icon: <BookOpen className="w-8 h-8" />, 
       path: '/student/registration',
       color: 'from-blue-500/10 to-indigo-500/10 dark:from-blue-500/20 dark:to-indigo-500/20 text-blue-600 dark:text-blue-400 border-blue-500/20',
-      badge: registeredCoursesCount > 0 ? `${registeredCoursesCount} ${isAr ? 'مواد' : 'Courses'}` : null
+      badge: registeredCoursesCount > 0 ? `${registeredCoursesCount} ${t('studentMenu.courses')}` : null
     },
     { 
       id: 'grades', 
       label: t('sidebar.courses_grades'), 
-      desc: isAr ? 'عرض النتائج ودرجات المواد والتقديرات الأكاديمية' : 'View semester grading results, course marks and academic GPA',
+      desc: t('studentMenu.grades_desc'),
       icon: <TrendingUp className="w-8 h-8" />, 
       path: '/student/grades',
       color: 'from-pink-500/10 to-rose-500/10 dark:from-pink-500/20 dark:to-rose-500/20 text-pink-600 dark:text-pink-400 border-pink-500/20',
@@ -82,34 +82,43 @@ const StudentMenu = () => {
     { 
       id: 'quizzes', 
       label: t('sidebar.quizzes'), 
-      desc: isAr ? 'الاختبارات الإلكترونية المستمرة والتقييمات' : 'Online assessment quizzes and scoring tests',
+      desc: t('studentMenu.quizzes_desc'),
       icon: <FileText className="w-8 h-8" />, 
       path: '/student/quizzes',
-      color: 'from-emerald-500/10 to-teal-500/10 dark:from-emerald-500/20 dark:to-teal-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
+      color: 'from-[#059669]/10 to-[#34d399]/10 text-[#059669] dark:text-[#34d399] border-[#059669]/20',
       badge: null
     },
     { 
       id: 'roadmap', 
       label: t('sidebar.roadmap'), 
-      desc: isAr ? 'خطة تخرجك الدراسي والتقدم التعليمي لسنواتك' : 'Your graduation curriculum roadmap and year progress',
+      desc: t('studentMenu.roadmap_desc'),
       icon: <Map className="w-8 h-8" />, 
       path: '/student/roadmap',
       color: 'from-amber-500/10 to-orange-500/10 dark:from-amber-500/20 dark:to-orange-500/20 text-amber-600 dark:text-amber-400 border-amber-500/20',
-      badge: isAr ? `مستوى ${student?.level || 1}` : `Level ${student?.level || 1}`
+      badge: t('studentMenu.level_label', { level: student?.level || 1 })
     },
     { 
       id: 'personal-tasks', 
       label: t('sidebar.personal_tasks'), 
-      desc: isAr ? 'قائمة مهامك اليومية وجدول المذاكرة الخاص بك' : 'Daily checklist tasks and personalized study schedules',
+      desc: t('studentMenu.tasks_desc'),
       icon: <CheckSquare className="w-8 h-8" />, 
       path: '/student/personal-tasks',
-      color: 'from-purple-500/10 to-fuchsia-500/10 dark:from-purple-500/20 dark:to-fuchsia-500/20 text-purple-600 dark:text-purple-400 border-purple-500/20',
-      badge: totalPendingTasks > 0 ? `${totalPendingTasks} ${isAr ? 'معلقة' : 'Pending'}` : null
+      color: 'from-[#059669]/10 to-[#34d399]/10 text-[#059669] dark:text-[#34d399] border-[#059669]/20',
+      badge: totalPendingTasks > 0 ? `${totalPendingTasks} ${t('studentMenu.pending')}` : null
+    },
+    { 
+      id: 'attendance', 
+      label: t('sidebar.attendance'), 
+      desc: t('studentMenu.attendance_desc'),
+      icon: <Layers className="w-8 h-8" />, 
+      path: '/student/attendance',
+      color: 'from-cyan-500/10 to-teal-500/10 dark:from-cyan-500/20 dark:to-teal-500/20 text-cyan-600 dark:text-cyan-400 border-cyan-500/20',
+      badge: null
     },
     { 
       id: 'settings', 
       label: t('sidebar.settings'), 
-      desc: isAr ? 'تعديل الملف الشخصي والمظهر وخيارات الحساب' : 'Edit profile details, UI themes and account options',
+      desc: t('studentMenu.settings_desc'),
       icon: <Settings className="w-8 h-8" />, 
       path: '/student/settings',
       color: 'from-gray-500/10 to-slate-500/10 dark:from-gray-500/20 dark:to-slate-500/20 text-gray-600 dark:text-gray-400 border-gray-500/20',
@@ -121,11 +130,11 @@ const StudentMenu = () => {
     menuItems.push({ 
       id: 'admin-panel', 
       label: t('sidebar.admin_panel'), 
-      desc: isAr ? 'لوحة التحكم والتحليل وإدارة شؤون الطلاب' : 'Dashboard control center and student manager portal',
+      desc: t('studentMenu.admin_desc'),
       icon: <ShieldCheck className="w-8 h-8" />, 
       path: '/admin',
       color: 'from-rose-500/10 to-pink-500/10 dark:from-rose-500/20 dark:to-pink-500/20 text-rose-600 dark:text-rose-400 border-rose-500/20',
-      badge: isAr ? 'إدارة' : 'Admin'
+      badge: t('studentMenu.admin_btn')
     });
   }
 
@@ -137,8 +146,8 @@ const StudentMenu = () => {
       
       {/* Ambient Glowing Blobs */}
       <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[-10%] inset-inline-end-[-5%] w-[50vw] h-[50vw] bg-[#8b5cf6]/5 blur-[120px] rounded-full"></div>
-        <div className="absolute bottom-[-10%] inset-inline-start-[-5%] w-[40vw] h-[40vw] bg-[#2cfc7d]/3 blur-[100px] rounded-full"></div>
+        <div className="absolute top-[-10%] inset-inline-end-[-5%] w-[50vw] h-[50vw] bg-[#059669]/5 blur-[120px] rounded-full"></div>
+        <div className="absolute bottom-[-10%] inset-inline-start-[-5%] w-[40vw] h-[40vw] bg-[#34d399]/3 blur-[100px] rounded-full"></div>
       </div>
 
       <Sidebar onLogout={handleLogout} />
@@ -149,10 +158,10 @@ const StudentMenu = () => {
           {/* Header & Student Identity Card */}
           <div className="flex flex-col md:flex-row items-center justify-between gap-8 bg-white dark:bg-[#0e0e16] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-8 md:p-10 shadow-sm relative overflow-hidden group">
             {/* Ambient Background Gradient for the Identity Card */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-[#8b5cf6]/2 to-[#2cfc7d]/2 opacity-50 dark:opacity-20 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-[#059669]/2 to-[#34d399]/2 opacity-50 dark:opacity-20 pointer-events-none" />
             
             <div className="flex flex-col sm:flex-row items-center gap-6 relative z-10 text-center sm:text-start">
-              <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-3xl font-black shadow-lg shadow-indigo-500/20 transform group-hover:scale-105 transition-transform duration-500">
+              <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-[#059669] to-[#047857] flex items-center justify-center text-white text-3xl font-black shadow-lg shadow-indigo-500/20 transform group-hover:scale-105 transition-transform duration-500">
                 {student?.name ? student.name.charAt(0).toUpperCase() : <User className="w-10 h-10" />}
               </div>
               <div className="space-y-2">
@@ -160,24 +169,24 @@ const StudentMenu = () => {
                   <h1 className={`text-2xl md:text-3xl font-black tracking-tight text-gray-900 dark:text-white ${isAr ? 'font-arabic' : ''}`}>
                     {student?.name}
                   </h1>
-                  <span className="px-3 py-1 rounded-full bg-[#2cfc7d]/10 text-[#10b981] dark:text-[#2cfc7d] text-[10px] font-black uppercase tracking-widest border border-[#2cfc7d]/20">
-                    {isAr ? 'طالب نشط' : 'Active Student'}
+                  <span className="px-3 py-1 rounded-full bg-[#34d399]/10 text-[#059669] dark:text-[#34d399] text-[10px] font-black uppercase tracking-widest border border-[#34d399]/20">
+                    {t('studentMenu.active_student')}
                   </span>
                 </div>
                 <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-xs font-semibold text-gray-400 dark:text-white/40">
                   <span className="flex items-center gap-1.5">
                     <GraduationCap className="w-4 h-4 text-primary" />
-                    {student?.department_name || student?.department_code || (isAr ? 'القسم العام' : 'General Department')}
+                    {student?.department_name || student?.department_code || t('studentMenu.general_dept')}
                   </span>
                   <span className="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-white/10 hidden sm:inline-block"></span>
                   <span className="flex items-center gap-1.5">
                     <Layers className="w-4 h-4 text-indigo-400" />
-                    {isAr ? `المستوى ${student?.level || 1}` : `Level ${student?.level || 1}`}
+                    {t('studentMenu.level_value', { level: student?.level || 1 })}
                   </span>
                   <span className="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-white/10 hidden sm:inline-block"></span>
                   <span className="flex items-center gap-1.5">
                     <Users className="w-4 h-4 text-amber-400" />
-                    {isAr ? `شعبة ${student?.section || '—'}` : `Section ${student?.section || '—'}`}
+                    {t('studentMenu.section_value', { section: student?.section || '—' })}
                   </span>
                 </div>
               </div>
@@ -186,7 +195,7 @@ const StudentMenu = () => {
             <div className="flex items-center gap-4 relative z-10 shrink-0">
               <div className="text-center md:text-inline-end space-y-1">
                 <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 dark:text-white/20">
-                  {isAr ? 'كود الطالب' : 'Student ID'}
+                  {t('studentMenu.student_id')}
                 </p>
                 <p className="text-lg font-black tracking-widest text-gray-900 dark:text-white opacity-80">
                   {student?.id}
@@ -232,7 +241,7 @@ const StudentMenu = () => {
                 </div>
 
                 <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary opacity-60 group-hover:opacity-100 group-hover:translate-x-1.5 transition-all duration-300">
-                  <span>{isAr ? 'انتقال الآن' : 'Go Now'}</span>
+                  <span>{t('studentMenu.go_now')}</span>
                   <ArrowRight className={`w-4 h-4 ${isAr ? 'rotate-180' : ''}`} />
                 </div>
               </motion.div>
@@ -251,8 +260,8 @@ const StudentMenu = () => {
                     <Languages className="w-5 h-5" />
                   </div>
                   <div>
-                    <p className={`text-xs font-black uppercase tracking-widest text-gray-400 ${isAr ? 'font-arabic' : ''}`}>{isAr ? 'اللغة' : 'Language'}</p>
-                    <p className="text-sm font-black text-gray-900 dark:text-white">{isAr ? 'English' : 'العربية'}</p>
+                    <p className={`text-xs font-black uppercase tracking-widest text-gray-400 ${isAr ? 'font-arabic' : ''}`}>{t('studentMenu.language_label')}</p>
+                    <p className="text-sm font-black text-gray-900 dark:text-white">{t('studentMenu.language_toggle')}</p>
                   </div>
                 </div>
                 <ArrowRight className={`w-4 h-4 opacity-30 group-hover:opacity-100 transition-all ${isAr ? 'rotate-180' : ''}`} />
@@ -267,9 +276,9 @@ const StudentMenu = () => {
                     {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
                   </div>
                   <div>
-                    <p className={`text-xs font-black uppercase tracking-widest text-gray-400 ${isAr ? 'font-arabic' : ''}`}>{isAr ? 'المظهر' : 'Theme'}</p>
+                    <p className={`text-xs font-black uppercase tracking-widest text-gray-400 ${isAr ? 'font-arabic' : ''}`}>{t('studentMenu.theme_label')}</p>
                     <p className="text-sm font-black text-gray-900 dark:text-white">
-                      {theme === 'dark' ? (isAr ? 'الوضع المضيء' : 'Light Mode') : (isAr ? 'الوضع المظلم' : 'Dark Mode')}
+                      {t(theme === 'dark' ? 'sidebar.light' : 'sidebar.dark')}
                     </p>
                   </div>
                 </div>
@@ -285,7 +294,7 @@ const StudentMenu = () => {
                     <LogOut className="w-5 h-5" />
                   </div>
                   <div>
-                    <p className={`text-xs font-black uppercase tracking-widest text-rose-400/60 ${isAr ? 'font-arabic' : ''}`}>{isAr ? 'تسجيل الخروج' : 'Account'}</p>
+                    <p className={`text-xs font-black uppercase tracking-widest text-rose-400/60 ${isAr ? 'font-arabic' : ''}`}>{t('studentMenu.account_label')}</p>
                     <p className="text-sm font-black text-rose-500">{t('sidebar.logout')}</p>
                   </div>
                 </div>

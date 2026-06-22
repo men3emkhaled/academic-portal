@@ -1,30 +1,27 @@
-# Stage 1: Build
-FROM node:18-alpine as build
+# ============================================
+# Stage 1: Build the React application
+# ============================================
+FROM node:18-alpine AS build
 WORKDIR /app
 
-# Accept API URL as build argument
 ARG VITE_API_URL
 ENV VITE_API_URL=$VITE_API_URL
 
 COPY package*.json ./
-RUN npm install
+RUN npm ci
 COPY . .
 RUN npm run build
 
-# Stage 2: Serve with Nginx
+# ============================================
+# Stage 2: Serve with Nginx using full config
+# ============================================
 FROM nginx:alpine
+
+# Copy the full-featured nginx.conf with gzip, caching, security headers, and API proxy
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# SPA-friendly Nginx configuration
-RUN echo 'server { \
-    listen 80; \
-    location / { \
-    root /usr/share/nginx/html; \
-    index index.html; \
-    try_files $uri $uri/ /index.html; \
-    } \
-    }' > /etc/nginx/conf.d/default.conf
-
 EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
 
+CMD ["nginx", "-g", "daemon off;"]

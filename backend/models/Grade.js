@@ -21,7 +21,7 @@ class Grade {
       FROM student_courses sc
       JOIN courses c ON c.id = sc.course_id
       LEFT JOIN grades g ON g.enrollment_id = sc.id
-      WHERE sc.student_id = $1
+      WHERE sc.student_id = $1 AND sc.status = 'active'
       ORDER BY c.name`,
       [studentId]
     );
@@ -147,6 +147,7 @@ class Grade {
       JOIN student_courses sc ON sc.id = g.enrollment_id
       JOIN students s ON s.id = sc.student_id
       JOIN courses c ON c.id = sc.course_id
+      WHERE sc.status = 'active'
       ORDER BY s.id, c.name
     `);
     return result.rows;

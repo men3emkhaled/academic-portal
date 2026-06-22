@@ -57,10 +57,6 @@ export default function ProgramsPage() {
         {/* Category Filters Panel */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12">
           <div className="space-y-4 max-w-2xl text-start">
-            <div className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-[#2cfc7d]"></div>
-              <span className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400">{tLocal.nav.programs}</span>
-            </div>
             <h2 className="text-3xl md:text-4xl font-black tracking-tight text-slate-900 dark:text-white uppercase leading-none">
               {tLocal.programs.title}
             </h2>

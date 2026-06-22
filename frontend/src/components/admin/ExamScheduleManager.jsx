@@ -2,25 +2,16 @@ import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
-import { 
-  Calendar, Plus, Trash2, Edit3, Clock, 
-  LayoutDashboard, FileText, X, Activity, 
-  ChevronRight, MapPin, Settings, Info, Zap,
-  Search, BookOpen, GraduationCap, CheckCircle
-} from 'lucide-react';
+import { Calendar, Plus, Trash2, Edit3, Clock, X, CheckCircle } from 'lucide-react';
 
-const ExamScheduleManager = ({ departments, selectedDepartmentId }) => {
+const ExamScheduleManager = ({ departments = [], selectedDepartmentId }) => {
   const { t, i18n } = useTranslation();
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingExam, setEditingExam] = useState(null);
   const [formData, setFormData] = useState({
-    course_name: '',
-    exam_type: 'Final',
-    exam_date: '',
-    start_time: '',
-    end_time: '',
+    course_name: '', exam_type: 'Final', exam_date: '', start_time: '', end_time: '',
     department_id: selectedDepartmentId || ''
   });
 
@@ -29,44 +20,32 @@ const ExamScheduleManager = ({ departments, selectedDepartmentId }) => {
     try {
       const res = await api.get('/exams/admin', { params: { department_id: selectedDepartmentId } });
       setExams(res.data);
-    } catch (error) {
-      toast.error(t('admin.messages.load_exams_failed'));
-    } finally {
-      setLoading(false);
-    }
+    } catch (error) { toast.error(t('admin.messages.load_exams_failed')); }
+    finally { setLoading(false); }
   };
 
   useEffect(() => {
     fetchExams();
-    if (selectedDepartmentId) {
-      setFormData(prev => ({ ...prev, department_id: selectedDepartmentId }));
-    }
+    if (selectedDepartmentId) setFormData(prev => ({ ...prev, department_id: selectedDepartmentId }));
   }, [selectedDepartmentId]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.department_id) {
-      toast.error(t('admin.messages.select_dept_req'));
-      return;
-    }
+    if (!formData.department_id) { toast.error(t('admin.messages.select_dept_req')); return; }
     setLoading(true);
     try {
       if (editingExam) {
         await api.put(`/exams/admin/${editingExam.id}`, formData);
-        toast.success(t('common.success'));
       } else {
         await api.post('/exams/admin', formData);
-        toast.success(t('common.success'));
       }
+      toast.success(t('common.success'));
       setShowAddModal(false);
       setEditingExam(null);
       setFormData({ course_name: '', exam_type: 'Final', exam_date: '', start_time: '', end_time: '', department_id: selectedDepartmentId || '' });
       fetchExams();
-    } catch (error) {
-      toast.error(error.response?.data?.message || t('admin.messages.save_exam_failed'));
-    } finally {
-      setLoading(false);
-    }
+    } catch (error) { toast.error(error.response?.data?.message || t('admin.messages.save_exam_failed')); }
+    finally { setLoading(false); }
   };
 
   const handleDelete = async (id) => {
@@ -75,16 +54,13 @@ const ExamScheduleManager = ({ departments, selectedDepartmentId }) => {
       await api.delete(`/exams/admin/${id}`);
       toast.success(t('common.success'));
       fetchExams();
-    } catch (error) {
-      toast.error(t('admin.messages.delete_failed'));
-    }
+    } catch (error) { toast.error(t('admin.messages.delete_failed')); }
   };
 
   const openEditModal = (exam) => {
     setEditingExam(exam);
     setFormData({
-      course_name: exam.course_name,
-      exam_type: exam.exam_type,
+      course_name: exam.course_name, exam_type: exam.exam_type,
       exam_date: exam.exam_date.split('T')[0],
       start_time: exam.start_time.substring(0, 5),
       end_time: exam.end_time.substring(0, 5),
@@ -94,127 +70,65 @@ const ExamScheduleManager = ({ departments, selectedDepartmentId }) => {
   };
 
   return (
-    <div className="space-y-8 lg:space-y-10 animate-in fade-in duration-700 text-start">
-      {/* Header Bento Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 flex items-center gap-6 bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 p-8 rounded-[2.5rem] shadow-sm text-start">
-          <div className="w-16 h-16 bg-[#8b5cf6]/10 dark:bg-[#8b5cf6]/20 rounded-2xl flex items-center justify-center border border-[#8b5cf6]/20 shadow-inner group transition-transform duration-500 hover:scale-110">
-            <FileText className="w-8 h-8 text-[#8b5cf6]" />
-          </div>
-          <div>
-            <h2 className={`text-2xl lg:text-3xl font-black text-gray-900 dark:text-white tracking-tight ${i18n.language === 'ar' ? 'font-arabic' : ''}`}>
-              {t('admin.exams.title')}
-            </h2>
-            <p className="text-gray-500 dark:text-slate-400 text-sm font-bold mt-1 uppercase tracking-widest">{t('admin.exams.description')}</p>
-          </div>
+    <div className="space-y-6 pb-10 max-w-[1200px] mx-auto w-full px-4">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('admin.exams.title')}</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{exams.length} {t('admin.exams.active_batches')}</p>
         </div>
-        
-        <div className="bg-[#8b5cf6] text-white p-8 rounded-[2.5rem] shadow-lg shadow-purple-500/20 flex flex-col justify-between relative overflow-hidden group text-start">
-          <div className="absolute inset-inline-end-0 top-0 w-32 h-32 bg-white/10 hidden rounded-full translate-x-1/2 -translate-y-1/2 group-hover:scale-150 transition-transform duration-700"></div>
-          <div className="flex justify-between items-start relative z-10">
-            <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
-              <Zap className="w-5 h-5" />
-            </div>
-            <span className="text-[10px] font-black uppercase tracking-widest bg-black/10 px-3 py-1 rounded-full">{t('admin.exams.proctor_node')}</span>
-          </div>
-          <div className="mt-4 relative z-10">
-            <p className="text-4xl font-black">{exams.length}</p>
-            <p className="text-[10px] font-black uppercase tracking-widest opacity-60 mt-1">{t('admin.exams.active_batches')}</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Actions Bar */}
-      <div className="flex justify-end">
-        <button
-          onClick={() => {
-            setEditingExam(null);
-            setFormData({ course_name: '', exam_type: 'Final', exam_date: '', start_time: '', end_time: '', department_id: selectedDepartmentId || '' });
-            setShowAddModal(true);
-          }}
-          className="flex items-center justify-center gap-3 bg-[#8b5cf6] text-white font-black py-4.5 px-10 rounded-2xl lg:rounded-[2rem] shadow-xl hover:scale-105 active:scale-95 transition-[color,background-color,border-color,transform,opacity] whitespace-nowrap group"
-        >
-          <Plus className="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" /> 
-          <span className="uppercase tracking-widest text-xs">{t('admin.exams.add_button')}</span>
+        <button onClick={() => { setEditingExam(null); setFormData({ course_name: '', exam_type: 'Final', exam_date: '', start_time: '', end_time: '', department_id: selectedDepartmentId || '' }); setShowAddModal(true); }}
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#059669] hover:bg-[#047857] text-white text-sm font-medium rounded-lg transition-colors">
+          <Plus className="w-4 h-4" />{t('admin.exams.add_button')}
         </button>
       </div>
 
-      <div className="bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[3rem] overflow-hidden shadow-sm relative">
-        {/* Top Glow Indicator */}
-        <div className="absolute top-0 inset-inline-start-0 w-full h-1.5 bg-gradient-to-r from-transparent via-[#8b5cf6] to-transparent opacity-30"></div>
-
-        <div className="overflow-x-auto custom-scrollbar">
-          <table className="w-full text-start border-collapse">
+      {/* Table */}
+      <div className="bg-white dark:bg-[#0d0d14] border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
             <thead>
-              <tr className="bg-gray-50/50 dark:bg-white/[0.01]">
-                <th className="py-6 px-8 text-[10px] font-black text-gray-400 dark:text-slate-400 uppercase tracking-[0.2em] text-start">{t('admin.exams.course_dept')}</th>
-                <th className="py-6 px-8 text-[10px] font-black text-gray-400 dark:text-slate-400 uppercase tracking-[0.2em] text-center">{t('admin.exams.type')}</th>
-                <th className="py-6 px-8 text-[10px] font-black text-gray-400 dark:text-slate-400 uppercase tracking-[0.2em] text-start">{t('admin.exams.schedule')}</th>
-                <th className="py-6 px-8 text-[10px] font-black text-gray-400 dark:text-slate-400 uppercase tracking-[0.2em] text-end">{t('admin.exams.actions')}</th>
+              <tr className="bg-gray-50 dark:bg-gray-800/50">
+                <th className="py-3 px-4 text-xs font-medium text-gray-500 text-start">{t('admin.exams.course_dept')}</th>
+                <th className="py-3 px-4 text-xs font-medium text-gray-500 text-center">{t('admin.exams.type')}</th>
+                <th className="py-3 px-4 text-xs font-medium text-gray-500 text-start">{t('admin.exams.schedule')}</th>
+                <th className="py-3 px-4 text-xs font-medium text-gray-500 text-end">{t('admin.exams.actions')}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
               {loading ? (
-                <tr>
-                    <td colSpan="4" className="text-center py-32">
-                        <div className="flex flex-col items-center gap-4 mx-auto">
-                            <Activity className="w-12 h-12 text-[#8b5cf6] animate-spin" />
-                            <p className="text-[10px] font-black text-gray-400 dark:text-slate-600 uppercase tracking-[0.3em]">{t('admin.exams.loading')}</p>
-                        </div>
-                    </td>
-                </tr>
+                <tr><td colSpan="4" className="text-center py-16 text-sm text-gray-400">{t('admin.exams.loading')}</td></tr>
               ) : exams.length === 0 ? (
-                <tr>
-                  <td colSpan="4" className="text-center py-32">
-                    <div className="w-20 h-20 bg-gray-50 dark:bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner grayscale opacity-30">
-                        <Calendar className="w-10 h-10 text-gray-400" />
-                    </div>
-                    <p className="text-[11px] font-black text-gray-400 dark:text-slate-600 uppercase tracking-[0.3em]">{t('admin.exams.no_exams')}</p>
-                  </td>
-                </tr>
+                <tr><td colSpan="4" className="text-center py-16 text-sm text-gray-400">{t('admin.exams.no_exams')}</td></tr>
               ) : (
                 exams.map((exam) => (
-                  <tr 
-                    key={exam.id}
-                    className="group hover:bg-[#8b5cf6]/5 transition-all duration-500"
-                  >
-                    <td className="py-8 px-8 text-start">
-                      <div className="flex flex-col gap-3">
-                        <p className="text-gray-900 dark:text-white font-black text-xl tracking-tight leading-tight group-hover:text-[#8b5cf6] transition-colors uppercase">{exam.course_name}</p>
-                        <div className="flex items-center gap-2">
-                           <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-100 dark:border-white/10 text-gray-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-widest transition-colors group-hover:bg-[#8b5cf6]/10">
-                              <LayoutDashboard className="w-4 h-4 text-[#8b5cf6]" /> {exam.department_name || t('admin.exams.global_context')}
-                           </span>
-                        </div>
-                      </div>
+                  <tr key={exam.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
+                    <td className="py-3 px-4">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">{exam.course_name}</p>
+                      <p className="text-xs text-gray-400">{exam.department_name || ''}</p>
                     </td>
-                    <td className="py-8 px-8 text-center">
-                      <span className={`px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest border shadow-inner transition-all ${
-                        exam.exam_type === 'Practical' ? 'bg-orange-500/10 border-orange-500/20 text-orange-600' : 'bg-[#8b5cf6]/10 border-[#8b5cf6]/20 text-[#8b5cf6]'
-                      }`}>
+                    <td className="py-3 px-4 text-center">
+                      <span className={`px-2 py-0.5 rounded text-xs ${exam.exam_type === 'Practical' ? 'bg-orange-50 dark:bg-orange-500/10 text-orange-600' : 'bg-[#059669]/10 text-[#059669]'}`}>
                         {t(`admin.exams.types.${exam.exam_type}`)}
                       </span>
                     </td>
-                    <td className="py-8 px-8 text-start">
-                      <div className="flex flex-col gap-3 text-start">
-                         <p className="text-gray-900 dark:text-white font-black text-sm uppercase tracking-widest flex items-center gap-2.5 transition-colors">
-                           <Calendar className="w-5 h-5 text-[#8b5cf6]" />
-                           {new Date(exam.exam_date).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'en-GB', { weekday: 'long' })},{' '}
-                           <span className="text-[#8b5cf6]">{new Date(exam.exam_date).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'en-GB')}</span>
-                         </p>
-                         <div className="flex items-center gap-3 text-[10px] text-gray-400 dark:text-slate-500 font-black uppercase tracking-widest opacity-60 transition-all">
-                           <Clock className="w-4 h-4" />
-                           <span className="bg-white dark:bg-black/40 px-3 py-1.5 rounded-xl border border-gray-100 dark:border-white/10 shadow-sm transition-colors">{exam.start_time.substring(0, 5)} — {exam.end_time.substring(0, 5)}</span>
-                         </div>
+                    <td className="py-3 px-4">
+                      <div className="flex items-center gap-2 text-sm text-gray-900 dark:text-white">
+                        <Calendar className="w-4 h-4 text-[#059669]" />
+                        {new Date(exam.exam_date).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'en-GB')}
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-gray-400 mt-0.5">
+                        <Clock className="w-3 h-3" />
+                        {exam.start_time?.substring(0, 5)} — {exam.end_time?.substring(0, 5)}
                       </div>
                     </td>
-                    <td className="py-8 px-8 text-end">
-                      <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all scale-90 group-hover:scale-100">
-                        <button onClick={() => openEditModal(exam)} className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 text-gray-400 hover:bg-[#8b5cf6] hover:text-white transition-all">
-                          <Edit3 className="w-5 h-5" />
+                    <td className="py-3 px-4">
+                      <div className="flex justify-end gap-1.5">
+                        <button onClick={() => openEditModal(exam)} className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-colors">
+                          <Edit3 className="w-4 h-4" />
                         </button>
-                        <button onClick={() => handleDelete(exam.id)} className="w-12 h-12 flex items-center justify-center rounded-2xl bg-rose-500/20 border border-rose-500/20 text-rose-500 hover:bg-rose-500 hover:text-white transition-all">
-                          <Trash2 className="w-5 h-5" />
+                        <button onClick={() => handleDelete(exam.id)} className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                     </td>
@@ -226,104 +140,74 @@ const ExamScheduleManager = ({ departments, selectedDepartmentId }) => {
         </div>
       </div>
 
-      {/* Cinematic Modal */}
+      {/* Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 animate-in fade-in duration-300">
-          <div 
-            onClick={() => setShowAddModal(false)}
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm" 
-          />
-          <div 
-            className="bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[3rem] p-8 lg:p-12 w-full max-w-2xl shadow-2xl relative overflow-hidden z-10 text-start animate-in zoom-in-95 duration-500" 
-            onClick={e => e.stopPropagation()}
-          >
-             {/* Modal Background Glow */}
-             <div className="absolute top-0 inset-inline-end-0 w-80 h-80 bg-[#8b5cf6]/5 pointer-events-none rounded-full"></div>
-
-             <div className="relative z-10">
-                <div className="flex items-center justify-between mb-10 pb-8 border-b border-gray-100 dark:border-white/5">
-                    <div className="flex items-center gap-5">
-                      <div className="w-16 h-16 bg-[#8b5cf6]/10 dark:bg-[#8b5cf6]/20 rounded-2xl flex items-center justify-center border border-[#8b5cf6]/20 text-[#8b5cf6] shadow-inner">
-                          {editingExam ? <Edit3 className="w-7 h-7" /> : <Plus className="w-7 h-7" />}
-                      </div>
-                      <div className="text-start">
-                          <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight uppercase">
-                              {editingExam ? t('admin.exams.modals.edit_exam') : t('admin.exams.modals.add_exam')}
-                          </h3>
-                          <p className="text-gray-400 text-[10px] font-black uppercase tracking-widest mt-1 italic">{t('admin.exams.temporal_alignment')}</p>
-                      </div>
-                    </div>
-                    <button onClick={() => setShowAddModal(false)} className="w-12 h-12 flex items-center justify-center bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 text-gray-400 rounded-2xl hover:text-rose-600 transition-all shadow-sm">
-                      <X className="w-6 h-6" />
-                    </button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div onClick={() => setShowAddModal(false)} className="absolute inset-0 bg-black/40" />
+          <div className="bg-white dark:bg-[#0c0c0e] border border-gray-200 dark:border-gray-700 rounded-xl w-full max-w-lg relative z-10 p-6" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-5 pb-4 border-b border-gray-200 dark:border-gray-700">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-[#059669]/10 rounded-lg flex items-center justify-center text-[#059669]">
+                  {editingExam ? <Edit3 className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
                 </div>
-
-                <form onSubmit={handleSubmit} className="space-y-8">
-                    <div className="space-y-3 text-start">
-                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('admin.exams.modals.course_name')} *</label>
-                        <div className="relative group/name">
-                            <BookOpen className="absolute inset-inline-start-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/name:text-[#8b5cf6] transition-colors" />
-                            <input type="text" required value={formData.course_name} onChange={(e) => setFormData({...formData, course_name: e.target.value})} className="w-full bg-gray-50 dark:bg-black/50 text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl ps-14 pe-6 py-4.5 font-black focus:ring-4 focus:ring-[#8b5cf6]/10 outline-none transition-all shadow-inner uppercase tracking-widest text-sm" placeholder={t('admin.exams.modals.placeholder_course')} />
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-start">
-                        <div className="space-y-3">
-                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('admin.exams.modals.exam_type')}</label>
-                            <div className="relative group/type">
-                                <Zap className="absolute inset-inline-start-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/type:text-[#8b5cf6] transition-colors" />
-                                <select value={formData.exam_type} onChange={(e) => setFormData({...formData, exam_type: e.target.value})} className="w-full bg-gray-50 dark:bg-black/50 text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl ps-14 pe-6 py-4.5 font-black focus:ring-4 focus:ring-[#8b5cf6]/10 outline-none transition-all appearance-none uppercase tracking-widest text-[11px] shadow-inner">
-                                    <option value="Final" className="bg-white dark:bg-[#0d0d14] dark:text-white">{t('admin.exams.types.Final')}</option>
-                                    <option value="Practical" className="bg-white dark:bg-[#0d0d14] dark:text-white">{t('admin.exams.types.Practical')}</option>
-                                </select>
-                                <ChevronRight className="absolute inset-inline-end-6 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 rotate-90" />
-                            </div>
-                        </div>
-                        <div className="space-y-3">
-                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('admin.exams.modals.dept_label')} *</label>
-                            <div className="relative group/dept">
-                                <GraduationCap className="absolute inset-inline-start-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/dept:text-[#8b5cf6] transition-colors" />
-                                <select value={formData.department_id} required onChange={(e) => setFormData({...formData, department_id: e.target.value})} className="w-full bg-gray-50 dark:bg-black/50 text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl ps-14 pe-6 py-4.5 font-black focus:ring-4 focus:ring-[#8b5cf6]/10 outline-none transition-all appearance-none uppercase tracking-widest text-[11px] shadow-inner">
-                                    <option value="" className="bg-white dark:bg-[#0d0d14] dark:text-white">{t('admin.exams.modals.placeholder_dept')}</option>
-                                    {departments.map(d => <option key={d.id} value={d.id} className="bg-white dark:bg-[#0d0d14] dark:text-white">{d.name}</option>)}
-                                </select>
-                                <ChevronRight className="absolute inset-inline-end-6 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 rotate-90" />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-start">
-                        <div className="space-y-3">
-                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('admin.exams.modals.exam_date')} *</label>
-                            <div className="relative group/date">
-                                <Calendar className="absolute inset-inline-start-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/date:text-[#8b5cf6] transition-colors" />
-                                <input type="date" required value={formData.exam_date} onChange={(e) => setFormData({...formData, exam_date: e.target.value})} className="w-full bg-gray-50 dark:bg-black/50 text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl ps-14 pe-6 py-4.5 font-black focus:ring-4 focus:ring-[#8b5cf6]/10 outline-none transition-all shadow-inner" />
-                            </div>
-                        </div>
-                        <div className="space-y-3">
-                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('admin.exams.modals.start_time')} *</label>
-                            <div className="relative group/start">
-                                <Clock className="absolute inset-inline-start-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/start:text-[#8b5cf6] transition-colors" />
-                                <input type="time" required value={formData.start_time} onChange={(e) => setFormData({...formData, start_time: e.target.value})} className="w-full bg-gray-50 dark:bg-black/50 text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl ps-14 pe-6 py-4.5 font-black focus:ring-4 focus:ring-[#8b5cf6]/10 outline-none transition-all shadow-inner" />
-                            </div>
-                        </div>
-                        <div className="space-y-3">
-                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('admin.exams.modals.end_time')} *</label>
-                            <div className="relative group/end">
-                                <Clock className="absolute inset-inline-start-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/end:text-[#8b5cf6] transition-colors" />
-                                <input type="time" required value={formData.end_time} onChange={(e) => setFormData({...formData, end_time: e.target.value})} className="w-full bg-gray-50 dark:bg-black/50 text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl ps-14 pe-6 py-4.5 font-black focus:ring-4 focus:ring-[#8b5cf6]/10 outline-none transition-all shadow-inner" />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="flex gap-6 pt-10 border-t border-gray-100 dark:border-white/5">
-                        <button type="submit" disabled={loading} className="flex-1 bg-[#8b5cf6] text-white font-black py-5 rounded-[2.5rem] shadow-xl shadow-purple-500/20 transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3 group/save">
-                            {loading ? <Activity className="w-6 h-6 animate-spin" /> : <><CheckCircle className="w-6 h-6 group-hover/save:scale-110 transition-transform" /> <span className="uppercase tracking-widest text-xs">{editingExam ? t('common.save') : t('admin.exams.modals.add_exam')}</span></>}
-                        </button>
-                        <button type="button" onClick={() => setShowAddModal(false)} className="px-14 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 font-black py-5 rounded-[2.5rem] transition-all uppercase tracking-widest text-xs">{t('common.cancel')}</button>
-                    </div>
-                </form>
-             </div>
+                <h3 className="text-base font-semibold text-gray-900 dark:text-white">
+                  {editingExam ? t('admin.exams.modals.edit_exam') : t('admin.exams.modals.add_exam')}
+                </h3>
+              </div>
+              <button onClick={() => setShowAddModal(false)} className="w-8 h-8 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center">
+                <X className="w-4 h-4 text-gray-400" />
+              </button>
+            </div>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-gray-500">{t('admin.exams.modals.course_name')} *</label>
+                <input type="text" required value={formData.course_name} onChange={(e) => setFormData({...formData, course_name: e.target.value})}
+                  className="w-full bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#059669]/30 focus:border-[#059669] outline-none" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-gray-500">{t('admin.exams.modals.exam_type')}</label>
+                  <select value={formData.exam_type} onChange={(e) => setFormData({...formData, exam_type: e.target.value})}
+                    className="w-full bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#059669]/30 outline-none">
+                    <option value="Final">{t('admin.exams.types.Final')}</option>
+                    <option value="Practical">{t('admin.exams.types.Practical')}</option>
+                  </select>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-gray-500">{t('admin.exams.modals.dept_label')} *</label>
+                  <select value={formData.department_id} required onChange={(e) => setFormData({...formData, department_id: e.target.value})}
+                    className="w-full bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#059669]/30 outline-none">
+                    <option value="">{t('admin.exams.modals.placeholder_dept')}</option>
+                    {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-gray-500">{t('admin.exams.modals.exam_date')} *</label>
+                  <input type="date" required value={formData.exam_date} onChange={(e) => setFormData({...formData, exam_date: e.target.value})}
+                    className="w-full bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#059669]/30 focus:border-[#059669] outline-none" />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-gray-500">{t('admin.exams.modals.start_time')} *</label>
+                  <input type="time" required value={formData.start_time} onChange={(e) => setFormData({...formData, start_time: e.target.value})}
+                    className="w-full bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#059669]/30 focus:border-[#059669] outline-none" />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-gray-500">{t('admin.exams.modals.end_time')} *</label>
+                  <input type="time" required value={formData.end_time} onChange={(e) => setFormData({...formData, end_time: e.target.value})}
+                    className="w-full bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#059669]/30 focus:border-[#059669] outline-none" />
+                </div>
+              </div>
+              <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <button type="submit" disabled={loading} className="px-4 py-2 bg-[#059669] hover:bg-[#047857] text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2">
+                  {loading ? '...' : <><CheckCircle className="w-4 h-4" />{editingExam ? t('common.save') : t('admin.exams.modals.add_exam')}</>}
+                </button>
+                <button type="button" onClick={() => setShowAddModal(false)} className="px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg transition-colors">
+                  {t('common.cancel')}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

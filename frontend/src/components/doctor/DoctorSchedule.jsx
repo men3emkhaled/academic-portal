@@ -132,13 +132,13 @@ const DoctorSchedule = ({ timetable, onRefresh, courses }) => {
       <div className="bg-white dark:bg-[#0c0c0e] border border-gray-100 dark:border-white/5 rounded-[3.5rem] p-10 shadow-sm">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-12">
           <div className="flex items-center gap-8">
-            <div className="w-20 h-20 rounded-3xl bg-violet-600 flex items-center justify-center shadow-2xl shadow-violet-600/30">
+            <div className="w-20 h-20 rounded-3xl bg-[#059669] flex items-center justify-center shadow-2xl shadow-[#059669]/30">
               <Calendar className="w-10 h-10 text-white" />
             </div>
             <div>
               <div className="flex items-center gap-3 mb-1">
                 <h2 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">{t('doctor.timetable.title')}</h2>
-                <span className="px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-[9px] font-black text-violet-500 uppercase tracking-widest">{t('doctor.timetable.timeline')}</span>
+                <span className="px-3 py-1 rounded-full bg-[#059669]/10 border border-[#059669]/20 text-[9px] font-black text-[#059669] uppercase tracking-widest">{t('doctor.timetable.timeline')}</span>
               </div>
               <p className="text-sm text-gray-400 font-bold uppercase tracking-widest flex items-center gap-2">
                 <Clock className="w-4 h-4" /> {t('doctor.timetable.description')}
@@ -150,7 +150,7 @@ const DoctorSchedule = ({ timetable, onRefresh, courses }) => {
             <select
               value={filterDept}
               onChange={(e) => setFilterDept(e.target.value)}
-              className="bg-gray-50 dark:bg-white/[0.05] border border-gray-100 dark:border-white/10 rounded-2xl py-4 px-6 text-gray-900 dark:text-white focus:ring-4 focus:ring-violet-500/10 outline-none transition-all font-black text-xs uppercase tracking-widest [color-scheme:dark]"
+              className="bg-gray-50 dark:bg-white/[0.05] border border-gray-100 dark:border-white/10 rounded-2xl py-4 px-6 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#059669]/10 outline-none transition-all font-black text-xs uppercase tracking-widest [color-scheme:dark]"
             >
               <option value="all" className="dark:bg-[#0A0A0A]">{t('admin.logs.filters.all_modules')}</option>
               {departments.map(d => (
@@ -161,7 +161,7 @@ const DoctorSchedule = ({ timetable, onRefresh, courses }) => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => handleOpenModal()}
-              className="bg-violet-600 hover:bg-violet-700 text-white px-8 py-4 rounded-2xl flex items-center gap-3 shadow-xl shadow-violet-600/20 transition-all text-xs font-black uppercase tracking-widest"
+              className="bg-[#059669] hover:bg-[#047857] text-white px-8 py-4 rounded-2xl flex items-center gap-3 shadow-xl shadow-[#059669]/20 transition-all text-xs font-black uppercase tracking-widest"
             >
               <Plus className="w-4 h-4" /> {t('doctor.timetable.add_class')}
             </motion.button>
@@ -170,7 +170,7 @@ const DoctorSchedule = ({ timetable, onRefresh, courses }) => {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
-            { label: t('doctor.timetable.stats.today'), value: groupedSchedule[DAYS[new Date().getDay()]]?.length || 0, icon: Zap, color: 'text-violet-500', bg: 'bg-violet-500/10' },
+            { label: t('doctor.timetable.stats.today'), value: groupedSchedule[DAYS[new Date().getDay()]]?.length || 0, icon: Zap, color: 'text-[#059669]', bg: 'bg-[#059669]/10' },
             { label: t('doctor.timetable.stats.weekly'), value: timetable?.length || 0, icon: BarChart3, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
             { label: t('doctor.timetable.stats.depts'), value: departments.length, icon: Building2, color: 'text-amber-500', bg: 'bg-amber-500/10' },
           ].map((stat, i) => (
@@ -208,16 +208,16 @@ const DoctorSchedule = ({ timetable, onRefresh, courses }) => {
                   <motion.div
                     variants={itemVariants}
                     key={entry.id}
-                    className="group bg-white dark:bg-[#0c0c0e] border border-gray-100 dark:border-white/5 p-6 rounded-[2rem] hover:border-violet-500/30 transition-all hover:bg-gray-50 dark:hover:bg-white/[0.01] hover:shadow-2xl hover:shadow-violet-500/5 relative overflow-hidden"
+                    className="group bg-white dark:bg-[#0c0c0e] border border-gray-100 dark:border-white/5 p-6 rounded-[2rem] hover:border-[#059669]/30 transition-all hover:bg-gray-50 dark:hover:bg-white/[0.01] hover:shadow-2xl hover:shadow-[#059669]/5 relative overflow-hidden"
                   >
-                    <div className={`absolute inset-y-0 start-0 w-1.5 ${entry.type === 'Lecture' ? 'bg-violet-600' : 'bg-emerald-500'}`}></div>
+                    <div className={`absolute inset-y-0 start-0 w-1.5 ${entry.type === 'Lecture' ? 'bg-[#059669]' : 'bg-emerald-500'}`}></div>
 
                     <div className="flex justify-between items-start mb-4">
                       <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 bg-gray-50 dark:bg-white/5 px-2 py-1 rounded-lg">
                         {entry.start_time.slice(0, 5)}
                       </span>
                       <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                        <button onClick={() => handleOpenModal(entry)} className="p-2 rounded-xl bg-white dark:bg-white/5 text-gray-400 hover:text-violet-500 border border-gray-100 dark:border-white/10 transition-all">
+                        <button onClick={() => handleOpenModal(entry)} className="p-2 rounded-xl bg-white dark:bg-white/5 text-gray-400 hover:text-[#059669] border border-gray-100 dark:border-white/10 transition-all">
                           <Edit3 className="w-4 h-4" />
                         </button>
                         <button onClick={() => handleDelete(entry.id)} className="p-2 rounded-xl bg-white dark:bg-white/5 text-gray-400 hover:text-rose-500 border border-gray-100 dark:border-white/10 transition-all">
@@ -232,7 +232,7 @@ const DoctorSchedule = ({ timetable, onRefresh, courses }) => {
 
                     <div className="space-y-3">
                       <div className="flex items-center gap-2 text-gray-400">
-                        <MapPin className="w-3 h-3 text-violet-500" />
+                        <MapPin className="w-3 h-3 text-[#059669]" />
                         <span className="text-[10px] font-bold">{entry.location}</span>
                       </div>
                       <div className="flex items-center gap-2 text-gray-400">
@@ -260,7 +260,7 @@ const DoctorSchedule = ({ timetable, onRefresh, courses }) => {
             <motion.div initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }} className="relative w-full max-w-xl bg-white dark:bg-[#0A0A0A] border border-gray-100 dark:border-white/10 rounded-[3rem] shadow-2xl overflow-hidden p-10">
               <div className="flex items-center justify-between mb-10">
                 <div className="flex items-center gap-5">
-                  <div className="w-16 h-16 rounded-2xl bg-violet-600 flex items-center justify-center shadow-2xl shadow-violet-600/20">
+                  <div className="w-16 h-16 rounded-2xl bg-[#059669] flex items-center justify-center shadow-2xl shadow-[#059669]/20">
                     <Plus className="w-8 h-8 text-white" />
                   </div>
                   <div>
@@ -283,7 +283,7 @@ const DoctorSchedule = ({ timetable, onRefresh, courses }) => {
                       required
                       value={formData.department_id}
                       onChange={(e) => setFormData({ ...formData, department_id: e.target.value })}
-                      className="w-full bg-gray-50 dark:bg-white/[0.05] border border-gray-100 dark:border-white/10 rounded-2xl py-4 px-6 text-gray-900 dark:text-white focus:ring-4 focus:ring-violet-500/10 outline-none transition-all font-black [color-scheme:dark]"
+                      className="w-full bg-gray-50 dark:bg-white/[0.05] border border-gray-100 dark:border-white/10 rounded-2xl py-4 px-6 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#059669]/10 outline-none transition-all font-black [color-scheme:dark]"
                     >
                       <option value="" disabled className="dark:bg-[#0A0A0A]">{t('doctor.timetable.form.choose_dept')}</option>
                       {departments.map(d => (
@@ -297,10 +297,10 @@ const DoctorSchedule = ({ timetable, onRefresh, courses }) => {
                     <input
                       required
                       type="text"
-                      placeholder="e.g. Programming 2"
+                      placeholder={t('doctor.timetable.form.course')}
                       value={formData.course_name}
                       onChange={(e) => setFormData({ ...formData, course_name: e.target.value })}
-                      className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/10 rounded-2xl py-4 px-6 text-gray-900 dark:text-white focus:ring-4 focus:ring-violet-500/10 outline-none transition-all font-black"
+                      className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/10 rounded-2xl py-4 px-6 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#059669]/10 outline-none transition-all font-black"
                     />
                     <div className="flex flex-wrap gap-2 mt-4">
                       {courses.map(c => (
@@ -308,7 +308,7 @@ const DoctorSchedule = ({ timetable, onRefresh, courses }) => {
                           key={c.id}
                           type="button"
                           onClick={() => setFormData({ ...formData, course_name: c.name, department_id: c.department_id })}
-                          className={`text-[9px] font-black uppercase tracking-widest px-4 py-2 rounded-xl border transition-all ${formData.course_name === c.name ? 'bg-violet-600 border-violet-600 text-white' : 'bg-gray-50 dark:bg-white/5 border-gray-100 dark:border-white/10 text-gray-400'}`}
+                          className={`text-[9px] font-black uppercase tracking-widest px-4 py-2 rounded-xl border transition-all ${formData.course_name === c.name ? 'bg-[#059669] border-[#059669] text-white' : 'bg-gray-50 dark:bg-white/5 border-gray-100 dark:border-white/10 text-gray-400'}`}
                         >
                           {c.name}
                         </button>
@@ -321,10 +321,10 @@ const DoctorSchedule = ({ timetable, onRefresh, courses }) => {
                     <input
                       type="text"
                       required
-                      placeholder="e.g. 1"
+                      placeholder={t('doctor.timetable.form.section')}
                       value={formData.section}
                       onChange={(e) => setFormData({ ...formData, section: e.target.value })}
-                      className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/10 rounded-2xl py-4 px-6 text-gray-900 dark:text-white focus:ring-4 focus:ring-violet-500/10 outline-none transition-all font-black"
+                      className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/10 rounded-2xl py-4 px-6 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#059669]/10 outline-none transition-all font-black"
                     />
                   </div>
 
@@ -333,7 +333,7 @@ const DoctorSchedule = ({ timetable, onRefresh, courses }) => {
                     <select
                       value={formData.type}
                       onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                      className="w-full bg-gray-50 dark:bg-white/[0.05] border border-gray-100 dark:border-white/10 rounded-2xl py-4 px-6 text-gray-900 dark:text-white focus:ring-4 focus:ring-violet-500/10 outline-none transition-all font-black [color-scheme:dark]"
+                      className="w-full bg-gray-50 dark:bg-white/[0.05] border border-gray-100 dark:border-white/10 rounded-2xl py-4 px-6 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#059669]/10 outline-none transition-all font-black [color-scheme:dark]"
                     >
                       <option value="Lecture" className="dark:bg-[#0A0A0A]">{t('doctor.timetable.types.lecture')}</option>
                       <option value="Section" className="dark:bg-[#0A0A0A]">{t('doctor.timetable.types.section')}</option>
@@ -347,7 +347,7 @@ const DoctorSchedule = ({ timetable, onRefresh, courses }) => {
                     <select
                       value={formData.day_of_week}
                       onChange={(e) => setFormData({ ...formData, day_of_week: e.target.value })}
-                      className="w-full bg-gray-50 dark:bg-white/[0.05] border border-gray-100 dark:border-white/10 rounded-2xl py-4 px-6 text-gray-900 dark:text-white focus:ring-4 focus:ring-violet-500/10 outline-none transition-all font-black [color-scheme:dark]"
+                      className="w-full bg-gray-50 dark:bg-white/[0.05] border border-gray-100 dark:border-white/10 rounded-2xl py-4 px-6 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#059669]/10 outline-none transition-all font-black [color-scheme:dark]"
                     >
                       {DAYS.map(day => <option key={day} value={day} className="dark:bg-[#0A0A0A]">{t(`admin.timetable.days.${day}`)}</option>)}
                     </select>
@@ -358,10 +358,10 @@ const DoctorSchedule = ({ timetable, onRefresh, courses }) => {
                     <input
                       type="text"
                       required
-                      placeholder="e.g. Hall 4"
+                      placeholder={t('doctor.timetable.form.location')}
                       value={formData.location}
                       onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                      className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/10 rounded-2xl py-4 px-6 text-gray-900 dark:text-white focus:ring-4 focus:ring-violet-500/10 outline-none transition-all font-black"
+                      className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/10 rounded-2xl py-4 px-6 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#059669]/10 outline-none transition-all font-black"
                     />
                   </div>
 
@@ -372,7 +372,7 @@ const DoctorSchedule = ({ timetable, onRefresh, courses }) => {
                       required
                       value={formData.start_time}
                       onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
-                      className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/10 rounded-2xl py-4 px-6 text-gray-900 dark:text-white focus:ring-4 focus:ring-violet-500/10 outline-none transition-all font-black [color-scheme:dark]"
+                      className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/10 rounded-2xl py-4 px-6 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#059669]/10 outline-none transition-all font-black [color-scheme:dark]"
                     />
                   </div>
 
@@ -383,7 +383,7 @@ const DoctorSchedule = ({ timetable, onRefresh, courses }) => {
                       required
                       value={formData.end_time}
                       onChange={(e) => setFormData({ ...formData, end_time: e.target.value })}
-                      className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/10 rounded-2xl py-4 px-6 text-gray-900 dark:text-white focus:ring-4 focus:ring-violet-500/10 outline-none transition-all font-black [color-scheme:dark]"
+                      className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/10 rounded-2xl py-4 px-6 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#059669]/10 outline-none transition-all font-black [color-scheme:dark]"
                     />
                   </div>
                 </div>
@@ -394,7 +394,7 @@ const DoctorSchedule = ({ timetable, onRefresh, courses }) => {
                     whileTap={{ scale: 0.98 }}
                     type="submit"
                     disabled={loading}
-                    className="flex-1 bg-violet-600 hover:bg-violet-700 text-white font-black py-5 rounded-[1.5rem] shadow-xl shadow-violet-600/20 flex items-center justify-center gap-3 text-xs uppercase tracking-widest disabled:opacity-50"
+                    className="flex-1 bg-[#059669] hover:bg-[#047857] text-white font-black py-5 rounded-[1.5rem] shadow-xl shadow-[#059669]/20 flex items-center justify-center gap-3 text-xs uppercase tracking-widest disabled:opacity-50"
                   >
                     {loading ? <div className="w-5 h-5 border-4 border-white/20 border-t-white rounded-full animate-spin"></div> : <><Save className="w-4 h-4" /> {editingEntry ? t('doctor.timetable.form.update_session') : t('doctor.timetable.add_class')}</>}
                   </motion.button>

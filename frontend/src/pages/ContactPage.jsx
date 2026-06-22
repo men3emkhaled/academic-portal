@@ -46,11 +46,6 @@ export default function ContactPage() {
       <main className="flex-grow z-10 max-w-[1200px] mx-auto px-6 py-12 md:py-16 w-full">
         
         <div className="space-y-6 text-center max-w-2xl mx-auto mb-12">
-          <div className="flex items-center justify-center gap-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-[#2cfc7d]"></div>
-            <span className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400">{tLocal.nav.contact}</span>
-          </div>
-
           <h2 className="text-3xl md:text-4xl font-black tracking-tight text-slate-900 dark:text-white uppercase leading-none">
             {tLocal.contact.title}
           </h2>
@@ -68,7 +63,7 @@ export default function ContactPage() {
               <MapPin className="w-4.5 h-4.5" />
             </div>
             <div className="space-y-0.5 mt-6">
-              <span className="block text-[8px] font-black uppercase tracking-wider opacity-40">{isAr ? "الموقع" : "Location"}</span>
+              <span className="block text-[8px] font-black uppercase tracking-wider opacity-40">{t('landing.contact_address')}</span>
               <span className="text-xs font-bold leading-relaxed">{tLocal.contact.address}</span>
             </div>
           </div>

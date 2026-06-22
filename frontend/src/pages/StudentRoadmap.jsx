@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
-  Target, CheckCircle2, Circle, Trophy, 
-  ChevronDown, Map, Rocket, Zap,
-  TrendingUp, Layers, Info, ArrowRight,
-  Star, ClipboardList
+  CheckCircle2, Circle,
+  ChevronDown, Rocket, 
+  ArrowRight
 } from 'lucide-react';
 import { useStudentAuth } from '../context/StudentAuthContext';
 import { useStudentData } from '../context/StudentDataContext';
@@ -115,7 +114,7 @@ const StudentRoadmap = () => {
   if ((loading || loadingRoadmap) && tracks.length === 0) {
     return (
       <div className="flex flex-col justify-center items-center h-screen bg-white dark:bg-[#0c0c14]">
-        <div className="w-12 h-12 border-2 border-gray-200 dark:border-white/10 border-t-[#2cfc7d] rounded-full animate-spin"></div>
+        <div className="w-12 h-12 border-2 border-gray-200 dark:border-white/10 border-t-[#34d399] rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -125,8 +124,8 @@ const StudentRoadmap = () => {
       
       {/* Background Decor */}
       <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[-10%] inset-inline-end-[-5%] w-[50vw] h-[50vw] bg-[#8b5cf6]/5 blur-[120px] rounded-full"></div>
-        <div className="absolute bottom-[-10%] inset-inline-start-[-5%] w-[40vw] h-[40vw] bg-[#2cfc7d]/3 blur-[100px] rounded-full"></div>
+        <div className="absolute top-[-10%] inset-inline-end-[-5%] w-[50vw] h-[50vw] bg-[#059669]/5 blur-[120px] rounded-full"></div>
+        <div className="absolute bottom-[-10%] inset-inline-start-[-5%] w-[40vw] h-[40vw] bg-[#34d399]/3 blur-[100px] rounded-full"></div>
       </div>
 
       <Sidebar onLogout={handleLogout} />
@@ -138,12 +137,8 @@ const StudentRoadmap = () => {
           
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-10">
             <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-[#2cfc7d]"></div>
-                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 dark:text-white/30">{t('roadmap.title')}</span>
-              </div>
               <h1 className={`text-[clamp(2.5rem,6vw,5.5rem)] font-black leading-[0.95] tracking-tighter uppercase text-gray-900 dark:text-white ${isAr ? 'font-arabic' : ''}`}>
-                {t('mavi.success')} {t('mavi.roadmap')}
+                {t('roadmap.title')}
               </h1>
             </div>
 
@@ -152,10 +147,10 @@ const StudentRoadmap = () => {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pb-20">
             
             {/* Track Selector Bento Card */}
-            <div className="lg:col-span-8 bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[3rem] p-12 flex flex-col justify-between gap-12 group hover:shadow-2xl transition-all duration-700">
-               <div className="space-y-6">
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
-                     <h2 className={`text-4xl font-black leading-tight tracking-tight max-w-md ${isAr ? 'font-arabic' : ''}`}>
+            <div className="lg:col-span-12 bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[3rem] p-8 flex flex-col justify-between gap-8 group hover:shadow-2xl transition-all duration-700">
+               <div className="space-y-4">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                     <h2 className={`text-3xl font-black leading-tight tracking-tight max-w-md ${isAr ? 'font-arabic' : ''}`}>
                        {selectedTrack ? selectedTrack.name : t('roadmap.select_track')}
                      </h2>
                      <div className="relative" ref={dropdownRef}>
@@ -173,7 +168,7 @@ const StudentRoadmap = () => {
                                  <button
                                     key={track.id}
                                     onClick={() => handleTrackChange(track)}
-                                    className={`w-full text-start px-6 py-4 rounded-xl transition-all flex items-center justify-between text-[10px] font-black uppercase tracking-widest ${selectedTrack?.id === track.id ? 'bg-[#10b981] text-white' : 'text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white'}`}
+                                    className={`w-full text-start px-6 py-4 rounded-xl transition-all flex items-center justify-between text-[10px] font-black uppercase tracking-widest ${selectedTrack?.id === track.id ? 'bg-[#059669] text-white' : 'text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white'}`}
                                  >
                                     {track.name}
                                     {selectedTrack?.id === track.id && <CheckCircle2 className="w-4 h-4" />}
@@ -185,39 +180,23 @@ const StudentRoadmap = () => {
                   </div>
                </div>
                
-               <div className="grid grid-cols-2 md:grid-cols-4 gap-8 border-t border-black/5 dark:border-white/5 pt-10">
+               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 border-t border-black/5 dark:border-white/5 pt-6">
                   <div className="space-y-1">
-                     <span className="text-3xl font-black text-[#10b981] dark:text-[#2cfc7d]">{progress?.completed_tasks || 0}</span>
+                     <span className="text-2xl font-black text-[#059669] dark:text-[#34d399]">{progress?.completed_tasks || 0}</span>
                      <p className="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 dark:text-white/30">{t('roadmap.done')}</p>
                   </div>
                   <div className="space-y-1">
-                     <span className="text-3xl font-black text-gray-900 dark:text-white">{progress?.total_tasks || 0}</span>
+                     <span className="text-2xl font-black text-gray-900 dark:text-white">{progress?.total_tasks || 0}</span>
                      <p className="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 dark:text-white/30">{t('roadmap.tasks')}</p>
                   </div>
                   <div className="space-y-1">
-                     <span className="text-3xl font-black text-[#8b5cf6]">{Math.max(0, (progress?.total_tasks || 0) - (progress?.completed_tasks || 0))}</span>
+                     <span className="text-2xl font-black text-[#059669] dark:text-[#34d399]">{Math.max(0, (progress?.total_tasks || 0) - (progress?.completed_tasks || 0))}</span>
                      <p className="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 dark:text-white/30">{t('mavi.remaining')}</p>
                   </div>
                   <div className="space-y-1">
-                     <span className="text-3xl font-black text-gray-900 dark:text-white">#{student?.level}</span>
+                     <span className="text-2xl font-black text-gray-900 dark:text-white">#{student?.level}</span>
                      <p className="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 dark:text-white/30">{t('mavi.hierarchy')}</p>
                   </div>
-               </div>
-            </div>
-
-            {/* Timeline Insight Card */}
-            <div className="lg:col-span-4 bg-[#8b5cf6] rounded-[3rem] p-12 text-white flex flex-col justify-between space-y-8 relative overflow-hidden group">
-               <div className="absolute top-[-10%] inset-inline-end-[-10%] w-40 h-40 bg-white/10 blur-[40px] rounded-full group-hover:scale-150 transition-transform duration-1000"></div>
-               <div className="space-y-4 relative z-10">
-                  <Map className="w-10 h-10 mb-4" />
-                  <h3 className="text-2xl font-black uppercase italic leading-none">{t('mavi.milestone_logic')}</h3>
-                  <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-60">{t('mavi.milestone_desc')}</p>
-               </div>
-               <div className="flex items-center justify-between relative z-10">
-                  <span className="text-[4rem] font-black tracking-tighter leading-none">{progress?.percentage}%</span>
-                  <button className="w-16 h-16 bg-white text-black rounded-full flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-2xl">
-                    <Rocket className={`w-6 h-6 ${isAr ? 'rotate-180' : ''}`} />
-                  </button>
                </div>
             </div>
 
@@ -226,11 +205,11 @@ const StudentRoadmap = () => {
                
                <div className="flex items-center justify-between px-2">
                   <div className="flex flex-col">
-                    <h2 className={`text-4xl font-black uppercase tracking-tight ${isAr ? 'font-arabic' : ''}`}>
-                      {isAr ? 'المهمات' : 'Tasks'}
+                     <h2 className={`text-3xl font-black uppercase tracking-tight ${isAr ? 'font-arabic' : ''}`}>
+                      {t('roadmap.tasks')}
                     </h2>
                   </div>
-                  <div className="bg-[#10b981]/10 dark:bg-[#2cfc7d]/10 px-6 py-2 rounded-2xl text-[#10b981] dark:text-[#2cfc7d] text-xs font-black uppercase tracking-widest">
+                  <div className="bg-[#059669]/10 dark:bg-[#34d399]/10 px-6 py-2 rounded-2xl text-[#059669] dark:text-[#34d399] text-xs font-black uppercase tracking-widest">
                      {tasks.length} {t('roadmap.tasks')}
                   </div>
                </div>
@@ -239,16 +218,19 @@ const StudentRoadmap = () => {
                   {/* The Vertical Core Line */}
                   <div className="absolute top-0 bottom-0 start-4 md:start-12 w-[3px] bg-gray-100 dark:bg-white/5 rounded-full">
                      <div 
-                        className="absolute top-0 start-0 w-full bg-[#10b981] dark:bg-[#2cfc7d] rounded-full transition-all duration-1000 shadow-[0_0_20px_rgba(46,204,113,0.5)]"
+                        className="absolute top-0 start-0 w-full bg-[#059669] dark:bg-[#34d399] rounded-full transition-all duration-1000 shadow-[0_0_20px_rgba(5,150,105,0.5)]"
                         style={{ height: `${progress?.percentage || 0}%` }}
                      />
                   </div>
 
-                  <div className="space-y-12 relative">
+                  <div className="space-y-8 relative">
                      {tasks.length === 0 ? (
-                       <div className="py-32 bg-white dark:bg-[#0d0d14] border border-dashed border-gray-100 dark:border-white/10 rounded-[3rem] text-center opacity-40">
-                          <ClipboardList className="w-16 h-16 mx-auto mb-6 opacity-20" />
-                          <h3 className="text-xl font-black uppercase tracking-[0.4em]">{t('common.no_data')}</h3>
+                        <div className="py-32 bg-white dark:bg-[#0d0d14] border border-dashed border-gray-100 dark:border-white/10 rounded-[3rem] text-center opacity-40">
+                           <div className="w-16 h-16 rounded-2xl bg-gray-50 dark:bg-white/5 flex items-center justify-center mx-auto mb-6">
+                             <div className="w-6 h-0.5 bg-gray-200 dark:bg-white/10 rounded-full rotate-45" />
+                             <div className="w-6 h-0.5 bg-gray-200 dark:bg-white/10 rounded-full -rotate-45 absolute" />
+                           </div>
+                           <h3 className="text-xl font-black uppercase tracking-[0.4em]">{t('common.no_data')}</h3>
                        </div>
                      ) : (
                        tasks.map((task, idx) => {
@@ -258,31 +240,31 @@ const StudentRoadmap = () => {
                            <div key={task.task_id} className="relative group">
                              {/* Node Indicator */}
                              <div 
-                                className={`absolute top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 rounded-full border-4 flex items-center justify-center transition-all duration-500 z-10 start-[-25px] md:start-[-50px] ${isCompleted ? 'bg-[#10b981] border-[#10b981] text-white shadow-[0_0_30px_rgba(46,204,113,0.5)] scale-110 md:scale-125' : 'bg-white dark:bg-[#0c0c14] border-gray-100 dark:border-white/10 text-gray-200 dark:text-white/5'}`}
+                                className={`absolute top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 rounded-full border-4 flex items-center justify-center transition-all duration-500 z-10 start-[-25px] md:start-[-50px] ${isCompleted ? 'bg-[#059669] border-[#059669] text-white shadow-[0_0_30px_rgba(5,150,105,0.5)] scale-110 md:scale-125' : 'bg-white dark:bg-[#0c0c14] border-gray-100 dark:border-white/10 text-gray-200 dark:text-white/5'}`}
                              >
                                 {isCompleted ? <CheckCircle2 className="w-5 h-5 md:w-6 md:h-6" /> : <div className="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-current" />}
                              </div>
 
-                             <div 
-                               onClick={() => !updating && toggleTask(task.task_id, isCompleted)}
-                               className={`bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[3rem] p-8 md:p-12 flex flex-col md:flex-row items-start md:items-center gap-10 hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all duration-700 hover:-translate-y-2 hover:shadow-2xl shadow-sm relative cursor-pointer group/card ${isCompleted ? 'opacity-60 grayscale-[0.5]' : ''}`}
-                             >
-                                <div className="flex-1 space-y-4">
-                                   <div className="flex items-center gap-3">
-                                      <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 dark:text-white/30 group-hover:text-white/50 dark:group-hover:text-black/30 transition-colors">{isAr ? 'مهمة' : 'Task'} {idx + 1}</span>
-                                      {isCompleted && (
-                                         <div className="bg-[#10b981]/10 px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest text-[#10b981]">{t('quizzes.completed')}</div>
-                                      )}
-                                   </div>
-                                    <h4 className={`text-2xl md:text-3xl font-black uppercase tracking-tight ${isAr ? 'font-arabic' : ''}`}>
-                                       {task.title}
-                                    </h4>
-                                    {task.description && (
-                                       <p className="text-gray-500 dark:text-white/60 group-hover:text-white/80 dark:group-hover:text-black/70 text-lg font-bold leading-relaxed max-w-2xl mt-4">
-                                          {task.description}
-                                       </p>
-                                    )}
-                                 </div>
+                              <div 
+                                onClick={() => !updating && toggleTask(task.task_id, isCompleted)}
+                                 className={`bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[2rem] p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center gap-6 hover:border-[#059669] dark:hover:border-[#34d399] transition-all duration-700 hover:-translate-y-1.5 hover:shadow-2xl shadow-sm relative cursor-pointer group/card ${isCompleted ? 'opacity-60 grayscale-[0.5]' : ''}`}
+                              >
+                                 <div className="flex-1 space-y-2">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 dark:text-white/30">{t('roadmap.milestone')} {idx + 1}</span>
+                                       {isCompleted && (
+                                          <div className="bg-[#059669]/10 px-2 py-0.5 rounded-full text-[7px] font-black uppercase tracking-widest text-[#059669]">{t('quizzes.completed')}</div>
+                                       )}
+                                    </div>
+                                     <h4 className={`text-xl md:text-2xl font-black uppercase tracking-tight ${isAr ? 'font-arabic' : ''}`}>
+                                        {task.title}
+                                     </h4>
+                                     {task.description && (
+                                         <p className="text-gray-500 dark:text-white/60 text-sm font-bold leading-relaxed max-w-2xl mt-2">
+                                           {task.description}
+                                        </p>
+                                     )}
+                                  </div>
                                  {updating && (
                                     <div className="absolute inset-0 bg-white/20 dark:bg-black/20 backdrop-blur-[2px] flex items-center justify-center rounded-[3rem] z-30">
                                        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />

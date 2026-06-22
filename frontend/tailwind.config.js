@@ -8,9 +8,9 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: '#2ecc71',
-        primaryLight: '#58d68d',
-        primaryDark: '#27ae60',
+        primary: '#059669',
+        primaryLight: '#34d399',
+        primaryDark: '#047857',
         secondary: '#1abc9c',
         success: '#2ecc71',
         danger: '#e74c3c',
@@ -39,8 +39,8 @@ module.exports = {
       },
       keyframes: {
         glow: {
-          '0%': { boxShadow: '0 0 5px rgba(46, 204, 113, 0.3)' },
-          '100%': { boxShadow: '0 0 20px rgba(46, 204, 113, 0.5)' },
+          '0%': { boxShadow: '0 0 5px rgba(5, 150, 105, 0.3)' },
+          '100%': { boxShadow: '0 0 20px rgba(5, 150, 105, 0.5)' },
         },
         fadeIn: {
           'from': { opacity: '0' },

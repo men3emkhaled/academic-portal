@@ -43,7 +43,7 @@ const DoctorQuizAnalytics = ({ courses }) => {
       {/* Header */}
       <div>
         <h2 className="text-xl md:text-2xl font-black text-gray-900 dark:text-white flex items-center gap-2">
-          <PieChart className="w-6 h-6 text-indigo-500" /> {t('doctor.quiz_analytics.title')}
+          <PieChart className="w-6 h-6 text-[#059669]" /> {t('doctor.quiz_analytics.title')}
         </h2>
         <p className="text-sm text-gray-500 dark:text-slate-500 mt-1">
           {t('doctor.quiz_analytics.description')}
@@ -54,7 +54,7 @@ const DoctorQuizAnalytics = ({ courses }) => {
       <select
         value={selectedCourseId}
         onChange={(e) => setSelectedCourseId(e.target.value)}
-        className="w-full sm:max-w-md bg-white dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/5 rounded-xl p-3.5 text-gray-900 dark:text-white font-medium focus:border-indigo-500/50 focus:outline-none transition-colors"
+        className="w-full sm:max-w-md bg-white dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/5 rounded-xl p-3.5 text-gray-900 dark:text-white font-medium focus:border-[#059669]/50 focus:outline-none transition-colors"
       >
         <option value="">{t('doctor.quiz_analytics.select_course')}</option>
         {courses.map(c => (
@@ -83,8 +83,8 @@ const DoctorQuizAnalytics = ({ courses }) => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="bg-white dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/5 rounded-2xl p-5">
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 bg-indigo-500/10 rounded-xl flex items-center justify-center">
-                  <Award className="w-5 h-5 text-indigo-500" />
+                <div className="w-10 h-10 bg-[#059669]/10 rounded-xl flex items-center justify-center">
+                  <Award className="w-5 h-5 text-[#059669]" />
                 </div>
               </div>
               <p className="text-2xl font-black text-gray-900 dark:text-white">{analytics.summary?.total_quizzes || 0}</p>
@@ -126,7 +126,7 @@ const DoctorQuizAnalytics = ({ courses }) => {
           {analytics.distribution && analytics.distribution.length > 0 && (
             <div className="bg-white dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/5 rounded-2xl p-6">
               <h3 className="text-lg font-black text-gray-900 dark:text-white mb-5 flex items-center gap-2">
-                <Target className="w-5 h-5 text-indigo-500" /> {t('doctor.quiz_analytics.score_distribution')}
+                <Target className="w-5 h-5 text-[#059669]" /> {t('doctor.quiz_analytics.score_distribution')}
               </h3>
               <div className="space-y-3">
                 {allRanges.map(range => {
@@ -161,7 +161,7 @@ const DoctorQuizAnalytics = ({ courses }) => {
           {analytics.quizzes && analytics.quizzes.length > 0 && (
             <div className="space-y-3">
               <h3 className="text-lg font-black text-gray-900 dark:text-white flex items-center gap-2">
-                <Award className="w-5 h-5 text-indigo-500" /> {t('doctor.quiz_analytics.per_quiz')}
+                <Award className="w-5 h-5 text-[#059669]" /> {t('doctor.quiz_analytics.per_quiz')}
               </h3>
               {analytics.quizzes.map(q => {
                 const passRate = q.completed_attempts > 0

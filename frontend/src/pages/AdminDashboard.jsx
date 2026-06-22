@@ -19,7 +19,7 @@ const NotificationsManager = lazy(() => import('../components/admin/Notification
 const DepartmentManager = lazy(() => import('../components/admin/DepartmentManager'));
 const QuizManager = lazy(() => import('../components/admin/QuizManager'));
 const DoctorManager = lazy(() => import('../components/admin/DoctorManager'));
-const PendingReviews = lazy(() => import('../components/admin/quizzes/PendingReviews'));
+
 const MobileAlertCenter = lazy(() => import('../components/admin/MobileAlertCenter'));
 const EventsManager = lazy(() => import('../components/admin/EventsManager'));
 const ProgressManager = lazy(() => import('../components/admin/ProgressManager'));
@@ -27,6 +27,7 @@ const LogsDashboard = lazy(() => import('../components/admin/LogsDashboard'));
 const LinkedEmailsManager = lazy(() => import('../components/admin/LinkedEmailsManager'));
 const ExamScheduleManager = lazy(() => import('../components/admin/ExamScheduleManager'));
 const OfficialTaskManager = lazy(() => import('../components/admin/OfficialTaskManager'));
+const TeachingAssistantManager = lazy(() => import('../components/admin/TeachingAssistantManager'));
 
 import {
   Users, BookOpen, FileText, Map as RoadmapIcon,
@@ -75,6 +76,7 @@ const AdminDashboard = () => {
     { id: 'resources', label: t('admin.sidebar.tabs.resources'), icon: <FileText className="w-4 h-4" />, reqPerm: 'manage_resources' },
     { id: 'roadmap', label: t('admin.sidebar.tabs.roadmap'), icon: <RoadmapIcon className="w-4 h-4" />, reqPerm: 'manage_roadmap' },
     { id: 'doctors', label: t('admin.sidebar.tabs.doctors'), icon: <UserCheck className="w-4 h-4" />, reqPerm: 'admin' },
+    { id: 'assistants', label: t('admin.sidebar.tabs.assistants'), icon: <Users className="w-4 h-4" />, reqPerm: 'admin' },
     { id: 'students', label: t('admin.sidebar.tabs.students'), icon: <Users className="w-4 h-4" />, reqPerm: 'admin' },
     { id: 'records', label: t('admin.sidebar.tabs.records'), icon: <Database className="w-4 h-4" />, reqPerm: 'admin' },
     { id: 'timetable', label: t('admin.sidebar.tabs.timetable'), icon: <Calendar className="w-4 h-4" />, reqPerm: 'manage_timetable' },
@@ -83,7 +85,7 @@ const AdminDashboard = () => {
     { id: 'mobile_center', label: t('admin.sidebar.tabs.mobile_center'), icon: <Smartphone className="w-4 h-4" />, reqPerm: 'manage_notifications' },
     { id: 'departments', label: t('admin.sidebar.tabs.departments'), icon: <LayoutDashboard className="w-4 h-4" />, reqPerm: 'admin' },
     { id: 'quizzes', label: t('admin.sidebar.tabs.quizzes'), icon: <Award className="w-4 h-4" />, reqPerm: 'manage_quizzes' },
-    { id: 'reviews', label: t('admin.sidebar.tabs.reviews'), icon: <CheckCircle className="w-4 h-4" />, reqPerm: 'manage_quizzes' },
+
     { id: 'events', label: t('admin.sidebar.tabs.events'), icon: <Heart className="w-4 h-4" />, reqPerm: 'manage_events' },
     { id: 'progress', label: t('admin.sidebar.tabs.progress'), icon: <Activity className="w-4 h-4" />, reqPerm: 'admin' },
     { id: 'tasks', label: t('admin.sidebar.tabs.tasks'), icon: <CheckSquare className="w-4 h-4" />, reqPerm: 'manage_courses' },
@@ -123,12 +125,10 @@ const AdminDashboard = () => {
   const [verifyingPassword, setVerifyingPassword] = useState(false);
 
   const handleUpgradeSemester = async () => {
-    const isAr = i18n.language === 'ar';
-
     setTransitioning(true);
     try {
       await api.post('/admin/upgrade-semester');
-      toast.success(isAr ? 'تم ترقية الفصل الدراسي بنجاح!' : 'Semester upgraded successfully!');
+      toast.success(t('admin.dashboard.upgrade_success'));
       fetchStudents();
       fetchCourses();
       fetchDepartments();
@@ -136,7 +136,7 @@ const AdminDashboard = () => {
     } catch (error) {
       console.error(error);
       const msg = error.response?.data?.message || error.message;
-      toast.error((isAr ? 'فشلت عملية الترقية: ' : 'Upgrade failed: ') + msg);
+      toast.error(t('admin.dashboard.upgrade_failed') + msg);
     } finally {
       setTransitioning(false);
     }
@@ -151,7 +151,6 @@ const AdminDashboard = () => {
     e.preventDefault();
     if (!passwordInput.trim()) return;
 
-    const isAr = i18n.language === 'ar';
     setVerifyingPassword(true);
     try {
       await api.post('/admin/login', {
@@ -160,15 +159,11 @@ const AdminDashboard = () => {
       });
       setShowPasswordModal(false);
       setPasswordInput('');
-      const confirmMessage = isAr
-        ? 'تحذير هام جداً!\n\nهل أنت متأكد من ترقية الفصل الدراسي؟ هذا الإجراء سيقوم بـ:\n1. أرشفة جميع المواد الحالية للطلاب كـ "مواد مكتملة".\n2. مسح الجدول الدراسي وجدول الامتحانات الحالي.\n3. ترقية مستوى (ليفل) الطلاب في حال الانتقال لسنة دراسية جديدة (ترم فردي).\n4. فتح التسجيل للطلاب يدوياً للترم الجديد.\n\nهذا الإجراء غير قابل للتراجع. هل تريد الاستمرار؟'
-        : 'CRITICAL WARNING!\n\nAre you sure you want to upgrade the semester? This will:\n1. Archive all active student courses as completed.\n2. Delete current timetable and exam schedules.\n3. Upgrade student levels if transitioning to a new academic year.\n4. Students must register manually for the new semester.\n\nThis action cannot be undone. Do you wish to proceed?';
+      const confirmMessage = t('admin.dashboard.upgrade_warning');
       if (!window.confirm(confirmMessage)) return;
       await handleUpgradeSemester();
     } catch (error) {
-      toast.error(isAr
-        ? 'كلمة المرور غير صحيحة. يجب استخدام كلمة مرور المدير الرئيسي.'
-        : 'Incorrect password. Must use the root admin password.');
+      toast.error(t('admin.dashboard.root_password_required'));
     } finally {
       setVerifyingPassword(false);
     }
@@ -228,7 +223,7 @@ const AdminDashboard = () => {
   const handleUpdateNotification = async (e) => {
     e.preventDefault();
     try {
-      await api.put(`/notifications/admin/update/${editingNotification.id}`, editNotifForm);
+      await api.put(`/notifications/admin/${editingNotification.id}`, editNotifForm);
       toast.success(t('common.success'));
       setShowEditModal(false);
       fetchNotifications();
@@ -240,7 +235,7 @@ const AdminDashboard = () => {
   const handleDeleteNotification = async (id) => {
     if (!window.confirm(t('admin.messages.delete_notif_confirm'))) return;
     try {
-      await api.delete(`/notifications/admin/delete/${id}`);
+      await api.delete(`/notifications/admin/${id}`);
       toast.success(t('common.success'));
       fetchNotifications();
     } catch (error) {
@@ -305,6 +300,7 @@ const AdminDashboard = () => {
       case 'resources': return <Suspense fallback={<div className="p-10 text-gray-400">{t('common.loading')}</div>}><ResourceManager /></Suspense>;
       case 'roadmap': return <Suspense fallback={<div className="p-10 text-gray-400">{t('common.loading')}</div>}><RoadmapManager /></Suspense>;
       case 'doctors': return <Suspense fallback={<div className="p-10 text-gray-400">{t('common.loading')}</div>}><DoctorManager /></Suspense>;
+      case 'assistants': return <Suspense fallback={<div className="p-10 text-gray-400">{t('common.loading')}</div>}><TeachingAssistantManager /></Suspense>;
       case 'students': return (
         <Suspense fallback={<div className="p-10 text-gray-400">{t('common.loading')}</div>}>
           <StudentsManager
@@ -357,7 +353,7 @@ const AdminDashboard = () => {
       );
       case 'departments': return <Suspense fallback={<div className="p-10 text-gray-400">{t('common.loading')}</div>}><DepartmentManager /></Suspense>;
       case 'quizzes': return <Suspense fallback={<div className="p-10 text-gray-400">{t('common.loading')}</div>}><QuizManager /></Suspense>;
-      case 'reviews': return <Suspense fallback={<div className="p-10 text-gray-400">{t('common.loading')}</div>}><PendingReviews /></Suspense>;
+
       case 'events': return <Suspense fallback={<div className="p-10 text-gray-400">{t('common.loading')}</div>}><EventsManager /></Suspense>;
       case 'progress': return <Suspense fallback={<div className="p-10 text-gray-400">{t('common.loading')}</div>}><ProgressManager /></Suspense>;
       case 'tasks': return <Suspense fallback={<div className="p-10 text-gray-400">{t('common.loading')}</div>}><OfficialTaskManager /></Suspense>;
@@ -365,77 +361,61 @@ const AdminDashboard = () => {
       case 'logs': return <Suspense fallback={<div className="p-10 text-gray-400">{t('common.loading')}</div>}><LogsDashboard /></Suspense>;
       case 'exams': return <Suspense fallback={<div className="p-10 text-gray-400">{t('common.loading')}</div>}><ExamScheduleManager /></Suspense>;
       default: return (
-        <div className="p-6 lg:p-10 space-y-8 lg:space-y-12 relative z-10 animate-in fade-in duration-500">
-          {/* Bento Grid Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-8">
+        <div className="p-6 lg:p-10 space-y-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { label: t('admin.stats.system_load'), value: '12%', icon: Activity, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-              { label: t('admin.stats.active_users'), value: students.length + 42, icon: Users, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-              { label: t('admin.stats.database'), value: t('admin.stats.syncing'), icon: Database, color: 'text-amber-500', bg: 'bg-amber-500/10' },
-              { label: t('admin.stats.protocol'), value: 'v4.0.2', icon: Shield, color: 'text-rose-500', bg: 'bg-rose-500/10' },
+              { label: t('admin.stats.system_load'), value: '12%', icon: Activity },
+              { label: t('admin.stats.active_users'), value: students.length + 42, icon: Users },
+              { label: t('admin.stats.database'), value: t('admin.stats.syncing'), icon: Database },
+              { label: t('admin.stats.protocol'), value: 'v4.0.2', icon: Shield },
             ].map((stat, i) => (
               <div
                 key={stat.label || i}
-                style={{ animationDelay: `${i * 60}ms` }}
-                className="group relative bg-white/80 dark:bg-white/[0.03] border border-gray-100 dark:border-white/5 p-6 lg:p-8 rounded-[2rem] lg:rounded-[2.5rem] shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden fade-in-up">
-                <div className={`w-10 h-10 lg:w-12 lg:h-12 rounded-2xl ${stat.bg} ${stat.color} flex items-center justify-center mb-6 relative z-10 group-hover:scale-105 transition-transform duration-200 will-change-transform`}>
-                  <stat.icon className="w-5 lg:w-6 h-5 lg:h-6" />
+                className="bg-white dark:bg-white/[0.03] border border-gray-100 dark:border-white/5 rounded-xl p-4">
+                <div className="flex items-center gap-3 mb-3">
+                  <stat.icon className="w-5 h-5 text-[#059669]" />
+                  <p className="text-xs text-gray-400">{stat.label}</p>
                 </div>
-                <p className="text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-1">{stat.label}</p>
-                <p className="text-2xl lg:text-3xl font-black text-gray-900 dark:text-white">{stat.value}</p>
+                <p className="text-xl font-bold text-gray-900 dark:text-white">{stat.value}</p>
               </div>
             ))}
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10">
-            <div className="bg-white dark:bg-[#080808] border border-gray-100 dark:border-white/5 rounded-[3rem] lg:rounded-[3.5rem] p-8 lg:p-12 shadow-sm relative overflow-hidden group">
-              <div className="absolute top-0 inset-inline-end-0 w-64 h-64 bg-emerald-500/5 hidden rounded-full translate-x-1/2 -translate-y-1/2 group-hover:scale-110 transition-transform duration-1000" />
-              <h4 className="text-2xl font-black mb-2 uppercase tracking-tight relative z-10">{t('admin.overview.control_tower')}</h4>
-              <p className="text-sm text-gray-400 font-bold uppercase tracking-widest mb-10 relative z-10">{t('admin.overview.central_node')}</p>
-              <div className="space-y-3 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="bg-white dark:bg-[#080808] border border-gray-100 dark:border-white/5 rounded-xl p-5">
+              <h4 className="text-lg font-semibold mb-1">{t('admin.overview.control_tower')}</h4>
+              <p className="text-xs text-gray-400 mb-4">{t('admin.overview.central_node')}</p>
+              <div className="space-y-1">
                 {ALL_TABS.slice(1, 5).map(tab => (
-                  <button key={tab.id} onClick={() => handleTabChange(tab.id)} className="w-full flex items-center justify-between p-5 lg:p-6 rounded-[2rem] bg-gray-50/50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 hover:border-emerald-500/30 transition-[border-color,background-color] duration-200 group/item">
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-white dark:bg-white/5 flex items-center justify-center text-gray-400 group-hover/item:text-emerald-500 transition-colors duration-200 shadow-sm">
-                        {tab.icon}
-                      </div>
-                      <span className="font-black text-xs uppercase tracking-widest text-gray-600 dark:text-gray-300">{tab.label}</span>
+                  <button key={tab.id} onClick={() => handleTabChange(tab.id)} className="w-full flex items-center justify-between px-4 py-3 rounded-lg bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 hover:border-[#059669]/30 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <span className="text-gray-400">{tab.icon}</span>
+                      <span className="text-xs text-gray-600 dark:text-gray-300">{tab.label}</span>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-gray-300 group-hover/item:translate-x-1 transition-all rtl:rotate-180" />
+                    <ChevronRight className="w-3 h-3 text-gray-300 rtl:rotate-180" />
                   </button>
                 ))}
               </div>
             </div>
 
-            <div className="bg-white dark:bg-[#080808] border border-gray-100 dark:border-white/5 rounded-[3rem] lg:rounded-[3.5rem] p-8 lg:p-12 shadow-sm relative overflow-hidden group">
-              <div className="absolute top-0 inset-inline-end-0 w-64 h-64 bg-blue-500/5 hidden rounded-full translate-x-1/2 -translate-y-1/2 group-hover:scale-110 transition-transform duration-700 will-change-transform" />
-
-              <div className="flex items-center gap-4 mb-8 relative z-10">
-                <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500 transition-transform duration-200 group-hover:scale-105 will-change-transform">
-                  <TrendingUp className="w-6 h-6" />
+            <div className="bg-white dark:bg-[#080808] border border-gray-100 dark:border-white/5 rounded-xl p-5">
+              <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">{t('quizzes.quick_stats')}</h4>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 rounded-lg p-4">
+                  <p className="text-[10px] text-gray-400 mb-1">{t('admin.sidebar.tabs.students')}</p>
+                  <p className="text-lg font-bold text-gray-900 dark:text-white">{students.length}</p>
                 </div>
-                <div>
-                  <h4 className="text-2xl font-black uppercase tracking-tight">{t('quizzes.quick_stats')}</h4>
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{t('admin.overview.terminal_hint')}</p>
+                <div className="bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 rounded-lg p-4">
+                  <p className="text-[10px] text-gray-400 mb-1">{t('admin.sidebar.tabs.courses')}</p>
+                  <p className="text-lg font-bold text-gray-900 dark:text-white">{courses.length}</p>
                 </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 relative z-10">
-                <div className="bg-gray-50/50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 rounded-3xl p-6 hover:border-blue-500/20 transition-all">
-                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">{t('admin.sidebar.tabs.students')}</p>
-                  <p className="text-2xl font-black text-gray-900 dark:text-white">{students.length}</p>
+                <div className="bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 rounded-lg p-4">
+                  <p className="text-[10px] text-gray-400 mb-1">{t('admin.sidebar.tabs.departments')}</p>
+                  <p className="text-lg font-bold text-gray-900 dark:text-white">{departments.length}</p>
                 </div>
-                <div className="bg-gray-50/50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 rounded-3xl p-6 hover:border-emerald-500/20 transition-all">
-                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">{t('admin.sidebar.tabs.courses')}</p>
-                  <p className="text-2xl font-black text-gray-900 dark:text-white">{courses.length}</p>
-                </div>
-                <div className="bg-gray-50/50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 rounded-3xl p-6 hover:border-amber-500/20 transition-all">
-                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">{t('admin.sidebar.tabs.departments')}</p>
-                  <p className="text-2xl font-black text-gray-900 dark:text-white">{departments.length}</p>
-                </div>
-                <div className="bg-gray-50/50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 rounded-3xl p-6 hover:border-rose-500/20 transition-all">
-                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">{t('admin.sidebar.tabs.notifications')}</p>
-                  <p className="text-2xl font-black text-gray-900 dark:text-white">{notifications.length}</p>
+                <div className="bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 rounded-lg p-4">
+                  <p className="text-[10px] text-gray-400 mb-1">{t('admin.sidebar.tabs.notifications')}</p>
+                  <p className="text-lg font-bold text-gray-900 dark:text-white">{notifications.length}</p>
                 </div>
               </div>
             </div>
@@ -448,135 +428,113 @@ const AdminDashboard = () => {
   const availableTabs = ALL_TABS.filter(tab => isSuperAdmin || (tab.reqPerm !== 'admin' && userPermissions.includes(tab.reqPerm)));
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0c0c14] transition-colors duration-500 font-sans relative overflow-hidden" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0c0c14]" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
       <AdminSidebar activeTab={activeTab} setActiveTab={handleTabChange} onLogout={logout} admin={decodedToken} availableTabs={availableTabs} />
 
-      {/* Background Decor matching student dashboard */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[-10%] inset-inline-end-[-5%] w-[50vw] h-[50vw] bg-[#8b5cf6]/5 blur-[120px] rounded-full"></div>
-        <div className="absolute bottom-[-10%] inset-inline-start-[-5%] w-[40vw] h-[40vw] bg-[#2cfc7d]/3 blur-[100px] rounded-full"></div>
-      </div>
+      {/* Background */}
+      <div className="fixed inset-0 z-0 pointer-events-none" />
 
       <div className="lg:ps-[22rem] min-h-screen relative z-10">
         <main className="pt-8 lg:pt-12 pb-12 overflow-x-hidden">
           <div
             key={activeTab}
-            className={`flex-1 lg:ps-8 flex flex-col min-w-0 relative w-full ${direction === 0 ? 'animate-fadeIn' : (direction === 1 ? (i18n.language === 'ar' ? 'animate-slideInLeft' : 'animate-slideInRight') : (i18n.language === 'ar' ? 'animate-slideInRight' : 'animate-slideInLeft'))}`}
+            className="flex-1 lg:ps-8 flex flex-col min-w-0 relative w-full"
           >
             {activeTab === 'overview' ? (
-              <div className="p-6 lg:p-10 space-y-16 lg:space-y-24 animate-in fade-in duration-700 max-w-[1500px] mx-auto w-full">
-                {/* Hero Section */}
-                <div className="space-y-4 max-w-2xl text-start">
-                  <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-[#2cfc7d]"></div>
-                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 dark:text-white/30">{t('admin.sidebar.tabs.overview')}</span>
-                  </div>
-                  <h1 className={`text-[clamp(2.5rem,6vw,5.5rem)] font-black leading-[0.95] tracking-tighter uppercase text-gray-900 dark:text-white ${i18n.language === 'ar' ? 'font-arabic' : ''}`}>
+              <div className="p-6 lg:p-10 space-y-8 max-w-[1500px] mx-auto w-full">
+                {/* Hero */}
+                <div className="space-y-1">
+                  <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                     {t('admin.overview.control_tower')}
                   </h1>
+                  <p className="text-sm text-gray-400">{t('admin.overview.central_node')}</p>
                 </div>
 
                 {/* Bento Grid Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   {[
-                    { label: t('admin.stats.system_load'), value: '12%', icon: Activity, color: 'text-violet-500', bg: 'bg-violet-500/10' },
-                    { label: t('admin.stats.active_users'), value: students.length + 42, icon: Users, color: 'text-[#2cfc7d]', bg: 'bg-[#2cfc7d]/10' },
-                    { label: t('admin.stats.database'), value: t('admin.stats.syncing'), icon: Database, color: 'text-amber-500', bg: 'bg-amber-500/10' },
-                    { label: t('admin.stats.protocol'), value: 'v4.0.2', icon: Shield, color: 'text-rose-500', bg: 'bg-rose-500/10' },
+                    { label: t('admin.stats.system_load'), value: '12%', icon: Activity },
+                    { label: t('admin.stats.active_users'), value: students.length + 42, icon: Users },
+                    { label: t('admin.stats.database'), value: t('admin.stats.syncing'), icon: Database },
+                    { label: t('admin.stats.protocol'), value: 'v4.0.2', icon: Shield },
                   ].map((stat, i) => (
                     <div
                       key={stat.label || i}
-                      className="group bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-8 space-y-8 hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all duration-700 shadow-sm"
+                      className="bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-xl p-5 space-y-3"
                     >
-                      <div className="flex justify-between items-start">
-                        <div className={`w-12 h-12 rounded-2xl ${stat.bg} flex items-center justify-center ${stat.color} group-hover:bg-white/20 transition-all duration-500`}>
-                          <stat.icon className="w-6 h-6" />
-                        </div>
-                        <div className="w-10 h-10 rounded-full border border-gray-100 dark:border-white/10 flex items-center justify-center group-hover:border-white/30 transition-all duration-500">
-                          <TrendingUp className="w-4 h-4 opacity-30" />
-                        </div>
+                      <div className="flex items-center gap-3">
+                        <stat.icon className="w-5 h-5 text-[#059669]" />
+                        <p className="text-xs text-gray-400">{stat.label}</p>
                       </div>
-                      <div className="space-y-1 text-start">
-                        <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40">{stat.label}</p>
-                        <p className="text-4xl font-black tracking-tighter">{stat.value}</p>
-                      </div>
+                      <p className="text-2xl font-bold text-gray-900 dark:text-white">{stat.value}</p>
                     </div>
                   ))}
                 </div>
 
                 {/* Quick Access Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                  <div className="lg:col-span-8 bg-gradient-to-br from-[#8b5cf6] to-[#6d28d9] rounded-[3rem] p-12 text-white flex flex-col md:flex-row items-center justify-between gap-10 group overflow-hidden relative shadow-2xl">
-                    <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent pointer-events-none" />
-                    <div className="space-y-4 relative z-10 text-center md:text-start">
-                      <h3 className="text-[3rem] lg:text-[4rem] font-black uppercase italic leading-none">{t('admin.sidebar.tabs.students')}</h3>
-                      <p className="text-violet-100/60 font-black uppercase tracking-widest text-xs">{t('admin.overview.central_node')}</p>
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+                  <div className="lg:col-span-8 bg-[#059669] rounded-xl p-6 text-white flex items-center justify-between">
+                    <div>
+                      <h3 className="text-2xl font-bold">{t('admin.sidebar.tabs.students')}</h3>
+                      <p className="text-sm text-white/70 mt-1">{t('admin.overview.central_node')}</p>
                     </div>
-                    <div className="flex items-center gap-12 relative z-10">
-                      <span className="text-[6rem] lg:text-[8rem] font-black tracking-tighter leading-none">{students.length}</span>
+                    <div className="flex items-center gap-4">
+                      <span className="text-4xl font-bold">{students.length}</span>
                       <button
                         onClick={() => handleTabChange('students')}
-                        className="w-20 h-20 bg-white text-black hover:bg-black hover:text-white rounded-full flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-2xl"
+                        className="w-10 h-10 bg-white text-[#059669] rounded-lg flex items-center justify-center hover:bg-gray-100 transition-colors"
                       >
-                        <ChevronRight className={`w-8 h-8 ${i18n.language === 'ar' ? 'rotate-180' : ''}`} />
+                        <ChevronRight className={`w-5 h-5 ${i18n.language === 'ar' ? 'rotate-180' : ''}`} />
                       </button>
                     </div>
                   </div>
 
-                  <div className="lg:col-span-4 bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[3rem] p-10 space-y-8 shadow-sm">
-                    <div className="flex items-center justify-between">
-                      <h4 className="text-xl font-black uppercase tracking-tighter">{t('quizzes.quick_stats')}</h4>
-                      <div className="w-8 h-8 rounded-full bg-gray-50 dark:bg-white/5 flex items-center justify-center">
-                        <Activity className="w-4 h-4 text-[#2cfc7d]" />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-1 gap-3">
+                  <div className="lg:col-span-4 bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-xl p-5">
+                    <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">{t('quizzes.quick_stats')}</h4>
+                    <div className="space-y-2">
                       {[
-                        { label: t('admin.sidebar.tabs.courses'), value: courses.length, color: 'text-emerald-500', icon: BookOpen },
-                        { label: t('admin.sidebar.tabs.departments'), value: departments.length, color: 'text-amber-500', icon: LayoutDashboard },
-                        { label: t('admin.sidebar.tabs.notifications'), value: notifications.length, color: 'text-rose-500', icon: Bell },
+                        { label: t('admin.sidebar.tabs.courses'), value: courses.length, icon: BookOpen },
+                        { label: t('admin.sidebar.tabs.departments'), value: departments.length, icon: LayoutDashboard },
+                        { label: t('admin.sidebar.tabs.notifications'), value: notifications.length, icon: Bell },
                       ].map((s, i) => (
-                        <div key={s.label || i} className="flex items-center justify-between p-4 rounded-2xl bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5">
-                          <div className="flex items-center gap-3">
-                            <s.icon className={`w-4 h-4 ${s.color}`} />
-                            <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">{s.label}</span>
+                        <div key={s.label || i} className="flex items-center justify-between py-2">
+                          <div className="flex items-center gap-2">
+                            <s.icon className="w-4 h-4 text-gray-400" />
+                            <span className="text-xs text-gray-500">{s.label}</span>
                           </div>
-                          <span className="text-lg font-black">{s.value}</span>
+                          <span className="text-sm font-semibold text-gray-900 dark:text-white">{s.value}</span>
                         </div>
                       ))}
                     </div>
                   </div>
                 </div>
 
-                {/* System Management / Semester Transition */}
-                <div className="bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[3rem] p-8 lg:p-12 shadow-sm relative overflow-hidden group">
-                  <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 to-transparent pointer-events-none" />
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 relative z-10">
-                    <div className="space-y-3 text-start">
-                      <h4 className="text-3xl font-black uppercase tracking-tight">
-                        {i18n.language === 'ar' ? 'ترقية الفصل الدراسي' : 'Upgrade Semester'}
+                {/* Upgrade Semester */}
+                <div className="bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-xl p-6">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="space-y-2">
+                      <h4 className="text-lg font-semibold">
+                        {t('admin.dashboard.upgrade_btn')}
                       </h4>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xl font-medium">
-                        {i18n.language === 'ar' 
-                          ? 'عند الترقية، سيتم زيادة رقم الفصل الدراسي بمقدار ١، ونقل تسجيلات الطلاب الحالية إلى الأرشيف كـ (مواد منتهية). سيتم أيضاً مسح الجدول الدراسي وجدول الامتحانات الحاليين ليقوم الطلاب بالتسجيل يدوياً للترم الجديد. إذا انتقل الترم للفصل الدراسي التالي (فردي)، فسيتم ترقية ليفل الطلاب تلقائياً.'
-                          : 'Upgrading the semester will increment the active semester, archive currently registered student courses as completed, and clear the timetable/exam schedule. Students will manually enroll for the new semester. If moving to an odd semester, students level will be promoted.'}
+                      <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xl">
+                        {t('admin.dashboard.upgrade_desc')}
                       </p>
                     </div>
                     
                     <button
                       onClick={handleUpgradeClick}
                       disabled={transitioning}
-                      className="px-8 py-5 bg-black dark:bg-[#2cfc7d] text-white dark:text-black hover:bg-red-600 dark:hover:bg-red-500 dark:hover:text-white rounded-[2rem] font-black uppercase tracking-wider text-sm flex items-center justify-center gap-3 transition-all duration-300 shadow-xl hover:scale-105 active:scale-95 disabled:opacity-50 disabled:pointer-events-none self-start md:self-center shrink-0 border-2 border-transparent hover:border-red-600"
+                      className="px-6 py-3 bg-[#059669] hover:bg-[#047857] text-white rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:pointer-events-none shrink-0"
                     >
                       {transitioning ? (
                         <>
-                          <Loader2 className="w-5 h-5 animate-spin" />
-                          <span>{i18n.language === 'ar' ? 'جاري الترقية...' : 'Upgrading...'}</span>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span>{t('admin.dashboard.upgrading')}</span>
                         </>
                       ) : (
                         <>
-                          <Zap className="w-5 h-5" />
-                          <span>{i18n.language === 'ar' ? 'ترقية الترم الدراسي' : 'Upgrade Semester'}</span>
+                          <Zap className="w-4 h-4" />
+                          <span>{t('admin.dashboard.upgrade_btn')}</span>
                         </>
                       )}
                     </button>
@@ -588,76 +546,66 @@ const AdminDashboard = () => {
         </main>
       </div>
       {showPasswordModal && createPortal(
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 lg:p-10">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div
             onClick={() => setShowPasswordModal(false)}
-            className="absolute inset-0 bg-gray-950/40 dark:bg-black/80 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/40"
           />
           <div
-            className="bg-white dark:bg-[#0c0c0e] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-6 sm:p-10 w-full max-w-md shadow-2xl relative overflow-hidden z-10 text-start animate-in zoom-in-95 duration-200"
+            className="bg-white dark:bg-[#0c0c0e] border border-gray-100 dark:border-white/5 rounded-xl p-6 w-full max-w-md relative z-10"
             onClick={e => e.stopPropagation()}
           >
-            <div className="relative z-10">
-              <div className="flex items-center justify-between mb-8 pb-6 border-b border-gray-100 dark:border-white/5">
-                <div className="flex items-center gap-5">
-                  <div className="w-14 h-14 bg-red-500/10 dark:bg-red-500/20 rounded-2xl flex items-center justify-center border border-red-500/20 shadow-inner">
-                    <Lock className="w-7 h-7 text-red-500 dark:text-red-400" />
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
-                      {i18n.language === 'ar' ? 'ترقية الفصل الدراسي' : 'Upgrade Semester'}
-                    </h3>
-                    <p className="text-gray-400 text-xs lg:text-sm font-black uppercase tracking-widest mt-1">
-                      {i18n.language === 'ar' ? 'يجب إدخال كلمة مرور المدير الرئيسي' : 'Root admin password required'}
-                    </p>
-                  </div>
-                </div>
-                <button onClick={() => setShowPasswordModal(false)} className="w-10 h-10 rounded-full hover:bg-gray-100 dark:hover:bg-white/5 flex items-center justify-center transition-colors">
-                  <X className="w-5 h-5 text-gray-400" />
-                </button>
+            <div className="flex items-center justify-between mb-4 pb-4 border-b border-gray-100 dark:border-white/5">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  {t('admin.dashboard.upgrade_btn')}
+                </h3>
+                <p className="text-xs text-gray-400 mt-1">
+                  {t('admin.dashboard.root_password_required')}
+                </p>
+              </div>
+              <button onClick={() => setShowPasswordModal(false)} className="p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
+                <X className="w-4 h-4 text-gray-400" />
+              </button>
+            </div>
+
+            <form onSubmit={handlePasswordSubmit} className="space-y-4">
+              <div>
+                <label className="text-xs text-gray-400 mb-1 block">
+                  {t('admin.dashboard.password_label')}
+                </label>
+                <input
+                  type="password"
+                  value={passwordInput}
+                  onChange={(e) => setPasswordInput(e.target.value)}
+                  className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-lg px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[#059669]/30"
+                  placeholder="••••••••"
+                  autoFocus
+                  required
+                />
               </div>
 
-              <form onSubmit={handlePasswordSubmit} className="space-y-6">
-                <div className="space-y-3">
-                  <label className="text-xs lg:text-sm font-black text-gray-400 uppercase tracking-widest ml-1">
-                    {i18n.language === 'ar' ? 'كلمة المرور' : 'Password'}
-                  </label>
-                  <input
-                    type="password"
-                    value={passwordInput}
-                    onChange={(e) => setPasswordInput(e.target.value)}
-                    className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl px-6 py-4.5 text-base lg:text-lg font-black focus:ring-4 focus:ring-red-500/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner placeholder-gray-400/50"
-                    placeholder="••••••••"
-                    autoFocus
-                    required
-                  />
-                </div>
-
-                <div className="flex gap-4 pt-6 border-t border-gray-100 dark:border-white/5">
-                  <button
-                    type="submit"
-                    disabled={verifyingPassword}
-                    className="flex-1 bg-red-500 hover:bg-red-600 text-white font-black py-5 rounded-[2rem] shadow-xl shadow-red-500/20 transition-[color,background-color,border-color,transform,opacity] hover:scale-[1.02] active:scale-95 disabled:opacity-50 uppercase tracking-widest text-sm lg:text-base flex items-center justify-center gap-3"
-                  >
-                    {verifyingPassword ? (
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                    ) : (
-                      <>
-                        <Lock className="w-5 h-5" />
-                        <span>{i18n.language === 'ar' ? 'تأكيد والترقية' : 'Verify & Upgrade'}</span>
-                      </>
-                    )}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowPasswordModal(false)}
-                    className="px-8 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 font-black py-5 rounded-[2rem] transition-[color,background-color,border-color,transform,opacity] uppercase tracking-widest text-sm lg:text-base"
-                  >
-                    {i18n.language === 'ar' ? 'إلغاء' : 'Cancel'}
-                  </button>
-                </div>
-              </form>
-            </div>
+              <div className="flex gap-3 pt-4 border-t border-gray-100 dark:border-white/5">
+                <button
+                  type="submit"
+                  disabled={verifyingPassword}
+                  className="flex-1 bg-[#059669] hover:bg-[#047857] text-white font-medium py-2.5 rounded-lg text-sm transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {verifyingPassword ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <span>{t('admin.dashboard.verify_upgrade')}</span>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowPasswordModal(false)}
+                  className="px-6 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 font-medium py-2.5 rounded-lg text-sm transition-colors"
+                >
+                  {t('admin.dashboard.cancel')}
+                </button>
+              </div>
+            </form>
           </div>
         </div>,
         document.body

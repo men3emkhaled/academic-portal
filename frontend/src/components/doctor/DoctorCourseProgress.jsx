@@ -176,7 +176,7 @@ const DoctorCourseProgress = ({ courses }) => {
                 required
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                placeholder="e.g. Chapter 1: Introduction to Data Structures"
+                placeholder={t('doctor.progress.title_placeholder')}
                 className="w-full bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl p-3 text-gray-900 dark:text-white focus:border-teal-500/50 focus:outline-none transition-colors"
                 autoFocus
               />

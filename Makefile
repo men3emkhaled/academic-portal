@@ -5,7 +5,7 @@
 # Usage: make <target>
 # ============================================
 
-.PHONY: help dev prod stop logs clean build test
+.PHONY: help dev dev-d prod stop logs clean build restart test migrate migrate-down lint staging prune health db-shell db-backup db-restore setup
 
 # Default target
 help: ## 📋 Show available commands
@@ -32,6 +32,11 @@ prod: ## 🚀 Start production environment
 prod-logs: ## 📋 Follow production logs
 	docker compose logs -f
 
+# ── Staging ───────────────────────────────────
+
+staging: ## 🚀 Deploy to staging
+	docker compose -f docker-compose.yml -f docker-compose.staging.yml up --build -d
+
 # ── Common ────────────────────────────────────
 
 stop: ## ⏹️  Stop all containers
@@ -43,6 +48,9 @@ clean: ## 🧹 Stop and remove volumes (⚠️  deletes DB data!)
 
 restart: ## 🔄 Restart all services
 	docker compose restart
+
+prune: ## 🧹 Remove unused Docker resources (safe)
+	docker system prune -f --volumes=false
 
 # ── Logs ──────────────────────────────────────
 
@@ -72,6 +80,15 @@ db-backup: ## 💾 Backup database
 db-restore: ## 📥 Restore database (usage: make db-restore FILE=backups/file.sql)
 	docker compose exec -T postgres psql -U postgres -d academic_portal < $(FILE)
 
+migrate: ## 🗄️  Run database migrations
+	cd backend && npm run migrate
+
+migrate-down: ## 🗄️  Roll back last migration
+	cd backend && npm run migrate:down
+
+migrate-create: ## 🗄️  Create a new migration (usage: make migrate-create NAME=description)
+	cd backend && npm run migrate:create $(NAME)
+
 # ── Build ─────────────────────────────────────
 
 build: ## 🏗️  Build all Docker images
@@ -82,6 +99,17 @@ build-backend: ## 🏗️  Build backend image only
 
 build-frontend: ## 🏗️  Build frontend image only
 	docker compose build frontend
+
+# ── Test ──────────────────────────────────────
+
+test: ## 🧪 Run backend tests
+	cd backend && npm test
+
+test:ci: ## 🧪 Run backend tests with CI flags
+	cd backend && npm run test:ci
+
+lint: ## 🔍 Run frontend linting
+	cd frontend && npm run lint
 
 # ── Health ────────────────────────────────────
 

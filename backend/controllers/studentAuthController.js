@@ -25,13 +25,13 @@ const studentLogin = async (req, res) => {
     const student = await Student.findByUsername(username);
     
     if (!student) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res.status(401).json({ message: 'username_not_found' });
     }
     
     const isValid = await Student.verifyPassword(student, password);
     
     if (!isValid) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res.status(401).json({ message: 'incorrect_password' });
     }
     
     const token = jwt.sign(

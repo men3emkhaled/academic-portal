@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  CheckSquare, Edit, Trash2, ExternalLink, BookOpen, 
-  Plus, Calendar, ArrowLeft, CheckCircle2, Circle,
-  Layout, Zap, Activity, ShieldAlert, X, Loader2, ArrowRight
+  Edit, Trash2, ExternalLink,
+  Plus, ArrowLeft, CheckCircle2, Circle,
+  X, Loader2, ArrowRight
 } from 'lucide-react';
 import { useStudentAuth } from '../context/StudentAuthContext';
 import { useStudentData } from '../context/StudentDataContext';
@@ -114,7 +114,7 @@ const StudentPersonalTasks = () => {
   if (loading) {
     return (
       <div className="flex flex-col justify-center items-center h-screen bg-white dark:bg-[#0c0c14]">
-        <div className="w-12 h-12 border-2 border-gray-200 dark:border-white/10 border-t-[#2cfc7d] rounded-full animate-spin"></div>
+        <div className="w-12 h-12 border-2 border-gray-200 dark:border-white/10 border-t-[#34d399] rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -124,8 +124,8 @@ const StudentPersonalTasks = () => {
       
       {/* Background Decor */}
       <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[-10%] inset-inline-end-[-5%] w-[50vw] h-[50vw] bg-[#8b5cf6]/5 blur-[120px] rounded-full"></div>
-        <div className="absolute bottom-[-10%] inset-inline-start-[-5%] w-[40vw] h-[40vw] bg-[#2cfc7d]/3 blur-[100px] rounded-full"></div>
+        <div className="absolute top-[-10%] inset-inline-end-[-5%] w-[50vw] h-[50vw] bg-[#059669]/5 blur-[120px] rounded-full"></div>
+        <div className="absolute bottom-[-10%] inset-inline-start-[-5%] w-[40vw] h-[40vw] bg-[#34d399]/3 blur-[100px] rounded-full"></div>
       </div>
 
       <Sidebar onLogout={handleLogout} />
@@ -137,12 +137,8 @@ const StudentPersonalTasks = () => {
           
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-10">
             <div className="space-y-4 text-start">
-              <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-[#2cfc7d]"></div>
-                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 dark:text-white/30">{t('sidebar.personal_tasks')}</span>
-              </div>
               <h1 className={`text-[clamp(2.5rem,6vw,5.5rem)] font-black leading-[0.95] tracking-tighter uppercase text-gray-900 dark:text-white ${isAr ? 'font-arabic' : ''}`}>
-                {t('mavi.command')}
+                {t('tasks.title')}
               </h1>
             </div>
 
@@ -150,7 +146,7 @@ const StudentPersonalTasks = () => {
                
                <button 
                 onClick={() => { setShowForm(true); setEditingTask(null); setFormData({ title: '', description: '' }); }}
-                className="bg-gray-900 dark:bg-[#2cfc7d] text-white dark:text-black px-10 py-5 rounded-[2rem] font-black text-xs uppercase tracking-[0.4em] shadow-2xl hover:scale-[1.05] active:scale-95 transition-all flex items-center gap-3"
+                className="bg-gray-900 dark:bg-[#34d399] text-white dark:text-black px-10 py-5 rounded-[2rem] font-black text-xs uppercase tracking-[0.4em] shadow-2xl hover:scale-[1.05] active:scale-95 transition-all flex items-center gap-3"
                >
                  <Plus className="w-5 h-5" />
                  {t('tasks.add_task')}
@@ -160,8 +156,9 @@ const StudentPersonalTasks = () => {
 
           {(tasks.length === 0 && officialTasks.length === 0) ? (
             <div className="py-24 bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[4rem] text-center shadow-xl flex flex-col items-center justify-center max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-8 duration-700">
-              <div className="w-32 h-32 rounded-[2.5rem] bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 flex items-center justify-center mb-8">
-                <Layout className="w-16 h-16 text-gray-200 dark:text-white/10" />
+              <div className="w-20 h-20 rounded-2xl bg-gray-50 dark:bg-white/5 flex items-center justify-center mb-6">
+                <div className="w-8 h-0.5 bg-gray-200 dark:bg-white/10 rounded-full rotate-45" />
+                <div className="w-8 h-0.5 bg-gray-200 dark:bg-white/10 rounded-full -rotate-45 absolute" />
               </div>
               <h4 className="font-black text-4xl text-gray-900 dark:text-white mb-4 uppercase tracking-tighter">{t('tasks.no_tasks')}</h4>
               <p className="text-gray-400 dark:text-white/30 font-black uppercase tracking-widest text-xs">{t('tasks.no_tasks_desc')}</p>
@@ -171,15 +168,9 @@ const StudentPersonalTasks = () => {
 
               {/* OFFICIAL TASKS */}
               <div className="space-y-8">
-                <div className="flex items-center gap-4 bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 p-8 rounded-[2.5rem] shadow-sm text-start relative overflow-hidden group">
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                  <div className="w-14 h-14 rounded-[1.2rem] bg-blue-500/10 flex items-center justify-center text-blue-500 border border-blue-500/10">
-                    <BookOpen className="w-7 h-7" />
-                  </div>
-                  <div>
-                    <h3 className="font-black text-2xl text-gray-900 dark:text-white uppercase tracking-tighter leading-none">{t('tasks.official')}</h3>
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] mt-1 opacity-50 italic">{t('mavi.central_assignments')}</p>
-                  </div>
+                <div className="bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-6 sm:p-8 shadow-sm text-start relative overflow-hidden">
+                  <div className="absolute top-0 inset-x-0 h-0.5 bg-blue-500/40" />
+                  <h3 className="font-black text-2xl text-gray-900 dark:text-white uppercase tracking-tighter">{t('tasks.official')}</h3>
                 </div>
 
                 {officialTasks.length === 0 ? (
@@ -224,15 +215,9 @@ const StudentPersonalTasks = () => {
 
               {/* PERSONAL TASKS */}
               <div className="space-y-8">
-                <div className="flex items-center gap-4 bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 p-8 rounded-[2.5rem] shadow-sm text-start relative overflow-hidden group">
-                  <div className="absolute inset-0 bg-gradient-to-r from-[#10b981]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                  <div className="w-14 h-14 rounded-[1.2rem] bg-emerald-500/10 flex items-center justify-center text-emerald-500 border border-emerald-500/10">
-                    <Activity className="w-7 h-7" />
-                  </div>
-                  <div>
-                    <h3 className="font-black text-2xl text-gray-900 dark:text-white uppercase tracking-tighter leading-none">{t('tasks.personal')}</h3>
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] mt-1 opacity-50 italic">{t('mavi.user_space')}</p>
-                  </div>
+                <div className="bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-6 sm:p-8 shadow-sm text-start relative overflow-hidden">
+                  <div className="absolute top-0 inset-x-0 h-0.5 bg-[#059669]/40 dark:bg-[#34d399]/40" />
+                  <h3 className="font-black text-2xl text-gray-900 dark:text-white uppercase tracking-tighter">{t('tasks.personal')}</h3>
                 </div>
 
                 {tasks.length === 0 ? (
@@ -245,7 +230,7 @@ const StudentPersonalTasks = () => {
                           onClick={() => handleToggle(task.id, task.is_completed)}
                           className={`relative z-10 shrink-0 w-12 h-12 rounded-[1.2rem] flex items-center justify-center transition-all duration-500 ${
                             task.is_completed
-                              ? 'bg-[#10b981] dark:bg-[#2cfc7d] text-white dark:text-black shadow-xl shadow-emerald-500/20 scale-90'
+                              ? 'bg-[#059669] dark:bg-[#34d399] text-white dark:text-black shadow-xl shadow-[#059669]/20 scale-90'
                               : 'bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 text-gray-300 hover:scale-110'
                           }`}
                         >
@@ -282,8 +267,8 @@ const StudentPersonalTasks = () => {
                 <div className="p-12 space-y-12">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-6 text-start">
-                      <div className="w-16 h-16 rounded-[1.8rem] bg-[#10b981]/10 dark:bg-[#2cfc7d]/10 flex items-center justify-center border border-[#10b981]/10 dark:border-[#2cfc7d]/10">
-                        {editingTask ? <Edit className="w-8 h-8 text-[#10b981] dark:text-[#2cfc7d]" /> : <Plus className="w-8 h-8 text-[#10b981] dark:text-[#2cfc7d]" />}
+                      <div className="w-16 h-16 rounded-[1.8rem] bg-[#059669]/10 dark:bg-[#34d399]/10 flex items-center justify-center border border-[#059669]/10 dark:border-[#34d399]/10">
+                        {editingTask ? <Edit className="w-8 h-8 text-[#059669] dark:text-[#34d399]" /> : <Plus className="w-8 h-8 text-[#059669] dark:text-[#34d399]" />}
                       </div>
                       <div>
                         <h3 className="text-4xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-none">
@@ -305,7 +290,7 @@ const StudentPersonalTasks = () => {
                         placeholder={t('tasks.placeholder_title')}
                         value={formData.title}
                         onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                        className="w-full bg-gray-50 dark:bg-black/40 text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-[2.5rem] px-10 py-6 text-xl font-black focus:border-[#10b981] dark:focus:border-[#2cfc7d] outline-none transition-all shadow-inner uppercase tracking-tighter"
+                        className="w-full bg-gray-50 dark:bg-black/40 text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-[2.5rem] px-10 py-6 text-xl font-black focus:border-[#059669] dark:focus:border-[#34d399] outline-none transition-all shadow-inner uppercase tracking-tighter"
                         required
                         autoFocus
                       />
@@ -317,12 +302,12 @@ const StudentPersonalTasks = () => {
                         rows="4"
                         value={formData.description}
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                        className="w-full bg-gray-50 dark:bg-black/40 text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-[3rem] px-10 py-8 text-lg font-bold focus:border-[#10b981] dark:focus:border-[#2cfc7d] outline-none transition-all shadow-inner resize-none custom-scrollbar"
+                        className="w-full bg-gray-50 dark:bg-black/40 text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-[3rem] px-10 py-8 text-lg font-bold focus:border-[#059669] dark:focus:border-[#34d399] outline-none transition-all shadow-inner resize-none custom-scrollbar"
                       />
                     </div>
 
                     <div className="flex flex-col sm:flex-row gap-4 pt-6">
-                      <button type="submit" disabled={submitting} className="flex-[2] py-6 bg-gray-900 dark:bg-[#2cfc7d] text-white dark:text-black font-black text-xs uppercase tracking-[0.5em] rounded-[2.5rem] shadow-2xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3">
+                      <button type="submit" disabled={submitting} className="flex-[2] py-6 bg-gray-900 dark:bg-[#34d399] text-white dark:text-black font-black text-xs uppercase tracking-[0.5em] rounded-[2.5rem] shadow-2xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3">
                         {submitting ? <Loader2 className="w-6 h-6 animate-spin" /> : editingTask ? t('common.save') : t('tasks.create')}
                         {!submitting && <ArrowRight className={`w-5 h-5 ${isAr ? 'rotate-180' : ''}`} />}
                       </button>
@@ -339,7 +324,7 @@ const StudentPersonalTasks = () => {
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(44, 252, 125, 0.2); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(52, 211, 153, 0.2); border-radius: 10px; }
       `}</style>
     </div>
   );

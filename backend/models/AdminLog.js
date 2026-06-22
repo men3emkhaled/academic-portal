@@ -1,4 +1,5 @@
 const db = require('../config/database');
+const logger = require('../utils/logger');
 
 class AdminLog {
   // إنشاء جدول الـ logs تلقائياً عند بدء السيرفر
@@ -32,15 +33,15 @@ class AdminLog {
         await db.query(`ALTER TABLE admin_logs ADD COLUMN IF NOT EXISTS ip_address VARCHAR(100)`);
         await db.query(`ALTER TABLE admin_logs ADD COLUMN IF NOT EXISTS status_code INTEGER`);
       } catch (alterError) {
-        console.log('Notice: Alter table skipped or failed (safe to ignore)', alterError.message);
+        logger.warn({ err: alterError.message }, 'Alter table skipped or failed (safe to ignore)');
       }
 
       await db.query(`CREATE INDEX IF NOT EXISTS idx_admin_logs_admin_id ON admin_logs(admin_id)`);
       await db.query(`CREATE INDEX IF NOT EXISTS idx_admin_logs_module ON admin_logs(module)`);
       await db.query(`CREATE INDEX IF NOT EXISTS idx_admin_logs_created_at ON admin_logs(created_at DESC)`);
-      console.log('✅ Admin logs table ready');
+      logger.info('Admin logs table ready');
     } catch (error) {
-      console.error('❌ Error creating admin_logs table:', error);
+      logger.error({ err: error.message }, 'Error creating admin_logs table');
       throw new Error('Failed to create admin_logs table: ' + error.message);
     }
   }

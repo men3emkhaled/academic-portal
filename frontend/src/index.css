@@ -12,7 +12,7 @@
     --border-main: rgba(0, 0, 0, 0.05);
 
     /* MAVI Inspiration Tokens - Light Mode */
-    --accent-green: #10b981;
+    --accent-green: #059669;
     --accent-purple: #8b5cf6;
     --card-bg: #ffffff;
     --hero-bg: #f0f0f0;
@@ -28,7 +28,7 @@
     --border-main: rgba(255, 255, 255, 0.05);
     
     /* MAVI Inspiration Tokens - Dark Mode */
-    --accent-green: #2cfc7d;
+    --accent-green: #34d399;
     --accent-purple: #d4a3ff;
     --card-bg: #151520;
     --hero-bg: #0c0c14;
@@ -52,11 +52,11 @@
 @layer components {
   .neon-text {
     @apply text-primary;
-    text-shadow: 0 0 5px rgba(46, 204, 113, 0.5);
+    text-shadow: 0 0 5px rgba(5, 150, 105, 0.5);
   }
 
   .neon-button {
-    @apply bg-primary text-dark font-semibold py-2.5 px-6 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-[0_0_15px_rgba(46, 204, 113, 0.5)] active:scale-95;
+    @apply bg-primary text-dark font-semibold py-2.5 px-6 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-[0_0_15px_rgba(5, 150, 105, 0.5)] active:scale-95;
   }
 
   .glass-card {
@@ -122,7 +122,7 @@
   }
 
   .neon-border {
-    @apply border border-primary/50 shadow-[0_0_10px_rgba(46, 204, 113, 0.2)];
+    @apply border border-primary/50 shadow-[0_0_10px_rgba(5, 150, 105, 0.2)];
   }
 
   /* Liquid Glass Utilities */
@@ -139,7 +139,7 @@
   }
 
   .glow-primary {
-    box-shadow: 0 0 40px rgba(46, 204, 113, 0.2);
+    box-shadow: 0 0 40px rgba(5, 150, 105, 0.2);
   }
 
   .glow-blue {
@@ -355,11 +355,11 @@
 /* ============= Glow Animation ============= */
 @keyframes glow {
   0% {
-    box-shadow: 0 0 5px rgba(46, 204, 113, 0.3);
+    box-shadow: 0 0 5px rgba(5, 150, 105, 0.3);
   }
 
   100% {
-    box-shadow: 0 0 20px rgba(46, 204, 113, 0.6);
+    box-shadow: 0 0 20px rgba(5, 150, 105, 0.6);
   }
 }
 
@@ -369,18 +369,18 @@
 
 /* ============= Selection Color ============= */
 ::selection {
-  background-color: #2ecc71;
+  background-color: #059669;
   color: #0a0a0a;
 }
 
 ::-moz-selection {
-  background-color: #2ecc71;
+  background-color: #059669;
   color: #0a0a0a;
 }
 
 /* ============= Focus Styles ============= */
 *:focus-visible {
-  outline: 2px solid #2ecc71;
+  outline: 2px solid #059669;
   outline-offset: 2px;
 }
 
@@ -404,7 +404,7 @@ input[type=number] {
 }
 
 .mesh-bg {
-  background: linear-gradient(-45deg, #10b981, #3b82f6, #6366f1, #2dd4bf);
+  background: linear-gradient(-45deg, #059669, #3b82f6, #6366f1, #2dd4bf);
   background-size: 400% 400%;
   animation: mesh-gradient 15s ease infinite;
 }
@@ -428,4 +428,105 @@ input[type=number] {
 
 .font-arabic {
   font-family: 'Cairo', sans-serif !important;
+}
+
+/* ============= Handle (People-Handle) Admin Styles ============= */
+.handle-page {
+  @apply space-y-6 duration-500 pb-20 max-w-[1500px] mx-auto w-full px-4 sm:px-0 text-start relative z-10;
+}
+
+.handle-header {
+  @apply flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10;
+}
+
+.handle-heading {
+  @apply text-[clamp(1.75rem,4vw,3rem)] font-black leading-[1.1] tracking-tighter uppercase text-gray-900 dark:text-white;
+}
+
+.handle-stat {
+  @apply flex items-center gap-3 px-4 py-2 rounded-xl bg-[#059669]/10 text-[#059669] dark:text-[#34d399] text-sm font-black tracking-tight;
+}
+
+.handle-btn {
+  @apply inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-black text-xs uppercase tracking-widest transition-all hover:scale-[1.02] active:scale-95;
+}
+
+.handle-btn-primary {
+  @apply handle-btn bg-black dark:bg-white text-white dark:text-black shadow-md hover:shadow-lg;
+}
+
+.handle-btn-secondary {
+  @apply handle-btn bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-white/10 hover:bg-gray-200 dark:hover:bg-white/10;
+}
+
+.handle-btn-success {
+  @apply handle-btn bg-[#059669] text-white shadow-md hover:bg-[#047857];
+}
+
+.handle-btn-danger {
+  @apply handle-btn bg-rose-500/10 text-rose-500 border border-rose-500/20 hover:bg-rose-500 hover:text-white;
+}
+
+.handle-btn-ghost {
+  @apply handle-btn bg-transparent text-gray-500 hover:bg-gray-100 dark:hover:bg-white/5;
+}
+
+.handle-card {
+  @apply bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-xl p-4 sm:p-6 transition-all shadow-sm;
+}
+
+.handle-table-wrap {
+  @apply bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-xl overflow-hidden shadow-sm;
+}
+
+.handle-table {
+  @apply w-full text-start border-collapse;
+}
+
+.handle-table th {
+  @apply py-4 px-5 text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-[0.3em] text-start bg-gray-50/50 dark:bg-white/[0.01];
+}
+
+.handle-table td {
+  @apply py-4 px-5 text-sm;
+}
+
+.handle-table tbody tr {
+  @apply border-b border-gray-100 dark:border-white/[0.03] hover:bg-gray-50/30 dark:hover:bg-white/[0.01] transition-all;
+}
+
+.handle-input {
+  @apply w-full bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/10 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-400 font-black text-xs sm:text-sm focus:ring-4 focus:ring-[#059669]/10 focus:border-[#059669]/30 outline-none transition-all shadow-inner;
+}
+
+.handle-select {
+  @apply w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-xl px-4 py-3 text-xs font-black focus:ring-4 focus:ring-[#059669]/10 outline-none appearance-none cursor-pointer;
+}
+
+.handle-modal {
+  @apply bg-white dark:bg-[#0c0c0e] border border-gray-100 dark:border-white/5 rounded-2xl p-6 w-full shadow-2xl relative overflow-hidden z-10 text-start duration-200;
+}
+
+.handle-modal-header {
+  @apply flex items-center justify-between pb-4 mb-4 border-b border-gray-100 dark:border-white/5;
+}
+
+.handle-modal-title {
+  @apply flex items-center gap-3;
+}
+
+.handle-modal-icon {
+  @apply w-10 h-10 bg-[#059669]/10 dark:bg-[#34d399]/20 rounded-xl flex items-center justify-center border border-[#059669]/20;
+}
+
+.handle-tag {
+  @apply inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest;
+}
+
+.handle-empty {
+  @apply py-16 text-center border-2 border-dashed border-gray-100 dark:border-white/10 rounded-2xl opacity-40;
+}
+
+.handle-grid {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4;
 }

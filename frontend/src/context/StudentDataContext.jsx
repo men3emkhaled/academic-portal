@@ -171,12 +171,14 @@ export const StudentDataContextProvider = ({ children }) => {
       if (fetchedRef.current[sessionKey]) return;
       fetchedRef.current[sessionKey] = true;
 
-      // Essential on mount: grades (used in dashboard), notifications (shown globally), quizzes (most visited)
       fetchGrades();
       fetchNotifications();
       fetchQuizzes();
-      // Timetable is also commonly needed (sidebar indicators)
       fetchTimetable();
+      fetchTasks();
+      fetchOfficialTasks();
+      fetchRoadmapTracks();
+      fetchExams();
     } else {
       // Clear data if logged out
       setGradesData({ grades: [], summary: null });
@@ -190,7 +192,7 @@ export const StudentDataContextProvider = ({ children }) => {
       setExams([]);
       setOfficialTasks([]);
     }
-  }, [student, token, fetchGrades, fetchNotifications, fetchQuizzes, fetchTimetable]);
+  }, [student, token, fetchGrades, fetchNotifications, fetchQuizzes, fetchTimetable, fetchTasks, fetchOfficialTasks, fetchRoadmapTracks, fetchExams]);
 
   return (
     <StudentDataContext.Provider value={{

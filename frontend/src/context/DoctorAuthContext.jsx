@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import { safeGetItem, safeSetItem, safeRemoveItem } from '../utils/localStorage';
-import api from '../services/api';
+import doctorApi from '../services/doctorApi';
 
 const DoctorAuthContext = createContext();
 
@@ -11,12 +11,12 @@ export const DoctorAuthProvider = ({ children }) => {
   const [doctor, setDoctor] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const doctorApi = useCallback((method, url, data, customHeaders = {}) => {
-    return api({
+  const doctorApiWrapper = useCallback((method, url, data, customHeaders = {}) => {
+    return doctorApi({
       method,
       url,
       data,
-      headers: { 
+      headers: {
         Authorization: `Bearer ${token}`,
         ...customHeaders
       }
@@ -26,10 +26,7 @@ export const DoctorAuthProvider = ({ children }) => {
   useEffect(() => {
     if (token) {
       safeSetItem('doctorToken', token);
-      // Fetch doctor profile
-      api.get('/doctor/profile', {
-        headers: { Authorization: `Bearer ${token}` }
-      })
+      doctorApi.get('/doctor/profile')
         .then(res => {
           setDoctor(res.data);
           setLoading(false);
@@ -59,7 +56,7 @@ export const DoctorAuthProvider = ({ children }) => {
   };
 
   return (
-    <DoctorAuthContext.Provider value={{ token, doctor, loading, login, logout, doctorApi }}>
+    <DoctorAuthContext.Provider value={{ token, doctor, loading, login, logout, doctorApi: doctorApiWrapper }}>
       {children}
     </DoctorAuthContext.Provider>
   );

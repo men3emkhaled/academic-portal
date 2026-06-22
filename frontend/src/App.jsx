@@ -14,6 +14,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { StudentAuthProvider, useStudentAuth } from './context/StudentAuthContext';
 import { StudentDataContextProvider } from './context/StudentDataContext';
 import { DoctorAuthProvider } from './context/DoctorAuthContext';
+import { TAAuthProvider } from './context/TAAuthContext';
 import AdminDashboard from './pages/AdminDashboard';
 import StudentLogin from './pages/StudentLogin';
 import StudentDashboard from './pages/StudentDashboard';
@@ -25,6 +26,7 @@ import StudentMaterials from './pages/StudentMaterials';
 import StudentNotifications from './pages/StudentNotifications';
 import StudentSettings from './pages/StudentSettings';
 import StudentPersonalTasks from './pages/StudentPersonalTasks';
+import StudentAttendance from './pages/StudentAttendance';
 import StudentCourseRegistration from './pages/StudentCourseRegistration';
 import StudentMenu from './pages/StudentMenu';
 import ResetPassword from './pages/ResetPassword';
@@ -47,6 +49,10 @@ import AdminLogin from './pages/AdminLogin';
 
 // ✅ مساعد Zag AI
 import ZagAIChat from './pages/ZagAIChat';
+
+// ✅ TA Portal
+import TALogin from './pages/TALogin';
+import TADashboard from './pages/TADashboard';
 
 // مكون إعادة توجيه الطالب المسجل دخوله
 const StudentLoginRedirect = () => {
@@ -125,6 +131,7 @@ function AppContent() {
   const showSwitcher = [
     '/student/login',
     '/doctor/login',
+    '/ta/login',
     '/admin/login',
     '/admin',
   ].some((p) => location.pathname === p || location.pathname.startsWith(p)) && !(location.pathname.startsWith('/admin') && adminToken);
@@ -147,6 +154,8 @@ function AppContent() {
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/doctor/login" element={<DoctorLogin />} />
             <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
+            <Route path="/ta/login" element={<TALogin />} />
+            <Route path="/ta/dashboard" element={<TADashboard />} />
             <Route path="/student/login" element={<StudentLoginRedirect />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/verify-email" element={<VerifyEmail />} />
@@ -161,6 +170,7 @@ function AppContent() {
             <Route path="/student/notifications" element={<ProtectedStudentRoute><StudentNotifications /></ProtectedStudentRoute>} />
             <Route path="/student/settings" element={<ProtectedStudentRoute><StudentSettings /></ProtectedStudentRoute>} />
             <Route path="/student/personal-tasks" element={<ProtectedStudentRoute><StudentPersonalTasks /></ProtectedStudentRoute>} />
+            <Route path="/student/attendance" element={<ProtectedStudentRoute><StudentAttendance /></ProtectedStudentRoute>} />
             <Route path="/student/menu" element={<ProtectedStudentRoute><StudentMenu /></ProtectedStudentRoute>} />
             <Route path="/student/ai" element={<ProtectedStudentRoute><ZagAIChat /></ProtectedStudentRoute>} />
 
@@ -184,12 +194,14 @@ function App() {
         <StudentAuthProvider>
           <StudentDataContextProvider>
             <DoctorAuthProvider>
-              <Router>
-                <PullToRefresh>
-                  <AppContent />
-                </PullToRefresh>
-                <Toaster position="bottom-right" />
-              </Router>
+              <TAAuthProvider>
+                <Router>
+                  <PullToRefresh>
+                    <AppContent />
+                  </PullToRefresh>
+                  <Toaster position="bottom-right" />
+                </Router>
+              </TAAuthProvider>
             </DoctorAuthProvider>
           </StudentDataContextProvider>
         </StudentAuthProvider>

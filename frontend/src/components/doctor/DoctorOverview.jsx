@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Users, BookOpen, ClipboardList, Zap, Upload, Plus, CheckSquare, Calendar, ChevronRight, Clock, MapPin, MessageSquare, ArrowUpRight } from 'lucide-react';
 import { useDoctorAuth } from '../../context/DoctorAuthContext';
 import { motion } from 'framer-motion';
 
 const DoctorOverview = ({ stats, doctor, timetable, setActiveTab }) => {
+  const { t } = useTranslation();
   const { doctorApi } = useDoctorAuth();
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -23,17 +25,17 @@ const DoctorOverview = ({ stats, doctor, timetable, setActiveTab }) => {
   }, [doctorApi]);
 
   const SUMMARY_CARDS = [
-    { label: 'Active Students', value: stats.students, icon: Users, color: 'violet', gradient: 'from-violet-500/20 to-purple-500/20' },
-    { label: 'Courses', value: stats.courses, icon: BookOpen, color: 'blue', gradient: 'from-blue-500/20 to-indigo-500/20' },
-    { label: 'Portal Quizzes', value: stats.quizzes, icon: ClipboardList, color: 'amber', gradient: 'from-amber-500/20 to-orange-500/20' },
-    { label: 'New Resources', value: stats.resources, icon: Zap, color: 'emerald', gradient: 'from-emerald-500/20 to-teal-500/20' },
+    { label: t('doctor.overview.active_students'), value: stats.students, icon: Users, color: 'emerald', gradient: 'from-[#059669]/20 to-[#34d399]/20' },
+    { label: t('doctor.overview.courses'), value: stats.courses, icon: BookOpen, color: 'blue', gradient: 'from-blue-500/20 to-[#34d399]/20' },
+    { label: t('doctor.overview.portal_quizzes'), value: stats.quizzes, icon: ClipboardList, color: 'amber', gradient: 'from-amber-500/20 to-orange-500/20' },
+    { label: t('doctor.overview.new_resources'), value: stats.resources, icon: Zap, color: 'emerald', gradient: 'from-emerald-500/20 to-teal-500/20' },
   ];
 
   const QUICK_ACTIONS = [
-    { label: 'Upload Material', desc: 'Add slides or reading docs', icon: Upload, color: 'violet', tab: 'materials' },
-    { label: 'Create Quiz', desc: 'Draft a new assessment', icon: Plus, color: 'blue', tab: 'quizzes' },
-    { label: 'Grade Tasks', desc: 'Review submissions', icon: CheckSquare, color: 'amber', tab: 'tasks' },
-    { label: 'Schedule Class', desc: 'Set up a live session', icon: Calendar, color: 'emerald', tab: 'schedule' },
+    { label: t('doctor.overview.upload_material'), desc: t('doctor.overview.upload_desc'), icon: Upload, color: 'emerald', tab: 'materials' },
+    { label: t('doctor.overview.create_quiz'), desc: t('doctor.overview.create_quiz_desc'), icon: Plus, color: 'blue', tab: 'quizzes' },
+    { label: t('doctor.overview.grade_tasks'), desc: t('doctor.overview.grade_tasks_desc'), icon: CheckSquare, color: 'amber', tab: 'tasks' },
+    { label: t('doctor.overview.schedule_class'), desc: t('doctor.overview.schedule_class_desc'), icon: Calendar, color: 'emerald', tab: 'schedule' },
   ];
 
   const containerVariants = {
@@ -64,15 +66,15 @@ const DoctorOverview = ({ stats, doctor, timetable, setActiveTab }) => {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <h1 className="text-4xl lg:text-5xl font-black text-gray-900 dark:text-white tracking-tight mb-3">
-              Hello, Inst. {doctor?.name.split(' ')[0]}
+              {t('doctor.overview.hello', { name: doctor?.name.split(' ')[0] })}
             </h1>
             <p className="text-gray-500 dark:text-gray-400 font-medium text-lg lg:text-xl max-w-2xl">
-              Welcome back to your academic hub. Here is what's happening with your classes today.
+              {t('doctor.overview.welcome_subtitle')}
             </p>
           </div>
-          <div className="hidden md:flex items-center gap-3 px-5 py-2.5 bg-violet-500/10 border border-violet-500/20 rounded-2xl">
-            <div className="w-2 h-2 rounded-full bg-violet-500 animate-pulse"></div>
-            <span className="text-xs font-black text-violet-600 dark:text-violet-400 uppercase tracking-widest">Portal Active</span>
+          <div className="hidden md:flex items-center gap-3 px-5 py-2.5 bg-[#059669]/10 border border-[#059669]/20 rounded-2xl">
+            <div className="w-2 h-2 rounded-full bg-[#059669] animate-pulse"></div>
+            <span className="text-xs font-black text-[#059669] dark:text-[#34d399] uppercase tracking-widest">{t('doctor.overview.portal_active')}</span>
           </div>
         </div>
       </motion.div>
@@ -115,7 +117,7 @@ const DoctorOverview = ({ stats, doctor, timetable, setActiveTab }) => {
           <section>
             <div className="flex items-center justify-between mb-8">
               <h3 className="text-2xl font-black text-gray-900 dark:text-white flex items-center gap-3">
-                Quick Hub <span className="w-8 h-[2px] bg-violet-500/30 rounded-full"></span>
+                {t('doctor.overview.quick_hub')} <span className="w-8 h-[2px] bg-[#059669]/30 rounded-full"></span>
               </h3>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -128,7 +130,7 @@ const DoctorOverview = ({ stats, doctor, timetable, setActiveTab }) => {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => setActiveTab(action.tab)}
-                    className="bg-white/40 dark:bg-white/[0.02] backdrop-blur-md border border-white dark:border-white/5 p-6 rounded-[2rem] flex items-center gap-6 hover:bg-white/80 dark:hover:bg-white/[0.05] hover:border-violet-500/30 transition-all group text-left shadow-sm dark:shadow-none"
+                    className="bg-white/40 dark:bg-white/[0.02] backdrop-blur-md border border-white dark:border-white/5 p-6 rounded-[2rem] flex items-center gap-6 hover:bg-white/80 dark:hover:bg-white/[0.05] hover:border-[#059669]/30 transition-all group text-left shadow-sm dark:shadow-none"
                   >
                     <div className={`w-16 h-16 rounded-2xl bg-${action.color}-500/10 dark:bg-${action.color}-500/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-500 border border-${action.color}-500/10`}>
                       <Icon className={`w-7 h-7 text-${action.color}-600 dark:text-${action.color}-400`} />
@@ -147,28 +149,28 @@ const DoctorOverview = ({ stats, doctor, timetable, setActiveTab }) => {
           <section>
             <div className="flex items-center justify-between mb-8">
               <h3 className="text-2xl font-black text-gray-900 dark:text-white flex items-center gap-3">
-                Insights <span className="w-8 h-[2px] bg-violet-500/30 rounded-full"></span>
+                {t('doctor.overview.insights')} <span className="w-8 h-[2px] bg-[#059669]/30 rounded-full"></span>
               </h3>
               <button 
                 onClick={() => setActiveTab('inquiries')}
-                className="group flex items-center gap-2 text-violet-600 dark:text-violet-400 font-black text-xs uppercase tracking-widest hover:translate-x-1 transition-transform"
+                className="group flex items-center gap-2 text-[#059669] dark:text-[#34d399] font-black text-xs uppercase tracking-widest hover:translate-x-1 transition-transform"
               >
-                Inquiries Center <ChevronRight className="w-4 h-4" />
+                {t('doctor.overview.inquiries_center')} <ChevronRight className="w-4 h-4" />
               </button>
             </div>
             <div className="bg-white/60 dark:bg-white/[0.03] backdrop-blur-sm border border-white dark:border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl shadow-gray-200/50 dark:shadow-none">
               {loading ? (
                 <div className="flex flex-col items-center justify-center py-24 gap-4">
-                  <div className="w-10 h-10 border-2 border-violet-500/20 border-t-violet-500 rounded-full animate-spin"></div>
-                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">Synching Data...</p>
+                  <div className="w-10 h-10 border-2 border-[#059669]/20 border-t-[#059669] rounded-full animate-spin"></div>
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">{t('doctor.overview.synching_data')}</p>
                 </div>
               ) : activities.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-24 text-center px-10">
                    <div className="w-20 h-20 bg-gray-100 dark:bg-white/5 rounded-full flex items-center justify-center mb-6">
                      <Clock className="w-10 h-10 text-gray-300 dark:text-white/10" />
                    </div>
-                   <p className="text-gray-900 dark:text-white font-black text-xl mb-2">Queue is Empty</p>
-                   <p className="text-gray-500 dark:text-gray-400 text-sm font-medium max-w-xs mx-auto">New student submissions and course activities will appear here.</p>
+                   <p className="text-gray-900 dark:text-white font-black text-xl mb-2">{t('doctor.overview.queue_empty')}</p>
+                   <p className="text-gray-500 dark:text-gray-400 text-sm font-medium max-w-xs mx-auto">{t('doctor.overview.queue_empty_desc')}</p>
                 </div>
               ) : (
                 <div className="divide-y divide-gray-100 dark:divide-white/5">
@@ -193,7 +195,7 @@ const DoctorOverview = ({ stats, doctor, timetable, setActiveTab }) => {
                             {activity.user} <span className="text-gray-500 dark:text-gray-400 font-medium lowercase">{activity.action}</span>
                           </p>
                           <div className="flex items-center gap-3">
-                            <span className="text-[10px] font-black uppercase tracking-widest text-violet-500">{activity.category}</span>
+                            <span className="text-[10px] font-black uppercase tracking-widest text-[#059669]">{activity.category}</span>
                             <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-white/10"></span>
                             <p className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest flex items-center gap-1.5">
                               <Clock className="w-3 h-3" />
@@ -206,7 +208,7 @@ const DoctorOverview = ({ stats, doctor, timetable, setActiveTab }) => {
                         <span className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border ${
                           activity.type === 'assignment' 
                             ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20' 
-                            : 'bg-violet-500/10 text-violet-600 dark:text-violet-400 border-violet-500/20'
+                            : 'bg-[#059669]/10 text-[#059669] dark:text-[#34d399] border-[#059669]/20'
                         }`}>
                           {activity.status}
                         </span>
@@ -224,7 +226,7 @@ const DoctorOverview = ({ stats, doctor, timetable, setActiveTab }) => {
           <section>
              <div className="flex items-center justify-between mb-8">
               <h3 className="text-2xl font-black text-gray-900 dark:text-white flex items-center gap-3">
-                Agenda <span className="w-8 h-[2px] bg-violet-500/30 rounded-full"></span>
+                {t('doctor.overview.agenda')} <span className="w-8 h-[2px] bg-[#059669]/30 rounded-full"></span>
               </h3>
               <div className="px-4 py-1.5 bg-gray-100 dark:bg-white/5 rounded-xl">
                 <p className="text-gray-500 dark:text-gray-400 text-[10px] font-black uppercase tracking-widest">
@@ -234,7 +236,7 @@ const DoctorOverview = ({ stats, doctor, timetable, setActiveTab }) => {
             </div>
             <div className="bg-white/60 dark:bg-white/[0.03] backdrop-blur-sm border border-white dark:border-white/5 rounded-[3rem] p-8 space-y-10 relative overflow-hidden shadow-2xl shadow-gray-200/50 dark:shadow-none">
               {/* Vertical line with gradient */}
-              <div className="absolute left-[39px] top-12 bottom-12 w-[2px] bg-gradient-to-b from-violet-500/50 via-gray-100 dark:via-white/5 to-transparent"></div>
+              <div className="absolute left-[39px] top-12 bottom-12 w-[2px] bg-gradient-to-b from-[#059669]/50 via-gray-100 dark:via-white/5 to-transparent"></div>
               
               {timetable && timetable.length > 0 ? (
                 <div className="space-y-10">
@@ -245,15 +247,15 @@ const DoctorOverview = ({ stats, doctor, timetable, setActiveTab }) => {
                       className="relative flex gap-8 group"
                     >
                       {/* Indicator */}
-                      <div className="relative z-10 w-3 h-3 rounded-full bg-violet-500 mt-2 ring-8 ring-violet-500/10 group-hover:scale-125 transition-transform duration-500"></div>
+                      <div className="relative z-10 w-3 h-3 rounded-full bg-[#059669] mt-2 ring-8 ring-[#059669]/10 group-hover:scale-125 transition-transform duration-500"></div>
                       
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
-                          <span className="text-violet-600 dark:text-violet-400 text-[10px] font-black tracking-[0.2em] uppercase bg-violet-500/10 px-2 py-0.5 rounded-md">
+                          <span className="text-[#059669] dark:text-[#34d399] text-[10px] font-black tracking-[0.2em] uppercase bg-[#059669]/10 px-2 py-0.5 rounded-md">
                             {entry.start_time.slice(0, 5)} - {entry.end_time.slice(0, 5)}
                           </span>
                         </div>
-                        <h4 className="text-gray-900 dark:text-white font-black text-lg leading-tight mb-3 group-hover:text-violet-500 transition-colors">
+                        <h4 className="text-gray-900 dark:text-white font-black text-lg leading-tight mb-3 group-hover:text-[#059669] transition-colors">
                           {entry.course_name}
                         </h4>
                         <div className="flex flex-wrap gap-4">
@@ -275,7 +277,7 @@ const DoctorOverview = ({ stats, doctor, timetable, setActiveTab }) => {
                    <div className="w-16 h-16 bg-gray-100 dark:bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
                      <Calendar className="w-8 h-8 text-gray-300 dark:text-white/10" />
                    </div>
-                   <p className="text-gray-500 dark:text-gray-400 text-sm font-black uppercase tracking-widest">Free Agenda Today</p>
+                   <p className="text-gray-500 dark:text-gray-400 text-sm font-black uppercase tracking-widest">{t('doctor.overview.free_agenda')}</p>
                 </div>
               )}
 
@@ -285,7 +287,7 @@ const DoctorOverview = ({ stats, doctor, timetable, setActiveTab }) => {
                 onClick={() => setActiveTab('schedule')}
                 className="w-full bg-gray-900 dark:bg-white text-white dark:text-black font-black text-xs uppercase tracking-[0.2em] py-5 rounded-2xl flex items-center justify-center gap-3 transition-all shadow-xl shadow-gray-200 dark:shadow-none"
               >
-                Full Schedule
+                {t('doctor.overview.full_schedule')}
               </motion.button>
             </div>
           </section>

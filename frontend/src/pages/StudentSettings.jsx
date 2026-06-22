@@ -119,8 +119,8 @@ const StudentSettings = () => {
       
       {/* Background Decor */}
       <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[-10%] inset-inline-end-[-5%] w-[50vw] h-[50vw] bg-[#8b5cf6]/5 blur-[120px] rounded-full"></div>
-        <div className="absolute bottom-[-10%] inset-inline-start-[-5%] w-[40vw] h-[40vw] bg-[#2cfc7d]/3 blur-[100px] rounded-full"></div>
+        <div className="absolute top-[-10%] inset-inline-end-[-5%] w-[50vw] h-[50vw] bg-[#059669]/5 blur-[120px] rounded-full"></div>
+        <div className="absolute bottom-[-10%] inset-inline-start-[-5%] w-[40vw] h-[40vw] bg-[#34d399]/3 blur-[100px] rounded-full"></div>
       </div>
 
       <Sidebar onLogout={handleLogout} />
@@ -132,10 +132,6 @@ const StudentSettings = () => {
           
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-10">
             <div className="space-y-4 text-start">
-              <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-[#2cfc7d]"></div>
-                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 dark:text-white/30">{t('settings.title')}</span>
-              </div>
               <h1 className={`text-[clamp(2.5rem,6vw,5.5rem)] font-black leading-[0.95] tracking-tighter uppercase text-gray-900 dark:text-white ${isAr ? 'font-arabic' : ''}`}>
                 {t('mavi.settings')}
               </h1>
@@ -147,18 +143,18 @@ const StudentSettings = () => {
             
             {/* PROFILE HERO BENTO CARD */}
             <div className="lg:col-span-12 bg-white dark:bg-[#0d0d14] border border-gray-100 dark:border-white/5 rounded-[3rem] p-10 md:p-16 flex flex-col md:flex-row items-center gap-12 group hover:shadow-2xl transition-all duration-700 text-start overflow-hidden relative">
-               <div className="absolute top-[-20%] inset-inline-end-[-10%] w-[40%] h-[150%] bg-[#2cfc7d]/5 blur-[80px] rounded-full pointer-events-none group-hover:scale-125 transition-transform duration-1000"></div>
+               <div className="absolute top-[-20%] inset-inline-end-[-10%] w-[40%] h-[150%] bg-[#34d399]/5 blur-[80px] rounded-full pointer-events-none group-hover:scale-125 transition-transform duration-1000"></div>
                
                {/* Avatar Container */}
                <div className="relative shrink-0 z-10">
                   <div 
-                    className="w-48 h-48 rounded-[3.5rem] bg-gray-50 dark:bg-white/5 border-2 border-gray-100 dark:border-white/10 flex items-center justify-center overflow-hidden shadow-2xl cursor-pointer group/avatar hover:border-[#10b981] dark:hover:border-[#2cfc7d] transition-all duration-500"
+                    className="w-48 h-48 rounded-[3.5rem] bg-gray-50 dark:bg-white/5 border-2 border-gray-100 dark:border-white/10 flex items-center justify-center overflow-hidden shadow-2xl cursor-pointer group/avatar hover:border-[#059669] dark:hover:border-[#34d399] transition-all duration-500"
                     onClick={() => fileInputRef.current?.click()}
                   >
                      {student?.avatar_url ? (
                        <img src={student.avatar_url} alt={student.name} className={`w-full h-full object-cover group-hover/avatar:scale-110 transition-transform duration-700 ${isUploadingAvatar ? 'opacity-30 blur-sm' : ''}`} />
                      ) : (
-                       <User className="w-20 h-20 text-gray-200 dark:text-white/10 group-hover/avatar:text-[#10b981] transition-colors" />
+                       <User className="w-20 h-20 text-gray-200 dark:text-white/10 group-hover/avatar:text-[#059669] transition-colors" />
                      )}
                      
                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity">
@@ -167,7 +163,7 @@ const StudentSettings = () => {
 
                      {isUploadingAvatar && (
                         <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-                           <Loader2 className="w-10 h-10 text-[#2cfc7d] animate-spin" />
+                           <Loader2 className="w-10 h-10 text-[#34d399] animate-spin" />
                         </div>
                      )}
                   </div>
@@ -178,7 +174,7 @@ const StudentSettings = () => {
                <div className="flex-1 space-y-6 z-10 text-center md:text-start">
                   <div className="space-y-2">
                      <div className="flex items-center justify-center md:justify-start gap-3">
-                        <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#10b981] dark:text-[#2cfc7d]">{t('mavi.verification_uid')}</span>
+                        <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#059669] dark:text-[#34d399]">{t('mavi.verification_uid')}</span>
                         <div className="h-px w-10 bg-gray-100 dark:bg-white/10"></div>
                         <span className="text-[10px] font-black uppercase text-gray-400 tracking-widest">ZNU-{student?.id}</span>
                      </div>
@@ -191,24 +187,17 @@ const StudentSettings = () => {
                      <div className="bg-gray-50 dark:bg-white/5 px-6 py-3 rounded-2xl border border-gray-100 dark:border-white/5">
                         <span className="text-[8px] font-black uppercase tracking-widest text-gray-400 block mb-1">{t('settings.level')}</span>
                         <span className="text-sm font-black uppercase text-gray-900 dark:text-white">
-                           {isAr ? (
-                              student?.level === 1 ? 'الفرقة الأولى' :
-                              student?.level === 2 ? 'الفرقة الثانية' :
-                              student?.level === 3 ? 'الفرقة الثالثة' :
-                              student?.level === 4 ? 'الفرقة الرابعة' : `الفرقة ${student?.level}`
-                           ) : (
-                              student?.level === 1 ? 'First Year' :
-                              student?.level === 2 ? 'Second Year' :
-                              student?.level === 3 ? 'Third Year' :
-                              student?.level === 4 ? 'Fourth Year' : `Year ${student?.level}`
-                           )}
+                           {student?.level === 1 ? t('settings.level_1') :
+                              student?.level === 2 ? t('settings.level_2') :
+                              student?.level === 3 ? t('settings.level_3') :
+                              student?.level === 4 ? t('settings.level_4') : t('settings.level_num', { num: student?.level })}
                         </span>
                      </div>
                      <div className="bg-gray-50 dark:bg-white/5 px-6 py-3 rounded-2xl border border-gray-100 dark:border-white/5">
                         <span className="text-[8px] font-black uppercase tracking-widest text-gray-400 block mb-1">{t('settings.section')}</span>
                         <span className="text-sm font-black uppercase text-gray-900 dark:text-white">{student?.section || 'X-00'}</span>
                      </div>
-                     <div className="bg-[#10b981] dark:bg-[#2cfc7d] px-6 py-3 rounded-2xl shadow-lg">
+                     <div className="bg-[#059669] dark:bg-[#34d399] px-6 py-3 rounded-2xl shadow-lg">
                         <span className="text-[8px] font-black uppercase tracking-widest text-white/50 dark:text-black/50 block mb-1">{t('mavi.status')}</span>
                         <span className="text-sm font-black uppercase text-white dark:text-black">{t('mavi.active')}</span>
                      </div>
@@ -240,7 +229,7 @@ const StudentSettings = () => {
                         value={emailInput}
                         onChange={(e) => setEmailInput(e.target.value)}
                         placeholder={student?.email || t('settings.enter_email')}
-                        className="flex-1 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-[2rem] px-8 py-5 font-black text-xs uppercase tracking-widest focus:ring-2 focus:ring-[#10b981] outline-none"
+                        className="flex-1 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-[2rem] px-8 py-5 font-black text-xs uppercase tracking-widest focus:ring-2 focus:ring-[#059669] outline-none"
                      />
                      <button 
                         type="submit"
@@ -287,7 +276,7 @@ const StudentSettings = () => {
                      <button 
                         type="submit"
                         disabled={isChangingPassword}
-                        className="md:col-span-2 bg-[#8b5cf6] text-white py-5 rounded-[2rem] font-black text-[10px] uppercase tracking-[0.3em] hover:shadow-[0_0_30px_rgba(139,92,246,0.3)] transition-all active:scale-[0.98] disabled:opacity-40"
+                        className="md:col-span-2 bg-[#059669] text-white py-5 rounded-[2rem] font-black text-[10px] uppercase tracking-[0.3em] hover:shadow-[0_0_30px_rgba(5,150,105,0.3)] transition-all active:scale-[0.98] disabled:opacity-40"
                      >
                         {isChangingPassword ? t('mavi.encrypting') : t('settings.update_password')}
                      </button>
@@ -317,7 +306,7 @@ const StudentSettings = () => {
                            </div>
                            <span className="text-xs font-black uppercase tracking-widest">{isDarkMode ? t('settings.dark') : t('settings.light')}</span>
                         </div>
-                        <div className={`w-10 h-6 rounded-full p-1 transition-colors ${isDarkMode ? 'bg-[#2cfc7d]' : 'bg-gray-200 dark:bg-white/10'}`}>
+                        <div className={`w-10 h-6 rounded-full p-1 transition-colors ${isDarkMode ? 'bg-[#34d399]' : 'bg-gray-200 dark:bg-white/10'}`}>
                            <div className={`w-4 h-4 rounded-full bg-white transition-all ${isDarkMode ? (isAr ? '-translate-x-4' : 'translate-x-4') : 'translate-x-0'}`}></div>
                         </div>
                      </button>
@@ -332,12 +321,12 @@ const StudentSettings = () => {
                         className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 p-6 rounded-[2rem] flex items-center justify-between group/toggle"
                      >
                         <div className="flex items-center gap-4">
-                           <div className="w-12 h-12 rounded-2xl bg-[#10b981]/10 flex items-center justify-center text-[#10b981]">
+                           <div className="w-12 h-12 rounded-2xl bg-[#059669]/10 flex items-center justify-center text-[#059669]">
                               <Languages className="w-5 h-5" />
                            </div>
-                           <span className="text-xs font-black uppercase tracking-widest">{isAr ? 'العربية' : 'English'}</span>
+                           <span className="text-xs font-black uppercase tracking-widest">{t('settings.english')}</span>
                         </div>
-                        <Zap className="w-4 h-4 text-[#2cfc7d] opacity-0 group-hover/toggle:opacity-100 transition-opacity" />
+                        <Zap className="w-4 h-4 text-[#34d399] opacity-0 group-hover/toggle:opacity-100 transition-opacity" />
                      </button>
                   </div>
                </div>

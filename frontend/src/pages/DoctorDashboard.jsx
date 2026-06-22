@@ -12,6 +12,7 @@ import DoctorOverview from '../components/doctor/DoctorOverview';
 import DoctorCourses from '../components/doctor/DoctorCourses';
 import DoctorResourceManager from '../components/doctor/DoctorResourceManager';
 import DoctorTaskManager from '../components/doctor/DoctorTaskManager';
+import DoctorOfficialTaskManager from '../components/doctor/DoctorOfficialTaskManager';
 import DoctorQuizManager from '../components/doctor/DoctorQuizManager';
 import DoctorGradesView from '../components/doctor/DoctorGradesView';
 import DoctorAnalytics from '../components/doctor/DoctorAnalytics';
@@ -22,6 +23,7 @@ import DoctorSettings from '../components/doctor/DoctorSettings';
 import DoctorSchedule from '../components/doctor/DoctorSchedule';
 import DoctorInquiries from '../components/doctor/DoctorInquiries';
 import DoctorNotifications from '../components/doctor/DoctorNotifications';
+import DoctorTAManager from '../components/doctor/DoctorTAManager';
 
 const DoctorDashboard = () => {
   const { t, i18n } = useTranslation();
@@ -32,7 +34,7 @@ const DoctorDashboard = () => {
   const [activeTab, setActiveTabState] = useState('overview');
   const [direction, setDirection] = useState(0);
 
-  const DOCTOR_TABS_ORDER = ['overview', 'courses', 'materials', 'quizzes', 'tasks', 'inquiries', 'grades', 'analytics', 'attendance', 'syllabus', 'announcements', 'settings', 'notifications', 'schedule'];
+  const DOCTOR_TABS_ORDER = ['overview', 'courses', 'materials', 'quizzes', 'tasks', 'inquiries', 'grades', 'analytics', 'assistants', 'attendance', 'syllabus', 'announcements', 'settings', 'notifications', 'schedule'];
 
   const handleTabChange = (newTab) => {
     if (newTab === activeTab) return;
@@ -191,9 +193,12 @@ const DoctorDashboard = () => {
             {activeTab === 'materials' && <DoctorResourceManager courses={myCourses} />}
             {activeTab === 'quizzes' && <DoctorQuizManager courses={myCourses} />}
             {activeTab === 'tasks' && <DoctorTaskManager courses={myCourses} />}
+            {activeTab === 'official-tasks' && <DoctorOfficialTaskManager courses={myCourses} />}
             {activeTab === 'inquiries' && <DoctorInquiries />}
             {activeTab === 'grades' && <DoctorGradesView courses={myCourses} />}
             {activeTab === 'analytics' && <DoctorAnalytics courses={myCourses} />}
+
+            {activeTab === 'assistants' && <DoctorTAManager courses={myCourses} />}
 
             {activeTab === 'attendance' && <DoctorAttendance courses={myCourses} />}
 

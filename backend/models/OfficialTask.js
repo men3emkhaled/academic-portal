@@ -1,4 +1,5 @@
 const db = require('../config/database');
+const logger = require('../utils/logger');
 
 class OfficialTask {
   static async initializeTable() {
@@ -25,10 +26,9 @@ class OfficialTask {
           ADD COLUMN IF NOT EXISTS requires_submission BOOLEAN DEFAULT FALSE
         `);
       } catch (colErr) {
-        console.log('ℹ️ Migration official_tasks failed or already applied');
+        logger.info('Migration official_tasks failed or already applied');
       }
 
-      // Create student_official_tasks table
       await db.query(`
         CREATE TABLE IF NOT EXISTS student_official_tasks (
           student_id VARCHAR REFERENCES students(id) ON DELETE CASCADE,
@@ -50,12 +50,12 @@ class OfficialTask {
           ADD COLUMN IF NOT EXISTS feedback TEXT
         `);
       } catch (colErr) {
-        console.log('ℹ️ Migration student_official_tasks failed or already applied');
+        logger.info('Migration student_official_tasks failed or already applied');
       }
       
-      console.log('✅ Official tasks tables initialized');
+      logger.info('Official tasks tables initialized');
     } catch (err) {
-      console.error('❌ Error initializing official tasks tables:', err.message);
+      logger.error({ err: err.message }, 'Error initializing official tasks tables');
     }
   }
 
@@ -164,6 +164,20 @@ class OfficialTask {
       [grade, feedback, taskId, studentId]
     );
     return result.rows[0];
+  }
+
+  static async getByCourseIds(courseIds) {
+    if (!courseIds || courseIds.length === 0) return [];
+    const placeholders = courseIds.map((_, i) => `$${i + 1}`).join(',');
+    const result = await db.query(`
+      SELECT ot.*, c.name as course_name, d.name as department_name
+      FROM official_tasks ot
+      JOIN courses c ON ot.course_id = c.id
+      LEFT JOIN departments d ON ot.department_id = d.id
+      WHERE ot.course_id IN (${placeholders})
+      ORDER BY ot.created_at DESC
+    `, courseIds);
+    return result.rows;
   }
 
   static async getRecentSubmissionsForDoctor(doctorId, limit = 5) {

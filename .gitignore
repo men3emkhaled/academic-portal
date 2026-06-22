@@ -1,6 +1,5 @@
 ai-model-train/
 
-
 # Dependencies
 node_modules/
 npm-debug.log*
@@ -11,6 +10,8 @@ yarn-error.log*
 .env
 .env.local
 .env.production
+.env.staging
+
 # Build outputs
 dist/
 build/
@@ -20,7 +21,7 @@ build/
 uploads/
 
 # OS files
-.DS_Store
+.DS_store
 Thumbs.db
 
 # IDE files
@@ -31,6 +32,7 @@ Thumbs.db
 # Logs
 logs/
 *.log
+build_log*.txt
 
 # Database Dumps and Scripts
 *.sql
@@ -39,6 +41,8 @@ logs/
 v1.sql
 v9.sql
 
+# One-off migration / scratch scripts (moved to backend/scripts/)
+scripts/
 
 # Firebase & Auth Secrets
 backend/config/serviceAccountKey.json
@@ -49,9 +53,13 @@ client\ id.json
 # Test Scripts
 test_*.js
 backend/scratch/
+
 # Agent Assistant Skills & Context
 .antigravity/
 .gemini/
 CLAUDE.md
 GEMINI.md
 .github/copilot-instructions.md
+
+# Docker
+.dockerignore

@@ -1,0 +1,5 @@
+{
+  "migrationFileLanguage": "js",
+  "migrationsDir": "migrations",
+  "migrationTableName": "pgmigrations"
+}

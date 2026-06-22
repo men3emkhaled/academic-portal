@@ -1,6 +1,8 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
-const LoadingScreen = ({ text = 'Loading...' }) => {
+const LoadingScreen = ({ text }) => {
+  const { t } = useTranslation();
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#07070d] gap-8">
       <div className="relative">
@@ -17,7 +19,7 @@ const LoadingScreen = ({ text = 'Loading...' }) => {
           <span className="w-2.5 h-2.5 rounded-full bg-[#2cfc7d] animate-bounce" style={{ animationDelay: '150ms' }} />
           <span className="w-2.5 h-2.5 rounded-full bg-[#2cfc7d] animate-bounce" style={{ animationDelay: '300ms' }} />
         </div>
-        <p className="text-white/40 text-[10px] font-black uppercase tracking-[0.4em]">{text}</p>
+        <p className="text-white/40 text-[10px] font-black uppercase tracking-[0.4em]">{text || t('common.loading')}</p>
       </div>
     </div>
   );

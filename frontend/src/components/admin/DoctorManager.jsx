@@ -3,9 +3,8 @@ import api from '../../services/api';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { 
-  Plus, Edit3, Trash2, X, BookOpen, GraduationCap, 
-  Mail, Shield, Building2, ChevronRight, Activity, 
-  Search, UserCircle, Settings, Layers, Zap, CheckCircle, Users, Box
+  Plus, Edit3, Trash2, X, Mail, 
+  Search, UserCircle, CheckCircle
 } from 'lucide-react';
 
 const DoctorManager = () => {
@@ -13,16 +12,13 @@ const DoctorManager = () => {
   const [doctors, setDoctors] = useState([]);
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [modalType, setModalType] = useState(null); // 'add', 'edit', 'courses'
+  const [modalType, setModalType] = useState(null);
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [doctorCourses, setDoctorCourses] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
 
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    department: ''
+    name: '', email: '', password: '', department: ''
   });
 
   useEffect(() => {
@@ -31,15 +27,13 @@ const DoctorManager = () => {
   }, []);
 
   const fetchDoctors = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
       const res = await api.get('/admin/doctors');
       setDoctors(res.data);
     } catch (error) {
       toast.error(t('admin.messages.load_doctors_failed'));
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
   const fetchCourses = async () => {
@@ -47,56 +41,29 @@ const DoctorManager = () => {
       const res = await api.get('/courses');
       setCourses(res.data);
     } catch (error) {
-      console.error(t('admin.messages.load_courses_failed'));
+      console.error('Error fetching courses:', error);
     }
-  };
-
-  const handleOpenModal = (type, doctor = null) => {
-    setModalType(type);
-    setSelectedDoctor(doctor);
-    
-    if (type === 'add') {
-      setFormData({ name: '', email: '', password: '', department: '' });
-    } else if (type === 'edit') {
-      setFormData({
-        name: doctor.name,
-        email: doctor.email,
-        password: '', 
-        department: doctor.department || ''
-      });
-    } else if (type === 'courses') {
-      fetchDoctorCourses(doctor.id);
-    }
-  };
-
-  const handleCloseModal = () => {
-    setModalType(null);
-    setSelectedDoctor(null);
-    setDoctorCourses([]);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
-      if (modalType === 'add') {
-        if (!formData.password) return toast.error(t('admin.messages.password_req'));
+      if (modalType === 'edit') {
+        await api.put(`/admin/doctors/${selectedDoctor.id}`, formData);
+      } else {
         await api.post('/admin/doctors', formData);
-        toast.success(t('common.success'));
-      } else if (modalType === 'edit') {
-        const payload = { ...formData };
-        if (!payload.password) delete payload.password;
-        await api.put(`/admin/doctors/${selectedDoctor.id}`, payload);
-        toast.success(t('common.success'));
       }
-      handleCloseModal();
+      toast.success(t('common.success'));
+      setModalType(null);
       fetchDoctors();
     } catch (error) {
       toast.error(error.response?.data?.message || t('admin.messages.operation_failed'));
-    }
+    } finally { setLoading(false); }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm(t('admin.doctors.delete_confirm'))) return;
+  const handleDelete = async (id, name) => {
+    if (!window.confirm(t('admin.doctors.delete_confirm', { name }))) return;
     try {
       await api.delete(`/admin/doctors/${id}`);
       toast.success(t('common.success'));
@@ -106,354 +73,215 @@ const DoctorManager = () => {
     }
   };
 
-  const fetchDoctorCourses = async (doctorId) => {
+  const openEditModal = (doctor) => {
+    setSelectedDoctor(doctor);
+    setFormData({
+      name: doctor.name || '',
+      email: doctor.email || '',
+      password: '',
+      department: doctor.department || ''
+    });
+    setModalType('edit');
+  };
+
+  const openCoursesModal = async (doctor) => {
+    setSelectedDoctor(doctor);
     try {
-      const res = await api.get(`/admin/doctors/${doctorId}/courses`);
-      setDoctorCourses(res.data.map(c => c.id));
+      const res = await api.get(`/admin/doctors/${doctor.id}/courses`);
+      setDoctorCourses(res.data || []);
     } catch (error) {
-      toast.error(t('admin.messages.load_doctor_courses_failed'));
+      toast.error(t('admin.doctors.load_courses_failed'));
+    }
+    setModalType('courses');
+  };
+
+  const removeCourseFromDoctor = async (doctorId, courseId) => {
+    try {
+      await api.delete(`/admin/doctors/${doctorId}/courses/${courseId}`);
+      toast.success(t('common.success'));
+      setDoctorCourses(prev => prev.filter(c => c.id !== courseId));
+    } catch (error) {
+      toast.error(error.response?.data?.message || t('admin.doctors.remove_course_failed'));
     }
   };
 
-  const handleToggleCourse = async (courseId) => {
-    const isAssigned = doctorCourses.includes(courseId);
+  const addCourseToDoctor = async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const courseId = form.courseId.value;
+    if (!courseId) return;
     try {
-      if (isAssigned) {
-        await api.delete(`/admin/doctors/${selectedDoctor.id}/courses/${courseId}`);
-        setDoctorCourses(prev => prev.filter(id => id !== courseId));
-        toast.success(t('admin.doctors.remove'));
-      } else {
-        await api.post(`/admin/doctors/${selectedDoctor.id}/courses/${courseId}`);
-        setDoctorCourses(prev => [...prev, courseId]);
-        toast.success(t('admin.doctors.assign'));
-      }
-      fetchDoctors();
+      await api.post(`/admin/doctors/${selectedDoctor.id}/courses`, { courseId });
+      toast.success(t('common.success'));
+      const res = await api.get(`/admin/doctors/${selectedDoctor.id}/courses`);
+      setDoctorCourses(res.data || []);
+      form.reset();
     } catch (error) {
-      toast.error(error.response?.data?.message || t('admin.messages.toggle_course_failed'));
+      toast.error(error.response?.data?.message || t('admin.doctors.add_course_failed'));
     }
   };
 
-  const filteredDoctors = doctors.filter(d => 
-    d.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+  const filteredDoctors = doctors.filter(d =>
+    d.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     d.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
-    <div className="space-y-8 sm:space-y-16 lg:space-y-24 animate-in fade-in duration-700 pb-20 max-w-[1500px] mx-auto w-full px-4 sm:px-0 text-start relative z-10">
-      {/* Background Decor */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[-10%] inset-inline-end-[-5%] w-[50vw] h-[50vw] bg-[#8b5cf6]/5 blur-[120px] rounded-full"></div>
-        <div className="absolute bottom-[-10%] inset-inline-start-[-5%] w-[40vw] h-[40vw] bg-[#2cfc7d]/3 blur-[100px] rounded-full"></div>
-      </div>
-
-      {/* Hero Section */}
-      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 sm:gap-10 relative z-10 text-start">
-        <div className="space-y-2 sm:space-y-4 max-w-2xl">
-          <div className="flex items-center gap-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-[#2cfc7d]"></div>
-            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 dark:text-white/30">{t('admin.sidebar.tabs.doctors')}</span>
-          </div>
-          <h1 className={`text-[clamp(2.5rem,6vw,5.5rem)] font-black leading-[0.95] tracking-tighter uppercase text-gray-900 dark:text-white ${i18n.language === 'ar' ? 'font-arabic' : ''}`}>
+    <div className="space-y-6 pb-10 max-w-[1400px] mx-auto w-full px-4">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             {t('admin.doctors.title')}
           </h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            {doctors.length} {t('admin.doctors.active_count')}
+          </p>
         </div>
-
-        <div className="bg-gradient-to-br from-[#8b5cf6] to-[#6d28d9] text-white p-6 sm:p-8 rounded-[2.5rem] shadow-lg shadow-purple-600/20 flex flex-col justify-between relative overflow-hidden group min-w-[280px] w-full lg:w-auto">
-          <div className="absolute inset-inline-end-0 top-0 w-32 h-32 bg-white/10 hidden rounded-full translate-x-1/2 -translate-y-1/2 group-hover:scale-150 transition-transform duration-700"></div>
-          <div className="flex justify-between items-start relative z-10">
-            <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
-              <Users className="w-5 h-5" />
-            </div>
-            <span className="text-[10px] font-black uppercase tracking-widest bg-black/10 px-3 py-1 rounded-full">{t('admin.doctors.faculty_grid')}</span>
-          </div>
-          <div className="mt-4 relative z-10 text-start">
-            <p className="text-5xl sm:text-6xl font-black tracking-tighter">{doctors.length}</p>
-            <p className="text-[10px] font-black uppercase tracking-widest opacity-60 mt-1">{t('admin.doctors.authorized_entities')}</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Search & Actions Bar */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-8 relative z-20">
-        <div className="md:col-span-2 relative group">
-           <Search className="absolute inset-inline-start-6 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-focus-within:text-[#8b5cf6] transition-colors" />
-           <input 
-             type="text"
-             placeholder={t('common.search')}
-             value={searchTerm}
-             onChange={(e) => setSearchTerm(e.target.value)}
-             className="w-full bg-white dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 rounded-[2rem] ps-14 sm:ps-16 pe-6 sm:pe-8 py-4.5 sm:py-6 text-gray-900 dark:text-white font-black text-sm sm:text-lg tracking-tight uppercase focus:ring-4 focus:ring-[#8b5cf6]/10 outline-none transition-all shadow-inner"
-           />
-        </div>
-        
-        <button
-          onClick={() => handleOpenModal('add')}
-          className="group bg-black dark:bg-white text-white dark:text-black rounded-[2.5rem] p-6 sm:p-8 flex items-center justify-between gap-4 hover:scale-[1.02] active:scale-95 transition-all shadow-2xl relative overflow-hidden text-start w-full"
-        >
-          <div className="absolute inset-0 bg-gradient-to-br from-[#8b5cf6]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-          <div className="flex items-center gap-4 sm:gap-6 relative z-10 text-start">
-            <div className="w-12 h-12 sm:w-14 sm:h-14 bg-white/10 dark:bg-black/10 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-90 transition-all duration-700">
-              <Plus className="w-6 h-6 sm:w-7 sm:h-7" />
-            </div>
-            <div>
-               <span className="block text-lg sm:text-xl font-black uppercase tracking-tighter leading-none">{t('admin.doctors.add_instructor')}</span>
-               <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.3em] opacity-40 mt-1 block">{t('admin.doctors.identity_registration')}</span>
-            </div>
-          </div>
-          <ChevronRight className={`w-5 h-5 sm:w-6 sm:h-6 opacity-20 group-hover:opacity-100 group-hover:translate-x-2 transition-all ${i18n.language === 'ar' ? 'rotate-180 group-hover:-translate-x-2' : ''}`} />
+        <button onClick={() => { setSelectedDoctor(null); setFormData({ name: '', email: '', password: '', department: '' }); setModalType('add'); }}
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#059669] hover:bg-[#047857] text-white text-sm font-medium rounded-lg transition-colors">
+          <Plus className="w-4 h-4" />
+          {t('admin.doctors.add_doctor')}
         </button>
       </div>
 
-
-      {/* Main Content: Table Matrix */}
-      <div className="bg-white dark:bg-white/[0.01] border border-gray-100 dark:border-white/5 rounded-[3rem] overflow-hidden shadow-sm relative group">
-        <div className="overflow-x-auto custom-scrollbar relative z-10">
-          <table className="w-full text-start border-collapse">
-            <thead>
-              <tr className="bg-gray-50/50 dark:bg-white/[0.01]">
-                <th className="py-8 px-10 text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-[0.3em] text-start">{t('admin.doctors.name')}</th>
-                <th className="py-8 px-10 text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-[0.3em] text-start">{t('admin.doctors.email')}</th>
-                <th className="py-8 px-10 text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-[0.3em] text-center">{t('admin.doctors.department')}</th>
-                <th className="py-8 px-10 text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-[0.3em] text-center">{t('admin.doctors.assigned_courses')}</th>
-                <th className="py-8 px-10 text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-[0.3em] text-inline-end">{t('admin.doctors.actions')}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-white/[0.03]">
-              {loading ? (
-                 <tr>
-                    <td colSpan="5" className="py-40 text-center">
-                        <Activity className="w-16 h-16 text-[#8b5cf6] animate-spin mx-auto opacity-20" />
-                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mt-6">{t('admin.doctors.scanning')}</p>
-                    </td>
-                 </tr>
-              ) : filteredDoctors.length === 0 ? (
-                <tr>
-                    <td colSpan="5" className="text-center py-40">
-                        <div className="flex flex-col items-center gap-6 opacity-20 grayscale">
-                            <GraduationCap className="w-24 h-24 text-gray-400" />
-                            <p className="text-gray-500 font-black uppercase tracking-[0.3em] text-xs">{t('admin.doctors.no_doctors')}</p>
-                        </div>
-                    </td>
-                </tr>
-              ) : (
-                filteredDoctors.map((doctor) => (
-                  <tr 
-                    key={doctor.id}
-                    className="group/row hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all duration-700"
-                  >
-                    <td className="py-8 px-10 text-start">
-                      <div className="flex items-center gap-6 text-start">
-                        <div className="w-16 h-16 bg-[#8b5cf6]/10 rounded-2xl flex items-center justify-center font-black text-2xl group-hover/row:bg-white/20 group-hover/row:text-white transition-all duration-700">
-                          {doctor.name?.charAt(0)}
-                        </div>
-                        <div className="min-w-0 text-start">
-                            <h4 className="font-black tracking-tighter text-2xl uppercase leading-none group-hover/row:text-white transition-colors">{doctor.name}</h4>
-                            <p className="text-[9px] font-black uppercase tracking-[0.3em] opacity-40 group-hover/row:opacity-60 transition-opacity mt-2">{t('admin.doctors.identifier_protocol')}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-8 px-10 text-start">
-                        <div className="flex items-center gap-3 font-black text-[11px] tracking-widest opacity-60 group-hover/row:opacity-100 transition-opacity">
-                            <Mail className="w-4 h-4" />
-                            {doctor.email}
-                        </div>
-                    </td>
-                    <td className="py-8 px-10 text-center">
-                      <span className="px-4 py-2 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 text-[10px] font-black uppercase tracking-widest group-hover/row:bg-white/20 transition-colors">
-                        {doctor.department || 'CORE_FACULTY'}
-                      </span>
-                    </td>
-                    <td className="py-8 px-10 text-center">
-                      <button 
-                        onClick={() => handleOpenModal('courses', doctor)}
-                        className="bg-[#8b5cf6]/10 text-[#8b5cf6] border border-[#8b5cf6]/20 px-6 py-3 rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.2em] transition-all hover:scale-[1.05] active:scale-95 group-hover/row:bg-white group-hover/row:text-black group-hover/row:border-white"
-                      >
-                        {t('admin.doctors.courses_count', { count: doctor.courses_count })}
-                      </button>
-                    </td>
-                    <td className="py-8 px-10 text-inline-end">
-                      <div className="flex justify-inline-end gap-3 opacity-0 group-hover/row:opacity-100 transition-all scale-90 group-hover/row:scale-100">
-                        <button onClick={() => handleOpenModal('edit', doctor)} className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white/10 border border-white/20 text-white dark:text-black transition-all">
-                          <Edit3 className="w-5 h-5" />
-                        </button>
-                        <button onClick={() => handleDelete(doctor.id)} className="w-12 h-12 flex items-center justify-center rounded-2xl bg-rose-500/20 border border-rose-500/20 text-rose-500 hover:bg-rose-500 hover:text-white transition-all">
-                          <Trash2 className="w-5 h-5" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+      {/* Search */}
+      <div className="relative max-w-md">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder={t('admin.doctors.search_placeholder')}
+          className="w-full bg-white dark:bg-[#0d0d14] border border-gray-200 dark:border-gray-700 rounded-lg pl-9 pr-3 py-2 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-[#059669]/30 focus:border-[#059669] outline-none" />
       </div>
 
-      {/* Add/Edit Cinematic Modal */}
-      <>
-      {(modalType === 'add' || modalType === 'edit') && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
-          <div onClick={handleCloseModal} className="absolute inset-0 bg-gray-950/40 dark:bg-black/80 backdrop-blur-sm" />
-          <div 
-            className="bg-white dark:bg-[#0c0c0e] border border-gray-100 dark:border-white/5 rounded-[3.5rem] p-10 lg:p-12 w-full max-w-xl shadow-2xl relative overflow-hidden z-10 text-start" 
-            onClick={e => e.stopPropagation()}
-          >
-            {/* Modal Background Glow */}
-            <div className="absolute top-0 inset-inline-end-0 w-80 h-80 bg-purple-500/5 hidden rounded-full pointer-events-none"></div>
-
-            <div className="flex items-center justify-between mb-12 pb-8 border-b border-gray-100 dark:border-white/5 relative z-10">
-                <div className="flex items-center gap-6">
-                  <div className="w-16 h-16 bg-[#8b5cf6]/10 dark:bg-[#8b5cf6]/20 rounded-2xl flex items-center justify-center border border-[#8b5cf6]/20 shadow-inner text-[#8b5cf6] dark:text-[#d4a3ff] group-hover:scale-110 transition-transform duration-500">
-                    <UserCircle className="w-8 h-8" />
+      {/* Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {filteredDoctors.length === 0 ? (
+          <div className="col-span-full py-16 text-center border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl">
+            <UserCircle className="w-12 h-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
+            <p className="text-sm text-gray-400">{t('admin.doctors.no_doctors')}</p>
+          </div>
+        ) : (
+          filteredDoctors.map((doctor) => (
+            <div key={doctor.id} className="bg-white dark:bg-[#0d0d14] border border-gray-200 dark:border-gray-700 rounded-xl p-5">
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+                    <UserCircle className="w-5 h-5 text-gray-400" />
                   </div>
                   <div>
-                    <h3 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight uppercase">
-                        {modalType === 'add' ? t('admin.doctors.add_new_instructor') : t('admin.doctors.edit_instructor')}
-                    </h3>
-                    <p className="text-gray-400 text-[10px] font-black uppercase tracking-widest mt-1">{t('admin.doctors.identity_registration')}</p>
+                    <h3 className="text-sm font-semibold text-gray-900 dark:text-white">{doctor.name}</h3>
+                    <p className="text-xs text-gray-400">{doctor.email}</p>
                   </div>
                 </div>
-                <button onClick={handleCloseModal} className="w-12 h-12 flex items-center justify-center bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 text-gray-500 rounded-2xl hover:text-rose-600 transition-[color,background-color,border-color,transform,opacity] shadow-sm">
-                  <X className="w-6 h-6" />
+              </div>
+              <div className="flex flex-wrap gap-1.5 mb-3">
+                <span className="px-2 py-0.5 rounded text-xs bg-gray-100 dark:bg-gray-800 text-gray-500">{doctor.department || '—'}</span>
+              </div>
+              <div className="flex gap-1.5 pt-3 border-t border-gray-100 dark:border-gray-800">
+                <button onClick={() => openEditModal(doctor)} className="flex-1 px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-lg transition-colors">
+                  <Edit3 className="w-3.5 h-3.5 inline mr-1" />{t('common.edit')}
                 </button>
+                <button onClick={() => openCoursesModal(doctor)} className="flex-1 px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-[#059669] hover:bg-[#059669]/10 rounded-lg transition-colors">
+                  {t('admin.doctors.courses')}
+                </button>
+                <button onClick={() => handleDelete(doctor.id, doctor.name)} className="px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors">
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
-            
-            <form onSubmit={handleSubmit} className="space-y-8 relative z-10">
-              <div className="space-y-3">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('admin.doctors.full_name')} *</label>
-                <div className="relative group/name">
-                    <UserCircle className="absolute inset-inline-start-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/name:text-[#8b5cf6] transition-colors" />
-                    <input
-                        type="text"
-                        required
-                        value={formData.name}
-                        onChange={e => setFormData({...formData, name: e.target.value})}
-                        className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl ps-14 pe-6 py-5 font-black focus:ring-4 focus:ring-[#8b5cf6]/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner uppercase tracking-widest text-sm"
-                        placeholder="John Doe"
-                    />
+          ))
+        )}
+      </div>
+
+      {/* Add/Edit Modal */}
+      {(modalType === 'add' || modalType === 'edit') && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div onClick={() => setModalType(null)} className="absolute inset-0 bg-black/40" />
+          <div className="bg-white dark:bg-[#0c0c0e] border border-gray-200 dark:border-gray-700 rounded-xl w-full max-w-md relative z-10 p-6" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-5 pb-4 border-b border-gray-200 dark:border-gray-700">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-[#059669]/10 rounded-lg flex items-center justify-center text-[#059669]">
+                  {modalType === 'edit' ? <Edit3 className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
                 </div>
+                <h3 className="text-base font-semibold text-gray-900 dark:text-white">
+                  {modalType === 'edit' ? t('admin.doctors.edit_doctor') : t('admin.doctors.add_doctor')}
+                </h3>
               </div>
-              <div className="space-y-3">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('admin.doctors.email_label')} *</label>
-                <div className="relative group/email">
-                    <Mail className="absolute inset-inline-start-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/email:text-[#8b5cf6] transition-colors" />
-                    <input
-                        type="email"
-                        required
-                        value={formData.email}
-                        onChange={e => setFormData({...formData, email: e.target.value})}
-                        className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl ps-14 pe-6 py-5 font-black focus:ring-4 focus:ring-[#8b5cf6]/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner font-mono text-xs tracking-wider"
-                        placeholder="doctor@academy.edu"
-                    />
-                </div>
+              <button onClick={() => setModalType(null)} className="w-8 h-8 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center">
+                <X className="w-4 h-4 text-gray-400" />
+              </button>
+            </div>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-gray-500">{t('admin.doctors.name')} *</label>
+                <input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="w-full bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#059669]/30 focus:border-[#059669] outline-none" required />
               </div>
-              <div className="space-y-3">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('admin.doctors.password')}</label>
-                <div className="relative group/pass">
-                    <Shield className="absolute inset-inline-start-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/pass:text-[#8b5cf6] transition-colors" />
-                    <input
-                        type="password"
-                        required={modalType === 'add'}
-                        value={formData.password}
-                        onChange={e => setFormData({...formData, password: e.target.value})}
-                        placeholder={modalType === 'edit' ? t('admin.doctors.password_hint') : "••••••••"}
-                        className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl ps-14 pe-6 py-5 font-black focus:ring-4 focus:ring-[#8b5cf6]/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner placeholder:text-[9px] placeholder:font-black uppercase placeholder:tracking-[0.2em]"
-                    />
-                </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-gray-500">{t('admin.doctors.email')} *</label>
+                <input type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} className="w-full bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#059669]/30 focus:border-[#059669] outline-none" required />
               </div>
-              <div className="space-y-3">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('admin.doctors.department')}</label>
-                <div className="relative group/dept">
-                    <Building2 className="absolute inset-inline-start-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/dept:text-[#8b5cf6] transition-colors" />
-                    <input
-                        type="text"
-                        value={formData.department}
-                        onChange={e => setFormData({...formData, department: e.target.value})}
-                        className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-2xl ps-14 pe-6 py-5 font-black focus:ring-4 focus:ring-[#8b5cf6]/10 outline-none transition-[color,background-color,border-color,transform,opacity] shadow-inner uppercase tracking-widest text-[11px]"
-                        placeholder="e.g. Computer Science"
-                    />
-                </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-gray-500">{t('admin.doctors.password')}</label>
+                <input type="text" value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} className="w-full bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#059669]/30 focus:border-[#059669] outline-none" placeholder={modalType === 'edit' ? t('admin.doctors.password_edit') : ''} />
               </div>
-              
-              <div className="flex gap-6 pt-12 border-t border-gray-100 dark:border-white/5">
-                <button type="submit" className="flex-1 bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-black py-5 rounded-[2.5rem] shadow-xl shadow-purple-500/20 transition-[color,background-color,border-color,transform,opacity] hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-3 group/save">
-                    <CheckCircle className="w-6 h-6 group-hover/save:scale-110 transition-transform" />
-                    <span className="uppercase tracking-widest text-xs">
-                        {modalType === 'add' ? t('admin.doctors.create_instructor') : t('admin.doctors.save_changes')}
-                    </span>
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-gray-500">{t('admin.doctors.department')}</label>
+                <input type="text" value={formData.department} onChange={(e) => setFormData({ ...formData, department: e.target.value })} className="w-full bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#059669]/30 focus:border-[#059669] outline-none" />
+              </div>
+              <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <button type="submit" disabled={loading} className="px-4 py-2 bg-[#059669] hover:bg-[#047857] text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50">
+                  {loading ? '...' : (modalType === 'edit' ? t('common.save') : t('admin.doctors.add_doctor'))}
                 </button>
-                <button type="button" onClick={handleCloseModal} className="px-12 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 font-black py-5 rounded-[2.5rem] transition-[color,background-color,border-color,transform,opacity] uppercase tracking-widest text-xs">
-                    {t('common.cancel')}
+                <button type="button" onClick={() => setModalType(null)} className="px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg transition-colors">
+                  {t('common.cancel')}
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
-      </>
 
-      {/* Courses Assignment Cinematic Modal */}
-      <>
+      {/* Courses Modal */}
       {modalType === 'courses' && selectedDoctor && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
-          <div onClick={handleCloseModal} className="absolute inset-0 bg-gray-950/40 dark:bg-black/80 backdrop-blur-sm" />
-          <div 
-            className="bg-white dark:bg-[#0c0c0e] border border-gray-100 dark:border-white/5 rounded-[3.5rem] p-10 lg:p-12 w-full max-w-2xl shadow-2xl relative overflow-hidden z-10 max-h-[85vh] flex flex-col text-start" 
-            onClick={e => e.stopPropagation()}
-          >
-            {/* Modal Background Glow */}
-            <div className="absolute top-0 inset-inline-end-0 w-80 h-80 bg-purple-500/10 hidden rounded-full pointer-events-none"></div>
-
-            <div className="flex items-center justify-between mb-10 pb-8 border-b border-gray-100 dark:border-white/5 shrink-0 relative z-10">
-                <div className="flex items-center gap-6">
-                  <div className="w-16 h-16 bg-[#8b5cf6]/10 dark:bg-[#8b5cf6]/20 rounded-[1.5rem] flex items-center justify-center border border-[#8b5cf6]/20 shadow-inner text-[#8b5cf6] dark:text-[#d4a3ff] group-hover:scale-110 transition-transform duration-500">
-                    <Layers className="w-8 h-8" />
-                  </div>
-                  <div>
-                    <h3 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight uppercase">{t('admin.doctors.assign_courses')}</h3>
-                    <p className="text-[#2cfc7d] text-[10px] font-black uppercase tracking-widest mt-1 italic">{t('admin.doctors.instructor_prefix')} {selectedDoctor.name}</p>
-                  </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div onClick={() => setModalType(null)} className="absolute inset-0 bg-black/40" />
+          <div className="bg-white dark:bg-[#0c0c0e] border border-gray-200 dark:border-gray-700 rounded-xl w-full max-w-lg relative z-10 p-6" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-5 pb-4 border-b border-gray-200 dark:border-gray-700">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-[#059669]/10 rounded-lg flex items-center justify-center text-[#059669]">
+                  <Mail className="w-5 h-5" />
                 </div>
-                <button onClick={handleCloseModal} className="w-12 h-12 flex items-center justify-center bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 text-gray-500 rounded-2xl hover:text-[#8b5cf6] transition-[color,background-color,border-color,transform,opacity] shadow-sm">
-                  <X className="w-6 h-6" />
-                </button>
+                <div>
+                  <h3 className="text-base font-semibold text-gray-900 dark:text-white">{t('admin.doctors.courses')}</h3>
+                  <p className="text-xs text-gray-400">{selectedDoctor.name}</p>
+                </div>
+              </div>
+              <button onClick={() => setModalType(null)} className="w-8 h-8 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center">
+                <X className="w-4 h-4 text-gray-400" />
+              </button>
             </div>
-            
-            <div className="flex-1 overflow-y-auto pe-4 space-y-6 custom-scrollbar relative z-10">
-              {courses.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-32 opacity-30 grayscale text-center">
-                    <Box className="w-16 h-16 text-gray-400 mb-6" />
-                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500">{t('admin.doctors.void_registry')}</p>
-                  </div>
+
+            <form onSubmit={addCourseToDoctor} className="flex gap-2 mb-4">
+              <select name="courseId" className="flex-1 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#059669]/30 outline-none">
+                <option value="">{t('admin.doctors.select_course')}</option>
+                {courses.filter(c => !doctorCourses.find(dc => dc.id === c.id)).map(c => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+              <button type="submit" className="px-3 py-2 bg-[#059669] hover:bg-[#047857] text-white text-sm font-medium rounded-lg transition-colors">
+                <Plus className="w-4 h-4" />
+              </button>
+            </form>
+
+            <div className="space-y-2 max-h-[300px] overflow-y-auto">
+              {doctorCourses.length === 0 ? (
+                <p className="text-sm text-gray-400 text-center py-8">{t('admin.doctors.no_courses_assigned')}</p>
               ) : (
-                courses.map(course => (
-                  <div key={course.id} className="group flex items-center justify-between p-8 bg-gray-50 dark:bg-white/[0.01] border border-gray-100 dark:border-white/5 rounded-[2.5rem] hover:border-[#8b5cf6]/30 hover:bg-[#8b5cf6]/[0.02] transition-[color,background-color,border-color,transform,opacity] duration-500 hover:shadow-xl hover:shadow-purple-500/5">
-                    <div className="flex items-center gap-6 min-w-0">
-                      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center border transition-[color,background-color,border-color,transform,opacity] duration-700 shadow-inner group-hover:scale-110 ${
-                          doctorCourses.includes(course.id) 
-                          ? 'bg-[#8b5cf6] text-white border-[#8b5cf6] shadow-purple-500/20' 
-                          : 'bg-white dark:bg-black/40 border-gray-100 dark:border-white/10 text-gray-400'
-                      }`}>
-                          <BookOpen className="w-6 h-6" />
-                      </div>
-                      <div className="min-w-0">
-                          <h4 className="font-black text-gray-900 dark:text-white tracking-tight uppercase text-lg group-hover:text-[#8b5cf6] dark:group-hover:text-[#d4a3ff] transition-colors truncate">{course.name}</h4>
-                          <div className="flex items-center gap-3 mt-1.5 text-[9px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-widest italic">
-                              <span>{t('admin.doctors.semester')}: {course.semester}</span>
-                              <div className="w-1 h-1 bg-gray-200 dark:bg-slate-800 rounded-full"></div>
-                              <span>{t('admin.doctors.dept_code')}: {course.department_id}</span>
-                          </div>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => handleToggleCourse(course.id)}
-                      className={`px-10 py-4.5 rounded-[1.5rem] font-black text-[10px] uppercase tracking-[0.2em] transition-[color,background-color,border-color,transform,opacity] hover:scale-[1.02] active:scale-95 shadow-xl shrink-0 ${
-                        doctorCourses.includes(course.id)
-                          ? 'bg-rose-500 text-white shadow-rose-500/20 border border-rose-600'
-                          : 'bg-[#8b5cf6] hover:bg-[#7c3aed] text-white shadow-purple-500/20 border border-[#8b5cf6]'
-                      }`}
-                    >
-                      {doctorCourses.includes(course.id) ? t('admin.doctors.remove') : t('admin.doctors.assign')}
+                doctorCourses.map(c => (
+                  <div key={c.id} className="flex items-center justify-between px-3 py-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <span className="text-sm text-gray-900 dark:text-white">{c.name}</span>
+                    <button onClick={() => removeCourseFromDoctor(selectedDoctor.id, c.id)} className="text-red-400 hover:text-red-500 transition-colors">
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
                 ))
@@ -462,19 +290,6 @@ const DoctorManager = () => {
           </div>
         </div>
       )}
-      </>
-
-      <style>{`
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { 
-          background: rgba(139, 92, 246, 0.1); 
-          border-radius: 10px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(139, 92, 246, 0.2); }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-      `}</style>
     </div>
   );
 };

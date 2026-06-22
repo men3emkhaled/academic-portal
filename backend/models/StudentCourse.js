@@ -7,15 +7,26 @@ class StudentCourse {
     return result.rows;
   }
   static async getByStudentId(studentId) {
-    const result = await db.query(`SELECT sc.*, c.name as course_name, c.semester, c.max_score FROM student_courses sc JOIN courses c ON sc.course_id=c.id WHERE sc.student_id=$1 ORDER BY c.semester, c.name`, [studentId]);
+    const result = await db.query(`SELECT sc.*, c.name as course_name, c.semester, c.max_score FROM student_courses sc JOIN courses c ON sc.course_id=c.id WHERE sc.student_id=$1 AND sc.status='active' ORDER BY c.semester, c.name`, [studentId]);
     return result.rows;
   }
   static async getByCourseId(courseId) {
     const result = await db.query(`SELECT sc.*, s.name as student_name FROM student_courses sc JOIN students s ON sc.student_id=s.id WHERE sc.course_id=$1 ORDER BY s.name`, [courseId]);
     return result.rows;
   }
-  static async enroll(studentId, courseId, progress=0, status='active') {
-    const result = await db.query(`INSERT INTO student_courses (student_id, course_id, progress_percentage, status) VALUES ($1,$2,$3,$4) ON CONFLICT (student_id,course_id) DO UPDATE SET progress_percentage=EXCLUDED.progress_percentage, status=EXCLUDED.status, updated_at=CURRENT_TIMESTAMP RETURNING *`, [studentId, courseId, progress, status]);
+  static async enroll(studentId, courseId, progress=0, status='active', instructorType=null, instructorId=null) {
+    const result = await db.query(
+      `INSERT INTO student_courses (student_id, course_id, progress_percentage, status, instructor_type, instructor_id)
+       VALUES ($1,$2,$3,$4,$5,$6)
+       ON CONFLICT (student_id,course_id) DO UPDATE SET
+         progress_percentage=EXCLUDED.progress_percentage,
+         status=EXCLUDED.status,
+         instructor_type=COALESCE(EXCLUDED.instructor_type, student_courses.instructor_type),
+         instructor_id=COALESCE(EXCLUDED.instructor_id, student_courses.instructor_id),
+         updated_at=CURRENT_TIMESTAMP
+       RETURNING *`,
+      [studentId, courseId, progress, status, instructorType, instructorId]
+    );
     return result.rows[0];
   }
   static async updateProgress(studentId, courseId, progress) {
@@ -27,7 +38,7 @@ class StudentCourse {
     return result.rows[0];
   }
   static async unenroll(studentId, courseId) {
-    await db.query(`DELETE FROM student_courses WHERE student_id=$1 AND course_id=$2`, [studentId, courseId]);
+    await db.query(`UPDATE student_courses SET status='suspended', updated_at=CURRENT_TIMESTAMP WHERE student_id=$1 AND course_id=$2`, [studentId, courseId]);
     return true;
   }
   static async bulkEnroll(enrollments) {
@@ -49,7 +60,7 @@ class StudentCourse {
       `SELECT c.*
        FROM courses c
        WHERE c.id NOT IN (
-         SELECT course_id FROM student_courses WHERE student_id = $1
+         SELECT course_id FROM student_courses WHERE student_id = $1 AND status = 'active'
        )
        ORDER BY c.semester, c.name`,
       [studentId]

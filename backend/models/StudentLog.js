@@ -1,4 +1,5 @@
 const db = require('../config/database');
+const logger = require('../utils/logger');
 
 class StudentLog {
   static async initializeTable() {
@@ -15,9 +16,9 @@ class StudentLog {
       `);
       await db.query(`CREATE INDEX IF NOT EXISTS idx_student_logins_student_id ON student_logins(student_id)`);
       await db.query(`CREATE INDEX IF NOT EXISTS idx_student_logins_created_at ON student_logins(created_at DESC)`);
-      console.log('✅ student_logins table ready');
+      logger.info('student_logins table ready');
     } catch (error) {
-      console.error('❌ Error creating student_logins table:', error);
+      logger.error({ err: error.message }, 'Error creating student_logins table');
     }
   }
 
@@ -29,7 +30,7 @@ class StudentLog {
         [studentId, studentName, method, ipAddress]
       );
     } catch (error) {
-      console.error('⚠️ Error saving student login log:', error.message);
+      logger.error({ err: error.message }, 'Error saving student login log');
     }
   }
 
@@ -52,7 +53,7 @@ class StudentLog {
         await this.logLogin(studentId, studentName, 'Auto-Login', ipAddress);
       }
     } catch (error) {
-      console.error('⚠️ Error in logDailyVisit:', error.message);
+      logger.error({ err: error.message }, 'Error in logDailyVisit');
     }
   }
 

@@ -5,7 +5,7 @@ try {
   xss = (s) => s.replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
 }
 
-const OLLAMA_MODEL = 'qwen3-vl:4b';
+const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'qwen3-vl:4b';
 const OLLAMA_HOSTS = process.env.OLLAMA_HOST
   ? [process.env.OLLAMA_HOST]
   : ['http://127.0.0.1:11434', 'http://localhost:11434', 'http://host.docker.internal:11434'];
@@ -18,12 +18,39 @@ const systemPrompt = `أنت مساعد ذكي لطلاب جامعة الزقا�
 4. إذا كتب المستخدم بالإنجليزي، رد بالإنجليزي.
 5. للأسئلة البسيطة والتحية، قلل التفكير جداً وجاوب فوراً باختصار.`;
 
+const contentToString = (content) => {
+  if (Array.isArray(content)) {
+    return content
+      .filter(p => p.type === 'text')
+      .map(p => p.text)
+      .join('\n');
+  }
+  return content;
+};
+
+const normalizeContent = (msg) => {
+  if (!Array.isArray(msg.content)) return msg;
+  const textParts = [];
+  const images = [];
+  for (const part of msg.content) {
+    if (part.type === 'text') {
+      textParts.push(part.text);
+    } else if (part.type === 'image_url') {
+      const url = part.image_url?.url || '';
+      const base64 = url.replace(/^data:image\/\w+;base64,/, '');
+      if (base64) images.push(base64);
+    }
+  }
+  return { ...msg, content: textParts.join('\n').trim() || ' ', images: images.length ? images : undefined };
+};
+
 const buildOllamaMessages = (messages) => {
+  const normalized = messages.map(normalizeContent);
   if (OLLAMA_MODEL.toLowerCase().includes('internvl')) {
-    const last = messages[messages.length - 1];
+    const last = normalized[normalized.length - 1];
     return [{ role: 'user', content: `${systemPrompt}\n\n${last.content}` }];
   }
-  return [{ role: 'system', content: systemPrompt }, ...messages];
+  return [{ role: 'system', content: systemPrompt }, ...normalized];
 };
 
 const extractThinking = (content) => {
@@ -50,7 +77,10 @@ const getRealResponse = async (messages) => {
         body: JSON.stringify({ model: OLLAMA_MODEL, messages, stream: false }),
       });
       clearTimeout(timer);
-      if (!res.ok) throw new Error(`Ollama returned ${res.status}`);
+      if (!res.ok) {
+        const errBody = await res.text().catch(() => '');
+        throw new Error(`Ollama returned ${res.status}: ${errBody}`);
+      }
       const data = await res.json();
       const { response, thinking } = extractThinking(data.message?.content || '');
       const modelThinking = data.message?.thinking || '';
@@ -101,7 +131,8 @@ const chatStream = async (req, res) => {
       if (usedHost) break;
       try {
         const controller = new AbortController();
-        req.on('close', () => controller.abort());
+        const onClose = () => controller.abort();
+        req.on('close', onClose);
 
         const ollamaRes = await fetch(`${baseUrl}/api/chat`, {
           method: 'POST',
@@ -110,69 +141,79 @@ const chatStream = async (req, res) => {
           body: JSON.stringify({ model: OLLAMA_MODEL, messages: ollamaMessages, stream: true }),
         });
 
-        if (!ollamaRes.ok) throw new Error(`Ollama returned ${ollamaRes.status}`);
+        if (!ollamaRes.ok) {
+          const errBody = await ollamaRes.text().catch(() => '');
+          throw new Error(`Ollama returned ${ollamaRes.status}: ${errBody}`);
+        }
 
         usedHost = true;
         let fullContent = '';
         let fullThinking = '';
         let insideThink = false;
+
+        if (!ollamaRes.body) throw new Error('Ollama returned empty response body');
+
         const reader = ollamaRes.body.getReader();
         const decoder = new TextDecoder();
         let buffer = '';
 
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
 
-          buffer += decoder.decode(value, { stream: true });
-          const parts = buffer.split('\n');
-          buffer = parts.pop() || '';
+            buffer += decoder.decode(value, { stream: true });
+            const parts = buffer.split('\n');
+            buffer = parts.pop() || '';
 
-          for (const part of parts) {
-            if (!part.trim()) continue;
-            let json;
-            try { json = JSON.parse(part); } catch { continue; }
+            for (const part of parts) {
+              if (!part.trim()) continue;
+              let json;
+              try { json = JSON.parse(part); } catch { continue; }
 
-            const contentToken = json.message?.content || '';
-            const thinkingToken = json.message?.thinking || '';
+              const contentToken = json.message?.content || '';
+              const thinkingToken = json.message?.thinking || '';
 
-            if (thinkingToken) {
-              fullThinking += thinkingToken;
-              res.write(`data: ${JSON.stringify({ thinking: thinkingToken })}\n\n`);
-            }
+              if (thinkingToken) {
+                fullThinking += thinkingToken;
+                res.write(`data: ${JSON.stringify({ thinking: thinkingToken })}\n\n`);
+              }
 
-            if (!contentToken) continue;
+              if (!contentToken) continue;
 
-            let toSend = '';
-            let remaining = contentToken;
+              let toSend = '';
+              let remaining = contentToken;
 
-            while (remaining.length > 0) {
-              if (insideThink) {
-                const end = remaining.indexOf('</think>');
-                if (end !== -1) {
-                  insideThink = false;
-                  remaining = remaining.slice(end + '</think>'.length);
+              while (remaining.length > 0) {
+                if (insideThink) {
+                  const end = remaining.indexOf('</think>');
+                  if (end !== -1) {
+                    insideThink = false;
+                    remaining = remaining.slice(end + '</think>'.length);
+                  } else {
+                    remaining = '';
+                  }
                 } else {
-                  remaining = '';
-                }
-              } else {
-                const start = remaining.indexOf('<think>');
-                if (start !== -1) {
-                  toSend += remaining.slice(0, start);
-                  insideThink = true;
-                  remaining = remaining.slice(start + '<think>'.length);
-                } else {
-                  toSend += remaining;
-                  remaining = '';
+                  const start = remaining.indexOf('<think>');
+                  if (start !== -1) {
+                    toSend += remaining.slice(0, start);
+                    insideThink = true;
+                    remaining = remaining.slice(start + '<think>'.length);
+                  } else {
+                    toSend += remaining;
+                    remaining = '';
+                  }
                 }
               }
-            }
 
-            if (toSend) {
-              fullContent += toSend;
-              res.write(`data: ${JSON.stringify({ token: toSend })}\n\n`);
+              if (toSend) {
+                fullContent += toSend;
+                res.write(`data: ${JSON.stringify({ token: toSend })}\n\n`);
+              }
             }
           }
+        } finally {
+          req.removeListener('close', onClose);
         }
 
         const { response, thinking } = extractThinking(fullContent);
@@ -180,6 +221,10 @@ const chatStream = async (req, res) => {
         res.end();
         return;
       } catch (err) {
+        if (err.name === 'AbortError') {
+          if (!res.headersSent) res.end();
+          return;
+        }
         lastError = err;
         console.error('Stream error on host:', err.message);
       }

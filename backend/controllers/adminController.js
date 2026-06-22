@@ -28,39 +28,48 @@ const login = async (req, res) => {
         
         // ✅ Security: Use bcrypt for constant-time password comparison
         const adminHash = await getAdminPasswordHash();
-        if (username === adminUsername && adminHash && await bcrypt.compare(password, adminHash)) {
-            const token = generateToken('admin_user');
-            // ✅ تسجيل دخول الـ Root Admin
-            logAdminLogin(req, 'admin_user', 'Root Admin', 'admin');
-            return res.json({ token, message: 'Login successful', role: 'admin' });
+
+        // Check super admin first
+        if (username === adminUsername) {
+            if (adminHash && await bcrypt.compare(password, adminHash)) {
+                const token = generateToken('admin_user');
+                logAdminLogin(req, 'admin_user', 'Root Admin', 'admin');
+                return res.json({ token, message: 'Login successful', role: 'admin' });
+            }
+            return res.status(401).json({ message: 'incorrect_password' });
         }
         
         // If not super admin, check if it's an assistant student
         const student = await Student.findByUsername(username);
-        if (student && (student.role === 'assistant' || student.role === 'admin')) {
-            const isValid = await Student.verifyPassword(student, password);
-            if (isValid) {
-                const token = jwt.sign(
-                  { 
-                    id: student.id, 
-                    role: student.role,
-                    permissions: student.permissions || [] 
-                  },
-                  process.env.JWT_SECRET,
-                  { expiresIn: '24h' }
-                );
-                // ✅ تسجيل دخول المساعد/الأدمن
-                logAdminLogin(req, student.id, student.name, student.role);
-                return res.json({ 
-                  token, 
-                  message: 'Login successful', 
-                  role: student.role, 
-                  permissions: student.permissions 
-                });
-            }
+        if (!student) {
+            return res.status(401).json({ message: 'username_not_found' });
         }
         
-        return res.status(401).json({ message: 'Invalid credentials or access denied' });
+        if (student.role !== 'assistant' && student.role !== 'admin') {
+            return res.status(401).json({ message: 'access_denied' });
+        }
+        
+        const isValid = await Student.verifyPassword(student, password);
+        if (!isValid) {
+            return res.status(401).json({ message: 'incorrect_password' });
+        }
+        
+        const token = jwt.sign(
+          { 
+            id: student.id, 
+            role: student.role,
+            permissions: student.permissions || [] 
+          },
+          process.env.JWT_SECRET,
+          { expiresIn: '24h' }
+        );
+        logAdminLogin(req, student.id, student.name, student.role);
+        return res.json({ 
+          token, 
+          message: 'Login successful', 
+          role: student.role, 
+          permissions: student.permissions 
+        });
     } catch (error) {
         console.error('Admin login error:', error);
         res.status(500).json({ message: 'Internal server error' });

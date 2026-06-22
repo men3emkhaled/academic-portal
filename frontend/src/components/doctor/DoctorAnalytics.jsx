@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDoctorAuth } from '../../context/DoctorAuthContext';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -12,6 +13,7 @@ import {
 } from 'lucide-react';
 
 const DoctorAnalytics = ({ courses }) => {
+  const { t } = useTranslation();
   const { doctorApi } = useDoctorAuth();
   const [selectedCourseId, setSelectedCourseId] = useState('');
   const [activeView, setActiveView] = useState('overview'); 
@@ -44,7 +46,7 @@ const DoctorAnalytics = ({ courses }) => {
       setProgressData(progressRes.data);
       setQuizData(quizRes.data);
     } catch (err) {
-      toast.error('Failed to synchronize intelligence data');
+      toast.error(t('doctor.analytics.failed_sync'));
     } finally {
       setLoading(false);
     }
@@ -118,26 +120,26 @@ const DoctorAnalytics = ({ courses }) => {
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
         <div className="space-y-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-violet-500/10 flex items-center justify-center">
-              <Activity className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+            <div className="w-10 h-10 rounded-xl bg-[#059669]/10 flex items-center justify-center">
+              <Activity className="w-5 h-5 text-[#059669] dark:text-[#34d399]" />
             </div>
-            <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">System Intelligence</span>
+            <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">{t('doctor.analytics.system_intelligence')}</span>
           </div>
-          <h2 className="text-4xl font-black text-gray-900 dark:text-white tracking-tight leading-none">Intelligence Hub</h2>
+          <h2 className="text-4xl font-black text-gray-900 dark:text-white tracking-tight leading-none">{t('doctor.analytics.intelligence_hub')}</h2>
           <p className="text-gray-500 dark:text-gray-400 font-semibold max-w-xl">
-            Analyze class performance, detect academic risks, and synchronize student progress data.
+            {t('doctor.analytics.subtitle')}
           </p>
         </div>
         
         <div className="flex items-center gap-4">
             <div className="relative group min-w-[280px]">
-              <div className="absolute inset-0 bg-violet-500/5 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <div className="absolute inset-0 bg-[#059669]/5 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
               <select
                   value={selectedCourseId}
                   onChange={(e) => setSelectedCourseId(e.target.value)}
-                  className="relative w-full bg-white/70 dark:bg-white/[0.03] backdrop-blur-md border border-gray-200 dark:border-white/5 rounded-2xl py-4 px-6 text-gray-900 dark:text-white font-black text-xs uppercase tracking-widest focus:outline-none focus:ring-4 focus:ring-violet-500/5 transition-all appearance-none cursor-pointer"
+                  className="relative w-full bg-white/70 dark:bg-white/[0.03] backdrop-blur-md border border-gray-200 dark:border-white/5 rounded-2xl py-4 px-6 text-gray-900 dark:text-white font-black text-xs uppercase tracking-widest focus:outline-none focus:ring-4 focus:ring-[#059669]/5 transition-all appearance-none cursor-pointer"
               >
-                  <option value="" disabled>Select Target Course</option>
+                  <option value="" disabled>{t('doctor.analytics.select_course')}</option>
                   {courses.map(c => (
                     <option key={c.id} value={c.id} className="text-gray-900">{c.name}</option>
                   ))}
@@ -159,8 +161,8 @@ const DoctorAnalytics = ({ courses }) => {
             <div className="w-24 h-24 rounded-[2.5rem] bg-gray-100 dark:bg-white/5 flex items-center justify-center mx-auto mb-8">
               <BarChart3 className="w-12 h-12 text-gray-300 dark:text-white/10" />
             </div>
-            <h3 className="text-2xl font-black text-gray-900 dark:text-white mb-3">Sync Pending</h3>
-            <p className="text-gray-500 dark:text-gray-500 max-w-sm mx-auto font-semibold">Select a course to synchronize academic intelligence and visualize performance radar.</p>
+            <h3 className="text-2xl font-black text-gray-900 dark:text-white mb-3">{t('doctor.analytics.sync_pending')}</h3>
+            <p className="text-gray-500 dark:text-gray-500 max-w-sm mx-auto font-semibold">{t('doctor.analytics.sync_pending_desc')}</p>
           </motion.div>
         ) : loading ? (
           <motion.div 
@@ -170,11 +172,11 @@ const DoctorAnalytics = ({ courses }) => {
             className="flex flex-col items-center justify-center py-48 gap-8"
           >
               <div className="relative w-20 h-20">
-                  <div className="absolute inset-0 border-4 border-violet-500/10 rounded-full"></div>
-                  <div className="absolute inset-0 border-4 border-transparent border-t-violet-500 rounded-full animate-spin"></div>
-                  <Sparkles className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 text-violet-500 animate-pulse" />
+                  <div className="absolute inset-0 border-4 border-[#059669]/10 rounded-full"></div>
+                  <div className="absolute inset-0 border-4 border-transparent border-t-[#059669] rounded-full animate-spin"></div>
+                  <Sparkles className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 text-[#059669] animate-pulse" />
               </div>
-              <p className="text-gray-400 font-black text-[10px] uppercase tracking-[0.4em] animate-pulse">Aggregating Academic Data...</p>
+              <p className="text-gray-400 font-black text-[10px] uppercase tracking-[0.4em] animate-pulse">{t('doctor.analytics.aggregating_data')}</p>
           </motion.div>
         ) : (
           <motion.div 
@@ -186,10 +188,10 @@ const DoctorAnalytics = ({ courses }) => {
               {/* Core Metrics Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8">
                   {[
-                    { label: 'Total Enrollment', value: analyticsData?.total_students || 0, icon: Users, color: 'blue', sub: 'Active Profiles' },
-                    { label: 'Avg Attendance', value: `${analyticsData?.average_attendance_percentage || 0}%`, icon: UserCheck, color: 'emerald', sub: 'Class Presence' },
-                    { label: 'Academic Score', value: `${progressData.length > 0 ? (progressData.reduce((s, x) => s + (x.avg_quiz_score || 0), 0) / progressData.length).toFixed(1) : 0}%`, icon: Target, color: 'violet', sub: 'Performance Avg' },
-                    { label: 'Risk Intensity', value: analyticsData?.at_risk_count || 0, icon: AlertTriangle, color: 'rose', sub: 'Critical Flags' }
+                    { label: t('doctor.analytics.total_enrollment'), value: analyticsData?.total_students || 0, icon: Users, color: 'blue', sub: t('doctor.analytics.active_profiles') },
+                    { label: t('doctor.analytics.avg_attendance'), value: `${analyticsData?.average_attendance_percentage || 0}%`, icon: UserCheck, color: 'emerald', sub: t('doctor.analytics.class_presence') },
+                    { label: t('doctor.analytics.academic_score'), value: `${progressData.length > 0 ? (progressData.reduce((s, x) => s + (x.avg_quiz_score || 0), 0) / progressData.length).toFixed(1) : 0}%`, icon: Target, color: 'emerald', sub: t('doctor.analytics.performance_avg') },
+                    { label: t('doctor.analytics.risk_intensity'), value: analyticsData?.at_risk_count || 0, icon: AlertTriangle, color: 'rose', sub: t('doctor.analytics.critical_flags') }
                   ].map((stat, i) => (
                     <motion.div 
                       key={i}
@@ -214,10 +216,10 @@ const DoctorAnalytics = ({ courses }) => {
               <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-8">
                   <div className="flex p-2 bg-gray-100 dark:bg-white/[0.03] rounded-[2rem] w-fit border border-gray-200 dark:border-white/5 overflow-x-auto hidden-scrollbar backdrop-blur-sm">
                       {[
-                          { id: 'overview', label: 'Overview', icon: LayoutGrid },
-                          { id: 'performance', label: 'Progress Radar', icon: TrendingUp },
-                          { id: 'risk', label: 'Risk Detection', icon: ShieldAlert },
-                          { id: 'quizzes', label: 'Assessments', icon: Award }
+                          { id: 'overview', label: t('doctor.analytics.overview'), icon: LayoutGrid },
+                          { id: 'performance', label: t('doctor.analytics.progress_radar'), icon: TrendingUp },
+                          { id: 'risk', label: t('doctor.analytics.risk_detection'), icon: ShieldAlert },
+                          { id: 'quizzes', label: t('doctor.analytics.assessments'), icon: Award }
                       ].map(view => (
                           <button
                               key={view.id}
@@ -225,10 +227,10 @@ const DoctorAnalytics = ({ courses }) => {
                               className={`flex items-center gap-3 px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all whitespace-nowrap ${
                                   activeView === view.id 
                                   ? 'bg-white dark:bg-white shadow-xl text-gray-900' 
-                                  : 'text-gray-500 dark:text-gray-400 hover:text-violet-500'
+                                  : 'text-gray-500 dark:text-gray-400 hover:text-[#059669]'
                               }`}
                           >
-                              <view.icon className={`w-4 h-4 ${activeView === view.id ? 'text-violet-600' : ''}`} />
+                              <view.icon className={`w-4 h-4 ${activeView === view.id ? 'text-[#059669]' : ''}`} />
                               {view.label}
                           </button>
                       ))}
@@ -236,13 +238,13 @@ const DoctorAnalytics = ({ courses }) => {
 
                   <div className="flex flex-col sm:flex-row items-center gap-4">
                       <div className="relative group w-full sm:w-80">
-                          <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-violet-500 transition-colors" />
+                          <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-[#059669] transition-colors" />
                           <input
                               type="text"
-                              placeholder="Synchronize specific record..."
+                              placeholder={t('doctor.analytics.search_placeholder')}
                               value={searchTerm}
                               onChange={(e) => setSearchTerm(e.target.value)}
-                              className="w-full bg-white dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-[1.5rem] py-4 pl-14 pr-6 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-4 focus:ring-violet-500/5 transition-all font-semibold"
+                              className="w-full bg-white dark:bg-black/20 border border-gray-200 dark:border-white/5 rounded-[1.5rem] py-4 pl-14 pr-6 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-4 focus:ring-[#059669]/5 transition-all font-semibold"
                           />
                       </div>
                   </div>
@@ -264,19 +266,19 @@ const DoctorAnalytics = ({ courses }) => {
                           <div className="grid grid-cols-1 xl:grid-cols-2 gap-20">
                               <div className="space-y-12">
                                   <div className="flex items-center gap-5">
-                                      <div className="w-14 h-14 rounded-2xl bg-violet-500/10 flex items-center justify-center">
-                                          <TrendingUp className="w-7 h-7 text-violet-600 dark:text-violet-400" />
+                                      <div className="w-14 h-14 rounded-2xl bg-[#059669]/10 flex items-center justify-center">
+                                          <TrendingUp className="w-7 h-7 text-[#059669] dark:text-[#34d399]" />
                                       </div>
                                       <div>
-                                          <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">Academic Momentum</h3>
-                                          <p className="text-[10px] text-gray-400 uppercase font-black tracking-[0.2em] mt-1.5 text-violet-500">Live Health Index</p>
+                                          <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">{t('doctor.analytics.academic_momentum')}</h3>
+                                          <p className="text-[10px] text-gray-400 uppercase font-black tracking-[0.2em] mt-1.5 text-[#059669]">{t('doctor.analytics.live_health_index')}</p>
                                       </div>
                                   </div>
                                   
                                   <div className="space-y-8">
                                       <div className="p-8 bg-gray-50/50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 rounded-[2.5rem] space-y-5">
                                           <div className="flex items-center justify-between">
-                                              <span className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-widest">Attendance Stability</span>
+                                              <span className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-widest">{t('doctor.analytics.attendance_stability')}</span>
                                               <span className="text-lg font-black text-emerald-500">{analyticsData?.average_attendance_percentage || 0}%</span>
                                           </div>
                                           {getProgressBar(analyticsData?.average_attendance_percentage || 0)}
@@ -286,10 +288,10 @@ const DoctorAnalytics = ({ courses }) => {
                                       </div>
                                       <div className="p-8 bg-gray-50/50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 rounded-[2.5rem] space-y-5">
                                           <div className="flex items-center justify-between">
-                                              <span className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-widest">Quiz Completion Flow</span>
-                                              <span className="text-lg font-black text-violet-500">Healthy</span>
+                                              <span className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-widest">{t('doctor.analytics.quiz_completion')}</span>
+                                              <span className="text-lg font-black text-[#059669]">{t('doctor.analytics.healthy')}</span>
                                           </div>
-                                          {getProgressBar(82, 100, 'bg-violet-500')}
+                                          {getProgressBar(82, 100, 'bg-[#059669]')}
                                           <p className="text-xs text-gray-500 dark:text-gray-400 font-semibold italic leading-relaxed opacity-70">
                                             Automated assessment velocity indicates strong student engagement levels.
                                           </p>
@@ -303,19 +305,19 @@ const DoctorAnalytics = ({ courses }) => {
                                           <Zap className="w-7 h-7 text-amber-500" />
                                       </div>
                                       <div>
-                                          <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">Smart Insights</h3>
-                                          <p className="text-[10px] text-gray-400 uppercase font-black tracking-[0.2em] mt-1.5 text-amber-500">Neural Pattern Detection</p>
+                                          <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">{t('doctor.analytics.smart_insights')}</h3>
+                                          <p className="text-[10px] text-gray-400 uppercase font-black tracking-[0.2em] mt-1.5 text-amber-500">{t('doctor.analytics.neural_pattern')}</p>
                                       </div>
                                   </div>
 
                                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                       {[
-                                        { label: 'High Achievers', value: progressData.filter(s => s.avg_quiz_score >= 85).length, icon: Award, color: 'emerald' },
-                                        { label: 'Active Sessions', value: analyticsData?.total_sessions || 0, icon: Clock, color: 'violet' },
-                                        { label: 'Progress Profiles', value: progressData.length, icon: Activity, color: 'blue' },
-                                        { label: 'Quiz Sync Rate', value: '74%', icon: Sparkles, color: 'amber' }
+                                        { label: t('doctor.analytics.high_achievers'), value: progressData.filter(s => s.avg_quiz_score >= 85).length, icon: Award, color: 'emerald' },
+                                        { label: t('doctor.analytics.active_sessions'), value: analyticsData?.total_sessions || 0, icon: Clock, color: 'emerald' },
+                                        { label: t('doctor.analytics.progress_profiles'), value: progressData.length, icon: Activity, color: 'blue' },
+                                        { label: t('doctor.analytics.quiz_sync_rate'), value: '74%', icon: Sparkles, color: 'amber' }
                                       ].map((item, i) => (
-                                        <div key={i} className="p-8 bg-gray-50/50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 rounded-[2.5rem] flex flex-col gap-4 group hover:border-violet-500/20 transition-all">
+                                        <div key={i} className="p-8 bg-gray-50/50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 rounded-[2.5rem] flex flex-col gap-4 group hover:border-[#059669]/20 transition-all">
                                             <item.icon className={`w-7 h-7 text-${item.color}-500 transition-transform group-hover:scale-110`} />
                                             <div>
                                               <p className="text-3xl font-black text-gray-900 dark:text-white leading-none mb-1">{item.value}</p>
@@ -339,20 +341,20 @@ const DoctorAnalytics = ({ courses }) => {
                           <table className="w-full text-left border-separate border-spacing-y-4">
                               <thead>
                                   <tr className="text-gray-400">
-                                      <th className="px-8 pb-4 text-[9px] font-black uppercase tracking-[0.2em]">Student Identity</th>
-                                      <th className="px-8 pb-4 text-[9px] font-black uppercase tracking-[0.2em] text-center">Quiz Engagement</th>
-                                      <th className="px-8 pb-4 text-[9px] font-black uppercase tracking-[0.2em] text-center">Academic Avg</th>
-                                      <th className="px-8 pb-4 text-[9px] font-black uppercase tracking-[0.2em] text-center">Task Flow</th>
-                                      <th className="px-8 pb-4 text-[9px] font-black uppercase tracking-[0.2em] text-center">Score Card</th>
-                                      <th className="px-8 pb-4 text-[9px] font-black uppercase tracking-[0.2em] text-right">Trend</th>
+                                      <th className="px-8 pb-4 text-[9px] font-black uppercase tracking-[0.2em]">{t('doctor.analytics.student_identity')}</th>
+                                      <th className="px-8 pb-4 text-[9px] font-black uppercase tracking-[0.2em] text-center">{t('doctor.analytics.quiz_engagement')}</th>
+                                      <th className="px-8 pb-4 text-[9px] font-black uppercase tracking-[0.2em] text-center">{t('doctor.analytics.academic_avg')}</th>
+                                      <th className="px-8 pb-4 text-[9px] font-black uppercase tracking-[0.2em] text-center">{t('doctor.analytics.task_flow')}</th>
+                                      <th className="px-8 pb-4 text-[9px] font-black uppercase tracking-[0.2em] text-center">{t('doctor.analytics.score_card')}</th>
+                                      <th className="px-8 pb-4 text-[9px] font-black uppercase tracking-[0.2em] text-right">{t('doctor.analytics.trend')}</th>
                                   </tr>
                               </thead>
                               <tbody>
                                   {filteredProgress.map(student => (
                                       <tr key={student.student_id} className="group transition-all">
-                                          <td className="bg-gray-50/50 dark:bg-white/[0.02] px-8 py-6 rounded-l-[2.5rem] border-y border-l border-gray-100 dark:border-white/5 group-hover:bg-violet-500/[0.03] transition-all">
+                                          <td className="bg-gray-50/50 dark:bg-white/[0.02] px-8 py-6 rounded-l-[2.5rem] border-y border-l border-gray-100 dark:border-white/5 group-hover:bg-[#059669]/[0.03] transition-all">
                                               <div className="flex items-center gap-5">
-                                                  <div className="w-12 h-12 rounded-2xl overflow-hidden bg-violet-500/10 dark:bg-violet-500/10 flex items-center justify-center font-black text-violet-600 dark:text-violet-400 text-sm border border-violet-500/10">
+                                                  <div className="w-12 h-12 rounded-2xl overflow-hidden bg-[#059669]/10 dark:bg-[#059669]/10 flex items-center justify-center font-black text-[#059669] dark:text-[#34d399] text-sm border border-[#059669]/10">
                                                       {student.avatar_url ? (
                                                           <img src={student.avatar_url} alt={student.student_name} className="w-full h-full object-cover" />
                                                       ) : (
@@ -365,13 +367,13 @@ const DoctorAnalytics = ({ courses }) => {
                                                   </div>
                                               </div>
                                           </td>
-                                          <td className="bg-gray-50/50 dark:bg-white/[0.02] px-8 py-6 border-y border-gray-100 dark:border-white/5 group-hover:bg-violet-500/[0.03] text-center">
+                                          <td className="bg-gray-50/50 dark:bg-white/[0.02] px-8 py-6 border-y border-gray-100 dark:border-white/5 group-hover:bg-[#059669]/[0.03] text-center">
                                               <div className="flex flex-col items-center gap-2.5 min-w-[120px]">
                                                   <span className="text-[10px] font-black text-gray-700 dark:text-white/80 uppercase tracking-widest">{student.quizzes_completed} / {student.quizzes_total}</span>
-                                                  {getProgressBar(student.quizzes_completed, student.quizzes_total, 'bg-violet-500')}
+                                                  {getProgressBar(student.quizzes_completed, student.quizzes_total, 'bg-[#059669]')}
                                               </div>
                                           </td>
-                                          <td className="bg-gray-50/50 dark:bg-white/[0.02] px-8 py-6 border-y border-gray-100 dark:border-white/5 group-hover:bg-violet-500/[0.03] text-center">
+                                          <td className="bg-gray-50/50 dark:bg-white/[0.02] px-8 py-6 border-y border-gray-100 dark:border-white/5 group-hover:bg-[#059669]/[0.03] text-center">
                                               <div className="flex flex-col items-center gap-2.5 min-w-[120px]">
                                                   <span className={`text-base font-black ${getScoreColor(student.avg_quiz_score)}`}>
                                                       {student.avg_quiz_score !== null ? `${student.avg_quiz_score}%` : '—'}
@@ -379,19 +381,19 @@ const DoctorAnalytics = ({ courses }) => {
                                                   {getProgressBar(student.avg_quiz_score || 0)}
                                               </div>
                                           </td>
-                                          <td className="bg-gray-50/50 dark:bg-white/[0.02] px-8 py-6 border-y border-gray-100 dark:border-white/5 group-hover:bg-violet-500/[0.03] text-center">
+                                          <td className="bg-gray-50/50 dark:bg-white/[0.02] px-8 py-6 border-y border-gray-100 dark:border-white/5 group-hover:bg-[#059669]/[0.03] text-center">
                                               <div className="flex flex-col items-center gap-2.5 min-w-[120px]">
                                                   <span className="text-[10px] font-black text-gray-700 dark:text-white/80 uppercase tracking-widest">{student.tasks_completed} / {student.tasks_total}</span>
                                                   {getProgressBar(student.tasks_completed, student.tasks_total, 'bg-blue-500')}
                                               </div>
                                           </td>
-                                          <td className="bg-gray-50/50 dark:bg-white/[0.02] px-8 py-6 border-y border-gray-100 dark:border-white/5 group-hover:bg-violet-500/[0.03] text-center">
+                                          <td className="bg-gray-50/50 dark:bg-white/[0.02] px-8 py-6 border-y border-gray-100 dark:border-white/5 group-hover:bg-[#059669]/[0.03] text-center">
                                               <div className="inline-flex flex-col items-center justify-center min-w-[5rem] py-2.5 px-4 rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-black/20 shadow-sm">
                                                   <span className="text-base font-black text-gray-900 dark:text-white leading-none">{student.grade_total}/40</span>
-                                                  <span className="text-[8px] font-black uppercase mt-1.5 text-gray-400">Total</span>
+                                                  <span className="text-[8px] font-black uppercase mt-1.5 text-gray-400">{t('doctor.analytics.total')}</span>
                                               </div>
                                           </td>
-                                          <td className="bg-gray-50/50 dark:bg-white/[0.02] px-8 py-6 rounded-r-[2.5rem] border-y border-r border-gray-100 dark:border-white/5 group-hover:bg-violet-500/[0.03] text-right">
+                                          <td className="bg-gray-50/50 dark:bg-white/[0.02] px-8 py-6 rounded-r-[2.5rem] border-y border-r border-gray-100 dark:border-white/5 group-hover:bg-[#059669]/[0.03] text-right">
                                               <div className="flex justify-end">
                                                   <motion.div whileHover={{ scale: 1.1 }} className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 border border-emerald-500/10">
                                                       <TrendingUp className="w-5 h-5" />
@@ -417,9 +419,9 @@ const DoctorAnalytics = ({ courses }) => {
                                 <ShieldAlert className="w-6 h-6 text-rose-500" />
                               </div>
                               <div>
-                                  <h4 className="text-sm font-black text-rose-600 dark:text-rose-500 uppercase tracking-[0.2em] mb-2">Automated Risk Detection Radar</h4>
+                                  <h4 className="text-sm font-black text-rose-600 dark:text-rose-500 uppercase tracking-[0.2em] mb-2">{t('doctor.analytics.risk_detection_title')}</h4>
                                   <p className="text-xs text-gray-500 dark:text-gray-400 font-semibold leading-relaxed max-w-3xl">
-                                    Students are flagged when performance drops below the 40th percentile or attendance stability fails to reach 50%. Neural patterns suggest immediate intervention for these profiles.
+                                    {t('doctor.analytics.risk_detection_desc')}
                                   </p>
                               </div>
                           </div>
@@ -429,17 +431,17 @@ const DoctorAnalytics = ({ courses }) => {
                                   <div className="w-24 h-24 bg-emerald-500/5 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8">
                                       <CheckCircle2 className="w-12 h-12 text-emerald-500/20" />
                                   </div>
-                                  <h3 className="text-2xl font-black text-gray-900 dark:text-white mb-2 tracking-tight">Zero Risk Intensity</h3>
-                                  <p className="text-gray-400 font-semibold">Class academic integrity is currently optimal across all monitored parameters.</p>
+                                  <h3 className="text-2xl font-black text-gray-900 dark:text-white mb-2 tracking-tight">{t('doctor.analytics.zero_risk')}</h3>
+                                  <p className="text-gray-400 font-semibold">{t('doctor.analytics.zero_risk_desc')}</p>
                               </div>
                           ) : (
                               <table className="w-full text-left border-separate border-spacing-y-4">
                                   <thead>
                                       <tr className="text-gray-400">
-                                          <th className="px-8 pb-4 text-[9px] font-black uppercase tracking-[0.2em]">Flagged Profile</th>
-                                          <th className="px-8 pb-4 text-[9px] font-black uppercase tracking-[0.2em] text-center">Critical Indicators</th>
-                                          <th className="px-8 pb-4 text-[9px] font-black uppercase tracking-[0.2em]">Sync Reason</th>
-                                          <th className="px-8 pb-4 text-[9px] font-black uppercase tracking-[0.2em] text-right">Action Protocol</th>
+                                          <th className="px-8 pb-4 text-[9px] font-black uppercase tracking-[0.2em]">{t('doctor.analytics.flagged_profile')}</th>
+                                          <th className="px-8 pb-4 text-[9px] font-black uppercase tracking-[0.2em] text-center">{t('doctor.analytics.critical_indicators')}</th>
+                                          <th className="px-8 pb-4 text-[9px] font-black uppercase tracking-[0.2em]">{t('doctor.analytics.sync_reason')}</th>
+                                          <th className="px-8 pb-4 text-[9px] font-black uppercase tracking-[0.2em] text-right">{t('doctor.analytics.action_protocol')}</th>
                                       </tr>
                                   </thead>
                                   <tbody>
@@ -466,13 +468,13 @@ const DoctorAnalytics = ({ courses }) => {
                                                           <p className={`text-base font-black ${student.attendance_percentage < 50 ? 'text-rose-500' : 'text-amber-500'}`}>
                                                               {student.attendance_percentage !== null ? `${student.attendance_percentage}%` : '—'}
                                                           </p>
-                                                          <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Presence</p>
+                                                          <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">{t('doctor.analytics.presence')}</p>
                                                       </div>
                                                       <div className="text-center">
                                                           <p className={`text-base font-black ${student.avg_score < 50 ? 'text-rose-500' : 'text-amber-500'}`}>
                                                               {student.avg_score !== null ? `${student.avg_score}%` : '—'}
                                                           </p>
-                                                          <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Score Avg</p>
+                                                          <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">{t('doctor.analytics.score_avg')}</p>
                                                       </div>
                                                   </div>
                                               </td>
@@ -488,7 +490,7 @@ const DoctorAnalytics = ({ courses }) => {
                                                     whileTap={{ scale: 0.95 }}
                                                     className="bg-gray-900 dark:bg-white text-white dark:text-black font-black px-8 py-4 rounded-2xl text-[9px] uppercase tracking-widest shadow-xl transition-all"
                                                   >
-                                                      Initiate Sync
+                                                      {t('doctor.analytics.initiate_sync')}
                                                   </motion.button>
                                               </td>
                                           </tr>
@@ -510,12 +512,12 @@ const DoctorAnalytics = ({ courses }) => {
                           {quizData?.distribution && quizData.distribution.length > 0 && (
                               <div className="space-y-10">
                                   <div className="flex items-center gap-5">
-                                      <div className="w-14 h-14 rounded-2xl bg-violet-500/10 flex items-center justify-center">
-                                          <PieChart className="w-7 h-7 text-violet-600 dark:text-violet-400" />
+                                      <div className="w-14 h-14 rounded-2xl bg-[#059669]/10 flex items-center justify-center">
+                                          <PieChart className="w-7 h-7 text-[#059669] dark:text-[#34d399]" />
                                       </div>
                                       <div>
-                                        <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">Grade Density Profile</h3>
-                                        <p className="text-[10px] text-gray-400 uppercase font-black tracking-[0.2em] mt-1.5 text-violet-500">Class Distribution Matrix</p>
+                                        <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">{t('doctor.analytics.grade_density')}</h3>
+                                        <p className="text-[10px] text-gray-400 uppercase font-black tracking-[0.2em] mt-1.5 text-[#059669]">{t('doctor.analytics.class_distribution')}</p>
                                       </div>
                                   </div>
                                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
@@ -527,11 +529,11 @@ const DoctorAnalytics = ({ courses }) => {
                                           const colors = distColors[range];
 
                                           return (
-                                              <div key={range} className="p-8 bg-gray-50/50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 rounded-[2.5rem] space-y-5 group hover:border-violet-500/20 transition-all">
+                                              <div key={range} className="p-8 bg-gray-50/50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 rounded-[2.5rem] space-y-5 group hover:border-[#059669]/20 transition-all">
                                                   <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${colors.text}`}>{range}%</p>
                                                   <p className="text-4xl font-black text-gray-900 dark:text-white">{count}</p>
                                                   {getProgressBar(count, totalAttempts, colors.bg)}
-                                                  <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">{pct.toFixed(0)}% Intensity</p>
+                                                  <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">{pct.toFixed(0)}% {t('doctor.analytics.intensity')}</p>
                                               </div>
                                           );
                                       })}
@@ -546,8 +548,8 @@ const DoctorAnalytics = ({ courses }) => {
                                       <List className="w-7 h-7 text-emerald-600 dark:text-emerald-400" />
                                   </div>
                                   <div>
-                                    <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">Assessment Intelligence</h3>
-                                    <p className="text-[10px] text-gray-400 uppercase font-black tracking-[0.2em] mt-1.5 text-emerald-500">Granular Evaluation Metrics</p>
+                                    <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">{t('doctor.analytics.assessment_intelligence')}</h3>
+                                    <p className="text-[10px] text-gray-400 uppercase font-black tracking-[0.2em] mt-1.5 text-emerald-500">{t('doctor.analytics.granular_metrics')}</p>
                                   </div>
                               </div>
                               
@@ -558,37 +560,37 @@ const DoctorAnalytics = ({ courses }) => {
                                       : 0;
 
                                       return (
-                                          <div key={q.id} className="bg-gray-50/50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-8 hover:bg-violet-500/[0.02] transition-all group">
+                                          <div key={q.id} className="bg-gray-50/50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-8 hover:bg-[#059669]/[0.02] transition-all group">
                                               <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-10">
                                                   <div className="flex-1 space-y-3">
                                                       <div className="flex items-center gap-4">
-                                                          <h4 className="text-xl font-black text-gray-900 dark:text-white group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">{q.title}</h4>
+                                                          <h4 className="text-xl font-black text-gray-900 dark:text-white group-hover:text-[#059669] dark:group-hover:text-[#34d399] transition-colors">{q.title}</h4>
                                                           <span className={`text-[8px] font-black uppercase px-3 py-1.5 rounded-lg border ${q.is_published ? 'bg-emerald-500/5 text-emerald-600 dark:text-emerald-400 border-emerald-500/10' : 'bg-gray-100 text-gray-400 border-gray-200 dark:bg-white/5 dark:border-white/10'}`}>
-                                                              {q.is_published ? 'Live' : 'Draft'}
+                                                              {q.is_published ? t('doctor.analytics.live') : t('doctor.analytics.draft')}
                                                           </span>
                                                       </div>
                                                       <div className="flex items-center gap-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                                                          <span className="flex items-center gap-2 bg-white dark:bg-black/20 px-3 py-1 rounded-lg border border-gray-100 dark:border-white/5"><Clock className="w-3.5 h-3.5 text-violet-500" /> {q.time_limit_minutes} Min</span>
-                                                          <span className="flex items-center gap-2 bg-white dark:bg-black/20 px-3 py-1 rounded-lg border border-gray-100 dark:border-white/5"><Target className="w-3.5 h-3.5 text-emerald-500" /> Passing {q.passing_score}%</span>
+                                                          <span className="flex items-center gap-2 bg-white dark:bg-black/20 px-3 py-1 rounded-lg border border-gray-100 dark:border-white/5"><Clock className="w-3.5 h-3.5 text-[#059669]" /> {q.time_limit_minutes} {t('doctor.analytics.min')}</span>
+                                                          <span className="flex items-center gap-2 bg-white dark:bg-black/20 px-3 py-1 rounded-lg border border-gray-100 dark:border-white/5"><Target className="w-3.5 h-3.5 text-emerald-500" /> {t('doctor.analytics.passing')} {q.passing_score}%</span>
                                                       </div>
                                                   </div>
 
                                                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-12 shrink-0">
                                                       <div className="text-center">
                                                           <p className="text-2xl font-black text-gray-900 dark:text-white">{q.completed_attempts || 0}</p>
-                                                          <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Attempts</p>
+                                                          <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">{t('doctor.analytics.attempts')}</p>
                                                       </div>
                                                       <div className="text-center">
                                                           <p className={`text-2xl font-black ${getScoreColor(q.avg_score)}`}>{q.avg_score !== null ? `${q.avg_score}%` : '—'}</p>
-                                                          <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Avg Sync</p>
+                                                          <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">{t('doctor.analytics.avg_sync')}</p>
                                                       </div>
                                                       <div className="text-center">
                                                           <p className="text-2xl font-black text-blue-500">{q.max_score !== null ? `${Math.round(q.max_score)}%` : '—'}</p>
-                                                          <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Top Radar</p>
+                                                          <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">{t('doctor.analytics.top_radar')}</p>
                                                       </div>
                                                       <div className="text-center">
                                                           <p className={`text-2xl font-black ${passRate >= 70 ? 'text-emerald-500' : 'text-amber-500'}`}>{passRate}%</p>
-                                                          <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Pass Integrity</p>
+                                                          <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">{t('doctor.analytics.pass_integrity')}</p>
                                                       </div>
                                                   </div>
                                               </div>

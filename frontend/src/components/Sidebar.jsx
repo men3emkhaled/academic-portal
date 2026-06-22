@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { flushSync } from 'react-dom';
-import { Home, Calendar, Library, BarChart3, FileText, Map, Bell, CheckSquare, Settings, LogOut, Menu, X, ShieldCheck, Sun, Moon, LayoutDashboard, BookOpen, TrendingUp, Languages, ArrowRight, Sparkles } from 'lucide-react';
+import { Home, Calendar, Library, BarChart3, FileText, Map, Bell, CheckSquare, Settings, LogOut, Menu, X, ShieldCheck, Sun, Moon, LayoutDashboard, BookOpen, TrendingUp, Languages, ArrowRight, Sparkles, UserCheck, ChevronLeft, ChevronRight } from 'lucide-react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useStudentAuth } from '../context/StudentAuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -35,6 +35,33 @@ const Sidebar = ({ onLogout }) => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const [isZagOpen, setIsZagOpen] = useState(() => {
+    try {
+      return localStorage.getItem('zag-sidebar-open') !== 'false';
+    } catch {
+      return true;
+    }
+  });
+
+  const handleToggleZag = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const nextVal = !isZagOpen;
+    setIsZagOpen(nextVal);
+    localStorage.setItem('zag-sidebar-open', String(nextVal));
+    window.dispatchEvent(new Event('zag-sidebar-toggle'));
+  };
+
+  useEffect(() => {
+    const handleToggle = () => {
+      try {
+        setIsZagOpen(localStorage.getItem('zag-sidebar-open') !== 'false');
+      } catch {}
+    };
+    window.addEventListener('zag-sidebar-toggle', handleToggle);
+    return () => window.removeEventListener('zag-sidebar-toggle', handleToggle);
   }, []);
 
   const bottomBarItems = [
@@ -76,6 +103,7 @@ const Sidebar = ({ onLogout }) => {
       { id: 'dashboard', label: t('sidebar.dashboard'), icon: <LayoutDashboard className="w-5 h-5" />, path: '/student/dashboard' },
       { id: 'timetable', label: t('sidebar.timetable'), icon: <Calendar className="w-5 h-5" />, path: '/student/timetable' },
       { id: 'materials', label: t('sidebar.materials'), icon: <Library className="w-5 h-5" />, path: '/student/materials' },
+      { id: 'attendance', label: t('sidebar.attendance'), icon: <UserCheck className="w-5 h-5" />, path: '/student/attendance' },
       { id: 'grades', label: t('sidebar.courses_grades'), icon: <TrendingUp className="w-5 h-5" />, path: '/student/grades' },
       { id: 'notifications', label: t('sidebar.notifications'), icon: <Bell className="w-5 h-5" />, path: '/student/notifications' },
       ...menuItems
@@ -112,6 +140,18 @@ const Sidebar = ({ onLogout }) => {
                       {item.icon}
                     </span>
                     <span className={`relative z-10 text-[11px] font-black uppercase tracking-[0.2em] ${i18n.language === 'ar' ? 'font-arabic' : ''}`}>{item.label}</span>
+                    {item.id === 'ai' && isActive && (
+                      <button
+                        onClick={handleToggleZag}
+                        className="relative z-20 ms-auto p-1.5 rounded-xl hover:bg-gray-200 dark:hover:bg-white/10 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-all active:scale-95 flex items-center justify-center"
+                      >
+                        {(i18n.language === 'ar' ? !isZagOpen : isZagOpen) ? (
+                          <ChevronLeft className="w-4 h-4" />
+                        ) : (
+                          <ChevronRight className="w-4 h-4" />
+                        )}
+                      </button>
+                    )}
                     {isActive && (
                       <div className="absolute start-0 w-1 h-6 bg-primary rounded-full shadow-[4px_0_15px_rgba(46,204,113,0.5)]" />
                     )}

@@ -1,4 +1,5 @@
 const db = require('../config/database');
+const logger = require('../utils/logger');
 
 class Notification {
   // تهيئة وتحديث جدول الإشعارات تلقائياً
@@ -11,19 +12,18 @@ class Notification {
       await db.query(`
         CREATE INDEX IF NOT EXISTS idx_notifications_department_id ON notifications(department_id)
       `);
-      console.log('✅ Notifications table department_id ready');
+      logger.info('Notifications table department_id ready');
       
-      // تنظيف النسخ المكررة القديمة
       await this.cleanupOldDuplicates();
     } catch (error) {
-      console.error('❌ Error updating notifications table schema:', error);
+      logger.error({ err: error.message }, 'Error updating notifications table schema');
     }
   }
 
   // دمج وتنظيف النسخ القديمة المكررة للمحافظة على أداء فائق
   static async cleanupOldDuplicates() {
     try {
-      console.log('🔄 Starting notification database deduplication cleanup...');
+      logger.info('Starting notification database deduplication cleanup...');
       
       const batchRes = await db.query(`
         SELECT title, content, date_trunc('minute', created_at) as minute, COUNT(*) as cnt
@@ -33,7 +33,7 @@ class Notification {
         HAVING COUNT(*) > 5
       `);
       
-      console.log(`[Deduplicate] Found ${batchRes.rows.length} duplicate notification batches to clean.`);
+      logger.info({ batchCount: batchRes.rows.length }, 'Found duplicate notification batches to clean');
       
       let totalDeleted = 0;
       for (const batch of batchRes.rows) {
@@ -69,12 +69,12 @@ class Notification {
       }
       
       if (totalDeleted > 0) {
-        console.log(`✅ Deduplication completed. Cleaned up ${totalDeleted} duplicate rows from notifications table.`);
+        logger.info({ totalDeleted }, 'Deduplication completed');
       } else {
-        console.log(`✅ Notification table is already clean and optimized.`);
+        logger.info('Notification table is already clean and optimized');
       }
     } catch (err) {
-      console.error('❌ Failed to run notifications deduplication:', err);
+      logger.error({ err }, 'Failed to run notifications deduplication');
     }
   }
 

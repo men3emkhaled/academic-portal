@@ -1,38 +1,49 @@
 const { Pool } = require('pg');
-require('dotenv').config();
+const dotenv = require('dotenv');
+dotenv.config();
+
+const logger = require('../utils/logger');
 
 let poolConfig;
 
 if (process.env.DATABASE_URL) {
-    // Production (Neon / Supabase / etc.)
-    // ✅ Security: Default to validating SSL certs. Set DB_SSL_REJECT_UNAUTHORIZED=false only if your provider requires it.
     const rejectUnauthorized = process.env.DB_SSL_REJECT_UNAUTHORIZED !== 'false';
     poolConfig = {
         connectionString: process.env.DATABASE_URL,
         ssl: { rejectUnauthorized },
+        max: parseInt(process.env.DB_POOL_MAX, 10) || 10,
+        idleTimeoutMillis: 30000,
+        connectionTimeoutMillis: 5000,
+        statement_timeout: 10000,
     };
     if (!rejectUnauthorized) {
-        console.warn('⚠️ SSL certificate validation is DISABLED. Set DB_SSL_REJECT_UNAUTHORIZED=true for production.');
+        logger.warn('SSL certificate validation is DISABLED. Set DB_SSL_REJECT_UNAUTHORIZED=true for production.');
     }
 } else {
-    // Local development
     poolConfig = {
         host: process.env.DB_HOST || 'localhost',
         port: process.env.DB_PORT || 5432,
         database: process.env.DB_NAME || 'academic_portal',
         user: process.env.DB_USER || 'postgres',
         password: process.env.DB_PASSWORD,
+        max: parseInt(process.env.DB_POOL_MAX, 10) || 10,
+        idleTimeoutMillis: 30000,
+        connectionTimeoutMillis: 5000,
+        statement_timeout: 10000,
     };
 }
 
 const pool = new Pool(poolConfig);
 
-// ✅ اختبار الاتصال
+pool.on('error', (err) => {
+    logger.error({ err }, 'Unexpected PostgreSQL pool error');
+});
+
 pool.connect(async (err, client, release) => {
     if (err) {
-        console.error('❌ Database connection error:', err.message);
+        logger.error({ err: err.message }, 'Database connection error');
     } else {
-        console.log('✅ Connected to PostgreSQL database');
+        logger.info('Connected to PostgreSQL database');
         release();
         try {
             await pool.query(`
@@ -46,9 +57,9 @@ pool.connect(async (err, client, release) => {
                 VALUES ('active_semester', '2')
                 ON CONFLICT (key) DO NOTHING;
             `);
-            console.log('✅ System settings table ensured and initialized');
+            logger.info('System settings table ensured and initialized');
         } catch (dbErr) {
-            console.error('❌ Error initializing system settings table:', dbErr.message);
+            logger.error({ err: dbErr.message }, 'Error initializing system settings table');
         }
     }
 });
@@ -60,9 +71,9 @@ const getActiveSemester = async () => {
             return parseInt(res.rows[0].value, 10);
         }
     } catch (err) {
-        console.error('Error fetching active semester:', err.message);
+        logger.error({ err: err.message }, 'Error fetching active semester');
     }
-    return 2; // fallback
+    return 2;
 };
 
 module.exports = {

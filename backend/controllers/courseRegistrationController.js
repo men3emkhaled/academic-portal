@@ -38,7 +38,7 @@ const getAvailableCourses = async (req, res) => {
        FROM courses c
        LEFT JOIN departments d ON c.department_id = d.id
        WHERE c.id NOT IN (
-         SELECT course_id FROM student_courses WHERE student_id = $1
+         SELECT course_id FROM student_courses WHERE student_id = $1 AND status = 'active'
        )
        AND (c.department_id = $2 OR c.department_id IS NULL)
        ORDER BY c.semester, c.name`,
@@ -210,24 +210,11 @@ const dropCourse = async (req, res) => {
     const studentId = req.user.id;
     const { courseId } = req.params;
 
-    // Delete grades first (via enrollment_id)
+    // Soft-delete: set enrollment status to suspended (preserves grades)
     await db.query(
-      `DELETE FROM grades
-       WHERE enrollment_id IN (
-         SELECT id FROM student_courses WHERE student_id = $1 AND course_id = $2
-       )`,
+      `UPDATE student_courses SET status = 'suspended', updated_at = CURRENT_TIMESTAMP WHERE student_id = $1 AND course_id = $2`,
       [studentId, courseId]
     );
-
-    // Delete enrollment
-    const result = await db.query(
-      `DELETE FROM student_courses WHERE student_id = $1 AND course_id = $2 RETURNING *`,
-      [studentId, courseId]
-    );
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({ message: 'Enrollment not found' });
-    }
 
     res.json({ message: 'Course dropped successfully' });
   } catch (error) {

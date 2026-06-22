@@ -33,7 +33,7 @@ export default function LandingPage() {
   const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState('all');
   const { isDarkMode } = useTheme();
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const isAr = i18n.language === 'ar';
 
   const tLocal = isAr ? landingTranslations.ar : landingTranslations.en;
@@ -79,13 +79,6 @@ export default function LandingPage() {
             
             {/* Hero Information */}
             <div className="lg:col-span-7 space-y-6 md:space-y-8 text-start">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-gray-200/50 dark:border-white/5 bg-white/50 dark:bg-white/[0.02]">
-                <div className="w-2 h-2 rounded-full bg-[#2cfc7d] shadow-[0_0_10px_#2cfc7d]"></div>
-                <span className="text-[9px] font-black uppercase tracking-[0.25em] text-gray-500 dark:text-gray-400">
-                  {tLocal.hero.tagline}
-                </span>
-              </div>
-
               <h1 className={`text-[clamp(2.5rem,5.5vw,5.5rem)] font-black leading-[0.95] tracking-tighter uppercase text-slate-900 dark:text-white ${isAr ? 'font-arabic' : ''}`}>
                 {tLocal.hero.title}
               </h1>
@@ -150,10 +143,6 @@ export default function LandingPage() {
           <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12">
               <div className="space-y-4 max-w-2xl text-start">
-                <div className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#2cfc7d]"></div>
-                  <span className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400">{tLocal.nav.programs}</span>
-                </div>
                 <h2 className="text-3xl md:text-4xl font-black tracking-tight text-slate-900 dark:text-white uppercase leading-none">
                   {tLocal.programs.title}
                 </h2>
@@ -251,7 +240,7 @@ export default function LandingPage() {
                 }}
                 className="bg-slate-900 dark:bg-white text-white dark:text-black font-black text-xs md:text-sm uppercase tracking-widest px-8 py-4.5 rounded-3xl hover:scale-105 transition-all shadow-md flex items-center gap-2 group"
               >
-                <span>{isAr ? "مشاهدة جميع البرامج" : "View All Programs"}</span>
+                <span>{t('landing.view_all')}</span>
                 {isAr ? <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> : <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />}
               </button>
             </div>
@@ -266,11 +255,6 @@ export default function LandingPage() {
 
               {/* Left Description Column */}
               <div className="lg:col-span-6 space-y-6">
-                <div className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#2cfc7d]"></div>
-                  <span className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400">{tLocal.about.subtitle}</span>
-                </div>
-
                 <h2 className="text-3xl md:text-5xl font-black tracking-tight text-slate-900 dark:text-white uppercase leading-[1.05]">
                   {tLocal.about.title}
                 </h2>
@@ -314,11 +298,6 @@ export default function LandingPage() {
         <section className="py-20 border-t border-gray-100 dark:border-white/5 bg-gray-50/20 dark:bg-black/5">
           <div className="max-w-[1200px] mx-auto px-6">
             <div className="space-y-6 text-center max-w-2xl mx-auto mb-12">
-              <div className="flex items-center justify-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-[#2cfc7d]"></div>
-                <span className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400">{tLocal.nav.contact}</span>
-              </div>
-
               <h2 className="text-3xl md:text-4xl font-black tracking-tight text-slate-900 dark:text-white uppercase leading-none">
                 {tLocal.contact.title}
               </h2>
@@ -336,7 +315,7 @@ export default function LandingPage() {
                   <MapPin className="w-4.5 h-4.5" />
                 </div>
                 <div className="space-y-0.5 mt-6">
-                  <span className="block text-[8px] font-black uppercase tracking-wider opacity-40">{isAr ? "الموقع" : "Location"}</span>
+                  <span className="block text-[8px] font-black uppercase tracking-wider opacity-40">{t('landing.contact_address')}</span>
                   <span className="text-xs font-bold leading-relaxed">{tLocal.contact.address}</span>
                 </div>
               </div>

@@ -47,11 +47,6 @@ export default function AboutPage() {
 
           {/* Left Description Column */}
           <div className="lg:col-span-6 space-y-6">
-            <div className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-[#2cfc7d]"></div>
-              <span className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400">{tLocal.about.subtitle}</span>
-            </div>
-
             <h2 className="text-3xl md:text-5xl font-black tracking-tight text-slate-900 dark:text-white uppercase leading-[1.05]">
               {tLocal.about.title}
             </h2>

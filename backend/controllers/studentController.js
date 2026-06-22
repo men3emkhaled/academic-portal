@@ -336,6 +336,9 @@ const getCourseHubData = async (req, res) => {
 
 const uploadAvatar = async (req, res) => {
   try {
+    if (!supabase) {
+      return res.status(503).json({ message: 'File upload is not available (Supabase not configured)' });
+    }
     if (!req.file) {
       return res.status(400).json({ message: 'No file uploaded' });
     }
@@ -378,6 +381,32 @@ const uploadAvatar = async (req, res) => {
   }
 };
 
+const getMyAttendance = async (req, res) => {
+    try {
+        const studentId = req.user.id;
+        const result = await db.query(`
+            SELECT 
+                ar.id as record_id,
+                ar.status,
+                ar.scanned_at,
+                as2.id as session_id,
+                as2.title as session_title,
+                as2.date as session_date,
+                c.id as course_id,
+                c.name as course_name
+            FROM attendance_records ar
+            JOIN attendance_sessions as2 ON ar.session_id = as2.id
+            JOIN courses c ON as2.course_id = c.id
+            JOIN student_courses sc ON sc.student_id = ar.student_id AND sc.course_id = c.id
+            WHERE ar.student_id = $1 AND sc.status = 'active'
+            ORDER BY as2.date DESC, as2.created_at DESC
+        `, [studentId]);
+        res.json(result.rows);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports = {
   uploadStudentsExcel,
   getAllStudents,
@@ -388,5 +417,6 @@ module.exports = {
   updateStudentRole,
   generateAttendanceToken,
   getCourseHubData,
-  uploadAvatar
+  uploadAvatar,
+  getMyAttendance
 };

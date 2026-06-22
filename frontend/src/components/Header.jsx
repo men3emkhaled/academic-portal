@@ -10,7 +10,7 @@ export default function Header() {
   const navigate = useNavigate();
   const location = useLocation();
   const { isDarkMode, toggleTheme } = useTheme();
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const isAr = i18n.language === 'ar';
 
   const tLocal = isAr ? landingTranslations.ar : landingTranslations.en;
@@ -43,7 +43,7 @@ export default function Header() {
           <img src="/logo.png" alt="ZNU Logo" className="w-11 h-11 object-contain hover:scale-105 transition-transform" />
           <div className="flex flex-col justify-center">
             <span className="block font-black text-sm uppercase tracking-wider text-slate-800 dark:text-white leading-none">
-              {isAr ? "جامعة الزقازيق الأهلية" : "Zagazig National"}
+              {t('header.portal_title')}
             </span>
           </div>
         </div>

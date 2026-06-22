@@ -1,20 +1,38 @@
-# Academic Portal Backend - Production Dockerfile
-FROM node:18-alpine
+# ============================================
+# Stage 1: Install production dependencies only
+# ============================================
+FROM node:18-alpine AS deps
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production && npm cache clean --force
 
-# Use production environment
+# ============================================
+# Stage 2: Runtime image (minimal, non-root)
+# ============================================
+FROM node:18-alpine AS runtime
+
 ENV NODE_ENV=production
+ENV PORT=5000
+
+# Security: run as non-root user
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
 WORKDIR /app
 
-# Copy package files and install dependencies
-COPY package*.json ./
-RUN npm install --production
+# Copy only production node_modules from deps stage
+COPY --chown=appuser:appgroup --from=deps /app/node_modules ./node_modules
 
-# Copy source code
-COPY . .
+# Copy application source code
+COPY --chown=appuser:appgroup . .
 
-# Expose the port (Railway typically provides PORT env var)
+# Create uploads directory with correct permissions
+RUN mkdir -p uploads && chown -R appuser:appgroup uploads
+
 EXPOSE 5000
 
-# Start the server
+USER appuser
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:5000/api/health || exit 1
+
 CMD ["node", "server.js"]

@@ -1,5 +1,6 @@
 const AdminLog = require('../models/AdminLog');
 const jwt = require('jsonwebtoken');
+const logger = require('../utils/logger');
 
 /**
  * Middleware لتسجيل كل عمليات الأدمن تلقائياً
@@ -172,7 +173,7 @@ const adminActivityLogger = (req, res, next) => {
           statusCode: res.statusCode
         });
       } catch (error) {
-        console.error('⚠️ Activity log error (non-blocking):', error.message);
+        logger.error({ err: error.message }, 'Activity log error (non-blocking)');
       }
     });
 
@@ -200,7 +201,7 @@ const logAdminLogin = async (req, adminId, adminName, adminRole) => {
       statusCode: 200
     });
   } catch (error) {
-    console.error('⚠️ Login log error:', error.message);
+    logger.error({ err: error.message }, 'Login log error');
   }
 };
 

@@ -21,7 +21,8 @@ const {
   updateFcmToken,
   generateAttendanceToken,
   getCourseHubData,
-  uploadAvatar
+  uploadAvatar,
+  getMyAttendance
 } = require('../controllers/studentController');
 const { 
   createInquiry, 
@@ -170,6 +171,8 @@ router.get('/my-timetable', studentAuth, async (req, res) => {
 });
 
 // ✅ جلب بنك الأسئلة للمادة (كل الأسئلة الاختيارية من الاختبارات المنشورة)
+router.get('/my-attendance', studentAuth, getMyAttendance);
+
 router.get('/course/:courseId/question-bank', studentAuth, async (req, res) => {
   try {
     const { courseId } = req.params;

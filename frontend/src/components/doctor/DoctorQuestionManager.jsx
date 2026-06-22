@@ -151,14 +151,14 @@ const DoctorQuestionManager = ({ quiz, onBack }) => {
                         whileHover={{ scale: 1.1, x: -5 }}
                         whileTap={{ scale: 0.9 }}
                         onClick={onBack} 
-                        className="w-14 h-14 rounded-2xl bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 flex items-center justify-center text-gray-400 hover:text-violet-500 transition-all shadow-sm"
+                        className="w-14 h-14 rounded-2xl bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 flex items-center justify-center text-gray-400 hover:text-[#059669] transition-all shadow-sm"
                     >
                         <ArrowLeft className="w-6 h-6" />
                     </motion.button>
                     <div>
                         <div className="flex items-center gap-3 mb-1">
                             <h2 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">{quiz.title}</h2>
-                            <span className="px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-[9px] font-black text-violet-500 uppercase tracking-widest">{t('doctor.questions.title_suffix')}</span>
+                            <span className="px-3 py-1 rounded-full bg-[#059669]/10 border border-[#059669]/20 text-[9px] font-black text-[#059669] uppercase tracking-widest">{t('doctor.questions.title_suffix')}</span>
                         </div>
                         <p className="text-sm text-gray-400 font-bold uppercase tracking-widest flex items-center gap-2">
                             <Layout className="w-4 h-4" /> {t('doctor.questions.edit_mode')}
@@ -177,11 +177,11 @@ const DoctorQuestionManager = ({ quiz, onBack }) => {
                             className="bg-white dark:bg-[#0c0c0e] border border-gray-100 dark:border-white/5 p-8 rounded-[3rem] shadow-2xl relative overflow-hidden"
                         >
                             <div className="absolute top-0 right-0 p-8 opacity-5">
-                                <Zap className="w-24 h-24 text-violet-500" />
+                                <Zap className="w-24 h-24 text-[#059669]" />
                             </div>
 
                             <h3 className="text-2xl font-black mb-10 flex items-center gap-4 text-gray-900 dark:text-white uppercase tracking-tight">
-                                <div className="w-10 h-10 rounded-xl bg-violet-600 flex items-center justify-center shadow-lg shadow-violet-600/20">
+                                <div className="w-10 h-10 rounded-xl bg-[#059669] flex items-center justify-center shadow-lg shadow-[#059669]/20">
                                     {editingQuestion ? <Edit3 className="w-5 h-5 text-white" /> : <Plus className="w-5 h-5 text-white" />}
                                 </div>
                                 {editingQuestion ? t('doctor.questions.edit_question') : t('doctor.questions.add_question')}
@@ -194,11 +194,11 @@ const DoctorQuestionManager = ({ quiz, onBack }) => {
                                         <select
                                             value={formData.question_type}
                                             onChange={(e) => setFormData({ ...formData, question_type: e.target.value })}
-                                            className="w-full bg-gray-50 dark:bg-white/[0.05] border border-gray-100 dark:border-white/10 rounded-2xl py-4 px-5 text-sm font-black appearance-none cursor-pointer outline-none focus:ring-4 focus:ring-violet-500/10 dark:text-white [color-scheme:dark]"
+                                            className="w-full bg-gray-50 dark:bg-white/[0.05] border border-gray-100 dark:border-white/10 rounded-2xl py-4 px-5 text-sm font-black appearance-none cursor-pointer outline-none focus:ring-4 focus:ring-[#059669]/10 dark:text-white [color-scheme:dark]"
                                         >
-                                            <option value="multiple_choice" className="dark:bg-[#0A0A0A]">MCQ</option>
-                                            <option value="true_false" className="dark:bg-[#0A0A0A]">True / False</option>
-                                            <option value="written" className="dark:bg-[#0A0A0A]">Written</option>
+                                            <option value="multiple_choice" className="dark:bg-[#0A0A0A]">{t('doctor.questions.type_mcq')}</option>
+                                            <option value="true_false" className="dark:bg-[#0A0A0A]">{t('doctor.questions.type_true_false')}</option>
+                                            <option value="written" className="dark:bg-[#0A0A0A]">{t('doctor.questions.type_written')}</option>
                                         </select>
                                     </div>
 
@@ -211,7 +211,7 @@ const DoctorQuestionManager = ({ quiz, onBack }) => {
                                                 min="1"
                                                 value={formData.points}
                                                 onChange={(e) => setFormData({ ...formData, points: parseInt(e.target.value) })}
-                                                className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/10 rounded-2xl py-4 pl-12 pr-5 text-sm font-black outline-none focus:ring-4 focus:ring-violet-500/10 dark:text-white"
+                                                className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/10 rounded-2xl py-4 pl-12 pr-5 text-sm font-black outline-none focus:ring-4 focus:ring-[#059669]/10 dark:text-white"
                                                 required
                                             />
                                         </div>
@@ -223,7 +223,7 @@ const DoctorQuestionManager = ({ quiz, onBack }) => {
                                     <textarea
                                         value={formData.question_text}
                                         onChange={(e) => setFormData({ ...formData, question_text: e.target.value })}
-                                        className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/10 rounded-3xl py-5 px-6 text-sm font-semibold min-h-[120px] resize-none outline-none focus:ring-4 focus:ring-violet-500/10 dark:text-white"
+                                        className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/10 rounded-3xl py-5 px-6 text-sm font-semibold min-h-[120px] resize-none outline-none focus:ring-4 focus:ring-[#059669]/10 dark:text-white"
                                         placeholder={t('doctor.questions.text_placeholder')}
                                         required
                                     />
@@ -232,7 +232,7 @@ const DoctorQuestionManager = ({ quiz, onBack }) => {
                                 <div className="space-y-3">
                                     <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('doctor.questions.image_label')}</label>
                                     <div className="relative group">
-                                        <div className={`flex flex-col items-center justify-center w-full min-h-[100px] border-2 border-dashed rounded-[2rem] transition-all cursor-pointer ${imageFile ? 'bg-emerald-500/5 border-emerald-500/30' : 'bg-gray-50 dark:bg-white/[0.02] border-gray-200 dark:border-white/10 hover:border-violet-500/30'}`}>
+                                        <div className={`flex flex-col items-center justify-center w-full min-h-[100px] border-2 border-dashed rounded-[2rem] transition-all cursor-pointer ${imageFile ? 'bg-emerald-500/5 border-emerald-500/30' : 'bg-gray-50 dark:bg-white/[0.02] border-gray-200 dark:border-white/10 hover:border-[#059669]/30'}`}>
                                             <input
                                                 type="file"
                                                 accept="image/*"
@@ -246,7 +246,7 @@ const DoctorQuestionManager = ({ quiz, onBack }) => {
                                                 </div>
                                             ) : (
                                                 <div className="flex flex-col items-center gap-2 text-gray-400">
-                                                    <UploadCloud className="w-6 h-6 group-hover:text-violet-500 transition-colors" />
+                                                    <UploadCloud className="w-6 h-6 group-hover:text-[#059669] transition-colors" />
                                                     <span className="text-[9px] font-black uppercase tracking-[0.2em]">{t('doctor.questions.upload_hint')}</span>
                                                 </div>
                                             )}
@@ -290,7 +290,7 @@ const DoctorQuestionManager = ({ quiz, onBack }) => {
                                                 onClick={() => setFormData({ ...formData, correct_answer: val })}
                                                 className={`py-4 rounded-2xl border-2 font-black text-xs uppercase tracking-widest transition-all ${formData.correct_answer === val ? 'bg-emerald-500 text-white border-emerald-500 shadow-lg shadow-emerald-500/20' : 'bg-gray-50 dark:bg-white/5 border-gray-100 dark:border-white/5 text-gray-400 hover:border-gray-300'}`}
                                             >
-                                                {val}
+                                                {val === 'True' ? t('doctor.questions.option_true') : t('doctor.questions.option_false')}
                                             </button>
                                         ))}
                                     </div>
@@ -302,7 +302,7 @@ const DoctorQuestionManager = ({ quiz, onBack }) => {
                                         whileTap={{ scale: 0.98 }}
                                         type="submit"
                                         disabled={loading}
-                                        className="flex-1 bg-violet-600 hover:bg-violet-700 text-white font-black py-5 rounded-[1.5rem] shadow-xl shadow-violet-600/20 disabled:opacity-50 flex items-center justify-center gap-3 text-xs uppercase tracking-widest"
+                                        className="flex-1 bg-[#059669] hover:bg-[#047857] text-white font-black py-5 rounded-[1.5rem] shadow-xl shadow-[#059669]/20 disabled:opacity-50 flex items-center justify-center gap-3 text-xs uppercase tracking-widest"
                                     >
                                         {loading ? <div className="w-5 h-5 border-4 border-white/20 border-t-white rounded-full animate-spin"></div> : <><Save className="w-4 h-4" /> {t('doctor.questions.save_btn')}</>}
                                     </motion.button>
@@ -353,17 +353,17 @@ const DoctorQuestionManager = ({ quiz, onBack }) => {
                                     <motion.div 
                                         variants={itemVariants}
                                         key={q.id} 
-                                        className="group bg-gray-50 dark:bg-white/[0.01] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-8 transition-all hover:border-violet-500/30 hover:bg-white dark:hover:bg-white/[0.02] hover:shadow-2xl hover:shadow-violet-500/5"
+                                        className="group bg-gray-50 dark:bg-white/[0.01] border border-gray-100 dark:border-white/5 rounded-[2.5rem] p-8 transition-all hover:border-[#059669]/30 hover:bg-white dark:hover:bg-white/[0.02] hover:shadow-2xl hover:shadow-[#059669]/5"
                                     >
                                         <div className="flex justify-between items-start gap-8">
                                             <div className="flex items-start gap-6 flex-1 min-w-0">
-                                                <div className="bg-white dark:bg-white/5 text-violet-600 dark:text-violet-400 font-black w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 border border-gray-100 dark:border-white/10 shadow-sm text-lg">
+                                                <div className="bg-white dark:bg-white/5 text-[#059669] dark:text-[#34d399] font-black w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 border border-gray-100 dark:border-white/10 shadow-sm text-lg">
                                                     {idx + 1}
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <div className="flex flex-wrap gap-2 mb-4">
                                                         <span className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-400 bg-white dark:bg-white/5 px-3 py-1.5 rounded-xl border border-gray-100 dark:border-white/10">
-                                                            {q.question_type.replace('_', ' ')}
+                                                            {q.question_type === 'multiple_choice' ? t('doctor.questions.type_mcq') : q.question_type === 'true_false' ? t('doctor.questions.type_true_false') : t('doctor.questions.type_written')}
                                                         </span>
                                                         <span className="text-[9px] font-black uppercase tracking-[0.2em] text-emerald-500 bg-emerald-500/5 px-3 py-1.5 rounded-xl border border-emerald-500/10">
                                                             {q.points} {t('doctor.questions.points_suffix')}
@@ -375,7 +375,7 @@ const DoctorQuestionManager = ({ quiz, onBack }) => {
                                                     
                                                     {q.image_url && (
                                                         <div className="mb-6 relative group/img inline-block">
-                                                            <img src={q.image_url} alt="Question" className="rounded-3xl max-h-48 object-cover border-4 border-white dark:border-white/5 shadow-2xl transition-transform group-hover/img:scale-105" />
+                                                            <img src={q.image_url} alt={t('doctor.questions.image_alt')} className="rounded-3xl max-h-48 object-cover border-4 border-white dark:border-white/5 shadow-2xl transition-transform group-hover/img:scale-105" />
                                                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity rounded-3xl flex items-center justify-center">
                                                                 <Eye className="text-white w-8 h-8" />
                                                             </div>
@@ -395,7 +395,7 @@ const DoctorQuestionManager = ({ quiz, onBack }) => {
                                                     {q.question_type === 'true_false' && (
                                                         <div className="mt-4">
                                                             <span className="inline-flex items-center gap-3 bg-emerald-500 text-white font-black text-[10px] px-5 py-2.5 rounded-2xl shadow-lg shadow-emerald-500/20 uppercase tracking-widest">
-                                                                <CheckCircle2 className="w-4 h-4" /> {t('doctor.questions.correct_answer')}: {q.correct_answer}
+                                                                <CheckCircle2 className="w-4 h-4" /> {t('doctor.questions.correct_answer')}: {q.correct_answer === 'True' ? t('doctor.questions.option_true') : t('doctor.questions.option_false')}
                                                             </span>
                                                         </div>
                                                     )}
@@ -403,7 +403,7 @@ const DoctorQuestionManager = ({ quiz, onBack }) => {
                                             </div>
                                             
                                             <div className="flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all -translate-y-2 group-hover:translate-y-0">
-                                                <button onClick={() => startEdit(q)} className="w-12 h-12 bg-white dark:bg-white/5 hover:bg-violet-500 hover:text-white border border-gray-100 dark:border-white/10 rounded-xl flex items-center justify-center text-gray-400 transition-all shadow-xl shadow-black/5">
+                                                <button onClick={() => startEdit(q)} className="w-12 h-12 bg-white dark:bg-white/5 hover:bg-[#059669] hover:text-white border border-gray-100 dark:border-white/10 rounded-xl flex items-center justify-center text-gray-400 transition-all shadow-xl shadow-black/5">
                                                     <Edit3 className="w-5 h-5" />
                                                 </button>
                                                 <button onClick={() => handleDelete(q.id)} className="w-12 h-12 bg-white dark:bg-white/5 hover:bg-rose-500 hover:text-white border border-gray-100 dark:border-white/10 rounded-xl flex items-center justify-center text-rose-400 transition-all shadow-xl shadow-black/5">

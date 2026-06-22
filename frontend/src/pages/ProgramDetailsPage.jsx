@@ -13,7 +13,7 @@ export default function ProgramDetailsPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { isDarkMode } = useTheme();
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const isAr = i18n.language === 'ar';
 
   const [activeTab, setActiveTab] = useState('description');
@@ -26,14 +26,14 @@ export default function ProgramDetailsPage() {
         <Header />
         <main className="flex-grow z-10 flex flex-col items-center justify-center p-6 text-center">
           <GraduationCap className="w-16 h-16 text-red-500 mb-4 animate-bounce" />
-          <h2 className="text-2xl font-black mb-2">{isAr ? "البرنامج الأكاديمي غير موجود" : "Program Not Found"}</h2>
-          <p className="text-xs text-slate-400 mb-6">{isAr ? "عذراً، لم نتمكن من العثور على تفاصيل هذا البرنامج الأكاديمي." : "Sorry, we couldn't find the details for this academic program."}</p>
+          <h2 className="text-2xl font-black mb-2">{t('programDetail.not_found')}</h2>
+          <p className="text-xs text-slate-400 mb-6">{t('programDetail.not_found_detail')}</p>
           <button
             onClick={() => navigate('/programs')}
             className="bg-[#2cfc7d] hover:bg-[#25d366] text-black font-black text-xs px-6 py-3 rounded-xl transition-all flex items-center gap-2"
           >
             {isAr ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
-            {isAr ? "العودة لجميع البرامج" : "Back to Programs"}
+            {t('programDetail.back_to_programs')}
           </button>
         </main>
         <Footer />
@@ -112,7 +112,7 @@ export default function ProgramDetailsPage() {
   const currentFiles = isAr ? details.filesTabAr : details.filesTabEn;
 
   const handleDownload = (filename) => {
-    toast.success(isAr ? `بدأ تحميل الملف: ${filename}` : `Downloading file: ${filename}`);
+    toast.success(t('programDetail.download_started', { filename }));
   };
 
   return (
@@ -152,7 +152,7 @@ export default function ProgramDetailsPage() {
           className="mb-8 text-xs font-black uppercase tracking-widest text-slate-400 hover:text-[#2cfc7d] transition-colors flex items-center gap-2 group"
         >
           {isAr ? <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" /> : <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />}
-          {isAr ? "العودة إلى البرامج الأكاديمية" : "Back to Academic Programs"}
+          {t('programDetail.back_link')}
         </button>
 
         {/* Grand Banner Header */}
@@ -168,11 +168,11 @@ export default function ProgramDetailsPage() {
             <div className="flex flex-wrap items-center gap-6 text-xs text-slate-400 font-bold pt-2">
               <div className="flex items-center gap-2">
                 <BookOpen className="w-4 h-4 text-purple-500" />
-                <span>{isAr ? "مدة الدراسة:" : "Duration:"} {isAr ? program.durationAr : program.durationEn}</span>
+                <span>{t('programDetail.duration')} {isAr ? program.durationAr : program.durationEn}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Award className="w-4 h-4 text-[#2cfc7d]" />
-                <span>{isAr ? "المصروفات السنوية:" : "Tuition:"} {program.fees} {isAr ? "جنيه مصري" : "EGP"}</span>
+                <span>{t('programDetail.tuition')} {program.fees} {t('programDetail.egp')}</span>
               </div>
             </div>
           </div>
@@ -205,7 +205,7 @@ export default function ProgramDetailsPage() {
                     </p>
 
                     <div className="space-y-4 pt-4 border-t border-gray-100 dark:border-white/5">
-                      <h3 className="text-xs font-black uppercase tracking-wider text-[#2cfc7d]">{isAr ? "أهداف البرنامج الأساسية:" : "Program Core Goals:"}</h3>
+                      <h3 className="text-xs font-black uppercase tracking-wider text-[#2cfc7d]">{t('programDetail.core_goals')}</h3>
                       <ul className="space-y-3.5">
                         {currentDesc.points.map((pt, index) => (
                           <li key={pt?.id || index} className="text-xs font-medium text-slate-500 dark:text-slate-300 flex items-start gap-3">
@@ -237,7 +237,7 @@ export default function ProgramDetailsPage() {
                     </p>
 
                     <div className="space-y-4 pt-4 border-t border-gray-100 dark:border-white/5">
-                      <h3 className="text-xs font-black uppercase tracking-wider text-purple-500">{isAr ? "أهم بنود اللائحة:" : "Key Regulations:"}</h3>
+                      <h3 className="text-xs font-black uppercase tracking-wider text-purple-500">{t('programDetail.regulations')}</h3>
                       <ul className="space-y-3.5">
                         {currentBylaw.points.map((pt, index) => (
                           <li key={pt?.id || index} className="text-xs font-medium text-slate-500 dark:text-slate-300 flex items-start gap-3">
@@ -270,10 +270,10 @@ export default function ProgramDetailsPage() {
                       </div>
                       <div className="space-y-1">
                         <h4 className="text-sm font-black text-slate-900 dark:text-white">
-                          {isAr ? "لا توجد ملفات مرفقة حالياً" : "No Attached Files Currently"}
+                          {t('programDetail.no_files')}
                         </h4>
                         <p className="text-xs text-slate-400 dark:text-gray-500 max-w-md mx-auto leading-relaxed">
-                          {isAr ? "لم يتم إرفاق أي لوائح أو ملفات تعريفية خاصة بهذا البرنامج الأكاديمي في الوقت الحالي." : "No bylaws, booklets, or regulatory documents are currently available for this academic program."}
+                          {t('programDetail.no_files_detail')}
                         </p>
                       </div>
                     </div>
@@ -298,7 +298,7 @@ export default function ProgramDetailsPage() {
               >
                 <div className="flex items-center gap-2.5">
                   <Info className="w-4.5 h-4.5" />
-                  <span>{isAr ? "وصف البرنامج" : "Program Description"}</span>
+                  <span>{t('programDetail.description_tab')}</span>
                 </div>
                 <ChevronRight className={`w-4 h-4 hidden lg:block ${isAr ? 'rotate-180' : ''}`} />
               </button>
@@ -313,7 +313,7 @@ export default function ProgramDetailsPage() {
               >
                 <div className="flex items-center gap-2.5">
                   <BookOpen className="w-4.5 h-4.5" />
-                  <span>{isAr ? "اللائحة الدراسية" : "Regulations (Bylaw)"}</span>
+                  <span>{t('programDetail.regulations_tab')}</span>
                 </div>
                 <ChevronRight className={`w-4 h-4 hidden lg:block ${isAr ? 'rotate-180' : ''}`} />
               </button>
@@ -328,7 +328,7 @@ export default function ProgramDetailsPage() {
               >
                 <div className="flex items-center gap-2.5">
                   <FileText className="w-4.5 h-4.5" />
-                  <span>{isAr ? "الملفات والوثائق" : "Files & Documents"}</span>
+                  <span>{t('programDetail.files_tab')}</span>
                 </div>
                 <ChevronRight className={`w-4 h-4 hidden lg:block ${isAr ? 'rotate-180' : ''}`} />
               </button>
