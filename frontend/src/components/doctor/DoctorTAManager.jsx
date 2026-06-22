@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useDoctorAuth } from '../../context/DoctorAuthContext';
 import toast from 'react-hot-toast';
-import { Users, Plus, X, Search, BookOpen, Mail, Phone, Key, Trash2, Loader2, UserPlus } from 'lucide-react';
+import { Users, Plus, X, Search, BookOpen, Mail, Phone, Key, Trash2, Loader2, UserPlus, Eye, EyeOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 
@@ -13,6 +13,7 @@ const DoctorTAManager = ({ courses }) => {
   const [search, setSearch] = useState('');
 
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showTAPwd, setShowTAPwd] = useState(false);
   const [creating, setCreating] = useState(false);
   const [newTA, setNewTA] = useState({ name: '', email: '', password: '', phone: '' });
 
@@ -206,7 +207,10 @@ const DoctorTAManager = ({ courses }) => {
                   <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ms-1">{t('doctor.ta.modal.password_label')}</label>
                   <div className="flex items-center gap-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 mt-1">
                     <Key className="w-5 h-5 text-gray-400" />
-                    <input type="password" value={newTA.password} onChange={(e) => setNewTA({ ...newTA, password: e.target.value })} placeholder={t('doctor.ta.modal.password_placeholder')} className="bg-transparent flex-1 outline-none text-gray-900 dark:text-white font-medium" />
+                    <input type={showTAPwd ? 'text' : 'password'} value={newTA.password} onChange={(e) => setNewTA({ ...newTA, password: e.target.value })} placeholder={t('doctor.ta.modal.password_placeholder')} className="bg-transparent flex-1 outline-none text-gray-900 dark:text-white font-medium" />
+                    <button type="button" onClick={() => setShowTAPwd(!showTAPwd)} className="p-1.5 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-white/5">
+                      {showTAPwd ? <EyeOff className="w-4 h-4 text-gray-400" /> : <Eye className="w-4 h-4 text-gray-400" />}
+                    </button>
                   </div>
                 </div>
                 <div>

@@ -35,7 +35,7 @@ import {
   CheckCircle, Database, LogOut, Lock, UserCheck,
   TrendingUp, Award, Activity, ShieldCheck, ChevronRight,
   Smartphone, Heart, ScrollText, Mail, ClipboardList, Sun, Moon, CheckSquare, Menu, X,
-  Terminal, Shield, Zap, Loader2
+  Terminal, Shield, Zap, Loader2, Eye, EyeOff
 } from 'lucide-react';
 
 import AdminSidebar from '../components/admin/AdminSidebar';
@@ -123,6 +123,7 @@ const AdminDashboard = () => {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
   const [verifyingPassword, setVerifyingPassword] = useState(false);
+  const [showAdminPwd, setShowAdminPwd] = useState(false);
 
   const handleUpgradeSemester = async () => {
     setTransitioning(true);
@@ -574,15 +575,20 @@ const AdminDashboard = () => {
                 <label className="text-xs text-gray-400 mb-1 block">
                   {t('admin.dashboard.password_label')}
                 </label>
-                <input
-                  type="password"
-                  value={passwordInput}
-                  onChange={(e) => setPasswordInput(e.target.value)}
-                  className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-lg px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[#059669]/30"
-                  placeholder="••••••••"
-                  autoFocus
-                  required
-                />
+                <div className="relative">
+                  <input
+                    type={showAdminPwd ? 'text' : 'password'}
+                    value={passwordInput}
+                    onChange={(e) => setPasswordInput(e.target.value)}
+                    className="w-full bg-gray-50 dark:bg-white/[0.02] text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-lg px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[#059669]/30"
+                    placeholder="••••••••"
+                    autoFocus
+                    required
+                  />
+                  <button type="button" onClick={() => setShowAdminPwd(!showAdminPwd)} className="absolute end-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-white/5">
+                    {showAdminPwd ? <EyeOff className="w-4 h-4 text-gray-400" /> : <Eye className="w-4 h-4 text-gray-400" />}
+                  </button>
+                </div>
               </div>
 
               <div className="flex gap-3 pt-4 border-t border-gray-100 dark:border-white/5">

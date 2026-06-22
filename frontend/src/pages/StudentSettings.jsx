@@ -5,7 +5,7 @@ import {
   Camera, Loader2, ShieldCheck, 
   CheckCircle2, Languages, Zap, 
   ArrowRight, Star, Layers,
-  Trash2, ShieldAlert
+  Trash2, ShieldAlert, Eye, EyeOff
 } from 'lucide-react';
 import { useStudentAuth } from '../context/StudentAuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -31,6 +31,7 @@ const StudentSettings = () => {
     confirmPassword: ''
   });
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [showPwd, setShowPwd] = useState({ old: false, new: false, confirm: false });
   const fileInputRef = useRef(null);
   const { student, logout, linkEmail, changePassword, uploadAvatar } = useStudentAuth();
 
@@ -250,34 +251,45 @@ const StudentSettings = () => {
                      <h4 className="text-xs font-black uppercase tracking-widest">{t('settings.change_password')}</h4>
                   </div>
                   <form onSubmit={handleChangePassword} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                     <div className="md:col-span-2">
+                     <div className="md:col-span-2 relative">
                         <input 
-                           type="password"
+                           type={showPwd.old ? 'text' : 'password'}
                            value={passwordData.oldPassword}
                            onChange={(e) => setPasswordData({...passwordData, oldPassword: e.target.value})}
                            placeholder={t('settings.current_password')}
                            className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-[2rem] px-8 py-5 font-black text-xs uppercase tracking-widest focus:ring-2 focus:ring-amber-500 outline-none"
                         />
+                        <button type="button" onClick={() => setShowPwd({...showPwd, old: !showPwd.old})} className="absolute end-4 top-1/2 -translate-y-1/2 p-2 rounded-full transition-colors hover:bg-gray-100 dark:hover:bg-white/5">
+                          {showPwd.old ? <EyeOff className="w-5 h-5 text-gray-400" /> : <Eye className="w-5 h-5 text-gray-400" />}
+                        </button>
                      </div>
                       <div className="relative">
                          <input 
-                            type="password"
+                            type={showPwd.new ? 'text' : 'password'}
                             value={passwordData.newPassword}
                             onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
                             placeholder={t('settings.new_password')}
                             className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-[2rem] px-8 py-5 font-black text-xs uppercase tracking-widest focus:ring-2 focus:ring-amber-500 outline-none"
                          />
+                         <button type="button" onClick={() => setShowPwd({...showPwd, new: !showPwd.new})} className="absolute end-4 top-1/2 -translate-y-1/2 p-2 rounded-full transition-colors hover:bg-gray-100 dark:hover:bg-white/5">
+                           {showPwd.new ? <EyeOff className="w-5 h-5 text-gray-400" /> : <Eye className="w-5 h-5 text-gray-400" />}
+                         </button>
                          {passwordData.newPassword && (
                             <PasswordStrengthBar password={passwordData.newPassword} />
                          )}
                       </div>
-                      <input 
-                         type="password"
-                         value={passwordData.confirmPassword}
-                         onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
-                         placeholder={t('settings.confirm_password')}
-                         className="bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-[2rem] px-8 py-5 font-black text-xs uppercase tracking-widest focus:ring-2 focus:ring-amber-500 outline-none"
-                      />
+                      <div className="relative">
+                        <input 
+                           type={showPwd.confirm ? 'text' : 'password'}
+                           value={passwordData.confirmPassword}
+                           onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
+                           placeholder={t('settings.confirm_password')}
+                           className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-[2rem] px-8 py-5 font-black text-xs uppercase tracking-widest focus:ring-2 focus:ring-amber-500 outline-none"
+                        />
+                        <button type="button" onClick={() => setShowPwd({...showPwd, confirm: !showPwd.confirm})} className="absolute end-4 top-1/2 -translate-y-1/2 p-2 rounded-full transition-colors hover:bg-gray-100 dark:hover:bg-white/5">
+                          {showPwd.confirm ? <EyeOff className="w-5 h-5 text-gray-400" /> : <Eye className="w-5 h-5 text-gray-400" />}
+                        </button>
+                      </div>
                      <button 
                         type="submit"
                         disabled={isChangingPassword}

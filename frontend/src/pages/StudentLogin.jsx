@@ -7,7 +7,7 @@ import { useMsal } from "@azure/msal-react";
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Lock, ArrowRight, GraduationCap, BookOpen, Clock, Database } from 'lucide-react';
+import { Mail, Lock, ArrowRight, GraduationCap, BookOpen, Clock, Database, Eye, EyeOff } from 'lucide-react';
 
 const StudentLogin = () => {
   const [username, setUsername] = useState('');
@@ -184,12 +184,15 @@ const StudentLogin = () => {
                   <div className={`group relative flex items-center rounded-[2.5rem] border transition-all duration-500 focus-within:ring-8 focus-within:ring-[#059669]/5 ${isDarkMode ? 'bg-black/40 border-white/5 focus-within:border-[#059669]' : 'bg-gray-50 border-gray-100 focus-within:border-[#059669] shadow-inner'}`}>
                     <Lock className={`ms-8 w-6 h-6 transition-colors ${isDarkMode ? 'text-white/10 group-focus-within:text-[#059669]' : 'text-gray-300 group-focus-within:text-[#059669]'}`} />
                     <input
-                      type="password"
+                      type={showPassword ? 'text' : 'password'}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
                       className="w-full bg-transparent py-7 px-8 text-xl font-bold outline-none tracking-widest placeholder:tracking-normal placeholder:opacity-20"
                     />
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="me-4 p-2 rounded-full transition-colors hover:bg-white/5">
+                      {showPassword ? <EyeOff className="w-5 h-5 text-gray-400" /> : <Eye className="w-5 h-5 text-gray-400" />}
+                    </button>
                   </div>
                 </div>
               </div>

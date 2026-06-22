@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import { Mail, Lock, ArrowRight, GraduationCap, BookOpen, Users } from 'lucide-react';
+import { Mail, Lock, ArrowRight, GraduationCap, BookOpen, Users, Eye, EyeOff } from 'lucide-react';
 
 const TALogin = () => {
   const { token, login } = useTAAuth();
@@ -15,6 +15,7 @@ const TALogin = () => {
   const navigate = useNavigate();
   const [credentials, setCredentials] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     if (token) navigate('/ta/dashboard', { replace: true });
@@ -126,12 +127,15 @@ const TALogin = () => {
                   <div className={`group relative flex items-center rounded-[2.5rem] border transition-all duration-500 focus-within:ring-8 focus-within:ring-[#059669]/5 ${isDarkMode ? 'bg-black/40 border-white/5 focus-within:border-[#059669]' : 'bg-gray-50 border-gray-100 focus-within:border-[#059669] shadow-inner'}`}>
                     <Lock className={`ms-8 w-6 h-6 transition-colors ${isDarkMode ? 'text-white/10 group-focus-within:text-[#059669]' : 'text-gray-300 group-focus-within:text-[#059669]'}`} />
                     <input
-                      type="password"
+                      type={showPassword ? 'text' : 'password'}
                       value={credentials.password}
                       onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
                       placeholder="••••••••"
                       className="w-full bg-transparent py-7 px-8 text-xl font-bold outline-none tracking-widest placeholder:tracking-normal placeholder:opacity-20"
                     />
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="me-4 p-2 rounded-full transition-colors hover:bg-white/5">
+                      {showPassword ? <EyeOff className="w-5 h-5 text-gray-400" /> : <Eye className="w-5 h-5 text-gray-400" />}
+                    </button>
                   </div>
                 </div>
               </div>

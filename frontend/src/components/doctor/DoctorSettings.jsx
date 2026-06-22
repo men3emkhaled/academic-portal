@@ -6,7 +6,7 @@ import {
   User, Mail, Phone, Book, Shield, Moon, Sun, 
   Camera, Save, Lock, Bell, Loader2,
   Settings as SettingsIcon, Palette, Zap, Globe,
-  Building2, GraduationCap, Languages
+  Building2, GraduationCap, Languages, Eye, EyeOff
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -18,6 +18,7 @@ const DoctorSettings = () => {
   
   const [activeSection, setActiveSection] = useState('profile');
   const [loading, setLoading] = useState(false);
+  const [showPwd, setShowPwd] = useState([false, false, false]);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   
   const [profileData, setProfileData] = useState({
@@ -221,10 +222,15 @@ const DoctorSettings = () => {
                             ].map((f, i) => (
                                 <div key={i} className="space-y-2">
                                     <label className="text-xs text-gray-400 font-medium">{f.label}</label>
-                                    <input type="password" required value={passwordData[f.key]}
-                                        onChange={(e) => setPasswordData({...passwordData, [f.key]: e.target.value})}
-                                        className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/10 rounded-xl py-3 px-4 text-gray-900 dark:text-white outline-none"
-                                    />
+                                    <div className="relative">
+                                        <input type={showPwd[i] ? 'text' : 'password'} required value={passwordData[f.key]}
+                                            onChange={(e) => setPasswordData({...passwordData, [f.key]: e.target.value})}
+                                            className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/10 rounded-xl py-3 px-4 text-gray-900 dark:text-white outline-none"
+                                        />
+                                        <button type="button" onClick={() => { const s = [...showPwd]; s[i] = !s[i]; setShowPwd(s); }} className="absolute end-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-white/5">
+                                          {showPwd[i] ? <EyeOff className="w-4 h-4 text-gray-400" /> : <Eye className="w-4 h-4 text-gray-400" />}
+                                        </button>
+                                    </div>
                                 </div>
                             ))}
 
