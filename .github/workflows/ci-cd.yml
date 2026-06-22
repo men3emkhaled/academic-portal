@@ -2,9 +2,9 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [main, develop]
+    branches: [master, develop]
   pull_request:
-    branches: [main]
+    branches: [master]
 
 env:
   NODE_VERSION: '18'
@@ -162,7 +162,7 @@ jobs:
     name: 🐳 Docker Build & Push
     runs-on: ubuntu-latest
     needs: build
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
@@ -207,13 +207,13 @@ jobs:
           cache-to: type=gha,mode=max
 
   # ────────────────────────────────────────────
-  # 5. Deploy to Production (main branch)
+  # 5. Deploy to Production (master branch)
   # ────────────────────────────────────────────
   deploy:
     name: 🚀 Deploy Production
     runs-on: ubuntu-latest
     needs: docker
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
     environment: production
     steps:
       - name: 🚀 Deploy via Railway webhook
@@ -272,13 +272,13 @@ jobs:
           echo "✅ Staging health check passed!"
 
   # ────────────────────────────────────────────
-  # 7. Release & Tag (main branch only)
+  # 7. Release & Tag (master branch only)
   # ────────────────────────────────────────────
   release:
     name: 🏷️ Create Release
     runs-on: ubuntu-latest
     needs: deploy
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
