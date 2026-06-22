@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { 
   BookOpen, FileText, Map, CheckSquare, Settings, ShieldCheck, 
   Languages, Sun, Moon, LogOut, ArrowRight, User, GraduationCap, 
-  Layers, Users, Bell, CalendarDays, TrendingUp
+  Layers, Users, Bell, CalendarDays, TrendingUp, Sparkles
 } from 'lucide-react';
 import { useStudentAuth } from '../context/StudentAuthContext';
 import { useStudentData } from '../context/StudentDataContext';
@@ -113,6 +113,15 @@ const StudentMenu = () => {
       icon: <Layers className="w-8 h-8" />, 
       path: '/student/attendance',
       color: 'from-cyan-500/10 to-teal-500/10 dark:from-cyan-500/20 dark:to-teal-500/20 text-cyan-600 dark:text-cyan-400 border-cyan-500/20',
+      badge: null
+    },
+    { 
+      id: 'ai', 
+      label: 'Zag AI', 
+      desc: t('studentMenu.ai_desc') || 'AI-powered academic assistant',
+      icon: <Sparkles className="w-8 h-8" />, 
+      path: '/student/ai',
+      color: 'from-emerald-500/10 to-teal-500/10 dark:from-emerald-500/20 dark:to-teal-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
       badge: null
     },
     { 
