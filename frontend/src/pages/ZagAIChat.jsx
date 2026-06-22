@@ -12,6 +12,7 @@ import {
   Plus, MessageSquare, Download, Loader2,
   Paperclip, X, Maximize2, BookOpen, GraduationCap, Calendar, HelpCircle, Bot, ArrowRight
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import Sidebar from '../components/Sidebar';
 import studentApi from '../services/studentApi';
@@ -366,7 +367,11 @@ const ZagAIChat = () => {
           if (chatId) persist(chatId, finalMsgs);
         }
       } else {
-        const finalMsgs = [...updatedMessages, { id: (Date.now() + 1).toString(), role: 'assistant', text: err.message || 'Failed', error: true, createdAt: Date.now() }];
+        const isOffline = err.message === 'Failed to fetch' || err.message?.includes('NetworkError') || err.message?.includes('Network request failed') || err.message?.includes('load failed');
+        const errorText = isOffline
+          ? (isAr ? 'الموديل لسا تحت التدريب' : 'The model is still under training')
+          : (err.message || 'Failed');
+        const finalMsgs = [...updatedMessages, { id: (Date.now() + 1).toString(), role: 'assistant', text: errorText, error: true, createdAt: Date.now() }];
         setMessages(finalMsgs);
         if (chatId) persist(chatId, finalMsgs);
       }
@@ -440,6 +445,10 @@ const ZagAIChat = () => {
         body.keyboard-open .fixed.bottom-0 {
           display: none !important;
         }
+        .chat-scroll-area {
+          overscroll-behavior: contain;
+          -webkit-overflow-scrolling: touch;
+        }
         @media (min-width: 1024px) {
           .zag-content-area {
             padding-inline-start: ${isSidebarOpen ? '39.5rem' : '21rem'} !important;
@@ -448,7 +457,7 @@ const ZagAIChat = () => {
         }
       `}</style>
 
-      <div className="h-screen h-[100dvh] w-screen overflow-hidden bg-slate-50 dark:bg-[#07070c] text-gray-900 dark:text-white font-sans flex">
+      <div className="h-screen h-[100dvh] w-screen overflow-hidden bg-slate-50 dark:bg-[#07070c] text-gray-900 dark:text-white font-sans flex" style={{ touchAction: 'none' }}>
 
         <Sidebar onLogout={handleLogout} />
 
@@ -556,7 +565,7 @@ const ZagAIChat = () => {
           <main className="flex-1 flex flex-col min-h-0 relative bg-transparent">
 
             {/* Messages area */}
-            <div className="flex-1 overflow-y-auto min-h-0 p-4 lg:p-8 space-y-6 pb-6 custom-scrollbar">
+            <div className="flex-1 overflow-y-auto min-h-0 p-4 lg:p-8 space-y-6 pb-6 custom-scrollbar chat-scroll-area" onClick={() => inputRef.current?.blur()} onTouchEnd={() => inputRef.current?.blur()}>
 
               {/* Empty state */}
               {messages.length === 0 && !sending && !streamingText && (
@@ -781,7 +790,7 @@ const ZagAIChat = () => {
                   placeholder={t('ai.placeholder')}
                   rows={1}
                   disabled={sending}
-                  className="textarea-smooth flex-1 bg-transparent py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-white/30 resize-none focus:outline-none leading-relaxed"
+                  className="textarea-smooth flex-1 bg-transparent py-2.5 text-sm text-[16px] text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-white/30 resize-none focus:outline-none leading-relaxed"
                   style={{ minHeight: '36px', maxHeight: '130px' }}
                   onInput={(e) => { e.target.style.height = 'auto'; e.target.style.height = `${Math.min(e.target.scrollHeight, 130)}px`; }}
                 />
@@ -805,50 +814,65 @@ const ZagAIChat = () => {
         </div>
 
         {/* ── Mobile drawer overlay (< lg) ── */}
-        {showHistory && (
-          <div className="lg:hidden fixed inset-0 z-50 flex">
-            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowHistory(false)} />
-            <aside className="relative w-[280px] bg-white dark:bg-[#0d0d14] h-full shadow-2xl border-e border-gray-100 dark:border-white/5 flex flex-col">
-              <div className="flex-shrink-0 p-4 border-b border-gray-100 dark:border-white/5 flex items-center justify-between">
-                <span className="font-black text-base text-gray-900 dark:text-white">{t('ai.title')}</span>
-                <button onClick={() => setShowHistory(false)} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-              <div className="flex-shrink-0 p-3 flex gap-2">
-                <button
-                  onClick={() => { newChat(); setShowHistory(false); }}
-                  disabled={isEmptyChat}
-                  className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-[#10b981] dark:bg-[#2cfc7d] rounded-xl text-[10px] font-black uppercase tracking-[0.15em] ${isEmptyChat ? 'opacity-20 pointer-events-none cursor-not-allowed bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-gray-600' : 'text-white dark:text-black'}`}
-                >
-                  {t('ai.new_chat')}
-                </button>
-                {messages.length > 0 && (
-                  <button onClick={() => { exportChat(); setShowHistory(false); }} className="flex items-center justify-center px-3 py-2.5 bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/5 rounded-xl text-[11px] font-black uppercase tracking-[0.15em]">
-                    <Download className="w-3.5 h-3.5" />
+        <AnimatePresence>
+          {showHistory && (
+            <div className="lg:hidden fixed inset-0 z-50 flex">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+                onClick={() => setShowHistory(false)}
+              />
+              <motion.aside
+                initial={{ x: '-100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '-100%' }}
+                transition={{ type: 'spring', damping: 28, stiffness: 260 }}
+                className="relative w-[280px] bg-white/90 dark:bg-[#0d0d14]/90 backdrop-blur-md h-full shadow-2xl border-e border-gray-100 dark:border-white/5 flex flex-col"
+              >
+                <div className="flex-shrink-0 p-4 border-b border-gray-100 dark:border-white/5 flex items-center justify-between">
+                  <span className="font-black text-base text-gray-900 dark:text-white">{t('ai.title')}</span>
+                  <button onClick={() => setShowHistory(false)} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
+                    <X className="w-4 h-4" />
                   </button>
-                )}
-              </div>
-              <div className="flex-1 overflow-y-auto min-h-0 p-2 space-y-0.5">
-                {conversations.length === 0 && (
-                  <p className="text-xs text-gray-400 text-center py-8">{t('ai.no_conversations')}</p>
-                )}
-                {conversations.map(chat => (
-                  <div key={chat.id} onClick={() => switchChat(chat.id)} className={`flex items-center gap-2 px-3 py-2.5 rounded-xl cursor-pointer transition-all duration-200 group ${chat.id === activeChatId
-                    ? 'bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white'
-                    : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5'
-                    }`}>
-                    <MessageSquare className="w-3.5 h-3.5 flex-shrink-0" />
-                    <span className="flex-1 text-xs truncate">{chat.title}</span>
-                    <button onClick={(e) => deleteChat(chat.id, e)} className="p-1 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-red-500/20 text-gray-400 hover:text-red-400 transition-all">
-                      <X className="w-3 h-3" />
+                </div>
+                <div className="flex-shrink-0 p-3 flex gap-2">
+                  <button
+                    onClick={() => { newChat(); setShowHistory(false); }}
+                    disabled={isEmptyChat}
+                    className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-[#10b981] dark:bg-[#2cfc7d] rounded-xl text-[10px] font-black uppercase tracking-[0.15em] ${isEmptyChat ? 'opacity-20 pointer-events-none cursor-not-allowed bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-gray-600' : 'text-white dark:text-black'}`}
+                  >
+                    {t('ai.new_chat')}
+                  </button>
+                  {messages.length > 0 && (
+                    <button onClick={() => { exportChat(); setShowHistory(false); }} className="flex items-center justify-center px-3 py-2.5 bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/5 rounded-xl text-[11px] font-black uppercase tracking-[0.15em]">
+                      <Download className="w-3.5 h-3.5" />
                     </button>
-                  </div>
-                ))}
-              </div>
-            </aside>
-          </div>
-        )}
+                  )}
+                </div>
+                <div className="flex-1 overflow-y-auto min-h-0 p-2 space-y-0.5">
+                  {conversations.length === 0 && (
+                    <p className="text-xs text-gray-400 text-center py-8">{t('ai.no_conversations')}</p>
+                  )}
+                  {conversations.map(chat => (
+                    <div key={chat.id} onClick={() => switchChat(chat.id)} className={`flex items-center gap-2 px-3 py-2.5 rounded-xl cursor-pointer transition-all duration-200 group ${chat.id === activeChatId
+                      ? 'bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white'
+                      : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5'
+                      }`}>
+                      <MessageSquare className="w-3.5 h-3.5 flex-shrink-0" />
+                      <span className="flex-1 text-xs truncate">{chat.title}</span>
+                      <button onClick={(e) => deleteChat(chat.id, e)} className="p-1 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-red-500/20 text-gray-400 hover:text-red-400 transition-all">
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </motion.aside>
+            </div>
+          )}
+        </AnimatePresence>
 
         {/* Image zoom modal */}
         {zoomImage && (
