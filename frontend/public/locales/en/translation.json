@@ -1200,7 +1200,7 @@
     "instructor_id": "Instructor ID",
     "admin_id": "Admin ID",
     "enter_id": "Enter ID",
-    "access_key": "Access Key",
+    "access_key": "Password",
     "password": "Password",
     "authenticate": "Login",
     "processing": "Processing...",
