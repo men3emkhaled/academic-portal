@@ -92,46 +92,46 @@ const TALogin = () => {
             </div>
           </motion.div>
         </div>
-        <div className={`flex-1 flex flex-col items-center justify-center p-8 lg:p-24 relative overflow-hidden transition-colors duration-500 ${isDarkMode ? 'bg-[#010101]' : 'bg-[#fafafa]'}`}>
+        <div className={`flex-1 flex flex-col items-center justify-center p-6 sm:p-8 lg:p-24 relative overflow-hidden transition-colors duration-500 ${isDarkMode ? 'bg-[#010101]' : 'bg-[#fafafa]'}`}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, ease: "easeOut" }}
             className="w-full max-w-md relative z-10 text-center flex flex-col"
           >
-            <div className="lg:hidden mb-10 flex flex-col items-center">
+            <div className="lg:hidden mb-6 flex flex-col items-center">
               <img src="/logo.png" className="w-20 h-20 object-contain mb-4" alt="Logo" />
               <div className="h-px w-12 bg-[#059669]/30"></div>
             </div>
-            <div className="text-start mb-12">
-              <h2 className="text-5xl lg:text-6xl font-black uppercase tracking-tighter text-gray-900 dark:text-white leading-none">{t('auth.sign_in')}</h2>
-              <p className="mt-4 text-sm font-bold text-gray-400 uppercase tracking-widest">{t('ta.login.portal_label')}</p>
+            <div className="text-start mb-6 lg:mb-8">
+              <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tighter text-gray-900 dark:text-white leading-none">{t('auth.sign_in')}</h2>
+              <p className="mt-2 text-xs sm:text-sm font-bold text-gray-400 uppercase tracking-widest">{t('ta.login.portal_label')}</p>
             </div>
-            <form onSubmit={handleLogin} className="space-y-10">
+            <form onSubmit={handleLogin} className="space-y-6 lg:space-y-8">
               <div className="space-y-6">
                 <div className="space-y-3">
                   <label className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 ms-6">{t('ta.login.email_label')}</label>
-                  <div className={`group relative flex items-center rounded-[2.5rem] border transition-all duration-500 focus-within:ring-8 focus-within:ring-[#059669]/5 ${isDarkMode ? 'bg-black/40 border-white/5 focus-within:border-[#059669]' : 'bg-gray-50 border-gray-100 focus-within:border-[#059669] shadow-inner'}`}>
-                    <Mail className={`ms-8 w-6 h-6 transition-colors ${isDarkMode ? 'text-white/10 group-focus-within:text-[#059669]' : 'text-gray-300 group-focus-within:text-[#059669]'}`} />
+                  <div className={`group relative flex items-center rounded-[1.75rem] border transition-all duration-500 focus-within:ring-8 focus-within:ring-[#059669]/5 ${isDarkMode ? 'bg-black/40 border-white/5 focus-within:border-[#059669]' : 'bg-gray-50 border-gray-100 focus-within:border-[#059669] shadow-inner'}`}>
+                    <Mail className={`ms-6 w-5 h-5 transition-colors ${isDarkMode ? 'text-white/10 group-focus-within:text-[#059669]' : 'text-gray-300 group-focus-within:text-[#059669]'}`} />
                     <input
                       type="email"
                       value={credentials.email}
                       onChange={(e) => setCredentials({ ...credentials, email: e.target.value })}
                       placeholder={t('ta.login.email_placeholder')}
-                      className="w-full bg-transparent py-7 px-8 text-xl font-bold outline-none placeholder:opacity-20 tracking-tight"
+                      className="w-full bg-transparent py-4 px-6 text-base font-bold outline-none placeholder:opacity-20 tracking-tight"
                     />
                   </div>
                 </div>
                 <div className="space-y-3">
                   <label className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 ms-6">{t('auth.access_key')}</label>
-                  <div className={`group relative flex items-center rounded-[2.5rem] border transition-all duration-500 focus-within:ring-8 focus-within:ring-[#059669]/5 ${isDarkMode ? 'bg-black/40 border-white/5 focus-within:border-[#059669]' : 'bg-gray-50 border-gray-100 focus-within:border-[#059669] shadow-inner'}`}>
-                    <Lock className={`ms-8 w-6 h-6 transition-colors ${isDarkMode ? 'text-white/10 group-focus-within:text-[#059669]' : 'text-gray-300 group-focus-within:text-[#059669]'}`} />
+                  <div className={`group relative flex items-center rounded-[1.75rem] border transition-all duration-500 focus-within:ring-8 focus-within:ring-[#059669]/5 ${isDarkMode ? 'bg-black/40 border-white/5 focus-within:border-[#059669]' : 'bg-gray-50 border-gray-100 focus-within:border-[#059669] shadow-inner'}`}>
+                    <Lock className={`ms-6 w-5 h-5 transition-colors ${isDarkMode ? 'text-white/10 group-focus-within:text-[#059669]' : 'text-gray-300 group-focus-within:text-[#059669]'}`} />
                     <input
                       type={showPassword ? 'text' : 'password'}
                       value={credentials.password}
                       onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
                       placeholder="••••••••"
-                      className="w-full bg-transparent py-7 px-8 text-xl font-bold outline-none tracking-widest placeholder:tracking-normal placeholder:opacity-20"
+                      className="w-full bg-transparent py-4 px-6 text-base font-bold outline-none tracking-widest placeholder:tracking-normal placeholder:opacity-20"
                     />
                     <button type="button" onClick={() => setShowPassword(!showPassword)} className="me-4 p-2 rounded-full transition-colors hover:bg-white/5">
                       {showPassword ? <EyeOff className="w-5 h-5 text-gray-400" /> : <Eye className="w-5 h-5 text-gray-400" />}
@@ -143,7 +143,7 @@ const TALogin = () => {
                 whileHover={{ scale: 1.02, y: -4 }}
                 whileTap={{ scale: 0.98 }}
                 disabled={loading}
-                className={`w-full font-black py-7 rounded-[2.5rem] flex items-center justify-center gap-4 text-xs uppercase tracking-[0.6em] shadow-[0_20px_50px_rgba(0,0,0,0.3)] relative overflow-hidden group ${isDarkMode ? 'bg-white text-black' : 'bg-gray-900 text-white'} ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`w-full font-black py-4 rounded-[1.75rem] flex items-center justify-center gap-4 text-xs uppercase tracking-[0.6em] shadow-[0_20px_50px_rgba(0,0,0,0.3)] relative overflow-hidden group ${isDarkMode ? 'bg-white text-black' : 'bg-gray-900 text-white'} ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-[#059669]/0 via-[#059669]/20 to-[#059669]/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
                 {loading ? (
@@ -151,7 +151,7 @@ const TALogin = () => {
                     <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
                     <span>{t('auth.processing')}</span>
                   </div>
-                ) : <>{t('auth.authenticate')} <ArrowRight className={`w-6 h-6 ${i18n.language === 'ar' ? 'rotate-180' : ''}`} /></>}
+                ) : <>{t('auth.authenticate')} <ArrowRight className={`w-5 h-5 ${i18n.language === 'ar' ? 'rotate-180' : ''}`} /></>}
               </motion.button>
             </form>
           </motion.div>
