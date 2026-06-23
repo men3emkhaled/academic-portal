@@ -48,7 +48,9 @@ const StudentLogin = () => {
       toast.success(t('auth.signed_in'));
       navigate('/student/dashboard');
     } else {
-      toast.error(result.message || t('auth.login_failed'));
+      const errMsg = result.message;
+      const errTranslated = errMsg && t('auth.' + errMsg);
+      toast.error(errTranslated !== 'auth.' + errMsg ? errTranslated : errMsg || t('auth.login_failed'));
     }
   };
 

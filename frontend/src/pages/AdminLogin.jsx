@@ -30,7 +30,9 @@ const AdminLogin = () => {
          toast.success(t('auth.admin_portal') + ' ' + t('auth.authorized'));
          navigate('/admin', { replace: true });
       } catch (error) {
-         toast.error(error.response?.data?.message || t('auth.login_failed'));
+         const errMsg = error.response?.data?.message;
+         const errTranslated = errMsg && t('auth.' + errMsg);
+         toast.error(errTranslated !== 'auth.' + errMsg ? errTranslated : errMsg || t('auth.login_failed'));
       } finally {
          setLoading(false);
       }
