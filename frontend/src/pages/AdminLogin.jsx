@@ -78,19 +78,19 @@ const AdminLogin = () => {
                   <div className="space-y-4">
                      <h1 className={`text-[clamp(4rem,8vw,8rem)] font-black uppercase text-gray-900 dark:text-white ${i18n.language === 'ar' ? 'font-arabic leading-[1.2] tracking-normal' : 'leading-[0.9] tracking-tighter'}`}>
                         {t('auth.admin_portal').split(' ')[0]} <br />
-                        <span className="text-emerald-500">{t('auth.admin_portal').split(' ')[1]}.</span>
+                        <span className="text-emerald-500 dark:text-emerald-300">{t('auth.admin_portal').split(' ')[1]}.</span>
                      </h1>
                   </div>
 
-                  <p className={`text-2xl font-medium max-w-lg leading-relaxed mx-auto ${isDarkMode ? 'text-white/30' : 'text-gray-400'}`}>
-                     {t('mavi.login_desc')}
-                  </p>
+<p className={`text-2xl font-medium max-w-lg leading-relaxed mx-auto ${isDarkMode ? 'text-white/40' : 'text-gray-400'}`}>
+               {t('mavi.login_desc')}
+             </p>
 
                   <div className="flex justify-center gap-8 pt-6">
                      {[ShieldCheck, Activity, Cpu].map((Icon, i) => (
                         <div key={Icon?.displayName || i} className="flex flex-col items-center gap-3 group">
                            <div className={`w-16 h-16 rounded-2xl border flex items-center justify-center transition-all duration-500 group-hover:-translate-y-2 ${isDarkMode ? 'bg-white/[0.02] border-white/5' : 'bg-white border-gray-100 shadow-sm'}`}>
-                              <Icon className="w-7 h-7 text-emerald-500 opacity-40 group-hover:opacity-100 transition-opacity" />
+                              <Icon className="w-7 h-7 text-emerald-500 dark:text-emerald-300 opacity-40 group-hover:opacity-100 transition-opacity" />
                            </div>
                         </div>
                      ))}
@@ -157,7 +157,7 @@ const AdminLogin = () => {
                         whileHover={{ scale: 1.02, y: -4 }}
                         whileTap={{ scale: 0.98 }}
                         disabled={loading}
-                        className={`w-full font-black py-4 rounded-[1.75rem] flex items-center justify-center gap-4 text-xs uppercase tracking-[0.6em] shadow-[0_20px_50px_rgba(0,0,0,0.3)] relative overflow-hidden group ${isDarkMode ? 'bg-white text-black' : 'bg-gray-900 text-white'} ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        className={`w-full font-black py-4 rounded-[1.75rem] flex items-center justify-center gap-4 text-xs uppercase tracking-[0.6em] shadow-[0_20px_50px_rgba(0,0,0,0.3)] relative overflow-hidden group ${isDarkMode ? 'bg-white/90 text-black border border-white/10' : 'bg-gray-900 text-white'} ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                      >
                         <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/0 via-emerald-500/20 to-emerald-500/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
                         {loading ? (

@@ -126,9 +126,9 @@ const StudentLogin = () => {
               </h1>
             </div>
 
-            <p className={`text-2xl font-medium max-w-lg leading-relaxed mx-auto ${isDarkMode ? 'text-white/30' : 'text-gray-400'}`}>
-              {t('mavi.login_desc')}
-            </p>
+<p className={`text-2xl font-medium max-w-lg leading-relaxed mx-auto ${isDarkMode ? 'text-white/40' : 'text-gray-400'}`}>
+               {t('mavi.login_desc')}
+             </p>
 
             <div className="flex justify-center gap-8 pt-6">
               {[GraduationCap, BookOpen, Clock].map((Icon, i) => (
@@ -212,7 +212,7 @@ const StudentLogin = () => {
                       whileHover={{ scale: 1.02, y: -4 }}
                       whileTap={{ scale: 0.98 }}
                       disabled={loading}
-                      className={`w-full font-black py-4 rounded-[1.75rem] flex items-center justify-center gap-4 text-xs uppercase tracking-[0.6em] shadow-[0_20px_50px_rgba(0,0,0,0.3)] relative overflow-hidden group ${isDarkMode ? 'bg-white text-black' : 'bg-gray-900 text-white'} ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      className={`w-full font-black py-4 rounded-[1.75rem] flex items-center justify-center gap-4 text-xs uppercase tracking-[0.6em] shadow-[0_20px_50px_rgba(0,0,0,0.3)] relative overflow-hidden group ${isDarkMode ? 'bg-white/90 text-black border border-white/10' : 'bg-gray-900 text-white'} ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
                       <div className="absolute inset-0 bg-gradient-to-r from-[#34d399]/0 via-[#34d399]/20 to-[#34d399]/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
                       {loading ? (
