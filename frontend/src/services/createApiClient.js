@@ -53,7 +53,10 @@ const createApiClient = ({ tokenKey, onUnauthorized } = {}) => {
       (response) => response,
       (error) => {
         if (error.response?.status === 401) {
-          onUnauthorized(error);
+          const url = error.config?.url || '';
+          if (!url.includes('/login')) {
+            onUnauthorized(error);
+          }
         }
         return Promise.reject(error);
       }
