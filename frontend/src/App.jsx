@@ -29,6 +29,7 @@ import StudentPersonalTasks from './pages/StudentPersonalTasks';
 import StudentAttendance from './pages/StudentAttendance';
 import StudentCourseRegistration from './pages/StudentCourseRegistration';
 import StudentMenu from './pages/StudentMenu';
+import StudentInternships from './pages/StudentInternships';
 import ResetPassword from './pages/ResetPassword';
 import VerifyEmail from './pages/VerifyEmail';
 import LandingPage from './pages/LandingPage';
@@ -98,6 +99,7 @@ function AppContent() {
     '/student/grades',
     '/student/roadmap',
     '/student/materials',
+    '/student/internships',
     '/student/personal-tasks',
     '/student/notifications',
     '/student/settings',
@@ -172,6 +174,7 @@ function AppContent() {
             <Route path="/student/personal-tasks" element={<ProtectedStudentRoute><StudentPersonalTasks /></ProtectedStudentRoute>} />
             <Route path="/student/attendance" element={<ProtectedStudentRoute><StudentAttendance /></ProtectedStudentRoute>} />
             <Route path="/student/menu" element={<ProtectedStudentRoute><StudentMenu /></ProtectedStudentRoute>} />
+            <Route path="/student/internships" element={<ProtectedStudentRoute><StudentInternships /></ProtectedStudentRoute>} />
             <Route path="/student/ai" element={<ProtectedStudentRoute><ZagAIChat /></ProtectedStudentRoute>} />
 
             {/* ✅ مسارات الاختبارات */}

@@ -28,9 +28,10 @@ const LinkedEmailsManager = lazy(() => import('../components/admin/LinkedEmailsM
 const ExamScheduleManager = lazy(() => import('../components/admin/ExamScheduleManager'));
 const OfficialTaskManager = lazy(() => import('../components/admin/OfficialTaskManager'));
 const TeachingAssistantManager = lazy(() => import('../components/admin/TeachingAssistantManager'));
+const InternshipManager = lazy(() => import('../components/admin/InternshipManager'));
 
 import {
-  Users, BookOpen, FileText, Map as RoadmapIcon,
+  Users, BookOpen, FileText, Map as RoadmapIcon, Briefcase,
   Calendar, Bell, LayoutDashboard, Settings,
   CheckCircle, Database, LogOut, Lock, UserCheck,
   TrendingUp, Award, Activity, ShieldCheck, ChevronRight,
@@ -91,6 +92,7 @@ const AdminDashboard = () => {
     { id: 'tasks', label: t('admin.sidebar.tabs.tasks'), icon: <CheckSquare className="w-4 h-4" />, reqPerm: 'manage_courses' },
     { id: 'emails', label: t('admin.sidebar.tabs.emails'), icon: <Mail className="w-4 h-4" />, reqPerm: 'admin' },
     { id: 'logs', label: t('admin.sidebar.tabs.logs'), icon: <ScrollText className="w-4 h-4" />, reqPerm: 'admin' },
+    { id: 'internships', label: t('admin.sidebar.tabs.internships'), icon: <Briefcase className="w-4 h-4" />, reqPerm: 'admin' },
   ];
 
   const initialTab = () => {
@@ -361,6 +363,7 @@ const AdminDashboard = () => {
       case 'emails': return <Suspense fallback={<div className="p-10 text-gray-400">{t('common.loading')}</div>}><LinkedEmailsManager /></Suspense>;
       case 'logs': return <Suspense fallback={<div className="p-10 text-gray-400">{t('common.loading')}</div>}><LogsDashboard /></Suspense>;
       case 'exams': return <Suspense fallback={<div className="p-10 text-gray-400">{t('common.loading')}</div>}><ExamScheduleManager /></Suspense>;
+      case 'internships': return <Suspense fallback={<div className="p-10 text-gray-400">{t('common.loading')}</div>}><InternshipManager /></Suspense>;
       default: return (
         <div className="p-6 lg:p-10 space-y-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

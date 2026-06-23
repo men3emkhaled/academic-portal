@@ -18,7 +18,8 @@
     "language": "اللغة",
     "appearance": "المظهر",
     "course_registration": "تسجيل المواد",
-    "attendance": "سجل الحضور"
+    "attendance": "سجل الحضور",
+    "internships": "التدريب"
   },
   "course_registration": {
     "title": "تسجيل المواد الدراسية",
@@ -64,7 +65,8 @@
         "progress": "تتبع الإنجاز",
         "tasks": "التكليفات الرسمية",
         "emails": "الحسابات المربوطة",
-        "logs": "سجل العمليات"
+        "logs": "سجل العمليات",
+        "internships": "التدريب"
       },
       "logout": "تسجيل الخروج",
       "language_en": "English",
@@ -976,6 +978,36 @@
         "error_deleted": "فشل حذف سجل البث"
       }
     },
+    "internships": {
+      "title": "إدارة التدريب",
+      "active_count": "تدريب",
+      "tracks": "المسارات",
+      "create": "إضافة تدريب",
+      "edit": "تعديل التدريب",
+      "delete": "حذف التدريب",
+      "delete_confirm": "هل أنت متأكد من حذف هذا التدريب؟",
+      "save": "حفظ",
+      "cancel": "إلغاء",
+      "created": "تم إنشاء التدريب بنجاح",
+      "updated": "تم تحديث التدريب بنجاح",
+      "deleted": "تم حذف التدريب بنجاح",
+      "no_internships": "لا توجد تدريبات بعد. أضف واحداً!",
+      "search_placeholder": "ابحث باسم أو شركة...",
+      "form": {
+        "title": "المسمى",
+        "company_name": "اسم الشركة",
+        "company_logo_url": "رابط شعار الشركة",
+        "track_tag": "المسار",
+        "work_mode": "نمط العمل",
+        "min_level": "أقل مستوى",
+        "description": "الوصف",
+        "requirements": "المتطلبات",
+        "duration": "المدة",
+        "application_deadline": "آخر موعد للتقديم",
+        "application_link": "رابط التقديم",
+        "status": "الحالة"
+      }
+    },
     "dashboard": {
       "title": "لوحة التحكم",
       "upgrade_success": "تم ترقية الفصل الدراسي بنجاح!",
@@ -1473,6 +1505,8 @@
     "id": "الكود",
     "just_now": "الآن",
     "hours_ago": "منذ {{hours}} ساعة",
+    "add": "إضافة",
+    "rename": "إعادة تسمية",
     "language_toggle": "العربية"
   },
   "verify_email": {
@@ -1686,6 +1720,32 @@
   },
   "header": {
     "portal_title": "جامعة الزقازيق الأهلية"
+  },
+  "internships": {
+    "title": "التدريب",
+    "subtitle": "اكتشف فرص التدريب",
+    "search_placeholder": "ابحث عن شركة أو مسمى...",
+    "all_tracks": "كل التخصصات",
+    "all_modes": "كل الأنماط",
+    "view_details": "التفاصيل",
+    "apply_now": "تقدم الآن",
+    "deadline": "آخر موعد",
+    "duration": "المدة",
+    "requirements": "المتطلبات",
+    "no_results": "لا توجد فرص تطابق بحثك",
+    "status_open": "مفتوح",
+    "status_closed": "مغلق",
+    "status_upcoming": "قادم",
+    "online": "عن بعد",
+    "offline": "حضوري",
+    "online_offline": "عن بعد + حضوري",
+    "company": "الشركة",
+    "track": "المسار",
+    "work_mode": "نمط العمل",
+    "description": "الوصف",
+    "application_link": "رابط التقديم",
+    "details": "التفاصيل",
+    "level_required": "يتطلب المستوى {{level}} فأعلى"
   },
   "programDetail": {
     "not_found": "البرنامج الأكاديمي غير موجود",

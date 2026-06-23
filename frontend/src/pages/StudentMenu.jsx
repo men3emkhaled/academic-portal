@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { 
   BookOpen, FileText, Map, CheckSquare, Settings, ShieldCheck, 
   Languages, Sun, Moon, LogOut, ArrowRight, User, GraduationCap, 
-  Layers, Users, Bell, CalendarDays, TrendingUp, Sparkles
+  Layers, Users, Bell, CalendarDays, TrendingUp, Sparkles, Briefcase
 } from 'lucide-react';
 import { useStudentAuth } from '../context/StudentAuthContext';
 import { useStudentData } from '../context/StudentDataContext';
@@ -113,6 +113,15 @@ const StudentMenu = () => {
       icon: <Layers className="w-8 h-8" />, 
       path: '/student/attendance',
       color: 'from-cyan-500/10 to-teal-500/10 dark:from-cyan-500/20 dark:to-teal-500/20 text-cyan-600 dark:text-cyan-400 border-cyan-500/20',
+      badge: null
+    },
+    { 
+      id: 'internships', 
+      label: t('sidebar.internships'), 
+      desc: t('internships.subtitle'),
+      icon: <Briefcase className="w-8 h-8" />, 
+      path: '/student/internships',
+      color: 'from-blue-500/10 to-indigo-500/10 dark:from-blue-500/20 dark:to-indigo-500/20 text-blue-600 dark:text-blue-400 border-blue-500/20',
       badge: null
     },
     { 

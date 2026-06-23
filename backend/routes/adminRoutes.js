@@ -12,6 +12,8 @@ const { adminAuth, checkPermission } = require('../middleware/auth');
 const { studentCreationLimiter } = require('../middleware/rateLimiter');
 const db = require('../config/database');
 const quizController = require('../controllers/quizController');
+const internshipController = require('../controllers/internshipController');
+const internshipTrackController = require('../controllers/internshipTrackController');
 
 router.post('/login', adminController.login);
 router.get('/stats', adminAuth, adminController.getDashboardStats);
@@ -200,5 +202,16 @@ router.post('/upgrade-semester', adminAuth, async (req, res) => {
     client.release();
   }
 });
+
+// ==================== INTERNSHIPS MANAGEMENT (ADMIN) ====================
+router.post('/internships', adminAuth, internshipController.createInternship);
+router.put('/internships/:id', adminAuth, internshipController.updateInternship);
+router.delete('/internships/:id', adminAuth, internshipController.deleteInternship);
+
+// ==================== INTERNSHIP TRACKS MANAGEMENT (ADMIN) ====================
+router.post('/internship-tracks', adminAuth, internshipTrackController.createTrack);
+router.put('/internship-tracks/:id', adminAuth, internshipTrackController.updateTrack);
+router.delete('/internship-tracks/:id', adminAuth, internshipTrackController.deleteTrack);
+router.post('/internship-tracks/seed', adminAuth, internshipTrackController.seedTracks);
 
 module.exports = router;

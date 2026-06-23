@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { flushSync } from 'react-dom';
-import { Home, Calendar, Library, BarChart3, FileText, Map, Bell, CheckSquare, Settings, LogOut, Menu, X, ShieldCheck, Sun, Moon, LayoutDashboard, BookOpen, TrendingUp, Languages, ArrowRight, Sparkles, UserCheck, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Home, Calendar, Library, BarChart3, FileText, Map, Bell, CheckSquare, Settings, LogOut, Menu, X, ShieldCheck, Sun, Moon, LayoutDashboard, BookOpen, TrendingUp, Languages, ArrowRight, Sparkles, UserCheck, ChevronLeft, ChevronRight, Briefcase } from 'lucide-react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useStudentAuth } from '../context/StudentAuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -78,6 +78,7 @@ const Sidebar = ({ onLogout }) => {
     { id: 'roadmap', label: t('sidebar.roadmap'), icon: <Map className="w-5 h-5" />, path: '/student/roadmap' },
     { id: 'personal-tasks', label: t('sidebar.personal_tasks'), icon: <CheckSquare className="w-5 h-5" />, path: '/student/personal-tasks' },
     { id: 'ai', label: 'Zag AI', icon: <Sparkles className="w-5 h-5" />, path: '/student/ai' },
+    { id: 'internships', label: t('sidebar.internships'), icon: <Briefcase className="w-5 h-5" />, path: '/student/internships' },
     { id: 'settings', label: t('sidebar.settings'), icon: <Settings className="w-5 h-5" />, path: '/student/settings' },
   ];
 

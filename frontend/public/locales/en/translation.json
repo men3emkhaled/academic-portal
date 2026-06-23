@@ -18,7 +18,8 @@
     "language": "Language",
     "appearance": "Appearance",
     "course_registration": "Course Registration",
-    "attendance": "Attendance"
+    "attendance": "Attendance",
+    "internships": "Internships"
   },
   "course_registration": {
     "title": "Course Registration",
@@ -64,7 +65,8 @@
         "progress": "Student Progress",
         "tasks": "Official Tasks",
         "emails": "Linked Emails",
-        "logs": "System Logs"
+        "logs": "System Logs",
+        "internships": "Internships"
       },
       "logout": "Logout",
       "language_en": "English",
@@ -976,6 +978,36 @@
         "error_deleted": "Failed to delete notification"
       }
     },
+    "internships": {
+      "title": "Manage Internships",
+      "active_count": "internships",
+      "tracks": "Tracks",
+      "create": "Add Internship",
+      "edit": "Edit Internship",
+      "delete": "Delete Internship",
+      "delete_confirm": "Are you sure you want to delete this internship?",
+      "save": "Save",
+      "cancel": "Cancel",
+      "created": "Internship created successfully",
+      "updated": "Internship updated successfully",
+      "deleted": "Internship deleted successfully",
+      "no_internships": "No internships yet. Create one!",
+      "search_placeholder": "Search by title or company...",
+      "form": {
+        "title": "Title",
+        "company_name": "Company Name",
+        "company_logo_url": "Company Logo URL",
+        "track_tag": "Track Tag",
+        "work_mode": "Work Mode",
+        "min_level": "Min Level",
+        "description": "Description",
+        "requirements": "Requirements",
+        "duration": "Duration",
+        "application_deadline": "Application Deadline",
+        "application_link": "Application Link",
+        "status": "Status"
+      }
+    },
     "dashboard": {
       "title": "Dashboard",
       "upgrade_success": "Semester upgraded successfully!",
@@ -1472,6 +1504,8 @@
     "confirm_delete": "Are you sure?",
     "just_now": "Just now",
     "hours_ago": "{{hours}}h ago",
+    "add": "Add",
+    "rename": "Rename",
     "language_toggle": "English"
   },
   "verify_email": {
@@ -1690,6 +1724,32 @@
   },
   "header": {
     "portal_title": "Zagazig National"
+  },
+  "internships": {
+    "title": "Internships",
+    "subtitle": "Discover internship opportunities",
+    "search_placeholder": "Search by company or title...",
+    "all_tracks": "All Tracks",
+    "all_modes": "All Modes",
+    "view_details": "View Details",
+    "apply_now": "Apply Now",
+    "deadline": "Deadline",
+    "duration": "Duration",
+    "requirements": "Requirements",
+    "no_results": "No internships match your filters",
+    "status_open": "Open",
+    "status_closed": "Closed",
+    "status_upcoming": "Upcoming",
+    "online": "Online",
+    "offline": "Offline",
+    "online_offline": "Online + Offline",
+    "company": "Company",
+    "track": "Track",
+    "work_mode": "Work Mode",
+    "description": "Description",
+    "application_link": "Application Link",
+    "details": "Details",
+    "level_required": "Requires Level {{level}} or higher"
   },
   "programDetail": {
     "not_found": "Program Not Found",
@@ -1941,6 +2001,7 @@
       "analytics": "Analytics",
       "assistants": "TAs",
       "attendance": "Attendance",
+      "internships": "Internships",
       "notifications": "Notifications",
       "settings": "Settings",
       "menu": "Menu",

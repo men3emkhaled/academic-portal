@@ -231,6 +231,9 @@ app.use('/api/material-hub', materialHubRoutes);
 const aiRoutes = require('./routes/aiRoutes');
 app.use('/api/ai', aiRoutes);
 
+const internshipRoutes = require('./routes/internshipRoutes');
+app.use('/api/internships', internshipRoutes);
+
 // Enhanced health check
 app.get('/api/health', async (req, res) => {
   const health = {
